@@ -20,7 +20,7 @@ function lines_from(file)
 end
 
 local compileFile = function( file, libName)
-   os.execute("gcc -c -fPIC " .. file .. " -o tmp")
+   os.execute("gcc -c -std=c99 -fPIC " .. file .. " -o tmp")
    os.execute ("gcc tmp -shared -o " .. libName)
 end
 
@@ -30,6 +30,7 @@ end
 
 local parseFile = function(retType, type1, type2, fileIn, fileOut)
    print (fileOut)
+
    os.execute(" python test.py RET=" .. retType .. " TYPE1=" .. type1 .. " TYPE2=" .. type2 .. " " .. fileIn .. " " ..fileOut)
 end
 
@@ -37,7 +38,7 @@ local load_c_ffi = function(libName , retType, type1, type2)
    local ffi  = require("ffi")
    -- RET * add(TYPE1* A, TYPE2* B, RET* C, int length, int nb, int blk_size)
    ffi.cdef ( " int add(" .. type1 .. "* A, " .. type2 .. "* B, int length, int blk_size)")
-   local c = ffi.load("/home/indra/luatest/playground/bindings/lua/luadc/libtest.so")
+   local c = ffi.load(fldr .. "libtestfin.so")
    return c
 end
 
@@ -64,7 +65,7 @@ local addTwoVectors = function(vec1, vec2, vecres)
    ffi.cdef ("int initA(" .. vec1.dataType .. "*A, int length);")
    ffi.cdef ("int initB(" .. vec2.dataType .. "*B, int length);")
    ffi.cdef ("int writeOut(" .. vecres.dataType .. "*C, int length);")
-   local C = ffi.load("/home/indra/luatest/code/qtests/basic/libtestfin.so")
+   local C = ffi.load(fldr .. "libtestfin.so")
    local res = C.initA(vec1.ptr, vec1.size)
    local res = C.initB(vec2.ptr, vec2.size)
    local res = C.add(vec1.ptr, vec2.ptr, vecres.ptr, vec1.size, 64) -- right now assuming everything is 4 bytes
@@ -79,11 +80,12 @@ local addTwoTables = function(table1, table2, tableres)
       if table1.dataType == nil or table2.dataType == nil or tableres.dataType == nil then 
          error("Expected data types to calculate length", 2) 
       end
-      parseFile(tableres.dataType, table1.dataType, table2.dataType, "/home/indra/luatest/code/qtests/basic/test.c", "/home/indra/luatest/code/qtests/basic/testfin.c")
-      compileFile("/home/indra/luatest/code/qtests/basic/testfin.c", "/home/indra/luatest/code/qtests/basic/libtestfin.so")
+      parseFile(tableres.dataType, table1.dataType, table2.dataType, fldr .. "test.c", fldr .. "testfin.c")
+      compileFile(fldr .. "testfin.c", fldr .. "libtestfin.so")
       addTwoVectors(table1, table2, tableres)
 end
 
+fldr = "/home/srinath/Ramesh/Q/experimental/c_files/"
 A = mallocAsQTable(4000)
 A.dataType = "int"
 B = mallocAsQTable(4000)
@@ -91,4 +93,3 @@ B.dataType = "int"
 C = mallocAsQTable(4000)
 C.dataType = "int"
 addTwoTables(A, B, C)
-
