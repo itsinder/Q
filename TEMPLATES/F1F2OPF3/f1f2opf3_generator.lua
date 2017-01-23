@@ -1,9 +1,9 @@
 #!/usr/bin/env lua
 
-package.path = package.path.. ";../?.lua"
+package.path = package.path.. ";../../UTILS/src/?.lua"
 require("aux")
 
-dofile '../globals.lua'
+dofile '../../UTILS/src/globals.lua' -- do not hard code locations
 
 local srcdir = "../../PRIMITIVES/src/" 
 local incdir = "../../PRIMITIVES/inc/" 
