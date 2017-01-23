@@ -290,13 +290,13 @@ Table~\ref{tbl_default_types}
 \begin{tabular}{|l|l|l|l|l|l|} \hline \hline
   {\bf Short Code} & {\bf C Equivalent} & {\bf Description} %
   & {\bf Input Converter} & {\bf output Converter} \\ \hline \hline
-  c & \verb+int8_t+ &  & strtod & fprintf, \%d\\ \hline
-  s & \verb+int16_t+ & & strtod & fprintf, \%d\\ \hline
-  i & \verb+int32_t+ & & strtod & fprintf, \%d\\ \hline
-  l & \verb+int64_t+ & & strtoll & fprintf, \%lld \\ \hline
-  f & \verb+float+ &   & strtof & fprintf, \%f\\ \hline
-  d & \verb+double+ &  & strtold & fprintf, \%lf\\ \hline
-  t & struct tm & timestamp & strptime+ & strftime \\ \hline
+  I1 & \verb+int8_t+ &  & strtod & fprintf, \%d\\ \hline
+  I2 & \verb+int16_t+ & & strtod & fprintf, \%d\\ \hline
+  I4 & \verb+int32_t+ & & strtod & fprintf, \%d\\ \hline
+  I8 & \verb+int64_t+ & & strtoll & fprintf, \%lld \\ \hline
+  F4 & \verb+float+ &   & strtof & fprintf, \%f\\ \hline
+  F8 & \verb+double+ &  & strtold & fprintf, \%lf\\ \hline
+  TM & struct tm & timestamp & strptime+ & strftime \\ \hline
 \hline
 \end{tabular}
 \caption{Pre-built types}

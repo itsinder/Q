@@ -3,14 +3,15 @@ function vvand_static_checker(
   f1type, 
   f2type
   )
-  if ( ( f1type ~= "int8_t" ) or ( f2type ~= "int8_t" ) ) then
-    print("and requires both operands to be int8_t")
+  if ( ( f1type ~= "I1" ) or ( f2type ~= "I1" ) ) then
+    print("and requires both operands to be I1")
     return nil
   end
-  outtype = "int8_t"
-  substitutions.fn = "vvand_" .. f1type .. "_" .. f2type 
-  substitutions.in1type = f1type
-  substitutions.in2type = f2type
-  substitutions.scalar_op = "c = a && b"
-  return substitutions, includes
+  local subs = {} ; local incs = {}
+  subs.fn = "vvand_" .. f1type .. "_" .. f2type 
+  subs.in1type = assert(g_qtypes[f1type].ctype)
+  subs.in2type = assert(g_qtypes[f2type].ctype)
+  subs.returntype = assert(g_qtypes["I1"].ctype)
+  subs.scalar_op = "c = a && b"
+  return subs, incs
 end
