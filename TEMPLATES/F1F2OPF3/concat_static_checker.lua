@@ -1,59 +1,58 @@
-g_bitlen = {}
-g_bitlen["int8_t"]  = 8;
-g_bitlen["int16_t"] = 16;
-g_bitlen["int32_t"] = 32;
-g_bitlen["int64_t"] = 64;
-g_bitlen["float"]   = 32;
-g_bitlen["double"]  = 64;
 
 function concat_static_checker(
   f1type, 
   f2type, 
   fouttype
   )
-    local shift = g_bitlen[f2type]
-    if not ( ( f1type == "int8_t" ) or 
-      ( f1type == "int16_t" ) or 
-      ( f1type == "int32_t" ) ) then
+
+    local w1   = g_qtypes[f1type].width
+    local w2   = g_qtypes[f2type].width
+    local wout = g_qtypes[fouttype].width
+    local shift = w2 * 8 -- convert bytes to bits 
+    if not ( ( f1type == "I1" ) or 
+      ( f1type == "I2" ) or 
+      ( f1type == "I4" ) ) then
       print("concat requires fldtype of 1st argument to be I1/I2/I4")
       return nil
     end
-    if not ( ( f2type == "int8_t" ) or 
-      ( f2type == "int16_t" ) or 
-      ( f2type == "int32_t" ) ) then
+    if not ( ( f2type == "I1" ) or 
+      ( f2type == "I2" ) or 
+      ( f2type == "I4" ) ) then
       print("concat requires fldtype of 1st argument to be I1/I2/I4")
       return nil
     end
     local l_outtype = nil
-    if ( f1type == "int32_t" ) then 
-      l_outtype = "int64_t"
-    elseif( f1type == "int16_t" ) then 
-      if ( f2type == "int32_t" ) then
-        l_outtype = "int64_t"
-      elseif( f2type == "int16_t" ) then
-        l_outtype = "int32_t"
-      elseif( f2type == "int8_t" ) then
-        l_outtype = "int32_t"
+    if ( f1type == "I4" ) then 
+      l_outtype = "I8"
+    elseif( f1type == "I2" ) then 
+      if ( f2type == "I4" ) then
+        l_outtype = "I8"
+      elseif( f2type == "I2" ) then
+        l_outtype = "I4"
+      elseif( f2type == "I1" ) then
+        l_outtype = "I4"
       end
-    elseif( f1type == "int8_t" ) then 
-      if ( f2type == "int32_t" ) then
-        l_outtype = "int64_t"
-      elseif( f2type == "int16_t" ) then
-        l_outtype = "int32_t"
-      elseif( f2type == "int8_t" ) then
-        l_outtype = "int16_t"
+    elseif( f1type == "I1" ) then 
+      if ( f2type == "I4" ) then
+        l_outtype = "I8"
+      elseif( f2type == "I2" ) then
+        l_outtype = "I4"
+      elseif( f2type == "I1" ) then
+        l_outtype = "I2"
       end
     end
     if ( l_outtype == nil ) then 
       error("Control should never come here")
     end
 
+    local l_wout = g_qtypes[l_outtype].width
     if ( fouttype ~= nil ) then 
-      if ( ( fouttype == "float" ) or ( fouttype == "double") )  then
-        print("float and double are not valid destination types")
+      valid_outtype = { "I1", "I2", "I4", "I8" }
+      if ( valid_outtype[fouttype] ) then 
+        print("fouttype is not valid destination type for concat")
         return nil
       end
-      if ( g_bitlen[fouttype] >= g_bitlen[l_outtype] ) then
+      if ( l_wout >= wout ) then 
         l_outtype = fouttype
       else
         print("specified output type is not big enough")
@@ -62,13 +61,14 @@ function concat_static_checker(
     end
     includes = {"math", "curl/curl" }
     substitutions = {}
-    substitutions.name = 
+    substitutions.fn = 
     "concat_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
-    substitutions.in1type = f1type
-    substitutions.in2type = f2type
-    substitutions.returntype = l_outtype
+    substitutions.in1type = g_qtypes[f1type].ctype
+    substitutions.in2type = g_qtypes[f2type].ctype
+    substitutions.returntype = g_qtypes[l_outtype].ctype
     substitutions.scalar_op = 
-    " c = ( (" .. l_outtype .. ")a << " .. shift .. " ) | b "
+    " c = ( (" .. substitutions.returntype .. ")a << " .. shift .. " ) | b "
 
     return substitutions, includes
+
 end

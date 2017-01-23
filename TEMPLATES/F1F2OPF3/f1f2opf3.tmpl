@@ -1,10 +1,10 @@
-return require 'CodeGen' {
+return require 'code_gen' {
 
    declaration = [[
 
-#include <inttypes.h>
+#include "q_types.h"
 extern int
-${name}(  
+${fn}(  
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
@@ -16,7 +16,7 @@ ${name}(
    ]],
    definition = [[
 
-#include "_${name}.h"
+#include "_${fn}.h"
 
 static void
 __operation(
@@ -31,7 +31,7 @@ __operation(
       }
 
 int
-${name}(  
+${fn}(  
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  

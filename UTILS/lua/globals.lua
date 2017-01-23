@@ -22,10 +22,10 @@ g_iorf["F4"]   = "floating_point";
 g_iorf["F8"]  = "floating_point";
 
 g_qtypes = {}
-g_qtypes.I1 = { short_code = "I1", ctype = "int8_t", txt_to_ctype = "txt_to_I1", ctype_to_txt = "TBD" }
-g_qtypes.I2 = { short_code = "I2", ctype = "int16_t", txt_to_ctype = "txt_to_I2", ctype_to_txt = "TBD" }
-g_qtypes.I4 = { short_code = "I4", ctype = "int32_t", txt_to_ctype = "txt_to_I4", ctype_to_txt = "TBD" }
-g_qtypes.I8 = { short_code = "I8", ctype = "int64_t", txt_to_ctype = "txt_to_I8", ctype_to_txt = "TBD" }
-g_qtypes.F4 = { short_code = "F4", ctype = "float", txt_to_ctype = "txt_to_F4", ctype_to_txt = "TBD" }
-g_qtypes.F8 = { short_code = "F8", ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
+g_qtypes.I1 = { short_code = "I1", width = 1, ctype = "int8_t", txt_to_ctype = "txt_to_I1", ctype_to_txt = "TBD" }
+g_qtypes.I2 = { short_code = "I2", width = 2, ctype = "int16_t", txt_to_ctype = "txt_to_I2", ctype_to_txt = "TBD" }
+g_qtypes.I4 = { short_code = "I4", width = 4, ctype = "int32_t", txt_to_ctype = "txt_to_I4", ctype_to_txt = "TBD" }
+g_qtypes.I8 = { short_code = "I8", width = 8, ctype = "int64_t", txt_to_ctype = "txt_to_I8", ctype_to_txt = "TBD" }
+g_qtypes.F4 = { short_code = "F4", width = 4, ctype = "float", txt_to_ctype = "txt_to_F4", ctype_to_txt = "TBD" }
+g_qtypes.F8 = { short_code = "F8", width = 8, ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
 
