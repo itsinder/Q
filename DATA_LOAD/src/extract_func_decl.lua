@@ -1,5 +1,5 @@
 #!/bin/lua
-package.path = package.path.. ";../../UTILS/src/?.lua"
+package.path = package.path.. ";../../UTILS/lua/?.lua"
 require("is_file")
 n = #arg
 infile = arg[1]
