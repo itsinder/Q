@@ -5,7 +5,7 @@
 #include "is_valid_chars_for_num.h"
 //START_FUNC_DECL
 int
-txt_to_d(
+txt_to_F8(
       const char *X,
       double *ptr_out
       )
