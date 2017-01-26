@@ -1,5 +1,5 @@
 #!/bin/bash
-#These lua and C files are for calling the core C functions (i.e.the sum function) from Lua using LuaJit FFI.
+#These lua and C files are for calling the core C functions (i.e.the sum() function) from Lua using LuaJit FFI.
 #
 #The sum function supports for the following 6 types:
 #1) int8_t, int16_t, int32_t, int64_t, float, double, char and
