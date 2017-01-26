@@ -1,6 +1,6 @@
 Entry{
   qtype = "F4",
-  name = 'txt_to_F4',
+  fn = 'txt_to_F4',
   out_type_displ = 'F4',
   out_type = 'float',
   min_val = 'FLT_MIN',
@@ -10,7 +10,7 @@ Entry{
     
 Entry{
   qtype = "F8",
-  name = 'txt_to_F8',
+  fn = 'txt_to_F8',
   out_type_displ = 'F8',
   out_type = 'double',
   min_val = 'DBL_MIN',
