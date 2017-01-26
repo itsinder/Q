@@ -12,11 +12,16 @@ txt_to_F4(
       )
 //STOP_FUNC_DECL
 {
-  int status = 0;
+  int status = 0; int nw;
   if ( X == NULL ) { go_BYE(-1); }
   memset(X, '\0', nX);
-  int nw = snprintf(X, nX-1, fmt, in);
+  if ( ( fmt == NULL ) || ( *fmt == '\0' ) ) { 
+    nw = snprintf(X, nX-1, "%f", in);
+  }
+  else {
+    nw = snprintf(X, nX-1, fmt, in);
+  }
   if ( nw >= nX ) { go_BYE(-1); }
- BYE:
+BYE:
   return status ;
 }
