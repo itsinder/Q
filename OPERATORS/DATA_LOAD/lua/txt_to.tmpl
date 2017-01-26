@@ -18,7 +18,7 @@ txt_to_${out_type_displ}(
 ]],
 
 definition = [[
-#include "txt_to_${out_type_displ}.h"
+#include "_txt_to_${out_type_displ}.h"
 
 int
 txt_to_${out_type_displ}(
@@ -31,7 +31,7 @@ txt_to_${out_type_displ}(
   ${big_out_type} out;
   if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
   if ( !is_valid_chars_for_num(X) ) { go_BYE(-1); }
-  out = ${converter}(X, &endptr);
+  out = ${converter}(X, &endptr ${base});
   if ( ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { go_BYE(-1); }
   if ( ( out < ${min_val} ) || ( out > ${max_val} ) ) { go_BYE(-1); }
   *ptr_out = (${out_type})out;

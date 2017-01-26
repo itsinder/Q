@@ -1,0 +1,45 @@
+return require 'code_gen' {
+  declaration = [[
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <float.h>
+#include <inttypes.h>
+#include "q_macros.h"
+
+extern int
+${out_type_displ}_to_txt(
+    ${out_type} in,
+    const char * const fmt,
+    char *X,
+    size_t nX
+    );
+  ]],
+definition= [[
+#include "_${out_type_displ}_to_txt.h"
+
+int
+${out_type_displ}_to_txt(
+    ${out_type} in,
+    const char * const fmt,
+    char *X,
+    size_t nX
+    )
+{
+  int status = 0; int nw;
+  const char *default_fmt = ${default_fmt};
+  if ( X == NULL ) { go_BYE(-1); }
+  memset(X, '\0', nX);
+  if ( ( fmt == NULL ) || ( *fmt == '\0' ) ) { 
+    nw = snprintf(X, nX-1, default_fmt, in);
+  }
+  else {
+    nw = snprintf(X, nX-1, fmt, in);
+  }
+  if ( nw >= nX ) { go_BYE(-1); }
+BYE:
+  return status ;
+}
+  ]]
+}

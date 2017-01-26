@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 package.path = package.path.. ";../../../UTILS/lua/?.lua"
-local tmpl = dofile 'txt_to.tmpl'
+local tmpl = dofile 'to_txt.tmpl'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
 local subs = {}      -- a set to collect authors
@@ -15,11 +15,7 @@ for k, v in pairs(subs) do
   tmpl.fn = v.fn
   tmpl.out_type_displ = v.out_type_displ 
   tmpl.out_type = v.out_type 
-  tmpl.big_out_type = v.big_out_type 
-  tmpl.base = v.base 
-  tmpl.min_val = v.min_val 
-  tmpl.max_val = v.max_val 
-  tmpl.converter = v.converter
+  tmpl.default_fmt = v.default_fmt
   -- print(tmpl 'declaration')
   doth = tmpl 'declaration'
   local fname = incdir .. "_" .. tmpl.fn .. ".h", "w"

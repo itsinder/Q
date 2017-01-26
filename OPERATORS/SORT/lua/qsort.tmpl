@@ -1,5 +1,5 @@
 
-return require 'CodeGen' {
+return require 'code_gen' {
 
    declaration = [[
 
@@ -33,9 +33,6 @@ return require 'CodeGen' {
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#ifdef MAC_OSX
-#include "macstuff.h"
-#endif
 
 extern void
 qsort_${SORT_ORDER}_${FLDTYPE} (
