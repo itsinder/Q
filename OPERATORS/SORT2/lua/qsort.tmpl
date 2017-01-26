@@ -1,5 +1,8 @@
+
 return require 'code_gen' {
+
    declaration = [[
+
 /* http://www.umcs.maine.edu/~chaw/200801/capstone/n/qsort.c */
 
 /* Copyright (C) 1991,1992,1996,1997,1999,2004 Free Software Foundation, Inc.
@@ -30,36 +33,22 @@ return require 'code_gen' {
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#ifdef MAC_OSX
-#include "macstuff.h"
-#endif
 
 extern void
-qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
-  ${FLDTYPE1} f1,
-  ${FLDTYPE2} f2
-	    size_t total_elems
+qsort_${SORT_ORDER}_${FLDTYPE} (
+	    ${FLDTYPE} f1, 
+	    ssize_t total_elems
 	    );
 ]],
 definition = [[
 
-#include
-"_qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL}.h"
+#include "_${NAME}.h"
 
-#define SWAP1(a, b) \
+#define SWAP(a, b) \
 { \
-  ${FLDTYPE1} *ia = (${FLDTYPE1} *)a; \
-  ${FLDTYPE1} *ib = (${FLDTYPE1} *)b; \
-  ${FLDTYPE1} itmp = *ia; \
-  *ia = *ib; \
-  *ib = itmp; \
-}
-
-#define SWAP2(a, b) \
-{ \
-  ${FLDTYPE2} *ia = (${FLDTYPE2} *)a; \
-  ${FLDTYPE2} *ib = (${FLDTYPE2} *)b; \
-  ${FLDTYPE2} itmp = *ia; \
+  ${FLDTYPE} *ia = (${FLDTYPE} *)a; \
+  ${FLDTYPE} *ib = (${FLDTYPE} *)b; \
+  ${FLDTYPE} itmp = *ia; \
   *ia = *ib; \
   *ib = itmp; \
 }
@@ -113,15 +102,14 @@ typedef struct
 
 // START FUNC DECL
 void
-qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
-  ${FLDTYPE1} f1,
-  ${FLDTYPE2} f2,
-	    size_t total_elems
+${NAME} ( 
+	    ${FLDTYPE} *f1,
+	    ssize_t total_elems
 	    )
 // STOP FUNC DECL
 {
-  register ${FLDTYPE1} *base_ptr1 = f1;
-  register ${FLDTYPE2} *base_ptr2 = f2;
+  int size = sizeof(${FLDTYPE});
+  const size_t max_thresh = MAX_THRESH * size; 
 
   if (total_elems == 0) {
     /* Avoid lossage with unsigned arithmetic below.  */
@@ -129,18 +117,16 @@ qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
   }
 
   if ( total_elems > MAX_THRESH ) {
-    char *lo = base_ptr;
-    char *hi = &lo[size * (total_elems - 1)];
+    ${FLDTYPE} *lo = f1;
+    ${FLDTYPE} *hi = f1 + (total_elems-1);
     stack_node stack[STACK_SIZE];
     stack_node *top = stack;
 
     PUSH (NULL, NULL);
 
     while (STACK_NOT_EMPTY) {
-      ${FLDTYPE1} *left_ptr1;
-      ${FLDTYPE1} *right_ptr1;
-      ${FLDTYPE2} *left_ptr2;
-      ${FLDTYPE2} *right_ptr2;
+      ${FLDTYPE} *left_ptr;
+      ${FLDTYPE} *right_ptr;
 
       /* Select median value from among LO, MID, and HI. Rearrange
 	 LO and HI so the three values are sorted. This lowers the
@@ -148,33 +134,33 @@ qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
 	 skips a comparison for both the LEFT_PTR and RIGHT_PTR in
 	 the while loops. */
 
-      char *mid = lo + size * ((hi - lo) / size >> 1);
+     ${FLDTYPE} *mid = (lo+hi)>>1;
 
-      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)lo) ) {
-	SWAP (mid, lo, size);
+      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) then 
+      if ( *mid ${COMPARATOR} *lo ) {
+	SWAP (mid, lo);
       }
-      // if ( (*cmp) ((void *) hi, (void *) mid) < 0) {
-      if ( *((${FLDTYPE} *)hi) ${COMPARATOR} *((${FLDTYPE} *)mid) ) {
-	SWAP (mid, hi, size);
+      // if ( (*cmp) ((void *) hi, (void *) mid) < 0) then
+      if ( *hi ${COMPARATOR} *mid ) {
+	SWAP (mid, hi);
       }
       else {
 	goto jump_over;
       }
-      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)lo) ) {
-	SWAP (mid, lo, size);
+      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) then
+      if ( *mid ${COMPARATOR} *lo ) {
+	SWAP (mid, lo);
       }
     jump_over:;
 
-      left_ptr  = lo++;
-      right_ptr = hi--;
+      left_ptr  = lo+1;
+      right_ptr = hi-1;
 
       /* Here's the famous ``collapse the walls'' section of quicksort.
 	 Gotta like those tight inner loops!  They are the main reason
 	 that this algorithm runs much faster than others. */
       do {
-	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) {
+	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) do
 	while ( *((${FLDTYPE} *)left_ptr) ${COMPARATOR} *((${FLDTYPE} *)mid) ) {
 	  left_ptr += size;
 	}
@@ -185,7 +171,7 @@ qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
 	}
 
 	if (left_ptr < right_ptr) {
-	  SWAP (left_ptr, right_ptr, size);
+	  SWAP (left_ptr, right_ptr);
 	  if (mid == left_ptr) {
 	    mid = right_ptr;
 	  }
@@ -253,14 +239,14 @@ qsort_${SRT_ORDR1}_${SRT_ORDR2}_${FLDTYPE1_DISPL}_${FLDTYPE2_DISPL} (
        and the operation speeds up insertion sort's inner loop. */
 
     for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
-      // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
+      // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) then
       if (  *((${FLDTYPE} *)run_ptr) ${COMPARATOR} *((${FLDTYPE} *) tmp_ptr) ) {
         tmp_ptr = run_ptr;
       }
     }
 
     if (tmp_ptr != base_ptr) {
-      SWAP (tmp_ptr, base_ptr, size);
+      SWAP (tmp_ptr, base_ptr);
     }
 
     /* Insertion sort, running from left-hand-side up to right-hand-side.  */
