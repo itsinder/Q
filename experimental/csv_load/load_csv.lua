@@ -41,20 +41,20 @@ function load( csv_file, M , G)
         local addNewValue = metadata["add"] or true  -- default value is true, add null values
           
         if(isDict == true) then
-          local dict = _G[dictName] 
+          local dict = _G["Q_DICTIONARIES"][dictName] 
           if(dict == nil) then 
               print("Dictionary does not exist. Aborting the operation") 
               return -1
           end 
         else
-          local dict = _G[dictName]
+          local dict = _G["Q_DICTIONARIES"][dictName]
           if(dict ~= nil) then 
               print("Dictionary with the same name exists, cannot create new dictionary")
           end
           
           -- create new dictory and set it in the globals
           dict = {}
-          _G[dictName] = newDictionary() 
+          _G["Q_DICTIONARIES"][dictName] = newDictionary() 
         end
         
     end
@@ -84,8 +84,9 @@ function load( csv_file, M , G)
           -- local isDict = metadata["is_dict"] or false  
           local addNewValue = metadata["add"] or true 
           
-          local dict = _G[dictName]
+          local dict = _G["Q_DICTIONARIES"][dictName]
           local retNumber = dict.addWithCondition(val, addNewValue)
+          
           if(retNumber < 0 ) then 
             print("Error: value exists in the dictionary, cannot add new one, aborting operation")
             return -1 
@@ -93,7 +94,7 @@ function load( csv_file, M , G)
           
           -- now change the value to index instead of string
           val = tostring(retNumber)
-          -- print("Value after conversion is " .. val) 
+          
         end
         
         local cVal = convertTextToCValue(funName, val, sizeOfData)

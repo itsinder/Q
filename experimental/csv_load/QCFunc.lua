@@ -2,7 +2,7 @@ local ffi = require("ffi")
 local so_file_path_name = "./QCFunc.so" --path for .so file
 local qCLib  = ffi.load(so_file_path_name) 
 
-local binfilepath = "/home/pranav/q/git/ramesh/Q/experimental/csv_load/out/"
+local binfilepath = "./out/"
 
 ffi.cdef[[
   void *malloc(size_t size);

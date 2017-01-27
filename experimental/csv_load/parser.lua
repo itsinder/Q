@@ -43,6 +43,3 @@ function ParseCSVLine (line,sep)
 	return res
 end
 
-
---ParseCSVLine("1001,2012,\"Rahul Jadhav\"",',')
-

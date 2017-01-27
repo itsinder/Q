@@ -6,7 +6,8 @@
 -- getIndex(text) - gets the index of the value, if it exists in the dictionary, nil otherwise
 -- isTextExists(text) - does value exist in dictionary 
 -- ------------------------------------------------------------------------------------
-
+require 'util'
+require 'parser'
 
 function newDictionary()
   -- Two tables are used here, so that bidirectional lookup becomes easy 
@@ -49,9 +50,10 @@ function newDictionary()
   
   -- later on, instead of boolean second condition can be made function to make criteria more generic
   local addWithCondition = function(text, addIfExists)
+    
     local textExists = isTextExists(text)
     if(addIfExists) then 
-      if(textExsts) then 
+      if(textExists) then 
         return getNumberByString(text)
       else
         put(text)
@@ -67,26 +69,39 @@ function newDictionary()
     end
     
   end
+  
+  local saveToFile = function(filePath)
+    file = io.open (filePath, "w")
+    io.output(file);
+    local separator = ",";
+    
+    for k,v in pairs(self.textToNumber) do 
+      local s = escapeCSV(k) .. separator  .. v
+      -- print("S is : " .. s)
+      -- store the line in the file
+       io.write(s, "\n")
+     end    
+  end
+
+  -- Using Naive approach for reading currently, with the assumption that file will be in correct format 
+  local readFromFile = function(filePath)
+    for line in io.lines(filePath) do 
+      local entry= ParseCSVLine(line,',')
+      -- each entry is the form string, number
+      self.textToNumber[entry[1]] = entry[2]
+      self.numberToText[entry[2]] = entry[1]
+    end  
+      
+  end
+  
                         
   return {
       addWithCondition = addWithCondition,
       getStringByNumber = getStringByNumber , 
       getNumberByString = getNumberByString, 
-      isTextExists = isTextExists
+      isTextExists = isTextExists, 
+      saveToFile = saveToFile,
+      readFromFile = readFromFile
   }
   
 end
-
-
-
--- test --- 
---[[
-d1 = newDictionary()
-print(d1.addWithCondition("Pranav"))
-print(d1.addWithCondition("Maniar"))
-print(d1.addWithCondition("Pranav", false))
-print(d1.getStringByNumber(1))
-print(d1.getNumberByString("Pranav"))
-print(d1.isTextExists("Maniar"))
-print(d1.isTextExists("Maniar1"))
---]]
