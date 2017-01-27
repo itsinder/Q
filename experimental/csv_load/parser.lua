@@ -1,3 +1,8 @@
+-- --------------------------------------------------------------------------------------
+-- This function was written using code example on url : http://lua-users.org/wiki/LuaCsv
+-- -------------------------------------------------------------------------------------
+
+
 function ParseCSVLine (line,sep) 
 	res = {}
 	local pos = 1
