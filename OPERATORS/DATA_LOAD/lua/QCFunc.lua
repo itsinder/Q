@@ -1,5 +1,5 @@
 local ffi = require("ffi") 
-local so_file_path_name = "./QCFunc.so" --path for .so file
+local so_file_path_name = "../src/QCFunc.so" --path for .so file
 local qCLib  = ffi.load(so_file_path_name) 
 
 local binfilepath = "./out/"

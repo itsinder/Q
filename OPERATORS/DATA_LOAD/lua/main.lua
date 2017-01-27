@@ -2,7 +2,7 @@ require 'load_csv'
 require 'dictionary'
 require 'environment'
 
-local csv_file_path_name = "./csv_input1.csv" --path for input csv file 
+local csv_file_path_name = "../test/csv_input1.csv" --path for input csv file 
 
 --[[ 
 local M = {
