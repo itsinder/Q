@@ -22,13 +22,12 @@ D1.put("test1")
 _G["Q_DICTIONARIES"]["D1"] = D1
 --]]
 
-
-
 local M = {
-  { name = "empid", type = "I4" },
-  { name = "yoj", type ="I2" },
+  { name = "empid", null = "true", type = "I4" },
+  { name = "yoj", null = "true", type ="I2" },
   { name = "empname", type ="varchar",dict = "D1", is_dict = false, add=true}
 }
+
 
 ret = load( csv_file_path_name, M )  --call to load function
 

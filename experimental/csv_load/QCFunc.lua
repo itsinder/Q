@@ -12,6 +12,7 @@ ffi.cdef[[
   typedef struct FILE FILE;  
   FILE* createFile(const char *fname);
   void write(FILE *fp, const void* val, int size);
+  void writeNull(FILE *fp, uint8_t val, int size);
   void close(FILE *fp);
   int txt_to_d(const char *X, double *ptr_out);
   int txt_to_I1(const char *X, int8_t *ptr_out);
@@ -19,7 +20,17 @@ ffi.cdef[[
   int txt_to_I4(const char *X, int32_t *ptr_out);
   int txt_to_I8(const char *X, int64_t *ptr_out);
   
+  uint8_t setBit(int colno, uint8_t byteval, int row_cnt);
+  
   ]]
+
+
+function setBit(col, byteval, row_cnt)
+
+  byteval = qCLib["setBit"](col, byteval ,row_cnt)
+  return byteval
+end
+
 
 -- --------------------------------------------------------
 -- Converts given text value into C value representation
@@ -57,6 +68,12 @@ end
 function write(fp,data, size) 
   -- ffi.cast("void *", data), this should be used on data, before writing it to ensure that its pointer 
   qCLib["write"](fp, data, size)
+  
+end
+
+function writeNull(fp,data, size) 
+  -- ffi.cast("void *", data), this should be used on data, before writing it to ensure that its pointer 
+  qCLib["writeNull"](fp, data, size)
   
 end
 
