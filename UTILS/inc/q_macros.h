@@ -16,14 +16,6 @@
 #define max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define sqr(X)  ((X) * (X))
 
-#define MACRO_GETDOCROOT {  \
-  if ( ( strlen(argv[1]) == 0 ) || ( strcmp(argv[1], "_" ) == 0 ) ) { \
-    docroot = getenv("EU_DOC_ROOT");  \
-  } \
-  else { \
-    docroot = argv[1]; \
-  } \
-}
 #define rs_munmap(X, nX) { \
   if ( ( X == NULL ) && ( nX != 0 ) ) {  WHEREAMI; return(-1); } \
   if ( ( X != NULL ) && ( nX == 0 ) )  { WHEREAMI; return(-1); } \
@@ -48,15 +40,12 @@
 
 #define chk_range(xval, lb_incl, ub_excl) { if ( ( (xval) < (lb_incl) ) || ( (xval) >= (ub_excl ) ) ) { go_BYE(-1); } }
 
-#define mk_file_name(filename, fileno) {  \
-  if ( filename == NULL ) { go_BYE(-1); } \
-  if ( fileno < 0  ) { go_BYE(-1); } \
-  sprintf(filename, "_%d", fileno); \
-}
+#define get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))
 
-#ifdef CILK
-#define cilkfor _Cilk_for
-#else
-#define cilkfor for
-#endif
+#define is_ith_bit_set(x, i) ((x) & ((uint64_t) 1 << (i))) == 0 ? false : true 
+
+#define set_bit(x, i) (x = (x) | ((uint64_t) 1 << (i)))
+
+#define unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
+
 #endif

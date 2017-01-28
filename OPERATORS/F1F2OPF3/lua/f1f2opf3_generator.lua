@@ -1,12 +1,12 @@
 #!/usr/bin/env lua
 
-package.path = package.path.. ";../../UTILS/lua/?.lua"
+package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("aux")
 
-dofile '../../UTILS/lua/globals.lua' -- do not hard code locations
+dofile '../../../UTILS/lua/globals.lua' -- do not hard code locations
 
-local srcdir = "../../PRIMITIVES/src/" 
-local incdir = "../../PRIMITIVES/inc/" 
+local srcdir = "../gen_src/" 
+local incdir = "../gen_inc/" 
 local T = dofile 'f1f2opf3_operators.lua' 
 local tmpl = dofile 'f1f2opf3.tmpl'
 -- Improve following
