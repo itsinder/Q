@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e 
+
 cat vvadd_static_checker.lua | \
   sed s'/vvadd_/vvsub_/'g | \
   sed s'/scalar_op = .*$/scalar_op = "c = ( a - b )" /'g \
@@ -23,11 +26,10 @@ cat vvand_static_checker.lua | \
   sed s'/scalar_op = .*$/scalar_op = "c = ( a ^ b )" /'g \
   > vvxor_static_checker.lua
 
-# why does following not work TODO
-# cat vvand_static_checker.lua | \
-#   sed s'/vvand_/vvandnot/'g | \
-#   sed s'/scalar_op = .*$/scalar_op = "( a && (\~b) )" /'g \
-#   > vvandnot_static_checker.lua
+cat vvand_static_checker.lua | \
+  sed s'/vvand_/vvandnot/'g | \
+  sed s'/scalar_op = .*$/scalar_op = "( a && (\~b) )" /'g \
+  > vvandnot_static_checker.lua
 
 cat vveq_static_checker.lua | \
   sed s'/vveq_/vvneq_/'g | \
@@ -59,3 +61,4 @@ cat vveq_static_checker.lua | \
   sed s'/scalar_op = .*$/scalar_op = "c = ( a != b )" /'g \
   > vvneq_static_checker.lua
 
+echo "Completed $0"

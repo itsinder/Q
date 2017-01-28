@@ -9,4 +9,7 @@ rm -f vvneq_static_checker.lua
 rm -f vvor_static_checker.lua
 rm -f vvsub_static_checker.lua
 rm -f vvxor_static_checker.lua
-# TODO rm -f vvandnot_static_checker.lua
+rm -f vvandnot_static_checker.lua
+rm -f vvsub_white_list.lua
+rm -f vvmul_white_list.lua
+rm -f vvdiv_white_list.lua
