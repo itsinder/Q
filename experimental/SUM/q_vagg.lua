@@ -15,15 +15,11 @@ vagg = function (l, v, elemType, aggType, aggFn)
 
   local ffi = require("ffi")	--Loading the FFI library
   local decl = "int " .. aggFn .. "(" .. elemType .. " *X, int n, " .. aggType .. " *res);"
-  print("\nCalling "..decl) 
+  --print("\nCalling "..decl) 
   ffi.cdef(decl)	--Add a C declaration for the C function 
   
   local n = table.getn(v)
-  -- create lua object equivalent to ptr_sum
-  -- Note that instead of creating a scalar and passing the address of the
-  -- scalar to C, we are creating an array of size 1 and passing address of
-  -- array to C. This is how we will get C to set the value of a scalar that Lua
-  -- can also inspect once set
+ 
   local res = ffi.new(aggType .. "[1]"); 
   v = ffi.new(elemType .. "[" .. n .. "]", v) -- create pointer that will be passed to C
 
