@@ -4,7 +4,6 @@ local ffi = require("ffi") --Loading the FFI library
 local mylib = ffi.load("./adder.so") --set the path of your adder.so file here in ""
 require 'q_vagg'
 
-
 local mysum, status = vagg(mylib, {-127,100,5,-1}, "int8_t", "int16_t", "int8_sum") -- call to function in q_vagg.lua file 
 print("\nTotal is " .. mysum);
 
@@ -38,3 +37,13 @@ print("\nTotal is " .. mysum);
 local mysum, status = vagg(mylib, {65,6,9}, "char", "char", "char_sum")
 print("\nTotal is " .. mysum);
 
+-- ---------------------------------------------------
+print("------------DynCall tests------------------------")
+-- assumes luadc.so is created; check README* under dyntest/.../luadc
+
+require "package"
+f,e = package.loadlib("../dyntest/bindings/lua/luadc/luadc.so", "luadc_open")
+f()
+local mylib = dc.load("./adder.so")
+local mysum, status = vaggDynCall(mylib, {-127,100,5,-1}, "int8_t", "int16_t", "int8_sum") -- call to function in q_vagg.lua file 
+print("\nTotal is " .. mysum);
