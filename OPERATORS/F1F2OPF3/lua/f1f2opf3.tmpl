@@ -43,7 +43,7 @@ ${fn}(
  ${in1type} inv1; 
  ${in2type} inv2; 
  ${returntype} outv; 
-#pragma omp parallel for 
+#pragma omp parallel for simd
  for ( uint64_t i = 0; i < nR; i++ ) {  
    inv1 = *in1; 
    inv2 = *in2; 
