@@ -138,8 +138,18 @@ function load( csv_file, M , G)
     end
   end
   
-  --TODO: 1. Flush the null pointer data 2. close the Null pointer files 
+  --Flush the null pointer data 
+  if((row_count%bitval) ~=0)then
+    for i in ipairs(fpNullTable)do
+        writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
+        fpNullTable[i][2]=0
+    end
+  end
   
+  --close the Null pointer files 
+  for i in ipairs(fpNullTable)do
+      close(fpNullTable[i][1])
+  end
   
   -- close all the files
   for i, metadata in ipairs(M) do 
