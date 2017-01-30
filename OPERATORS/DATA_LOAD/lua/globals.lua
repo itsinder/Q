@@ -28,4 +28,4 @@ g_qtypes.I4 = { short_code = "I4", width = 4, ctype = "int32_t", txt_to_ctype = 
 g_qtypes.I8 = { short_code = "I8", width = 8, ctype = "int64_t", txt_to_ctype = "txt_to_I8", ctype_to_txt = "TBD" }
 g_qtypes.F4 = { short_code = "F4", width = 4, ctype = "float", txt_to_ctype = "txt_to_F4", ctype_to_txt = "TBD" }
 g_qtypes.F8 = { short_code = "F8", width = 8, ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
-
+g_qtypes.varchar = { short_code = "varchar", width = 4, ctype = "int32_t", txt_to_ctype = "txt_to_I4", ctype_to_txt = "TBD", dictionary = true }

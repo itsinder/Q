@@ -1,3 +1,8 @@
+-- --------------------------------------------------------------------------------------
+-- This function was written using code example on url : http://lua-users.org/wiki/LuaCsv
+-- -------------------------------------------------------------------------------------
+
+
 function ParseCSVLine (line,sep) 
 	res = {}
 	local pos = 1
@@ -37,7 +42,4 @@ function ParseCSVLine (line,sep)
 	end
 	return res
 end
-
-
---ParseCSVLine("1001,2012,\"Rahul Jadhav\"",',')
 
