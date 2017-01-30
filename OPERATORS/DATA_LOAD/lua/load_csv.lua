@@ -2,6 +2,7 @@ require 'globals'
 require 'parser'
 require 'dictionary'
 require 'QCFunc'
+require 'util'
 
 local ffi = require("ffi") 
 
@@ -55,7 +56,7 @@ function load( csv_file, M , G)
         local addNewValue = metadata["add"] or true  -- default value is true, add null values
           
         if(isDict == true) then
-	  local dict = _G["Q_DICTIONARIES"][dictName] 
+	        local dict = _G["Q_DICTIONARIES"][dictName] 
           if(dict == nil) then 
               print("Dictionary does not exist. Aborting the operation") 
               return -1
@@ -66,9 +67,8 @@ function load( csv_file, M , G)
               print("Dictionary with the same name exists, cannot create new dictionary")
           end
           
-          -- create new dictory and set it in the globals
-          dict = {}
-          _G["Q_DICTIONARIES"][dictName] = newDictionary() 
+          -- create new dictionary, dictionary itself sets self reference in the globals
+          local retVal = newDictionary(dictName) 
         end
         
     end
@@ -87,44 +87,33 @@ function load( csv_file, M , G)
       if metadata.name == "" then 
         -- Skip this line
       else
-        
+
+        local dataTypeShortCode = metadata["type"];
+        local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
+        local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
+        local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
+               
         local val = res[i]
         
-        -- NULL values handled here
-      
-        if val==" " then
-           
+        -- NULL values handled here      
+        if val == nil or trim(val) == "" then
+          -- set the null bit
            if((row_count%bitval) <= bitval)then
               byteval = setBit(i, fpNullTable[i][2], row_count)
               fpNullTable[i][2]=byteval
            end
-          
-           if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
-              writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-             
-              fpNullTable[i][2]=0
-           end
-        
-        elseif(((row_count%bitval) ==0) and fpNullTable[i]~=nil) then
-             --print("\n when * of 8",row_count)
-             writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-             
-             fpNullTable[i][2]=0
+           -- set all null values to string 0, so that instead of some junk data 0 will be written to the file. 
+           val = "0"
+            
         else
-       
-          local dataTypeShortCode = metadata["type"];
-          local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
-          local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
-          local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
-        
+          -- If value is not null then do dictionary string to number conversion
           if(dictionary ~= nil and dictionary == true) then 
           -- print("Dictionary conversion is required for this field")
             local dictName = metadata["dict"]
           -- local isDict = metadata["is_dict"] or false  
             local addNewValue = metadata["add"] or true 
-           	
             local dict = _G["Q_DICTIONARIES"][dictName]
-	    local retNumber = dict.addWithCondition(val, addNewValue)
+            local retNumber = dict.addWithCondition(val, addNewValue)
             if(retNumber < 0 ) then 
               print("Error: value exists in the dictionary, cannot add new one, aborting operation")
               return -1 
@@ -134,14 +123,23 @@ function load( csv_file, M , G)
             val = tostring(retNumber)
             -- print("Value after conversion is " .. val) 
           end
-        
-          local cVal = convertTextToCValue(funName, val, sizeOfData)
-          write(fpTable[i],cVal, sizeOfData) 
-        
         end
+        
+        local cVal = convertTextToCValue(funName, val, sizeOfData)
+        write(fpTable[i],cVal, sizeOfData) 
+        
+        
+        if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
+          writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
+          fpNullTable[i][2]=0
+        end
+        
       end
     end
   end
+  
+  --TODO: 1. Flush the null pointer data 2. close the Null pointer files 
+  
   
   -- close all the files
   for i, metadata in ipairs(M) do 

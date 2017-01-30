@@ -9,7 +9,10 @@ function escapeCSV (s)
 end
 
 
-
-
+-- Trip string : taken from : http://lua-users.org/wiki/CommonFunctions
+function trim(s)
+  -- from PiL2 20.4
+  return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
 
 

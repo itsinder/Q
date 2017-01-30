@@ -9,7 +9,16 @@
 require 'util'
 require 'parser'
 
-function newDictionary()
+function newDictionary(dictName)
+  
+  if(dictName == nil or dicName == "") then
+    print("Dictionary name should not be empty")
+    return -1 
+  end
+
+
+  
+  
   -- Two tables are used here, so that bidirectional lookup becomes easy 
   -- and whole table scan is not required for one side
   local self = {
@@ -94,14 +103,18 @@ function newDictionary()
       
   end
   
-                        
-  return {
+  local retFunction = {
       addWithCondition = addWithCondition,
       getStringByNumber = getStringByNumber , 
       getNumberByString = getNumberByString, 
       isTextExists = isTextExists, 
       saveToFile = saveToFile,
       readFromFile = readFromFile
-  }
+  }              
+    --put newly created dictionary into global variable
+  
+  _G["Q_DICTIONARIES"][dictName] = retFunction
+  return retFunction 
   
 end
+
