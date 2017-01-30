@@ -2,8 +2,6 @@ local ffi = require("ffi")
 local so_file_path_name = "../src/QCFunc.so" --path for .so file
 local qCLib  = ffi.load(so_file_path_name) 
 
-local binfilepath = "./out/"
-
 ffi.cdef[[
   void *malloc(size_t size);
   void free(void *ptr);
@@ -52,8 +50,7 @@ end
 
 --- ######################## FILE Related function Starts ##########
 
-function create(fileName) 
-  filepath = binfilepath..fileName
+function create(filepath) 
   -- print("filepath : " .. filepath .. " Length is " .. #filepath)
   -- local filePathArg = ffi.new("char [?]", #filepath, filepath)
   -- local fp = qCLib["createFile"](filePathArg);

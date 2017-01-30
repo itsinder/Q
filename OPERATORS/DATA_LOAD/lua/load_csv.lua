@@ -25,53 +25,52 @@ function load( csv_file, M , G)
   
   -- open file for each field defined in metdata
   for i, metadata in ipairs(M) do 
-    -- TODO : Handle case where metadata name is empty
-    fpTable[i] = create(metadata.name)
-    
-    
-    -- metadata NULL field is true then create null files and store null file ptr in table
-    if metadata.null == "true" then -- To create nn file for storing null values
-        local fpNullEntry = {}
-        fpNullEntry[1] = create(metadata.name.."_nn")
-        fpNullEntry[2] = byteval
-        -- fpNullTable[i] = create(metadata.name.."_nn")
-        fpNullTable[i] = fpNullEntry
-
-    end 
-    
+    -- If metadata name is not empty/null, then only create file and pointer for it
+    if trim(metadata.name) ~= "" then
+      fpTable[i] = create(_G["Q_DATA_DIR"] .. "_" .. metadata.name)
+      -- metadata NULL field is true then create null files and store null file ptr in table
+      if metadata.null == "true" then -- To create nn file for storing null values
+          local fpNullEntry = {}
+          fpNullEntry[1] = create(_G["Q_DATA_DIR"] .. "_nn_" .. metadata.name)
+          fpNullEntry[2] = byteval
+          -- fpNullTable[i] = create(metadata.name.."_nn")
+          fpNullTable[i] = fpNullEntry
   
-    -- TODO : 
-    -- create dictionaries if required.. upfront for only one type based on metdata
-    -- This needs to be more generalized.. It should be driven by q_types stored in globals
-    -- as below code is, so that new types like varchar can be handled easilty .. ideally without code cahnge
-    
-    local fieldType = metadata["type"];
-    if( fieldType == "varchar") then 
-        -- print("Field Type is varchar.. now chehck fields realted to dictionary") 
+      end 
       
-        -- { name = "colName", type ="varchar",dict = "D1", is_dict = true, add=true}
-        -- read field realted to dictionary from the medata 
-        local dictName = metadata["dict"]
-        local isDict = metadata["is_dict"] or false  -- default value is false, dictionary does not exist.. create one
-        local addNewValue = metadata["add"] or true  -- default value is true, add null values
-          
-        if(isDict == true) then
-	        local dict = _G["Q_DICTIONARIES"][dictName] 
-          if(dict == nil) then 
-              print("Dictionary does not exist. Aborting the operation") 
-              return -1
-          end 
-        else
-          local dict = _G["Q_DICTIONARIES"][dictName] 
-          if(dict ~= nil) then 
-              print("Dictionary with the same name exists, cannot create new dictionary")
-          end
-          
-          -- create new dictionary, dictionary itself sets self reference in the globals
-          local retVal = newDictionary(dictName) 
-        end
+      -- TODO : 
+      -- create dictionaries if required.. upfront for only one type based on metdata
+      -- This needs to be more generalized.. It should be driven by q_types stored in globals
+      -- as below code is, so that new types like varchar can be handled easilty .. ideally without code cahnge
+      
+      local fieldType = metadata["type"];
+      if( fieldType == "varchar") then 
+          -- print("Field Type is varchar.. now chehck fields realted to dictionary") 
         
-    end
+          -- { name = "colName", type ="varchar",dict = "D1", is_dict = true, add=true}
+          -- read field realted to dictionary from the medata 
+          local dictName = metadata["dict"]
+          local isDict = metadata["is_dict"] or false  -- default value is false, dictionary does not exist.. create one
+          local addNewValue = metadata["add"] or true  -- default value is true, add null values
+            
+          if(isDict == true) then
+  	        local dict = _G["Q_DICTIONARIES"][dictName] 
+            if(dict == nil) then 
+                print("Dictionary does not exist. Aborting the operation") 
+                return -1
+            end 
+          else
+            local dict = _G["Q_DICTIONARIES"][dictName] 
+            if(dict ~= nil) then 
+                print("Dictionary with the same name exists, cannot create new dictionary")
+            end
+            
+            -- create new dictionary, dictionary itself sets self reference in the globals
+            local retVal = newDictionary(dictName) 
+          end
+        
+      end
+     end
   end
   
   local row_count =0 ;
@@ -79,12 +78,11 @@ function load( csv_file, M , G)
 
   -- TODO : Check if file:open makes more sense then io.lines 
   for line in io.lines(csv_file) do
-    
     local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
     row_count = row_count + 1
     
     for i, metadata in ipairs(M) do 
-      if metadata.name == "" then 
+      if trim(metadata.name) == "" then 
         -- Skip this line
       else
 
@@ -138,22 +136,24 @@ function load( csv_file, M , G)
     end
   end
   
-  --Flush the null pointer data 
-  if((row_count%bitval) ~=0)then
-    for i in ipairs(fpNullTable)do
-        writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-        fpNullTable[i][2]=0
-    end
-  end
   
-  --close the Null pointer files 
-  for i in ipairs(fpNullTable)do
-      close(fpNullTable[i][1])
-  end
   
   -- close all the files
   for i, metadata in ipairs(M) do 
+    -- If it was not null then only close the file
+    if trim(metadata.name) ~= "" then
+      --Flush the null pointer data 
+      if((row_count%bitval) ~=0 and fpNullTable[i]~=nil)then
+        writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
+        fpNullTable[i][2]=0
+      end
+        
+      -- close files
+      if(fpNullTable[i] ~= nil) then
+        close(fpNullTable[i][1])
+      end
       close(fpTable[i])
+    end
   end
   
 
