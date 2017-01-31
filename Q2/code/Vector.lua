@@ -201,13 +201,13 @@ function Vector:memo(bool)
     if type(bool) ~= "boolean" then
         error("Incorrect type supplied")
     end
-    if self.last_chunk_number ~= nil then
-        error("Cannot set this after calls to chunk")
-    end
     if self.input_from_file then
         error("Input from file is always memoized and cannot be changed")
     end
-    self.memoized = bool
+    if self.last_chunk_number ~= nil then
+        error("Cannot set this after calls to chunk")
+    end
+   self.memoized = bool
 end
 
 function Vector:ismemo()
@@ -310,15 +310,18 @@ function Vector:chunk(num)
                     self:map_to_file() -- better name flush and remmap
                 end
                 local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-                return ffi.cast('void*', ptr + self.chunk_size*num)
+                return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
             else
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
-            return self.last_chun_kbuf, self.last_chunk_size
+            return self.last_chunk_buf, self.last_chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
-                return self:get_from_generator(num)
+                local status, buffer, size = self:get_from_generator(num)
+                if status ~= true then error("No chunk found") end
+                self.last_chunk_buf, self.last_chunk_size = buffer, size
+                return self.last_chunk_buf, self.last_chunk_size
             elseif self.output_to_file == true then
                 error("Yet to implement")
             elseif self.input_from_file then
