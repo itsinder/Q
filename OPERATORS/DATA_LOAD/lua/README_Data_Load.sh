@@ -4,7 +4,8 @@
 #1) Change the directory to Q/OPERATORS/DATA_LOAD/lua
 
 #2) Compile the C code and create the QFunc.so file, the command is:
-gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
+#gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
+gcc -std=gnu99 -o ../src/QCFunc.so ../src/QCFunc.c ../src/txt_to_I1.c ../src/txt_to_I2.c ../src/txt_to_I4.c ../src/txt_to_I8.c ../src/txt_to_F4.c ../src/txt_to_F8.c ../src/txt_to_SC.c ../../../UTILS/src/is_valid_chars_for_num.c -fPIC -shared -I../../../UTILS/inc
 
 #3) If out and metadata directory doesnot exists then create the directory ./out and ./metadata .. here the output files (binary files and null files) will be stored.
 #If out, metadata directory exists then remove and create new directories:

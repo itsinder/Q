@@ -24,7 +24,7 @@ _G["Q_DICTIONARIES"]["D1"] = D1
 
 local M = {
   { name = "empid", null = "true", type = "I4" },
-  { name = "yoj", null = "true", type ="I2" },
+  { name = "", null = "true", type ="I2" },
   { name = "empname", type ="varchar",dict = "D1", is_dict = false, add=true}
 }
 
@@ -34,7 +34,7 @@ ret = load( csv_file_path_name, M )  --call to load function
 -- System is going to shutdown, so save all dictionaries
 saveAllDictionaries()
 
-if(ret ~= nil and ret < 0 ) then 
+if(ret ~= nil and type(ret) ~= "table" and ret < 0 ) then 
   print("Loading Aborted")
 else
   print("Loading Completed") 

@@ -1,10 +1,5 @@
 -- ------------------------------------------------------------------------------------
--- Creates closure for dictionary, so that dectionary can be treated as separate entity
--- It will have following methods 
--- put(text) - puts value into dictionary
--- get(index) - get value by index
--- getIndex(text) - gets the index of the value, if it exists in the dictionary, nil otherwise
--- isTextExists(text) - does value exist in dictionary 
+-- Creates closure for dictionary, so that dictionary can be treated as separate entity
 -- ------------------------------------------------------------------------------------
 require 'util'
 require 'parser'
@@ -12,12 +7,9 @@ require 'parser'
 function newDictionary(dictName)
   
   if(dictName == nil or dicName == "") then
-    print("Dictionary name should not be empty")
-    return -1 
+    error("Dictionary name should not be empty")
+    return nil
   end
-
-
-  
   
   -- Two tables are used here, so that bidirectional lookup becomes easy 
   -- and whole table scan is not required for one side
