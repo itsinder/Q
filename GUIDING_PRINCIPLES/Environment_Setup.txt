@@ -62,3 +62,21 @@ touch .dep
 eval `../latex/tools/setenv`
 make -f ../latex/tools/docdir.mk csv_load.pdf
 
+
+
+###### Lua Rocks and third party library installed using it ############
+
+wget https://luarocks.org/releases/luarocks-2.4.1.tar.gz
+tar zxpf luarocks-2.4.1.tar.gz
+cd luarocks-2.4.1
+./configure; sudo make bootstrap
+
+
+# install lua socket #
+sudo luarocks install luasocket
+
+# install luaunit #
+sudo luarocks install luaunit
+
+#install penlight ###
+sudo luarocks install penlight

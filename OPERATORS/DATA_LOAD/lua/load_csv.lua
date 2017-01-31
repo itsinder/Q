@@ -3,6 +3,7 @@ require 'parser'
 require 'dictionary'
 require 'QCFunc'
 require 'util'
+require 'pl'
 
 local ffi = require("ffi") 
 
@@ -10,24 +11,38 @@ local ffi = require("ffi")
 -- load( "CSV file to load", "meta data", "Global Metadata") 
 -- Loads the CSV file and stores in the Q internal format
 -- 
--- Remaining Things : 
--- 1. Global metdata is not being used currently
--- 2. Dictionary Handling is remaining
--- 3. Null values are curently not handled
--- 4. 
+-- returns : table containing list of files for each column defined in metadata. 
+--           If any error was encountered during load operation then negative status code  
 -- ----------------
 
 function load( csv_file, M , G)
 
+  -- Check if the directory required by this load operation exists
+  if( _G["Q_DATA_DIR"] == nil or not path.exists(_G["Q_DATA_DIR"]) or not path.isdir(_G["Q_DATA_DIR"]) )  then
+      print("Please make sure that Q_DATA_DIR points to correct directory")
+      return -1
+  end
+  
+  if( _G["Q_META_DATA_DIR"] == nil or not path.exists(_G["Q_META_DATA_DIR"]) or not path.isdir(_G["Q_META_DATA_DIR"]) )  then
+      print("Please make sure that Q_META_DATA_DIR points to correct directory")
+      return -1
+  end
+ 
+
+
   local fpTable = {}
   local fpNullTable = {} 
   local byteval = 0
+  local retTable = {} 
   
   -- open file for each field defined in metdata
   for i, metadata in ipairs(M) do 
     -- If metadata name is not empty/null, then only create file and pointer for it
     if trim(metadata.name) ~= "" then
-      fpTable[i] = create(_G["Q_DATA_DIR"] .. "_" .. metadata.name)
+      local filePath = _G["Q_DATA_DIR"] .. "_" .. metadata.name
+      fpTable[i] = create(filePath)
+      retTable[i] = path.abspath(filePath)
+      
       -- metadata NULL field is true then create null files and store null file ptr in table
       if metadata.null == "true" then -- To create nn file for storing null values
           local fpNullEntry = {}
@@ -80,12 +95,10 @@ function load( csv_file, M , G)
   for line in io.lines(csv_file) do
     local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
     row_count = row_count + 1
-    
     for i, metadata in ipairs(M) do 
       if trim(metadata.name) == "" then 
         -- Skip this line
       else
-
         local dataTypeShortCode = metadata["type"];
         local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
         local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
@@ -122,10 +135,8 @@ function load( csv_file, M , G)
             -- print("Value after conversion is " .. val) 
           end
         end
-        
         local cVal = convertTextToCValue(funName, val, sizeOfData)
         write(fpTable[i],cVal, sizeOfData) 
-        
         
         if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
           writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
@@ -156,5 +167,5 @@ function load( csv_file, M , G)
     end
   end
   
-
+  return retTable
 end
