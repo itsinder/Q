@@ -1,0 +1,39 @@
+There are 4 kinds of installations that I would like to see.
+
+(1) Assume that latest Ubuntu minimal server install is in place
+
+In this case, 
+
+a) I will start with a git clone of the Q repo
+
+b) After that, I want a single script that will install and configure
+*everything* that I need for Lua. 
+
+This script is free to use LuaRocks or install from source. In case of
+LuaRocks, I would like to be able to specify which version of the
+package I am interested in. If not, then I would prefer that we
+install from source that we have checked into our repo.
+
+This script should also modify the .bashrc file so that the
+environment is exaclty the way we want it. Note that it may also have
+to modify the .vimrc file or other such files so that we write code in
+the same way (e.g., tabs or spaces?)
+
+Indrajeet to do (later): Figure out if and how Vagrant fits in?
+-------------------------------------------------------------
+
+(2) In case I want to run on any other platform, there will be
+instructions but there is no expectation of support for these
+instructions.
+
+----------------------------------
+
+(3) An ISO that I can boot a machine (physical or virtual) from and
+which installs everything from the OS on up. To confirm, this should
+be able to install withot Internet access. Ideally, it will create a few
+standard users and groups as well. 
+
+(4) Same as above but for Raspberry Pi as opposed to x86 
+
+(5) Create image for deploy as uni-kernel
+
