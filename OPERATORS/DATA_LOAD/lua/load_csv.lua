@@ -19,12 +19,12 @@ function load( csv_file, M , G)
 
   -- Check if the directory required by this load operation exists
   if( _G["Q_DATA_DIR"] == nil or not path.exists(_G["Q_DATA_DIR"]) or not path.isdir(_G["Q_DATA_DIR"]) )  then
-      print("Please make sure that Q_DATA_DIR points to correct directory")
+      error("Please make sure that Q_DATA_DIR points to correct directory")
       return -1
   end
   
   if( _G["Q_META_DATA_DIR"] == nil or not path.exists(_G["Q_META_DATA_DIR"]) or not path.isdir(_G["Q_META_DATA_DIR"]) )  then
-      print("Please make sure that Q_META_DATA_DIR points to correct directory")
+      error("Please make sure that Q_META_DATA_DIR points to correct directory")
       return -1
   end
  
@@ -71,13 +71,13 @@ function load( csv_file, M , G)
           if(isDict == true) then
   	        local dict = _G["Q_DICTIONARIES"][dictName] 
             if(dict == nil) then 
-                print("Dictionary does not exist. Aborting the operation") 
+                error("Dictionary does not exist. Aborting the operation") 
                 return -1
             end 
           else
             local dict = _G["Q_DICTIONARIES"][dictName] 
             if(dict ~= nil) then 
-                print("Dictionary with the same name exists, cannot create new dictionary")
+                error("Dictionary with the same name exists, cannot create new dictionary")
             end
             
             -- create new dictionary, dictionary itself sets self reference in the globals
@@ -93,58 +93,64 @@ function load( csv_file, M , G)
 
   -- TODO : Check if file:open makes more sense then io.lines 
   for line in io.lines(csv_file) do
-    local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
-    row_count = row_count + 1
-    for i, metadata in ipairs(M) do 
-      if trim(metadata.name) == "" then 
-        -- Skip this line
-      else
-        local dataTypeShortCode = metadata["type"];
-        local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
-        local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
-        local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
-               
-        local val = res[i]
-        
-        -- NULL values handled here      
-        if val == nil or trim(val) == "" then
-          -- set the null bit
-           if((row_count%bitval) <= bitval)then
-              byteval = setBit(i, fpNullTable[i][2], row_count)
-              fpNullTable[i][2]=byteval
-           end
-           -- set all null values to string 0, so that instead of some junk data 0 will be written to the file. 
-           val = "0"
+    
+    if(trim(line) == "") then 
+       --skip empty lines in csv file, such scenario can be there if someone press enter after last line
+    else
+      local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
+      row_count = row_count + 1
+      for i, metadata in ipairs(M) do 
+          if trim(metadata.name) == "" then 
+            -- Skip this line
+          else
+            local dataTypeShortCode = metadata["type"];
+            local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
+            local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
+            local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
+                   
+            local val = res[i]  
             
-        else
-          -- If value is not null then do dictionary string to number conversion
-          if(dictionary ~= nil and dictionary == true) then 
-          -- print("Dictionary conversion is required for this field")
-            local dictName = metadata["dict"]
-          -- local isDict = metadata["is_dict"] or false  
-            local addNewValue = metadata["add"] or true 
-            local dict = _G["Q_DICTIONARIES"][dictName]
-            local retNumber = dict.addWithCondition(val, addNewValue)
-            if(retNumber < 0 ) then 
-              print("Error: value exists in the dictionary, cannot add new one, aborting operation")
-              return -1 
+            -- NULL values handled here      
+            if val == nil or trim(val) == "" then
+               if(fpNullTable[i] == nil) then error("NUll value encountered in not null column .. column number " .. i ) end
+              -- set the null bit
+               if((row_count%bitval) <= bitval)then
+                  byteval = setBit(i, fpNullTable[i][2], row_count)
+                  fpNullTable[i][2]=byteval
+               end
+               -- set all null values to string 0, so that instead of some junk data 0 will be written to the file. 
+               val = "0"
+                
+            else
+              -- If value is not null then do dictionary string to number conversion
+              if(dictionary ~= nil and dictionary == true) then 
+              -- print("Dictionary conversion is required for this field")
+                local dictName = metadata["dict"]
+              -- local isDict = metadata["is_dict"] or false  
+                local addNewValue = metadata["add"] or true 
+                local dict = _G["Q_DICTIONARIES"][dictName]
+                -- dictionary throws error if any during the add operation
+                local retNumber = dict.addWithCondition(val, addNewValue)
+                          
+                -- now change the value to index instead of string
+                val = tostring(retNumber)
+                -- print("Value after conversion is " .. val)
+              else 
+                -- remove any spaces before or after string, otherwise number conversion function throws error
+                val = trim(val) 
+              end
             end
-          
-            -- now change the value to index instead of string
-            val = tostring(retNumber)
-            -- print("Value after conversion is " .. val) 
+            -- print(val)
+            local cVal = convertTextToCValue(funName, val, sizeOfData)
+            write(fpTable[i],cVal, sizeOfData) 
+            
+            if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
+              writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
+              fpNullTable[i][2]=0
+            end      
           end
-        end
-        local cVal = convertTextToCValue(funName, val, sizeOfData)
-        write(fpTable[i],cVal, sizeOfData) 
-        
-        if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
-          writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-          fpNullTable[i][2]=0
-        end
-        
+        end -- for loop ends
       end
-    end
   end
   
   
