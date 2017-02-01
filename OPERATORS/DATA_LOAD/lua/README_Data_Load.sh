@@ -25,18 +25,16 @@ mkdir metadata
 #5) If you are using your CSV file then adjust the metadata M according to the respective CSV file in main.lua
 
 #6) Then run the main.lua file, the command is:
-lua main.lua
+luajit main.lua
 
 
 
 
 ############## REMAINING Things ############
 
-# - Dictionary for varchar -- testing remaining
-# - NULL value handing -- started working on the same
+# - Dictionary for varchar -- testing
+# - NULL value handing --testing
 # - File Name : what pattern to use to make it 16 characters long
-# - If output/metadata directory does not exists, then it should throw error
 # - Deleting null vector file, if null value is not found in input
-# - Integrate this with function created by Ramesh.
 # - Fix size string 
 # - Custom datatype (ts example given in csv_load.pdf)
