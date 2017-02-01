@@ -17,6 +17,7 @@ dictionaries, ...
 (c) loop through all cells as follows
 col_idx = 0;
 row_idx = 0;
+num_nulls[] = 0; // array of size num_cols
 -- num_cols set in Step (a)
 for ( ; ; ) { 
   s = get_cell(...) -- gets next cell value
@@ -31,13 +32,21 @@ for ( ; ; ) {
     else
       write null byte to nn_file
       write sizeof(..) null bytes to file 
+      num_nulls[col_idx]++;
     endif
   else
-    -- depending on type of this column
-    int status = C.ffi.txt_to_I4(s, &space);
+    -- I would prefer NOT to see a switch statement. This is for exposition
+    switch ( depending on type of this column ) { 
+      case I1 : ... break; 
+      case I4 : int status = C.ffi.txt_to_I4(s, &space); break;
+      default : go_BYE(-1); break;
+    }
     assert(status == 0)
     int nw = C.ffi.fwrite(space, sizeof(..), 1, fp);
     assert(nw, sizeof(..))
+    if ( has_nulls[col_idx] ) then
+      write byte with value 1 to nn_file
+    endif
   endif
   if ( col_idx == ( num_cols - 1 ) {
     col_idx = 0;
@@ -45,7 +54,13 @@ for ( ; ; ) {
   }
 }
 assert(row_idx > 0, "table must have at least one row") 
-assert(col_idx == num_columns, "all rows have same number of columns")
+assert(col_idx == 0, "all rows have same number of columns")
+for ( int col_idx = 0; col_idx < num_cols; col_idx++ ) {
+  if ( ( has_nulls[col_idx] ) && ( num_nulls[col_idx] == 0 ) ) { 
+    delete nn file
+  }
+}
+
 
 
 int
