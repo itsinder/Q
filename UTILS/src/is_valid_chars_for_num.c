@@ -2,12 +2,13 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "q_macros.h"
 bool
 is_valid_chars_for_num(
-      const char *X
+      char * const X
       )
 {
-  if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
+  if ( ( X == NULL ) || ( *X == '\0' ) ) { WHEREAMI; return false; }
   for ( char *cptr = X; *cptr != '\0'; cptr++ ) { 
     if ( isdigit(*cptr) || 
         ( *cptr == '-' )  ||

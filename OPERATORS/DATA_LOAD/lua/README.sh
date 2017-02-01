@@ -2,7 +2,7 @@
 set -e 
 # cleanup
 rm -r -f ../gen_inc/*.h
-rm -r -f ../gen_src/*.h
+rm -r -f ../gen_src/*.c
 # generate all primitives
 lua gen_code.lua 
 # iterate over all generated code=> should compile without warnings
