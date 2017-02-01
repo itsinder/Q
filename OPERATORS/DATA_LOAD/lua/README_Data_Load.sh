@@ -25,7 +25,7 @@ mkdir metadata
 #5) If you are using your CSV file then adjust the metadata M according to the respective CSV file in main.lua
 
 #6) Then run the main.lua file, the command is:
-luajit main.lua
+lua main.lua
 
 
 
