@@ -15,6 +15,7 @@ The interpreter can be changed from Project->Lua Interpreter
 Note: Lua 5.1 isn’t shipped by default
 
 Gotchas:
+
 - Debugger steps into lua functions in another file only if the other file is open; otherwise it steps over. See faq question “Why stepping into function calls doesn’t work in some cases?”
 - With LuaJIT, occasionally it steps on same line multiple times; see https://studio.zerobrane.com/doc-luajit-debugging
 - If you require any other files, set package.path at start of script accordingly
@@ -47,3 +48,4 @@ Multiple “projects” view etc
 Minuses:
 Debugger configuration has extra dependencies and was too time-consuming to get going
 Does some “magic” w.r.t. paths, so command-line compatibility would require additional overseeing
+
