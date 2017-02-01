@@ -1,5 +1,5 @@
 \documentclass[letterpaper]{article}
-\input{../../latex/styles/ramesh_abbreviations}
+\input{../../../latex/styles/ramesh_abbreviations}
 \usepackage{times}
 \usepackage{helvet}
 \usepackage{courier}
@@ -107,14 +107,14 @@ that we expect to find in foo.csv
 
 What does M look like?
 \begin{verbatim}
-M = { { name = "", field_type = "" },
-{ name = "f1", null = "true", type = "int32_t" },
-{ name = "f2", null = "false", type = "integer" },
-{ name = "f3", type = "number" },
-{ name = "f4", size = 16 },
-{ name = "f5", type = "varchar", dict = "D1", is_dict = false }, 
-{ name = "f6", type = "varchar", dict = "D2", is_dict = true, add=true},
-{ name = "f7", type = "varchar", dict = "D3", is_dict = true, add=false},
+M = { { name = "", qtype_type = "" },
+{ name = "f1", null = "true", qtype = "I8" },
+{ name = "f2", null = "false", qtype = "integer" },
+{ name = "f3", qtype = "number" },
+{ name = "f4", qtype = "SC", size = 16 },
+{ name = "f5", qtype = "SV", dict = "D1", is_dict = false }, 
+{ name = "f6", qtype = "SV", dict = "D2", is_dict = true, add=true},
+{ name = "f7", qtype = "SV", dict = "D3", is_dict = true, add=false},
     }
 \end{verbatim}
 
@@ -123,25 +123,29 @@ Let's go through these lines one at a time. The table has 6 fields.
 \be
 \item 
 The first line says that the first field should be ignored - hence we
-do not need to provide a name or a field type
+do not need to provide a name or a qtype
 \item 
 Line 2 for field f1 says that we expect all values of the second field to
-be valid values for a variable of type \verb+int32_t+ and that the
-resulting vector is of type \verb+int32_t+
+be valid values for a variable of I4 and that the 
+resulting vector is of qtype I4
 
 \item 
 Line 3 for field f2  says that we expect all values of the third field to
-be valid values for a variable of type \verb+int64_t+ and that the
+be valid values for a variable of qtype in 
+\(\{\mathrm{I1, I2, I4, I8}\}\)
+and that the
 resulting vector is of type
-\verb+int8_t, int16_t, int32_t, int64_t+. The smallest field that
+\(\{\mathrm{I1, I2, I4, I8}\}\).
+The smallest field that
 can accomodate the values will be used. In other words, if all values are
-between -32768 and +32767, then we will use \verb+int16_t+
+between -32768 and +32767, then we will use I2
 \framebox{Not for version 1. }
 \item 
 Line 4 for field f3 says that we expect all values of the third field to
-be valid values for a variable of type double and that the resulting
+be valid values for a variable of type F8 and that the resulting
 vector is of type
-\verb+int8_t, int16_t, int32_t, int64_t, float, double+. If all values
+\(\{\mathrm{I1, I2, I4, I8, F4, F8}\}\).
+If all values
 can be represented by an integer, the smallest integer field will be
 used. Else, float will be used if it causes no loss; else, double.
 \framebox{Not for version 1. }
@@ -156,6 +160,51 @@ used. Else, float will be used if it causes no loss; else, double.
 In order to explain lines with ``dict'', we need to introduce the concept of
 a dictionary, Section~\ref{dictionary}
 \ee
+
+\subsection{Validations}
+
+\begin{invariant}
+If a given row of M does not have name specified or name is not null, then the
+corresponding column will be ignored
+\end{invariant}
+
+\begin{invariant}
+No validations on rows of meta data which are to be ignored
+\end{invariant}
+
+\begin{invariant}
+  At least one column of the CSV file must not be ignored
+\end{invariant}
+
+\begin{invariant}
+  {\bf name} must be unique
+\end{invariant}
+
+\begin{invariant}
+  {\bf name} must contain only alphanumeric characters and underscore
+\end{invariant}
+
+\begin{invariant}
+  {\bf qtype} must be specified and must be a valid value
+\end{invariant}
+
+\begin{invariant}
+{\bf null} need not be specified. If not, assume false. If yes, then must
+be either true or false, nothing else.
+\end{invariant}
+
+\begin{invariant}
+If {\bf null} is true, then it is okay for data to have no null values.
+If {\bf null} is false, then it is {\bf not} okay for data to have no null values.
+either true or false, nothing else.
+\end{invariant}
+
+\begin{invariant}
+If {\bf qtype} is SV, then {\bf is\_dict} must be specified as 
+either true or or false. 
+\end{invariant}
+
+
 
 \section{Null values}
 \label{null_values}

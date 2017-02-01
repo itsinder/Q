@@ -14,7 +14,7 @@ gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
 #5) Adjust metadata in main.lua according to the csv file you are reading 
 
 #6) Then run the main.lua file, the command is:
-luajit main.lua
+lua main.lua
 
 
 
