@@ -41,7 +41,7 @@ make && sudo make install
 wget http://luarocks.github.io/luarocks/releases/luarocks-2.4.2.tar.gz
 tar -xvzf luarocks-2.4.2.tar.gz
 cd luarocks-2.4.2/
-make build && sudo make install
+./configure && make build && sudo make install
 
 
 
