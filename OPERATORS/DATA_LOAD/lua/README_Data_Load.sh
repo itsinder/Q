@@ -24,7 +24,7 @@ gcc -std=gnu99 \
   -fPIC -shared \
   -I../../../UTILS/inc/ \
   -I../gen_inc/
-echo PREMATURE; exit;
+# echo PREMATURE; exit;
 
 #3) If out and metadata directory doesnot exists then create the directory ./out and ./metadata .. here the output files (binary files and null files) will be stored.
 #If out, metadata directory exists then remove and create new directories:

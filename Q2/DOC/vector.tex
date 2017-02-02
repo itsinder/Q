@@ -13,15 +13,41 @@ so I will take the liberty of doing so.
 \section{Data storage and access}
 
 Q supports only one data structure, a vector. All elements of the
-vector must be of the same type and, for starters, we will support
-only primitive types --- integers, floating point numbers and possibly
-constant length strings.
+vector must be of the same type,  Section~\ref, {q_types}. Note that all
+elements of a field have the same length. 
 
 A vector is best thought of as an object. Lua provides basic but
 entirely servicable object oriented
 support \url{https://www.lua.org/pil/16.html}. For something to be a
 vector, it must satisfy the following contractual obligations,
 Section~\ref{vector_contract}.
+
+\subsection{Q Types}
+\label{q_types}
+Q currently supports the types listed in Table~\ref{tbl_q_types}
+
+\begin{table}[hb]
+\centering
+\begin{tabular}{|l|l|l|l|l|} \hline \hline
+  {\bf Name} & {\bf Input Type} & {\bf Output Type} & {\bf Return Value} \\ \hline \hline
+  logit & Vector \(x\) & Vector \(y\) & \(y = \frac{e^x}{1 + 1^x}\) \\ \hline
+  constant & Scalar \(x\) & Vector \(y\) & \(\forall i:~y_i = x \) \\ \hline
+  vvadd & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x + y \)  \\ \hline
+  vvsub & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x - y \)  \\ \hline
+  vvmul & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x \times y \)  \\ \hline
+  vvdiv & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x / y \)  \\ \hline
+  vsmul & Vector \(x\), Scalar \(y\) & Vector \(z\) & \(\forall i:~z_i = x_ \times y \)  \\ \hline
+  sumprod & Vector \(x\), Vector \(y\) & Scalar \(z\) & \(z = \sum_i (x_i \times y_i)\) \\ \hline
+  sumprod2 & Vector \(x\), Vector \(y\), Vector \(z\) & Scalar \(w\) &  \(w = \sum_i (x_i \times y_i \times z_i)\) \\ \hline
+\hline
+\end{tabular}
+\caption{Necessary Operators}
+\label{tbl_custom_ops}
+\end{table}
+
+
+\section{Details}
+
 
 \section{Definitions}
 In this section, we make some important definitions which will be useful for the

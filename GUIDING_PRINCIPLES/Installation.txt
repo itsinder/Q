@@ -20,6 +20,16 @@ to modify the .vimrc file or other such files so that we write code in
 the same way (e.g., tabs or spaces?)
 
 Indrajeet to do (later): Figure out if and how Vagrant fits in?
+
+--- Setting up machine
+Use minimal install Ubuntu 16.04 LTS 
+When asked about packages to install, select 
+standard system utilities
+openssh server
+See screenshot
+
+
+
 -------------------------------------------------------------
 
 (2) In case I want to run on any other platform, there will be
