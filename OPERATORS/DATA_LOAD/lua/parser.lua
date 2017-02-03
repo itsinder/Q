@@ -3,7 +3,7 @@
 -- -------------------------------------------------------------------------------------
 
 
-function ParseCSVLine (line,sep) 
+function parse_csv_line (line,sep) 
 	res = {}
 	local pos = 1
 	sep = sep or ','

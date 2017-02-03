@@ -16,11 +16,13 @@ sudo make install
 - git clone https://github.com/jmckaskill/luaffi/
 
 vim Makefile
-Add lua5.1 instead of lua in the below line, basically
-Change : LUA_CFLAGS=`$(PKG_CONFIG) --cflags lua5.2 2>/dev/null || $(PKG_CONFIG) --cflags lua5.1`
-with : LUA_CFLAGS=`$(PKG_CONFIG) --cflags lua5.2 2>/dev/null || $(PKG_CONFIG) --cflags lua5.1`
+	Add lua5.1 instead of lua in the below line, basically
+	Change : LUA_CFLAGS=`$(PKG_CONFIG) --cflags lua5.2 2>/dev/null || $(PKG_CONFIG) --cflags lua5.1`
+	with : LUA_CFLAGS=`$(PKG_CONFIG) --cflags lua5.2 2>/dev/null || $(PKG_CONFIG) --cflags lua5.1`
 
-copied ffi.so  in the directlry where the lua code was there for assignemtn1 and it worked without change..
+make clean all
+sudo cp ffi.so /usr/local/lib/lua/5.1/
+
 
 
 

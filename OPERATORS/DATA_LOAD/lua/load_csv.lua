@@ -81,7 +81,7 @@ function load( csv_file, M , G)
             end
             
             -- create new dictionary, dictionary itself sets self reference in the globals
-            local retVal = newDictionary(dictName) 
+            local retVal = new_dictionary(dictName) 
           end
         
       end
@@ -97,7 +97,7 @@ function load( csv_file, M , G)
     if(trim(line) == "") then 
        --skip empty lines in csv file, such scenario can be there if someone press enter after last line
     else
-      local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
+      local res= parse_csv_line(line,',')       -- call to parse to parse the line of csv file
       row_count = row_count + 1
       for i, metadata in ipairs(M) do 
           if trim(metadata.name) == "" then 
@@ -105,6 +105,7 @@ function load( csv_file, M , G)
           else
             local dataTypeShortCode = metadata["type"];
             local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
+            local ctype = g_qtypes[dataTypeShortCode]["ctype"]
             local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
             local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
                    
@@ -124,13 +125,12 @@ function load( csv_file, M , G)
             else
               -- If value is not null then do dictionary string to number conversion
               if(dictionary ~= nil and dictionary == true) then 
-              -- print("Dictionary conversion is required for this field")
                 local dictName = metadata["dict"]
               -- local isDict = metadata["is_dict"] or false  
                 local addNewValue = metadata["add"] or true 
                 local dict = _G["Q_DICTIONARIES"][dictName]
                 -- dictionary throws error if any during the add operation
-                local retNumber = dict.addWithCondition(val, addNewValue)
+                local retNumber = dict.add_with_condition(val, addNewValue)
                           
                 -- now change the value to index instead of string
                 val = tostring(retNumber)
@@ -141,7 +141,7 @@ function load( csv_file, M , G)
               end
             end
             -- print(val)
-            local cVal = convertTextToCValue(funName, val, sizeOfData)
+            local cVal = convertTextToCValue(funName, ctype, val, sizeOfData)
             write(fpTable[i],cVal, sizeOfData) 
             
             if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
