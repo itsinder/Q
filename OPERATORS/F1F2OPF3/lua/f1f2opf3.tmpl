@@ -8,6 +8,7 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
+      void *args,
       ${opt_args}
       ${returntype} * restrict out 
       ) 
@@ -26,7 +27,7 @@ __operation(
       )
       {
       ${returntype} c;
-      ${scalar_op};
+      ${c_code_for_operator}
       *ptr_c = c;
       }
 
@@ -35,6 +36,7 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
+      void *args,
       ${returntype} * restrict out 
       )
 

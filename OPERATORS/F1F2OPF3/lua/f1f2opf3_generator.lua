@@ -1,29 +1,30 @@
 #!/usr/bin/env lua
 
-package.path = package.path.. ";../?.lua"
+package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("aux")
 
-dofile '../globals.lua'
+dofile '../../../UTILS/lua/globals.lua'
 
-local srcdir = "../../PRIMITIVES/src/" 
-local incdir = "../../PRIMITIVES/inc/" 
+local srcdir = "../gen_src/"
+local incdir = "../gen_inc/"
 local T = dofile 'f1f2opf3_operators.lua' 
 local tmpl = dofile 'f1f2opf3.tmpl'
-local types = { 'int8_t', 'int16_t', 'int32_t', 'int64_t','float', 'double' }
+local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
+args = nil -- not being used just yet
 for i, v in ipairs(T) do
   local base_name = v
   local str = 'require \'' .. base_name .. '_static_checker\''
 --  require concat_static_checker.lua
-  load(str)()
+  loadstring(str)()
   for i, in1type in ipairs(types) do 
     for j, in2type in ipairs(types) do 
       for k, returntype in ipairs(types) do 
         stat_chk = base_name .. '_static_checker'
-        assert(_G[stat_chk], "no checker for " .. base_name)
-        local substitutions, includes = 
-        _G[base_name .. '_static_checker'](in1type, in2type, returntype)
-        if ( substitutions ) then
+        assert(_G[stat_chk], "function not found " .. stat_chk)
+        -- print("Lua premature", stat_chk); os.exit()
+        local subs, incs = _G[stat_chk](in1type, in2type, returntype, args)
+        if ( subs ) then
           local B = nil; local W = nil
           if ( file_exists(base_name .. "_black_list.lua")) then 
             B = dofile(base_name .. "_black_list.lua")
@@ -39,11 +40,11 @@ for i, v in ipairs(T) do
             error("Cannot have both black and white list")
           end
           -- TODO Improve following.
-          tmpl.name = substitutions.name
-          tmpl.in1type = substitutions.in1type
-          tmpl.in2type = substitutions.in2type
-          tmpl.returntype = substitutions.returntype
-          tmpl.scalar_op = substitutions.scalar_op
+          tmpl.fn           = subs.fn
+          tmpl.in1type      = subs.in1type
+          tmpl.in2type      = subs.in2type
+          tmpl.returntype   = subs.returntype
+          tmpl.c_code_for_operator = subs.c_code_for_operator
           -- process black/white lists
           local skip = false; local decided = false
           if ( ( B == nil ) and ( W == nil ) ) then 
@@ -64,7 +65,7 @@ for i, v in ipairs(T) do
           -- print(tmpl 'declaration')
           doth = tmpl 'declaration'
           -- print("doth = ", doth)
-          local fname = incdir .. "_" .. substitutions.name .. ".h", "w"
+          local fname = incdir .. "_" .. subs.fn .. ".h", "w"
           local f = assert(io.open(fname, "w"))
           f:write(doth)
           if ( includes ) then 
@@ -76,7 +77,7 @@ for i, v in ipairs(T) do
           -- print(tmpl 'definition')
           dotc = tmpl 'definition'
           -- print("dotc = ", dotc)
-          local fname = srcdir .. "_" .. substitutions.name .. ".c", "w"
+          local fname = srcdir .. "_" .. subs.fn .. ".c", "w"
           local f = assert(io.open(fname, "w"))
           f:write(dotc)
           f:close()

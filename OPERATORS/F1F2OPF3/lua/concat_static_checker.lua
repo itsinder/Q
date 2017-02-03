@@ -2,24 +2,21 @@
 function concat_static_checker(
   f1type, 
   f2type, 
-  fouttype
+  fouttype,
+  args
   )
 
-    local w1   = g_qtypes[f1type].width
-    local w2   = g_qtypes[f2type].width
-    local wout = g_qtypes[fouttype].width
+    local ok_intypes = { I1 = true, I2 = true, I4 = true }
+    local ok_outtypes = { I2 = true, I4 = true, I8 = true }
+
+    local w1   = assert(g_qtypes[f1type].width)
+    local w2   = assert(g_qtypes[f2type].width)
     local shift = w2 * 8 -- convert bytes to bits 
-    if not ( ( f1type == "I1" ) or 
-      ( f1type == "I2" ) or 
-      ( f1type == "I4" ) ) then
-      print("concat requires fldtype of 1st argument to be I1/I2/I4")
-      return nil
+    if ( not ok_intypes[f1type] ) then 
+      print("input type", f1type, " not acceptable"); return nil; 
     end
-    if not ( ( f2type == "I1" ) or 
-      ( f2type == "I2" ) or 
-      ( f2type == "I4" ) ) then
-      print("concat requires fldtype of 1st argument to be I1/I2/I4")
-      return nil
+    if ( not ok_intypes[f2type] ) then 
+      print("input type", f2type, " not acceptable"); return nil; 
     end
     local l_outtype = nil
     if ( f1type == "I4" ) then 
@@ -41,34 +38,31 @@ function concat_static_checker(
         l_outtype = "I2"
       end
     end
-    if ( l_outtype == nil ) then 
-      error("Control should never come here")
-    end
-
-    local l_wout = g_qtypes[l_outtype].width
+    assert(l_outtype ~= nil, "Control should never come here")
+    local l_wout = assert(g_qtypes[l_outtype].width, "ERROR")
     if ( fouttype ~= nil ) then 
-      valid_outtype = { "I1", "I2", "I4", "I8" }
-      if ( valid_outtype[fouttype] ) then 
+      local wout   = assert(g_qtypes[fouttype].width, "ERROR")
+      if ( not ok_outtypes[fouttype] ) then 
         print("fouttype is not valid destination type for concat")
         return nil
       end
-      if ( l_wout >= wout ) then 
+      if ( wout >= l_wout ) then 
+        print("Adjusting ", f1type, f2type, l_outtype, fouttype)
         l_outtype = fouttype
       else
-        print("specified output type is not big enough")
+        print("specified output type", l_outtype, " is not big enough")
         return nil
       end
     end
     includes = {"math", "curl/curl" }
-    substitutions = {}
-    substitutions.fn = 
+    subs = {}
+    subs.fn = 
     "concat_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
-    substitutions.in1type = g_qtypes[f1type].ctype
-    substitutions.in2type = g_qtypes[f2type].ctype
-    substitutions.returntype = g_qtypes[l_outtype].ctype
-    substitutions.scalar_op = 
-    " c = ( (" .. substitutions.returntype .. ")a << " .. shift .. " ) | b "
+    subs.in1type = g_qtypes[f1type].ctype
+    subs.in2type = g_qtypes[f2type].ctype
+    subs.returntype = g_qtypes[l_outtype].ctype
+    subs.c_code_for_operator = 
+    " c = ( (" .. subs.returntype .. ")a << " .. shift .. " ) | b; "
 
-    return substitutions, includes
-
+    return subs, includes
 end
