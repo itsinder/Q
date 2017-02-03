@@ -6,6 +6,9 @@ g_valid_types['f'] = 'float'
 g_valid_types['d'] = 'double'
 g_valid_types['c'] = 'char'
 g_chunk_size = 64
+g_valid_meta = {}
+g_valid_meta["dir"] = 1
+
 local charset = {}
 
 -- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
@@ -93,7 +96,7 @@ type = function( obj )
     return otype
 end
 
-function Vector:set_generator(gen)
+local function set_generator(self, gen)
     if type(gen) ~= "Generator" then
         error("Expected a generator set to gen")
     end
@@ -111,7 +114,7 @@ function Vector:set_generator(gen)
 
 end
 
-function Vector:read_file_vector(arg)
+local function read_file_vector(self, arg)
     self.input_from_file = true
     self.filename = arg.filename
     self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
@@ -128,15 +131,17 @@ function Vector:read_file_vector(arg)
     return self
 end
 
-function Vector:write_file_vector(arg)
+local function write_file_vector(self, arg)
     self.output_to_file = true
     self.filename = arg.filename or get_new_filename(10)
     self.is_materialized = false
+    self.length = 0
     return self
 end
 
 function Vector.new(arg)
     local self = setmetatable({}, Vector)
+    self.meta = {}
     self.destructor_ptr=ffi.gc(C.malloc(1), Vector.destructor) -- Destructor hack for luajit
     DestructorLookup[self.destructor_ptr] = self
     if type(arg) ~= "table" then
@@ -148,37 +153,32 @@ function Vector.new(arg)
         if type(gen) ~= "Generator" then
             error("Expected a generator set to gen")
         end
-        return self:set_generator(gen)
-    end
-
-    -- No generator
-    if arg.field_type == nil or g_valid_types[arg.field_type] == nil
-        then error("Valid type not given")
-    end
-    self.field_type = arg.field_type
-    -- TODO only size maybe type is not important
-    -- Make changes to enable registering of global structs etc. Type or number.
-    -- If number alone then type is custom
-    if arg.field_size == nil then -- for constant length string. For errors I can set the size to -1 and catch that if needed
-        local type_val =  g_valid_types[arg.field_type]
-        if type_val == nil then
-            error("Invalid type")
+        set_generator(self, gen)
+    else -- No generator
+        if arg.field_type == nil or g_valid_types[arg.field_type] == nil
+            then error("Valid type not given")
         end
-        self.field_size = ffi.sizeof(type_val)
-    else
-        self.field_size = arg.field_size
-    end
-    -- what are the cases where field type is irrelevant
+        self.field_type = arg.field_type
+        if arg.field_size == nil then -- for constant length string this cannot be nil
+            local type_val =  g_valid_types[arg.field_type]
+            if type_val == nil then
+                error("Invalid type")
+            end
+            self.field_size = ffi.sizeof(type_val)
+        else
+            self.field_size = arg.field_size
+        end
 
-    if arg.write_vector == true then
-        return self:write_file_vector(arg)
+        if arg.write_vector == true then
+            write_file_vector(self, arg)
+        else
+            if arg.filename ~= nil then -- filename means read from file
+                read_file_vector(self, arg)
+            else
+                error('No data input to vector. Need either a file or a generator')
+            end
+        end
     end
-    if arg.filename ~= nil then -- filename means read from file
-        self:read_file_vector(arg)
-    else
-        error('No data input to vector. Need either a file or a generator')
-    end
-
     local buff_size = self.field_size * self.chunk_size
     self.buffer = ffi.gc( C.malloc(buff_size), C.free)
     return self
@@ -197,7 +197,7 @@ function Vector:sz()
     return self.field_size
 end
 
-function Vector:memo(bool) 
+function Vector:memo(bool)
     if type(bool) ~= "boolean" then
         error("Incorrect type supplied")
     end
@@ -207,7 +207,7 @@ function Vector:memo(bool)
     if self.last_chunk_number ~= nil then
         error("Cannot set this after calls to chunk")
     end
-   self.memoized = bool
+    self.memoized = bool
 end
 
 function Vector:ismemo()
@@ -219,7 +219,7 @@ function Vector:last_chunk()
 end
 
 
-function Vector:append_to_file(ptr, size)
+local function append_to_file(self, ptr, size)
     ptr = ptr or self.last_chunk_buf
     size = size or self.chunk_size
     if self.filename == nil then error("Filename should have been set in constructor") end
@@ -235,7 +235,7 @@ function Vector:append_to_file(ptr, size)
     c.fwrite(ptr,self.field_size, size, self.file)
 end
 
-function Vector:map_to_file()
+local function flush_remap_file(self)
     if self.filename == nil then error("Filename should have been set in constructor") end
     if self.input_from_file == true then error("No need to mmap a file that is mmap in constructor") end
     if self.file == nil then error("No file to mmap to") end
@@ -252,7 +252,7 @@ function Vector:materialized()
     return self.is_materialized
 end
 
-function Vector:get_from_generator(num)
+local function get_from_generator(self, num)
     if self.generator:status() == "dead" then
         error("Cannot produce any more data")
     end
@@ -261,7 +261,7 @@ function Vector:get_from_generator(num)
     self.last_chunk_number = num
     -- if memoized then add to file
     if self.memoized then
-        self:append_to_file(self.last_chunk_buf, self.last_chunk_size)
+        append_to_file(self, self.last_chunk_buf, self.last_chunk_size)
     end
     self.last_chunk_buf = buffer
     self.last_chunk_size = size
@@ -272,12 +272,12 @@ function Vector:get_from_generator(num)
         --if math.ceil(self.length/self.chunk_size) == num then
         --TODO Add assert to here whenever you know something has to be true
         self.is_materialized = true
-        self:map_to_file()
+        flush_remap_file(self)
     end
     return self.last_chunk_buf, self.last_chunk_size
 end
 
-function Vector:get_from_file(num)
+local function get_from_file(self, num)
     if num >= 0 then
         if num < self.max_chunks then
             local chunk_size = self.chunk_size
@@ -291,23 +291,25 @@ function Vector:get_from_file(num)
             error('Invalid chunk number')
         end
     else
-        return self.cdata -- a mmap to the ramfs file --TODO Add vector length
+        return self.cdata, self.length -- a mmap to the ramfs file
     end
 
 end
 
+--TODO need to have a chat with Ramesh about size of text returned by each step
+--of generator and of write vector
 function Vector:chunk(num)
     if type(num) ~= "number" then
         error("Require a number for chunk number")
     end
     if self:materialized() then
-        return self:get_from_file(num)
+        return get_from_file(self, num)
     else -- if not materialized
         if num < self:last_chunk() then
             if self.memoized == true then
                 if num > self.file_last_chunk_number then
                     --flush temp file mmap updated file
-                    self:map_to_file() -- better name flush and remmap
+                    flush_remap_file(self)
                 end
                 local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
                 return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
@@ -315,15 +317,22 @@ function Vector:chunk(num)
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
-            return self.last_chunk_buf, self.last_chunk_size
+            return self.last_chunk_buf, self.last_chunk_size --TODO this might change based on our discussion
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
-                local status, buffer, size = self:get_from_generator(num)
-                if status ~= true then error("No chunk found") end
+                local status, buffer, size = get_from_generator(self, num)
+                if status ~= true then error("No chunk found: " .. buffer) end
                 self.last_chunk_buf, self.last_chunk_size = buffer, size
+                if self.memoized == true then
+                    append_to_file(self, buffer, size)
+                    self.length = self.length + size -- memoized
+                else
+                    self.length = size -- non memoized
+                end
+                self.last_chunk_number = num 
                 return self.last_chunk_buf, self.last_chunk_size
             elseif self.output_to_file == true then
-                error("Yet to implement")
+                error("Vector does not support pull semantics in this mode")
             elseif self.input_from_file then
                 error("I should not be here")
             end
@@ -338,7 +347,8 @@ function Vector:put_chunk(chunk, length)
     if self.output_to_file ~= true or self.is_materialized == true then
         error("This vector cannot be written to")
     end
-    self:append_to_file(chunk, length)
+    append_to_file(self, chunk, length)
+    self.length = self.length + length
 end
 
 function Vector:eov()
@@ -356,5 +366,15 @@ function Vector:eov()
     self.length = tonumber(self.f_map.ptr_file_size) / self.field_size
     self.max_chunks = math.ceil(self.length/self.chunk_size)
 end
-   
+
+function Vector:get_meta(index)
+    if g_valid_meta[index] == nil then error("Invalid key give: ".. index) end
+    return self.meta[index]
+end
+
+function Vector:set_meta(index, val)
+    if g_valid_meta[index] == nil then error("Invalid key give: ".. index) end
+    self.meta[index] = val
+end
+
 return Vector
