@@ -7,11 +7,13 @@ function vvandnot_static_checker(
     print("and requires both operands to be I1")
     return nil
   end
+  local tmpl = 'f1f2opf3.tmpl'
   local subs = {} ; local incs = {}
   subs.fn = "vvandnot" .. f1type .. "_" .. f2type 
   subs.in1type = assert(g_qtypes[f1type].ctype)
   subs.in2type = assert(g_qtypes[f2type].ctype)
   subs.returntype = assert(g_qtypes["I1"].ctype)
+    subs.argstype = "void *"
   subs.c_code_for_operator = " c = ( a & ~b ) ; "
-  return subs, incs
+  return subs, incs, tmpl
 end

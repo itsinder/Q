@@ -8,8 +8,7 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      void *args,
-      ${opt_args}
+      void *ptr_args,
       ${returntype} * restrict out 
       ) 
 ;
@@ -23,6 +22,7 @@ static void
 __operation(
       ${in1type} a,
       ${in2type} b, 
+      ${argstype} *ptr_args,
       ${returntype} *ptr_c
       )
       {
@@ -36,7 +36,7 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      void *args,
+      void *ptr_args,
       ${returntype} * restrict out 
       )
 
@@ -49,7 +49,7 @@ ${fn}(
  for ( uint64_t i = 0; i < nR; i++ ) {  
    inv1 = *in1; 
    inv2 = *in2; 
-   __operation(inv1, inv2, &outv);
+   __operation(inv1, inv2, ptr_args, &outv);
    *out = outv; 
    in1++; 
    in2++; 

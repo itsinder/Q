@@ -8,7 +8,6 @@ dofile '../../../UTILS/lua/globals.lua'
 local srcdir = "../gen_src/"
 local incdir = "../gen_inc/"
 local T = dofile 'f1f2opf3_operators.lua' 
-local tmpl = dofile 'f1f2opf3.tmpl'
 local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
 args = nil -- not being used just yet
@@ -23,7 +22,8 @@ for i, v in ipairs(T) do
         stat_chk = base_name .. '_static_checker'
         assert(_G[stat_chk], "function not found " .. stat_chk)
         -- print("Lua premature", stat_chk); os.exit()
-        local subs, incs = _G[stat_chk](in1type, in2type, returntype, args)
+        local subs, incs, tmpl = 
+        _G[stat_chk](in1type, in2type, returntype, args)
         if ( subs ) then
           local B = nil; local W = nil
           if ( file_exists(base_name .. "_black_list.lua")) then 
@@ -40,11 +40,13 @@ for i, v in ipairs(T) do
             error("Cannot have both black and white list")
           end
           -- TODO Improve following.
-          tmpl.fn           = subs.fn
-          tmpl.in1type      = subs.in1type
-          tmpl.in2type      = subs.in2type
-          tmpl.returntype   = subs.returntype
-          tmpl.c_code_for_operator = subs.c_code_for_operator
+          local T = dofile(tmpl)
+          T.fn         = subs.fn
+          T.in1type    = subs.in1type
+          T.in2type    = subs.in2type
+          T.returntype = subs.returntype
+          T.argstype   = subs.argstype
+          T.c_code_for_operator = subs.c_code_for_operator
           -- process black/white lists
           local skip = false; local decided = false
           if ( ( B == nil ) and ( W == nil ) ) then 
@@ -62,8 +64,7 @@ for i, v in ipairs(T) do
           end
           if not decided then error("Control cannot come here") end
           if not skip then 
-          -- print(tmpl 'declaration')
-          doth = tmpl 'declaration'
+          doth = T 'declaration'
           -- print("doth = ", doth)
           local fname = incdir .. "_" .. subs.fn .. ".h", "w"
           local f = assert(io.open(fname, "w"))
@@ -74,8 +75,7 @@ for i, v in ipairs(T) do
             end
           end
           f:close()
-          -- print(tmpl 'definition')
-          dotc = tmpl 'definition'
+          dotc = T 'definition'
           -- print("dotc = ", dotc)
           local fname = srcdir .. "_" .. subs.fn .. ".c", "w"
           local f = assert(io.open(fname, "w"))
