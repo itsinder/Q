@@ -8,7 +8,7 @@ g_valid_types['i'] = 'int'
 g_valid_types['f'] = 'float'
 g_valid_types['d'] = 'double'
 g_valid_types['c'] = 'char'
-g_chunk_size = 10
+g_chunk_size = 15
 --local size = 1000
 --create bin file of only ones of type int
 local v1 = Vector{field_type='i',
