@@ -6,7 +6,7 @@ ffi.cdef[[
   void *malloc(size_t size);
   void free(void *ptr);
 
-
+  typedef struct ssize_t ssize_t;
   typedef struct FILE FILE;  
   FILE* createFile(const char *fname);
   void write(FILE *fp, const void* val, int size);
@@ -17,7 +17,7 @@ ffi.cdef[[
   int txt_to_I2(const char *X, int16_t *ptr_out);
   int txt_to_I4(const char *X, int32_t *ptr_out);
   int txt_to_I8(const char *X, int64_t *ptr_out);
-  
+  int txt_to_SC(const char *X, char *out, size_t sz_out);
   uint8_t setBit(int colno, uint8_t byteval, int row_cnt);
   
   ]]
@@ -33,17 +33,28 @@ end
 -- --------------------------------------------------------
 -- Converts given text value into C value representation
 -- --------------------------------------------------------
-function convertTextToCValue(funName, data, sizeOfCData) 
+function convertTextToCValue(funName,ctype, data, sizeOfCData) 
   
   if(sizeOfCData == nil) then 
       print("FunName " ..funName .. " Data " .. data)
   end
   
   local cValue = ffi.C.malloc(sizeOfCData)
-  local status = qCLib[funName](data, cValue)
+  -- explicit cast is required for luaffi to work, luajit ffi implicitly casts void * to any data type
+  local cValue = ffi.cast(ctype.. " * ", cValue)
+  local status = nil
   
-  ffi.gc( cValue, ffi.C.free )
+  -- for fixed size string pass the size of stirng data also
+  if ctype == "char" then 
+     local ssize = ffi.cast("size_t" ,sizeOfCData)
+    -- status = qCLib[funName](data, cValue, sizeOfCData)
+    status = qCLib[funName](data, cValue, ssize)
+  else
+    status = qCLib[funName](data, cValue)
+  end
   
+  
+  ffi.gc( cValue, ffi.C.free )  
   -- TODO : Handle scenarios where status is negative. i.e. Error conditions
   return cValue
 end
