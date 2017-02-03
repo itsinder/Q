@@ -8,7 +8,7 @@ int
 txt_to_SC(
       char * const X,
       char *out,
-      ssize_t sz_out /* size of buffer. needs to end with nullc */
+      size_t sz_out /* size of buffer. needs to end with nullc */
       )
 //STOP_FUNC_DECL
 {

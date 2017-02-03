@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-package.path = package.path.. ";../../../UTILS/lua/?.lua"
+package.path = package.path.. ";../?.lua"
 local tmpl = dofile 'qsort.tmpl'
 
 order = { 'asc', 'dsc' }
@@ -17,13 +17,13 @@ for i, o in ipairs(order) do
     tmpl.COMPARATOR = c
     --======================
     doth = tmpl 'declaration'
-    fname = "../gen_inc/" .. "_" .. tmpl.NAME .. ".h" 
+    fname = "../../PRIMITIVES/inc/" .. "_" .. tmpl.NAME .. ".h" 
     local f = assert(io.open(fname, "w"))
     f:write(doth)
     f:close()
     --======================
     dotc = tmpl 'definition'
-    fname = "../gen_src/" .. "_" .. tmpl.NAME .. ".c" 
+    fname = "../../PRIMITIVES/src/" .. "_" .. tmpl.NAME .. ".c" 
     local f = assert(io.open(fname, "w"))
     f:write(dotc)
     f:close()
