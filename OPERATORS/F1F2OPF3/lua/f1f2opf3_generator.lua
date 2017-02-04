@@ -2,6 +2,8 @@
 
 package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("aux")
+local pl = require 'pl'
+-- pl.unlink("_qfns_f1f2opf3.lua")
 
 dofile '../../../UTILS/lua/globals.lua'
 
@@ -12,6 +14,15 @@ local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
 args = nil -- not being used just yet
 for i, v in ipairs(T) do
+  -- ==================
+  local str = "function " .. v .. "(f1, f2, optargs)\n"
+  str = str .. "  expander(\"f1f2opf3\", \"" .. v .. "\", f1, f2, optargs)\n"
+  str = str .. "end\n"
+  local f = assert(io.open("_qfns_f1f2opf3.lua", "a"))
+  f:write(str)
+  f:close()
+  -- ==================
+
   local base_name = v
   local str = 'require \'' .. base_name .. '_static_checker\''
 --  require concat_static_checker.lua
@@ -89,3 +100,4 @@ for i, v in ipairs(T) do
     end
   end
 end
+

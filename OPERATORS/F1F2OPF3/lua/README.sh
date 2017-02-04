@@ -6,6 +6,7 @@ bash cleanup.sh
 bash generate_static_checker.sh
 bash generate_white_list.sh
 lua f1f2opf3_generator.lua
+lua _qfns_f1f2opf3.lua # test syntax of generated lua functions
 cd ../gen_src/
 ls *c > _x
 while read line; do
