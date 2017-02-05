@@ -2,10 +2,9 @@
 function concat_static_checker(
   f1type, 
   f2type, 
-  fouttype,
-  args
+  optargs
   )
-
+    local fouttype = optargs[fouttype] -- okay for fouttype to be nil
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_outtypes = { I2 = true, I4 = true, I8 = true }
 

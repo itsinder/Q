@@ -30,11 +30,13 @@ for i, v in ipairs(T) do
   for i, in1type in ipairs(types) do 
     for j, in2type in ipairs(types) do 
       for k, returntype in ipairs(types) do 
+        local optargs = {}
+        optargs.returntype = returntype
         stat_chk = base_name .. '_static_checker'
         assert(_G[stat_chk], "function not found " .. stat_chk)
         -- print("Lua premature", stat_chk); os.exit()
         local subs, incs, tmpl = 
-        _G[stat_chk](in1type, in2type, returntype, args)
+        _G[stat_chk](in1type, in2type, optargs)
         if ( subs ) then
           local B = nil; local W = nil
           if ( file_exists(base_name .. "_black_list.lua")) then 
