@@ -17,5 +17,15 @@ gcc -std=gnu99 \
   -I../../OPERATORS/DATA_LOAD/gen_inc/  \
   -o asc2bin
 # chmod +x txt_to_bin
+# Run some basic tests
+./asc2bin inF4.csv F4 _xx
+od -f _xx > _yy
+diff _yy chk_inF4.txt
+#------------
+./asc2bin inI4.csv I4 _xx
+od -i _xx > _yy
+diff _yy chk_inI4.txt
+#------------
+rm -f _xx _yy
 
 echo "Completed $0 in $PWD"
