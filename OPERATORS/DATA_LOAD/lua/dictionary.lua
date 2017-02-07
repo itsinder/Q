@@ -10,7 +10,7 @@ require 'parser'
 -- Every new dictionary adds its reference to itself in the global variable called  _G["Q_DICTIONARIES"][dictName] . 
 -- This can be used at the time shutdown time, to iterate over all dictionary and persist it to the disk. 
 -- ----------------------------------------------
-function new_dictionary(dict_name)
+function Dictionary(dict_name)
   
   if(dict_name == nil or dicName == "") then
     error("Dictionary name should not be empty")
