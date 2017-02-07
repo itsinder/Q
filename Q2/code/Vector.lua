@@ -1,13 +1,16 @@
 local Vector = {}
 Vector.__index = Vector
-g_valid_types = {}
-g_valid_types['i'] = 'int'
-g_valid_types['f'] = 'float'
-g_valid_types['d'] = 'double'
-g_valid_types['c'] = 'char'
-g_chunk_size = 64
-g_valid_meta = {}
-g_valid_meta["dir"] = 1
+local valid_types = {}
+valid_types['i'] = 'int'
+valid_types['f'] = 'float'
+valid_types['d'] = 'double'
+valid_types['c'] = 'char'
+local chunk_size = 64
+local valid_meta = {}
+valid_meta["dir"] = 1
+g_valid_types = g_valid_types or valid_types
+g_chunk_size = g_chunk_size or chunk_size
+g_valid_meta = g_valid_meta or valid_meta
 
 local charset = {}
 
@@ -220,8 +223,9 @@ end
 
 
 local function append_to_file(self, ptr, size)
-    ptr = ptr or self.last_chunk_buf
+    if ptr == nil then error("No pointer given to write") end
     size = size or self.chunk_size
+
     if self.filename == nil then error("Filename should have been set in constructor") end
     if self.input_from_file == true then error("Cannot write to input file") end
     if self.file == nil then
@@ -266,11 +270,8 @@ local function get_from_generator(self, num)
     self.last_chunk_buf = buffer
     self.last_chunk_size = size
     -- now check if the materialization is complete
-    -- Two ways to do it, check the length of the vector or
-    -- status of generator. Right now just using length
     if self.generator:status() == "dead" then
-        --if math.ceil(self.length/self.chunk_size) == num then
-        --TODO Add assert to here whenever you know something has to be true
+        assert(math.ceil(self.length/self.chunk_size) - 1  == num)
         self.is_materialized = true
         flush_remap_file(self)
     end
@@ -296,8 +297,10 @@ local function get_from_file(self, num)
 
 end
 
---TODO need to have a chat with Ramesh about size of text returned by each step
---of generator and of write vector
+local function update_max_chunks(self)
+ self.last_chunk_number = math.ceil(self.length/ self.chunk_size) -1 
+end
+
 function Vector:chunk(num)
     if type(num) ~= "number" then
         error("Require a number for chunk number")
@@ -305,32 +308,35 @@ function Vector:chunk(num)
     if self:materialized() then
         return get_from_file(self, num)
     else -- if not materialized
+        if num < 0 then return self.cdata, self.length end
         if num < self:last_chunk() then
             if self.memoized == true then
-                if num > self.file_last_chunk_number then
-                    --flush temp file mmap updated file
-                    flush_remap_file(self)
-                end
+                if num > self.file_last_chunk_number then flush_remap_file(self) end
                 local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
                 return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
             else
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
-            return self.last_chunk_buf, self.last_chunk_size --TODO this might change based on our discussion
+            if self.length % self.chunk_size ~= 0 then
+                error("Incomplete chunk cannot be returned")
+            end
+            --TODO this needs to change
+             if num > self.file_last_chunk_number then flush_remap_file(self) end
+              local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
+              return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
                 local status, buffer, size = get_from_generator(self, num)
                 if status ~= true then error("No chunk found: " .. buffer) end
-                self.last_chunk_buf, self.last_chunk_size = buffer, size
                 if self.memoized == true then
                     append_to_file(self, buffer, size)
                     self.length = self.length + size -- memoized
                 else
                     self.length = size -- non memoized
                 end
-                self.last_chunk_number = num 
-                return self.last_chunk_buf, self.last_chunk_size
+                update_max_chunks(self)
+                return buffer, size
             elseif self.output_to_file == true then
                 error("Vector does not support pull semantics in this mode")
             elseif self.input_from_file then
