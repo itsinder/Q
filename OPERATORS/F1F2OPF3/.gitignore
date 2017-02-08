@@ -6,7 +6,6 @@ vvsub_static_checker.lua
 vvsub_white_list.lua
 vvor_static_checker.lua
 vvxor_static_checker.lua
-vvandnot_static_checker.lua
 vvneq_static_checker.lua
 vvgt_static_checker.lua
 vvlt_static_checker.lua
