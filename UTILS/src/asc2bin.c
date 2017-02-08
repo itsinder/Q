@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "q_macros.h"
 #include "mmap.h"
+#include "_txt_to_SC.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"
 #include "_txt_to_I4.h"
@@ -27,7 +28,8 @@ int
 asc2bin(
     char *infile,
     char *fldtype,
-    char *outfile
+    char *outfile,
+    int len // for SC
      )
 // STOP FUNC DECL
 {
@@ -37,6 +39,7 @@ asc2bin(
   FILE *ofp = NULL;
   char *cptr;
   char line[MAXLINE];
+  char *opbuf = NULL;
 
   if ( *infile != '\0' ) {
     if ( strcmp(infile, outfile) == 0 ) { go_BYE(-1); }
@@ -76,13 +79,18 @@ asc2bin(
     qtype = F8;
   }
   else if ( strcasecmp(fldtype, "SC") == 0 ) {
-    /* not implemented */ go_BYE(-1); 
+    if ( len < 2 ) { go_BYE(-1); }
+    qtype = SC;
   }
   else if ( strcasecmp(fldtype, "TM") == 0 ) {
     /* not implemented */ go_BYE(-1); 
   }
   else { go_BYE(-1); }
 
+  if ( len > 0 ) { 
+    opbuf = malloc(len * sizeof(char));
+    return_if_malloc_failed(opbuf);
+  }
   memset(line, '\0', MAXLINE);
   for ( int lno = 0; ; lno++ ) { 
     int8_t tempI1; int16_t tempI2; int32_t tempI4; int64_t tempI8;
@@ -127,6 +135,11 @@ asc2bin(
         status = txt_to_F8(xptr, &tempF8); cBYE(status);
         fwrite(&tempF8, 1, sizeof(double), ofp);
         break;
+      case SC : 
+        memset(opbuf, '\0', len);
+        status = txt_to_SC(xptr, opbuf, len); cBYE(status);
+        fwrite(opbuf, len, sizeof(char), ofp);
+        break;
       default : 
         go_BYE(-1);
         break;
@@ -149,8 +162,17 @@ main(
     )
 {
   int status = 0;
-  if ( argc != 4 ) { go_BYE(-1); }
-  status = asc2bin(argv[1], argv[2], argv[3]); cBYE(status);
+  int len = 0;
+  if ( ( argc != 4 ) && ( argc != 5 ) ) { go_BYE(-1); }
+  char *infile    = argv[1];
+  char *str_qtype = argv[2]; 
+  char *opfile    = argv[3];
+  if ( argc == 5 ) { 
+    char *str_len   = argv[4];
+    status = txt_to_I4(str_len, &len); cBYE(status);
+    if ( len <= 1 ) { go_BYE(-1); }
+  }
+  status = asc2bin(infile, str_qtype, opfile, len); cBYE(status);
 BYE:
   return status;
 }

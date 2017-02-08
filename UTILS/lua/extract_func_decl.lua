@@ -1,17 +1,30 @@
 #!/bin/lua
-package.path = package.path.. ";../../UTILS/lua/?.lua"
+require 'pl'
+-- Move isdir to proper place. Use appropriate package
+function is_dir(fn) -- TODO 
+  return true
+--      return (posix.stat(fn, "type") == 'directory')
+end
+
+package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("is_file")
 n = #arg
+assert( n == 2 ) 
 infile = arg[1]
-assert( n == 1 ) 
-assert(is_file(infile))
+opdir  = arg[2]
+assert(is_file(infile)) -- TODO improve
+assert(is_dir(opdir)) -- TODO improve
 io.input(infile)
 code = io.read("*all")
+io.close()
 z = string.match(code, "//START_FUNC_DECL.*//STOP_FUNC_DECL")
 assert(z ~= "")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
-print('extern ' .. z .. ';')
+opfile = opdir .. "/_" .. string.gsub(infile, ".c", ".h")
+io.output(opfile)
+io.write('extern ' .. z .. ';') -- TODO get semi-colon on previous line
+io.close()
 os.exit()
 
 --[[
