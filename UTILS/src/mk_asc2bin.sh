@@ -3,10 +3,14 @@ set -e
 cd ../../OPERATORS/DATA_LOAD/lua/
 bash gen_files.sh
 cd -
+cd ../../OPERATORS/DATA_LOAD/src/
+bash gen_files.sh
+cd -
 
-gcc -std=gnu99 \
+gcc -g -std=gnu99 \
   asc2bin.c \
   is_valid_chars_for_num.c \
+  ../../OPERATORS/DATA_LOAD/src/txt_to_SC.c \
   ../../OPERATORS/DATA_LOAD/gen_src/_txt_to_I1.c \
   ../../OPERATORS/DATA_LOAD/gen_src/_txt_to_I2.c \
   ../../OPERATORS/DATA_LOAD/gen_src/_txt_to_I4.c \
@@ -15,6 +19,7 @@ gcc -std=gnu99 \
   ../../OPERATORS/DATA_LOAD/gen_src/_txt_to_F8.c \
   -I../inc/ \
   -I../../OPERATORS/DATA_LOAD/gen_inc/  \
+  -I../../OPERATORS/DATA_LOAD/inc/  \
   -o asc2bin
 # chmod +x txt_to_bin
 # Run some basic tests
@@ -26,6 +31,10 @@ diff _yy chk_inF4.txt
 od -i _xx > _yy
 diff _yy chk_inI4.txt
 #------------
+./asc2bin inSC.csv SC _xx 16 
+od -c --width=16 _xx > _yy
+diff _yy chk_inSC.csv
+#---------------
 rm -f _xx _yy
 
 echo "Completed $0 in $PWD"
