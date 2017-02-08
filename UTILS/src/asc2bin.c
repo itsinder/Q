@@ -29,7 +29,7 @@ asc2bin(
     char *infile,
     char *fldtype,
     char *outfile,
-    int len // for SC
+    int outlen // for SC
      )
 // STOP FUNC DECL
 {
@@ -79,7 +79,7 @@ asc2bin(
     qtype = F8;
   }
   else if ( strcasecmp(fldtype, "SC") == 0 ) {
-    if ( len < 2 ) { go_BYE(-1); }
+    if ( outlen < 2 ) { go_BYE(-1); }
     qtype = SC;
   }
   else if ( strcasecmp(fldtype, "TM") == 0 ) {
@@ -87,8 +87,8 @@ asc2bin(
   }
   else { go_BYE(-1); }
 
-  if ( len > 0 ) { 
-    opbuf = malloc(len * sizeof(char));
+  if ( outlen > 0 ) { 
+    opbuf = malloc(outlen * sizeof(char));
     return_if_malloc_failed(opbuf);
   }
   memset(line, '\0', MAXLINE);
@@ -137,8 +137,8 @@ asc2bin(
         break;
       case SC : 
         memset(opbuf, '\0', len);
-        status = txt_to_SC(xptr, opbuf, len); cBYE(status);
-        fwrite(opbuf, len, sizeof(char), ofp);
+        status = txt_to_SC(xptr, opbuf, outlen); cBYE(status);
+        fwrite(opbuf, outlen, sizeof(char), ofp);
         break;
       default : 
         go_BYE(-1);

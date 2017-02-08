@@ -7,7 +7,7 @@ cd ../../OPERATORS/DATA_LOAD/src/
 bash gen_files.sh
 cd -
 
-gcc -std=gnu99 \
+gcc -g -std=gnu99 \
   asc2bin.c \
   is_valid_chars_for_num.c \
   ../../OPERATORS/DATA_LOAD/src/txt_to_SC.c \
@@ -31,6 +31,10 @@ diff _yy chk_inF4.txt
 od -i _xx > _yy
 diff _yy chk_inI4.txt
 #------------
+./asc2bin inSC.csv SC _xx 16 
+od -c --width=16 _xx > _yy
+diff _yy chk_inSC.csv
+#---------------
 rm -f _xx _yy
 
 echo "Completed $0 in $PWD"
