@@ -15,18 +15,23 @@ end
 
 
 function test_dictionary:test_create() 
-  local dictionary = Dictionary("testDictionary")
+  local dictionary = Dictionary({dict = "testDictionary", is_dict = false, add=true})
   luaunit.assertNotNil(dictionary)
   luaunit.assertIsTable(dictionary)
 end
 
-function test_dictionary:test_create_null_name_error()
+function test_dictionary:test_create_null_metadata_error()
   luaunit.assertError(Dictionary)
-  luaunit.assertErrorMsgContains("Dictionary name should not be empty", Dictionary ) 
+  luaunit.assertErrorMsgContains("Dictionary metadata should not be empty", Dictionary ) 
+end
+
+function test_dictionary:test_create_null_name_error()
+  luaunit.assertError(Dictionary, { is_dict = false, add=true})
+  luaunit.assertErrorMsgContains("Dictionary name should not be empty", Dictionary, {dict = "", is_dict = false, add=true} ) 
 end
 
 function test_dictionary:test_add()
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   local entry1 = dictionary.add_with_condition("Entry1", false)
   local entry2 =  dictionary.add_with_condition("Entry2")
   
@@ -39,7 +44,7 @@ function test_dictionary:test_add()
 end
 
 function test_dictionary:testAddNil()
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   luaunit.assertError(dictionary.add_with_condition, "")
   luaunit.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "")
   luaunit.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "", false)
@@ -47,7 +52,7 @@ function test_dictionary:testAddNil()
 end
 
 function test_dictionary:testAddMultipleWithAddFalse()  
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   local entry1 = dictionary.add_with_condition("Entry1", false)
    
   luaunit.assertNumber(entry1)
@@ -55,7 +60,7 @@ function test_dictionary:testAddMultipleWithAddFalse()
 end
 
 function test_dictionary:testAddMutipleWithAddTrue()
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   local entry1 = dictionary.add_with_condition("Entry1", true)
   local entry2 = dictionary.add_with_condition("Entry1", true)
   
@@ -65,7 +70,7 @@ function test_dictionary:testAddMutipleWithAddTrue()
 end
 
 function test_dictionary:testStoreDictionary()
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   dictionary.add_with_condition("Entry1")
   dictionary.add_with_condition("Entry2")
   dictionary.save_to_file("./serializedD1")
@@ -83,12 +88,12 @@ function test_dictionary:testStoreDictionary()
 end
 
 function test_dictionary:testReadDictionaryFromFile()
-  local dictionary = Dictionary("D1")
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   dictionary.add_with_condition("Entry1")
   dictionary.add_with_condition("Entry2")
   dictionary.save_to_file("./serializedD2")
   
-  local restored_dictionary = Dictionary("D2")
+  local restored_dictionary = Dictionary({dict = "D2", is_dict = false, add=true})
   restored_dictionary.restore_from_file("./serializedD2")
   
   local val = restored_dictionary.get_number_by_string("Entry1")

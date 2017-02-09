@@ -1,6 +1,7 @@
 require 'load_csv'
 require 'dictionary'
 require 'environment'
+require 'pl'
 
 -- Process input arguments, verify all okay TODO
 -- e.g., if shell script 
@@ -9,43 +10,52 @@ require 'environment'
 -- data_file=$2
 -- test -f $meta_file
 -- test -f $data_file
-local csv_file_path_name = "../test/csv_input1.csv" --path for input csv file 
 
---[[ 
-local M = {
-  { name = "empid", type = "int32_t" },
-  { name = "yoj", type ="int16_t" },
-  { name = "empname", type ="varchar",dict = "D1", is_dict = true, add=true},
-  { name = "address" ,type ="varchar", dict = "D2", is_dict = true, add=false}
-}
---]]
-
-setEnvironment() -- snake case TODO
-
---[[
-D1 = newDictionary() # Upper case for Classes TODO 
-D1.put("test")
-D1.put("test1")
-_G["Q_DICTIONARIES"]["D1"] = D1
---]]
-
-local M = {
-  { name = "empid", null = "true", type = "I4" },
-  { name = "yoj", null = "true", type ="I2" },
-  { name = "empname", type ="varchar",dict = "D1", is_dict = false, add=true}
-}
-
-
-status, ret = pcall(load, csv_file_path_name, M )  --call to load function
--- System is going to shutdown, so save all dictionaries
-saveAllDictionaries()
-
-
-if(status==false or  ret ~= nil and type(ret) ~= "table" and ret < 0 ) then 
-  print("Error" .. ret)
-  print("Loading Aborted")
-else
-  print("Loading Completed") 
+local no_of_args = #arg
+if no_of_args ~= 2 then
+  print("ERROR: Please provide metadata_file_path followed by data_file_path")
+  return -1 
 end
+
+local metadata_file_path = arg[1]
+local csv_file_path = arg[2]
+
+if not path.exists(metadata_file_path) or not path.isfile(metadata_file_path) then
+  print("ERROR: Please check metadata_file_path")
+  return -1
+end
+if not path.exists(csv_file_path) or not path.isfile(csv_file_path) then
+  print("ERROR: Please check csv_file_path")
+  return -1
+end
+
+
+-- read the content of file into lua table
+local f = io.open(metadata_file_path, "rb")
+local content = f:read("*all")
+f:close()
+local metadata = pretty.read(content)
+
+ 
+--set defaults..
+set_environment() 
+
+-- call load function to load the data
+status, ret = pcall(load, csv_file_path, metadata )
+
+-- System is going to shutdown, so save all dictionaries
+save_all_dictionaries()
+
+
+if( status == false ) then 
+  print("Error: " .. ret)
+  print("Loading Aborted")
+  return -1
+else
+  print("Loading Completed")
+  return 0 
+end
+
+
 -- if returning control to shell script, make sure that exit code is set
 -- correctly 

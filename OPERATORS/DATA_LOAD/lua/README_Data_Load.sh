@@ -11,7 +11,7 @@ bash README.sh
 #gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
 
 gcc -std=gnu99 \
-  -o ../obj/QCFunc.o \
+  -o ../obj/QCFunc.so \
   ../src/QCFunc.c \
   ../src/txt_to_SC.c \
   ../gen_src/_txt_to_I1.c \
@@ -44,10 +44,13 @@ mkdir metadata
 #5) If you are using your CSV file then adjust the metadata M according to the respective CSV file in main.lua
 
 #6) Then run the main.lua file, the command is:
+
 # Following will be in a loop testing several combinations TODO
 meta_data_file=meta.lua
 data_file=t1.csv
 luajit main.lua $meta_data_file $data_file
+
+
 
 ############## REMAINING Things ############
 

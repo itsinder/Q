@@ -28,5 +28,15 @@ g_qtypes.I4 = { short_code = "I4", width = 4, ctype = "int32_t", txt_to_ctype = 
 g_qtypes.I8 = { short_code = "I8", width = 8, ctype = "int64_t", txt_to_ctype = "txt_to_I8", ctype_to_txt = "TBD" }
 g_qtypes.F4 = { short_code = "F4", width = 4, ctype = "float", txt_to_ctype = "txt_to_F4", ctype_to_txt = "TBD" }
 g_qtypes.F8 = { short_code = "F8", width = 8, ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
-g_qtypes.varchar = { short_code = "varchar", width = 4, ctype = "int32_t", txt_to_ctype = "txt_to_I4", ctype_to_txt = "TBD", dictionary = true }
-g_qtypes.string = { short_code = "string", width = 16, ctype = "char", txt_to_ctype = "txt_to_SC", ctype_to_txt = "TBD" }
+g_qtypes.varchar = { short_code = "varchar", width = 4, ctype = "int32_t", txt_to_ctype = "txt_to_I4", ctype_to_txt = "TBD"}
+g_qtypes.SC = { short_code = "SC", width = 8, ctype = "char", txt_to_ctype = "txt_to_SC", ctype_to_txt = "TBD" }
+
+g_valid_types = {}
+g_valid_types['I1'] = "int8_t"
+g_valid_types['I2'] = "int16_t"
+g_valid_types['I4'] = "int32_t"
+g_valid_types['I8'] = "int64_t"
+g_valid_types['F4'] = "float"
+g_valid_types['F8'] = "double"
+g_valid_types['varchar'] = "int32_t"
+g_valid_types['SC'] = "char"

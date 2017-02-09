@@ -6,16 +6,36 @@ require 'parser'
 
 -- --------------------------------------------------
 -- New dictionary can be created by calling : 
--- local d1 = new_dictionary(dictionary_name)
+-- local d1 = new_dictionary(dict_metadata)
 -- Every new dictionary adds its reference to itself in the global variable called  _G["Q_DICTIONARIES"][dictName] . 
 -- This can be used at the time shutdown time, to iterate over all dictionary and persist it to the disk. 
 -- ----------------------------------------------
-function Dictionary(dict_name)
+function Dictionary(dict_metadata)
+
+  if(dict_metadata == nil or dict_metadata == "") then
+    error("Dictionary metadata should not be empty")
+  end  
+
+  local dict_name = dict_metadata.dict
+  local is_dict = dict_metadata.is_dict or false  -- default value is false, dictionary does not exist.. create one
+  local add_new_value = dict_metadata.add or true  -- default value is true, add null values
   
-  if(dict_name == nil or dicName == "") then
-    error("Dictionary name should not be empty")
-    return nil
+  if(dict_name == nil or dict_name == "") then
+    error("Please specify correct metadata")
   end
+  
+  if(is_dict == true) then
+    local dict = _G["Q_DICTIONARIES"][dict_name] 
+    if(dict == nil) then 
+        error("Dictionary does not exist. Aborting the operation") 
+    end 
+  else
+    local dict = _G["Q_DICTIONARIES"][dict_name] 
+    if(dict ~= nil) then 
+        error("Dictionary with the same name exists, cannot create new dictionary")
+    end
+  end
+  
   
   -- Two tables are used here, so that bidirectional lookup becomes easy 
   -- and whole table scan is not required for one side
@@ -132,7 +152,7 @@ function Dictionary(dict_name)
   end
  
   
-  local retFunction = {
+  local ret_function = {
       add_with_condition = add_with_condition,
       get_string_by_number = get_string_by_number , 
       get_number_by_string = get_number_by_string, 
@@ -142,8 +162,8 @@ function Dictionary(dict_name)
   }              
   
   --put newly created dictionary into global variable
-  _G["Q_DICTIONARIES"][dict_name] = retFunction
-  return retFunction 
+  _G["Q_DICTIONARIES"][dict_name] = ret_function
+  return ret_function 
   
 end
 
