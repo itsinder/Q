@@ -7,7 +7,6 @@ Entry{
   min_val = 'SCHAR_MIN',
   max_val = 'SCHAR_MAX',
   converter = 'strtoll',
-  base = ", 10",
 }
     
 Entry{
@@ -19,7 +18,6 @@ Entry{
   min_val = 'SHRT_MIN',
   max_val = 'SHRT_MAX',
   converter = 'strtoll',
-  base = ", 10",
 }
     
 Entry{
@@ -31,7 +29,6 @@ Entry{
   min_val = 'INT_MIN',
   max_val = 'INT_MAX',
   converter = 'strtoll',
-  base = ", 10",
 }
     
 Entry{
@@ -43,7 +40,6 @@ Entry{
   min_val = 'LLONG_MIN',
   max_val = 'LLONG_MAX',
   converter = 'strtoll',
-  base = ", 10",
 }
     
 Entry{
@@ -55,7 +51,6 @@ Entry{
   min_val = 'FLT_MIN',
   max_val = 'FLT_MAX',
   converter = 'strtold',
-  base = "",
 }
     
 Entry{
@@ -67,6 +62,5 @@ Entry{
   min_val = 'DBL_MIN',
   max_val = 'DBL_MAX',
   converter = 'strtold',
-  base = "",
 }
 
