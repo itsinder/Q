@@ -1,3 +1,4 @@
+#include <sys/mman.h>
 extern int
 rs_mmap(
 	const char *file_name,

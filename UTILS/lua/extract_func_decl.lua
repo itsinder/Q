@@ -8,6 +8,7 @@ end
 
 package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("is_file")
+require("trim")
 n = #arg
 assert( n == 2 ) 
 infile = arg[1]
@@ -17,13 +18,24 @@ assert(is_dir(opdir)) -- TODO improve
 io.input(infile)
 code = io.read("*all")
 io.close()
+--=========================================
+incs = string.match(code, "//START_INCLUDES.*//STOP_INCLUDES")
+if ( incs ) then 
+  incs = string.gsub(incs, "//START_INCLUDES", "")
+  incs = string.gsub(incs, "//STOP_INCLUDES", "")
+end 
+--=========================================
 z = string.match(code, "//START_FUNC_DECL.*//STOP_FUNC_DECL")
 assert(z ~= "")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
+--=========================================
 opfile = opdir .. "/_" .. string.gsub(infile, ".c", ".h")
 io.output(opfile)
-io.write('extern ' .. z .. ';') -- TODO get semi-colon on previous line
+if ( incs ) then 
+  io.write(incs)
+end
+io.write('extern ' .. trim(z) .. ';') -- TODO get semi-colon on previous line
 io.close()
 os.exit()
 

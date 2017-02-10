@@ -1,11 +1,15 @@
+//START_INCLUDES
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "q_macros.h"
+//STOP_INCLUDES
 //START_FUNC_DECL
 int
-txt_to_SC(
+SC_to_txt(
     char * const in,
+    uint32_t width, 
     char * X,
     ssize_t nX
     )
