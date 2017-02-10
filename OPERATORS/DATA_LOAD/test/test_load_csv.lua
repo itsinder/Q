@@ -15,26 +15,17 @@ function test_load_csv:setUp()
   _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
   _G["Q_DICTIONARIES"] = {}
   
-  test_load_csv:create_directory(_G["Q_DATA_DIR"])
-  test_load_csv:create_directory(_G["Q_META_DATA_DIR"])
+  dir.makepath(_G["Q_DATA_DIR"])
+  dir.makepath(_G["Q_META_DATA_DIR"])
 end
 
 -- commond cleanup for all testcases
 function test_load_csv:tearDown()
   -- clear the output directory 
-  test_load_csv:empty_directory(_G["Q_DATA_DIR"])
-  test_load_csv:empty_directory(_G["Q_META_DATA_DIR"])
+  dir.rmtree(_G["Q_DATA_DIR"])
+  dir.rmtree(_G["Q_META_DATA_DIR"])
 end
 
-
--- Utility functions used in this testcase -----
-function test_load_csv:create_directory(dir_path)
-  os.execute("mkdir " .. dir_path)
-end
-
-function test_load_csv:empty_directory(dir_path)
-  os.execute('rm -rd "'..dir_path..'"')
-end
 
 function test_load_csv:calculate_file_size(file_path)
   local file =  io.open(file_path, "r")
@@ -322,6 +313,9 @@ end
 TODO : 
 
 - Fixed size string metadata validation
+- NULL values
+- Deleting Null file, of no null value was found
+
 o) floating point out of range
 o) Can we specify integer in hex format?
 o) Can we specify floating point in exponent format?
@@ -331,16 +325,11 @@ o) Can we specify floating point in exponent format?
 print("#####")
   _G["Q_DATA_DIR"] = "./test_data/"
   _G["Q_META_DATA_DIR"] = "./test_data/"
+  _G["Q_DICTIONARIES"] = {}
  
-  local csv_file_path = test_input_dir .. "sample_varchar.csv"
-  local num_records = 4
-  local metadata = { { name = "col1", type="SC" , size = 16}}
-  local ret = load( csv_file_path, metadata )
-  lu.assertEquals(type(ret),"table") 
-  lu.assertEquals(test_load_csv:calculate_file_size(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
+  
 print("####")
 --]]
-
 
 os.exit( lu.LuaUnit.run() )
 

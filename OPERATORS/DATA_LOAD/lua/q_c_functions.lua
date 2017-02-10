@@ -22,6 +22,11 @@ ffi.cdef[[
 -- --------------------------------------------------------
 -- Converts given text value into C value representation
 -- --------------------------------------------------------
+--[[ 
+
+-- This function is devided into two function below, keeping here, since I havent checked for all reference of this function. 
+-- I will remove this comment once all reference are updated 
+
 function convert_text_to_c_value(function_name, ctype, data, size_of_c_data) 
     
   local c_value = ffi.C.malloc(size_of_c_data)
@@ -45,4 +50,34 @@ function convert_text_to_c_value(function_name, ctype, data, size_of_c_data)
   
   ffi.gc( c_value, ffi.C.free )  
   return c_value
+end
+--]]
+
+function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
+
+  local chunk = ffi.C.malloc(size_of_c_data*chunk_size)
+  -- explicit cast is required for luaffi to work, luajit ffi implicitly casts void * to any data type
+  local chunk = ffi.cast(ctype.. " * ", chunk)
+     
+  ffi.gc( chunk, ffi.C.free )  
+  return chunk
+  
+end
+
+function covert_data(function_name, ctype, data, c_value, size_of_c_data)
+  local status = nil
+  -- for fixed size string pass the size of stirng data also
+  if ctype == "char" then
+    local ssize = ffi.cast("size_t" ,size_of_c_data)
+    -- status = qCLib[funName](data, cValue, sizeOfCData)
+    status = q_c_lib[function_name](data, c_value, ssize)
+  else
+    status = q_c_lib[function_name](data, c_value)
+  end
+  
+  -- negative status indicates erorr condition
+  if(status < 0) then 
+    error("Invalid data found")
+  end
+  
 end

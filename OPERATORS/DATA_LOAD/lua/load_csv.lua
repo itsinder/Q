@@ -1,6 +1,6 @@
 package.path = package.path .. ";../../../Q2/code/?.lua"
 
-local Vector = require 'Vector'
+require 'chunk_writer'
 require 'globals'
 require 'parser'
 require 'dictionary'
@@ -17,10 +17,9 @@ local ffi = require("ffi")
 --           If any error was encountered during load operation then negative status code  
 -- ----------------
 
-
 -- validate meta-data & create vector + null vector for each of the file being created 
-local vectors = {}
-local nil_vectors = {}
+local writers = {}
+local nil_writers = {}
 local col_count = 0 --each field in the metadata represents one column in csv file
 local col_idx = 0
 local row_idx = 0
@@ -28,15 +27,11 @@ local col_num_nil = {}
 local validate_input, valid_file, valid_dir, initialize, cleanup
 local NULL  
 local NOT_NULL
-local chunk_size = 1
 
 function load( csv_file_path, metadata , G)
   
   validate_input(csv_file_path, metadata, G)   
-  col_count = #metadata
-  
   initialize(metadata)  
-  
   
   for line in io.lines(csv_file_path) do
  
@@ -47,7 +42,7 @@ function load( csv_file_path, metadata , G)
     if(#col_values ~= col_count) then 
      -- If its the single column and nil is allowed then its a valid case
      if(col_count == 1) then
-       if(nil_vectors[col_count] == nil) then error("Null value found in not null field") end 
+       if(nil_writers[col_count] == nil) then error("Null value found in not null field") end 
      else
       error("Column count does not match with count of column in metadata")
      end 
@@ -66,9 +61,8 @@ function load( csv_file_path, metadata , G)
       local current_value = col_values[col_idx]          
       if current_value == nil or stringx.strip(current_value) == "" then 
         -- nil values
-        if(nil_vectors[col_idx] == nil) then error("Null value found in not null field .. column number " .. col_idx ) end
-        -- TODO check putvalue syntaxt
-        nil_vectors[col_idx]:put_chunk(NULL, chunk_size)
+        if(nil_writers[col_idx] == nil) then error("Null value found in not null field .. column number " .. col_idx ) end
+        nil_writers[col_idx].write(NULL)
         if col_num_nil[col_idx] == nil then 
           col_num_nil[col_idx] =  1 
         else 
@@ -79,8 +73,8 @@ function load( csv_file_path, metadata , G)
       else
         -- Not nil value
         
-        if(nil_vectors[col_idx] ~= nil) then
-          nil_vectors[col_idx]:put_chunk(NOT_NULL, chunk_size) 
+        if(nil_writers[col_idx] ~= nil) then
+          nil_writers[col_idx].write(NOT_NULL) 
         end
         -- If value is not null then do dictionary string to number conversion
         if(dictionary ~= nil and dictionary == true) then 
@@ -97,17 +91,9 @@ function load( csv_file_path, metadata , G)
           current_value = stringx.strip(current_value) 
         end
       end
-      
-      if(data_type_short_code == "SC") then
-        -- For Fixed length string width of the data comes from the metadata instead of globals  
-        local size_of_data = metadata[col_idx]["size"];
-        -- For SC add the size_of_data to the multiplication
-        local c_value = convert_text_to_c_value(txt_to_ctype_func_name, ctype, current_value, size_of_data)
-        vectors[col_idx]:put_chunk(c_value, chunk_size*size_of_data)        
-      else
-        local c_value = convert_text_to_c_value(txt_to_ctype_func_name, ctype, current_value, size_of_data)
-        vectors[col_idx]:put_chunk(c_value, chunk_size) 
-      end
+            
+      writers[col_idx].write(current_value)
+
     end  
     row_idx = row_idx + 1
   end
@@ -115,39 +101,61 @@ function load( csv_file_path, metadata , G)
   --cleanup
   cleanup(metadata)  
   -- close all vectors & delete the null vector if it is not required..
-  return vectors
+  return writers
 end
 
 initialize = function(metadata)
+  
 
   -- initialize value which needs to be written to null vector, since it will be either 0 or 1
-  NULL =  convert_text_to_c_value("txt_to_I1", "int8_t", "1", 1)
-  NOT_NULL =  convert_text_to_c_value("txt_to_I1","int8_t", "0", 1)
-
+  --NULL =  convert_text_to_c_value("txt_to_I1", "int8_t", "1", 1)
+  --NOT_NULL =  convert_text_to_c_value("txt_to_I1","int8_t", "0", 1)
+  -- Initialize all the values
+  writers = {}
+  nil_writers = {}
+  col_count = 0 --each field in the metadata represents one column in csv file
+  col_idx = 0
+  row_idx = 0
+  col_num_nil = {}  
+    
+  NULL =  "1"
+  NOT_NULL =  "0"
+  col_count = #metadata
+    
   for i = 1, col_count do 
     -- If metadata name is not empty/null, then only create new vector
     if stringx.strip(metadata[i].name) ~= "" then
-      vectors[i] = Vector{field_type=metadata[i].type, filename= _G["Q_DATA_DIR"] .. "_" ..metadata[i].name, write_vector=true}
-      if metadata[i].null == true then
-        nil_vectors[i] =  Vector{field_type="int8_t", filename= _G["Q_DATA_DIR"] .. "_nn_" ..metadata[i].name, write_vector=true}
+      writers[i] = Writer(metadata[i])
+      if metadata[i].null == true or metadata[i].null == "true" then
+        local nil_metadata = {}
+        nil_metadata.name = "nn_" .. metadata[i].name
+        nil_metadata.type = "I1"
+        nil_writers[i] =  Writer(nil_metadata)
       end
       
       if(metadata[i].type == "varchar") then
-        --TODO: add dictionary field handling in dictionary code itself
         Dictionary(metadata[i]) 
       end 
     end    
   end
+  
 end
 
 cleanup = function(metadata)
   for i = 1, col_count do 
     -- If metadata name is not empty/null, then only create new vector
     if stringx.strip(metadata[i].name) ~= "" then
-      vectors[i]:eov()
-      --TODO : Deleting the null vector if its not required
-      if metadata[i].null == true then
-        nil_vectors[i]:eov()
+      writers[i].close()
+      
+      if nil_writers[i] ~= nil  then
+        nil_writers[i].close()
+        
+        if col_num_nil[i] == nil or col_num_nil[i] == 0 then 
+          --TODO : Since vector is in append mode, this deletion comflicts with that, check with others regarding this deletion    
+          local nn_filepath = _G["Q_DATA_DIR"] .."_nn_" .. metadata[i].name
+          file.delete(nn_filepath)
+        end 
+        
       end 
     end     
   end
@@ -190,5 +198,3 @@ valid_file = function(file_path)
       return true 
     end
 end
-
-

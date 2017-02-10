@@ -46,8 +46,8 @@ mkdir metadata
 #6) Then run the main.lua file, the command is:
 
 # Following will be in a loop testing several combinations TODO
-meta_data_file=meta.lua
-data_file=t1.csv
+meta_data_file=../test/meta.txt
+data_file=../test/t1.csv
 luajit main.lua $meta_data_file $data_file
 
 
