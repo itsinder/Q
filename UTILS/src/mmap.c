@@ -12,13 +12,8 @@
 #include <assert.h>
 #include <fcntl.h>
 /* STOP HDR FILES  */
-#include "constants.h"
-#include "macros.h"
+#include "q_macros.h"
 #include "mmap.h"
-#ifdef IPP
-#include <ippi.h>
-#include "ipp.h"
-#endif
 
 // START FUNC DECL
 int
@@ -34,8 +29,9 @@ rs_mmap(
   int fd;
   struct stat filestat;
   size_t len;
+#define MAX_LEN_DIR_NAME 255
 
-  if ( is_write == true ) { 
+  if ( is_write ) { 
     fd = open(file_name, O_RDWR);
   }
   else {
@@ -57,7 +53,7 @@ rs_mmap(
     *ptr_file_size = 0;
   }
   else {
-    if ( is_write == TRUE ) { 
+    if ( is_write ) { 
       *ptr_mmaped_file = (void *)mmap(NULL, (size_t) len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     }
     else {
