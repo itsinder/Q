@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 rm -f ../gen_src/_*.c
+rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h
 bash cleanup.sh
 bash generate_static_checker.sh
