@@ -1,29 +1,43 @@
 #!/usr/bin/env lua
 
-package.path = package.path.. ";../?.lua"
+package.path = package.path.. ";../../../UTILS/lua/?.lua"
 require("aux")
+local pl = require 'pl'
+-- pl.unlink("_qfns_f1f2opf3.lua")
 
-dofile '../globals.lua'
+dofile '../../../UTILS/lua/globals.lua'
 
-local srcdir = "../../PRIMITIVES/src/" 
-local incdir = "../../PRIMITIVES/inc/" 
+local srcdir = "../gen_src/"
+local incdir = "../gen_inc/"
 local T = dofile 'f1f2opf3_operators.lua' 
-local tmpl = dofile 'f1f2opf3.tmpl'
-local types = { 'int8_t', 'int16_t', 'int32_t', 'int64_t','float', 'double' }
+local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
+args = nil -- not being used just yet
 for i, v in ipairs(T) do
+  -- ==================
+  local str = "function " .. v .. "(f1, f2, optargs)\n"
+  str = str .. "  expander(\"f1f2opf3\", \"" .. v .. "\", f1, f2, optargs)\n"
+  str = str .. "end\n"
+  local f = assert(io.open("_qfns_f1f2opf3.lua", "a"))
+  f:write(str)
+  f:close()
+  -- ==================
+
   local base_name = v
   local str = 'require \'' .. base_name .. '_static_checker\''
 --  require concat_static_checker.lua
-  load(str)()
+  loadstring(str)()
   for i, in1type in ipairs(types) do 
     for j, in2type in ipairs(types) do 
       for k, returntype in ipairs(types) do 
+        local optargs = {}
+        optargs.returntype = returntype
         stat_chk = base_name .. '_static_checker'
-        assert(_G[stat_chk], "no checker for " .. base_name)
-        local substitutions, includes = 
-        _G[base_name .. '_static_checker'](in1type, in2type, returntype)
-        if ( substitutions ) then
+        assert(_G[stat_chk], "function not found " .. stat_chk)
+        -- print("Lua premature", stat_chk); os.exit()
+        local subs, incs, tmpl = 
+        _G[stat_chk](in1type, in2type, optargs)
+        if ( subs ) then
           local B = nil; local W = nil
           if ( file_exists(base_name .. "_black_list.lua")) then 
             B = dofile(base_name .. "_black_list.lua")
@@ -39,11 +53,13 @@ for i, v in ipairs(T) do
             error("Cannot have both black and white list")
           end
           -- TODO Improve following.
-          tmpl.name = substitutions.name
-          tmpl.in1type = substitutions.in1type
-          tmpl.in2type = substitutions.in2type
-          tmpl.returntype = substitutions.returntype
-          tmpl.scalar_op = substitutions.scalar_op
+          local T = dofile(tmpl)
+          T.fn         = subs.fn
+          T.in1type    = subs.in1type
+          T.in2type    = subs.in2type
+          T.returntype = subs.returntype
+          T.argstype   = subs.argstype
+          T.c_code_for_operator = subs.c_code_for_operator
           -- process black/white lists
           local skip = false; local decided = false
           if ( ( B == nil ) and ( W == nil ) ) then 
@@ -61,10 +77,9 @@ for i, v in ipairs(T) do
           end
           if not decided then error("Control cannot come here") end
           if not skip then 
-          -- print(tmpl 'declaration')
-          doth = tmpl 'declaration'
+          doth = T 'declaration'
           -- print("doth = ", doth)
-          local fname = incdir .. "_" .. substitutions.name .. ".h", "w"
+          local fname = incdir .. "_" .. subs.fn .. ".h", "w"
           local f = assert(io.open(fname, "w"))
           f:write(doth)
           if ( includes ) then 
@@ -73,10 +88,9 @@ for i, v in ipairs(T) do
             end
           end
           f:close()
-          -- print(tmpl 'definition')
-          dotc = tmpl 'definition'
+          dotc = T 'definition'
           -- print("dotc = ", dotc)
-          local fname = srcdir .. "_" .. substitutions.name .. ".c", "w"
+          local fname = srcdir .. "_" .. subs.fn .. ".c", "w"
           local f = assert(io.open(fname, "w"))
           f:write(dotc)
           f:close()
@@ -88,3 +102,4 @@ for i, v in ipairs(T) do
     end
   end
 end
+

@@ -6,13 +6,13 @@ g_sz["I8"] = 64;
 g_sz["F4"]   = 32;
 g_sz["F8"]  = 64;
 g_isz_to_fld = {}
-g_isz_to_fld[1]  = "int8_t"
-g_isz_to_fld[2] = "int16_t"
-g_isz_to_fld[4] = "int32_t"
-g_isz_to_fld[8] = "int64_t"
+g_isz_to_fld[1]  = "I8"
+g_isz_to_fld[2] = "I2"
+g_isz_to_fld[4] = "I4"
+g_isz_to_fld[8] = "I8"
 g_fsz_to_fld = {}
-g_fsz_to_fld[4] = "float"
-g_fsz_to_fld[8] = "double"
+g_fsz_to_fld[4] = "F4"
+g_fsz_to_fld[8] = "F8"
 g_iorf = {}
 g_iorf["I1"]  = "fixed";
 g_iorf["I2"] = "fixed";
@@ -28,6 +28,7 @@ g_qtypes.I4 = { short_code = "I4", width = 4, ctype = "int32_t", txt_to_ctype = 
 g_qtypes.I8 = { short_code = "I8", width = 8, ctype = "int64_t", txt_to_ctype = "txt_to_I8", ctype_to_txt = "TBD" }
 g_qtypes.F4 = { short_code = "F4", width = 4, ctype = "float", txt_to_ctype = "txt_to_F4", ctype_to_txt = "TBD" }
 g_qtypes.F8 = { short_code = "F8", width = 8, ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
--- not sure about SC TODO 
 g_qtypes.SC = { short_code = "SC", ctype = "char", txt_to_ctype = "txt_to_SC", ctype_to_txt = "TBD" }
+g_qtypes.TM = { short_code = "TM", ctype = "struct tm", txt_to_ctype = "txt_to_TM", ctype_to_txt = "TBD" }
+g_qtypes.BT = { short_code = "BT", ctype = "uint64_t", txt_to_ctype = "txt_to_BT", ctype_to_txt = "TBD" }
 

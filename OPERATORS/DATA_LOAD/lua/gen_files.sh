@@ -4,7 +4,8 @@ set -e
 rm -r -f ../gen_inc/*.h
 rm -r -f ../gen_src/*.c
 # generate all primitives
-lua gen_code.lua 
+lua gen_code_I.lua 
+lua gen_code_F.lua 
 # iterate over all generated code=> should compile without warnings
 cd ../gen_src/
 ls *c > _x

@@ -1,13 +1,13 @@
 #!/usr/bin/env lua
 package.path = package.path.. ";../../../UTILS/lua/?.lua"
-local tmpl = dofile 'txt_to.tmpl'
+local tmpl = dofile 'txt_to_I.tmpl'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
 local subs = {}      -- a set to collect authors
 function Entry (b) 
   subs[b.qtype] = b 
 end
-dofile("subs.lua")
+dofile("subs_I.lua")
 -- for qtype in pairs(subs) do print(qtype) end
 for k, v in pairs(subs) do 
   print("Processing ", k)
@@ -16,7 +16,6 @@ for k, v in pairs(subs) do
   tmpl.out_type_displ = v.out_type_displ 
   tmpl.out_type = v.out_type 
   tmpl.big_out_type = v.big_out_type 
-  tmpl.base = v.base 
   tmpl.min_val = v.min_val 
   tmpl.max_val = v.max_val 
   tmpl.converter = v.converter
