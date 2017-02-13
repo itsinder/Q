@@ -275,6 +275,24 @@ function test_load_csv:test_valid_I8()
   lu.assertEquals(test_load_csv:calculate_file_size(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
 end
 
+function test_load_csv:test_valid_F4()
+  local csv_file_path = test_input_dir .. "sample_F4.csv"
+  local num_records = 4
+  local metadata = { { name = "col1", type = "F4", null ="true" }}
+  local ret = load( csv_file_path, metadata )
+  lu.assertEquals(type(ret),"table") 
+  lu.assertEquals(test_load_csv:calculate_file_size(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
+end
+
+function test_load_csv:test_valid_F8()
+  local csv_file_path = test_input_dir .. "sample_F8.csv"
+  local num_records = 4
+  local metadata = { { name = "col1", type = "F8", null ="true" }}
+  local ret = load( csv_file_path, metadata )
+  lu.assertEquals(type(ret),"table") 
+  lu.assertEquals(test_load_csv:calculate_file_size(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
+end
+
 function test_load_csv:test_valid_fix_size_string()
   local csv_file_path = test_input_dir .. "sample_varchar.csv"
   local num_records = 4
@@ -298,8 +316,7 @@ function test_load_csv:test_int_overflow()
   lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "sample_I1_overflow.csv", { { name = "col1", type = "I1", null ="true" }} )
   lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "sample_I2_overflow.csv", { { name = "col1", type = "I2", null ="true" }} )
   lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "sample_I4_overflow.csv", { { name = "col1", type = "I4", null ="true" }} )
-  --TODO Enable it after overflow issue is fixed 
-  -- lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "sample_I8_overflow.csv", { { name = "col1", type = "I8", null ="true" }} )
+  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "sample_I8_overflow.csv", { { name = "col1", type = "I8", null ="true" }} )
 end
 
 
@@ -316,7 +333,7 @@ TODO :
 - NULL values
 - Deleting Null file, of no null value was found
 
-o) floating point out of range
+o) floating point data 
 o) Can we specify integer in hex format?
 o) Can we specify floating point in exponent format?
 --]]

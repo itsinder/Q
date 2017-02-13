@@ -1,4 +1,4 @@
-#!/bin/bash # TODO
+#!/bin/bash 
 set -e 
 # ASSIGNMENT:2 CSV_LOAD
 #Compile + run instructions:
@@ -6,13 +6,13 @@ set -e
 #1) Change the directory to Q/OPERATORS/DATA_LOAD/lua
 
 # Generate txt_to_*.c and txt_to_*.h files 
-bash README.sh
+#bash README.sh
+bash gen_files.sh
 #2) Compile the C code and create the QFunc.so file, the command is:
 #gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
 
 gcc -std=gnu99 \
-  -o ../obj/QCFunc.so \
-  ../src/QCFunc.c \
+  -o ../obj/q_c_functions.so \
   ../src/txt_to_SC.c \
   ../gen_src/_txt_to_I1.c \
   ../gen_src/_txt_to_I2.c \
@@ -52,13 +52,6 @@ luajit main.lua $meta_data_file $data_file
 
 
 
-############## REMAINING Things ############
-
-# - Dictionary for varchar -- testing
-# - NULL value handing --testing
-# - File Name : what pattern to use to make it 16 characters long
-# - Deleting null vector file, if null value is not found in input
-# - Fix size string 
-# - Custom datatype (ts example given in csv_load.pdf)
+############## REMAINING Things ############# 
 
 echo "Completed $0 in $PWD" # TODO

@@ -1,5 +1,5 @@
 local ffi = require("ffi") 
-local so_file_path_name = "../obj/QCFunc.so" --path for .so file
+local so_file_path_name = "../obj/q_c_functions.so" --path for .so file
 local q_c_lib  = ffi.load(so_file_path_name) 
 
 ffi.cdef[[
@@ -9,12 +9,15 @@ ffi.cdef[[
   typedef struct ssize_t ssize_t;
   typedef struct FILE FILE;  
   int txt_to_d(const char *X, double *ptr_out);
-  int txt_to_I1(const char *X, int8_t *ptr_out);
-  int txt_to_I2(const char *X, int16_t *ptr_out);
-  int txt_to_I4(const char *X, int32_t *ptr_out);
-  int txt_to_I8(const char *X, int64_t *ptr_out);
-  int txt_to_SC(const char *X, char *out, size_t sz_out);
+  int txt_to_I1(const char *X, int base, int8_t *ptr_out);
+  int txt_to_I2(const char *X, int base, int16_t *ptr_out);
+  int txt_to_I4(const char *X, int base, int32_t *ptr_out);
+  int txt_to_I8(const char *X, int base, int64_t *ptr_out);
   
+  int txt_to_F4(const char *X, float *ptr_out);
+  int txt_to_F8(const char *X, double *ptr_out);
+  
+  int txt_to_SC(const char *X, char *out, size_t sz_out);
   ]]
 
 
@@ -71,8 +74,13 @@ function covert_data(function_name, ctype, data, c_value, size_of_c_data)
     local ssize = ffi.cast("size_t" ,size_of_c_data)
     -- status = qCLib[funName](data, cValue, sizeOfCData)
     status = q_c_lib[function_name](data, c_value, ssize)
-  else
+  elseif ( ctype == "int8_t" or ctype == "int16_t" or ctype == "int32_t" or ctype == "int64_t") then
+    -- For now second parameter , base is 10 only
+    status = q_c_lib[function_name](data, 10, c_value)
+  elseif ctype == "float" or ctype == "double"  then 
     status = q_c_lib[function_name](data, c_value)
+  else 
+    error("Data type" .. ctype .. " Not supported ")
   end
   
   -- negative status indicates erorr condition
