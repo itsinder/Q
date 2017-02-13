@@ -69,7 +69,7 @@ function Writer(metadata, chunk_size)
     
     -- Get the pointer for data on the current index   
     -- Call convert function to convert the data to appropriate C Data
-    covert_data(self.function_name, self.ctype, data, self.current_chunk + self.current_idx ,   self.size_of_data)
+    convert_data(self.function_name, self.ctype, data, self.current_chunk + self.current_idx ,   self.size_of_data)
     self.current_idx = self.current_idx + 1
     
   end

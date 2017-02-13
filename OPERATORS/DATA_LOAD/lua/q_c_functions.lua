@@ -67,7 +67,7 @@ function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
   
 end
 
-function covert_data(function_name, ctype, data, c_value, size_of_c_data)
+function convert_data(function_name, ctype, data, c_value, size_of_c_data)
   local status = nil
   -- for fixed size string pass the size of stirng data also
   if ctype == "char" then

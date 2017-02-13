@@ -7,8 +7,6 @@ require 'dictionary'
 require 'q_c_functions'
 require 'pl'
 
-local ffi = require("ffi") 
-
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata") 
 -- Loads the CSV file and stores in the Q internal format
