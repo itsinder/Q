@@ -9,7 +9,11 @@
 
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-  local T = dofile 'f1f2opf3_operators.lua' 
+  local operator_file = assert(argv[2])
+  assert(is_file(operator_file))
+  print(operator_file)
+  os.exit()
+  local T = dofile(operator_file)
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
   args = nil -- not being used just yet

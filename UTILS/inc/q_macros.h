@@ -48,4 +48,9 @@
 
 #define unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
+#define SETBIT(x,0)  { /* do nothing */ }
+#define SETBIT(x,i)  x[i/8] |= (1<<(i%8));
+#define CLEARBIT(x,i) x[i/8] &= ~(1<<(i%8));
+#define GETBIT(x,i) x[i/8] & (1<<(i %8) > 0;
+
 #endif
