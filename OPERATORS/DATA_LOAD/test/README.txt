@@ -13,6 +13,8 @@ o) integer out of range
 o) floating point out of range
 o) Can we specify integer in hex format?
 o) Can we specify floating point in exponent format?
+o) Column names must be alphanumeric characters (and underscore) but should not start with underscore. 
+o) Maximum length of column is 31 characters.
 
 and on and on....
 
