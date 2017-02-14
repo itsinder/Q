@@ -3,6 +3,7 @@ return require 'code_gen' {
    declaration = [[
 
 #include "q_types.h"
+${includes}
 extern int
 ${fn}(  
       const ${in1type} * restrict in1,  

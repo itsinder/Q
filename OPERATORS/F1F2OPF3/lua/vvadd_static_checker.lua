@@ -30,7 +30,7 @@ function vvadd_static_checker(
       assert(g_qtypes[fouttype]) -- make sure that this is valid outtype
     end
     local tmpl = 'f1f2opf3.tmpl'
-    local subs = {}; local incs = {}
+    local subs = {}; 
     print("f1type = ", f1type)
     print("f2type = ", f1type)
     print("fouttype = ", fouttype)
@@ -41,5 +41,5 @@ function vvadd_static_checker(
     subs.returntype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
     subs.c_code_for_operator = "c = a + b"
-    return subs, incs, tmpl
+    return subs, tmpl
 end
