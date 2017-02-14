@@ -92,6 +92,18 @@ let me know.
 I would like the use of some code coverage tool to give us confidence
 that the suite of tests does cover the code adequately.
 
+10) NN field
+
+There needs to be some testing of the NN field. Once again, the way to do is it
+to say that every 4th element will be null when you create the data and then
+verify that this is in fact the case. Note that when a value is null, you are
+effectively doing "memset(X, '\0', width_of_element)" so that when you read it
+back, you will get a 0 for null values. 
+
+
+Indrajeet has some macros GET_BIT, SET_BIT, ... in UTILS/inc/ you may need these
+for the nn vector 
+
 
 
 
