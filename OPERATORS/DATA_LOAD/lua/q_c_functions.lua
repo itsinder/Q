@@ -5,6 +5,7 @@ local q_c_lib  = ffi.load(so_file_path_name)
 ffi.cdef[[
   void *malloc(size_t size);
   void free(void *ptr);
+  void *memset(void *str, int c, size_t n);
 
   typedef struct ssize_t ssize_t;
   typedef struct FILE FILE;  
@@ -21,43 +22,11 @@ ffi.cdef[[
   ]]
 
 
-
--- --------------------------------------------------------
--- Converts given text value into C value representation
--- --------------------------------------------------------
---[[ 
-
--- This function is devided into two function below, keeping here, since I havent checked for all reference of this function. 
--- I will remove this comment once all reference are updated 
-
-function convert_text_to_c_value(function_name, ctype, data, size_of_c_data) 
-    
-  local c_value = ffi.C.malloc(size_of_c_data)
-  -- explicit cast is required for luaffi to work, luajit ffi implicitly casts void * to any data type
-  local c_value = ffi.cast(ctype.. " * ", c_value)
-  local status = nil
-  
-  -- for fixed size string pass the size of stirng data also
-  if ctype == "char" then
-    local ssize = ffi.cast("size_t" ,size_of_c_data)
-    -- status = qCLib[funName](data, cValue, sizeOfCData)
-    status = q_c_lib[function_name](data, c_value, ssize)
-  else
-    status = q_c_lib[function_name](data, c_value)
-  end
-  
-  -- negative status indicates erorr condition
-  if(status < 0) then 
-    error("Invalid data found")
-  end
-  
-  ffi.gc( c_value, ffi.C.free )  
-  return c_value
+function reset_chunk_data(chunk, size_of_c_data ,chunk_size)
+  ffi.C.memset(chunk, 0, size_of_c_data * chunk_size)
 end
---]]
 
 function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
-
   local chunk = ffi.C.malloc(size_of_c_data*chunk_size)
   -- explicit cast is required for luaffi to work, luajit ffi implicitly casts void * to any data type
   local chunk = ffi.cast(ctype.. " * ", chunk)
@@ -67,25 +36,29 @@ function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
   
 end
 
-function convert_data(function_name, ctype, data, c_value, size_of_c_data)
-  local status = nil
-  -- for fixed size string pass the size of stirng data also
-  if ctype == "char" then
-    local ssize = ffi.cast("size_t" ,size_of_c_data)
-    -- status = qCLib[funName](data, cValue, sizeOfCData)
-    status = q_c_lib[function_name](data, c_value, ssize)
-  elseif ( ctype == "int8_t" or ctype == "int16_t" or ctype == "int32_t" or ctype == "int64_t") then
-    -- For now second parameter , base is 10 only
-    status = q_c_lib[function_name](data, 10, c_value)
-  elseif ctype == "float" or ctype == "double"  then 
-    status = q_c_lib[function_name](data, c_value)
+
+function convert_data(function_name, q_type, data, c_value, size_of_c_data)
+  -- for null fields set all bytes to \0
+  if(data == nil) then 
+    ffi.C.memset(c_value, 0, size_of_c_data)
   else 
-    error("Data type" .. ctype .. " Not supported ")
-  end
-  
-  -- negative status indicates erorr condition
-  if(status < 0) then 
-    error("Invalid data found")
-  end
-  
+    local status = nil
+    -- for fixed size string pass the size of stirng data also
+    if q_type == "SC" then
+      local ssize = ffi.cast("size_t" ,size_of_c_data)
+      status = q_c_lib[function_name](data, c_value, ssize)
+    elseif ( q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "varchar") then
+      -- For now second parameter , base is 10 only
+      status = q_c_lib[function_name](data, 10, c_value)
+    elseif q_type == "F4" or q_type == "F8"  then 
+      status = q_c_lib[function_name](data, c_value)
+    else 
+      error("Data type" .. q_type .. " Not supported ")
+    end
+    
+    -- negative status indicates erorr condition
+    if(status < 0) then 
+      error("Invalid data found")
+    end
+  end  
 end

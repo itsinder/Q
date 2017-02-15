@@ -27,12 +27,12 @@ end
 
 function test_dictionary:test_create_null_name_error()
   luaunit.assertError(Dictionary, { is_dict = false, add=true})
-  luaunit.assertErrorMsgContains("Dictionary name should not be empty", Dictionary, {dict = "", is_dict = false, add=true} ) 
+  luaunit.assertErrorMsgContains("Please specify correct metadata", Dictionary, {dict = "", is_dict = false, add=true} ) 
 end
 
 function test_dictionary:test_add()
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local entry1 = dictionary.add_with_condition("Entry1", false)
+  local entry1 = dictionary.add_with_condition("Entry1", true)
   local entry2 =  dictionary.add_with_condition("Entry2")
   
   luaunit.assertNumber(entry1)
@@ -53,10 +53,10 @@ end
 
 function test_dictionary:testAddMultipleWithAddFalse()  
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local entry1 = dictionary.add_with_condition("Entry1", false)
+  local entry1 = dictionary.add_with_condition("Entry1", true)
    
   luaunit.assertNumber(entry1)
-  luaunit.assertErrorMsgContains("Text already exists in dictionary", dictionary.add_with_condition, "Entry1", false)  
+  luaunit.assertErrorMsgContains("Text does not exist in dictionary", dictionary.add_with_condition, "Entry2", false)  
 end
 
 function test_dictionary:testAddMutipleWithAddTrue()

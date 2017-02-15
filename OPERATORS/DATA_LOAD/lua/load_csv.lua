@@ -1,4 +1,4 @@
-package.path = package.path .. ";../../../Q2/code/?.lua"
+package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 
 require 'chunk_writer'
 require 'globals'
@@ -6,6 +6,8 @@ require 'parser'
 require 'dictionary'
 require 'q_c_functions'
 require 'pl'
+require 'utils'
+
 
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata") 
@@ -16,15 +18,12 @@ require 'pl'
 -- ----------------
 
 -- validate meta-data & create vector + null vector for each of the file being created 
-local writers = {}
-local nil_writers = {}
+local vector_wrapper = {}
 local col_count = 0 --each field in the metadata represents one column in csv file
 local col_idx = 0
 local row_idx = 0
 local col_num_nil = {}  
-local validate_input, valid_file, valid_dir, initialize, cleanup
-local NULL  
-local NOT_NULL
+local validate_input, initialize, cleanup
 
 function load( csv_file_path, metadata , G)
   
@@ -35,15 +34,18 @@ function load( csv_file_path, metadata , G)
  
     -- local col_values= parse_csv_line(line,',')       -- call to parse to parse the line of csv file
     local status, col_values = pcall(parse_csv_line, line, ',' )
-    if(status == false ) then error("Invalid CSV data") end
+    assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
     
     if(#col_values ~= col_count) then 
      -- If its the single column and nil is allowed then its a valid case
+     --TODO : If the last column is null
+    
      if(col_count == 1) then
-       if(nil_writers[col_count] == nil) then error("Null value found in not null field") end 
+      --[[assert(nil_vector_wrapper[col_count] ~= nil, "Null value found in not null field") --]] 
      else
       error("Column count does not match with count of column in metadata")
-     end 
+     end
+      
     end
     
     for col_idx = 1, col_count do
@@ -53,44 +55,10 @@ function load( csv_file_path, metadata , G)
       local ctype = g_qtypes[data_type_short_code]["ctype"]
       local size_of_data = g_qtypes[data_type_short_code]["width"]
       
-      -- For varchar, do the dictionary conversion
-      local dictionary =  data_type_short_code == "varchar" or false
+      local current_value = col_values[col_idx]
       
-      local current_value = col_values[col_idx]          
-      if current_value == nil or stringx.strip(current_value) == "" then 
-        -- nil values
-        if(nil_writers[col_idx] == nil) then error("Null value found in not null field .. column number " .. col_idx ) end
-        nil_writers[col_idx].write(NULL)
-        if col_num_nil[col_idx] == nil then 
-          col_num_nil[col_idx] =  1 
-        else 
-          col_num_nil[col_idx] = col_num_nil[col_idx] + 1
-        end 
-        current_value = "0" -- setting here 0, so that instead of some garbage 0 will be written in file
-     
-      else
-        -- Not nil value
-        
-        if(nil_writers[col_idx] ~= nil) then
-          nil_writers[col_idx].write(NOT_NULL) 
-        end
-        -- If value is not null then do dictionary string to number conversion
-        if(dictionary ~= nil and dictionary == true) then 
-          local dict_name = metadata[col_idx].dict
-          local add_new_value = metadata[col_idx].add or true 
-          local dict = _G["Q_DICTIONARIES"][dict_name]
-          -- dictionary throws error if any during the add operation
-          local ret_number = dict.add_with_condition(current_value,add_new_value)                    
-          -- return is number, convert it to string
-          current_value = tostring(ret_number)
-
-        else 
-          -- remove any spaces before or after string, otherwise number conversion function throws error
-          current_value = stringx.strip(current_value) 
-        end
-      end
-            
-      writers[col_idx].write(current_value)
+      -- Now vector_wrapper handles null value handling and string to c_type value conversion
+      vector_wrapper[col_idx].write(current_value)
 
     end  
     row_idx = row_idx + 1
@@ -99,100 +67,86 @@ function load( csv_file_path, metadata , G)
   --cleanup
   cleanup(metadata)  
   -- close all vectors & delete the null vector if it is not required..
-  return writers
+  return vector_wrapper
 end
 
 initialize = function(metadata)
   
 
   -- initialize value which needs to be written to null vector, since it will be either 0 or 1
-  --NULL =  convert_text_to_c_value("txt_to_I1", "int8_t", "1", 1)
-  --NOT_NULL =  convert_text_to_c_value("txt_to_I1","int8_t", "0", 1)
   -- Initialize all the values
-  writers = {}
-  nil_writers = {}
+  vector_wrapper = {}
   col_count = 0 --each field in the metadata represents one column in csv file
   col_idx = 0
   row_idx = 0
-  col_num_nil = {}  
-    
-  NULL =  "1"
-  NOT_NULL =  "0"
+  col_num_nil = {}      
   col_count = #metadata
     
   for i = 1, col_count do 
     -- If metadata name is not empty/null, then only create new vector
     if stringx.strip(metadata[i].name) ~= "" then
-      writers[i] = Writer(metadata[i])
-      if metadata[i].null == true or metadata[i].null == "true" then
-        local nil_metadata = {}
-        nil_metadata.name = "nn_" .. metadata[i].name
-        nil_metadata.type = "I1"
-        nil_writers[i] =  Writer(nil_metadata)
-      end
-      
-      if(metadata[i].type == "varchar") then
-        Dictionary(metadata[i]) 
-      end 
+      vector_wrapper[i] = assert(Vector_Wrapper(metadata[i]))
     end    
   end
-  
+
 end
 
 cleanup = function(metadata)
   for i = 1, col_count do 
     -- If metadata name is not empty/null, then only create new vector
     if stringx.strip(metadata[i].name) ~= "" then
-      writers[i].close()
-      
-      if nil_writers[i] ~= nil  then
-        nil_writers[i].close()
-        
-        if col_num_nil[i] == nil or col_num_nil[i] == 0 then 
-          --TODO : Since vector is in append mode, this deletion comflicts with that, check with others regarding this deletion    
-          local nn_filepath = _G["Q_DATA_DIR"] .."_nn_" .. metadata[i].name
-          file.delete(nn_filepath)
-        end 
-        
-      end 
+      vector_wrapper[i].close()
     end     
   end
 end
 
 
 validate_input =  function(csv_file_path, metadata, G)
-  if( metadata == nil ) then error("Metadata should not be nil") end
-  if( type(metadata) ~= "table") then error("Please specify correct metadata") end
-  if( not valid_file(csv_file_path) )  then  error("Please make sure that csv_file_path is correct") end
+  assert( metadata ~= nil, "Metadata should not be nil")
+  assert( type(metadata) == "table", "Metadata type should be table")
+  assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
   -- Check if the directory required by this load operation exists
-  if( not valid_dir(_G["Q_DATA_DIR"]) )  then  error("Please make sure that Q_DATA_DIR points to correct directory") end
-  if( not valid_dir(_G["Q_META_DATA_DIR"]) )  then  error("Please make sure that Q_META_DATA_DIR points to correct directory") end
+  assert( valid_dir(_G["Q_DATA_DIR"]),"Please make sure that Q_DATA_DIR points to correct directory")
+  assert( valid_dir(_G["Q_META_DATA_DIR"]) , "Please make sure that Q_META_DATA_DIR points to correct directory")
   
+  local col_names = {}
   -- now look at fields of metadata
   for i,m in pairs(metadata) do
-     if m.name == nil or m.type == nil or g_qtypes[m.type] == nil  then
-        error("Please specify correct metadata") 
-     end
+    assert(m.name ~= nil, "metadata " .. i .. " : name cannot be null")
+    assert(m.type ~= nil, "metadata " .. i .. " : type cannot be null")
+    assert(g_qtypes[m.type] ~= nil, "metdata " .. i .. " : type contains invalid q type")
+    -- if not null is specified then only true/false is the acceptable value
+    if(m.null ~= nil) then 
+      assert( (m.null == true or m.null == "true" or m.null == false or m.null == "false" ), "metdata " .. i .. " : null can contain true/false only" )
+    end
+    
+    -- check if the same column name is found before in metadata
+    if(m.name ~= "") then 
+      assert( col_names[m.name] == nil , "metadata " .. i .. " : duplicate column name is not allowed") 
+      col_names[m.name] = 1 
+    end
+    -- Perform check based on metadata type
+    -- nothing more needs to be checked for integer, float field in addition to the above checks
+    --if(m.type == "I1" or m.type == "I2" or m.type == "I4" or m.type == "I8") then   
+    --elseif(m.type == "F4" or m.type == "F8") then 
+    
+    if(m.type == "SC") then 
+      assert(m.size ~= nil , "metadata " .. i .. " : size should be specified for fixed length strings")
+      assert(tonumber(m.size) , "metadata " .. i .. " : size should be valid number")
+      
+    elseif(m.type == "varchar") then
+      assert(m.dict ~= nil,"metadata " .. i .. " : dict cannot be null")
+      assert(m.is_dict ~= nil, "metadata " .. i .. " : is_dict cannot be null")
+      assert(m.is_dict == true or m.is_dict == "true" or m.is_dict == false or m.is_dict == "false", "metadata " .. i .. " : is_dict can contain true/false only")
+      if(m.is_dict == true or m.is_dict == "true") then 
+        assert(m.add ~= nil, "metadata " .. i .. " : add cannot be null for dictionary which has is_dict true")
+        assert(m.add == true or m.add == "true" or m.add == false or m.add == "false", "metadata " .. i .. " : add can contain true/false only")
+      end
+    end     
   end
   
   -- file should not be empty
-  local file_size  =  path.getsize(csv_file_path)
-  if file_size == 0 then error("File should not be empty") end
-   
+  assert( path.getsize(csv_file_path) ~= 0 , "File should not be empty")
+     
 end
 
-valid_dir = function(dir_path)
-    if( dir_path == nil or not path.exists(dir_path) or not path.isdir(dir_path) ) then 
-      return false 
-    else 
-      return true 
-    end
-end
-
-valid_file = function(file_path)
-    if( file_path == nil or not path.exists(file_path) or not path.isfile(file_path) ) then 
-      return false 
-    else 
-      return true 
-    end
-end

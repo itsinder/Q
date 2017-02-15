@@ -83,22 +83,21 @@ function Dictionary(dict_metadata)
   
   -- --------------------------------------------------
   -- Adds the string into dictionary and returns number corresponding to the string 
-  --     add_if_exists = true (default) :  If string exists in the dictionary then returns number corresponding to that string 
+  --     add_if_not_exists = true (default) :  If string exists in the dictionary then returns number corresponding to that string 
   --                                      otherwise adds the string into dictionary and returns the number at which string was added
-  --     add_if_exists = false : If string exists in the dictionary then returns -1, 
-  --                                        otherwise adds the string into dictionary and returns the number at which string was added
+  --     add_if_not_exists = false : If string exists in the dictionary then returns the number corresponding to that string 
+  --                                        otherwise error out
   -- -------------------------------------------------
-  
-  local add_with_condition = function(text, add_if_exists)
+  local add_with_condition = function(text, add_if_not_exists)
   
     if(text == nil or text == "") then error("Cannot add nil or empty string in dictionary") end
   
     -- default to true for addIfExists condition
-    if(add_if_exists == nil) then add_if_exists = true end
+    if(add_if_not_exists == nil) then add_if_not_exists = true end
     
     
     local text_exists = is_string_exists(text)
-    if(add_if_exists) then 
+    if(add_if_not_exists) then 
       if(text_exists) then 
         return get_number_by_string(text)
       else
@@ -107,10 +106,10 @@ function Dictionary(dict_metadata)
       end
     else
       if(text_exists) then 
-        error("Text already exists in dictionary")
-      else
         put(text)
         return get_number_by_string(text)
+      else
+        error("Text does not exist in dictionary")
       end
     end
     
