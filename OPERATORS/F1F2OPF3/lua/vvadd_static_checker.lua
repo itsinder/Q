@@ -1,10 +1,8 @@
 
 function vvadd_static_checker(
   f1type, 
-  f2type, 
-  optargs
+  f2type
   )
-    local fouttype = optargs[fouttype]
     local l_outtype = nil
     local sz1 = assert(g_qtypes[f1type].width)
     local sz2 = assert(g_qtypes[f2type].width)
@@ -24,20 +22,11 @@ function vvadd_static_checker(
     else
       assert(false, "Control should not come here")
     end
-    print("l_outtype = ", l_outtype)
-    if ( fouttype ~= nil ) then 
-      l_outtype = fouttype
-      assert(g_qtypes[fouttype]) -- make sure that this is valid outtype
-    end
     local tmpl = 'f1f2opf3.tmpl'
     local subs = {}; 
-    print("f1type = ", f1type)
-    print("f2type = ", f1type)
-    print("fouttype = ", fouttype)
     subs.fn = "vvadd_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
     subs.in2type = g_qtypes[f2type].ctype
-    print("l_outtype = ", l_outtype)
     subs.returntype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
     subs.c_code_for_operator = "c = a + b"
