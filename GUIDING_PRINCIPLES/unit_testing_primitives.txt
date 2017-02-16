@@ -1,0 +1,27 @@
+I would like to use Lua to drive unit tests for the C code written in OPERTORS/
+
+For example, consider that I want to test
+int
+add_I4_I4_I4(
+  int32_t *a,
+  int32_t *b,
+  uint64_t n,
+  int32_t *c
+)
+{
+  int status = 0;
+  for ( int i = 0; i < n; i++ ) {
+    c[i] = a[i] + b[i];
+  }
+  return status;
+}
+
+I would like the Lua code to use its FFI functionality to 
+1) malloc space for a, b,c 
+2) initialize a, b 
+3) call add_I4_I4_I4(...)
+4) iterate over values of c to do some basic verification. We will typically
+initialize a and b in such a way that there is an analytic soluton for c e.g.,
+if we set a[i] = i, b[i] = i*i, then we know that c[i] = i + i*i;
+
+An alternative is to use vectors but I will reserve that for later.

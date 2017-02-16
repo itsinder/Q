@@ -1,0 +1,46 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include "q_types.h"
+extern int
+${fn}(  
+      const ${in1type} * restrict in1,  
+      const ${in2type} * restrict in2,  
+      uint64_t nR,  
+      uint64_t * restrict out 
+      ) 
+;
+
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(  
+      const ${in1type} * restrict in1,  
+      const ${in2type} * restrict in2,  
+      uint64_t nR,  
+      uint8_t * restrict out 
+      )
+
+{ 
+  int status = 0;
+ ${in1type} inv1; 
+ ${in2type} inv2; 
+#pragma omp parallel for 
+ for ( uint64_t i = 0; i < nR; i++ ) {  
+   inv1 = *in1; 
+   inv2 = *in2; 
+   set_bit(out, i, (inv1 ${comparison} inv2));
+   *out = outv; 
+   in1++; 
+   in2++; 
+   out++; 
+ } 
+ return status;
+}
+
+   ]]
+}

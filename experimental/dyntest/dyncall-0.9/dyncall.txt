@@ -1,0 +1,91 @@
+>
+We would like to confirm that we can call any of the core C functions 
+from Lua using both Dyncall and LuaJit FFI
+
+In particular, all C functions have the following signature
+
+1) they will *ALL* return a single integer as a status
+
+2) if the function needs to return a  value, then it will look something 
+like the example shown below. Note that in this case, status is not used 
+but in general it is used to indicate that something has gone wrong.
+
+int
+sum(
+  int32_t *X,
+  int n,
+  int64_t *ptr_sum
+)
+{
+  int status = 0;
+  uint64_t sum = 0;
+  for ( int i = 0; i < n; i++ ) { 
+    sum += X[i];
+  }
+  *ptr_sum = sum;
+  return status;
+}
+
+1) Note the difference between X and ptr_sum. While both are pointers, 
+their meaning is different. X refers to an array whereas ptr_sum is the 
+address of a scalar.
+
+=================================================
+
+3) The 6 types that need to be supported are
+int8_t, int16_t, int32_t, int64_t, float, double, char
+
+Bonus points for being able to support 
+uint8_t, uint16_t, uint32_t, uint64_t
+
+=================================================
+
+Assignment 1: Specifically, what I would like you to do is to make sure 
+that we can support *ALL* the types mentioned above. 
+
+The aim is to convince us that we can 
+
+1) return all the different types of values (e.g., ptr_sum in the
+example could be *double, *float, *int32_t, …..)
+
+2) the C function iterates through the data correctly for all
+different input data types i.e., in the example, X can be int8_t *,
+int16_t *, …. So, I don’t care what function it is (sum may be good
+enough) as long as it convinces us that we are iterating through the
+data correctly
+
+3) this means that you will need to create small binary files as
+inputs and mmap them and send the pointers in to the C
+function. Indrajeet has done this already. Please steal from him.
+
+BTW, the reason for this work is 2-fold
+
+1) It de-risks the project. If there are any gotchas, we need to know
+them early
+
+2) It serves as a reference implementation. So, as newer people get on
+to the project, I can point them at small , comprehensible,
+stand-alone units of work that allow them to get a sense of how the
+whole system works.
+
+Assignment 2: Would like a wrapper which makes the Lua programmer 
+oblivious of whether FFI is being used or Dyncall is being used. Under 
+the covers, depending on some global variable, we will go down one path 
+or the other.
+
+================================== 
+
+At the risk of repetition, let’s summarize what we need. From Lua
+code, we need to be able to do the following for the 6 types we
+currently intend to support.  Bonus points for any other types.
+
+1) malloc memory and free memory. By the way, if the malloc fails for
+any reason, Lua needs to know that.
+
+2) invoke a C function,
+
+3) have this C function be able to both read from and write to the
+memory malloc’d earlier
+
+4) capture the return value of the C function, which will always be an
+integer

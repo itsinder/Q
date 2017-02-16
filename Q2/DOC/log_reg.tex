@@ -29,16 +29,25 @@
   \(X_{i, j}\) is value of \(j^{th}\) attribute of \(i^{th}\)
   instance. \(X\) is stored as \(M\) columns, where \(X_j\) is
   observations for attribute \(j\)
+
+Note: We must add an additional attribute which is the constant 1.
+This is necessary because \framebox{{\bf ANDREW TO FILL IN}}
+
 \item \(y\) is an \(N \times 1\) classification vector. \(y_i\) is
   classification of instance \(i\) and can be 1 or 0.
 \item \(\beta\) is an \(M \times 1\) coefficient vector. \(\beta_j\)
-  is coefficient for attribute \(j\). This is stored as a Lua table\footnote{In
-    this presentation, we skip details such as Lua tables being indexes from 1
-  and not 0}
-  from 1
-\item \(w\) is actually an \(N \times N\) matrix. However, since
+  is coefficient for attribute \(j\). 
+\item \(\beta^{\mathrm new}\) is an \(M \times 1\) vector, which are the new
+  coefficients that we solve for in each iteration
+\item \(A\) is an \(M \times M\) matrix. Since it is symmetric, we can skip
+  computing the lower diagonal elements.
+\item \(W\) is actually an \(N \times N\) matrix. However, since
   off-diagonal elements are zero, we can represent is as an \(N \times
-  1\) vector.  \ei
+  1\) vector.   When used as a vector, we will use lower case \(w\). When used
+  as a matrix, we will use upper case \(W\). Note that \(W_{i, i} = w_i\) and
+  that \( i \neq j \Rightarrow W_{i,j} = 0\)
+\item \(b\) is an \(M \times 1\) vector, \(X^T W ( X \beta + W^{-1}(y - p) )\)
+  \ei
 
 We start with an initial guess for \(\beta\) and then calculate better
 approximations using Equation~\ref{eqn1} until convergence.
@@ -53,10 +62,15 @@ A x = b
 \end{equation}
 where 
 \be
-\item \(A\) is an \(M \times M\) symmetric matrix, \((X^T W X)\)
-\item \(x\) is an \(M \times 1\) vector, which are the new
-  coefficients, \(\beta^{new}\), that we solve for in each iteration
-\item \(b\) is an \(M \times 1\) vector, \(X^T W ( X \beta + W^{-1}(y - p) )\)
+\item \(W\) is symmetric and positive definite
+\item Because \(W\) is symmetric and positive definite, \(A = 
+  X^T W X\) is at least positive semi-definite.
+\item If the attributes are linearly independent, then \(A\) will actually be
+  positive definite; else, the dependent attributes should be removed prior to
+  starting the computation.
+
+\framebox{{\bf ANDREW Any easy way to do the above? }}
+
 \ee
 
 \section{computations}
@@ -66,12 +80,11 @@ Step by step computations in Table~\ref{step_by_step_calc}.
 \centering
 \begin{tabular}{|l|l|l|l|} \hline \hline
   {\bf Name} & {\bf Description} & {\bf Type} & {\bf Code} \\ \hline \hline
-  \(t_1\) & \(X \beta\) & \((N \times M) \times (M \times 1)\)  &
-  Section~\ref{t1} \\ 
+  \(t_1\) & \(X \beta\) & \((N \times M) \times (M \times 1)\)  &  \\
   & & \(= N \times 1\) & \\ \hline
-  \(p\) & & \(N \times 1\) & \( p = \mathrm{logit}(x)\) \\ \hline
+  \(p\) & & \(N \times 1\) & \( p = \mathrm{logit}(t1)\) \\ \hline
   \(t_2\) &  \(y - p\) & \(N \times 1\) & \( t_2 = \mathrm{sub}(y, p)\) \\ \hline
-\(w\) & & \(N \times 1\) & \( w = \mathrm{fn}(x)\) \\ \hline
+  \(w\) & & \(N \times 1\) & \( w = p \times (1-p)\) \\ \hline
   \(t_3\) & \((y-p)/w\) & \(N \times 1\) & \(t_3 = \mathrm{div}(t_2, p)\) \\ \hline
   \(t_4\) & \(X \beta + w^{-1}(y-p)\) & \(N \times 1\) & \(\mathrm{add}(t_1, t_3)\) \\ \hline
   \(t_5\) & \(w(X \beta + w^{-1}(y-p))\) & \(N \times 1\) & \(\mathrm{mul}(w, t_4)\) \\ \hline
@@ -92,30 +105,22 @@ Step by step computations in Table~\ref{step_by_step_calc}.
 \begin{table}[hb]
 \centering
 \begin{tabular}{|l|l|l|l|l|} \hline \hline
-  {\bf Name} & {\bf Input Type} & {\bf Arguments} & {\bf Return Value} \\ \hline \hline
-  logit & Scalar & \(x\) & \(\frac{e^x}{1 + 1^x}\) \\ \hline
-  add & Scalar & \(x, y\) & \(x + y \)  \\ \hline
-  sub & Scalar & \(x, y\) & \(x - y \)  \\ \hline
-  mul & Scalar & \(x, y\) & \(x \times y \)  \\ \hline
-  div & Scalar & \(x, y\) & \(x / y \)  \\ \hline
-  fn & Scalar & \(x\) & \(\frac{1}{1 - x}\) \\ \hline
-  sumprod & Vector & \(x, y\) & \(\sum_i (x_i \times y_i)\) \\ \hline
-  sumprod2 & Vector & \(x, y, z\) & \(\sum_i (x_i \times y_i \times z_i)\) \\ \hline
+  {\bf Name} & {\bf Input Type} & {\bf Output Type} & {\bf Return Value} \\ \hline \hline
+  logit & Vector \(x\) & Vector \(y\) & \(y = \frac{e^x}{1 + 1^x}\) \\ \hline
+  constant & Scalar \(x\) & Vector \(y\) & \(\forall i:~y_i = x \) \\ \hline
+  vvadd & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x + y \)  \\ \hline
+  vvsub & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x - y \)  \\ \hline
+  vvmul & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x \times y \)  \\ \hline
+  vvdiv & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x / y \)  \\ \hline
+  vsmul & Vector \(x\), Scalar \(y\) & Vector \(z\) & \(\forall i:~z_i = x_ \times y \)  \\ \hline
+  sumprod & Vector \(x\), Vector \(y\) & Scalar \(z\) & \(z = \sum_i (x_i \times y_i)\) \\ \hline
+  sumprod2 & Vector \(x\), Vector \(y\), Vector \(z\) & Scalar \(w\) &  \(w = \sum_i (x_i \times y_i \times z_i)\) \\ \hline
 \hline
 \end{tabular}
 \caption{Necessary Operators}
 \label{tbl_custom_ops}
 \end{table}
 
-\subsection{t1}
-\label{t1}
-
-\begin{verbatim}
-t1 = constant(0, N, "int64_t",) -- N by 1 vector 
-for j, beta_j in ipairs(beta) do
-  t1 = add(t1, mul(Xj, beta_j) -- 
-end
-\end{verbatim}
 
 \section{Details}
 
@@ -123,15 +128,38 @@ end
 
 \be
 \item The calculation of \(A\) is simplified by the fact that the off-diagonal
-  elements of \(w\) are 0 and that it is a symmetric matrix
+  elements of \(w\) are 0 and that it is a symmetric matrix. See last row of
+  Table~\ref{step_by_step_calc}
 \ee
 \subsection{Clarifications needed}
 
 \be
-\item 
-There was something with ``affine'' which required an additional column for
-\(X\) to consist of all 1's? \TBC
 \item Initial guess for \(\beta\)
 \ee
+
+\section{Putting it all together}
+The Q code will look like the following.
+
+\begin{verbatim}
+t1 = constant(0, N, "int32_t") -- N by 1 vector 
+for j, beta_j in ipairs(beta) do
+  t1 = vvadd(t1, vsmul(Xj, beta_j)) 
+end
+p = logit(t1)
+t2 = vvsub(y, p)
+w = vvmul(p, vssub(1, p))
+t3 = vvdiv(t2, w)
+t4 = vvadd(t1, t3)
+t5 = vvmul(w, t4)
+for j in 1 to M do 
+  beta[j] = sumprod(Xj, t5) 
+end
+for j in 1 to M do 
+  for k in j to M do 
+    A[j][k] = sumprod2(Xj, w, Xk)
+  end
+end
+\end{verbatim}
+
 
 \end{document}
