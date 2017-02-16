@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 #include <limits.h>
+#include <inttypes.h>
 #include <ctype.h>
 #include "q_macros.h"
 #include "mmap.h"
@@ -107,11 +108,17 @@ main(
   double **A = NULL;
   double *a = NULL; double *b = NULL;
   double **Aprime = NULL;
+  double *gamma = NULL;
+  double *rho = NULL;
+  FILE *ofp = NULL;
   int nJ = 15; // number of functions used
 
   if ( argc != 3 ) { go_BYE(-1); }
   char *infile = argv[1];
   char *opfile = argv[2];
+  ofp = fopen(opfile, "w");
+  if ( strcmp(infile, opfile) == 0 ) { go_BYE(-1); }
+  return_if_fopen_failed(ofp, opfile, "w");
   status = load_col_csv(infile, &X, &nT); cBYE(status);
   U = malloc(nJ * sizeof(double *));
   return_if_malloc_failed(U);
@@ -119,6 +126,7 @@ main(
     U[j] = malloc(nT * sizeof(double));
     return_if_malloc_failed(U[j]);
   }
+
   //-------------------------------------
   Y = malloc(nT * sizeof(double));
   return_if_malloc_failed(Y);
@@ -148,29 +156,101 @@ main(
   }
   //-------------------------------------
   //  Create symmetric matrix A
+  status = alloc_matrix(&A, nJ); cBYE(status);
+  for ( int j1 = 0; j1 < nJ; j1++ ) { 
+    for ( int j2 = 0; j2 < nJ; j2++ ) { 
+      double sum = 0;
+      for ( int t = 0; t < nT; t++ ) { 
+        sum += ( U[j1][t] * U[j2][t] );
+      }
+      A[j1][j2] = sum;
+    }
+  }
   //-------------------------------------
   //  Create b
   b = malloc(nJ * sizeof(double));
   return_if_malloc_failed(b);
+  for ( int j = 0; j < nJ; j++ ) { 
+    double sum = 0;
+    for ( int t = 0; t < nT; t++ ) { 
+      sum += Z[t] * U[j][t];
+    }
+    b[j] = sum;
+  }
   //-------------------------------------
   // Solve for a 
   a = malloc(nJ * sizeof(double));
   return_if_malloc_failed(a);
+  for ( int j = 0; j < nJ; j++ ) { a[j] = 0; }
+
   status = convert_matrix_for_solver(A, nJ, &Aprime); cBYE(status);
-  status = positive_solver(Aprime, a, b, nJ);
-  cBYE(status);
+  // print_input(A, Aprime, a, b, nJ);
+  status = positive_solver(Aprime, a, b, nJ); cBYE(status);
+  // vVerify solution 
+  for ( int j = 0; j < nJ; j++ ) { 
+    double sum = 0;
+    for ( int j2 = 0; j2 < nJ; j2++ ) { 
+      sum += A[j][j2] * a[j2];
+    }
+    double minval = min(sum, b[j]);
+    if ( ( sum/b[j] > 1.01 ) || ( sum / b[j] < 0.09 ) ) {
+      printf("Error on a[%d]: %lf versus %lf \n", j, sum, b[j]);
+    }
+  }
+  //---------------------------------
+  W = malloc(nT * sizeof(double));
+  return_if_malloc_failed(W);
+  for ( int t = 0; t < nT; t++ ) { 
+    double sum = 0;
+    for ( int j = 0; j < nJ; j++ ) { 
+      sum += (a[j] * U[j][t]);
+    }
+    W[t] = Z[t] -  sum;
+  }
+  for ( int t = 0; t < nT; t++ ) {
+    fprintf(ofp, "%lf\n", W[t]);
+  }
+  //--------------------------------
+  double mu = 0;
+  for ( int t = 0; t < nT; t++ ) { 
+    mu += W[t];
+  }
+  mu /= nT;
+  go_BYE(0); 
+  //--------------------------------
+  gamma = malloc(nT * sizeof(double));
+  return_if_malloc_failed(gamma);
+  for ( int t = 0; t < nT; t++ ) { 
+    rho[t] = gamma[t] / gamma[0];
+  }
+  //----------------------
+  rho = malloc(nT * sizeof(double));
+  return_if_malloc_failed(rho);
 
 
+  printf("ALL DONE\n");
 BYE:
-  if ( U != NULL ) { 
+  free_matrix(A, nJ);
+  if ( Aprime != NULL ) {
+    for ( int j = 0; j < nJ; j++ ) { 
+      free_if_non_null(Aprime[j]);
+    }
+  }
+  free_if_non_null(Aprime);
+  if ( U != NULL ) {
     for ( int j = 0; j < nJ; j++ ) { 
       free_if_non_null(U[j]);
     }
   }
+  fclose_if_non_null(ofp);
   free_if_non_null(U);
   free_if_non_null(X);
   free_if_non_null(Y);
   free_if_non_null(Z);
   free_if_non_null(W);
+  free_if_non_null(a);
+  free_if_non_null(b);
+  free_if_non_null(gamma);
+  free_if_non_null(rho);
   return status;
 }

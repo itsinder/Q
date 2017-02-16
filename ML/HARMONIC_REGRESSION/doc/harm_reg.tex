@@ -21,6 +21,26 @@
 \rfoot{{\small \thepage}}
 
 \section{The Math}
+Minimize \(\sum_{t=0}^{t=T} (Z_t - \sum_{j=0}^{j=J} a_j U_j(t))^2\)
+by taking the derivative with respect to \(a_j\) and setting it to 0.
+
+\(0 = \sum_{t=0}^{t=T} 2 Z_t - \sum_{j=0}^{j=J} a_j U_j(t) - U_k(t)\)
+
+\(= -2 \times  \sum_{t=0}^{t=T}  Z_t U_k(t) - 
+\sum_{t=0}^{t=T}  \sum_{j=0}^{j=J} a_j U_j(t) U_k(t) \)
+
+So  
+\begin{displaymath}
+  \sum_{t=0}^{t=T}  Z_t U_k(t) =  \sum_{t=0}^{t=T}  \sum_{j=0}^{j=J} a_j
+U_j(t) U_k(t) =  \sum_{j=0}^{j=J}  \sum_{t=0}^{t=T} a_j U_j(t) U_k(t)
+= \sum_{j=0}^{j=J}  a_j  \sum_{t=0}^{t=T} U_j(t) U_k(t)
+\end{displaymath}
+
+If \(A_{jk} =  \sum_{t=0}^{t=T} U_j(t) U_k(t)\) and 
+\(b_k =  \sum_{t=0}^{t=T}  Z_t U_k(t)\) we have 
+\(b_k = \sum_{j=0}^{j=J} a_j A_{jk}\)
+
+
 \TBC
 \section{From Math to Code}
 \bi
@@ -37,7 +57,7 @@ function index
 \be
 \item \(U_0 = 1\)
 \item For \(1 \leq j \leq 7 \), \(U_j = cos(\frac{2 \pi j t}{7})\)
-\item For \(8 \leq j \leq 14 \), \(U_j = sin(\frac{2 \pi {j-7} t}{7})\)
+\item For \(8 \leq j \leq 14 \), \(U_j = sin(\frac{2 \pi (j-7) t}{7})\)
 \ee
 \item As a computational convenience, 
 compute all the \(U_j\) up front so that \(U_j[t] = U_j(t)\)
