@@ -6,6 +6,9 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
 */
 #include <stdlib.h>
 #include <stdio.h>
+#define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__);  }
+#define go_BYE(x) { WHEREAMI; status = x ; goto BYE; }
+#define cBYE(x) { if ( (x) < 0 ) { go_BYE((x)) } }
 #include "positive_solver.h"
 int _positive_solver(
     double ** A, 
@@ -14,11 +17,12 @@ int _positive_solver(
     int n
     ) 
 {
-  printf("The alpha is %f\n", A[0][0]);
-  if (n < 1) { return -1; }
+  int status = 0;
+  /// printf("The alpha is %f\n", A[0][0]);
+  if (n < 1) { go_BYE(-1); }
   if (n == 1) {
     if (A[0][0] == 0.0) {
-        if (b[0] != 0.0) exit(-1); /* or close enough... */
+        if (b[0] != 0.0) { go_BYE(-1); }
         x[0] = 0.0;
         return 0;
     }
@@ -41,20 +45,25 @@ int _positive_solver(
     }
   } /* else check that Avec is 0 */
 
-  int status = _positive_solver(Asub, bvec, xvec, m);
+  status = _positive_solver(Asub, bvec, xvec, m);
+  cBYE(status);
   if ( status < 0 ) { return status; }
 
   if (A[0][0] == 0.0) {
-      if (b[0] != 0.0) exit(-1); /* or close enough... */
+      if (b[0] != 0.0) { go_BYE(-1); }  /* or close enough... */
       x[0] = 0.0;
-      return 0;
+      return status;
   }
 
-  double p = 0; for(int k=0; k<m; k++) p += Avec[k] * xvec[k];
+  double p = 0; 
+  for ( int k = 0; k < m; k++ ) {
+    p += Avec[k] * xvec[k];
+  }
 
   x[0] = (b[0] - p) / A[0][0];
 
-  return 0;
+BYE:
+  return status;
 }
 
 #include <malloc.h>
@@ -65,6 +74,8 @@ int positive_solver(
     int n
     ) 
 {
-  int status = _positive_solver(A, b, x, n);
+  int status = 0;
+  status = _positive_solver(A, b, x, n); cBYE(status);
+BYE:
   return status;
 }

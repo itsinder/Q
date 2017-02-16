@@ -9,10 +9,8 @@
 
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-  local operator_file = assert(argv[2])
-  assert(is_file(operator_file))
-  print(operator_file)
-  os.exit()
+  local operator_file = assert(arg[1])
+  assert(file_exists(operator_file))
   local T = dofile(operator_file)
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 

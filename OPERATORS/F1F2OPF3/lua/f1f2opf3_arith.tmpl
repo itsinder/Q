@@ -1,0 +1,63 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include "q_types.h"
+${includes}
+extern int
+${fn}(  
+      const ${in1type} * restrict in1,  
+      const ${in2type} * restrict in2,  
+      uint64_t nR,  
+      void *ptr_args,
+      ${returntype} * restrict out 
+      ) 
+;
+
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+static void
+__operation(
+      ${in1type} a,
+      ${in2type} b, 
+      ${argstype} *ptr_args,
+      ${returntype} *ptr_c
+      )
+      {
+      ${returntype} c;
+      ${c_code_for_operator}
+      *ptr_c = c;
+      }
+
+int
+${fn}(  
+      const ${in1type} * restrict in1,  
+      const ${in2type} * restrict in2,  
+      uint64_t nR,  
+      void *ptr_args,
+      ${returntype} * restrict out 
+      )
+
+{ 
+  int status = 0;
+ ${in1type} inv1; 
+ ${in2type} inv2; 
+ ${returntype} outv; 
+#pragma omp parallel for simd
+ for ( uint64_t i = 0; i < nR; i++ ) {  
+   inv1 = *in1; 
+   inv2 = *in2; 
+   __operation(inv1, inv2, ptr_args, &outv);
+   *out = outv; 
+   in1++; 
+   in2++; 
+   out++; 
+ } 
+ return status;
+}
+
+   ]]
+}
