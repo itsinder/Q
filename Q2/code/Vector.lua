@@ -24,6 +24,8 @@ local function random_string(length_inp)
     local length = length_inp or 11
     if length > 0 then
         return random_string(length - 1) .. charset[math.random(1, #charset)]
+    else
+        return ""
     end
 end
 
@@ -74,6 +76,7 @@ setmetatable(Vector, {
             return cls.new(...)
         end,
     })
+
 function Vector.destructor(data)
     print "bye" -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
@@ -99,10 +102,9 @@ type = function( obj )
     return otype
 end
 
-local function set_generator(self, gen)
-    if type(gen) ~= "Generator" then
-        error("Expected a generator set to gen")
-    end
+local function set_generator(self, arg)
+    local gen = arg.gen
+    assert(type(gen) == "Generator", "Expected a generator set to gen")
     self.generator = gen
     self.input_from_generator = true
     self.field_type = gen.field_type
@@ -112,18 +114,16 @@ local function set_generator(self, gen)
     self.memoized = true
     self.is_materialized = false
     self.input_from_file = false
-    self.filename = get_new_filename(10) -- file name to write to
+    self.filename = arg.filename or get_new_filename(10) -- file name to write to
     return self
 
 end
 
 local function read_file_vector(self, arg)
     self.input_from_file = true
-    self.filename = arg.filename
+    self.filename = assert(arg.filename, "Filename not specified to read from")
     self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
-    if self.f_map.status ~= 0 then
-        error("Mmap failed")
-    end
+    assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
     --take length of file to be length of vector
@@ -143,48 +143,37 @@ local function write_file_vector(self, arg)
 end
 
 function Vector.new(arg)
-    local self = setmetatable({}, Vector)
-    self.meta = {}
-    self.destructor_ptr=ffi.gc(C.malloc(1), Vector.destructor) -- Destructor hack for luajit
-    DestructorLookup[self.destructor_ptr] = self
-    if type(arg) ~= "table" then
-        error("Called constructor with incorrect arguements")
-    end
-    self.chunk_size = arg.chunk_size or g_chunk_size
+    local vec = setmetatable({}, Vector)
+    vec.meta = {}
+    vec.destructor_ptr=ffi.gc(C.malloc(1), Vector.destructor) -- Destructor hack for luajit
+    DestructorLookup[vec.destructor_ptr] = vec
+    assert(type(arg) == "table", "Called constructor with incorrect arguements")
+    vec.chunk_size = arg.chunk_size or g_chunk_size
     if arg.generator ~= nil then -- generator as input
-        local gen = arg.generator
-        if type(gen) ~= "Generator" then
-            error("Expected a generator set to gen")
-        end
-        set_generator(self, gen)
+        set_generator(vec, arg)
     else -- No generator
-        if arg.field_type == nil or g_valid_types[arg.field_type] == nil
-            then error("Valid type not given")
-        end
-        self.field_type = arg.field_type
+        assert(arg.field_type ~= nil and g_valid_types[arg.field_type] ~= nil, "Valid type not given")
+        vec.field_type = arg.field_type
         if arg.field_size == nil then -- for constant length string this cannot be nil
-            local type_val =  g_valid_types[arg.field_type]
-            if type_val == nil then
-                error("Invalid type")
-            end
-            self.field_size = ffi.sizeof(type_val)
+            local type_val =  assert(g_valid_types[arg.field_type], "Invalid type")
+            vec.field_size = ffi.sizeof(type_val)
         else
-            self.field_size = arg.field_size
+            vec.field_size = arg.field_size
         end
 
         if arg.write_vector == true then
-            write_file_vector(self, arg)
+            write_file_vector(vec, arg)
         else
             if arg.filename ~= nil then -- filename means read from file
-                read_file_vector(self, arg)
+                read_file_vector(vec, arg)
             else
                 error('No data input to vector. Need either a file or a generator')
             end
         end
     end
-    local buff_size = self.field_size * self.chunk_size
-    self.buffer = ffi.gc( C.malloc(buff_size), C.free)
-    return self
+    local buff_size = vec.field_size * vec.chunk_size
+    vec.buffer = ffi.gc( C.malloc(buff_size), C.free)
+    return vec
 end
 
 function Vector:length()
@@ -201,15 +190,9 @@ function Vector:sz()
 end
 
 function Vector:memo(bool)
-    if type(bool) ~= "boolean" then
-        error("Incorrect type supplied")
-    end
-    if self.input_from_file then
-        error("Input from file is always memoized and cannot be changed")
-    end
-    if self.last_chunk_number ~= nil then
-        error("Cannot set this after calls to chunk")
-    end
+    assert(type(bool) == "boolean", "Incorrect type supplied")
+    assert(self.input_from_file ~= true, "Input from file is always memoized and cannot be changed") 
+    assert(self.last_chunk_number == nil, "Cannot set this after calls to chunk")
     self.memoized = bool
 end
 
@@ -223,32 +206,29 @@ end
 
 
 local function append_to_file(self, ptr, size)
-    if ptr == nil then error("No pointer given to write") end
+    assert(ptr ~= nil, "No pointer given to write")
+    assert(self.filename ~= nil, "Filename should have been set in constructor")
     size = size or self.chunk_size
+    
+    assert(self.input_from_file ~= true, "Cannot write to input file")
 
-    if self.filename == nil then error("Filename should have been set in constructor") end
-    if self.input_from_file == true then error("Cannot write to input file") end
-    if self.file == nil then
+    if self.file == nil  or self.file == ffi.NULL then
         self.file = C.fopen(self.filename, "ab+")
-        if self.file == ffi.NULL then
-            self.file = nil
-            error('Unable to open file')
-        end
+        assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
     c.fwrite(ptr,self.field_size, size, self.file)
 end
 
 local function flush_remap_file(self)
-    if self.filename == nil then error("Filename should have been set in constructor") end
-    if self.input_from_file == true then error("No need to mmap a file that is mmap in constructor") end
-    if self.file == nil then error("No file to mmap to") end
+
+    assert(self.filename ~= nil, "Filename should have been set in constructor")
+    assert(self.input_from_file ~= true, "No need to mmap a file that is mmap in constructor")
+    assert(self.file ~= nil, "No file to mmap to")
     c.fflush(self.file) -- fflush to current state before mmaping
     self.file_last_chunk_number = self.last_chunk_number
     self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
-    if self.f_map.status ~= 0 then
-        error("Mmap failed")
-    end
+    assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
 end
 
@@ -257,11 +237,10 @@ function Vector:materialized()
 end
 
 local function get_from_generator(self, num)
-    if self.generator:status() == "dead" then
-        error("Cannot produce any more data")
-    end
-    status, buffer, size = self.generator:get_next_chunk()
-    if status == false then error(buffer) end
+    assert(self.generator:status() ~= "dead", "Cannot get more data from generator")
+    local status, buffer, size = self.generator:get_next_chunk()
+    assert(status, buffer)
+    
     self.last_chunk_number = num
     -- if memoized then add to file
     if self.memoized then
@@ -302,9 +281,8 @@ local function update_max_chunks(self)
 end
 
 function Vector:chunk(num)
-    if type(num) ~= "number" then
-        error("Require a number for chunk number")
-    end
+    assert(type(num) == "number", "Require a number for chunk number")
+    
     if self:materialized() then
         return get_from_file(self, num)
     else -- if not materialized
@@ -318,9 +296,7 @@ function Vector:chunk(num)
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
-            if self.length % self.chunk_size ~= 0 then
-                error("Incomplete chunk cannot be returned")
-            end
+            assert(self.length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
             --TODO this needs to change
              if num > self.file_last_chunk_number then flush_remap_file(self) end
               local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
@@ -328,7 +304,7 @@ function Vector:chunk(num)
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
                 local status, buffer, size = get_from_generator(self, num)
-                if status ~= true then error("No chunk found: " .. buffer) end
+                assert(status, "No chunk found: " .. buffer)
                 if self.memoized == true then
                     append_to_file(self, buffer, size)
                     self.length = self.length + size -- memoized
@@ -350,9 +326,8 @@ function Vector:chunk(num)
 end
 
 function Vector:put_chunk(chunk, length)
-    if self.output_to_file ~= true or self.is_materialized == true then
-        error("This vector cannot be written to")
-    end
+     assert(self.output_to_file == true,  "Cannot be write to non output vector")
+     assert(self.is_materialized ~= true, "The vector is already materialized")
     append_to_file(self, chunk, length)
     self.length = self.length + length
 end
@@ -361,9 +336,7 @@ function Vector:eov()
     c.fflush(self.file)
     self.input_from_file = true
     self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
-    if self.f_map.status ~= 0 then
-        error("Mmap failed")
-    end
+    assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
     --take length of file to be length of vector
@@ -374,12 +347,12 @@ function Vector:eov()
 end
 
 function Vector:get_meta(index)
-    if g_valid_meta[index] == nil then error("Invalid key give: ".. index) end
+    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]
 end
 
 function Vector:set_meta(index, val)
-    if g_valid_meta[index] == nil then error("Invalid key give: ".. index) end
+    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     self.meta[index] = val
 end
 
