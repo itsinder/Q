@@ -98,7 +98,7 @@ function Vector_Wrapper(metadata, chunk_size)
     elseif self.data_type == "SC" then 
       -- do not strip any value for SC
       if data ~= nil then 
-        assert( string.len(data) < self.size_of_data -1 , " contains string greater than allowed size. Please correct data or metadata.")  
+        assert( string.len(data) <= self.size_of_data -1 , " contains string greater than allowed size. Please correct data or metadata.")  
       end
     else
       -- for int, float strip the value first if its not nil and then 
