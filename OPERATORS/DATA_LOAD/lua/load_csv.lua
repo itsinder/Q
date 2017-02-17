@@ -1,6 +1,6 @@
 package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 
-require 'chunk_writer'
+require 'vector_wrapper'
 require 'globals'
 require 'parser'
 require 'dictionary'
@@ -35,21 +35,10 @@ function load( csv_file_path, metadata , G)
     -- local col_values= parse_csv_line(line,',')       -- call to parse to parse the line of csv file
     local status, col_values = pcall(parse_csv_line, line, ',' )
     assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
-    
-    if(#col_values ~= col_count) then 
-     -- If its the single column and nil is allowed then its a valid case
-     --TODO : If the last column is null
-    
-     if(col_count == 1) then
-      --[[assert(nil_vector_wrapper[col_count] ~= nil, "Null value found in not null field") --]] 
-     else
-      error("Column count does not match with count of column in metadata")
-     end
-      
-    end
+    assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
     
     for col_idx = 1, col_count do
-    
+  
       local data_type_short_code = metadata[col_idx]["type"];
       local txt_to_ctype_func_name = g_qtypes[data_type_short_code]["txt_to_ctype"]
       local ctype = g_qtypes[data_type_short_code]["ctype"]
@@ -58,8 +47,10 @@ function load( csv_file_path, metadata , G)
       local current_value = col_values[col_idx]
       
       -- Now vector_wrapper handles null value handling and string to c_type value conversion
-      vector_wrapper[col_idx].write(current_value)
-
+      -- vector_wrapper[col_idx].write(current_value)
+      local status, ret_message = pcall(vector_wrapper[col_idx].write, current_value)
+      if(status == false ) then  error("Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) end 
+     
     end  
     row_idx = row_idx + 1
   end
@@ -78,7 +69,7 @@ initialize = function(metadata)
   vector_wrapper = {}
   col_count = 0 --each field in the metadata represents one column in csv file
   col_idx = 0
-  row_idx = 0
+  row_idx = 1
   col_num_nil = {}      
   col_count = #metadata
     

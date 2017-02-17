@@ -1,6 +1,6 @@
-package.path = package.path .. ";../lua/?.lua"
+package.path = package.path .. ";../lua/?.lua;../../../UTILS/lua/?.lua"
 
-luaunit = require('luaunit')
+local lu = require('luaunit')
 require "dictionary"
 
 test_dictionary = {}
@@ -16,18 +16,18 @@ end
 
 function test_dictionary:test_create() 
   local dictionary = Dictionary({dict = "testDictionary", is_dict = false, add=true})
-  luaunit.assertNotNil(dictionary)
-  luaunit.assertIsTable(dictionary)
+  lu.assertNotNil(dictionary)
+  lu.assertIsTable(dictionary)
 end
 
 function test_dictionary:test_create_null_metadata_error()
-  luaunit.assertError(Dictionary)
-  luaunit.assertErrorMsgContains("Dictionary metadata should not be empty", Dictionary ) 
+  lu.assertError(Dictionary)
+  lu.assertErrorMsgContains("Dictionary metadata should not be empty", Dictionary ) 
 end
 
 function test_dictionary:test_create_null_name_error()
-  luaunit.assertError(Dictionary, { is_dict = false, add=true})
-  luaunit.assertErrorMsgContains("Please specify correct metadata", Dictionary, {dict = "", is_dict = false, add=true} ) 
+  lu.assertError(Dictionary, { is_dict = false, add=true})
+  lu.assertErrorMsgContains("Please specify correct metadata", Dictionary, {dict = "", is_dict = false, add=true} ) 
 end
 
 function test_dictionary:test_add()
@@ -35,41 +35,42 @@ function test_dictionary:test_add()
   local entry1 = dictionary.add_with_condition("Entry1", true)
   local entry2 =  dictionary.add_with_condition("Entry2")
   
-  luaunit.assertNumber(entry1)
-  luaunit.assertNumber(entry2)
-  luaunit.assertEquals("Entry1", dictionary.get_string_by_number(entry1))
-  luaunit.assertEquals("Entry2", dictionary.get_string_by_number(entry2))
-  luaunit.assertEquals(entry1, dictionary.get_number_by_string("Entry1"))
-  luaunit.assertEquals(entry2, dictionary.get_number_by_string("Entry2"))  
+  lu.assertNumber(entry1)
+  lu.assertNumber(entry2)
+  lu.assertEquals("Entry1", dictionary.get_string_by_number(entry1))
+  lu.assertEquals("Entry2", dictionary.get_string_by_number(entry2))
+  lu.assertEquals(entry1, dictionary.get_number_by_string("Entry1"))
+  lu.assertEquals(entry2, dictionary.get_number_by_string("Entry2"))  
+  lu.assertEquals(2, dictionary.get_size())
 end
 
-function test_dictionary:testAddNil()
+function test_dictionary:test_add_nil()
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  luaunit.assertError(dictionary.add_with_condition, "")
-  luaunit.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "")
-  luaunit.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "", false)
-  luaunit.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "", true)  
+  lu.assertError(dictionary.add_with_condition, "")
+  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "")
+  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "", false)
+  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, "", true)  
 end
 
-function test_dictionary:testAddMultipleWithAddFalse()  
+function test_dictionary:test_add_multiple_with_add_false()  
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   local entry1 = dictionary.add_with_condition("Entry1", true)
    
-  luaunit.assertNumber(entry1)
-  luaunit.assertErrorMsgContains("Text does not exist in dictionary", dictionary.add_with_condition, "Entry2", false)  
+  lu.assertNumber(entry1)
+  lu.assertErrorMsgContains("Text does not exist in dictionary", dictionary.add_with_condition, "Entry2", false)  
 end
 
-function test_dictionary:testAddMutipleWithAddTrue()
+function test_dictionary:test_add_mutiple_with_tdd_true()
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   local entry1 = dictionary.add_with_condition("Entry1", true)
   local entry2 = dictionary.add_with_condition("Entry1", true)
   
-  luaunit.assertNumber(entry1)
-  luaunit.assertNumber(entry2)
-  luaunit.assertEquals(entry1,entry2)
+  lu.assertNumber(entry1)
+  lu.assertNumber(entry2)
+  lu.assertEquals(entry1,entry2)
 end
 
-function test_dictionary:testStoreDictionary()
+function test_dictionary:test_store_dictionary()
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   dictionary.add_with_condition("Entry1")
   dictionary.add_with_condition("Entry2")
@@ -79,15 +80,15 @@ function test_dictionary:testStoreDictionary()
   local line1 = f:read("*l")
   local line2 = f:read("*line")
   local line3 = f:read("*line")
-  luaunit.assertEquals(line1, "Entry1,1")
-  luaunit.assertEquals(line2, "Entry2,2")
-  luaunit.assertNil(line3)      
+  lu.assertEquals(line1, "Entry1,1")
+  lu.assertEquals(line2, "Entry2,2")
+  lu.assertNil(line3)      
   
   f:close()
   os.remove("./serializedD1")
 end
 
-function test_dictionary:testReadDictionaryFromFile()
+function test_dictionary:test_read_dictionary_from_file()
   local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
   dictionary.add_with_condition("Entry1")
   dictionary.add_with_condition("Entry2")
@@ -98,12 +99,36 @@ function test_dictionary:testReadDictionaryFromFile()
   
   local val = restored_dictionary.get_number_by_string("Entry1")
   
-  luaunit.assertEquals( restored_dictionary.get_string_by_number(1), "Entry1")
-  luaunit.assertEquals( restored_dictionary.get_number_by_string("Entry2"), 2)
+  lu.assertEquals( restored_dictionary.get_string_by_number(1), "Entry1")
+  lu.assertEquals( restored_dictionary.get_number_by_string("Entry2"), 2)
   
   os.remove("./serializedD2")
 end
 
+function test_dictionary:test_increment_number_addition()
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
+  dictionary.add_with_condition("e1")
+  dictionary.add_with_condition("e2")
+  dictionary.add_with_condition("e3")
+  dictionary.add_with_condition("e4")
+  
+  lu.assertEquals(dictionary.get_string_by_number(1), "e1")
+  lu.assertEquals(dictionary.get_string_by_number(2), "e2")
+  lu.assertEquals(dictionary.get_string_by_number(3), "e3")
+  lu.assertEquals(dictionary.get_string_by_number(4), "e4")
+end
 
+function test_dictionary:test_dictionary_add()
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
+  dictionary.add_with_condition("e1")
+  dictionary.add_with_condition("e2")
+  dictionary.add_with_condition("e3")
+  dictionary.add_with_condition("e4")
+  lu.assertEquals(dictionary.get_size(), 4)
+  
+  dictionary.add_with_condition("e5")
+  dictionary.add_with_condition("e6")
+  lu.assertEquals(dictionary.get_size(), 6)    
+end
 
-os.exit( luaunit.LuaUnit.run() )
+os.exit( lu.LuaUnit.run() )

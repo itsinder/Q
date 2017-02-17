@@ -1,7 +1,7 @@
 -- ------------------------------------------------------------------------------------
 -- Creates closure for dictionary, so that dictionary can be treated as separate entity
 -- ------------------------------------------------------------------------------------
-require 'util'
+require 'utils'
 require 'parser'
 
 -- --------------------------------------------------
@@ -116,6 +116,14 @@ function Dictionary(dict_metadata)
   end
   
   
+  
+  -- ------------------------------------------------------------
+  -- returns the number of entries currently stored in dictionary
+  -- ------------------------------------------------------------
+  local get_size = function()
+    return #self.number_to_text
+  end
+  
   -- --------------------------------------
   -- save all dictionary content to the file specified by the filePath.   
   --     Currently only one table text_to_number is dumped into file as csv content. 
@@ -156,6 +164,7 @@ function Dictionary(dict_metadata)
       get_string_by_number = get_string_by_number , 
       get_number_by_string = get_number_by_string, 
       is_string_exists = is_string_exists, 
+      get_size = get_size,
       save_to_file = save_to_file,
       restore_from_file = restore_from_file
   }              

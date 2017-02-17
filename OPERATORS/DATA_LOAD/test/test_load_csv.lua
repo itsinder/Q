@@ -325,35 +325,49 @@ function test_load_csv:test_string_in_int_data()
   lu.assertErrorMsgContains("Invalid data", load, test_input_dir .. "bad_string_in_I1.csv", { { name = "col1", type = "I1", null ="true" }} )
 end
 
---[[
+
 function test_load_csv:test_whole_row_nil()
-  error("TODO: Implementation remaining")
+  local csv_file_path = test_input_dir .. "nil_row_2.csv"
+  local metadata = { { name = "col1", type="SC" , size = 15, null = true},{ name = "col2", type = "F8", null ="true" } }
+  -- there should not be any error during load
+  local res = load(csv_file_path, metadata)  
 end
 
 function test_load_csv:test_nil_data_I4()
-  error("TODO: Implementation remaining")
+  local csv_file_path = test_input_dir .. "I4_4_2_with_nil.csv"
+  local metadata = { { name = "col1", type="I4" ,null = true},{ name = "col2", type = "I4", null ="true" } }
+  -- there should not be any error during load
+  local res = load(csv_file_path, metadata)    
 end
 
 function test_load_csv:test_nil_data_varchar()
-  error("TODO: Implementation remaining")
+  local csv_file_path = test_input_dir .. "nil_row_2.csv"
+  local metadata = { { name = "col1", type ="varchar",dict = "D1", is_dict = false, add=true },{ name = "col2", type = "I4", null ="true" } }
+  -- there should not be any error during load
+  local res = load(csv_file_path, metadata)      
 end
 
 function test_load_csv:test_nil_data_file_deletion()
+  local csv_file_path = test_input_dir .. "sample_I4.csv"
+  local metadata = { { name = "col2", type = "I4", null ="true" } }
+  -- there should not be any error during load
+  local res = load(csv_file_path, metadata)      
+  lu.assertFalse(path.exists(_G["Q_DATA_DIR"].. "_nn_col1"))  
+end
+
+--[[
+function test_load_csv:test_valid_data_read_back()
   error("TODO: Implementation remaining")
 end
-
-function test_load_csv:test_valid_data_read_back()
-end
-
 --]]
+
 
 
 -- ---- Test cases ---------
 
 --[[
 TODO : 
-- NULL values
-- Deleting Null file, of no null value was found
+- Validating data by reading that data back through vector 
 
 o) Can we specify integer in hex format?
 o) Can we specify floating point in exponent format?
