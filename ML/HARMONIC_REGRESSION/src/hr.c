@@ -111,7 +111,6 @@ main(
   double *gamma = NULL;
   double *rho = NULL;
   FILE *ofp = NULL;
-  int nJ = 29; // number of functions used
 
   if ( argc != 3 ) { go_BYE(-1); }
   char *infile = argv[1];
@@ -120,12 +119,7 @@ main(
   if ( strcmp(infile, opfile) == 0 ) { go_BYE(-1); }
   return_if_fopen_failed(ofp, opfile, "w");
   status = load_col_csv(infile, &X, &nT); cBYE(status);
-  U = malloc(nJ * sizeof(double *));
-  return_if_malloc_failed(U);
-  for ( int j = 0; j < nJ; j++ ) { 
-    U[j] = malloc(nT * sizeof(double));
-    return_if_malloc_failed(U[j]);
-  }
+
 
   //-------------------------------------
   Y = malloc(nT * sizeof(double));
@@ -136,22 +130,33 @@ main(
   //-------------------------------------
   Z = malloc(nT * sizeof(double));
   return_if_malloc_failed(Z);
-  Z[0] = Y[0];
-  for ( int i = 1; i < nT; i++ ) { 
-    Z[i] = Y[i] - Y[i-1];
-  }
+
+  for ( int i = 0; i < 1; i++ ) { Z[i] = Y[i]; }
+  for ( int i = 1; i < nT; i++ ) { Z[i] = Y[i] - Y[i-1]; }
+
+  for ( int i = 0; i < nT; i++ ) { Y[i] = Z[i]; }
+  for ( int i = 0; i < 7; i++ ) { Z[i] = Y[i]; }
+  for ( int i = 8; i < nT; i++ ) { Z[i] = Y[i] - Y[i-7]; }
+
   //-------------------------------------
+  int nJ = 1+28+28; // number of functions used
+  U = malloc(nJ * sizeof(double *));
+  return_if_malloc_failed(U);
+  for ( int j = 0; j < nJ; j++ ) { 
+    U[j] = malloc(nT * sizeof(double));
+    return_if_malloc_failed(U[j]);
+  }
   for ( int i = 0; i < nT; i++ ) { 
     U[0][i] = 1;
   }
-  for ( int j = 1; j <= 14; j++ ) { 
+  for ( int j = 1; j < 28; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = cos ( 2 * PI * j * t / 14 );
+      U[j][t] = cos ( 2 * PI * (j-0) * t / 28 );
     }
   }
-  for ( int j = 15; j < 29; j++ ) { 
+  for ( int j = 28; j < 57; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = sin ( 2 * PI * (j-14) * t / 14 );
+      U[j][t] = sin ( 2 * PI * (j-28) * t / 28 );
     }
   }
   //-------------------------------------
