@@ -112,14 +112,17 @@ main(
   double *rho = NULL;
   FILE *ofp = NULL;
 
-  if ( argc != 3 ) { go_BYE(-1); }
+  if ( argc != 4 ) { go_BYE(-1); }
   char *infile = argv[1];
   char *opfile = argv[2];
+  char *str_period = argv[3];
   ofp = fopen(opfile, "w");
   if ( strcmp(infile, opfile) == 0 ) { go_BYE(-1); }
   return_if_fopen_failed(ofp, opfile, "w");
   status = load_col_csv(infile, &X, &nT); cBYE(status);
-
+  char *endptr = NULL;
+  int period = strtoll(str_period, &endptr, 10);
+  if ( period <= 0 ) { go_BYE(-1); }
 
   //-------------------------------------
   Y = malloc(nT * sizeof(double));
@@ -139,7 +142,7 @@ main(
   for ( int i = 8; i < nT; i++ ) { Z[i] = Y[i] - Y[i-7]; }
 
   //-------------------------------------
-  int nJ = 1+28+28; // number of functions used
+  int nJ = 1+period+period; // number of functions used
   U = malloc(nJ * sizeof(double *));
   return_if_malloc_failed(U);
   for ( int j = 0; j < nJ; j++ ) { 
@@ -149,14 +152,14 @@ main(
   for ( int i = 0; i < nT; i++ ) { 
     U[0][i] = 1;
   }
-  for ( int j = 1; j < 28; j++ ) { 
+  for ( int j = 1; j <= period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = cos ( 2 * PI * (j-0) * t / 28 );
+      U[j][t] = cos ( 2 * PI * (j-0) * t / period );
     }
   }
-  for ( int j = 28; j < 57; j++ ) { 
+  for ( int j = period+1; j <= period+period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = sin ( 2 * PI * (j-28) * t / 28 );
+      U[j][t] = sin ( 2 * PI * (j-28) * t / period );
     }
   }
   //-------------------------------------
@@ -245,8 +248,6 @@ main(
     fprintf(ofp, "%lf\n", rho[t]);
   }
   //----------------------
-
-
   printf("ALL DONE\n");
 BYE:
   free_matrix(A, nJ);
