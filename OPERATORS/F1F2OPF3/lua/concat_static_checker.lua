@@ -53,7 +53,7 @@ function concat_static_checker(
         return nil
       end
     end
-    local tmpl = 'f1f2opf3.tmpl'
+    local tmpl = 'base.tmpl'
     local subs = {}
     -- This includes is just as a demo. Not really needed
     subs.includes = "#include <math.h>\n#include <curl/curl.h>"

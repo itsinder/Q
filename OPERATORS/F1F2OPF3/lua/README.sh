@@ -5,9 +5,11 @@ rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h
 bash cleanup.sh
 bash generate_static_checker.sh
-bash generate_white_list.sh
-lua f1f2opf3_generator.lua f1f2opf3_operators.lua
-lua f1f2opf3_cmp_generator.lua f1f2opf3_cmp_operators.lua
+
+lua concat_generator.lua concat_operators.lua
+lua cmp_generator.lua    cmp_operators.lua
+lua arith_generator.lua  arith_operators.lua
+
 lua _qfns_f1f2opf3.lua # test syntax of generated lua functions
 cd ../gen_src/
 ls *c > _x
