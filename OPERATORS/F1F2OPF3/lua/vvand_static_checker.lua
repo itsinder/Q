@@ -7,7 +7,7 @@ function vvand_static_checker(
     print("and requires both operands to be I1")
     return nil
   end
-  local tmpl = 'f1f2opf3.tmpl'
+  local tmpl = 'bop.tmpl'
   local subs = {} ; 
   subs.fn = "vvand_" .. f1type .. "_" .. f2type 
   subs.in1type = assert(g_qtypes[f1type].ctype)

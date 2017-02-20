@@ -9,6 +9,7 @@ bash generate_static_checker.sh
 lua concat_generator.lua concat_operators.lua
 lua cmp_generator.lua    cmp_operators.lua
 lua arith_generator.lua  arith_operators.lua
+# lua bop_generator.lua    bop_operators.lua
 
 lua _qfns_f1f2opf3.lua # test syntax of generated lua functions
 cd ../gen_src/

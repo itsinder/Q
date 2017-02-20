@@ -22,7 +22,7 @@ function vvadd_static_checker(
     else
       assert(false, "Control should not come here")
     end
-    local tmpl = 'arith.tmpl'
+    local tmpl = 'base.tmpl'
     local subs = {}; 
     subs.fn = "vvadd_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
