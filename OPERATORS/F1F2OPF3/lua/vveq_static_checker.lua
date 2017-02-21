@@ -13,6 +13,6 @@ function vveq_static_checker(
 
   subs.in1type   = g_qtypes[f1type].ctype
   subs.in2type   = g_qtypes[f2type].ctype
-  subs.c_code_for_operator = "(a == b); "
+  subs.comparison = "(a == b); "
   return subs, tmpl
 end

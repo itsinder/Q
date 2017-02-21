@@ -40,7 +40,8 @@ main(
     if ( vz != Z[i] ) { 
       go_BYE(-1);
     }
-  }
+  }  
+  //--------------------------------
 
 BYE:
   free_if_non_null(X);
@@ -48,4 +49,3 @@ BYE:
   free_if_non_null(Z);
   return status;
 }
-
