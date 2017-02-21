@@ -31,7 +31,7 @@
     local str = 'require \'' .. base_name .. '_chk\''
     loadstring(str)()
     for i, intype in ipairs(types) do 
-      local stat_chk = "f_to_s" .. base_name .. '_chk'
+      local stat_chk = base_name .. '_chk'
       local stat_chk_fn = assert(_G[stat_chk], 
       "function not found " .. stat_chk)
       local subs, tmpl = stat_chk_fn(intype)

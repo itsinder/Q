@@ -15,6 +15,7 @@ rm -f _x
 cd -
 #-------------------------
 cd ../src/
+bash gen_files.sh
 ls *c > _x
 while read line; do
   echo $line
