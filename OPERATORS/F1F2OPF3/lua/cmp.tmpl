@@ -3,12 +3,13 @@ return require 'code_gen' {
    declaration = [[
 
 #include "q_types.h"
+${includes}
 extern int
 ${fn}(  
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      uint64_t * restrict out 
+      uint8_t *restrict out 
       ) 
 ;
 
@@ -16,6 +17,18 @@ ${fn}(
    definition = [[
 
 #include "_${fn}.h"
+
+static void
+__operation(
+      ${in1type} a,
+      ${in2type} b, 
+      uint8_t *ptr_c
+      )
+      {
+      uint8_t  c;
+      ${c_code_for_operator}
+      *ptr_c = c;
+      }
 
 int
 ${fn}(  
@@ -29,11 +42,12 @@ ${fn}(
   int status = 0;
  ${in1type} inv1; 
  ${in2type} inv2; 
-#pragma omp parallel for 
+  uint8_t outv; 
+#pragma omp parallel for simd
  for ( uint64_t i = 0; i < nR; i++ ) {  
    inv1 = *in1; 
    inv2 = *in2; 
-   set_bit(out, i, (inv1 ${comparison} inv2));
+   __operation(inv1, inv2,  &outv);
    *out = outv; 
    in1++; 
    in2++; 

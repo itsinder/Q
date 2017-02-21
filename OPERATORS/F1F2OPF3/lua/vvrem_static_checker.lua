@@ -17,7 +17,7 @@ function vvrem_static_checker(
     else
          outtype = f2type
     end
-    local tmpl = 'f1f2opf3.tmpl'
+    local tmpl = 'base.tmpl'
     local subs = {}
     subs.fn = "vvrem_" .. f1type .. "_" .. f2type .. "_" .. outtype
     subs.in1type = assert(g_qtypes[f1type].ctype)
