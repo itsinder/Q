@@ -29,6 +29,6 @@ function vvadd_static_checker(
     subs.in2type = g_qtypes[f2type].ctype
     subs.returntype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
-    subs.c_code_for_operator = "c = a + b"
+    subs.c_code_for_operator = "c = a + b; "
     return subs, tmpl
 end
