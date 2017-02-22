@@ -11,7 +11,7 @@ SC_to_txt(
     char * const in,
     uint32_t width, 
     char * X,
-    ssize_t nX
+    size_t nX
     )
 //STOP_FUNC_DECL
 {

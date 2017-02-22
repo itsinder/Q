@@ -30,5 +30,5 @@ g_qtypes.F4 = { short_code = "F4", width = 4, ctype = "float", txt_to_ctype = "t
 g_qtypes.F8 = { short_code = "F8", width = 8, ctype = "double", txt_to_ctype = "txt_to_F8", ctype_to_txt = "TBD" }
 g_qtypes.SC = { short_code = "SC", ctype = "char", txt_to_ctype = "txt_to_SC", ctype_to_txt = "TBD" }
 g_qtypes.TM = { short_code = "TM", ctype = "struct tm", txt_to_ctype = "txt_to_TM", ctype_to_txt = "TBD" }
-g_qtypes.BT = { short_code = "BT", ctype = "uint64_t", txt_to_ctype = "txt_to_BT", ctype_to_txt = "TBD" }
+g_qtypes.B1 = { short_code = "B1", width = 1/8, ctype = "unsigned char", txt_to_ctype = "", ctype_to_txt = "TBD" }
 

@@ -33,26 +33,15 @@
     loadstring(str)()
     for i, in1type in ipairs(types) do 
       for j, in2type in ipairs(types) do 
-          stat_chk = base_name .. '_static_checker'
-          assert(_G[stat_chk], "function not found " .. stat_chk)
+        for k, returntype in ipairs(types) do 
+          local optargs = {}
+          optargs.returntype = returntype
+          local stat_chk = base_name .. '_static_checker'
+          local stat_chk_fn = assert(_G[stat_chk], 
+          "function not found " .. stat_chk)
           -- print("Lua premature", stat_chk); os.exit()
-          local subs, tmpl = 
-          _G[stat_chk](in1type, in2type, optargs)
-          assert(subs)
-            local B = nil; local W = nil
-            if ( file_exists(base_name .. "_black_list.lua")) then 
-              B = dofile(base_name .. "_black_list.lua")
-            end
-            if ( file_exists(base_name .. "_white_list.lua")) then 
-              local w = dofile(base_name .. "_white_list.lua")
-              W = {}
-              for i, v in ipairs(w) do
-                W[v] = true
-              end
-            end
-            if ( W and B ) then 
-              error("Cannot have both black and white list")
-            end
+          local subs, tmpl = stat_chk_fn(in1type, in2type, optargs)
+          if ( subs) then
             -- TODO Improve following.
             local T = dofile(tmpl)
             T.fn         = subs.fn
@@ -63,7 +52,9 @@
             T.argstype   = subs.argstype
             T.c_code_for_operator = subs.c_code_for_operator
             gen_doth(T.fn, T, incdir)
-            gen_doth(T.fn, T, srcdir)
+            gen_dotc(T.fn, T, srcdir)
           end
+        end
+      end
     end
   end

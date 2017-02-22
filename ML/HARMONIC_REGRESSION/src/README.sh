@@ -5,4 +5,9 @@ gcc -g -std=gnu99 ../../../UTILS/src/mmap.c hr.c \
   -I../../../AxEqualsBSolver/ \
   -o hr -lm 
 
-./hr ../data/harm_reg.csv _out.csv
+# ./hr <INPUT FILE> <OUTPUT FILE> <PERIOD>
+# Values for PERIOD are 7, 14, ...
+inputfile=../data/harm_reg.csv
+outputfile=_out.csv
+period=7 # experiment with 7, 14, 28, ....
+./hr $inputfile $outputfile $period

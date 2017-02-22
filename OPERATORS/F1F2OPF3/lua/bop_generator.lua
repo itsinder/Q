@@ -10,7 +10,7 @@
 
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-  local T = dofile 'f1f2opf3_cmp_operators.lua' 
+  local T = dofile 'cmp_operators.lua' 
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
   args = nil -- not being used just yet
