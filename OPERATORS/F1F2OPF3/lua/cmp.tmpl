@@ -40,18 +40,25 @@ ${fn}(
 
 { 
   int status = 0;
- ${in1type} inv1; 
- ${in2type} inv2; 
-  uint8_t outv; 
+  ${in1type} inv1; 
+  ${in2type} inv2; 
+  //-- Initialize out 
+#pragma omp parallel for simd
+  for ( uint64_t i = 0; i < nR/8; i++ ) {  
+    out[i] = 0;
+  }
+  // handle case when nR is not multiple of 8
+  if ( ( nR / 8 ) * 8 ) != 8 ) { 
+    out[nR/8 + 1] = 0;
+  }
 #pragma omp parallel for simd
  for ( uint64_t i = 0; i < nR; i++ ) {  
    inv1 = *in1; 
    inv2 = *in2; 
-   __operation(inv1, inv2,  &outv);
-   *out = outv; 
+   int oval = inv1 ${comparison} inv2;
+   mcr_set_bit(out, i, oval);
    in1++; 
    in2++; 
-   out++; 
  } 
  return status;
 }

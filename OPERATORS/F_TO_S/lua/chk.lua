@@ -1,5 +1,5 @@
 
-function min_chk(
+function f_to_s_min_chk(
   intype
   )
 
@@ -9,6 +9,6 @@ function min_chk(
     subs.includes = "#include <math.h>\n#include <curl/curl.h>"
     subs.fn = "min_" .. intype 
     subs.intype = g_qtypes[intype].ctype
-    subs.reducer = "mcr_min"
+    subs.reducer = "mcr_sum"
     return subs, tmpl
 end

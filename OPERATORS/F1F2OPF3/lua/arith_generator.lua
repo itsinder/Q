@@ -39,6 +39,7 @@
           -- print("Lua premature", stat_chk); os.exit()
           local subs, tmpl = stat_chk_fn(in1type, in2type, optargs)
           if ( subs ) then 
+          assert(tmpl)
             -- TODO Improve following.
             local T = dofile(tmpl)
             T.fn         = subs.fn
@@ -49,7 +50,7 @@
             T.argstype   = subs.argstype
             T.c_code_for_operator = subs.c_code_for_operator
             gen_doth(T.fn, T, incdir)
-            gen_doth(T.fn, T, srcdir)
+            gen_dotc(T.fn, T, srcdir)
           end
         end
     end
