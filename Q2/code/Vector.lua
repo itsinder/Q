@@ -66,7 +66,11 @@ FILE *fopen(const char *path, const char *mode);
 int fclose(FILE *stream);
 int fwrite(void *Buffer,int Size,int Count,FILE *ptr);
 int fflush(FILE *stream);
-    ]])
+int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size );
+int print_bits(char * file_name, int length);
+int get_bits(FILE* fp, int* arr, int length);
+int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
+ ]])
 
 local c = ffi.load('./vector_mmap.so')
 local C = ffi.C
@@ -137,6 +141,7 @@ end
 local function write_file_vector(self, arg)
     self.output_to_file = true
     self.filename = arg.filename or get_new_filename(10)
+    --TODO ensure the file is empty to avoid confusion
     self.is_materialized = false
     self.length = 0
     return self
@@ -217,7 +222,12 @@ local function append_to_file(self, ptr, size)
         assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
-    c.fwrite(ptr,self.field_size, size, self.file)
+    -- TODO makke more general based on field size
+    if self.field_type == "B1" then
+        c.write_bits_to_file(self.file, ptr, size, self.length) 
+    else
+        c.fwrite(ptr,self.field_size, size, self.file)
+    end
 end
 
 local function flush_remap_file(self)
@@ -265,8 +275,10 @@ local function get_from_file(self, num)
                 chunk_size = self.length - num*self.chunk_size
             end
             --return nil --return the mmapped location of the file
-            local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-            return ffi.cast('void*', ptr + self.chunk_size*num), chunk_size
+            -- TODO change this as we are doing custom types Think in terms of
+            -- bytes and bits
+            local ptr = ffi.cast("unsigned char*", self.cdata)
+            return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
         else
             error('Invalid chunk number')
         end
@@ -290,8 +302,8 @@ function Vector:chunk(num)
         if num < self:last_chunk() then
             if self.memoized == true then
                 if num > self.file_last_chunk_number then flush_remap_file(self) end
-                local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-                return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
+                local ptr = ffi.cast("unsigned char*", self.cdata)
+                return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
             else
                 error("Cannot return past chunk for non memoized function")
             end
@@ -299,8 +311,8 @@ function Vector:chunk(num)
             assert(self.length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
             --TODO this needs to change
              if num > self.file_last_chunk_number then flush_remap_file(self) end
-              local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-              return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
+             local ptr = ffi.cast("unsigned char*", self.cdata)
+             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
                 local status, buffer, size = get_from_generator(self, num)
