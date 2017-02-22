@@ -30,7 +30,7 @@ function load( csv_file_path, metadata , G)
   validate_input(csv_file_path, metadata, G)   
   initialize(metadata)  
   
-  for line in io.lines(csv_file_path) do
+  for line in assert(io.lines(csv_file_path)) do
  
     -- local col_values= parse_csv_line(line,',')       -- call to parse to parse the line of csv file
     local status, col_values = pcall(parse_csv_line, line, ',' )
@@ -38,18 +38,12 @@ function load( csv_file_path, metadata , G)
     assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
     
     for col_idx = 1, col_count do
-  
-      local data_type_short_code = metadata[col_idx]["type"];
-      local txt_to_ctype_func_name = g_qtypes[data_type_short_code]["txt_to_ctype"]
-      local ctype = g_qtypes[data_type_short_code]["ctype"]
-      local size_of_data = g_qtypes[data_type_short_code]["width"]
-      
+    
       local current_value = col_values[col_idx]
       
       -- Now vector_wrapper handles null value handling and string to c_type value conversion
-      -- vector_wrapper[col_idx].write(current_value)
       local status, ret_message = pcall(vector_wrapper[col_idx].write, current_value)
-      if(status == false ) then  error("Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) end 
+      assert(status ~= false , "Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) 
      
     end  
     row_idx = row_idx + 1
@@ -105,7 +99,7 @@ validate_input =  function(csv_file_path, metadata, G)
   for i,m in pairs(metadata) do
     assert(m.name ~= nil, "metadata " .. i .. " : name cannot be null")
     assert(m.type ~= nil, "metadata " .. i .. " : type cannot be null")
-    assert(g_qtypes[m.type] ~= nil, "metdata " .. i .. " : type contains invalid q type")
+    assert(g_qtypes[m.type] ~= nil, "metadata " .. i .. " : type contains invalid q type")
     -- if not null is specified then only true/false is the acceptable value
     if(m.null ~= nil) then 
       assert( (m.null == true or m.null == "true" or m.null == false or m.null == "false" ), "metdata " .. i .. " : null can contain true/false only" )
@@ -117,17 +111,14 @@ validate_input =  function(csv_file_path, metadata, G)
       col_names[m.name] = 1 
     end
     -- Perform check based on metadata type
-    -- nothing more needs to be checked for integer, float field in addition to the above checks
-    --if(m.type == "I1" or m.type == "I2" or m.type == "I4" or m.type == "I8") then   
-    --elseif(m.type == "F4" or m.type == "F8") then 
-    
+   
     if(m.type == "SC") then 
       assert(m.size ~= nil , "metadata " .. i .. " : size should be specified for fixed length strings")
       assert(tonumber(m.size) , "metadata " .. i .. " : size should be valid number")
       
-    elseif(m.type == "varchar") then
+    elseif(m.type == "SV") then
       assert(m.dict ~= nil,"metadata " .. i .. " : dict cannot be null")
-      assert(m.is_dict ~= nil, "metadata " .. i .. " : is_dict cannot be null")
+      assert(m.is_dict ~= nil, "metadata " .. i .. " : is_dict cannot be null") -- m["is_dict"]
       assert(m.is_dict == true or m.is_dict == "true" or m.is_dict == false or m.is_dict == "false", "metadata " .. i .. " : is_dict can contain true/false only")
       if(m.is_dict == true or m.is_dict == "true") then 
         assert(m.add ~= nil, "metadata " .. i .. " : add cannot be null for dictionary which has is_dict true")

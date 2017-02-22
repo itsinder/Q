@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 echo "-----------------------------"
 echo "Running Dictionary Test Cases"
 echo "-----------------------------"

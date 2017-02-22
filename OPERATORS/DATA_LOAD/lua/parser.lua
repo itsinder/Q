@@ -36,7 +36,7 @@ function parse_csv_line (line,sep)
 			local startp,endp = string.find(line,sep,pos)
 			if (startp) then 
 				table.insert(res,string.sub(line,pos,startp-1))
-				pos = endp + 1
+				pos = endp + 1  
 			else
 			 -- no separator found -> use rest of string and terminate
 				table.insert(res,string.sub(line,pos))
@@ -46,3 +46,4 @@ function parse_csv_line (line,sep)
 	end
 	return res
 end
+

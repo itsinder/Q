@@ -131,4 +131,14 @@ function test_dictionary:test_dictionary_add()
   lu.assertEquals(dictionary.get_size(), 6)    
 end
 
+
+function test_dictionary:test_dictionary_add_backslash()
+  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
+  local slash_num = dictionary.add_with_condition("\\")
+  lu.assertEquals(dictionary.get_size(), 1)
+  lu.assertEquals(slash_num, 1)
+  lu.assertEquals(dictionary.get_string_by_number(1), "\\")    
+end
+
+
 os.exit( lu.LuaUnit.run() )
