@@ -13,7 +13,7 @@ cat vvadd_static_checker.lua | \
 
 cat vvadd_static_checker.lua | \
   sed s'/vvadd_/vvdiv_/'g | \
-  sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a \/ b )"/'g \
+  sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a \/ b );/'g \
   > vvdiv_static_checker.lua
 
 cat vvand_static_checker.lua | \

@@ -10,7 +10,7 @@ return require 'code_gen' {
 
 extern int
 ${out_type_displ}_to_txt(
-    ${out_type} in,
+    const ${out_type} * const in,
     const char * const fmt,
     char *X,
     size_t nX
@@ -21,7 +21,7 @@ definition= [[
 
 int
 ${out_type_displ}_to_txt(
-    ${out_type} in,
+    const ${out_type} * const in,
     const char * const fmt,
     char *X,
     size_t nX
@@ -32,10 +32,10 @@ ${out_type_displ}_to_txt(
   if ( X == NULL ) { go_BYE(-1); }
   memset(X, '\0', nX);
   if ( ( fmt == NULL ) || ( *fmt == '\0' ) ) { 
-    nw = snprintf(X, nX-1, default_fmt, in);
+    nw = snprintf(X, nX-1, default_fmt, *in);
   }
   else {
-    nw = snprintf(X, nX-1, fmt, in);
+    nw = snprintf(X, nX-1, fmt, *in);
   }
   if ( nw >= nX ) { go_BYE(-1); }
 BYE:

@@ -107,25 +107,22 @@ main(
   double *W = NULL; double **U = NULL;
   double **A = NULL;
   double *a = NULL; double *b = NULL;
-  double **Aprime = NULL;
+  double **Aprime = NULL; double *bprime = NULL;
   double *gamma = NULL;
   double *rho = NULL;
   FILE *ofp = NULL;
-  int nJ = 15; // number of functions used
 
-  if ( argc != 3 ) { go_BYE(-1); }
+  if ( argc != 4 ) { go_BYE(-1); }
   char *infile = argv[1];
   char *opfile = argv[2];
+  char *str_period = argv[3];
   ofp = fopen(opfile, "w");
   if ( strcmp(infile, opfile) == 0 ) { go_BYE(-1); }
   return_if_fopen_failed(ofp, opfile, "w");
   status = load_col_csv(infile, &X, &nT); cBYE(status);
-  U = malloc(nJ * sizeof(double *));
-  return_if_malloc_failed(U);
-  for ( int j = 0; j < nJ; j++ ) { 
-    U[j] = malloc(nT * sizeof(double));
-    return_if_malloc_failed(U[j]);
-  }
+  char *endptr = NULL;
+  int period = strtoll(str_period, &endptr, 10);
+  if ( period <= 0 ) { go_BYE(-1); }
 
   //-------------------------------------
   Y = malloc(nT * sizeof(double));
@@ -136,22 +133,33 @@ main(
   //-------------------------------------
   Z = malloc(nT * sizeof(double));
   return_if_malloc_failed(Z);
-  Z[0] = Y[0];
-  for ( int i = 1; i < nT; i++ ) { 
-    Z[i] = Y[i] - Y[i-1];
-  }
+
+  for ( int i = 0; i < 1; i++ ) { Z[i] = Y[i]; }
+  for ( int i = 1; i < nT; i++ ) { Z[i] = Y[i] - Y[i-1]; }
+
+  for ( int i = 0; i < nT; i++ ) { Y[i] = Z[i]; }
+  for ( int i = 0; i < 7; i++ ) { Z[i] = Y[i]; }
+  for ( int i = 8; i < nT; i++ ) { Z[i] = Y[i] - Y[i-7]; }
+
   //-------------------------------------
+  int nJ = 1+period+period; // number of functions used
+  U = malloc(nJ * sizeof(double *));
+  return_if_malloc_failed(U);
+  for ( int j = 0; j < nJ; j++ ) { 
+    U[j] = malloc(nT * sizeof(double));
+    return_if_malloc_failed(U[j]);
+  }
   for ( int i = 0; i < nT; i++ ) { 
     U[0][i] = 1;
   }
-  for ( int j = 1; j <= 7; j++ ) { 
+  for ( int j = 1; j <= period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = cos ( 2 * PI * j * t / 7 );
+      U[j][t] = cos ( 2 * PI * (j-0) * t / period );
     }
   }
-  for ( int j = 8; j <= 14; j++ ) { 
+  for ( int j = period+1; j <= period+period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = sin ( 2 * PI * (j-7) * t / 7 );
+      U[j][t] = sin ( 2 * PI * (j-28) * t / period );
     }
   }
   //-------------------------------------
@@ -184,6 +192,12 @@ main(
   for ( int j = 0; j < nJ; j++ ) { a[j] = 0; }
 
   status = convert_matrix_for_solver(A, nJ, &Aprime); cBYE(status);
+  // make a copy of b in bprime
+  bprime = malloc(nJ * sizeof(double));
+  return_if_malloc_failed(bprime);
+  for ( int j = 0; j < nJ; j++ ) { 
+    bprime[j] = b[j];
+  }
   // print_input(A, Aprime, a, b, nJ);
   status = positive_solver(Aprime, a, b, nJ); cBYE(status);
   // vVerify solution 
@@ -192,9 +206,9 @@ main(
     for ( int j2 = 0; j2 < nJ; j2++ ) { 
       sum += A[j][j2] * a[j2];
     }
-    double minval = min(sum, b[j]);
-    if ( ( sum/b[j] > 1.01 ) || ( sum / b[j] < 0.09 ) ) {
-      printf("Error on a[%d]: %lf versus %lf \n", j, sum, b[j]);
+    double minval = min(sum, bprime[j]);
+    if ( ( sum/bprime[j] > 1.01 ) || ( sum / bprime[j] < 0.99 ) ) {
+      printf("Error on b[%d]: %lf versus %lf \n", j, sum, bprime[j]);
     }
   }
   //---------------------------------
@@ -207,27 +221,33 @@ main(
     }
     W[t] = Z[t] -  sum;
   }
-  for ( int t = 0; t < nT; t++ ) {
-    fprintf(ofp, "%lf\n", W[t]);
-  }
   //--------------------------------
   double mu = 0;
   for ( int t = 0; t < nT; t++ ) { 
     mu += W[t];
   }
   mu /= nT;
-  go_BYE(0); 
   //--------------------------------
   gamma = malloc(nT * sizeof(double));
   return_if_malloc_failed(gamma);
+  for ( int t1 = 0; t1 < nT; t1++ ) { 
+    double sum = 0;
+    for ( int t2 = 0; t2 < nT -t1; t2++ ) {
+      sum += ((Z[t2] - mu) * (W[t2+t1] - mu));
+    }
+    gamma[t1] = sum;
+  }
+  //--------------------------------
+  rho = malloc(nT * sizeof(double));
+  return_if_malloc_failed(rho);
   for ( int t = 0; t < nT; t++ ) { 
     rho[t] = gamma[t] / gamma[0];
   }
   //----------------------
-  rho = malloc(nT * sizeof(double));
-  return_if_malloc_failed(rho);
-
-
+  for ( int t = 0; t < nT; t++ ) {
+    fprintf(ofp, "%lf\n", rho[t]);
+  }
+  //----------------------
   printf("ALL DONE\n");
 BYE:
   free_matrix(A, nJ);

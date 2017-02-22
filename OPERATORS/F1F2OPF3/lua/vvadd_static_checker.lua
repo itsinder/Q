@@ -22,13 +22,13 @@ function vvadd_static_checker(
     else
       assert(false, "Control should not come here")
     end
-    local tmpl = 'f1f2opf3.tmpl'
+    local tmpl = 'base.tmpl'
     local subs = {}; 
     subs.fn = "vvadd_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
     subs.in2type = g_qtypes[f2type].ctype
     subs.returntype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
-    subs.c_code_for_operator = "c = a + b"
+    subs.c_code_for_operator = "c = a + b; "
     return subs, tmpl
 end
