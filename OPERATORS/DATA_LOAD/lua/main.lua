@@ -30,7 +30,4 @@ save_all_dictionaries()
 
 assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ") 
 print("Loading Completed")
-
--- if returning control to shell script, make sure that exit code is set
--- correctly 
   

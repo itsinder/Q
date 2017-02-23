@@ -1,6 +1,7 @@
+package.cpath = package.cpath .. ";../obj/q_c_functions.so;"
+
 local ffi = require("ffi") 
-local so_file_path_name = "../obj/q_c_functions.so" --path for .so file
-local q_c_lib  = ffi.load(so_file_path_name) 
+local q_c_lib  = ffi.load("../obj/q_c_functions.so") 
 local q_c_print_lib = ffi.load("../../PRINT/obj/q_c_print_functions.so")
 
 ffi.cdef[[

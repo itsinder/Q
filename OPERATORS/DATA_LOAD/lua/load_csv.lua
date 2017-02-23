@@ -1,5 +1,6 @@
 package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 
+
 require 'vector_wrapper'
 require 'globals'
 require 'parser'
@@ -25,33 +26,27 @@ local row_idx = 0
 local col_num_nil = {}  
 local validate_input, initialize, cleanup
 
-function load( csv_file_path, metadata , G)
+function load( csv_file_path, metadata , load_global_settings)
   
-  validate_input(csv_file_path, metadata, G)   
+  validate_input(csv_file_path, metadata, load_global_settings)   
   initialize(metadata)  
   
   for line in assert(io.lines(csv_file_path)) do
  
-    -- local col_values= parse_csv_line(line,',')       -- call to parse to parse the line of csv file
+    -- call to parse to parse the line of csv file
     local status, col_values = pcall(parse_csv_line, line, ',' )
     assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
     assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
     
     for col_idx = 1, col_count do
-    
       local current_value = col_values[col_idx]
-      
-      -- Now vector_wrapper handles null value handling and string to c_type value conversion
       local status, ret_message = pcall(vector_wrapper[col_idx].write, current_value)
       assert(status ~= false , "Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) 
-     
     end  
     row_idx = row_idx + 1
   end
   
-  --cleanup
   cleanup(metadata)  
-  -- close all vectors & delete the null vector if it is not required..
   return vector_wrapper
 end
 
@@ -86,9 +81,9 @@ cleanup = function(metadata)
 end
 
 
-validate_input =  function(csv_file_path, metadata, G)
-  assert( metadata ~= nil, "Metadata should not be nil")
-  assert( type(metadata) == "table", "Metadata type should be table")
+validate_input =  function(csv_file_path, metadata_table, load_global_settings)
+  assert( metadata_table ~= nil, "Metadata should not be nil")
+  assert( type(metadata_table) == "table", "Metadata type should be table")
   assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
   -- Check if the directory required by this load operation exists
   assert( valid_dir(_G["Q_DATA_DIR"]),"Please make sure that Q_DATA_DIR points to correct directory")
@@ -96,33 +91,33 @@ validate_input =  function(csv_file_path, metadata, G)
   
   local col_names = {}
   -- now look at fields of metadata
-  for i,m in pairs(metadata) do
-    assert(m.name ~= nil, "metadata " .. i .. " : name cannot be null")
-    assert(m.type ~= nil, "metadata " .. i .. " : type cannot be null")
-    assert(g_qtypes[m.type] ~= nil, "metadata " .. i .. " : type contains invalid q type")
+  for metadata_idx,metadata in pairs(metadata_table) do
+    assert(metadata.name ~= nil, "metadata " .. metadata_idx .. " : name cannot be null")
+    assert(metadata.type ~= nil, "metadata " .. metadata_idx .. " : type cannot be null")
+    assert(g_qtypes[metadata.type] ~= nil, "metadata " .. metadata_idx .. " : type contains invalid q type")
     -- if not null is specified then only true/false is the acceptable value
-    if(m.null ~= nil) then 
-      assert( (m.null == true or m.null == "true" or m.null == false or m.null == "false" ), "metdata " .. i .. " : null can contain true/false only" )
+    if(metadata.null ~= nil) then 
+      assert( (metadata.null == true or metadata.null == "true" or metadata.null == false or metadata.null == "false" ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
     end
     
     -- check if the same column name is found before in metadata
-    if(m.name ~= "") then 
-      assert( col_names[m.name] == nil , "metadata " .. i .. " : duplicate column name is not allowed") 
-      col_names[m.name] = 1 
+    if(metadata.name ~= "") then 
+      assert( col_names[metadata.name] == nil , "metadata " .. metadata_idx .. " : duplicate column name is not allowed") 
+      col_names[metadata.name] = 1 
     end
     -- Perform check based on metadata type
    
-    if(m.type == "SC") then 
-      assert(m.size ~= nil , "metadata " .. i .. " : size should be specified for fixed length strings")
-      assert(tonumber(m.size) , "metadata " .. i .. " : size should be valid number")
+    if(metadata.type == "SC") then 
+      assert(metadata.size ~= nil , "metadata " .. metadata_idx .. " : size should be specified for fixed length strings")
+      assert(tonumber(metadata.size) , "metadata " .. metadata_idx .. " : size should be valid number")
       
-    elseif(m.type == "SV") then
-      assert(m.dict ~= nil,"metadata " .. i .. " : dict cannot be null")
-      assert(m.is_dict ~= nil, "metadata " .. i .. " : is_dict cannot be null") -- m["is_dict"]
-      assert(m.is_dict == true or m.is_dict == "true" or m.is_dict == false or m.is_dict == "false", "metadata " .. i .. " : is_dict can contain true/false only")
-      if(m.is_dict == true or m.is_dict == "true") then 
-        assert(m.add ~= nil, "metadata " .. i .. " : add cannot be null for dictionary which has is_dict true")
-        assert(m.add == true or m.add == "true" or m.add == false or m.add == "false", "metadata " .. i .. " : add can contain true/false only")
+    elseif(metadata.type == "SV") then
+      assert(metadata.dict ~= nil,"metadata " .. metadata_idx .. " : dict cannot be null")
+      assert(metadata.is_dict ~= nil, "metadata " .. metadata_idx .. " : is_dict cannot be null") -- m["is_dict"]
+      assert(metadata.is_dict == true or metadata.is_dict == "true" or metadata.is_dict == false or metadata.is_dict == "false", "metadata " .. metadata_idx .. " : is_dict can contain true/false only")
+      if(metadata.is_dict == true or metadata.is_dict == "true") then 
+        assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has is_dict true")
+        assert(metadata.add == true or metadata.add == "true" or metadata.add == false or metadata.add == "false", "metadata " .. metadata_idx .. " : add can contain true/false only")
       end
     end     
   end

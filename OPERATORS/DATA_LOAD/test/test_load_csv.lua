@@ -1,5 +1,7 @@
 package.path = package.path .. ";../lua/?.lua"
 
+
+
 local lu = require('luaunit')
 require 'load_csv'
 require 'environment'
@@ -383,10 +385,10 @@ function test_load_csv:test_valid_SV()
   
   local D1 = _G["Q_DICTIONARIES"]["D1"]
     
-  lu.assertEquals(D1.get_string_by_number(1), "Sample")
-  lu.assertEquals(D1.get_string_by_number(2), "String")
-  lu.assertEquals(D1.get_string_by_number(3), "For")
-  lu.assertEquals(D1.get_string_by_number(4), "Varchar")    
+  lu.assertEquals(D1:get_string_by_number(1), "Sample")
+  lu.assertEquals(D1:get_string_by_number(2), "String")
+  lu.assertEquals(D1:get_string_by_number(3), "For")
+  lu.assertEquals(D1:get_string_by_number(4), "Varchar")    
 end
 
 function test_load_csv:test_int_overflow()

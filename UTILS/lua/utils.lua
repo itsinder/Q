@@ -19,7 +19,7 @@ end
 
 -- Following code was taken from : http://lua-users.org/wiki/CsvUtils
 -- Used to escape "'s , so that string can be inserted in csv line
-function escapeCSV (s)
+function escape_csv (s)
   if string.find(s, '[,"]') then
     s = '"' .. string.gsub(s, '"', '""') .. '"'
   end
@@ -27,7 +27,7 @@ function escapeCSV (s)
 end
 
 
---[[ Following con tains 1 liner example of useful tasks, which should be used directly 
+--[[ Following contains one liner example of useful tasks, which should be used directly 
 
 - trim the string : stringx.strip(string_data)
 

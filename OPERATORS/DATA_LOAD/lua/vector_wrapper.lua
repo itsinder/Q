@@ -3,7 +3,7 @@ package.path = package.path .. ";../../../Q2/code/?.lua"
 local Vector = require 'Vector'
 require 'q_c_functions'
 require 'pl'
-
+local Dictionary = require 'dictionary'
 
 function Vector_Wrapper(metadata, chunk_size)
   
@@ -96,7 +96,7 @@ function Vector_Wrapper(metadata, chunk_size)
       -- dictionary throws error if any during the add operation
 
       if data ~= nil and stringx.strip(data) ~= "" then 
-        local ret_number = self.dict.add_with_condition(data, self.add_new_value)                    
+        local ret_number = self.dict:add_with_condition(data, self.add_new_value)                    
         -- return is number, convert it to string
         data = tostring(ret_number)
       else
