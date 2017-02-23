@@ -51,6 +51,24 @@ txt_to_F8(
   return status ;
 }
 
+//-------------------
+int
+dump_to_file(
+    double *Y, 
+    int nT,
+    char *filename
+    )
+{
+  int status = 0;
+  FILE *ofp = fopen(filename, "w");
+  return_if_fopen_failed(ofp, filename,"w");
+  for ( int i = 0; i < nT; i++ ) { 
+    fprintf(ofp, "%d,%lf\n", i, Y[i]);
+  }
+BYE:
+  fclose_if_non_null(ofp);
+  return status;
+}
 //------------------------------
 int
 load_col_csv(
@@ -103,7 +121,8 @@ main(
   int status = 0;
   double *X = NULL; int nT = 0;
   double *Y = NULL; 
-  double *Z = NULL; 
+  double *Z1 = NULL; 
+  double *Z7 = NULL; 
   double *W = NULL; double **U = NULL;
   double **A = NULL;
   double *a = NULL; double *b = NULL;
@@ -130,19 +149,35 @@ main(
   for ( int i = 0; i < nT; i++ ) { 
     Y[i] = log(X[i]);
   }
+  status = dump_to_file(Y, nT,"_y.csv"); cBYE(status);
   //-------------------------------------
-  Z = malloc(nT * sizeof(double));
-  return_if_malloc_failed(Z);
+  Z1 = malloc(nT * sizeof(double));
+  return_if_malloc_failed(Z1);
 
-  for ( int i = 0; i < 1; i++ ) { Z[i] = Y[i]; }
-  for ( int i = 1; i < nT; i++ ) { Z[i] = Y[i] - Y[i-1]; }
+  for ( int i = 0; i < 1; i++ ) { Z1[i] = Y[i]; }
+  for ( int i = 1; i < nT; i++ ) { Z1[i] = Y[i] - Y[i-1]; }
+  status = dump_to_file(Z1, nT,"_z1.csv"); cBYE(status);
 
-  for ( int i = 0; i < nT; i++ ) { Y[i] = Z[i]; }
-  for ( int i = 0; i < 7; i++ ) { Z[i] = Y[i]; }
-  for ( int i = 8; i < nT; i++ ) { Z[i] = Y[i] - Y[i-7]; }
+  Z7 = malloc(nT * sizeof(double));
+  return_if_malloc_failed(Z7);
+
+  for ( int i = 0; i < 7; i++ ) { Z7[i] = Z1[i]; }
+  for ( int i = 8; i < nT; i++ ) { Z7[i] = Z1[i] - Z1[i-7]; }
+  status = dump_to_file(Z7, nT,"_z7.csv"); cBYE(status);
+
+  nT -= 7;
+  Z7 += 7;
+  /*
+  for ( int i = 0; i < 8; i++ ) { Z[i] = Y[i]; }
+  for ( int i = 8; i < nT; i++ ) { 
+    Z[i] = Y[i] - Y[i-1] - Y[i-7] + Y[i-8];
+  }
+  */
+
 
   //-------------------------------------
-  int nJ = 1+period+period; // number of functions used
+  char buf[16];
+  int nJ = 1+(period-1)+(period-1); // number of functions used
   U = malloc(nJ * sizeof(double *));
   return_if_malloc_failed(U);
   for ( int j = 0; j < nJ; j++ ) { 
@@ -152,14 +187,18 @@ main(
   for ( int i = 0; i < nT; i++ ) { 
     U[0][i] = 1;
   }
-  for ( int j = 1; j <= period; j++ ) { 
+  for ( int j = 1; j < period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = cos ( 2 * PI * (j-0) * t / period );
+      U[j][t] = cos ( 2 * PI * (j-0) * (double)t / (double)period );
+      sprintf(buf, "_u_%d.csv", j);
+      dump_to_file(U[j], nT, buf);
     }
   }
-  for ( int j = period+1; j <= period+period; j++ ) { 
+  for ( int j = period; j < 2*period-1; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = sin ( 2 * PI * (j-28) * t / period );
+      U[j][t] = sin ( 2 * PI * (j-(double)period) * (double)t / (double)period );
+      sprintf(buf, "_u_%d.csv", j);
+      dump_to_file(U[j], nT, buf);
     }
   }
   //-------------------------------------
@@ -181,7 +220,7 @@ main(
   for ( int j = 0; j < nJ; j++ ) { 
     double sum = 0;
     for ( int t = 0; t < nT; t++ ) { 
-      sum += Z[t] * U[j][t];
+      sum += Z7[t] * U[j][t];
     }
     b[j] = sum;
   }
@@ -200,13 +239,13 @@ main(
   }
   // print_input(A, Aprime, a, b, nJ);
   status = positive_solver(Aprime, a, b, nJ); cBYE(status);
-  // vVerify solution 
+  // Verify solution 
   for ( int j = 0; j < nJ; j++ ) { 
     double sum = 0;
     for ( int j2 = 0; j2 < nJ; j2++ ) { 
       sum += A[j][j2] * a[j2];
     }
-    double minval = min(sum, bprime[j]);
+    double minval = mcr_min(sum, bprime[j]);
     if ( ( sum/bprime[j] > 1.01 ) || ( sum / bprime[j] < 0.99 ) ) {
       printf("Error on b[%d]: %lf versus %lf \n", j, sum, bprime[j]);
     }
@@ -219,21 +258,25 @@ main(
     for ( int j = 0; j < nJ; j++ ) { 
       sum += (a[j] * U[j][t]);
     }
-    W[t] = Z[t] -  sum;
+    W[t] =  sum;
+    // W[t] = Z7[t] -  sum;
   }
+  status = dump_to_file(W, nT,"_w.csv"); cBYE(status);
+  go_BYE(-1); 
   //--------------------------------
   double mu = 0;
   for ( int t = 0; t < nT; t++ ) { 
     mu += W[t];
   }
   mu /= nT;
+  fprintf(stderr, "mu = %lf \n", mu);
   //--------------------------------
   gamma = malloc(nT * sizeof(double));
   return_if_malloc_failed(gamma);
   for ( int t1 = 0; t1 < nT; t1++ ) { 
     double sum = 0;
     for ( int t2 = 0; t2 < nT -t1; t2++ ) {
-      sum += ((Z[t2] - mu) * (W[t2+t1] - mu));
+      sum += ((Z7[t2] - mu) * (W[t2+t1] - mu));
     }
     gamma[t1] = sum;
   }
@@ -243,6 +286,7 @@ main(
   for ( int t = 0; t < nT; t++ ) { 
     rho[t] = gamma[t] / gamma[0];
   }
+  fprintf(stderr, "gamma[0] = %lf \n", gamma[0]);
   //----------------------
   for ( int t = 0; t < nT; t++ ) {
     fprintf(ofp, "%lf\n", rho[t]);
@@ -266,7 +310,9 @@ BYE:
   free_if_non_null(U);
   free_if_non_null(X);
   free_if_non_null(Y);
-  free_if_non_null(Z);
+  Z7 -= 7;
+  free_if_non_null(Z1);
+  free_if_non_null(Z7);
   free_if_non_null(W);
   free_if_non_null(a);
   free_if_non_null(b);
