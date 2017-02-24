@@ -5,7 +5,7 @@ Entry{
   out_type_displ = 'F4',
   out_type = 'float',
   big_out_type = 'double',
-  min_val = 'FLT_MIN',
+  min_val = '- FLT_MAX',
   max_val = 'FLT_MAX',
   converter = 'strtold',
 }
@@ -16,7 +16,7 @@ Entry{
   out_type_displ = 'F8',
   out_type = 'double',
   big_out_type = 'double',
-  min_val = 'DBL_MIN',
+  min_val = '- DBL_MAX',
   max_val = 'DBL_MAX',
   converter = 'strtold',
 }

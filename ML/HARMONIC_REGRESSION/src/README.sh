@@ -1,3 +1,5 @@
+##/bin/bash
+set -e
 gcc -g -std=gnu99 ../../../UTILS/src/mmap.c hr.c \
   ../../../AxEqualsBSolver/aux_driver.c \
   ../../../AxEqualsBSolver/positive_solver.c \

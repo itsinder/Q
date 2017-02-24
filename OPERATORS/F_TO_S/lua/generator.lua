@@ -1,11 +1,11 @@
 #!/usr/bin/env lua
 
+  require 'pl'
   package.path = package.path.. ";../../../UTILS/lua/?.lua"
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  local pl = require 'pl'
-  -- pl.unlink("_qfns_f1f2opf3.lua")
+  file.delete("_qfns_f1f2opf3.lua")
 
   dofile '../../../UTILS/lua/globals.lua'
 
@@ -39,11 +39,11 @@
       if ( subs ) then 
         -- TODO Improve following.
         local T = dofile(tmpl)
-        T.fn         = subs.fn
-        T.intype    = subs.intype
-        T.c_code_for_operator = subs.c_code_for_operator
+        T.fn      = subs.fn
+        T.intype  = subs.intype
+        T.reducer = subs.reducer
         gen_doth(T.fn, T, incdir)
-        gen_doth(T.fn, T, srcdir)
+        gen_dotc(T.fn, T, srcdir)
       end
     end
   end
