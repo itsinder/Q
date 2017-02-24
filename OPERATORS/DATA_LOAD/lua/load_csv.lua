@@ -1,7 +1,7 @@
 package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 
 
-require 'vector_wrapper'
+local Vector_Wrapper = require 'vector_wrapper'
 require 'globals'
 require 'parser'
 require 'dictionary'
@@ -10,78 +10,9 @@ require 'pl'
 require 'utils'
 
 
--- ----------------
--- load( "CSV file to load", "meta data", "Global Metadata") 
--- Loads the CSV file and stores in the Q internal format
--- 
--- returns : table containing list of files for each column defined in metadata. 
---           If any error was encountered during load operation then negative status code  
--- ----------------
-
--- validate meta-data & create vector + null vector for each of the file being created 
-local vector_wrapper = {}
-local col_count = 0 --each field in the metadata represents one column in csv file
-local col_idx = 0
-local row_idx = 0
-local col_num_nil = {}  
-local validate_input, initialize, cleanup
-
-function load( csv_file_path, metadata , load_global_settings)
-  
-  validate_input(csv_file_path, metadata, load_global_settings)   
-  initialize(metadata)  
-  
-  for line in assert(io.lines(csv_file_path)) do
- 
-    -- call to parse to parse the line of csv file
-    local status, col_values = pcall(parse_csv_line, line, ',' )
-    assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
-    assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
-    
-    for col_idx = 1, col_count do
-      local current_value = col_values[col_idx]
-      local status, ret_message = pcall(vector_wrapper[col_idx].write, current_value)
-      assert(status ~= false , "Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) 
-    end  
-    row_idx = row_idx + 1
-  end
-  
-  cleanup(metadata)  
-  return vector_wrapper
-end
-
-initialize = function(metadata)
-  
-
-  -- initialize value which needs to be written to null vector, since it will be either 0 or 1
-  -- Initialize all the values
-  vector_wrapper = {}
-  col_count = 0 --each field in the metadata represents one column in csv file
-  col_idx = 0
-  row_idx = 1
-  col_num_nil = {}      
-  col_count = #metadata
-    
-  for i = 1, col_count do 
-    -- If metadata name is not empty/null, then only create new vector
-    if stringx.strip(metadata[i].name) ~= "" then
-      vector_wrapper[i] = assert(Vector_Wrapper(metadata[i]))
-    end    
-  end
-
-end
-
-cleanup = function(metadata)
-  for i = 1, col_count do 
-    -- If metadata name is not empty/null, then only create new vector
-    if stringx.strip(metadata[i].name) ~= "" then
-      vector_wrapper[i].close()
-    end     
-  end
-end
 
 
-validate_input =  function(csv_file_path, metadata_table, load_global_settings)
+local function validate_input(csv_file_path, metadata_table, load_global_settings)
   assert( metadata_table ~= nil, "Metadata should not be nil")
   assert( type(metadata_table) == "table", "Metadata type should be table")
   assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
@@ -123,7 +54,72 @@ validate_input =  function(csv_file_path, metadata_table, load_global_settings)
   end
   
   -- file should not be empty
-  assert( path.getsize(csv_file_path) ~= 0 , "File should not be empty")
-     
+  assert( path.getsize(csv_file_path) ~= 0 , "File should not be empty")     
 end
 
+local function initialize(metadata, vector_wrapper_table)
+  
+
+  -- initialize value which needs to be written to null vector, since it will be either 0 or 1
+  -- Initialize all the values
+  local col_count = #metadata
+    
+  for i = 1, col_count do 
+    -- If metadata name is not empty/null, then only create new vector
+    if stringx.strip(metadata[i].name) ~= "" then
+      vector_wrapper_table[i] = assert(Vector_Wrapper(metadata[i]))
+    end    
+  end
+
+end
+
+local function cleanup(metadata, col_count, vector_wrapper_table)
+  for i = 1, col_count do 
+    -- If metadata name is not empty/null, then only create new vector
+    if stringx.strip(metadata[i].name) ~= "" then
+      vector_wrapper_table[i]:close()
+    end     
+  end
+end
+
+
+
+-- ----------------
+-- load( "CSV file to load", "meta data", "Global Metadata") 
+-- Loads the CSV file and stores in the Q internal format
+-- 
+-- returns : table containing list of files for each column defined in metadata. 
+--           If any error was encountered during load operation then negative status code  
+-- ----------------
+
+-- validate meta-data & create vector + null vector for each of the file being created 
+
+function load( csv_file_path, metadata , load_global_settings)
+  local vector_wrapper_table = {}
+  local col_count = 0 --each field in the metadata represents one column in csv file
+  local col_idx = 0
+  local row_idx = 0
+  local col_num_nil = {}  
+ 
+  validate_input(csv_file_path, metadata, load_global_settings)   
+  initialize(metadata, vector_wrapper_table)  
+  col_count = #metadata 
+  
+  for line in assert(io.lines(csv_file_path)) do
+ 
+    -- call to parse to parse the line of csv file
+    local status, col_values = pcall(parse_csv_line, line, ',' )
+    assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
+    assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
+    
+    for col_idx = 1, col_count do
+      local current_value = col_values[col_idx]
+      local status, ret_message = pcall(vector_wrapper_table[col_idx].write, vector_wrapper_table[col_idx], current_value)
+      assert(status ~= false , "Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) 
+    end  
+    row_idx = row_idx + 1
+  end
+  
+  cleanup(metadata, col_count, vector_wrapper_table)  
+  return vector_wrapper_table
+end

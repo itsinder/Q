@@ -19,7 +19,7 @@ end
 -- save all dictionaries in the medatadata directory.. this should be called before system shuts down, so that all dictionaries are saved
 function save_all_dictionaries()
    for dict_name, dictionary in pairs(_G["Q_DICTIONARIES"]) do
-      file_path =  _G["Q_META_DATA_DIR"] .. dict_name
-      dictionary.save_to_file(file_path)
+      local file_path =  _G["Q_META_DATA_DIR"] .. dict_name
+      dictionary:save_to_file(file_path)
    end
 end 

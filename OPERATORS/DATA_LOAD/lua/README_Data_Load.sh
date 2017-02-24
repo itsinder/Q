@@ -1,15 +1,6 @@
 #!/bin/bash 
 set -e 
-# ASSIGNMENT:2 CSV_LOAD
-#Compile + run instructions:
-
-#1) Change the directory to Q/OPERATORS/DATA_LOAD/lua
-
-# Generate txt_to_*.c and txt_to_*.h files 
-#bash README.sh
 bash gen_files.sh
-#2) Compile the C code and create the QFunc.so file, the command is:
-#gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
 
 gcc -std=gnu99 \
   -o ../obj/q_c_functions.so \
@@ -26,7 +17,6 @@ gcc -std=gnu99 \
   -I../gen_inc/
 # echo PREMATURE; exit;
 
-#3) If out and metadata directory doesnot exists then create the directory ./out and ./metadata .. here the output files (binary files and null files) will be stored.
 #If out, metadata directory exists then remove and create new directories:
 if [ -d "out" ]; then 
   rm -r -f out
@@ -38,20 +28,8 @@ if [ -d "metadata" ]; then
 fi
 mkdir metadata
 
-#4) If you want to use your CSV file then In main.lua file set the path of csv file which u will give as the input file:
-#e.g.: local csv_file_path_name = "../test/csv_inputfile1.csv"
-
-#5) If you are using your CSV file then adjust the metadata M according to the respective CSV file in main.lua
-
-#6) Then run the main.lua file, the command is:
-
-# Following will be in a loop testing several combinations TODO
 meta_data_file=../test/meta.txt
 data_file=../test/t1.csv
 luajit main.lua $meta_data_file $data_file
-
-
-
-############## REMAINING Things ############# 
 
 echo "Completed $0 in $PWD" # TODO

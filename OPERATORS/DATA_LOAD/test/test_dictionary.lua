@@ -37,10 +37,10 @@ function test_dictionary:test_add()
   
   lu.assertNumber(entry1)
   lu.assertNumber(entry2)
-  lu.assertEquals("Entry1", dictionary:get_string_by_number(entry1))
-  lu.assertEquals("Entry2", dictionary:get_string_by_number(entry2))
-  lu.assertEquals(entry1, dictionary:get_number_by_string("Entry1"))
-  lu.assertEquals(entry2, dictionary:get_number_by_string("Entry2"))  
+  lu.assertEquals("Entry1", dictionary:get_string_by_index(entry1))
+  lu.assertEquals("Entry2", dictionary:get_string_by_index(entry2))
+  lu.assertEquals(entry1, dictionary:get_index_by_string("Entry1"))
+  lu.assertEquals(entry2, dictionary:get_index_by_string("Entry2"))  
   lu.assertEquals(2, dictionary:get_size())
 end
 
@@ -97,10 +97,10 @@ function test_dictionary:test_read_dictionary_from_file()
   local restored_dictionary = Dictionary({dict = "D2", is_dict = false, add=true})
   restored_dictionary:restore_from_file("./serializedD2")
   
-  local val = restored_dictionary:get_number_by_string("Entry1")
+  local val = restored_dictionary:get_index_by_string("Entry1")
   
-  lu.assertEquals( restored_dictionary:get_string_by_number(1), "Entry1")
-  lu.assertEquals( restored_dictionary:get_number_by_string("Entry2"), 2)
+  lu.assertEquals( restored_dictionary:get_string_by_index(1), "Entry1")
+  lu.assertEquals( restored_dictionary:get_index_by_string("Entry2"), 2)
   
   os.remove("./serializedD2")
 end
@@ -112,10 +112,10 @@ function test_dictionary:test_increment_number_addition()
   dictionary:add_with_condition("e3")
   dictionary:add_with_condition("e4")
   
-  lu.assertEquals(dictionary:get_string_by_number(1), "e1")
-  lu.assertEquals(dictionary:get_string_by_number(2), "e2")
-  lu.assertEquals(dictionary:get_string_by_number(3), "e3")
-  lu.assertEquals(dictionary:get_string_by_number(4), "e4")
+  lu.assertEquals(dictionary:get_string_by_index(1), "e1")
+  lu.assertEquals(dictionary:get_string_by_index(2), "e2")
+  lu.assertEquals(dictionary:get_string_by_index(3), "e3")
+  lu.assertEquals(dictionary:get_string_by_index(4), "e4")
 end
 
 function test_dictionary:test_dictionary_add()
@@ -137,7 +137,7 @@ function test_dictionary:test_dictionary_add_backslash()
   local slash_num = dictionary:add_with_condition("\\")
   lu.assertEquals(dictionary:get_size(), 1)
   lu.assertEquals(slash_num, 1)
-  lu.assertEquals(dictionary:get_string_by_number(1), "\\")    
+  lu.assertEquals(dictionary:get_string_by_index(1), "\\")    
 end
 
 

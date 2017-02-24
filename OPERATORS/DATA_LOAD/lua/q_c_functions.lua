@@ -56,7 +56,7 @@ function convert_data(function_name, q_type, data, c_value, size_of_c_data)
     ffi.C.memset(c_value, 0, size_of_c_data)
   else 
     local status = nil
-    -- for fixed size string pass the size of stirng data also
+    -- for fixed size string pass the size of string data also
     if q_type == "SC" then
       local ssize = ffi.cast("size_t" ,size_of_c_data)
       status = q_c_lib[function_name](data, c_value, ssize)
@@ -69,7 +69,7 @@ function convert_data(function_name, q_type, data, c_value, size_of_c_data)
       error("Data type" .. q_type .. " Not supported ")
     end
     
-    -- negative status indicates erorr condition
+    -- negative status indicates error condition
     if(status < 0) then 
       error("Invalid data found")
     end
@@ -84,7 +84,7 @@ end
 -- q_type : Q data type. e.g. I1, I2, F4, ../
 -- c_data : pointer to the c data 
 -- idx : index the c_data 
--- size_of_c_data : size of c data to be used
+-- size_of_data : size of c data to be used
 -- 
 -- return string representation of c data 
 -- ------------------------
@@ -106,8 +106,7 @@ function convert_c_to_txt(q_type, c_data, idx,  size_of_data)
   else 
     status = q_c_print_lib[function_name](c_data + idx, nil, actual_data_ptr , size_of_data)
   end
-  -- local str = ffi.string(actual_data_pointer [,len])
-  -- function converts null terminated stirng, so actual len would not be required 
+
   local str = ffi.string(actual_data_ptr)
   return str
 end

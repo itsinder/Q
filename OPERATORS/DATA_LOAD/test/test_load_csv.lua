@@ -6,12 +6,12 @@ local lu = require('luaunit')
 require 'load_csv'
 require 'environment'
 require 'pl'
-
+local Dictionary = require 'dictionary'
 
 test_load_csv = {}
 local test_input_dir = "./test_data/"
 
--- command setting which needs to be done for all test-cases
+-- common setting which needs to be done for all test-cases
 function test_load_csv:setUp()
   --set environment variables for test-case
   _G["Q_DATA_DIR"] = "./test_data/out/"
@@ -22,7 +22,7 @@ function test_load_csv:setUp()
   dir.makepath(_G["Q_META_DATA_DIR"])
 end
 
--- commond cleanup for all testcases
+-- common cleanup for all testcases
 function test_load_csv:tearDown()
   -- clear the output directory 
   dir.rmtree(_G["Q_DATA_DIR"])
@@ -244,7 +244,7 @@ function test_load_csv:test_valid_I1()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 1)
   
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "-128")
@@ -261,7 +261,7 @@ function test_load_csv:test_valid_I2()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col2"), num_records * 2)
   
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I2", x , 0 ), "-32768")
@@ -279,7 +279,7 @@ function test_load_csv:test_valid_I4()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I4", x , 0 ), "-2147483648")
@@ -297,7 +297,7 @@ function test_load_csv:test_valid_I8()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
 
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I8", x , 0 ), "-9223372036854775808")
@@ -316,13 +316,13 @@ function test_load_csv:test_valid_F4()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
-  lu.assertEquals(convert_c_to_txt("F4", x , 0 ), "-922337203685477.58")
-  lu.assertEquals(convert_c_to_txt("F4", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("F4", x , 2 ), "922337203685477.58")
-  lu.assertEquals(convert_c_to_txt("F4", x , 3 ), "11")  
+  lu.assertStrContains(convert_c_to_txt("F4", x , 0 ), "-90000000.00")
+  lu.assertStrContains(convert_c_to_txt("F4", x , 1 ), "0")
+  lu.assertStrContains(convert_c_to_txt("F4", x , 2 ), "900000000.00")
+  lu.assertStrContains(convert_c_to_txt("F4", x , 3 ), "11")  
 end
 
 function test_load_csv:test_valid_F8()
@@ -333,13 +333,13 @@ function test_load_csv:test_valid_F8()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
   
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
-  lu.assertEquals(convert_c_to_txt("F4", x , 0 ), "-922337203685477.58")
-  lu.assertEquals(convert_c_to_txt("F4", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("F4", x , 2 ), "922337203685477.58")
-  lu.assertEquals(convert_c_to_txt("F4", x , 3 ), "11")  
+  lu.assertStrContains(convert_c_to_txt("F8", x , 0 ), "-9.58")
+  lu.assertStrContains(convert_c_to_txt("F8", x , 1 ), "0")
+  lu.assertStrContains(convert_c_to_txt("F8", x , 2 ), "9.58")
+  lu.assertStrContains(convert_c_to_txt("F8", x , 3 ), "11")  
   
 end
 
@@ -352,7 +352,7 @@ function test_load_csv:test_valid_fix_size_string()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * size_of_string)
 
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("SC", x , 0*size_of_string, 16), "Sample")
@@ -375,7 +375,7 @@ function test_load_csv:test_valid_SV()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1].get_vector()
+  local vector = ret[1]:get_vector()
   local x, x_size = vector:chunk(0)
   
   lu.assertEquals(convert_c_to_txt("I4", x , 0 ), "1")
@@ -385,11 +385,41 @@ function test_load_csv:test_valid_SV()
   
   local D1 = _G["Q_DICTIONARIES"]["D1"]
     
-  lu.assertEquals(D1:get_string_by_number(1), "Sample")
-  lu.assertEquals(D1:get_string_by_number(2), "String")
-  lu.assertEquals(D1:get_string_by_number(3), "For")
-  lu.assertEquals(D1:get_string_by_number(4), "Varchar")    
+  lu.assertEquals(D1:get_string_by_index(1), "Sample")
+  lu.assertEquals(D1:get_string_by_index(2), "String")
+  lu.assertEquals(D1:get_string_by_index(3), "For")
+  lu.assertEquals(D1:get_string_by_index(4), "Varchar")    
 end
+
+function test_load_csv:test_valid_SC_dict_is_dict_add_true()
+  local csv_file_path = test_input_dir .. "SV_valid.csv"
+  local num_records = 4
+  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = true, add=true} }
+  
+  local d1 = Dictionary.new({dict = "D1", is_dict = false, add=true})
+  d1:add_with_condition("Value1", true)
+  d1:add_with_condition("Value2", true)
+  lu.assertEquals(d1:get_size(), 2) 
+    
+  local ret = load( csv_file_path, metadata )
+  lu.assertEquals(type(ret),"table") 
+  lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
+
+  local vector = ret[1]:get_vector()
+  local x, x_size = vector:chunk(0)
+  
+  lu.assertEquals(d1:get_size(), 6)
+  
+  lu.assertEquals(d1:get_string_by_index(3), "Sample")
+  lu.assertEquals(d1:get_string_by_index(4), "String")
+  lu.assertEquals(d1:get_string_by_index(5), "For")
+  lu.assertEquals(d1:get_string_by_index(6), "Varchar")    
+
+end
+
+ 
+
+
 
 function test_load_csv:test_int_overflow()
   lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I1_overflow.csv", { { name = "col1", type = "I1", null ="true" }} )
@@ -416,7 +446,7 @@ function test_load_csv:test_nil_data_I4()
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)    
 
-  local vector = ret[1].get_nn_vector()
+  local vector = ret[1]:get_nn_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "1")
@@ -424,7 +454,7 @@ function test_load_csv:test_nil_data_I4()
   lu.assertEquals(convert_c_to_txt("I1", x , 2 ), "1")
   lu.assertEquals(convert_c_to_txt("I1", x , 3 ), "0")  
 
-  local vector_col2 = ret[2].get_nn_vector()
+  local vector_col2 = ret[2]:get_nn_vector()
   local y, y_size = vector_col2:chunk(0)
   lu.assertEquals(convert_c_to_txt("I1", y , 0 ), "1")
   lu.assertEquals(convert_c_to_txt("I1", y , 1 ), "1")
@@ -438,7 +468,7 @@ function test_load_csv:test_nil_data_SV()
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)      
 
-  local vector = ret[1].get_nn_vector()
+  local vector = ret[1]:get_nn_vector()
   local x, x_size = vector:chunk(0)
     
   lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "1")
@@ -446,7 +476,7 @@ function test_load_csv:test_nil_data_SV()
   lu.assertEquals(convert_c_to_txt("I1", x , 2 ), "0")
   lu.assertEquals(convert_c_to_txt("I1", x , 3 ), "1")  
 
-  local vector_col2 = ret[2].get_nn_vector()
+  local vector_col2 = ret[2]:get_nn_vector()
   local y, y_size = vector_col2:chunk(0)
   lu.assertEquals(convert_c_to_txt("I1", y , 0 ), "1")
   lu.assertEquals(convert_c_to_txt("I1", y , 1 ), "0")
@@ -468,16 +498,9 @@ end
 -- ---- Test cases ---------
 
 --[[
-TODO : 
+TODO : This has not been implemented in load_csv as of now, but was there in readme file, so keeping here for reference.  
 o) Can we specify integer in hex format?
 o) Can we specify floating point in exponent format?
---]]
---[[
-print("#####")
-  _G["Q_DATA_DIR"] = "./test_data/"
-  _G["Q_META_DATA_DIR"] = "./test_data/"
-  _G["Q_DICTIONARIES"] = {}
-print("####")
 --]]
 
 os.exit( lu.LuaUnit.run() )

@@ -22,7 +22,7 @@ end
 
 function Dictionary.new(dict_metadata)
   local self = setmetatable({}, Dictionary)
-  assert( (dict_metadata ~= nil and dict_metadata ~= "" ) , "Dictionary metadata should not be empty")
+  assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) , "Dictionary metadata should not be empty")
   assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "" ,"Please specify correct metadata")
  
   self.dict_name = dict_metadata.dict
@@ -42,8 +42,8 @@ function Dictionary.new(dict_metadata)
   
   -- Two tables are used here, so that bidirectional lookup becomes easy 
   -- and whole table scan is not required for one side
-  self.text_to_number = {}
-  self.number_to_text = {}  
+  self.text_to_index = {}
+  self.index_to_text = {}  
   
     --put newly created dictionary into global variable
   _G["Q_DICTIONARIES"][self.dict_name] = self
@@ -52,8 +52,8 @@ function Dictionary.new(dict_metadata)
 end
   
 -- If the text exists in the dictionary
-function Dictionary:is_string_exists(text) 
-    if self.text_to_number[text] ~= nil then
+function Dictionary:does_string_exists(text) 
+    if self.text_to_index[text] ~= nil then
       return true 
     else 
       return false
@@ -61,23 +61,23 @@ function Dictionary:is_string_exists(text)
 end
 
 
--- Given a number, if that number exists in dictionary then the string corresponding to that number is returned, null otherwise
-function Dictionary:get_string_by_number(index)
-  local num = self.number_to_text[index]
+-- Given a index, if that index exists in dictionary then the string corresponding to that index is returned, null otherwise
+function Dictionary:get_string_by_index(index)
+  local num = self.index_to_text[index]
   return num
 end
         
--- Given a string, if that string  exists in dictionary then the corresponding number to that string, null otherwise        
-function Dictionary:get_number_by_string(text) 
-  return self.text_to_number[text]
+-- Given a string, if that string  exists in dictionary then the corresponding index to that string, null otherwise        
+function Dictionary:get_index_by_string(text) 
+  return self.text_to_index[text]
 end
 
   
 -- --------------------------------------------------
--- Adds the string into dictionary and returns number corresponding to the string 
---     add_if_not_exists = true (default) :  If string exists in the dictionary then returns number corresponding to that string 
---                                      otherwise adds the string into dictionary and returns the number at which string was added
---     add_if_not_exists = false : If string exists in the dictionary then returns the number corresponding to that string 
+-- Adds the string into dictionary and returns index corresponding to the string 
+--     add_if_not_exists = true (default) :  If string exists in the dictionary then returns index corresponding to that string 
+--                                      otherwise adds the string into dictionary and returns the index at which string was added
+--     add_if_not_exists = false : If string exists in the dictionary then returns the index corresponding to that string 
 --                                        otherwise error out
 -- -------------------------------------------------
 function Dictionary:add_with_condition(text, add_if_not_exists)
@@ -87,32 +87,28 @@ function Dictionary:add_with_condition(text, add_if_not_exists)
   -- default to true for addIfExists condition
  if(add_if_not_exists == nil) then add_if_not_exists = true end
  
- local text_exists = self:is_string_exists(text)
-  if(add_if_not_exists) then 
-    if(text_exists) then 
-      return self:get_number_by_string(text)
-    else
-      local next_value = #self.number_to_text + 1
-      self.text_to_number[text] = next_value
-      self.number_to_text[next_value] = text
-      return next_value
-    end
+ if(self:does_string_exists(text)) then 
+  return self:get_index_by_string(text)
+ else
+  if(add_if_not_exists) then
+    local next_value = #self.index_to_text + 1
+    self.text_to_index[text] = next_value
+    self.index_to_text[next_value] = text
+    return next_value
   else
-    if(text_exists) then 
-      return self:get_number_by_string(text)
-    else
-      error("Text does not exist in dictionary")
-    end
-  end 
+    error("Text does not exist in dictionary")
+  end
+ end
+ 
 end
   
 function Dictionary:get_size()
-  return #self.number_to_text
+  return #self.index_to_text
 end  
 
 -- --------------------------------------
 -- save all dictionary content to the file specified by the filePath.   
---     Currently only one table text_to_number is dumped into file as csv content. 
+--     Currently only one table text_to_index is dumped into file as csv content. 
 --     CSV writing is the very basic function, which just escapes (‘ “ ) and writes the output. This function can be evolved if required
 -- -------------------------------------- 
 function Dictionary:save_to_file(file_path)
@@ -120,7 +116,7 @@ function Dictionary:save_to_file(file_path)
   io.output(file)
   local separator = ","
   
-  for k,v in pairs(self.text_to_number) do 
+  for k,v in pairs(self.text_to_index) do 
     local s = escape_csv(k) .. separator  .. v
     -- print("S is : " .. s)
     -- store the line in the file
@@ -131,16 +127,16 @@ end
 
 -- ----------------------------------------------
 -- reads the dictionary back from the file 
---   It will read each line from the csv file and add entry in both table (text_to_number and number_to_text ) 
+--   It will read each line from the csv file and add entry in both table (text_to_index and index_to_text ) 
 -- -------------------------------------------
 
 function Dictionary:restore_from_file(file_path)
   for line in io.lines(file_path) do 
     local entry= parse_csv_line(line,',')
-    -- each entry is the form string, number
+    -- each entry is the form string, index
     
-    self.text_to_number[entry[1]] = tonumber(entry[2])
-    self.number_to_text[tonumber(entry[2])] = entry[1]
+    self.text_to_index[entry[1]] = tonumber(entry[2])
+    self.index_to_text[tonumber(entry[2])] = entry[1]
   end  
 end
  
