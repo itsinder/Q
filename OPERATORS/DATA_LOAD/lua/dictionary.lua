@@ -23,14 +23,14 @@ end
 function Dictionary.new(dict_metadata)
   local self = setmetatable({}, Dictionary)
   assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) , "Dictionary metadata should not be empty")
-  assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "" ,"Please specify correct metadata")
+  assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "", "Please specify correct metadata")
  
   self.dict_name = dict_metadata.dict
   self.is_dict = dict_metadata.is_dict or false  -- default value is false, dictionary does not exist.. create one
   self.add_new_value = dict_metadata.add or true  -- default value is true, add null values
    
   local dict;
-  if(self.is_dict == true) then
+  if self.is_dict == true then
     local dict = _G["Q_DICTIONARIES"][self.dict_name] 
     assert(dict ~= nil, "Dictionary does not exist. Aborting the operation")
     --dictionary found in globals, return that dictionary 
@@ -85,12 +85,14 @@ function Dictionary:add_with_condition(text, add_if_not_exists)
  assert(text ~= nil and text ~= "", "Cannot add nil or empty string in dictionary") 
 
   -- default to true for addIfExists condition
- if(add_if_not_exists == nil) then add_if_not_exists = true end
+ if add_if_not_exists == nil then
+  add_if_not_exists = true 
+ end
  
- if(self:does_string_exists(text)) then 
+ if self:does_string_exists(text) then 
   return self:get_index_by_string(text)
  else
-  if(add_if_not_exists) then
+  if add_if_not_exists then
     local next_value = #self.index_to_text + 1
     self.text_to_index[text] = next_value
     self.index_to_text[next_value] = text
@@ -113,14 +115,12 @@ end
 -- -------------------------------------- 
 function Dictionary:save_to_file(file_path)
   local file = assert(io.open (file_path, "w"))
-  io.output(file)
   local separator = ","
-  
   for k,v in pairs(self.text_to_index) do 
     local s = escape_csv(k) .. separator  .. v
     -- print("S is : " .. s)
     -- store the line in the file
-     io.write(s, "\n")
+     file:write(s, "\n")
   end    
   assert(file:close()) 
 end
@@ -131,18 +131,15 @@ end
 -- -------------------------------------------
 
 function Dictionary:restore_from_file(file_path)
-  for line in io.lines(file_path) do 
-    local entry= parse_csv_line(line,',')
+  local file = assert(io.open(file_path, "r"))
+  for line in file:lines() do 
+    local entry= parse_csv_line(line, ',')
     -- each entry is the form string, index
-    
     self.text_to_index[entry[1]] = tonumber(entry[2])
     self.index_to_text[tonumber(entry[2])] = entry[1]
   end  
+  assert(file:close())
 end
  
-
-function Dictionary.destructor(self,data)
-    _G["Q_DICTIONARIES"][self.dict_name] = nil
-end
 
 return Dictionary

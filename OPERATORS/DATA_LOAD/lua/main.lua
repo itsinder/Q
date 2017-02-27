@@ -3,14 +3,13 @@ require 'dictionary'
 require 'environment'
 require 'pl'
 
-local no_of_args = #arg
-assert( no_of_args == 2 , "ERROR: Please provide metadata_file_path followed by data_file_path")
+assert( #arg == 2 , "ERROR: Please provide metadata_file_path followed by data_file_path")
   
 local metadata_file_path = arg[1]
 local csv_file_path = arg[2]
 
-assert(path.exists(metadata_file_path) and path.isfile(metadata_file_path), "ERROR: Please check metadata_file_path")
-assert(path.exists(csv_file_path) and path.isfile(csv_file_path) , "ERROR: Please check csv_file_path")
+assert(path.isfile(metadata_file_path), "ERROR: Please check metadata_file_path")
+assert(path.isfile(csv_file_path), "ERROR: Please check csv_file_path")
  
 
 -- read the content of file into lua table

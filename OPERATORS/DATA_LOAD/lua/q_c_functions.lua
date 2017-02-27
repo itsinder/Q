@@ -35,11 +35,11 @@ ffi.cdef[[
   ]]
 
 
-function reset_chunk_data(chunk, size_of_c_data ,chunk_size)
+function reset_chunk_data(chunk, size_of_c_data, chunk_size)
   ffi.C.memset(chunk, 0, size_of_c_data * chunk_size)
 end
 
-function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
+function allocate_chunk_data(ctype, size_of_c_data, chunk_size)
   local chunk = ffi.C.malloc(size_of_c_data*chunk_size)
   -- explicit cast is required for luaffi to work, luajit ffi implicitly casts void * to any data type
   local chunk = ffi.cast(ctype.. " * ", chunk)
@@ -50,17 +50,19 @@ function allocate_chunk_data(ctype, size_of_c_data ,chunk_size)
 end
 
 
-function convert_data(function_name, q_type, data, c_value, size_of_c_data)
+function convert_txt_to_c(q_type, data, c_value, size_of_c_data)
+  
   -- for null fields set all bytes to \0
-  if(data == nil) then 
+  if data == nil then 
     ffi.C.memset(c_value, 0, size_of_c_data)
   else 
     local status = nil
+    local function_name = g_qtypes[q_type]["txt_to_ctype"]
     -- for fixed size string pass the size of string data also
     if q_type == "SC" then
-      local ssize = ffi.cast("size_t" ,size_of_c_data)
+      local ssize = ffi.cast("size_t", size_of_c_data)
       status = q_c_lib[function_name](data, c_value, ssize)
-    elseif ( q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV") then
+    elseif q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV" then
       -- For now second parameter , base is 10 only
       status = q_c_lib[function_name](data, 10, c_value)
     elseif q_type == "F4" or q_type == "F8"  then 
@@ -70,7 +72,7 @@ function convert_data(function_name, q_type, data, c_value, size_of_c_data)
     end
     
     -- negative status indicates error condition
-    if(status < 0) then 
+    if status < 0 then 
       error("Invalid data found")
     end
   end  
@@ -98,13 +100,13 @@ function convert_c_to_txt(q_type, c_data, idx,  size_of_data)
   local function_name = g_qtypes[q_type]["ctype_to_txt"]
   local c_data = ffi.cast(g_qtypes[q_type]["ctype"] .. " * ", c_data)
     
-  local actual_data_ptr = allocate_chunk_data("char",size_of_data , 1);
+  local actual_data_ptr = allocate_chunk_data("char", size_of_data , 1);
  
   local status
   if q_type == "SC" then
     status = q_c_print_lib[function_name](c_data + idx, size_of_data, actual_data_ptr, size_of_data )
   else 
-    status = q_c_print_lib[function_name](c_data + idx, nil, actual_data_ptr , size_of_data)
+    status = q_c_print_lib[function_name](c_data + idx, nil, actual_data_ptr, size_of_data)
   end
 
   local str = ffi.string(actual_data_ptr)

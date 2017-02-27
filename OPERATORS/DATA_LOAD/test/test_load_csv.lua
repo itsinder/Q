@@ -96,18 +96,18 @@ end
 
 
 function test_load_csv:test_type_not_in_qtypes()
-  lu.assertErrorMsgContains("type contains invalid q type", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="I3", null="false"}} )
+  lu.assertErrorMsgContains("type contains invalid q type", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="I3", null=false}} )
 end
 
 
 -- ###### File content #########
 function test_load_csv:test_nil_file()
-  local metadata = { { name = "empid", null="true", type = "I4" } }
+  local metadata = { { name = "empid", null=true, type = "I4" } }
   lu.assertErrorMsgContains("Please make sure that csv_file_path is correct", load , nil, metadata)
 end
 
 function test_load_csv:test_file_not_exist()
-  local metadata = { { name = "empid", null="true", type = "I4" },
+  local metadata = { { name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
               { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
   local csv_file_path = test_input_dir .. "some_nonexistent_file"
@@ -166,7 +166,7 @@ end
 
 
 function test_load_csv:test_column_is_more()
-  local metadata = { { name = "col1", type = "I4", null ="true" },
+  local metadata = { { name = "col1", type = "I4", null =true },
               { name = "col2", type ="I2" },
               { name = "col3", type ="SV",dict = "D1", is_dict = false, add=true},
               { name = "extrac_column", type ="I2" }}
@@ -177,21 +177,21 @@ end
 
 function test_load_csv:test_column_is_less()
   local csv_file_path = test_input_dir .. "I2_I2_SV_3_4.csv"
-  local metadata = { { name = "col1", type = "I4", null ="true" },
+  local metadata = { { name = "col1", type = "I4", null =true },
               { name = "col2", type ="I2" }}
   lu.assertErrorMsgContains("Column count does not match with count of column in metadata", load, csv_file_path, metadata )
 end
 
 function test_load_csv:test_column_not_same_on_each_line()
   local csv_file_path = test_input_dir .. "bad_col_data_mismatch_each_line.csv"
-  local metadata = { { name = "col1", type = "I4", null ="true" },
+  local metadata = { { name = "col1", type = "I4", null =true },
               { name = "col2", type ="I2" }}
   lu.assertErrorMsgContains("Column count does not match with count of column in metadata", load, csv_file_path, metadata )
 end
 
 
 function test_load_csv:test_load_successfull()
-  local metadata = { { name = "empid", null="true", type = "I4" },
+  local metadata = { { name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
               { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
               
@@ -202,7 +202,7 @@ end
 
 function test_load_csv:test_valid_load_bin_file_size()
   local file_path, actual_size, expected_size
-  local metadata = {{ name = "empid", null="true", type = "I4" },
+  local metadata = {{ name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
               { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
   local csv_file_path = test_input_dir .. "I2_I2_SV_3_4.csv"
@@ -217,20 +217,20 @@ end
 
 function test_load_csv:test_nil_value_in_not_nil_field()
   local csv_file_path = test_input_dir .. "I4_2_null.csv"
-  local metadata = {{ name = "col1", type = "I4", null ="false" }, { name = "col2", type = "I4", null ="false" }}
+  local metadata = {{ name = "col1", type = "I4", null =false }, { name = "col2", type = "I4", null =false }}
   lu.assertErrorMsgContains("Null value found in not null field", load, csv_file_path, metadata )
 end
 
 function test_load_csv:test_nil_value_in_not_nil_field_2_column()
   local csv_file_path = test_input_dir .. "I4_2_4_null.csv"
-  local metadata = { { name = "col1", type = "I4", null ="false" }, { name = "col2", type = "I4", null ="false" }}
+  local metadata = { { name = "col1", type = "I4", null =false }, { name = "col2", type = "I4", null =false }}
   lu.assertErrorMsgContains("Null value found in not null field", load, csv_file_path, metadata )
 end
 
 function test_load_csv:test_no_nil_value_in_nil_field()
   local csv_file_path = test_input_dir .. "I4_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "I4", null ="true" }}
+  local metadata = { { name = "col1", type = "I4", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
@@ -239,7 +239,7 @@ end
 function test_load_csv:test_valid_I1()
   local csv_file_path = test_input_dir .. "I1_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "I1", null ="true" }}
+  local metadata = { { name = "col1", type = "I1", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 1)
@@ -256,7 +256,7 @@ end
 function test_load_csv:test_valid_I2()
   local csv_file_path = test_input_dir .. "I2_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col2", type = "I2", null ="true" }}
+  local metadata = { { name = "col2", type = "I2", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col2"), num_records * 2)
@@ -274,7 +274,7 @@ end
 function test_load_csv:test_valid_I4()
   local csv_file_path = test_input_dir .. "I4_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "I4", null ="true" }}
+  local metadata = { { name = "col1", type = "I4", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
@@ -292,7 +292,7 @@ end
 function test_load_csv:test_valid_I8()
   local csv_file_path = test_input_dir .. "I8_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "I8", null ="true" }}
+  local metadata = { { name = "col1", type = "I8", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
@@ -311,7 +311,7 @@ end
 function test_load_csv:test_valid_F4()
   local csv_file_path = test_input_dir .. "F4_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "F4", null ="true" }}
+  local metadata = { { name = "col1", type = "F4", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
@@ -328,7 +328,7 @@ end
 function test_load_csv:test_valid_F8()
   local csv_file_path = test_input_dir .. "F8_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type = "F8", null ="true" }}
+  local metadata = { { name = "col1", type = "F8", null =true }}
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
@@ -422,27 +422,27 @@ end
 
 
 function test_load_csv:test_int_overflow()
-  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I1_overflow.csv", { { name = "col1", type = "I1", null ="true" }} )
-  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I2_overflow.csv", { { name = "col1", type = "I2", null ="true" }} )
-  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I4_overflow.csv", { { name = "col1", type = "I4", null ="true" }} )
-  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I8_overflow.csv", { { name = "col1", type = "I8", null ="true" }} )
+  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I1_overflow.csv", { { name = "col1", type = "I1", null =true }} )
+  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I2_overflow.csv", { { name = "col1", type = "I2", null =true }} )
+  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I4_overflow.csv", { { name = "col1", type = "I4", null =true }} )
+  lu.assertErrorMsgContains("Invalid data found", load, test_input_dir .. "I8_overflow.csv", { { name = "col1", type = "I8", null =true }} )
 end
 
 function test_load_csv:test_string_in_int_data()
-  lu.assertErrorMsgContains("Invalid data", load, test_input_dir .. "bad_string_in_I1.csv", { { name = "col1", type = "I1", null ="true" }} )
+  lu.assertErrorMsgContains("Invalid data", load, test_input_dir .. "bad_string_in_I1.csv", { { name = "col1", type = "I1", null =true }} )
 end
 
 
 function test_load_csv:test_whole_row_nil()
   local csv_file_path = test_input_dir .. "I4_2_null.csv"
-  local metadata = { { name = "col1", type="SC" , size = 15, null = true},{ name = "col2", type = "F8", null ="true" } }
+  local metadata = { { name = "col1", type="SC" , size = 15, null = true},{ name = "col2", type = "F8", null =true } }
   -- there should not be any error during load
   local res = load(csv_file_path, metadata)  
 end
 
 function test_load_csv:test_nil_data_I4()
   local csv_file_path = test_input_dir .. "I4_2_4_null.csv"
-  local metadata = { { name = "col1", type="I4" ,null = true},{ name = "col2", type = "I4", null ="true" } }
+  local metadata = { { name = "col1", type="I4" ,null = true},{ name = "col2", type = "I4", null =true } }
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)    
 
@@ -464,7 +464,7 @@ end
 
 function test_load_csv:test_nil_data_SV()
   local csv_file_path = test_input_dir .. "I4_2_null.csv"
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true, null=true },{ name = "col2", type = "I4", null ="true" } }
+  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true, null=true },{ name = "col2", type = "I4", null =true } }
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)      
 
@@ -486,7 +486,7 @@ end
 
 function test_load_csv:test_nil_data_file_deletion()
   local csv_file_path = test_input_dir .. "I4_valid.csv"
-  local metadata = { { name = "col2", type = "I4", null ="true" } }
+  local metadata = { { name = "col2", type = "I4", null =true } }
   -- there should not be any error during load
   local res = load(csv_file_path, metadata)      
   lu.assertFalse(path.exists(_G["Q_DATA_DIR"].. "_nn_col1"))  

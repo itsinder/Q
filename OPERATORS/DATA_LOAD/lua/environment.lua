@@ -2,16 +2,16 @@ require 'dictionary'
 
 function set_environment()
 -- check Q_DATA_DIR, Q_META_DATA_DIR variable exists
-  if(_G["Q_DATA_DIR"] == nil) then
+  if _G["Q_DATA_DIR"] == nil then
     _G["Q_DATA_DIR"] = "./out/"     
   end
   
-  if(_G["Q_META_DATA_DIR"] == nil) then
+  if _G["Q_META_DATA_DIR"] == nil then
     _G["Q_META_DATA_DIR"] = "./metadata/"
   end
 
 -- create dictionary table if it does not exists
-  if(_G["Q_DICTIONARIES"] == nil) then
+  if _G["Q_DICTIONARIES"] == nil then
     _G["Q_DICTIONARIES"] = {}
   end
 end

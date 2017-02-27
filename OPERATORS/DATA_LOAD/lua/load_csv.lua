@@ -17,49 +17,47 @@ local function validate_input(csv_file_path, metadata_table, load_global_setting
   assert( type(metadata_table) == "table", "Metadata type should be table")
   assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
   -- Check if the directory required by this load operation exists
-  assert( valid_dir(_G["Q_DATA_DIR"]),"Please make sure that Q_DATA_DIR points to correct directory")
-  assert( valid_dir(_G["Q_META_DATA_DIR"]) , "Please make sure that Q_META_DATA_DIR points to correct directory")
+  assert( valid_dir(_G["Q_DATA_DIR"]), "Please make sure that Q_DATA_DIR points to correct directory")
+  assert( valid_dir(_G["Q_META_DATA_DIR"]), "Please make sure that Q_META_DATA_DIR points to correct directory")
   
   local col_names = {}
   -- now look at fields of metadata
-  for metadata_idx,metadata in pairs(metadata_table) do
+  for metadata_idx, metadata in pairs(metadata_table) do
     assert(metadata.name ~= nil, "metadata " .. metadata_idx .. " : name cannot be null")
     assert(metadata.type ~= nil, "metadata " .. metadata_idx .. " : type cannot be null")
     assert(g_qtypes[metadata.type] ~= nil, "metadata " .. metadata_idx .. " : type contains invalid q type")
     -- if not null is specified then only true/false is the acceptable value
-    if(metadata.null ~= nil) then 
-      assert( (metadata.null == true or metadata.null == "true" or metadata.null == false or metadata.null == "false" ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
+    if metadata.null ~= nil then 
+      assert((metadata.null == true  or metadata.null == false ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
     end
     
     -- check if the same column name is found before in metadata
-    if(metadata.name ~= "") then 
+    if metadata.name ~= "" then 
       assert( col_names[metadata.name] == nil , "metadata " .. metadata_idx .. " : duplicate column name is not allowed") 
       col_names[metadata.name] = 1 
     end
     -- Perform check based on metadata type
    
-    if(metadata.type == "SC") then 
-      assert(metadata.size ~= nil , "metadata " .. metadata_idx .. " : size should be specified for fixed length strings")
-      assert(tonumber(metadata.size) , "metadata " .. metadata_idx .. " : size should be valid number")
+    if metadata.type == "SC" then 
+      assert(metadata.size ~= nil, "metadata " .. metadata_idx .. " : size should be specified for fixed length strings")
+      assert(tonumber(metadata.size), "metadata " .. metadata_idx .. " : size should be valid number")
       
-    elseif(metadata.type == "SV") then
-      assert(metadata.dict ~= nil,"metadata " .. metadata_idx .. " : dict cannot be null")
+    elseif metadata.type == "SV" then
+      assert(metadata.dict ~= nil, "metadata " .. metadata_idx .. " : dict cannot be null")
       assert(metadata.is_dict ~= nil, "metadata " .. metadata_idx .. " : is_dict cannot be null") -- m["is_dict"]
-      assert(metadata.is_dict == true or metadata.is_dict == "true" or metadata.is_dict == false or metadata.is_dict == "false", "metadata " .. metadata_idx .. " : is_dict can contain true/false only")
-      if(metadata.is_dict == true or metadata.is_dict == "true") then 
+      assert(metadata.is_dict == true or metadata.is_dict == false , "metadata " .. metadata_idx .. " : is_dict can contain true/false only")
+      if metadata.is_dict == true then 
         assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has is_dict true")
-        assert(metadata.add == true or metadata.add == "true" or metadata.add == false or metadata.add == "false", "metadata " .. metadata_idx .. " : add can contain true/false only")
+        assert(metadata.add == true or metadata.add == false, "metadata " .. metadata_idx .. " : add can contain true/false only")
       end
     end     
   end
   
   -- file should not be empty
-  assert( path.getsize(csv_file_path) ~= 0 , "File should not be empty")     
+  assert( path.getsize(csv_file_path) ~= 0, "File should not be empty")     
 end
 
 local function initialize(metadata, vector_wrapper_table)
-  
-
   -- initialize value which needs to be written to null vector, since it will be either 0 or 1
   -- Initialize all the values
   local col_count = #metadata
@@ -75,7 +73,7 @@ end
 
 local function cleanup(metadata, col_count, vector_wrapper_table)
   for i = 1, col_count do 
-    -- If metadata name is not empty/null, then only create new vector
+    -- If metadata name is not empty/null, then vector_wrapper exists, close it.
     if stringx.strip(metadata[i].name) ~= "" then
       vector_wrapper_table[i]:close()
     end     
@@ -94,7 +92,7 @@ end
 
 -- validate meta-data & create vector + null vector for each of the file being created 
 
-function load( csv_file_path, metadata , load_global_settings)
+function load( csv_file_path, metadata, load_global_settings)
   local vector_wrapper_table = {}
   local col_count = 0 --each field in the metadata represents one column in csv file
   local col_idx = 0
