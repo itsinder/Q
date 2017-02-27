@@ -6,7 +6,7 @@ Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
         __call = function (cls, ...)
-            return cls.new(...)
+            return cls.get_instance(...)
         end,
 })
 
@@ -20,7 +20,7 @@ type = function( obj )
     return otype
 end
 
-function Dictionary.new(dict_metadata)
+function Dictionary.get_instance(dict_metadata)
   local self = setmetatable({}, Dictionary)
   assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) , "Dictionary metadata should not be empty")
   assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "", "Please specify correct metadata")

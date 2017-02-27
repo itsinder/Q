@@ -396,7 +396,7 @@ function test_load_csv:test_valid_SC_dict_is_dict_add_true()
   local num_records = 4
   local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = true, add=true} }
   
-  local d1 = Dictionary.new({dict = "D1", is_dict = false, add=true})
+  local d1 = Dictionary({dict = "D1", is_dict = false, add=true})
   d1:add_with_condition("Value1", true)
   d1:add_with_condition("Value2", true)
   lu.assertEquals(d1:get_size(), 2) 
