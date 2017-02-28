@@ -44,10 +44,10 @@ local function validate_input(csv_file_path, metadata_table, load_global_setting
       
     elseif metadata.type == "SV" then
       assert(metadata.dict ~= nil, "metadata " .. metadata_idx .. " : dict cannot be null")
-      assert(metadata.is_dict ~= nil, "metadata " .. metadata_idx .. " : is_dict cannot be null") -- m["is_dict"]
-      assert(metadata.is_dict == true or metadata.is_dict == false , "metadata " .. metadata_idx .. " : is_dict can contain true/false only")
-      if metadata.is_dict == true then 
-        assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has is_dict true")
+      assert(metadata.dict_exists ~= nil, "metadata " .. metadata_idx .. " : dict_exists cannot be null") -- m["dict_exists"]
+      assert(metadata.dict_exists == true or metadata.dict_exists == false , "metadata " .. metadata_idx .. " : dict_exists can contain true/false only")
+      if metadata.dict_exists == true then 
+        assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has dict_exists true")
         assert(metadata.add == true or metadata.add == false, "metadata " .. metadata_idx .. " : add can contain true/false only")
       end
     end     

@@ -27,6 +27,24 @@ function escape_csv (s)
 end
 
 
+function preprocess_bool_values(metadata_table, ...)
+  local col_names = {...}
+  for i, metadata in pairs(metadata_table) do 
+    for j, col_name in pairs(col_names) do
+       if metadata[col_name] ~= nil and type(metadata[col_name]) ~= "boolean" then
+        if string.lower(metadata[col_name]) == "true" then
+          metadata[col_name] = true
+        elseif string.lower(metadata[col_name]) == "false" then
+          metadata[col_name] = false
+        else
+          error("Invalid value in metadata ".. i .. " for boolean field " .. col_name)
+        end
+       end
+    end
+  end
+end
+
+
 --[[ Following contains one liner example of useful tasks, which should be used directly 
 
 - trim the string : stringx.strip(string_data)

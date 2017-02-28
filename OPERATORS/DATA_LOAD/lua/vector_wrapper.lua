@@ -140,7 +140,7 @@ function Vector_Wrapper:write(data)
     if self.nn_v ~= nil then 
       self.nn_v:put_chunk(self.nn_current_chunk, self.chunk_size ) 
     end 
-    allocate_chunk()  
+    allocate_chunk(self)  
   end
 
   -- Get the pointer for data on the current index   

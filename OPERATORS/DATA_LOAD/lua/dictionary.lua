@@ -26,11 +26,11 @@ function Dictionary.get_instance(dict_metadata)
   assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "", "Please specify correct metadata")
  
   self.dict_name = dict_metadata.dict
-  self.is_dict = dict_metadata.is_dict or false  -- default value is false, dictionary does not exist.. create one
+  self.dict_exists = dict_metadata.dict_exists or false  -- default value is false, dictionary does not exist.. create one
   self.add_new_value = dict_metadata.add or true  -- default value is true, add null values
    
   local dict;
-  if self.is_dict == true then
+  if self.dict_exists == true then
     local dict = _G["Q_DICTIONARIES"][self.dict_name] 
     assert(dict ~= nil, "Dictionary does not exist. Aborting the operation")
     --dictionary found in globals, return that dictionary 
