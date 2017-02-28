@@ -14,17 +14,18 @@ ffi.cdef([[
     int get_bits_from_file(FILE* fp, int* arr, int length);
     int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
     ]])
-local c = ffi.load('./print.so')
-local b = ffi.load('./vector_mmap.so')
+local c = ffi.load('print.so')
+local b = ffi.load('vector_mmap.so')
 local Generator = require "Generator"
 local Vector = require 'Vector'
+local Column = require "Column"
 g_valid_types = {}
 g_valid_types['i'] = 'int'
 g_valid_types['f'] = 'float'
 g_valid_types['d'] = 'double'
 g_valid_types['c'] = 'char'
 g_valid_types['B1'] = 'unsigned char'
-g_chunk_size = 15
+g_chunk_size = 16
 --local size = 1000
 --create bin file of only ones of type int
 local v1 = Vector{field_type='i',
@@ -63,4 +64,23 @@ b.get_bits_from_array(a, a_int, a_size)
 print "**************"
 c.print_vector(a_int, a_size)
 -- add function to print bits:b2
+v5 = Column{field_type='i',
+filename="o2.txt", write_vector=true,
+ }
+ v5:put_chunk(x_size, x )
+v5:eov()
+v6 = Column{field_type='i',
+filename="o3.txt", write_vector=true, nn=true
+ }
+assert(v6.nn_vec ~= nil , "has an nn vector")
+v6:put_chunk(x_size, x, a )
+v6:eov()
+q_size, q, q_nn = v6:chunk(0)
+c.print_vector(q, q_size)
+local q_int = ffi.gc(c.malloc(ffi.sizeof("int")* q_size), ffi.free)
+b.get_bits_from_array(q_nn, q_int, q_size)
+print "**************"
+c.print_vector(q_int, q_size)
 
+print "**************"
+c.print_vector(a_int, a_size)

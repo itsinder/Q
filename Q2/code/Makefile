@@ -6,7 +6,7 @@ RM = rm -f
 SOURCE_FILES = $(wildcard *.c)
 #CORESO := $(patsubst %.c,%.so,$(SOURCE_FILES))
 OBJECTS := $(patsubst %.c,%.o,$(SOURCE_FILES))
-CORE_SO = vector_map.so print.so
+CORE_SO = libvector_map.so libprint.so
 
 
 #%.so: ./%.c
@@ -18,16 +18,18 @@ CORE_SO = vector_map.so print.so
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-vector_map.so: $(OBJECTS)
-	$(CC) -shared -o vector_mmap.so vector_mmap.o bitops.o
+libvector_map.so: $(OBJECTS)
+	$(CC) -shared -o libvector_mmap.so vector_mmap.o bitops.o
 
-print.so: $(OBJECTS)
-	$(CC) -shared -o print.so print.o
+libprint.so: $(OBJECTS)
+	$(CC) -shared -o libprint.so print.o
 
 all: $(CORE_SO)
+	rm $(OBJECTS)
 	echo "done"
 
 test: 
+	echo "Now testing c function calls"
 	$(CC) driver.c -o driver
 	./driver > /dev/null
 	$(CC) vector_mmap.c -DTEST -o vec
@@ -36,8 +38,9 @@ test:
 	./bit
 	cp test.txt test1.txt
 	cp test.txt test2.txt
+	echo "Now testing lua bindings"
 	luajit testVector.lua
-	echo "Now testing c function calls"
+	rm ./*.txt *_nn
 clean:
 	$(RM) $(CORESO) $(OBJECTS)
 

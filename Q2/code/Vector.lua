@@ -1,3 +1,23 @@
+--[[
+Vector Semantics
+    1. Pull Semantics
+        1.1 Generator
+            Params
+                generator - The generator that is the source of data
+        1.2 Read file
+            Params
+                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
+                field_type - The field type used, which must be present in g_valid_types
+                field_size (optional) - The size of each element, defaults to getting it from g_valid_types
+                filename - The file to be read from
+    2. Push Semantics
+        2.1 Write file
+            Params
+                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
+                field_type - The field type used, which must be present in g_valid_types
+                field_size (optional) - The size of each element, defaults to getting it from g_valid_types 
+                filename (optional) - The file to be written out to, defaults to a random unused file
+]]
 local Vector = {}
 Vector.__index = Vector
 local valid_types = {}
@@ -72,7 +92,7 @@ int get_bits(FILE* fp, int* arr, int length);
 int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
  ]])
 
-local c = ffi.load('./vector_mmap.so')
+local c = ffi.load('vector_mmap.so')
 local C = ffi.C
 local DestructorLookup = {}
 setmetatable(Vector, {
@@ -142,7 +162,12 @@ local function write_file_vector(self, arg)
     self.output_to_file = true
     self.filename = arg.filename or get_new_filename(10)
     --TODO ensure the file is empty to avoid confusion
-    self.is_materialized = false
+	local f = io.open(self.filename,"r")
+	if f ~= nil then
+		io.close(f)
+		os.remove(self.filename)
+	end
+   self.is_materialized = false
     self.length = 0
     return self
 end
@@ -358,6 +383,7 @@ function Vector:eov()
     self.max_chunks = math.ceil(self.length/self.chunk_size)
 end
 
+--TODO deprecated
 function Vector:get_meta(index)
     assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]
