@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := all
 CC = gcc
-CFLAGS = -fPIC
+CFLAGS = -fPIC -std=gnu99
+
 LFLAGS = -shared
 RM = rm -f
 SOURCE_FILES = $(wildcard *.c)

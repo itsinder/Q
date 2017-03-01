@@ -1,11 +1,17 @@
 #!/bin/bash 
 set -e 
 
+#Clean all directory first
+rm -rf ../gen_inc ../gen_src ../obj
+
+#create all the required directory
+mkdir ../gen_src ../gen_inc ../obj
+
+
 bash gen_files.sh
-#gcc -fPIC -shared -o ../src/QCFunc.so ../src/QCFunc.c
 
 gcc -std=gnu99 \
-  -o ../obj/q_c_print_functions.so \
+  -o ../obj/libq_c_print_functions.so \
   ../src/SC_to_txt.c \
   ../gen_src/_I1_to_txt.c \
   ../gen_src/_I2_to_txt.c \
@@ -17,9 +23,5 @@ gcc -std=gnu99 \
   -fPIC -shared \
   -I../../../UTILS/inc/ \
   -I../gen_inc/
-
-
-
-
 
 echo "Completed $0 in $PWD" # TODO
