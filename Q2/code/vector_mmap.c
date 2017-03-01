@@ -89,6 +89,7 @@ void flush_file(FILE* fp) {
 }
 
 
+#ifdef TEST
 int main() {
     const char* f_name = "test.txt";
     mmap_struct* s;
@@ -98,3 +99,4 @@ int main() {
     printf("%d\n", vector_munmap(s));
 
 }
+#endif
