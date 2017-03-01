@@ -1,8 +1,8 @@
 package.cpath = package.cpath .. ";../obj/q_c_functions.so;"
 
 local ffi = require("ffi") 
-local q_c_lib  = ffi.load("../obj/q_c_functions.so") 
-local q_c_print_lib = ffi.load("../../PRINT/obj/q_c_print_functions.so")
+local q_c_lib  = ffi.load("q_c_functions.so") 
+local q_c_print_lib = ffi.load("q_c_print_functions.so")
 
 ffi.cdef[[
   void *malloc(size_t size);

@@ -83,9 +83,9 @@ end
 
 -- for SV fields dictionary is the mandatory attribute
 function test_load_csv:test_SV_missing_required_attribute()
-  lu.assertErrorMsgContains("dict cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", is_dict = true, add=true}} )
-  lu.assertErrorMsgContains("is_dict cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", dict = "D1", add=true}} )
-  lu.assertErrorMsgContains("add cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", dict = "D1", is_dict = true }} )
+  lu.assertErrorMsgContains("dict cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", dict_exists = true, add=true}} )
+  lu.assertErrorMsgContains("dict_exists cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", dict = "D1", add=true}} )
+  lu.assertErrorMsgContains("add cannot be null", load, test_input_dir .. "sample.csv", {{ name = "col1", type ="SV", dict = "D1", dict_exists = true }} )
 end
 
 function test_load_csv:test_duplicate_column_names()
@@ -109,7 +109,7 @@ end
 function test_load_csv:test_file_not_exist()
   local metadata = { { name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
-              { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
+              { name = "empname", type ="SV",dict = "D1", dict_exists = false, add=true} }
   local csv_file_path = test_input_dir .. "some_nonexistent_file"
   
   lu.assertError(load, csv_file_path, metadata)
@@ -123,7 +123,7 @@ end
 
 
 function test_load_csv:test_double_quotes_mismatch()
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true},
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true},
               { name = "col2", type ="I4" }}
   local csv_file_path = test_input_dir .. "bad_quote_mismatch.csv"
   --make sure error is reported by program
@@ -131,7 +131,7 @@ function test_load_csv:test_double_quotes_mismatch()
 end
 
 function test_load_csv:test_eoln_in_data()
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true}}
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true}}
   local num_records = 4
   local csv_file_path = test_input_dir .. "file_with_eol.csv"
   local ret = load ( csv_file_path, metadata )
@@ -140,7 +140,7 @@ function test_load_csv:test_eoln_in_data()
 end
 
 function test_load_csv:test_last_char_file_not_eol()
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true}}
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true}}
   local csv_file_path = test_input_dir .. "last_char_not_eol.csv"
   local num_records = 4
   local ret = load ( csv_file_path, metadata )
@@ -150,7 +150,7 @@ end
 
 
 function test_load_csv:test_load_valid_escape_char()
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true}}
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true}}
   local csv_file_path = test_input_dir .. "valid_escape.csv"
   local num_records = 4
   local ret = load ( csv_file_path, metadata )
@@ -159,7 +159,7 @@ function test_load_csv:test_load_valid_escape_char()
 end
 
 function test_load_csv:test_load_missing_escape_char()
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true}}
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true}}
   local csv_file_path = test_input_dir .. "missing_escape_char.csv"
   lu.assertErrorMsgContains("contains invalid data", load, csv_file_path, metadata )
 end
@@ -168,7 +168,7 @@ end
 function test_load_csv:test_column_is_more()
   local metadata = { { name = "col1", type = "I4", null =true },
               { name = "col2", type ="I2" },
-              { name = "col3", type ="SV",dict = "D1", is_dict = false, add=true},
+              { name = "col3", type ="SV",dict = "D1", dict_exists = false, add=true},
               { name = "extrac_column", type ="I2" }}
   local csv_file_path = test_input_dir .. "I2_I2_SV_3_4.csv"
   lu.assertErrorMsgContains("Column count does not match with count of column in metadata", load, csv_file_path, metadata )
@@ -193,7 +193,7 @@ end
 function test_load_csv:test_load_successfull()
   local metadata = { { name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
-              { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
+              { name = "empname", type ="SV",dict = "D1", dict_exists = false, add=true} }
               
   local csv_file_path = test_input_dir .. "I2_I2_SV_3_4.csv"
   local ret = load( csv_file_path, metadata )
@@ -204,7 +204,7 @@ function test_load_csv:test_valid_load_bin_file_size()
   local file_path, actual_size, expected_size
   local metadata = {{ name = "empid", null=true, type = "I4" },
               { name = "yoj", type ="I2" },
-              { name = "empname", type ="SV",dict = "D1", is_dict = false, add=true} }
+              { name = "empname", type ="SV",dict = "D1", dict_exists = false, add=true} }
   local csv_file_path = test_input_dir .. "I2_I2_SV_3_4.csv"
   local num_records = 4
   
@@ -370,7 +370,7 @@ end
 function test_load_csv:test_valid_SV()
   local csv_file_path = test_input_dir .. "SV_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true} }
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true} }
   local ret = load( csv_file_path, metadata )
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
@@ -391,12 +391,12 @@ function test_load_csv:test_valid_SV()
   lu.assertEquals(D1:get_string_by_index(4), "Varchar")    
 end
 
-function test_load_csv:test_valid_SC_dict_is_dict_add_true()
+function test_load_csv:test_valid_SC_dict_dict_exists_add_true()
   local csv_file_path = test_input_dir .. "SV_valid.csv"
   local num_records = 4
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = true, add=true} }
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = true, add=true} }
   
-  local d1 = Dictionary({dict = "D1", is_dict = false, add=true})
+  local d1 = Dictionary({dict = "D1", dict_exists = false, add=true})
   d1:add_with_condition("Value1", true)
   d1:add_with_condition("Value2", true)
   lu.assertEquals(d1:get_size(), 2) 
@@ -464,7 +464,7 @@ end
 
 function test_load_csv:test_nil_data_SV()
   local csv_file_path = test_input_dir .. "I4_2_null.csv"
-  local metadata = { { name = "col1", type ="SV",dict = "D1", is_dict = false, add=true, null=true },{ name = "col2", type = "I4", null =true } }
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true, null=true },{ name = "col2", type = "I4", null =true } }
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)      
 

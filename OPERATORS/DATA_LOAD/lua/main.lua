@@ -17,7 +17,7 @@ local f = assert(io.open(metadata_file_path, "rb"))
 local content = f:read("*all")
 f:close()
 local metadata = pretty.read(content)
-
+preprocess_bool_values(metadata, "null", "dict_exists", "add")
 --set defaults..
 set_environment() 
 
