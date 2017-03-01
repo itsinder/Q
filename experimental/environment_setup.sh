@@ -71,6 +71,7 @@ else
 	mkdir /tmp/luaffi 
 	cd /tmp
 	git clone https://github.com/jmckaskill/luaffi/ luaffi
+	cd luaffi
 	sed -i '6s@.*@LUA_CFLAGS=`$(PKG_CONFIG) --cflags lua5.2 2>/dev/null || $(PKG_CONFIG) --cflags lua5.1` @' Makefile
 	make clean all
 	sudo cp ffi.so /usr/local/lib/lua/5.1/	
