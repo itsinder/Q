@@ -30,6 +30,7 @@ end
 
 --testcase for 100000 rows and 259 cols with varchar
 function test_performance:test_rows100000_cols259_var()
+  print("Testing with 100000 rows and 259 columns")
   --meta information
   local meta_info= {{type= 'SC', size= 16, column_count= 1, null= false }, 
     { type= "SV", size= 3, column_count= 3, max_unique_values = 1000, null= true, dict_exists= false, add= true },
@@ -37,6 +38,7 @@ function test_performance:test_rows100000_cols259_var()
     { type= 'I1', column_count= 65, null= false }, {type= 'I2', column_count= 63, null= false },
     { type= 'I4', column_count= 63, null= false }, {type= 'F4', column_count= 63, null= false }
   }
+  print("Generating test file " .. "./_csv_1l_256.csv")
   --generating maximum dictionary size unique strings
   local unique_string_tables = generate_unique_varchar_strings(meta_info)
   
@@ -57,25 +59,28 @@ function test_performance:test_rows100000_cols259_var()
   filep:write(string.format("\nRows: %d \t Columns: %d \t Execution time: %.2f seconds \t Date:%s ",
               row_count,#metadata_table,end_time-start_time,date))
   file.delete(csv_file_path)  -- deleting generated csv file after getting results
+  print("--------------------------------------------")
 end
 
 
 --testcase for 200000 rows and 256 cols with varchar
 function test_performance:test_rows200000_cols256_var()
-
+  print("Testing with 200000 rows and 256 columns")
   --meta information
    local meta_info= {{type= 'SC', size= 16, column_count= 1, null= false }, 
     { type= "SV", size= 20, column_count= 1, max_unique_values = 200, null= true, dict_exists= false, add= true },
     { type= 'I1', column_count= 65, null= false }, {type= 'I2', column_count= 63, null= false },
     { type= 'I4', column_count= 63, null= false }, {type= 'F4', column_count= 63, null= false }
   }
+  
+  print("Generating test file " .. "./_csv_2l_256.csv")
   --generating maximum dictionary size unique strings
   local unique_string_tables = generate_unique_varchar_strings(meta_info)
   
   --generate metadata table which is to be passed to load csv
   local metadata_table = generate_metadata(meta_info)
     
-  local csv_file_path ="./_csv_2l_256v.csv"
+  local csv_file_path ="./_csv_2l_256.csv"
   local row_count = 200000 -- no of rows you wish to enter
   local chunk_print_size = 1000 -- writing data into files as chunks(i.e. chunk size)
 
@@ -89,16 +94,19 @@ function test_performance:test_rows200000_cols256_var()
   filep:write(string.format("\nRows: %d \t Columns: %d \t Execution time: %.2f seconds \t Date:%s ",
               row_count,#metadata_table,end_time-start_time,date))
   file.delete(csv_file_path) 
+  print("--------------------------------------------")
 end
 
 
 --testcase for 1000000 rows and 256 cols with no varchar
 function test_performance:test_rows1000000_cols256()
-  
-   local meta_info= {{type= 'SC', size= 16, column_count= 1, null= false }, 
+  print("Testing with 1000000 rows and 256 columns")
+  local meta_info= {{type= 'SC', size= 16, column_count= 1, null= false }, 
     { type= 'I1', column_count= 66, null= false }, {type= 'I2', column_count= 63, null= false },
     { type= 'I4', column_count= 63, null= false }, {type= 'F4', column_count= 63, null= false }
   }
+  
+  print("Generating test file " .. "./_csv_1m_256.csv")
   --generating maximum dictionary size unique strings
   local unique_string_tables = generate_unique_varchar_strings(meta_info)
   
@@ -119,6 +127,7 @@ function test_performance:test_rows1000000_cols256()
   filep:write(string.format("\nRows: %d \t Columns: %d \t Execution time: %.2f seconds \t Date:%s ",
               row_count,#metadata_table,end_time-start_time,date))
   file.delete(csv_file_path)
+  print("--------------------------------------------")
 end
 
 os.exit( lu.LuaUnit.run() )
