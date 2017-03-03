@@ -13,15 +13,15 @@ ld_library_add ../obj/
 ld_library_add ../../PRINT/obj/
 
 
-#echo "-----------------------------"
-#echo "Running Dictionary Test Cases"
-#echo "-----------------------------"
-#luajit test_dictionary.lua
+echo "-----------------------------"
+echo "Running Dictionary Test Cases"
+echo "-----------------------------"
+luajit -lluacov test_dictionary.lua
 
 echo "-----------------------------"
-echo "Running Load CSV Test Cases"
+echo "Running Lua Test Cases"
 echo "-----------------------------"
-luajit -lluacov test_load_csv.lua
+luajit -lluacov test_utils.lua
 
 echo "----------------------------"
 echo "DONE"

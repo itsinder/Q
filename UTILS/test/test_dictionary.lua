@@ -1,4 +1,4 @@
-package.path = package.path .. ";../lua/?.lua;../../../UTILS/lua/?.lua"
+package.path = package.path .. ";../lua/?.lua;../../OPERATORS/DATA_LOAD/lua/?.lua"
 
 local lu = require('luaunit')
 local Dictionary = require "dictionary"

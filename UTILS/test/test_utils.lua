@@ -1,3 +1,5 @@
+package.path = package.path .. ";../lua/?.lua;"
+
 require 'utils'
 local lu = require('luaunit')
 
