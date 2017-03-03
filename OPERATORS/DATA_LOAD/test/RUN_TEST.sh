@@ -23,5 +23,13 @@ echo "Running Load CSV Test Cases"
 echo "-----------------------------"
 luajit -lluacov test_load_csv.lua
 
+echo "-----------------------------"
+echo "Generating Code Coverage Report"
+echo "-----------------------------"
+luacov
+echo "OK"
+
+
+
 echo "----------------------------"
 echo "DONE"

@@ -23,5 +23,12 @@ echo "Running Lua Test Cases"
 echo "-----------------------------"
 luajit -lluacov test_utils.lua
 
+echo "-----------------------------"
+echo "Generating Code Coverage Report"
+echo "-----------------------------"
+luacov
+echo "OK"
+
+
 echo "----------------------------"
 echo "DONE"
