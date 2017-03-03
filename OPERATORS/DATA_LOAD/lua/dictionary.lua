@@ -1,149 +1,145 @@
--- ------------------------------------------------------------------------------------
--- Creates closure for dictionary, so that dictionary can be treated as separate entity
--- ------------------------------------------------------------------------------------
-require 'util'
+require 'utils'
 require 'parser'
 
--- --------------------------------------------------
--- New dictionary can be created by calling : 
--- local d1 = newDictionary(dictionaryName)
--- Every new dictionary adds its reference to itself in the global variable called  _G["Q_DICTIONARIES"][dictName] . 
--- This can be used at the time shutdown time, to iterate over all dictionary and persist it to the disk. 
--- ----------------------------------------------
-function newDictionary(dictName)
-  
-  if(dictName == nil or dicName == "") then
-    error("Dictionary name should not be empty")
-    return nil
+local Dictionary = {}
+Dictionary.__index = Dictionary
+
+setmetatable(Dictionary, {
+        __call = function (cls, ...)
+            return cls.get_instance(...)
+        end,
+})
+
+local original_type = type  -- saves `type` function
+-- monkey patch type function
+type = function( obj )
+    local otype = original_type( obj )
+    if  otype == "table" and getmetatable( obj ) == Dictionary then
+        return "Dictionary"
+    end
+    return otype
+end
+
+function Dictionary.get_instance(dict_metadata)
+  local self = setmetatable({}, Dictionary)
+  assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) , "Dictionary metadata should not be empty")
+  assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "", "Please specify correct metadata")
+ 
+  self.dict_name = dict_metadata.dict
+  self.dict_exists = dict_metadata.dict_exists or false  -- default value is false, dictionary does not exist.. create one
+  self.add_new_value = dict_metadata.add or true  -- default value is true, add null values
+   
+  local dict;
+  if self.dict_exists == true then
+    local dict = _G["Q_DICTIONARIES"][self.dict_name] 
+    assert(dict ~= nil, "Dictionary does not exist. Aborting the operation")
+    --dictionary found in globals, return that dictionary 
+    return dict
+  else
+    local dict = _G["Q_DICTIONARIES"][self.dict_name] 
+    assert(dict == nil, "Dictionary with the same name exists, cannot create new dictionary")
   end
   
   -- Two tables are used here, so that bidirectional lookup becomes easy 
   -- and whole table scan is not required for one side
-  local self = {
-      textToNumber = {},
-      numberToText = {},  
-      currIndex = 0,
-  }
-               
-  -- private function, used to get next number, which should be assigned to new strings being added into dictionary               
-  local getNextNumber = function()
-    self.currIndex = self.currIndex + 1
-    return self.currIndex
-  end
-                        
-  -- If the text exists in the dictionary
-  local isStringExists = function(text) 
-      if self.textToNumber[text] ~= nil then
-        return true 
-      else 
-        return false
-      end
-  end
+  self.text_to_index = {}
+  self.index_to_text = {}  
   
-  -- private function to add text into dictionary
-  local put = function(text)
-    -- if text does not exist then only add
-    -- if(isStringExists(text) ~= true) then 
-      local randomValue = getNextNumber()
-      self.textToNumber[text] = randomValue
-      self.numberToText[randomValue] = text
-    -- end
-  end
+    --put newly created dictionary into global variable
+  _G["Q_DICTIONARIES"][self.dict_name] = self
   
-  -- Given a number, if that number exists in dictionary then the string corresponding to that number is returned, null otherwise
-  local getStringByNumber = function(index)
-    local num = self.numberToText[index]
-    return num
-  end
-          
-  -- Given a string, if that string  exists in dictionary then the corresponding number to that string, null otherwise        
-  local getNumberByString = function(text) 
-    return self.textToNumber[text]
-  end
+  return self
+end
   
-  -- --------------------------------------------------
-  -- Adds the string into dictionary and returns number corresponding to the string 
-  --     addIfExists = true (default) :  If string exists in the dictionary then returns number corresponding to that string 
-  --                                      otherwise adds the string into dictionary and returns the number at which string was added
-  --     addIfExists = false : If string exists in the dictionary then returns -1, 
-  --                                        otherwise adds the string into dictionary and returns the number at which string was added
-  -- -------------------------------------------------
-  
-  local addWithCondition = function(text, addIfExists)
-  
-    if(text == nil or text == "") then error("Cannot add nil or empty string in dictionary") end
-  
-    -- default to true for addIfExists condition
-    if(addIfExists == nil) then addIfExists = true end
-    
-    
-    local textExists = isStringExists(text)
-    if(addIfExists) then 
-      if(textExists) then 
-        return getNumberByString(text)
-      else
-        put(text)
-        return getNumberByString(text)
-      end
-    else
-      if(textExists) then 
-        error("Text already exists in dictionary")
-      else
-        put(text)
-        return getNumberByString(text)
-      end
+-- If the text exists in the dictionary
+function Dictionary:does_string_exists(text) 
+    if self.text_to_index[text] ~= nil then
+      return true 
+    else 
+      return false
     end
-    
-  end
-  
-  
-  -- --------------------------------------
-  -- save all dictionary content to the file specified by the filePath.   
-  --     Currently only one table textToNumber is dumped into file as csv content. 
-  --     CSV writing is the very basic function, which just escapes (‘ “ ) and writes the output. This function can be evolved if required
-  -- -------------------------------------- 
-  local saveToFile = function(filePath)
-    file = io.open (filePath, "w")
-    io.output(file);
-    local separator = ",";
-    
-    for k,v in pairs(self.textToNumber) do 
-      local s = escapeCSV(k) .. separator  .. v
-      -- print("S is : " .. s)
-      -- store the line in the file
-       io.write(s, "\n")
-    end    
-    file:close() 
-  end
-
-  -- ----------------------------------------------
-  -- reads the dictionary back from the file 
-  --   It will read each line from the csv file and add entry in both table (textToNumber and numberToText ) 
-  -- -------------------------------------------
-  
-  local readFromFile = function(filePath)
-    for line in io.lines(filePath) do 
-      local entry= ParseCSVLine(line,',')
-      -- each entry is the form string, number
-      
-      self.textToNumber[entry[1]] = tonumber(entry[2])
-      self.numberToText[tonumber(entry[2])] = entry[1]
-    end  
-  end
- 
-  
-  local retFunction = {
-      addWithCondition = addWithCondition,
-      getStringByNumber = getStringByNumber , 
-      getNumberByString = getNumberByString, 
-      isStringExists = isStringExists, 
-      saveToFile = saveToFile,
-      readFromFile = readFromFile
-  }              
-  
-  --put newly created dictionary into global variable
-  _G["Q_DICTIONARIES"][dictName] = retFunction
-  return retFunction 
-  
 end
 
+
+-- Given a index, if that index exists in dictionary then the string corresponding to that index is returned, null otherwise
+function Dictionary:get_string_by_index(index)
+  local num = self.index_to_text[index]
+  return num
+end
+        
+-- Given a string, if that string  exists in dictionary then the corresponding index to that string, null otherwise        
+function Dictionary:get_index_by_string(text) 
+  return self.text_to_index[text]
+end
+
+  
+-- --------------------------------------------------
+-- Adds the string into dictionary and returns index corresponding to the string 
+--     add_if_not_exists = true (default) :  If string exists in the dictionary then returns index corresponding to that string 
+--                                      otherwise adds the string into dictionary and returns the index at which string was added
+--     add_if_not_exists = false : If string exists in the dictionary then returns the index corresponding to that string 
+--                                        otherwise error out
+-- -------------------------------------------------
+function Dictionary:add_with_condition(text, add_if_not_exists)
+
+ assert(text ~= nil and text ~= "", "Cannot add nil or empty string in dictionary") 
+
+  -- default to true for addIfExists condition
+ if add_if_not_exists == nil then
+  add_if_not_exists = true 
+ end
+ 
+ if self:does_string_exists(text) then 
+  return self:get_index_by_string(text)
+ else
+  if add_if_not_exists then
+    local next_value = #self.index_to_text + 1
+    self.text_to_index[text] = next_value
+    self.index_to_text[next_value] = text
+    return next_value
+  else
+    error("Text does not exist in dictionary")
+  end
+ end
+ 
+end
+  
+function Dictionary:get_size()
+  return #self.index_to_text
+end  
+
+-- --------------------------------------
+-- save all dictionary content to the file specified by the filePath.   
+--     Currently only one table text_to_index is dumped into file as csv content. 
+--     CSV writing is the very basic function, which just escapes (‘ “ ) and writes the output. This function can be evolved if required
+-- -------------------------------------- 
+function Dictionary:save_to_file(file_path)
+  local file = assert(io.open (file_path, "w"))
+  local separator = ","
+  for k,v in pairs(self.text_to_index) do 
+    local s = escape_csv(k) .. separator  .. v
+    -- print("S is : " .. s)
+    -- store the line in the file
+     file:write(s, "\n")
+  end    
+  assert(file:close()) 
+end
+
+-- ----------------------------------------------
+-- reads the dictionary back from the file 
+--   It will read each line from the csv file and add entry in both table (text_to_index and index_to_text ) 
+-- -------------------------------------------
+
+function Dictionary:restore_from_file(file_path)
+  local file = assert(io.open(file_path, "r"))
+  for line in file:lines() do 
+    local entry= parse_csv_line(line, ',')
+    -- each entry is the form string, index
+    self.text_to_index[entry[1]] = tonumber(entry[2])
+    self.index_to_text[tonumber(entry[2])] = entry[1]
+  end  
+  assert(file:close())
+end
+ 
+
+return Dictionary

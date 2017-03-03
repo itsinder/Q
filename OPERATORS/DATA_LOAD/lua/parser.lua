@@ -1,16 +1,19 @@
 -- --------------------------------------------------------------------------------------
 -- This function was written using code example on url : http://lua-users.org/wiki/LuaCsv
 -- -------------------------------------------------------------------------------------
+require 'pl'
 
-
-function ParseCSVLine (line,sep) 
+function parse_csv_line(line, sep) 
 	res = {}
 	local pos = 1
 	sep = sep or ','
 	while true do 
 		local c = string.sub(line,pos,pos)
-		if (c == "") then break end
-		if (c == '"') then
+		if c == "" then
+		  -- Insert the blank string for the last null field 
+		  table.insert(res,"") break 
+		end
+		if c == '"' then
 			-- quoted value (ignore separator within)
 			local txt = ""
 			repeat
@@ -18,7 +21,9 @@ function ParseCSVLine (line,sep)
 				txt = txt..string.sub(line,startp+1,endp-1)
 				pos = endp + 1
 				c = string.sub(line,pos,pos) 
-				if (c == '"') then txt = txt..'"' end 
+				if c == '"' then 
+				  txt = txt..'"' 
+				end 
 				-- check first char AFTER quoted string, if it is another
 				-- quoted string without separator, then append it
 				-- this is the way to "escape" the quote char in a quote. example:
@@ -26,15 +31,18 @@ function ParseCSVLine (line,sep)
 			until (c ~= '"')
 			table.insert(res,txt)
 			assert(c == sep or c == "")
+			if c == "" then 
+			 break 
+			end
 			pos = pos + 1
 		else	
 			-- no quotes used, just look for the first separator
 			local startp,endp = string.find(line,sep,pos)
-			if (startp) then 
+			if startp then 
 				table.insert(res,string.sub(line,pos,startp-1))
-				pos = endp + 1
+				pos = endp + 1  
 			else
-				-- no separator found -> use rest of string and terminate
+			 -- no separator found -> use rest of string and terminate
 				table.insert(res,string.sub(line,pos))
 				break
 			end 
