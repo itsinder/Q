@@ -186,6 +186,7 @@ function generate_csv_file(csv_file_name, metadata_table, row_count, chunk_print
   while( chunks <= no_of_chunks) do
     table_data = fill_table(metadata_table, chunk_print_size, unique_string_tables)
     write_and_empty_table(chunk_print_size, table_data, file)
+    print("Written",chunk_print_size*chunks,"rows in",csv_file_name,"file")
     chunks = chunks + 1
   end
   

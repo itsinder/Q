@@ -26,6 +26,7 @@ function test_performance:tearDown()
   dir.rmtree(_G["Q_DATA_DIR"])
   dir.rmtree(_G["Q_META_DATA_DIR"])
   filep:close()
+  print("Results written in performance_results file\n")
 end
 
 --testcase for 100000 rows and 259 cols with varchar
