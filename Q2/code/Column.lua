@@ -52,7 +52,7 @@ function Column.destructor(data)
         C.free(data.destructor_ptr)
     else
         print "using ptr"
-        local tmp_slf = DestructorLookup[data]
+        -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         C.free(data)
     end
@@ -101,8 +101,8 @@ function Column.new(arg)
     return column
 end
 
-function Column:length()
-    return self.vec:length()
+function Column:my_length()
+    return self.vec:my_length()
 end
 
 function Column:fldtype()
@@ -141,6 +141,14 @@ end
 
 function Column:materialized()
     return self.vec:materialized()
+end
+
+function Column:get_element(num)
+    if self.nn_vec ~= nil and self.nn_vec:get_element(num) == ffi.NULL then
+        return ffi.NULL
+    else
+        return self.vec:get_element(num)
+    end
 end
 
 function Column:chunk(num)

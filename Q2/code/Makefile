@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 CC = gcc
-CFLAGS = -fPIC
+CFLAGS = -fPIC -std=gnu99
 LFLAGS = -shared
 RM = rm -f
 SOURCE_FILES = $(wildcard *.c)
@@ -29,6 +29,8 @@ all: $(CORE_SO)
 	echo "done"
 
 test: 
+	make clean
+	make all
 	echo "Now testing c function calls"
 	$(CC) driver.c -o driver
 	./driver > /dev/null

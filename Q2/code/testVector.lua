@@ -77,10 +77,27 @@ v6:put_chunk(x_size, x, a )
 v6:eov()
 q_size, q, q_nn = v6:chunk(0)
 c.print_vector(q, q_size)
-local q_int = ffi.gc(c.malloc(ffi.sizeof("int")* q_size), ffi.free)
+local q_int = ffi.cast( "int*", ffi.gc(c.malloc(ffi.sizeof("int")* q_size), ffi.free) )
 b.get_bits_from_array(q_nn, q_int, q_size)
 print "**************"
 c.print_vector(q_int, q_size)
 
 print "**************"
 c.print_vector(a_int, a_size)
+print( v1:length())
+
+print(q_int[0])
+print(v6:get_element(1))
+
+print "**"
+print(q_int[0])
+print(q_int[1])
+print(q_int[3])
+print(q_int[5])
+print "**"
+print(v6:get_element(0))
+print(v6:get_element(1))
+print(v6:get_element(3))
+print(v6:get_element(5))
+print "**************"
+
