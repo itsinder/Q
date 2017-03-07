@@ -11,11 +11,31 @@ main(
     )
 {
   int status = 0;
-  char *X = "abc,def,123,456\n"; size_t nX = strlen(X);
+  char *X = "abc,\"de,f\",123,456\nabc,\"de\\\\f\",123,456\n";
+  size_t nX = strlen(X);
   size_t xidx = 0;
   int bufsz = 32;
-  char buf[bufssz]; 
-  for ( int i = 0; i < 4; i++ ) {
+  char buf[bufsz]; 
+  int ncols = 4;
+  int rowidx = 0, colidx = 0;
+  for ( ; ; ) { 
+    bool is_last_col;
+    if ( colidx == (ncols-1) ) { 
+      is_last_col = true;
+    }
+    else { 
+      is_last_col = false;
+    }
+    xidx = get_cell(X, nX, xidx, is_last_col, buf, bufsz);
+    fprintf(stderr, "%d:%d->%s\n", rowidx, colidx, buf);
+    if ( is_last_col ) { 
+      rowidx++;
+      colidx = 0;
+    }
+    else {
+      colidx++;
+    }
+    if ( xidx >= nX ) { break; }
   }
 BYE:
   return status;
