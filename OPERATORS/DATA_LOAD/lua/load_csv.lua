@@ -1,11 +1,86 @@
+package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
+
+
+local Vector_Wrapper = require 'vector_wrapper'
 require 'globals'
 require 'parser'
 require 'dictionary'
-require 'QCFunc'
-require 'util'
+require 'q_c_functions'
 require 'pl'
+require 'utils'
 
-local ffi = require("ffi") 
+
+
+
+local function validate_input(csv_file_path, metadata_table, load_global_settings)
+  assert( metadata_table ~= nil, "Metadata should not be nil")
+  assert( type(metadata_table) == "table", "Metadata type should be table")
+  assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
+  -- Check if the directory required by this load operation exists
+  assert( valid_dir(_G["Q_DATA_DIR"]), "Please make sure that Q_DATA_DIR points to correct directory")
+  assert( valid_dir(_G["Q_META_DATA_DIR"]), "Please make sure that Q_META_DATA_DIR points to correct directory")
+  
+  local col_names = {}
+  -- now look at fields of metadata
+  for metadata_idx, metadata in pairs(metadata_table) do
+    assert(metadata.name ~= nil, "metadata " .. metadata_idx .. " : name cannot be null")
+    assert(metadata.type ~= nil, "metadata " .. metadata_idx .. " : type cannot be null")
+    assert(g_qtypes[metadata.type] ~= nil, "metadata " .. metadata_idx .. " : type contains invalid q type")
+    -- if not null is specified then only true/false is the acceptable value
+    if metadata.null ~= nil then 
+      assert((metadata.null == true  or metadata.null == false ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
+    end
+    
+    -- check if the same column name is found before in metadata
+    if metadata.name ~= "" then 
+      assert( col_names[metadata.name] == nil , "metadata " .. metadata_idx .. " : duplicate column name is not allowed") 
+      col_names[metadata.name] = 1 
+    end
+    -- Perform check based on metadata type
+   
+    if metadata.type == "SC" then 
+      assert(metadata.size ~= nil, "metadata " .. metadata_idx .. " : size should be specified for fixed length strings")
+      assert(tonumber(metadata.size), "metadata " .. metadata_idx .. " : size should be valid number")
+      
+    elseif metadata.type == "SV" then
+      assert(metadata.dict ~= nil, "metadata " .. metadata_idx .. " : dict cannot be null")
+      assert(metadata.dict_exists ~= nil, "metadata " .. metadata_idx .. " : dict_exists cannot be null") -- m["dict_exists"]
+      assert(metadata.dict_exists == true or metadata.dict_exists == false , "metadata " .. metadata_idx .. " : dict_exists can contain true/false only")
+      if metadata.dict_exists == true then 
+        assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has dict_exists true")
+        assert(metadata.add == true or metadata.add == false, "metadata " .. metadata_idx .. " : add can contain true/false only")
+      end
+    end     
+  end
+  
+  -- file should not be empty
+  assert( path.getsize(csv_file_path) ~= 0, "File should not be empty")     
+end
+
+local function initialize(metadata, vector_wrapper_table)
+  -- initialize value which needs to be written to null vector, since it will be either 0 or 1
+  -- Initialize all the values
+  local col_count = #metadata
+    
+  for i = 1, col_count do 
+    -- If metadata name is not empty/null, then only create new vector
+    if stringx.strip(metadata[i].name) ~= "" then
+      vector_wrapper_table[i] = assert(Vector_Wrapper(metadata[i]))
+    end    
+  end
+
+end
+
+local function cleanup(metadata, col_count, vector_wrapper_table)
+  for i = 1, col_count do 
+    -- If metadata name is not empty/null, then vector_wrapper exists, close it.
+    if stringx.strip(metadata[i].name) ~= "" then
+      vector_wrapper_table[i]:close()
+    end     
+  end
+end
+
+
 
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata") 
@@ -15,163 +90,34 @@ local ffi = require("ffi")
 --           If any error was encountered during load operation then negative status code  
 -- ----------------
 
-function load( csv_file, M , G)
+-- validate meta-data & create vector + null vector for each of the file being created 
 
-  -- Check if the directory required by this load operation exists
-  if( _G["Q_DATA_DIR"] == nil or not path.exists(_G["Q_DATA_DIR"]) or not path.isdir(_G["Q_DATA_DIR"]) )  then
-      error("Please make sure that Q_DATA_DIR points to correct directory")
-      return -1
-  end
-  
-  if( _G["Q_META_DATA_DIR"] == nil or not path.exists(_G["Q_META_DATA_DIR"]) or not path.isdir(_G["Q_META_DATA_DIR"]) )  then
-      error("Please make sure that Q_META_DATA_DIR points to correct directory")
-      return -1
-  end
+function load( csv_file_path, metadata, load_global_settings)
+  local vector_wrapper_table = {}
+  local col_count = 0 --each field in the metadata represents one column in csv file
+  local col_idx = 0
+  local row_idx = 0
+  local col_num_nil = {}  
  
-
-
-  local fpTable = {}
-  local fpNullTable = {} 
-  local byteval = 0
-  local retTable = {} 
+  validate_input(csv_file_path, metadata, load_global_settings)   
+  initialize(metadata, vector_wrapper_table)  
+  col_count = #metadata 
   
-  -- open file for each field defined in metdata
-  for i, metadata in ipairs(M) do 
-    -- If metadata name is not empty/null, then only create file and pointer for it
-    if trim(metadata.name) ~= "" then
-      local filePath = _G["Q_DATA_DIR"] .. "_" .. metadata.name
-      fpTable[i] = create(filePath)
-      retTable[i] = path.abspath(filePath)
-      
-      -- metadata NULL field is true then create null files and store null file ptr in table
-      if metadata.null == "true" then -- To create nn file for storing null values
-          local fpNullEntry = {}
-          fpNullEntry[1] = create(_G["Q_DATA_DIR"] .. "_nn_" .. metadata.name)
-          fpNullEntry[2] = byteval
-          -- fpNullTable[i] = create(metadata.name.."_nn")
-          fpNullTable[i] = fpNullEntry
-  
-      end 
-      
-      -- TODO : 
-      -- create dictionaries if required.. upfront for only one type based on metdata
-      -- This needs to be more generalized.. It should be driven by q_types stored in globals
-      -- as below code is, so that new types like varchar can be handled easilty .. ideally without code cahnge
-      
-      local fieldType = metadata["type"];
-      if( fieldType == "varchar") then 
-          -- print("Field Type is varchar.. now chehck fields realted to dictionary") 
-        
-          -- { name = "colName", type ="varchar",dict = "D1", is_dict = true, add=true}
-          -- read field realted to dictionary from the medata 
-          local dictName = metadata["dict"]
-          local isDict = metadata["is_dict"] or false  -- default value is false, dictionary does not exist.. create one
-          local addNewValue = metadata["add"] or true  -- default value is true, add null values
-            
-          if(isDict == true) then
-  	        local dict = _G["Q_DICTIONARIES"][dictName] 
-            if(dict == nil) then 
-                error("Dictionary does not exist. Aborting the operation") 
-                return -1
-            end 
-          else
-            local dict = _G["Q_DICTIONARIES"][dictName] 
-            if(dict ~= nil) then 
-                error("Dictionary with the same name exists, cannot create new dictionary")
-            end
-            
-            -- create new dictionary, dictionary itself sets self reference in the globals
-            local retVal = newDictionary(dictName) 
-          end
-        
-      end
-     end
-  end
-  
-  local row_count =0 ;
-  local bitval = 8;
-
-  -- TODO : Check if file:open makes more sense then io.lines 
-  for line in io.lines(csv_file) do
+  for line in assert(io.lines(csv_file_path)) do
+ 
+    -- call to parse to parse the line of csv file
+    local status, col_values = pcall(parse_csv_line, line, ',' )
+    assert( status == true , "Input file line " .. row_idx .. " : contains invalid data. Please check data") 
+    assert(#col_values == col_count, "Error : row : " .. row_idx .. " Column count does not match with count of column in metadata")
     
-    if(trim(line) == "") then 
-       --skip empty lines in csv file, such scenario can be there if someone press enter after last line
-    else
-      local res= ParseCSVLine(line,',')       -- call to parse to parse the line of csv file
-      row_count = row_count + 1
-      for i, metadata in ipairs(M) do 
-          if trim(metadata.name) == "" then 
-            -- Skip this line
-          else
-            local dataTypeShortCode = metadata["type"];
-            local funName = g_qtypes[dataTypeShortCode]["txt_to_ctype"]
-            local sizeOfData = g_qtypes[dataTypeShortCode]["width"]
-            local dictionary = g_qtypes[dataTypeShortCode]["dictionary"]
-                   
-            local val = res[i]  
-            
-            -- NULL values handled here      
-            if val == nil or trim(val) == "" then
-               if(fpNullTable[i] == nil) then error("NUll value encountered in not null column .. column number " .. i ) end
-              -- set the null bit
-               if((row_count%bitval) <= bitval)then
-                  byteval = setBit(i, fpNullTable[i][2], row_count)
-                  fpNullTable[i][2]=byteval
-               end
-               -- set all null values to string 0, so that instead of some junk data 0 will be written to the file. 
-               val = "0"
-                
-            else
-              -- If value is not null then do dictionary string to number conversion
-              if(dictionary ~= nil and dictionary == true) then 
-              -- print("Dictionary conversion is required for this field")
-                local dictName = metadata["dict"]
-              -- local isDict = metadata["is_dict"] or false  
-                local addNewValue = metadata["add"] or true 
-                local dict = _G["Q_DICTIONARIES"][dictName]
-                -- dictionary throws error if any during the add operation
-                local retNumber = dict.addWithCondition(val, addNewValue)
-                          
-                -- now change the value to index instead of string
-                val = tostring(retNumber)
-                -- print("Value after conversion is " .. val)
-              else 
-                -- remove any spaces before or after string, otherwise number conversion function throws error
-                val = trim(val) 
-              end
-            end
-            -- print(val)
-            local cVal = convertTextToCValue(funName, val, sizeOfData)
-            write(fpTable[i],cVal, sizeOfData) 
-            
-            if(((row_count%bitval) ==0) and fpNullTable[i]~=nil)then
-              writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-              fpNullTable[i][2]=0
-            end      
-          end
-        end -- for loop ends
-      end
+    for col_idx = 1, col_count do
+      local current_value = col_values[col_idx]
+      local status, ret_message = pcall(vector_wrapper_table[col_idx].write, vector_wrapper_table[col_idx], current_value)
+      assert(status ~= false , "Error at row : " .. row_idx .. " column : " .. col_idx .. " : " .. tostring(ret_message)) 
+    end  
+    row_idx = row_idx + 1
   end
   
-  
-  
-  -- close all the files
-  for i, metadata in ipairs(M) do 
-    -- If it was not null then only close the file
-    if trim(metadata.name) ~= "" then
-      --Flush the null pointer data 
-      if((row_count%bitval) ~=0 and fpNullTable[i]~=nil)then
-        writeNull(fpNullTable[i][1],fpNullTable[i][2], 1)
-        fpNullTable[i][2]=0
-      end
-        
-      -- close files
-      if(fpNullTable[i] ~= nil) then
-        close(fpNullTable[i][1])
-      end
-      close(fpTable[i])
-    end
-  end
-  
-  return retTable
+  cleanup(metadata, col_count, vector_wrapper_table)  
+  return vector_wrapper_table
 end
