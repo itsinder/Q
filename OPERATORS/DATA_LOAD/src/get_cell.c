@@ -14,42 +14,57 @@ get_cell(
     )
 {
   int status = 0;
-  size_t bak_xidx = xidx;
+  char dquote = '"'; char comma = ','; 
+  char bslash = '\\'; char eoln = '\n';
   int bufidx = 0;
+  //--------------------------------
   if ( X == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
   if ( xidx == nX ) { go_BYE(-1); }
   if ( buf == NULL ) { go_BYE(-1); }
   if ( bufsz == 0 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
-  if ( X[xidx] == ',' ) { 
-    return ++xidx; // jump over comma
-  }
+  char last_char;
   bool start_dquote = false;
-  if ( X[xidx] == '"' ) { // must end with dquote
+  if ( X[xidx] == dquote ) { // must end with dquote
     start_dquote = true;
+    last_char = '"';
     xidx++;
   }
+  else {
+    if ( is_last_col ) { 
+      last_char = eoln;
+    }
+    else {
+      last_char = comma;
+    }
+  }
+  //----------------------------
   for ( ; ; ) { 
-    if ( X[xidx] == '\\' ) {
+    if ( X[xidx] == last_char ) {
+      xidx++; // jumo over last char;
+      if ( start_dquote ) { 
+        if ( xidx >= nX ) { go_BYE(-1); }
+        if ( is_last_col ) { 
+          if ( X[xidx] != eoln ) { go_BYE(-1); }
+        }
+        else {
+          if ( X[xidx] != comma ) { go_BYE(-1); }
+        }
+        xidx++;
+      }
+      return xidx;
+    }
+    //---------------------------------
+    if ( X[xidx] == bslash ) {
       xidx++;
       if ( xidx >= nX ) { go_BYE(-1); }
       if ( bufidx >= bufsz ) { go_BYE(-1); }
-      buf[bufidx++] = X[xidx];
+      buf[bufidx++] = X[xidx++];
       continue;
     }
-    if ( ( start_dquote ) && ( X[xidx] == '"' ) ) {
-      // consume dquote and quit
-      xidx++; goto BYE;
-    }
-    if ( !start_dquote ) {
-      if ( ( is_last_col ) && ( X[xidx] == '\n' ) ) {
-        // consume comma or eoln and quit
-        xidx++; goto BYE;
-      }
-    }
     if ( bufidx >= bufsz ) { go_BYE(-1); }
-    buf[bufidx++] = X[xidx];
+    buf[bufidx++] = X[xidx++];
   }
 BYE:
   if ( status < 0 ) { xidx = 0; }
