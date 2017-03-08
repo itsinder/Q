@@ -27,6 +27,7 @@ main(
       is_last_col = false;
     }
     xidx = get_cell(X, nX, xidx, is_last_col, buf, bufsz);
+    if ( xidx == 0 ) { go_BYE(-1); }
     fprintf(stderr, "%d:%d->%s\n", rowidx, colidx, buf);
     if ( is_last_col ) { 
       rowidx++;
@@ -37,6 +38,7 @@ main(
     }
     if ( xidx >= nX ) { break; }
   }
+  fprintf(stderr, "Completed successfully\n");
 BYE:
   return status;
 }
