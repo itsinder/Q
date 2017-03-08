@@ -68,12 +68,12 @@ local c = ffi.load("load_csv.so")
 
 function load( csv_file_path, metadata, load_global_settings)
    local col_count = 0 --each field in the metadata represents one column in csv file
-   local col_idx = 0
-   local row_idx = 0
    local col_num_nil = {}
    assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
    assert( path.getsize(csv_file_path) ~= 0, "File should not be empty")
    validate_meta(metadata)
+   --TODO unhard code
+   -- TODO Put nils for columns that you do not want to load 
    local column_list = {
       Column{field_type="I4", write_vector=true, filename="_i4"},
       Column{field_type="F4", write_vector=true, filename="_f4"}
@@ -83,8 +83,11 @@ function load( csv_file_path, metadata, load_global_settings)
    assert(f_map.status == 0 , "Mmap failed")
    local X = ffi.cast("char *", f_map.ptr_mmapped_file)
    local nX = tonumber(f_map.ptr_file_size)
+   assert (nX > 0, "File cannot be empty")
    local  xidx = 0;
    local bufsz = 8
+   --TODO bufsize should be calculated from c data
+   --TODO note double for SC type, SV max length in meta data
    local buf = ffi.gc(c.malloc(bufsz), c.free)
    local cbuf = ffi.gc(c.malloc(1024), c.free)
    local ncols = #metadata
@@ -102,13 +105,16 @@ function load( csv_file_path, metadata, load_global_settings)
 
       assert(xidx > 0 , "Index has to be valid")
       print(rowidx, colidx, ffi.string(buf))
+      -- TODO figure out c function based on meta data
+      -- TODO check status of c function
+      -- TODO if column_list[colidx] == nil then continue end 
       if ( colidx == 0 ) then
          c.txt_to_I4(buf, 10, cbuf);
       else 
          c.txt_to_F4(buf, cbuf);
       end
       -- print(tonumber(cbuf))
-      column_list[col_idx+1]:put_chunk(1, cbuf)
+      column_list[colidx+1]:put_chunk(1, cbuf)
       if ( is_last_col ) then
          rowidx = rowidx + 1
          colidx = 0;
@@ -121,7 +127,10 @@ function load( csv_file_path, metadata, load_global_settings)
    for i =1, #column_list do
       column_list[i]:eov()
    end
-   print("Completed successfully");
+   print("Completed successfully")
+   -- TODO create list and return that , not this
+   return column_list
+
 end
 
 load( "gm1d1.csv" , dofile("gm1.lua"), nil)
