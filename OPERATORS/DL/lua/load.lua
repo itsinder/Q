@@ -107,8 +107,8 @@ function load( csv_file_path, metadata, load_global_settings)
       else 
          c.txt_to_F4(buf, cbuf);
       end
-      print(tonumber(cbuf))
-      -- column_list[col_idx+1].put_chunk(1, ...)
+      -- print(tonumber(cbuf))
+      column_list[col_idx+1]:put_chunk(1, cbuf)
       if ( is_last_col ) then
          rowidx = rowidx + 1
          colidx = 0;
@@ -117,6 +117,9 @@ function load( csv_file_path, metadata, load_global_settings)
       end
 
       if ( xidx >= nX ) then  break end
+   end
+   for i =1, #column_list do
+      column_list[i]:eov()
    end
    print("Completed successfully");
 end
