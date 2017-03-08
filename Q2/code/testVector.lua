@@ -100,4 +100,11 @@ print(v6:get_element(1))
 print(v6:get_element(3))
 print(v6:get_element(5))
 print "**************"
-
+c7 = Column{field_type='i', filename="o7.txt", write_vector=true, nn=true}
+c7:put_chunk(1, x, a)
+-- c7:put_chunk(1, x, a)
+-- c7:put_chunk(1, x, a)
+-- c7:put_chunk(1, x, a)
+-- c7:put_chunk(1, x, a)
+-- c7:put_chunk(2, x, a)
+c7:eov()

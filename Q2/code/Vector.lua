@@ -237,6 +237,7 @@ function Vector:last_chunk()
     return self.last_chunk_number
 end
 
+local dbg = require("debugger")
 
 local function append_to_file(self, ptr, size)
     assert(ptr ~= nil, "No pointer given to write")
@@ -252,6 +253,7 @@ local function append_to_file(self, ptr, size)
     -- write out buffer to file
     -- TODO make more general based on field size
     if self.field_type == "B1" then
+        dbg()
         c.write_bits_to_file(self.file, ptr, size, self.my_length)
     else
         c.fwrite(ptr,self.field_size, size, self.file)
