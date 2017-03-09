@@ -102,7 +102,7 @@ function Column.new(arg)
 end
 
 function Column:length()
-    return self.vec:my_length()
+    return self.vec:length()
 end
 
 function Column:fldtype()
