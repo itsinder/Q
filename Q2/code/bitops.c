@@ -59,18 +59,34 @@ int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size )
     int offset = 0;
     int copied_count = 0;
     int status;
+#ifdef TEST
+    printf("file size=%d, length=%d\n", file_size, length);
+#endif
     status = fseek(fp, file_size / 8, SEEK_SET);
+#ifdef TEST
+    printf("Starting position =%ld\n", ftell(fp));
+#endif
+    if (status != 0 )
+    {
+        printf("Error in seeking file");
+    }
     //cBYE(status);
     if (file_size % 8 != 0)
     {
+#ifdef TEST
+        printf("Position before getting an element=%ld\n", ftell(fp));
+#endif
         val = fgetc(fp);
         status = fseek(fp, -1, SEEK_CUR);
+#ifdef TEST
+        printf(" Positionafter getting bit and stepping back =%ld\n", ftell(fp));
+#endif
         //cBYE(status);
         //offset = 8 - (file_size % 8);
         offset = file_size % 8 ;
-        for ( int i = 0; i + offset < 8; i++ )
+        for ( int i = 0; i + offset < 8 && i < length; i++ )
         {
-            int src_bit = GET_BIT(src, i);
+            unsigned char src_bit = GET_BIT(src, i);
             if (src_bit)
             {
                 SET_BIT(&val, offset + i);
@@ -82,7 +98,15 @@ int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size )
         }
         copied_count = 8 - offset;
         //status check
+#ifdef TEST
+        printf("Position before putting the char back=%ld\n", ftell(fp));
+#endif
         status = fputc(val, fp);
+#ifdef TEST
+        printf("Position after putting the char back=%ld\n", ftell(fp));
+        //status = fseek(fp, file_size/8 + 1, SEEK_SET);
+        //printf("Position after manual seek=%ld\n", ftell(fp));
+#endif
         //cBYE(status);
         val = 0;
     }
@@ -101,7 +125,8 @@ int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size )
         if (src_bit != 0 )
         {
             SET_BIT(&val, i % 8);
-        } else
+        }
+        else
         {
             CLEAR_BIT(&val, i % 8);
         }
@@ -211,7 +236,8 @@ int create_bit_file(char* path, int* arr, int length)
 #ifdef TEST
 
 
-int create_test_file(char * path) {
+int create_test_file(char * path)
+{
     // checked manually to be working
     FILE* fp = fopen(path, "wb+");
     if (fp == NULL)
@@ -229,31 +255,63 @@ int create_test_file(char * path) {
 void test_read_bits_from_file()
 {
     char * path = "./test_read.txt";
-    if (create_test_file(path)) {
+    if (create_test_file(path))
+    {
         printf("Error creating test file");
         return;
     }
     int arr[16];
-    
+
     FILE* fp = fopen(path, "rb");
     if (fp == NULL)
     {
         printf("Opening file for reading failed");
         return;
     }
-    
+
     get_bits_from_file(fp, arr, 16);
-    for (int i =0; i<16; i++){
-        if (i<8){
+    for (int i = 0; i < 16; i++)
+    {
+        if (i < 8)
+        {
             printf("READ for index %d should return %d, returned %d\n", i, arr[i], 1);
-        }else {
-            printf("READ for index %d should return %d, returned %d\n", i, arr[i], (i-1) % 2);
-        }  
+        }
+        else
+        {
+            printf("READ for index %d should return %d, returned %d\n", i, arr[i], (i - 1) % 2);
+        }
     }
 }
 
 void test_write_bits_to_file()
 {
+    const char* f_name = "test_write.txt";
+    unsigned char vec = 0;
+    for (int i = 0 ; i < 8 * sizeof(vec) ; i++)
+    {
+        if (i % 3 == 0)
+        {
+            SET_BIT(&vec, i);
+        }
+        else
+        {
+            CLEAR_BIT(&vec, i);
+        }
+    }
+    FILE* fp = fopen(f_name, "wb+");
+    write_bits_to_file(fp, &vec, 1 , 0);
+    write_bits_to_file(fp, &vec, 1 , 1);
+    write_bits_to_file(fp, &vec, 4 , 2);
+    write_bits_to_file(fp, &vec, 4 , 3);
+
+
+    //write_bits_to_file(fp, &vec, 4 , 8);
+    //fflush(fp);
+    //write_bits_to_file(fp, &vec, 3, 4 );
+    fseek(fp, 0, SEEK_SET);
+    int ret_val = fgetc(fp);
+    printf("WRITE to file should return %d, returned %d\n", 79, ret_val);
+    fclose(fp);
 
 }
 //int get_bits_from_array(unsigned char* input_arr, int* arr, int length)
@@ -262,24 +320,32 @@ void test_get_bits_from_array()
     int arr[32] = {0};
     unsigned char a = 31;
     get_bits_from_array(&a, arr, 8);
-    for (int i =0; i<8; i++){
-        if (i <= 4) {
+    for (int i = 0; i < 8; i++)
+    {
+        if (i <= 4)
+        {
             printf("ARRAY for index %d should return %d , returned %d\n", i, 1 , arr[i] );
-        } else {
+        }
+        else
+        {
             printf("ARRAY for index %d should return %d , returned %d\n", i, 0 , arr[i]);
-        }   
+        }
     }
     a = 8;
     get_bits_from_array(&a, arr, 8);
-    for (int i = 0; i<8; i++){
-         if (i == 3) {
+    for (int i = 0; i < 8; i++)
+    {
+        if (i == 3)
+        {
             printf("ARRAY for index %d should return %d , returned %d\n", i, 1 , arr[i]);
-        } else {
+        }
+        else
+        {
             printf("ARRAY for index %d should return %d , returned %d\n", i, 0 , arr[i]);
-        }   
+        }
     }
 
-    
+
 }
 
 void test_get_bit()
@@ -365,6 +431,7 @@ int main()
     test_clear_bit();
     test_get_bits_from_array();
     test_read_bits_from_file();
+    test_write_bits_to_file();
 }
 
 #endif

@@ -42,7 +42,7 @@ test:
 	cp test.txt test2.txt
 	echo "Now testing lua bindings"
 	luajit testVector.lua
-	#rm ./*.txt *_nn
+	rm ./*.txt *_nn
 clean:
 	$(RM) $(CORESO) $(OBJECTS)
 
