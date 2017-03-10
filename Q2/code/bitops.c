@@ -29,12 +29,12 @@
     do { if (PRINT_TEST)  fprintf(stderr, __VA_ARGS__);} while (0)
 //#define cBYE(i) (i) < 1 && return -1
 
-inline int get_bit(const int* x, int i)
+int get_bit(unsigned char* x, int i)
 {
     return x[i / 8] & (1 << (i % 8));
 }
 
-inline int set_bit(int* x, int i)
+int set_bit(unsigned char* x, int i)
 {
     return x[i / 8] |= 1 << (i % 8);
 }
@@ -180,6 +180,7 @@ int print_bits(char * file_name, int length)
     return 0;
 }
 
+//For internal use only . not tested properly
 int get_bits_from_array(unsigned char* input_arr, int* arr, int length)
 {
     unsigned char byte;
@@ -191,6 +192,7 @@ int get_bits_from_array(unsigned char* input_arr, int* arr, int length)
 }
 
 
+//For internal use only do not use
 int get_bits_from_file(FILE* fp, int* arr, int length)
 {
     unsigned char byte;

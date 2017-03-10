@@ -93,7 +93,8 @@ int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size )
 int print_bits(char * file_name, int length);
 int get_bits(FILE* fp, int* arr, int length);
 int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
- ]])
+int get_bit(unsigned char* x, int i);
+]])
 
 local c = ffi.load('vector_mmap.so')
 local C = ffi.C
@@ -332,9 +333,11 @@ function Vector:get_element(num)
    assert(offset <= size , "element needs to be in current chunk")
    chunk = ffi.cast("unsigned char*", chunk)
    if self.field_type == "B1" then
-      local int_block =ffi.cast("int*", ffi.gc(C.malloc(offset * ffi.sizeof("int")), C.free) )
-      c.get_bits_from_array(chunk, int_block, offset + 1)
-      local bit_value = tonumber(int_block[offset])
+      --first get offset in char and then get the correct bit
+      local char_offset = offset / 8
+      local bit_offset = offset % 8
+      local char_value = chunk + char_offset
+      local bit_value = tonumber( c.get_bit(char_value, bit_offset) )
       if bit_value == 0 then
          return ffi.NULL
       else
