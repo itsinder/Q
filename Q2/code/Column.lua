@@ -101,8 +101,8 @@ function Column.new(arg)
     return column
 end
 
-function Column:my_length()
-    return self.vec:my_length()
+function Column:length()
+    return self.vec:length()
 end
 
 function Column:fldtype()

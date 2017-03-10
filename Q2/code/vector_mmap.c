@@ -80,14 +80,6 @@ int vector_munmap(
     return 0;
 }
 
-FILE* open_file(const char* path) {
-    FILE* fp = fopen(path, "ab"); // TODO write in portable version
-    return fp;
-}
-void flush_file(FILE* fp) {
-    fflush(fp);
-}
-
 
 #ifdef TEST
 int main() {
