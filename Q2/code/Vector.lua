@@ -412,7 +412,7 @@ function Vector:eov()
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    -- self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
 end
 
