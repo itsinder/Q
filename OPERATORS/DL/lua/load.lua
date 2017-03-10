@@ -129,8 +129,10 @@ function load( csv_file_path, metadata, load_global_settings)
    end
    print("Completed successfully")
    -- TODO create list and return that , not this
+  dbg = require ("debugger")
+  dbg() 
    return column_list
 
 end
 
-load( "gm1d1.csv" , dofile("gm1.lua"), nil)
+-- load( "gm1d1.csv" , dofile("gm1.lua"), nil)
