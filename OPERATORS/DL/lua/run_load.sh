@@ -15,6 +15,7 @@ cd ../../../Q2/code
 make clean
 make all
 cd -
-#LD_LIBRARY_PATH='./;../../../Q2/code' luajit ./load.lua
-LD_LIBRARY_PATH='./;../../../Q2/code' luajit ./print_csv.lua
+export LD_LIBRARY_PATH='./;../../../Q2/code' 
+# luajit ./load.lua
+luajit ./print_csv.lua
 

@@ -76,7 +76,8 @@ function load( csv_file_path, metadata, load_global_settings)
    -- TODO Put nils for columns that you do not want to load 
    local column_list = {
       Column{field_type="I4", write_vector=true, filename="_i4"},
-      Column{field_type="F4", write_vector=true, filename="_f4"}
+      Column{field_type="F4", write_vector=true, filename="_f4"},
+      Column{field_type="B1", write_vector=true, filename="_b1"}
    }
    -- mmap function here
    f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
@@ -93,7 +94,7 @@ function load( csv_file_path, metadata, load_global_settings)
    local ncols = #metadata
    local rowidx = 0
    local colidx = 0
-
+   local dbg = require("debugger")
    while true do
       local is_last_col
       if ( colidx == (ncols-1) ) then
@@ -110,10 +111,19 @@ function load( csv_file_path, metadata, load_global_settings)
       -- TODO if column_list[colidx] == nil then continue end 
       if ( colidx == 0 ) then
          c.txt_to_I4(buf, 10, cbuf);
-      else 
+      elseif ( colidx == 1 ) then 
          c.txt_to_F4(buf, cbuf);
+       else
+         if ( ffi.string(buf) == "0" ) then
+            ffi.fill(cbuf,1, 0)
+         elseif ( ffi.string(buf) == "1" ) then 
+            ffi.fill(cbuf,1, 255)
+         else
+            assert(nil, "boolean must be 0 or 1")
+         end
       end
       -- print(tonumber(cbuf))
+      -- dbg()
       column_list[colidx+1]:put_chunk(1, cbuf)
       if ( is_last_col ) then
          rowidx = rowidx + 1
@@ -126,13 +136,13 @@ function load( csv_file_path, metadata, load_global_settings)
    end
    for i =1, #column_list do
       column_list[i]:eov()
+      print(column_list[i]:length())
    end
    print("Completed successfully")
    -- TODO create list and return that , not this
-  dbg = require ("debugger")
-  dbg() 
    return column_list
 
 end
 
 -- load( "gm1d1.csv" , dofile("gm1.lua"), nil)
+--load( "gm2d1.csv" , dofile("gm2.lua"), nil)
