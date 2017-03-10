@@ -69,6 +69,11 @@ filename="o2.txt", write_vector=true,
  }
  v5:put_chunk(x_size, x )
 v5:eov()
+local dbg = require "debugger"
+t1 = Vector{filename="t1.txt", field_type="B1", write_vector=true}
+t1:put_chunk(a,x_size)
+t1:eov()
+
 v6 = Column{field_type='i',
 filename="o3.txt", write_vector=true, nn=true
  }
@@ -106,5 +111,11 @@ V7:put_chunk(a, 1)
 V7:put_chunk(a, 1)
 V7:put_chunk(a, 1)
 V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
 V7:put_chunk(a, 2)
+
+
 V7:eov()

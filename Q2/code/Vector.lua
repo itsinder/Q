@@ -245,15 +245,19 @@ local function append_to_file(self, ptr, size)
     assert(self.input_from_file ~= true, "Cannot write to input file")
 
     if self.file == nil  or self.file == ffi.NULL then
-        self.file = C.fopen(self.filename, "wb+")
+        if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
+            self.file = C.fopen(self.filename, "wb+")
+        else
+            self.file = C.fopen(self.filename, "ab+")
+        end
         assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
     -- TODO make more general based on field size
     if self.field_type == "B1" then
-        c.write_bits_to_file(self.file, ptr, size, self.my_length)
+        assert(tonumber(c.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
     else
-        c.fwrite(ptr,self.field_size, size, self.file)
+        assert(c.fwrite(ptr,self.field_size, size, self.file) == size, "Unable to write to file")
     end
 end
 
