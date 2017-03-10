@@ -76,7 +76,6 @@ filename="o2.txt", write_vector=true,
  }
  v5:put_chunk(x_size, x )
 v5:eov()
-local dbg = require "debugger"
 t1 = Vector{filename="t1.txt", field_type="B1", write_vector=true}
 t1:put_chunk(a,x_size)
 t1:eov()
