@@ -59,9 +59,16 @@ c.print_vector(z, z_size)
 local v4 = Vector{field_type='B1',
 filename="test_bits.txt", field_size=1/8}
 local a, a_size = v4:chunk(0)
+print("Vector bit get test")
 local a_int = ffi.gc(c.malloc(ffi.sizeof("int")* a_size), ffi.free)
 b.get_bits_from_array(a, a_int, a_size)
+local t2 = Vector{field_type="i", write_vector=true}
+t2:put_chunk(a_int, a_size)
+t2:eov()
 print "**************"
+for i=0,15 do
+ print(v4:get_element(i), tonumber(ffi.cast("int*", a_int) + i))
+end
 c.print_vector(a_int, a_size)
 -- add function to print bits:b2
 v5 = Column{field_type='i',
@@ -69,6 +76,11 @@ filename="o2.txt", write_vector=true,
  }
  v5:put_chunk(x_size, x )
 v5:eov()
+local dbg = require "debugger"
+t1 = Vector{filename="t1.txt", field_type="B1", write_vector=true}
+t1:put_chunk(a,x_size)
+t1:eov()
+
 v6 = Column{field_type='i',
 filename="o3.txt", write_vector=true, nn=true
  }
@@ -100,4 +112,17 @@ print(v6:get_element(1))
 print(v6:get_element(3))
 print(v6:get_element(5))
 print "**************"
+V7 = Vector{field_type='B1', filename="o7.txt", write_vector=true}
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 1)
+V7:put_chunk(a, 2)
 
+
+V7:eov()
