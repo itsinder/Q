@@ -1,22 +1,20 @@
 
-function concat_static_checker(
+function concat_specialize(
   f1type, 
   f2type, 
   optargs
   )
-    local fouttype = optargs[fouttype] -- okay for fouttype to be nil
+    local outtype = optargs.outtype -- okay for outtype to be nil
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_outtypes = { I2 = true, I4 = true, I8 = true }
 
+    assert(ok_intypes[f1type], "input type " .. f1type .. " not acceptable")
+    assert(ok_intypes[f2type], "input type " .. f2type .. " not acceptable")
+
     local w1   = assert(g_qtypes[f1type].width)
     local w2   = assert(g_qtypes[f2type].width)
+
     local shift = w2 * 8 -- convert bytes to bits 
-    if ( not ok_intypes[f1type] ) then 
-      print("input type", f1type, " not acceptable"); return nil; 
-    end
-    if ( not ok_intypes[f2type] ) then 
-      print("input type", f2type, " not acceptable"); return nil; 
-    end
     local l_outtype = nil
     if ( f1type == "I4" ) then 
       l_outtype = "I8"
@@ -37,21 +35,17 @@ function concat_static_checker(
         l_outtype = "I2"
       end
     end
-    assert(l_outtype ~= nil, "Control should never come here")
-    local l_wout = assert(g_qtypes[l_outtype].width, "ERROR")
-    if ( fouttype ~= nil ) then 
-      local wout   = assert(g_qtypes[fouttype].width, "ERROR")
-      if ( not ok_outtypes[fouttype] ) then 
-        print("fouttype is not valid destination type for concat")
-        return nil
-      end
-      if ( wout >= l_wout ) then 
-        print("Adjusting ", f1type, f2type, l_outtype, fouttype)
-        l_outtype = fouttype
-      else
-        print("specified output type", l_outtype, " is not big enough")
-        return nil
-      end
+    assert(l_outtype, "Control should never come here")
+    assert(ok_outtypes[l_outtype], "output type " .. 
+    l_outtype .. " not acceptable")
+    if ( outtype ) then 
+      assert(ok_outtypes[outtype], "output type " ..
+      outtype .. " not acceptable")
+      local width_l_outtype = assert(g_qtypes[l_outtype].width, "ERROR")
+      local width_outtype   = assert(g_qtypes[outtype].width, "ERROR")
+      assert( width_outtype >= width_l_outtype,
+      "specfiied outputtype not big enough")
+      l_outtype = outtype
     end
     local tmpl = 'base.tmpl'
     local subs = {}
@@ -61,10 +55,10 @@ function concat_static_checker(
     "concat_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
     subs.in2type = g_qtypes[f2type].ctype
-    subs.returntype = g_qtypes[l_outtype].ctype
+    subs.outtype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
     subs.c_code_for_operator = 
-    " c = ( (" .. subs.returntype .. ")a << " .. shift .. " ) | b; "
+    " c = ( (" .. subs.outtype .. ")a << " .. shift .. " ) | b; "
 
     return subs, tmpl
 end

@@ -1,5 +1,5 @@
 
-function vvadd_static_checker(
+function vvadd_specialize(
   f1type, 
   f2type
   )
@@ -27,7 +27,7 @@ function vvadd_static_checker(
     subs.fn = "vvadd_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
     subs.in2type = g_qtypes[f2type].ctype
-    subs.returntype = g_qtypes[l_outtype].ctype
+    subs.outtype = g_qtypes[l_outtype].ctype
     subs.argstype = "void *"
     subs.c_code_for_operator = "c = a + b; "
     return subs, tmpl

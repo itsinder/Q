@@ -1,0 +1,1 @@
+Remove all paths and have them  be part of LUA_PATH ot some such

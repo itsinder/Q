@@ -24,11 +24,11 @@
     f:close()
     -- ==================
     local base_name = v
-    local str = 'require \'' .. base_name .. '_static_checker\''
+    local str = 'require \'' .. base_name .. '_specialize\''
     loadstring(str)()
     for i, in1type in ipairs(types) do 
       for j, in2type in ipairs(types) do 
-        stat_chk = base_name .. '_static_checker'
+        local stat_chk = base_name .. '_specialize'
         local stat_chk_fn = assert(_G[stat_chk])
         local subs, tmpl = stat_chk_fn(in1type, in2type)
           -- TODO Improve following.
