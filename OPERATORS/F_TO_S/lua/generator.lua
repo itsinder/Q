@@ -27,22 +27,26 @@
     -- ==================
 
     local base_name = v
-    local str = 'require \'' .. base_name .. '_chk\''
+    local str = 'require \'' .. base_name .. '_specialize\''
     loadstring(str)()
     for i, intype in ipairs(types) do 
-      local stat_chk = base_name .. '_chk'
+      local stat_chk = base_name .. '_specialize'
       local stat_chk_fn = assert(_G[stat_chk], 
       "function not found " .. stat_chk)
-      local subs, tmpl = stat_chk_fn(intype)
-      assert(subs); assert(tmpl);
-      if ( subs ) then 
-        -- TODO Improve following.
-        local T = dofile(tmpl)
-        T.fn      = subs.fn
-        T.intype  = subs.intype
-        T.reducer = subs.reducer
-        gen_doth(T.fn, T, incdir)
-        gen_dotc(T.fn, T, srcdir)
-      end
+      local status, subs, tmpl = pcall(stat_chk_fn, intype)
+      if ( status ) then 
+      -- TODO Improve following.
+      local T = dofile(tmpl)
+      T.fn            = subs.fn
+      T.intype        = subs.intype
+      T.reducer       = subs.reducer
+      T.disp_intype   = subs.disp_intype
+      T.reduce_intype = subs.reduce_intype
+      T.init_val      = subs.init_val     
+      gen_doth(T.fn, T, incdir)
+      gen_dotc(T.fn, T, srcdir)
+      print("Generated ", T.fn)
+    else
+    end
     end
   end

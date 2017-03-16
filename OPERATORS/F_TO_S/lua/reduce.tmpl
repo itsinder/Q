@@ -3,12 +3,19 @@ return require 'code_gen' {
    declaration = [[
 
 #include "q_types.h"
+#include "q_macros.h"
+
+typedef struct _reduce_${disp_intype}_args {
+  ${reduce_intype} cum_val;
+  } REDUCE_${disp_intype}_ARGS;
+  
 ${includes}
 extern int
 ${fn}(  
       const ${intype} * restrict in,  
       uint64_t nR,
-      void *ptr_args
+      void *ptr_args,
+      uint32_t num_threads
       ) 
 ;
 
@@ -21,31 +28,37 @@ int
 ${fn}(  
       const ${intype} * restrict in,
       uint64_t nR,  
-      void *ptr_args
+      void *in_ptr_args,
+      uint32_t num_threads
       )
 
 {
   int status = 0;
   ${intype} inv; 
-  ${intype} init_val = ptr_args->val;
+  REDUCE_${disp_intype}_ARGS *ptr_args;
+  ptr_args = (REDUCE_${disp_intype}_ARGS *)in_ptr_args;
 
-  uint64_t block_size = nR / num_threads();
+  ${reduce_intype} curr_val = ptr_args->cum_val;
+  if ( num_threads == 0 ) { go_BYE(-1); }
+
+  uint64_t block_size = nR / num_threads;
 #pragma omp parallel for 
-  for ( int b = 0; b < num_blocks; b++ ) { 
-    uint64_t lb = b * block_size;
+  for ( int t = 0; t < num_threads; t++ ) { 
+    uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
-    if ( b == (num_blocks-1) ) { ub = nR; }
-    ${intype} lval = init_val;
-    for ( uint64_t  = lb; i < ub; i++ ) {  
+    if ( t == (num_threads-1) ) { ub = nR; }
+    ${reduce_intype} lval = ${init_val};
+    for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       lval = ${reducer}(lval, inv);
     }
 #pragma omp critical _${fn}
     {
-    val_so_far = ${reducer}(val_so_far, lval);
+    curr_val = ${reducer}(curr_val, lval);
     }
   } 
-  *ptr_args->val = val_so_far;
+  ptr_args->cum_val = curr_val;
+BYE:
   return status;
 }
    ]]
