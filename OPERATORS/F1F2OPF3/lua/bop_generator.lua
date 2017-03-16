@@ -10,7 +10,7 @@
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
   local T = assert(dofile(operator_file))
-  local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  local types = { 'B1' }
   for i, base_name in ipairs(T) do
     -- ==================
     local str = "function " .. base_name .. "(f1, f2)\n"

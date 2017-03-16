@@ -1,28 +1,27 @@
-#!/usr/bin/env lua
-
-  require 'pl'
   package.path = package.path.. ";../../../UTILS/lua/?.lua"
+  local plfile = require 'pl.file'
+  dofile '../../../UTILS/lua/globals.lua'
+  local srcdir = "../gen_src/"
+  local incdir = "../gen_inc/"
+
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  file.delete("_qfns_f1f2opf3.lua")
+  plfile.delete("_qfns_f_to_s.lua")
 
-  dofile '../../../UTILS/lua/globals.lua'
-
-  local srcdir = "../gen_src/"
-  local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
-  assert(file_exists(operator_file))
+  assert(plfile.access_time(operator_file))
   local T = dofile(operator_file)
+
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
   args = nil -- not being used just yet
   for i, v in ipairs(T) do
     -- ==================
-    local str = "function " .. v .. "(f1, f2)\n"
-    str = str .. "  expander(\"f1f2opf3\", \"" .. v .. "\", f1, f2)\n"
+    local str = "function " .. v .. "(fld)\n"
+    str = str .. "  expander(\"f_to_s\", \"" .. v .. "\", fld)\n"
     str = str .. "end\n"
-    local f = assert(io.open("_qfns_f1f2opf3.lua", "a"))
+    local f = assert(io.open("_qfns_f_to_s.lua", "a"))
     f:write(str)
     f:close()
     -- ==================

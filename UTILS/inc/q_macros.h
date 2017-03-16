@@ -15,6 +15,7 @@
 #define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
 #define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define mcr_sum(X, Y)  ((X) + (Y))
+#define mcr_sum_sqr(X, Y)  ((X) + (Y)*(Y))
 #define sqr(X)  ((X) * (X))
 
 #define rs_munmap(X, nX) { \
