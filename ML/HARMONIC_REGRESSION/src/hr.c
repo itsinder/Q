@@ -12,7 +12,7 @@
 #include "aux_driver.h"
 #include "positive_solver.h"
 
-#define PI 3.141592
+#define PI 3.14159265358979
 
 bool
 is_valid_chars_for_num(
@@ -122,8 +122,11 @@ main(
   double *X = NULL; int nT = 0;
   double *Y = NULL; 
   double *Z1 = NULL; 
+  double *Z1a = NULL; 
   double *Z7 = NULL; 
-  double *W = NULL; double **U = NULL;
+  double *W = NULL;
+  double *Wm = NULL;
+  double **U = NULL;
   double **A = NULL;
   double *a = NULL; double *b = NULL;
   double **Aprime = NULL; double *bprime = NULL;
@@ -151,57 +154,59 @@ main(
   }
   status = dump_to_file(Y, nT,"_y.csv"); cBYE(status);
   //-------------------------------------
+
+  nT -= 1;
   Z1 = malloc(nT * sizeof(double));
   return_if_malloc_failed(Z1);
 
-  for ( int i = 0; i < 1; i++ ) { Z1[i] = Y[i]; }
-  for ( int i = 1; i < nT; i++ ) { Z1[i] = Y[i] - Y[i-1]; }
+  for ( int i = 0; i < nT; i++ ) { Z1[i] = Y[i+1] - Y[i]; }
   status = dump_to_file(Z1, nT,"_z1.csv"); cBYE(status);
 
+  nT -= 1;
+  Z1a = malloc(nT * sizeof(double));
+  return_if_malloc_failed(Z1a);
+
+  for ( int i = 0; i < nT; i++ ) { Z1a[i] = Z1[i+1] - Z1[i]; }
+  status = dump_to_file(Z1a, nT,"_z1a.csv"); cBYE(status);
+
+  nT -= 7;
   Z7 = malloc(nT * sizeof(double));
   return_if_malloc_failed(Z7);
 
-  for ( int i = 0; i < 7; i++ ) { Z7[i] = Z1[i]; }
-  for ( int i = 8; i < nT; i++ ) { Z7[i] = Z1[i] - Z1[i-7]; }
+  for ( int i = 0; i < nT; i++ ) { Z7[i] = Z1a[i+7] - Z1a[i]; }
   status = dump_to_file(Z7, nT,"_z7.csv"); cBYE(status);
 
-  nT -= 7;
-  Z7 += 7;
-  /*
-  for ( int i = 0; i < 8; i++ ) { Z[i] = Y[i]; }
-  for ( int i = 8; i < nT; i++ ) { 
-    Z[i] = Y[i] - Y[i-1] - Y[i-7] + Y[i-8];
-  }
-  */
-
-
-  //-------------------------------------
   char buf[16];
   int nJ = 1+(period-1)+(period-1); // number of functions used
   U = malloc(nJ * sizeof(double *));
   return_if_malloc_failed(U);
+
   for ( int j = 0; j < nJ; j++ ) { 
     U[j] = malloc(nT * sizeof(double));
     return_if_malloc_failed(U[j]);
   }
-  for ( int i = 0; i < nT; i++ ) { 
-    U[0][i] = 1;
+
+  for ( int t = 0; t < nT; t++ ) { 
+    U[0][t] = 1;
   }
   for ( int j = 1; j < period; j++ ) { 
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = cos ( 2 * PI * (j-0) * (double)t / (double)period );
-      sprintf(buf, "_u_%d.csv", j);
-      dump_to_file(U[j], nT, buf);
+      U[j][t] = cos ( 2 * PI * j * (double)t / (double)period );
     }
+    sprintf(buf, "_u_%d.csv", j);
+    dump_to_file(U[j], nT, buf);
   }
-  for ( int j = period; j < 2*period-1; j++ ) { 
+  int j_shifted;
+  for ( int j = 1; j < period; j++ ) { 
+    j_shifted = j + period -1;
     for ( int t = 0; t < nT; t++ ) { 
-      U[j][t] = sin ( 2 * PI * (j-(double)period) * (double)t / (double)period );
-      sprintf(buf, "_u_%d.csv", j);
-      dump_to_file(U[j], nT, buf);
+      U[j_shifted][t] = sin ( 2 * PI * j * (double)t / (double)period );
     }
+    sprintf(buf, "_u_%d.csv", j_shifted);
+    dump_to_file(U[j_shifted], nT, buf);
   }
   //-------------------------------------
+
   //  Create symmetric matrix A
   status = alloc_matrix(&A, nJ); cBYE(status);
   for ( int j1 = 0; j1 < nJ; j1++ ) { 
@@ -252,17 +257,18 @@ main(
   }
   //---------------------------------
   W = malloc(nT * sizeof(double));
+  Wm = malloc(nT * sizeof(double));
   return_if_malloc_failed(W);
   for ( int t = 0; t < nT; t++ ) { 
     double sum = 0;
     for ( int j = 0; j < nJ; j++ ) { 
-      sum += (a[j] * U[j][t]);
+      sum += a[j] * U[j][t];
     }
-    W[t] =  sum;
-    // W[t] = Z7[t] -  sum;
+    Wm[t] =  sum;
+    W[t] = Z7[t] -  sum;
   }
+  status = dump_to_file(Wm, nT,"_wm.csv"); cBYE(status);
   status = dump_to_file(W, nT,"_w.csv"); cBYE(status);
-  go_BYE(-1); 
   //--------------------------------
   double mu = 0;
   for ( int t = 0; t < nT; t++ ) { 
@@ -276,7 +282,7 @@ main(
   for ( int t1 = 0; t1 < nT; t1++ ) { 
     double sum = 0;
     for ( int t2 = 0; t2 < nT -t1; t2++ ) {
-      sum += ((Z7[t2] - mu) * (W[t2+t1] - mu));
+      sum += ((W[t2] - mu) * (W[t2+t1] - mu));
     }
     gamma[t1] = sum;
   }
@@ -310,7 +316,7 @@ BYE:
   free_if_non_null(U);
   free_if_non_null(X);
   free_if_non_null(Y);
-  Z7 -= 7;
+  free_if_non_null(Z1a);
   free_if_non_null(Z1);
   free_if_non_null(Z7);
   free_if_non_null(W);
