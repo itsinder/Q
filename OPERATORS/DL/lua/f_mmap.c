@@ -22,7 +22,7 @@ typedef struct {
 } mmap_struct;
 
 mmap_struct*
-vector_mmap(
+f_mmap(
    const char* file_name,
    bool is_write
 )
@@ -69,7 +69,7 @@ vector_mmap(
    return map;
 }
 
-int vector_munmap(
+int f_munmap(
     mmap_struct* map        
 )
 {
@@ -80,15 +80,23 @@ int vector_munmap(
     return 0;
 }
 
+FILE* open_file(const char* path) {
+    FILE* fp = fopen(path, "ab"); // TODO write in portable version
+    return fp;
+}
+void flush_file(FILE* fp) {
+    fflush(fp);
+}
+
 
 #ifdef TEST
 int main() {
     const char* f_name = "test.txt";
     mmap_struct* s;
-    s = vector_mmap(f_name, false);
+    s = f_mmap(f_name, false);
     printf("%d\n", s->status);
     printf("%s\n", s->ptr_mmapped_file);
-    printf("%d\n", vector_munmap(s));
+    printf("%d\n", f_munmap(s));
 
 }
 #endif

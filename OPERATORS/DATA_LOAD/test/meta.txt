@@ -1,0 +1,2 @@
+{ { name = "empid", null = "true", type = "I4" },  { name = "yoj", null = "true", type ="I2" },
+  { name = "empname", type ="SV",dict = "D1", dict_exists = false, add=true} }

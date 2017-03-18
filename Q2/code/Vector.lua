@@ -1,3 +1,23 @@
+--[[
+Vector Semantics
+    1. Pull Semantics
+        1.1 Generator
+            Params
+                generator - The generator that is the source of data
+        1.2 Read file
+            Params
+                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
+                field_type - The field type used, which must be present in g_valid_types
+                field_size (optional) - The size of each element, defaults to getting it from g_valid_types
+                filename - The file to be read from
+    2. Push Semantics
+        2.1 Write file
+            Params
+                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
+                field_type - The field type used, which must be present in g_valid_types
+                field_size (optional) - The size of each element, defaults to getting it from g_valid_types
+                filename (optional) - The file to be written out to, defaults to a random unused file
+]]
 local Vector = {}
 Vector.__index = Vector
 local valid_types = {}
@@ -5,11 +25,11 @@ valid_types['i'] = 'int'
 valid_types['f'] = 'float'
 valid_types['d'] = 'double'
 valid_types['c'] = 'char'
-local chunk_size = 64
+local self_chunk_size = 64
 local valid_meta = {}
 valid_meta["dir"] = 1
 g_valid_types = g_valid_types or valid_types
-g_chunk_size = g_chunk_size or chunk_size
+g_chunk_size = g_chunk_size or self_chunk_size
 g_valid_meta = g_valid_meta or valid_meta
 
 local charset = {}
@@ -45,6 +65,9 @@ local function get_new_filename(length)
     return name
 end
 
+function is_int(n)
+  return n == math.floor(n)
+end
 
 local ffi = require 'ffi'
 ffi.cdef([[
@@ -66,9 +89,14 @@ FILE *fopen(const char *path, const char *mode);
 int fclose(FILE *stream);
 int fwrite(void *Buffer,int Size,int Count,FILE *ptr);
 int fflush(FILE *stream);
-    ]])
+int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size );
+int print_bits(char * file_name, int length);
+int get_bits(FILE* fp, int* arr, int length);
+int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
+int get_bit(unsigned char* x, int i);
+]])
 
-local c = ffi.load('./vector_mmap.so')
+local c = ffi.load('vector_mmap.so')
 local C = ffi.C
 local DestructorLookup = {}
 setmetatable(Vector, {
@@ -84,7 +112,7 @@ function Vector.destructor(data)
         C.free(data.destructor_ptr)
     else
         print "using ptr"
-        local tmp_slf = DestructorLookup[data]
+        -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         C.free(data)
     end
@@ -109,7 +137,7 @@ local function set_generator(self, arg)
     self.input_from_generator = true
     self.field_type = gen.field_type
     self.field_size = gen.field_size
-    self.length = gen.length
+    self.my_length = gen.length
     self.field_size = gen.field_size
     self.memoized = true
     self.is_materialized = false
@@ -129,16 +157,22 @@ local function read_file_vector(self, arg)
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.length = tonumber(self.f_map.ptr_file_size) / self.field_size
-    self.max_chunks = math.ceil(self.length/self.chunk_size)
+    self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    self.max_chunks = math.ceil(self.my_length/self.chunk_size)
     return self
 end
 
 local function write_file_vector(self, arg)
     self.output_to_file = true
     self.filename = arg.filename or get_new_filename(10)
-    self.is_materialized = false
-    self.length = 0
+    -- ensure the file is empty to avoid confusion
+	local f = io.open(self.filename,"r")
+	if f ~= nil then
+		io.close(f)
+		os.remove(self.filename)
+	end
+   self.is_materialized = false
+    self.my_length = 0
     return self
 end
 
@@ -177,7 +211,7 @@ function Vector.new(arg)
 end
 
 function Vector:length()
-    return self.length
+    return self.my_length
 end
 
 function Vector:fldtype()
@@ -191,7 +225,7 @@ end
 
 function Vector:memo(bool)
     assert(type(bool) == "boolean", "Incorrect type supplied")
-    assert(self.input_from_file ~= true, "Input from file is always memoized and cannot be changed") 
+    assert(self.input_from_file ~= true, "Input from file is always memoized and cannot be changed")
     assert(self.last_chunk_number == nil, "Cannot set this after calls to chunk")
     self.memoized = bool
 end
@@ -204,20 +238,28 @@ function Vector:last_chunk()
     return self.last_chunk_number
 end
 
-
 local function append_to_file(self, ptr, size)
     assert(ptr ~= nil, "No pointer given to write")
     assert(self.filename ~= nil, "Filename should have been set in constructor")
     size = size or self.chunk_size
-    
+
     assert(self.input_from_file ~= true, "Cannot write to input file")
 
     if self.file == nil  or self.file == ffi.NULL then
-        self.file = C.fopen(self.filename, "ab+")
+        if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
+            self.file = C.fopen(self.filename, "wb+")
+        else
+            self.file = C.fopen(self.filename, "ab+")
+        end
         assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
-    c.fwrite(ptr,self.field_size, size, self.file)
+    -- TODO make more general based on field size
+    if self.field_type == "B1" then
+        assert(tonumber(c.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
+    else
+        assert(c.fwrite(ptr,self.field_size, size, self.file) == size, "Unable to write to file")
+    end
 end
 
 local function flush_remap_file(self)
@@ -240,7 +282,7 @@ local function get_from_generator(self, num)
     assert(self.generator:status() ~= "dead", "Cannot get more data from generator")
     local status, buffer, size = self.generator:get_next_chunk()
     assert(status, buffer)
-    
+
     self.last_chunk_number = num
     -- if memoized then add to file
     if self.memoized then
@@ -250,7 +292,7 @@ local function get_from_generator(self, num)
     self.last_chunk_size = size
     -- now check if the materialization is complete
     if self.generator:status() == "dead" then
-        assert(math.ceil(self.length/self.chunk_size) - 1  == num)
+        assert(math.ceil(self.my_length/self.chunk_size) - 1  == num)
         self.is_materialized = true
         flush_remap_file(self)
     end
@@ -262,54 +304,82 @@ local function get_from_file(self, num)
         if num < self.max_chunks then
             local chunk_size = self.chunk_size
             if num == self.max_chunks -1 then
-                chunk_size = self.length - num*self.chunk_size
+                chunk_size = self.my_length - num*self.chunk_size
             end
             --return nil --return the mmapped location of the file
-            local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-            return ffi.cast('void*', ptr + self.chunk_size*num), chunk_size
+            -- TODO change this as we are doing custom types Think in terms of
+            -- bytes and bits
+            local ptr = ffi.cast("unsigned char*", self.cdata)
+            return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
         else
             error('Invalid chunk number')
         end
     else
-        return self.cdata, self.length -- a mmap to the ramfs file
+        return self.cdata, self.my_length -- a mmap to the ramfs file
     end
 
 end
 
 local function update_max_chunks(self)
- self.last_chunk_number = math.ceil(self.length/ self.chunk_size) -1 
+ self.last_chunk_number = math.ceil(self.my_length/ self.chunk_size) -1
+end
+
+function Vector:get_element(num)
+   -- assert(num <= self.my_length, "The element queried should be in the vector")
+   assert(is_int(num), "chunks need to be integer type")
+   assert(num >= 0, "Requires a a whole number")
+   local chunk, size = self:chunk( math.floor(num / self.chunk_size))
+   local offset = num % self.chunk_size
+   assert(offset <= size , "element needs to be in current chunk")
+   chunk = ffi.cast("unsigned char*", chunk)
+   if self.field_type == "B1" then
+      --first get offset in char and then get the correct bit
+      local char_offset = offset / 8
+      local bit_offset = offset % 8
+      local char_value = chunk + char_offset
+      local bit_value = tonumber( c.get_bit(char_value, bit_offset) )
+      if bit_value == 0 then
+         return ffi.NULL
+      else
+         return 1
+      end
+   else
+      return ffi.cast("void *", chunk +  offset * self.field_size)
+
+   end
 end
 
 function Vector:chunk(num)
     assert(type(num) == "number", "Require a number for chunk number")
-    
+    assert(is_int(num), "chunks need to be integer type")
+    assert(num >= 0, "Requires a a whole number")
+
     if self:materialized() then
         return get_from_file(self, num)
     else -- if not materialized
-        if num < 0 then return self.cdata, self.length end
+        if num < 0 then return self.cdata, self.my_length end
         if num < self:last_chunk() then
             if self.memoized == true then
                 if num > self.file_last_chunk_number then flush_remap_file(self) end
-                local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-                return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
+                local ptr = ffi.cast("unsigned char*", self.cdata)
+                return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
             else
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
-            assert(self.length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
-            --TODO this needs to change
+            assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
              if num > self.file_last_chunk_number then flush_remap_file(self) end
-              local ptr = ffi.cast(g_valid_types[self.field_type] .. '*', self.cdata)
-              return ffi.cast('void*', ptr + self.chunk_size*num), self.chunk_size
+             local ptr = ffi.cast("unsigned char*", self.cdata)
+             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
                 local status, buffer, size = get_from_generator(self, num)
                 assert(status, "No chunk found: " .. buffer)
                 if self.memoized == true then
                     append_to_file(self, buffer, size)
-                    self.length = self.length + size -- memoized
+                    self.my_length = self.my_length + size -- memoized
                 else
-                    self.length = size -- non memoized
+                    self.my_length = size -- non memoized
                 end
                 update_max_chunks(self)
                 return buffer, size
@@ -319,7 +389,7 @@ function Vector:chunk(num)
                 error("I should not be here")
             end
         elseif num > self:last_chunk() + 1 then
-            error("Cannot return the chunk yet max number available is " .. self:last_chunk() .. " but was asked for " .. num)
+            error("Cannot return the chunk yet, beyond max available")
         end
 
     end
@@ -329,7 +399,7 @@ function Vector:put_chunk(chunk, length)
      assert(self.output_to_file == true,  "Cannot be write to non output vector")
      assert(self.is_materialized ~= true, "The vector is already materialized")
     append_to_file(self, chunk, length)
-    self.length = self.length + length
+    self.my_length = self.my_length + length
 end
 
 function Vector:eov()
@@ -342,18 +412,8 @@ function Vector:eov()
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.length = tonumber(self.f_map.ptr_file_size) / self.field_size
-    self.max_chunks = math.ceil(self.length/self.chunk_size)
-end
-
-function Vector:get_meta(index)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
-    return self.meta[index]
-end
-
-function Vector:set_meta(index, val)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
-    self.meta[index] = val
+    -- self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    self.max_chunks = math.ceil(self.my_length/self.chunk_size)
 end
 
 return Vector
