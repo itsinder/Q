@@ -12,7 +12,8 @@ require 'dictionary'
 local Vector = require 'Vector'
 local Column = require 'Column'
 -- require 'q_c_functions'
-require 'pl'
+local plfile = require 'pl.file'
+local plpath = require 'pl.plpath'
 require 'utils'
 local ffi = require "ffi"
 ffi.cdef([[
@@ -66,12 +67,16 @@ txt_to_I4(
 local c = ffi.load("load_csv.so")
 
 
-function load( csv_file_path, metadata, load_global_settings)
+function load( 
+  csv_file_path, 
+  metadata, 
+  load_global_settings
+  )
    local col_count = 0 --each field in the metadata represents one column in csv file
    local col_num_nil = {}
-   assert( valid_file(csv_file_path),"Please make sure that csv_file_path is correct")
-   assert( path.getsize(csv_file_path) ~= 0, "File should not be empty")
-   validate_meta(metadata)
+   assert( plpath.isfile(csv_file_path), "Input file not found")
+   assert( plfile.getsize(csv_file_path) > 0, "Input file empty")
+   assert(validate_meta(metadata))
    --TODO unhard code
    -- TODO Put nils for columns that you do not want to load 
    local column_list = {

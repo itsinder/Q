@@ -1,3 +1,5 @@
+g_max_size_SC = 1024
+
 g_constants = {}
 g_constants.INIT_VAL_FOR_INT_MIN = "LLONG_MAX"
 g_constants.INIT_VAL_FOR_FLT_MIN = "DBL_MAX"

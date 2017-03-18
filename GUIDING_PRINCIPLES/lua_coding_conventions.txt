@@ -1,0 +1,3 @@
+Instead of if ( x == nil ) or if ( x ~= nil ), go with 
+if ( not x ) then or if ( x ) then 
+
