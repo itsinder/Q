@@ -80,3 +80,6 @@ sudo luarocks install luaunit
 
 #install penlight ###
 sudo luarocks install penlight
+
+#install luaposix ###
+sudo luarocks install luaposix
