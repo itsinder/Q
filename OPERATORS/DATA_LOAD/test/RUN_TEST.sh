@@ -28,8 +28,5 @@ echo "Generating Code Coverage Report"
 echo "-----------------------------"
 luacov
 echo "OK"
-
-
-
 echo "----------------------------"
 echo "DONE"

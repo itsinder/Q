@@ -1,6 +1,10 @@
 .DEFAULT_GOAL := all
 CC = gcc
 CFLAGS = -fPIC -std=gnu99
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev-gsl
 LFLAGS = -shared
 RM = rm -f
 SOURCE_FILES = $(wildcard *.c)

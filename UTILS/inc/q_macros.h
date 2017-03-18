@@ -15,6 +15,7 @@
 #define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
 #define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define mcr_sum(X, Y)  ((X) + (Y))
+#define mcr_sum_sqr(X, Y)  ((X) + (Y)*(Y))
 #define sqr(X)  ((X) * (X))
 
 #define rs_munmap(X, nX) { \
@@ -49,9 +50,12 @@
 
 #define unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
-// #define SETBIT(x,0)  { /* do nothing */ }
-#define mcr_set_bit(x,i, val)  x[i/8] |= (1<<(i%8));
-#define mcr_clear_bit(x,i) x[i/8] &= ~(1<<(i%8));
-#define mcr_get_bitt(x,i) x[i/8] & (1<<(i %8) > 0;
+#define mcr_get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))
+
+#define mcr_is_ith_bit_set(x, i) ((x) & ((uint64_t) 1 << (i))) == 0 ? false : true 
+
+#define mcr_set_bit(x, i) (x = (x) | ((uint64_t) 1 << (i)))
+
+#define mcr_unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
 #endif
