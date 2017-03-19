@@ -1,3 +1,19 @@
+g_max_size_SC = 1024
+g_max_size_SV = 1024
+
+g_constants = {}
+g_constants.INIT_VAL_FOR_INT_MIN = "LLONG_MAX"
+g_constants.INIT_VAL_FOR_FLT_MIN = "DBL_MAX"
+
+g_constants.INIT_VAL_FOR_INT_MAX = "LLONG_MIN"
+g_constants.INIT_VAL_FOR_FLT_MAX = "DBL_MIN"
+
+g_constants.INIT_VAL_FOR_FLT_SUM = "0"
+g_constants.INIT_VAL_FOR_INT_SUM = "0"
+
+g_constants.INIT_VAL_FOR_FLT_SUM_SQR = "0"
+g_constants.INIT_VAL_FOR_INT_SUM_SQR = "0"
+--===========================
 g_sz = {}
 g_sz["I1"]  = 8;
 g_sz["I2"] = 16;
@@ -5,6 +21,7 @@ g_sz["I4"] = 32;
 g_sz["I8"] = 64;
 g_sz["F4"]   = 32;
 g_sz["F8"]  = 64;
+--===========================
 g_isz_to_fld = {}
 g_isz_to_fld[1]  = "I8"
 g_isz_to_fld[2] = "I2"
@@ -13,6 +30,7 @@ g_isz_to_fld[8] = "I8"
 g_fsz_to_fld = {}
 g_fsz_to_fld[4] = "F4"
 g_fsz_to_fld[8] = "F8"
+--===========================
 g_iorf = {}
 g_iorf["I1"]  = "fixed";
 g_iorf["I2"] = "fixed";
@@ -20,6 +38,7 @@ g_iorf["I4"] = "fixed";
 g_iorf["I8"] = "fixed";
 g_iorf["F4"]   = "floating_point";
 g_iorf["F8"]  = "floating_point";
+--===========================
 
 g_qtypes = {}
 g_qtypes.I1 = { short_code = "I1", width = 1, ctype = "int8_t", txt_to_ctype = "txt_to_I1", ctype_to_txt = "I1_to_txt", max_length="6"}
@@ -43,4 +62,4 @@ g_valid_types['F4'] = "float"
 g_valid_types['F8'] = "double"
 g_valid_types['SV'] = "int32_t"
 g_valid_types['SC'] = "char"
-g_valid_types['B1'] = "uint8_t"
+g_valid_types['B1'] = "uint64_t"

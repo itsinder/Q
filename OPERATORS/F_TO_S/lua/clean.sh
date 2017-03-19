@@ -1,2 +1,3 @@
-rm max_chk.lua
-rm sum_chk.lua
+#!/bin/bash
+rm -f max_specialize.lua
+rm -f sum_specialize.lua

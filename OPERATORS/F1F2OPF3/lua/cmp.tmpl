@@ -3,13 +3,14 @@ return require 'code_gen' {
    declaration = [[
 
 #include "q_types.h"
+#include "q_macros.h"
 ${includes}
 extern int
 ${fn}(  
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      uint8_t *restrict out 
+      uint64_t *restrict out 
       ) 
 ;
 
@@ -22,10 +23,10 @@ static void
 __operation(
       ${in1type} a,
       ${in2type} b, 
-      uint8_t *ptr_c
+      uint64_t *ptr_c
       )
       {
-      uint8_t  c;
+      uint64_t  c;
       ${c_code_for_operator}
       *ptr_c = c;
       }
@@ -35,32 +36,28 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      uint8_t * restrict out 
+      uint64_t * restrict out 
       )
 
 { 
   int status = 0;
-  ${in1type} inv1; 
-  ${in2type} inv2; 
-  //-- Initialize out 
 #pragma omp parallel for simd
-  for ( uint64_t i = 0; i < nR/8; i++ ) {  
-    out[i] = 0;
+  /* TODO: Convince yourself that work is parcelled out on 
+  64 element boundaries */
+  for ( uint64_t i = 0; i < nR; i++ ) {  
+    int bitidx = i % 64;
+    ${in1type} inv1 = in1[i]; 
+    ${in2type} inv2 = in2[i]; 
+    int obval = inv1 ${comparison} inv2;
+    /* TODO: Avoid the if condition */
+    if ( obval == 0 ) { 
+      mcr_set_bit(out[(i/64)], bitidx);
+    }
+    else {
+      mcr_unset_bit(out[(i/64)], bitidx);
+    }
   }
-  // handle case when nR is not multiple of 8
-  if ( ( nR / 8 ) * 8 ) != 8 ) { 
-    out[nR/8 + 1] = 0;
-  }
-#pragma omp parallel for simd
- for ( uint64_t i = 0; i < nR; i++ ) {  
-   inv1 = *in1; 
-   inv2 = *in2; 
-   int oval = inv1 ${comparison} inv2;
-   mcr_set_bit(out, i, oval);
-   in1++; 
-   in2++; 
- } 
- return status;
+  return status;
 }
 
    ]]

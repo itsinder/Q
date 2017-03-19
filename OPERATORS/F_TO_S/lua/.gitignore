@@ -1,2 +1,3 @@
-max_chk.lua
-sum_chk.lua
+max_specialize.lua
+sum_sqr_specialize.lua
+sum_specialize.lua

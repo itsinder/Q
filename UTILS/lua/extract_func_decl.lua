@@ -1,20 +1,15 @@
 #!/bin/lua
-require 'pl'
--- Move isdir to proper place. Use appropriate package
-function is_dir(fn) -- TODO 
-  return true
---      return (posix.stat(fn, "type") == 'directory')
-end
-
-package.path = package.path.. ";../../../UTILS/lua/?.lua"
-require("is_file")
+local rootdir = os.getenv("Q_SRC_ROOT")
+assert(rootdir, "Set Q_SRC_ROOT as /home/subramon/WORK/Q or some such")
+local plpath = require 'pl.path'
+package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 require("trim")
 n = #arg
-assert( n == 2 ) 
+assert( n == 2, "Specify infile and opdir")
 infile = arg[1]
 opdir  = arg[2]
-assert(is_file(infile)) -- TODO improve
-assert(is_dir(opdir)) -- TODO improve
+assert(plpath.isfile(infile)) 
+assert(plpath.isdir(opdir)) 
 io.input(infile)
 code = io.read("*all")
 io.close()
