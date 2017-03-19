@@ -1,3 +1,12 @@
 Instead of if ( x == nil ) or if ( x ~= nil ), go with 
 if ( not x ) then or if ( x ) then 
 
+
+
+Here is another coding convention - do not have unnecessary asserts. e.g.,
+assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) ,
+  "Dictionary metadata should not be empty”)
+could have been
+assert( type(dict_metadata) == "table" , "Dictionary metadata should not be empty)
+
+
