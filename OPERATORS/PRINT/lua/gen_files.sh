@@ -25,4 +25,4 @@ rm -f *.o
 rm -f _x
 cd -
 #-------------------------
-echo "ALL DONE"
+echo "ALL DONE; $0 in $PWD"
