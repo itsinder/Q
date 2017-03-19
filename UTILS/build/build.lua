@@ -9,13 +9,15 @@ package.path = package.path.. ";" .. rootdir .. "/UTILS/build/?.lua"
 local T = dofile("gen.lua")
 for dir, scripts in pairs(T) do 
   plpath.chdir(rootdir .. "/" .. dir)
-  local cwd = plpath.currentdir()
+  local cwd = assert(plpath.currentdir())
   print("Currently in ", cwd)
   local F = pldir.getfiles(cwd, "*.sh")
-  print(F)
   for i, script in ipairs(scripts) do
-    os.execute("bash " .. script)
     print(" Executing", script)
+    status = os.execute("bash " .. script)
+    if ( status ~= 0 ) then 
+      print("Failed... exiting")
+    end
   end
 end
 print("All done")

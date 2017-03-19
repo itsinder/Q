@@ -24,4 +24,4 @@ gcc -shared *.o -o _libfoo.so
 rm -f *.o *.so
 rm -f _x
 cd -
-echo "ALL DONE"
+echo "ALL DONE; $0 in $PWD"
