@@ -25,7 +25,7 @@ assert(z ~= "")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
 --=========================================
-opfile = opdir .. "/_" .. string.gsub(infile, ".c", ".h")
+opfile = opdir .. "/_" .. string.gsub(infile, ".c$", ".h")
 io.output(opfile)
 if ( incs ) then 
   io.write(incs)

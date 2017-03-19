@@ -1,3 +1,3 @@
 local T = {}
-T["UTILS/src/"] = "gen_files.sh"
+T["UTILS/src/"] = { "gen_files.sh" }
 return T
