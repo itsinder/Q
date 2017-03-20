@@ -8,8 +8,8 @@ n = #arg
 assert( n == 2, "Specify infile and opdir")
 infile = arg[1]
 opdir  = arg[2]
-assert(plpath.isfile(infile)) 
-assert(plpath.isdir(opdir)) 
+assert(plpath.isfile(infile), "Input file not found")
+assert(plpath.isdir(opdir), "Output directory not found")
 io.input(infile)
 code = io.read("*all")
 io.close()
@@ -21,7 +21,7 @@ if ( incs ) then
 end 
 --=========================================
 z = string.match(code, "//START_FUNC_DECL.*//STOP_FUNC_DECL")
-assert(z ~= "")
+assert(z ~= "", "Could not find stuff in START_FUNC_DECL .. STOP_FUNC_DECL")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
 --=========================================
@@ -30,7 +30,12 @@ io.output(opfile)
 if ( incs ) then 
   io.write(incs)
 end
-io.write('extern ' .. trim(z) .. ';') -- TODO get semi-colon on previous line
+fn = string.gsub(infile, ".c$", "")
+io.write("#ifndef __" .. fn .. "\n")
+io.write("#define __" .. fn .. "\n")
+
+io.write('extern ' .. trim(z) .. ';\n') 
+io.write("#endif\n")
 io.close()
 os.exit()
 

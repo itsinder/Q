@@ -1,8 +1,11 @@
+//START_INCLUDES
 #include <stdio.h>
 #include <string.h>
 #include "q_macros.h"
 #include "q_types.h"
+//STOP_INCLUDES
 
+//START_FUNC_DECL
 size_t
 get_cell(
     char *X,
@@ -12,6 +15,7 @@ get_cell(
     char *buf,
     size_t bufsz
     )
+//STOP_FUNC_DECL
 {
   int status = 0;
   char dquote = '"'; char comma = ','; 

@@ -1,9 +1,10 @@
+-- Specify script in order in which they should run
 local T = {}
-T["/UTILS/src/"] = { "gen_files.sh" }
-T["/OPERATORS/DATA_LOAD/lua/"] = { "gen_files.sh" }
-T["/OPERATORS/DATA_LOAD/src/"] = { "gen_files.sh" }
-T["/OPERATORS/F1F2OPF3/lua/"] = { "gen_files.sh" }
-T["/OPERATORS/PRINT/lua/"] = { "gen_files.sh" }
-T["/OPERATORS/PRINT/src/"] = { "gen_files.sh" }
-T["/OPERATORS/F_TO_S/lua/"] = { "gen_files.sh" }
+T[#T+1] = { dir = "/UTILS/src/", scripts = { "gen_files.sh" } }
+T[#T+1] = { dir = "/OPERATORS/DATA_LOAD/lua/", scripts = { "gen_files.sh" }}
+T[#T+1] = { dir = "/OPERATORS/DATA_LOAD/src/", scripts = { "gen_files.sh" }}
+T[#T+1] = { dir = "/OPERATORS/F1F2OPF3/lua/", scripts = { "gen_files.sh" }}
+T[#T+1] = { dir = "/OPERATORS/PRINT/lua/", scripts = { "gen_files.sh" }}
+T[#T+1] = { dir = "/OPERATORS/PRINT/src/", scripts = { "gen_files.sh" }}
+T[#T+1] = { dir = "/OPERATORS/F_TO_S/lua/", scripts = { "gen_files.sh"}}
 return T
