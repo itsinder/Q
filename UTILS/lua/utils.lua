@@ -1,5 +1,12 @@
 require 'pl'
 
+function load_file_as_string(fname)
+  local f = assert(io.open(fname))
+  local str = f:read("*a")
+  f:close()
+  return str
+end
+
 function valid_dir(dir_path)
     if dir_path == nil or not path.isdir(dir_path) then 
       return false 
