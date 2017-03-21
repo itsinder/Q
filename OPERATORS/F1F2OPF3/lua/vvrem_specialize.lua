@@ -21,7 +21,6 @@ function vvrem_specialize(
     subs.in1type = assert(g_qtypes[f1type].ctype)
     subs.in2type = assert(g_qtypes[f2type].ctype)
     subs.outtype = assert(g_qtypes[outtype].ctype)
-    subs.argstype = "void *"
     subs.c_code_for_operator = " c = a % b ;"
     return subs, tmpl
 end
