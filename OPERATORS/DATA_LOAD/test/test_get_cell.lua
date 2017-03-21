@@ -9,11 +9,11 @@ require 'utils'
 require 'compile_so'
 require 'extract_fn_proto'
 local ffi = require 'ffi'
-local cfile = "get_cell.c"
-local get_cell_h = extract_fn_proto("get_cell.c")
+local cfile = "../src/get_cell.c"
+local get_cell_h = extract_fn_proto("../src/get_cell.c")
 -- TODO Improve following. Should not have to give path to mmap
-local mmap_h = extract_fn_proto(rootdir .. "UTILS/src/f_mmap.c")
-local mmap_types_h = load_file_as_string(rootdir .. "UTILS/inc/mmap_types.h")
+local mmap_h = extract_fn_proto(rootdir .. "/UTILS/src/f_mmap.c")
+local mmap_types_h = load_file_as_string(rootdir .. "/UTILS/inc/mmap_types.h")
 mmap_types_h = string.gsub(mmap_types_h, "#.-\n", "")
 --============================
 local nargs = assert(#arg == 3, "Arguments are <nrows> <ncols> <infile>")
@@ -39,7 +39,7 @@ local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free)
 is_last_col = false
 -- Create libget_cell.so
 incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
-srcs = { "get_cell.c", "../../../UTILS/src/f_mmap.c" }
+srcs = { "../src/get_cell.c", "../../../UTILS/src/f_mmap.c" }
 tgt = "libget_cell.so"
 status = compile_so(incs, srcs, tgt)
 assert(status, "compile of .so failed")
