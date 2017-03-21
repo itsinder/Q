@@ -24,7 +24,8 @@ function compile_so(incs, srcs, tgt)
   command = command .. table.concat(srcs)
   command = command .. " -shared -o " .. tgt
   print(command)
-  os.execute(command)
+  status = os.execute(command)
+  assert(status == 0,"command failed \n" .. command)
 end
 --[[ sample invocation
 incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}

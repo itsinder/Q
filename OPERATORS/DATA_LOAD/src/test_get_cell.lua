@@ -6,6 +6,7 @@ local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local log = require 'log'
 require 'utils'
+require 'compile_so'
 require 'extract_fn_proto'
 local ffi = require 'ffi'
 local cfile = "get_cell.c"
@@ -34,15 +35,10 @@ ffi.cdef(mmap_h)
 local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
 is_last_col = false
 -- Create libget_cell.so
-local command = " gcc -Wall -g -std=gnu99 " ..
-  "-I../../../UTILS/inc/ " ..
-  "-I../../../UTILS/gen_inc/ " ..
- " -I../gen_inc/ " ..
- " get_cell.c " ..
- rootdir .. "/UTILS/src/mmap.c" ..
- " -fPIC -shared -o libget_cell.so " 
-
-assert( os.execute(command), "cannot create .so file")
+incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
+srcs = { "get_cell.c", "../../../UTILS/src/mmap.c" }
+tgt = "libget_cell.so"
+assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 local lget_cell = assert(ffi.load("get_cell.so").get_cell)
 local rs_mmap   = assert(ffi.load("get_cell.so").rs_mmap)
 X = ffi.new("char **");
