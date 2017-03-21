@@ -9,7 +9,6 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      void *ptr_args,
       ${outtype} * restrict out 
       ) 
 ;
@@ -23,7 +22,6 @@ static void
 __operation(
       ${in1type} a,
       ${in2type} b, 
-      ${argstype} *ptr_args,
       ${outtype} *ptr_c
       )
       {
@@ -37,18 +35,17 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      void *ptr_args,
       ${outtype} * restrict out 
       )
 
 { 
   int status = 0;
- #pragma omp parallel for simd
+ #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) {  
     ${in1type} inv1 = in1[i]; 
     ${in2type} inv2 = in2[i]; 
     ${outtype} outv;
-    __operation(inv1, inv2, ptr_args, &outv);
+    __operation(inv1, inv2, &outv);
     out[i] = outv;
   } 
   return status;

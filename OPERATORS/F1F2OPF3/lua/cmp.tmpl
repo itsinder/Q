@@ -41,7 +41,7 @@ ${fn}(
 
 { 
   int status = 0;
-#pragma omp parallel for simd
+#pragma omp parallel for 
   /* TODO: Convince yourself that work is parcelled out on 
   64 element boundaries */
   for ( uint64_t i = 0; i < nR; i++ ) {  

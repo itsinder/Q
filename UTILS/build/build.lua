@@ -14,9 +14,9 @@ for i, v in ipairs(T) do
   print("Currently in ", cwd)
   local F = pldir.getfiles(cwd, "*.sh")
   for i, script in ipairs(v.scripts) do
-    print(" Executing", script)
+    print(" Executing ", script)
     status = os.execute("bash " .. script)
-    assert ( status == 0, " failure at " .. script)
+    assert ( status == 0, " failure at " .. script, " in ", cwd)
   end
 end
 print("All done")

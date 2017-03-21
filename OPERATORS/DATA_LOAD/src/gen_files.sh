@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 # TODO. Don't want to have to provide path for Lua utilities
-test -d "Q_SRC_ROOT"
+test -d "$Q_SRC_ROOT"
 UDIR="$Q_SRC_ROOT/UTILS/lua"
 test -d $UDIR
 lua $UDIR/extract_func_decl.lua txt_to_SC.c ../gen_inc/
