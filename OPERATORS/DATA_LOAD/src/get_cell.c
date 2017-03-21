@@ -4,7 +4,7 @@
 #include "q_macros.h"
 #include "q_types.h"
 //STOP_INCLUDES
-
+#include "_get_cell.h"
 //START_FUNC_DECL
 size_t
 get_cell(
@@ -20,7 +20,7 @@ get_cell(
   int status = 0;
   char dquote = '"'; char comma = ','; 
   char bslash = '\\'; char eoln = '\n';
-  int bufidx = 0;
+  uint32_t bufidx = 0;
   //--------------------------------
   if ( X == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
