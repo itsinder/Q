@@ -5,6 +5,7 @@ local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/UTILS/build/?.lua"
+local log = require 'log'
 
 local T = dofile("gen.lua")
 for i, v in ipairs(T) do 
@@ -15,9 +16,7 @@ for i, v in ipairs(T) do
   for i, script in ipairs(v.scripts) do
     print(" Executing", script)
     status = os.execute("bash " .. script)
-    if ( status ~= 0 ) then 
-      print("Failed... exiting")
-    end
+    assert ( status == 0, " failure at " .. script)
   end
 end
 print("All done")
