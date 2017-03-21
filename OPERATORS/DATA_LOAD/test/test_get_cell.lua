@@ -2,16 +2,14 @@
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-local plpath = require 'pl.path'
-local pldir  = require 'pl.dir'
+local pl  = require 'pl'
 local log = require 'log'
 require 'utils'
 require 'compile_so'
 require 'extract_fn_proto'
 local ffi = require 'ffi'
 local cfile = "../src/get_cell.c"
-local get_cell_h = extract_fn_proto("../src/get_cell.c")
--- TODO Improve following. Should not have to give path to mmap
+local get_cell_h = assert(extract_fn_proto("../src/get_cell.c"))
 local mmap_h = extract_fn_proto(rootdir .. "/UTILS/src/f_mmap.c")
 local mmap_types_h = load_file_as_string(rootdir .. "/UTILS/inc/mmap_types.h")
 mmap_types_h = string.gsub(mmap_types_h, "#.-\n", "")
@@ -20,7 +18,7 @@ local nargs = assert(#arg == 3, "Arguments are <nrows> <ncols> <infile>")
 local nrows = assert(tonumber(arg[1]))
 local ncols = assert(tonumber(arg[2]))
 local infile = arg[3]
-assert(plpath.isfile(infile), "File not found")
+assert(pl.path.isfile(infile), "File not found")
 local instr = load_file_as_string(infile)
 local nX = string.len(instr)
 local xidx = 0

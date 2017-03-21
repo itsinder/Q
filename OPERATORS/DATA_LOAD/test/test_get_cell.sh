@@ -10,4 +10,8 @@ status=$?; if [ $status == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi
 
 luajit test_get_cell.lua 3 2 bad_get_cell_in1.txt
 if [ $? == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi 
+
+#-- No eoln
+luajit test_get_cell.lua 3 2 bad_get_cell_in2.txt
+if [ $? == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi 
 echo "Completed $0 in $PWD"
