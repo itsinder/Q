@@ -1,61 +1,66 @@
 package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 require 'globals'
-plpath = require 'pl.path'
-
+local pl = require 'pl'
 
 function validate_meta(
   M -- meta data table 
   )
   assert(type(M) == "table", "Metadata should be table")
-  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), 
+  assert(pl.path.isdir(_G["Q_META_DATA_DIR"]), 
   "Q_META_DATA_DIR not a directory")
   
   local col_names = {}
   -- now look at fields of metadata
-  for midx, fldM in pairs(M) do
+  for midx, fld_M in pairs(M) do
     local col = "Column " .. midx .. ": "
-    assert(type(fldM) == "table", col .. "column descriptor must be table")
-    assert(fldM.name ~= nil, col .. "name cannot be null")
-    assert(fldM.qtype ~= nil, col .. "qtype cannot be null")
-    assert(g_qtypes[fldM.qtype] ~= nil, 
+    assert(type(fld_M) == "table", col .. "column descriptor must be table")
+    assert(fld_M.name,  col .. "name cannot be null")
+    assert(fld_M.qtype, col .. "qtype cannot be null")
+    assert(g_qtypes[fld_M.qtype], 
     col ..  "qtype contains invalid q type")
-    if fldM.has_nulls then 
-      assert((fldM.has_nulls == true  or fldM.has_nulls == false ), 
+    if fld_M.has_nulls then 
+      assert((fld_M.has_nulls == true  or fld_M.has_nulls == false ), 
       col .. "has_nulls can contain true/false only" )
     else
-      fldM.has_nulls = false
+      fld_M.has_nulls = false
     end
-    if fldM.is_load then 
-      assert((fldM.is_load == true  or fldM.is_load == false ), 
+    if fld_M.is_load then 
+      assert((fld_M.is_load == true  or fld_M.is_load == false ), 
       col .. "is_load can contain true/false only" )
     else
-      fldM.is_load = true
+      fld_M.is_load = true
     end
-    if ( fldM.is_load ) then 
-      assert(not col_names[fldM.name],
+    if ( fld_M.is_load ) then 
+      assert(not col_names[fld_M.name],
       col .. "duplicate column name is not allowed") 
-      col_names[fldM.name] = true 
+      col_names[fld_M.name] = true 
     end
-    if fldM.qtype == "SC" then 
-      assert(fldM.size,  
-      col .. ": size should be specified for SC")
-      local sz = assert(tonumber(fldM.size), 
-      col .. " : size should be valid number")
-      assert(sz <= g_max_size_SC,
-      col .. " : size too large for SC")
+    if fld_M.qtype == "SC" then 
+      assert(
+      (tonumber(fld_M.width) >= 2) and 
+      (tonumber(fld_M.width) <= g_width_max_SC), 
+      col .. " : width for SC not valid")
     end
-    if fldM.qtype == "SV" then
-      assert(tonumber(fldM.max_length) > 0, 
-      col .. "Specify max_length for SV")
-      assert(fldM.dict,
-      col .. "Must specify dictionary for SV")
-      assert(fldM.dict_exists == true or fldM.dict_exists == false, 
+    if fld_M.qtype == "SV" then
+      assert(
+      (tonumber(fld_M.max_width) >= 2) and 
+      (tonumber(fld_M.max_width) <= g_width_max_SC), 
+      col .. " : width for SV not valid")
+      
+      assert(fld_M.dict, col .. "Must specify dictionary for SV")
+
+      assert(fld_M.dict_exists == true or fld_M.dict_exists == false, 
       col .. "dict_exists must be true or false")
-      if fldM.dict_exists == true then 
+
+      if fld_M.dict_exists == true then 
         -- TODO Verify that dictionary exists
-        assert(fldM.add == true or fldM.add == false, 
+        assert(fld_M.add == true or fld_M.add == false, 
         col .. ":add must be true or false if dict_exists = true for SV")
+      else
+        fld_M.add = true
       end
+      -- TODO  everybodu can add to a dict or nobody can add to it 
+      --
     end
   end
   return true

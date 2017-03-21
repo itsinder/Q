@@ -20,7 +20,7 @@ txt_to_SC(
     if ( *cptr == '\\' ) { 
       if ( ( *cptr == '"' ) || 
           ( *cptr == ',' ) || 
-          ( *cptr == '\n' ) || 
+          ( *cptr == '\n' ) ||  // TODO THINK WHETHER THIS IS RIGHT
           ( *cptr == '\\' ) ) {
         cptr++; // skip over backslash
       }
