@@ -1,5 +1,4 @@
 require 'utils'
-require 'parser'
 
 local Dictionary = {}
 Dictionary.__index = Dictionary
