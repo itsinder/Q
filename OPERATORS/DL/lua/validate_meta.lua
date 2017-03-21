@@ -11,6 +11,7 @@ function validate_meta(
   
   local col_names = {}
   -- now look at fields of metadata
+  local num_cols_to_load = 0
   for midx, fld_M in pairs(M) do
     local col = "Column " .. midx .. ": "
     assert(type(fld_M) == "table", col .. "column descriptor must be table")
@@ -34,6 +35,7 @@ function validate_meta(
       assert(not col_names[fld_M.name],
       col .. "duplicate column name is not allowed") 
       col_names[fld_M.name] = true 
+      num_cols_to_load = num_cols_to_load + 1
     end
     if fld_M.qtype == "SC" then 
       assert(
@@ -63,5 +65,6 @@ function validate_meta(
       --
     end
   end
+  assert(num_cols_to_load > 0, "Must load at least one column")
   return true
 end

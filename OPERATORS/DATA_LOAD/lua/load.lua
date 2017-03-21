@@ -170,15 +170,21 @@ function load_csv(
         assert(x_idx <= nX) 
       end
       assert(col_idx == num_cols, "bad number of columns on last line")
-      -- TODO : remove column_list length, as it might contain null values
-      for i =1, #column_list do
-        column_list[i]:eov()
-        print(column_list[i]:length())
+      --======================================
+      for i =1, #M do
+        if ( M[i].is_load ) then assert(cols[i]:eov()) end
+      end
+      --=============================
+      local cols_to_return = {} 
+      local rc_idx = 0
+      for i =1, #M do
+        if ( M[i].is_load ) then 
+          cols_to_return[rc_idx] = cols[i]
+          rc_idx = rc_idx + 1
+        end
       end
       print("Completed successfully")
-      -- TODO create list and return that , not this
-      return column_list
+      return cols_to_return
 
 end
-
 -- load( "test.csv" , dofile("meta.lua"), nil)
