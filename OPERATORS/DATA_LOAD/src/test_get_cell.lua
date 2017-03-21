@@ -12,7 +12,9 @@ local ffi = require 'ffi'
 local cfile = "get_cell.c"
 local get_cell_h = extract_fn_proto("get_cell.c")
 -- TODO Improve following. Should not have to give path to mmap
-local mmap_h = extract_fn_proto(rootdir .. "UTILS/src/mmap.c")
+local mmap_h = extract_fn_proto(rootdir .. "UTILS/src/f_mmap.c")
+local mmap_types_h = load_file_as_string(rootdir .. "UTILS/inc/mmap_types.h")
+mmap_types_h = string.gsub(mmap_types_h, "#.-\n", "")
 --============================
 local nargs = assert(#arg == 3, "Arguments are <nrows> <ncols> <infile>")
 local nrows = assert(tonumber(arg[1]))
@@ -31,43 +33,34 @@ void free(void *ptr);
 ]]
 )
 ffi.cdef(get_cell_h)
+ffi.cdef(mmap_types_h)
 ffi.cdef(mmap_h)
 local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
 is_last_col = false
 -- Create libget_cell.so
 incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
-srcs = { "get_cell.c", "../../../UTILS/src/mmap.c" }
+srcs = { "get_cell.c", "../../../UTILS/src/f_mmap.c" }
 tgt = "libget_cell.so"
-assert(compile_so(incs, srcs, tgt), "compile of .so failed")
-local lget_cell = assert(ffi.load("get_cell.so").get_cell)
-local rs_mmap   = assert(ffi.load("get_cell.so").rs_mmap)
-X = ffi.new("char **");
-nX = ffi.new("uint64_t *");
-local status = rs_mmap(infile, X, nX, 0);
-os.exit()
-local xidx = lget_cell(X, nX, xidx, is_last_col, buf, bufsz);
+status = compile_so(incs, srcs, tgt)
+assert(status, "compile of .so failed")
+local get_cell = assert(ffi.load("get_cell.so").get_cell)
+local f_mmap   = assert(ffi.load("get_cell.so").f_mmap)
+local M = assert(f_mmap(infile, 0))
+X = M.ptr_mmapped_file
+nX = tonumber(M.file_size)
 
--- for ( true ) do
--- end
---[[
-    bool is_last_col;
-    if ( colidx == (ncols-1) ) { 
-      is_last_col = true;
-    }
-    else { 
-      is_last_col = false;
-    }
-    xidx = get_cell(X, nX, xidx, is_last_col, buf, bufsz);
-    if ( xidx == 0 ) { go_BYE(-1); }
-    fprintf(stderr, "%d:%d->%s\n", rowidx, colidx, buf);
-    if ( is_last_col ) { 
-      rowidx++;
-      colidx = 0;
-    }
-    else {
-      colidx++;
-    }
-    if ( xidx >= nX ) { break; }
---]]
+local xidx = 0
+for rowidx = 1, nrows, 1 do 
+  for colidx = 1, ncols, 1 do 
+    if ( colidx == ncols ) then
+      is_last_col = true
+    else
+      is_last_col = false
+    end
+    xidx = tonumber(get_cell(X, nX, xidx, is_last_col, buf, bufsz))
+    assert(xidx > 0 )
+  end
+end
+assert(tonumber(xidx) == tonumber(nX))
 log.info("All is well")
 

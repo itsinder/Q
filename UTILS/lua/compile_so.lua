@@ -26,6 +26,7 @@ function compile_so(incs, srcs, tgt)
   print(command)
   status = os.execute(command)
   assert(status == 0,"command failed \n" .. command)
+  return true
 end
 --[[ sample invocation
 incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
