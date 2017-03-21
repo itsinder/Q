@@ -2,7 +2,7 @@
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-local pl  = require 'pl'
+local plpath  = require 'pl.path'
 local log = require 'log'
 require 'utils'
 require 'compile_so'
@@ -18,7 +18,7 @@ local nargs = assert(#arg == 3, "Arguments are <nrows> <ncols> <infile>")
 local nrows = assert(tonumber(arg[1]))
 local ncols = assert(tonumber(arg[2]))
 local infile = arg[3]
-assert(pl.path.isfile(infile), "File not found")
+assert(plpath.isfile(infile), "File not found")
 local instr = load_file_as_string(infile)
 local nX = string.len(instr)
 local xidx = 0
