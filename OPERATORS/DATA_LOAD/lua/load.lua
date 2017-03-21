@@ -40,22 +40,21 @@ function load_csv(
   M,  -- metadata
   load_global_settings
   )
-
     local pl = require 'pl'
     assert(pl.path.isdir(_G["Q_DATA_DIR"]))
     assert(pl.path.isdir(_G["Q_META_DATA_DIR"]))
     assert(type(_G["Q_DICTIONARIES"]) == "table")
     local cols = {} -- cols[i] is Column used for column i 
     local dicts = {} -- dicts[i] is di ctionary used for column i
-    local col_num_nil = {}
-    local size_of_data_list = {}
 
-    assert( pl.path.isfile(csv_file_path), "input file not found")
-    assert( pl.path.getsize(csv_file_path) > 0, "input file empty")
-    assert( pl.path.isdir(_G["Q_DATA_DIR"]), "directory not found -- Q_DATA_DIR")
-    assert( pl.path.isdir(_G["Q_META_DATA_DIR"]), "directory not found -- Q_META_DATA_DIR")
+    assert(pl.path.isfile(csv_file_path), "input file not found")
+    assert(pl.path.getsize(csv_file_path) > 0, "input file empty")
+    assert(pl.path.isdir(_G["Q_DATA_DIR"]), "directory not found -- Q_DATA_DIR")
+    assert(pl.path.isdir(_G["Q_META_DATA_DIR"]), "directory not found -- Q_META_DATA_DIR")
     validate_meta(M)
 
+    -- In this loop (1) calculate max_txt_width (2) create Column for each
+    -- is_load column (3) create Dictionary for each is_load SV column
     local max_txt_width = 0
     for i = 1, #M do 
       if M[i].is_load then 
@@ -72,19 +71,22 @@ function load_csv(
         end
         max_width = ( fld_max_txt_width > max_width ) 
           and fld_max_txt_width or max_width 
+          --==============================
         cols[i] = Column{
           field_type=M[i].qtype, 
           fld_width, filename= _G["Q_DATA_DIR"] .. "/_" .. M[i].name,
           write_vector=true,
           nn=M[i].has_nulls }
-          M[i].num_nulls = 0
-          if M[i].qtype == "SV" then
-            dicts[i] = assert(Dictionary(M[i]), 
-            "Error while creating/accessing dictionary for " .. M[i].name )
-          end 
-        end    
-      end
-      assert(max_txt_width > 0)
+        --==============================
+        M[i].num_nulls = 0
+        --==============================
+        if M[i].qtype == "SV" then
+          dicts[i] = assert(Dictionary(M[i]), 
+          "Error while creating/accessing dictionary for " .. M[i].name )
+        end 
+      end    
+    end
+    assert(max_txt_width > 0)
 
       -- TODO Put nils for columns that you do not want to load 
       --[[local column_list = {
@@ -180,6 +182,7 @@ function load_csv(
       for i =1, #M do
         if ( M[i].is_load ) then 
           cols_to_return[rc_idx] = cols[i]
+          cols_to_return[rc_idx].set_meta("num_nulls", M[i].num_nulls)
           rc_idx = rc_idx + 1
         end
       end
