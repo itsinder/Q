@@ -22,9 +22,13 @@ function recursive_descent(
   end
   local D = pldir.getdirectories(root)
   for index, v in ipairs(D) do
-    if ( ( string.find(v, ".git") ) or 
-       ( string.find(v, "DEPRECATED") ) or 
-       ( string.find(v, "experimental") ) ) then 
+    found = false
+    for i2, v2 in ipairs(X) do
+      if ( string.find(v, v2) ) then 
+        found = true
+      end
+    end
+    if ( found ) then 
        print("Skipping " .. v)
      else
       -- print("Descending into ", v)
@@ -50,14 +54,18 @@ X = dofile("exclude_from_so.lua")
   --==========================
 local pattern = "*.c"
 local cdir = "/tmp/LUAC/"
+plpath.rmdir(cdir)
+plpath.mkdir(cdir)
 xcopy(pattern, root, cdir)
   --==========================
 local pattern = "*.h"
 local hdir = "/tmp/LUAH/"
+plpath.rmdir(hdir)
+plpath.mkdir(hdir)
 xcopy(pattern, root, hdir)
   --==========================
 
-FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic "
+FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp "
 
 command = "gcc " .. FLAGS .. cdir .. "*.c -I" .. hdir
 print(command)
