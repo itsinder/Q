@@ -3,9 +3,11 @@ package.path = package.path .. ";../lua/?.lua"
 
 
 local lu = require('luaunit')
-require 'load_csv'
+-- require 'load_csv'
+require 'load'
 require 'environment'
 require 'pl'
+require 'q_c_functions'
 local Dictionary = require 'dictionary'
 
 test_load_csv = {}
@@ -244,13 +246,11 @@ function test_load_csv:test_valid_I1()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 1)
   
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "-128")
-  lu.assertEquals(convert_c_to_txt("I1", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("I1", x , 2 ), "127")
-  lu.assertEquals(convert_c_to_txt("I1", x , 3 ), "11")  
+  local column = ret[1]
+  lu.assertEquals(convert_c_to_txt("I1", column:get_element(0), 0 ), "-128")
+  lu.assertEquals(convert_c_to_txt("I1", column:get_element(1), 0 ), "0")
+  lu.assertEquals(convert_c_to_txt("I1", column:get_element(2), 0 ), "127")
+  lu.assertEquals(convert_c_to_txt("I1", column:get_element(3), 0 ), "11")  
 end
 
 function test_load_csv:test_valid_I2()
@@ -261,14 +261,11 @@ function test_load_csv:test_valid_I2()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col2"), num_records * 2)
   
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I2", x , 0 ), "-32768")
-  lu.assertEquals(convert_c_to_txt("I2", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("I2", x , 2 ), "32767")
-  lu.assertEquals(convert_c_to_txt("I2", x , 3 ), "11")  
-  
+  local column = ret[1]
+  lu.assertEquals(convert_c_to_txt("I2", column:get_element(0), 0 ), "-32768")
+  lu.assertEquals(convert_c_to_txt("I2", column:get_element(1), 0 ), "0")
+  lu.assertEquals(convert_c_to_txt("I2", column:get_element(2), 0 ), "32767")
+  lu.assertEquals(convert_c_to_txt("I2", column:get_element(3), 0 ), "11")  
 end
 
 function test_load_csv:test_valid_I4()
@@ -279,13 +276,11 @@ function test_load_csv:test_valid_I4()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I4", x , 0 ), "-2147483648")
-  lu.assertEquals(convert_c_to_txt("I4", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("I4", x , 2 ), "2147483647")
-  lu.assertEquals(convert_c_to_txt("I4", x , 3 ), "11")  
+  local column = ret[1]
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(0), 0 ), "-2147483648")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(1), 0 ), "0")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(2), 0 ), "2147483647")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(3), 0 ), "11")  
 
 end
 
@@ -297,16 +292,13 @@ function test_load_csv:test_valid_I8()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I8", x , 0 ), "-9223372036854775808")
-  lu.assertEquals(convert_c_to_txt("I8", x , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("I8", x , 2 ), "9223372036854775807")
-  lu.assertEquals(convert_c_to_txt("I8", x , 3 ), "11")  
-
-
+  local column = ret[1]
+  lu.assertEquals(convert_c_to_txt("I8", column:get_element(0), 0 ), "-9223372036854775808")
+  lu.assertEquals(convert_c_to_txt("I8", column:get_element(1), 0 ), "0")
+  lu.assertEquals(convert_c_to_txt("I8", column:get_element(2), 0 ), "9223372036854775807")
+  lu.assertEquals(convert_c_to_txt("I8", column:get_element(3), 0 ), "11")  
 end
+
 
 function test_load_csv:test_valid_F4()
   local csv_file_path = test_input_dir .. "F4_valid.csv"
@@ -316,13 +308,11 @@ function test_load_csv:test_valid_F4()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertStrContains(convert_c_to_txt("F4", x , 0 ), "-90000000.00")
-  lu.assertStrContains(convert_c_to_txt("F4", x , 1 ), "0")
-  lu.assertStrContains(convert_c_to_txt("F4", x , 2 ), "900000000.00")
-  lu.assertStrContains(convert_c_to_txt("F4", x , 3 ), "11")  
+  local column = ret[1]  
+  lu.assertStrContains(convert_c_to_txt("F4", column:get_element(0), 0 ), "-90000000.00")
+  lu.assertStrContains(convert_c_to_txt("F4", column:get_element(1), 0 ), "0")
+  lu.assertStrContains(convert_c_to_txt("F4", column:get_element(2), 0 ), "900000000.00")
+  lu.assertStrContains(convert_c_to_txt("F4", column:get_element(3), 0 ), "11")  
 end
 
 function test_load_csv:test_valid_F8()
@@ -333,15 +323,13 @@ function test_load_csv:test_valid_F8()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 8)
   
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertStrContains(convert_c_to_txt("F8", x , 0 ), "-9.58")
-  lu.assertStrContains(convert_c_to_txt("F8", x , 1 ), "0")
-  lu.assertStrContains(convert_c_to_txt("F8", x , 2 ), "9.58")
-  lu.assertStrContains(convert_c_to_txt("F8", x , 3 ), "11")  
-  
+  local column = ret[1]
+  lu.assertStrContains(convert_c_to_txt("F8", column:get_element(0), 0 ), "-9.58")
+  lu.assertStrContains(convert_c_to_txt("F8", column:get_element(1), 0 ), "0")
+  lu.assertStrContains(convert_c_to_txt("F8", column:get_element(2), 0 ), "9.58")
+  lu.assertStrContains(convert_c_to_txt("F8", column:get_element(3), 0 ), "11")    
 end
+
 
 function test_load_csv:test_valid_fix_size_string()
   local csv_file_path = test_input_dir .. "SV_valid.csv"
@@ -352,13 +340,11 @@ function test_load_csv:test_valid_fix_size_string()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * size_of_string)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("SC", x , 0*size_of_string, 16), "Sample")
-  lu.assertEquals(convert_c_to_txt("SC", x , 1*size_of_string, 16), "String")
-  lu.assertEquals(convert_c_to_txt("SC", x , 2*size_of_string, 16), "For")
-  lu.assertEquals(convert_c_to_txt("SC", x , 3*size_of_string, 16), "Varchar")    
+  local column = ret[1]   
+  lu.assertEquals(convert_c_to_txt("SC", column:get_element(0), 0, 16), "Sample")
+  lu.assertEquals(convert_c_to_txt("SC", column:get_element(1), 0, 16), "String")
+  lu.assertEquals(convert_c_to_txt("SC", column:get_element(2), 0, 16), "For")
+  lu.assertEquals(convert_c_to_txt("SC", column:get_element(3), 0, 16), "Varchar")    
 end
 
 function test_load_csv:test_fix_size_string_more_data_than_size()
@@ -366,6 +352,7 @@ function test_load_csv:test_fix_size_string_more_data_than_size()
   local metadata = { { name = "col1", type="SC" , size = 5}}
   lu.assertErrorMsgContains("string greater than allowed size", load, csv_file_path, metadata )     
 end
+
 
 function test_load_csv:test_valid_SV()
   local csv_file_path = test_input_dir .. "SV_valid.csv"
@@ -375,13 +362,11 @@ function test_load_csv:test_valid_SV()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-  
-  lu.assertEquals(convert_c_to_txt("I4", x , 0 ), "1")
-  lu.assertEquals(convert_c_to_txt("I4", x , 1 ), "2")
-  lu.assertEquals(convert_c_to_txt("I4", x , 2 ), "3")
-  lu.assertEquals(convert_c_to_txt("I4", x , 3 ), "4")  
+  local column = ret[1]
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(0), 0 ), "1")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(1), 0 ), "2")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(2), 0 ), "3")
+  lu.assertEquals(convert_c_to_txt("I4", column:get_element(3), 0 ), "4")  
   
   local D1 = _G["Q_DICTIONARIES"]["D1"]
     
@@ -405,20 +390,13 @@ function test_load_csv:test_valid_SC_dict_dict_exists_add_true()
   lu.assertEquals(type(ret),"table") 
   lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
 
-  local vector = ret[1]:get_vector()
-  local x, x_size = vector:chunk(0)
-  
+  local column = ret[1]
   lu.assertEquals(d1:get_size(), 6)
-  
   lu.assertEquals(d1:get_string_by_index(3), "Sample")
   lu.assertEquals(d1:get_string_by_index(4), "String")
   lu.assertEquals(d1:get_string_by_index(5), "For")
   lu.assertEquals(d1:get_string_by_index(6), "Varchar")    
-
 end
-
- 
-
 
 
 function test_load_csv:test_int_overflow()
@@ -442,24 +420,21 @@ end
 
 function test_load_csv:test_nil_data_I4()
   local csv_file_path = test_input_dir .. "I4_2_4_null.csv"
-  local metadata = { { name = "col1", type="I4" ,null = true},{ name = "col2", type = "I4", null =true } }
+  local metadata = { { name = "col1", type="I4" ,null = true},{ name = "col2", type = "I4", null=true } }
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)    
 
-  local vector = ret[1]:get_nn_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", x , 1 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", x , 2 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", x , 3 ), "0")  
+  local column = ret[1]
+  lu.assertEquals(type(column:get_element(0)), "cdata")
+  lu.assertEquals(type(column:get_element(1)), "cdata")
+  lu.assertEquals(type(column:get_element(2)), "cdata")
+  lu.assertEquals(column:get_element(3), nil)  
 
-  local vector_col2 = ret[2]:get_nn_vector()
-  local y, y_size = vector_col2:chunk(0)
-  lu.assertEquals(convert_c_to_txt("I1", y , 0 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", y , 1 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", y , 2 ), "0")
-  lu.assertEquals(convert_c_to_txt("I1", y , 3 ), "1")  
+  local column2 = ret[2]
+  lu.assertEquals(type(column2:get_element(0)), "cdata")
+  lu.assertEquals(type(column2:get_element(1)), "cdata")
+  lu.assertEquals(column2:get_element(2), nil)
+  lu.assertEquals(type(column2:get_element(3)), "cdata")  
 end
 
 function test_load_csv:test_nil_data_SV()
@@ -468,21 +443,19 @@ function test_load_csv:test_nil_data_SV()
   -- there should not be any error during load
   local ret = load(csv_file_path, metadata)      
 
-  local vector = ret[1]:get_nn_vector()
-  local x, x_size = vector:chunk(0)
-    
-  lu.assertEquals(convert_c_to_txt("I1", x , 0 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", x , 1 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", x , 2 ), "0")
-  lu.assertEquals(convert_c_to_txt("I1", x , 3 ), "1")  
+  local column = ret[1]
+  lu.assertEquals(type(column:get_element(0)), "cdata")
+  lu.assertEquals(type(column:get_element(1)), "cdata")
+  lu.assertEquals(column:get_element(2), nil)
+  lu.assertEquals(type(column:get_element(3)), "cdata")  
 
-  local vector_col2 = ret[2]:get_nn_vector()
-  local y, y_size = vector_col2:chunk(0)
-  lu.assertEquals(convert_c_to_txt("I1", y , 0 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", y , 1 ), "0")
-  lu.assertEquals(convert_c_to_txt("I1", y , 2 ), "1")
-  lu.assertEquals(convert_c_to_txt("I1", y , 3 ), "1")  
+  local column2 = ret[2]
+  lu.assertEquals(type(column2:get_element(0)), "cdata")
+  lu.assertEquals(column2:get_element(1), nil)
+  lu.assertEquals(type(column2:get_element(2)), "cdata")
+  lu.assertEquals(type(column2:get_element(3)), "cdata")  
 end
+
 
 function test_load_csv:test_nil_data_file_deletion()
   local csv_file_path = test_input_dir .. "I4_valid.csv"
@@ -493,15 +466,30 @@ function test_load_csv:test_nil_data_file_deletion()
 end
 
 
-
-
 -- ---- Test cases ---------
 
 --[[
 TODO : This has not been implemented in load_csv as of now, but was there in readme file, so keeping here for reference.  
 o) Can we specify integer in hex format?
-o) Can we specify floating point in exponent format?
+o) Can we specify floating point in exponent format?re
 --]]
+
+  --set environment variables for test-case
+  _G["Q_DATA_DIR"] = "./test_data/out/"
+  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+  _G["Q_DICTIONARIES"] = {}
+  
+  dir.makepath(_G["Q_DATA_DIR"])
+  dir.makepath(_G["Q_META_DATA_DIR"])
+
+  local metadata = { { name = "col1", type ="SV",dict = "D1", dict_exists = false, add=true}}
+  local csv_file_path = test_input_dir .. "valid_escape1.csv"
+  local num_records = 4
+  local ret = load ( csv_file_path, metadata )
+  lu.assertEquals(type(ret),"table") 
+  lu.assertEquals(path.getsize(_G["Q_DATA_DIR"].. "_col1"), num_records * 4)
+
+error("teste")
 
 os.exit( lu.LuaUnit.run() )
 
