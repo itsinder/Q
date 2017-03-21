@@ -21,3 +21,9 @@ log.warn(...)
 log.error(...)
 log.fatal(...)
 ====================
+
+Not quite a convention but try and have as few ways of doing something
+as possible. for example, we are using penlight for several
+file/directory related functions. Don't invent on your own. Look at
+UTILS/lua/*.lua before you roll your own. Conversely, if you do roll
+your own, please offer it up for common usage.

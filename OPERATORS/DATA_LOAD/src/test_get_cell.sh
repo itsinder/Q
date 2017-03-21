@@ -1,9 +1,5 @@
 #!/bin/bash
-gcc -Wall -g -std=gnu99 \
-  -I../../../UTILS/inc/ \
-  -I../gen_inc/ \
-  get_cell.c \
-  test_get_cell.c \
-  -o _exec_get_cell
-valgrind ./_exec_get_cell
-rm _exec_get_cell
+set -e 
+export LD_LIBRARY_PATH=$PWD
+luajit test_get_cell.lua 2 4 get_cell_input.txt
+echo "Completed $0 in $PWD"
