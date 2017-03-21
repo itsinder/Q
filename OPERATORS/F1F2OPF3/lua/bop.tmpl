@@ -41,10 +41,10 @@ ${fn}(
   int status = 0;
   uint64_t num_longs = nR/64;
   if ( ( num_longs * 64 ) != nR ) { num_longs++; }
-#pragma omp parallel for simd
+#pragma omp parallel for 
   for ( uint64_t i = 0; i < num_longs; i++ ) {  
     uint64_t inv1 = in1[i]; 
-    uint64_t inv2 = in1[i]; 
+    uint64_t inv2 = in2[i]; 
     uint64_t outv; 
     __operation(inv1, inv2, &outv);
     out[i] = outv;

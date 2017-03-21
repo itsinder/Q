@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <float.h>
 #include "q_macros.h"
-#include "is_valid_chars_for_num.h"
+#include "_is_valid_chars_for_num.h"
+#include "_txt_to_SC.h"
 //START_FUNC_DECL
 int
 txt_to_SC(
@@ -19,7 +20,7 @@ txt_to_SC(
     if ( *cptr == '\\' ) { 
       if ( ( *cptr == '"' ) || 
           ( *cptr == ',' ) || 
-          ( *cptr == '\n' ) || 
+          ( *cptr == '\n' ) ||  // TODO THINK WHETHER THIS IS RIGHT
           ( *cptr == '\\' ) ) {
         cptr++; // skip over backslash
       }

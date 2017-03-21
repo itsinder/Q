@@ -1,8 +1,11 @@
+//START_INCLUDES
 #include <stdio.h>
 #include <string.h>
 #include "q_macros.h"
 #include "q_types.h"
-
+//STOP_INCLUDES
+#include "_get_cell.h"
+//START_FUNC_DECL
 size_t
 get_cell(
     char *X,
@@ -12,11 +15,12 @@ get_cell(
     char *buf,
     size_t bufsz
     )
+//STOP_FUNC_DECL
 {
   int status = 0;
   char dquote = '"'; char comma = ','; 
   char bslash = '\\'; char eoln = '\n';
-  int bufidx = 0;
+  uint32_t bufidx = 0;
   //--------------------------------
   if ( X == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
@@ -41,6 +45,7 @@ get_cell(
   }
   //----------------------------
   for ( ; ; ) { 
+    if ( xidx >= nX ) { go_BYE(-1); }
     if ( X[xidx] == last_char ) {
       xidx++; // jumo over last char;
       if ( start_dquote ) { 

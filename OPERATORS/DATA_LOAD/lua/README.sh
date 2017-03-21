@@ -15,14 +15,8 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
 
-#Clean all directory first
-rm -rf ../gen_inc ../gen_src ../obj ./out ./metadata
-
-#create all the required directory
-mkdir ../gen_src ../gen_inc ../obj ./out ./metadata
-
 #generate files
-bash $SCRIPT_PATH/gen_files.sh
+#bash $SCRIPT_PATH/gen_files.sh
 
 #generate libq_c_functions
 gcc -std=gnu99 \
@@ -37,11 +31,9 @@ gcc -std=gnu99 \
   ../../../UTILS/src/is_valid_chars_for_num.c \
   -fPIC -shared \
   -I../../../UTILS/inc/ \
+  -I../../../UTILS/gen_inc/ \
   -I../gen_inc/
 
-#generate libq_c_print_functions
-cd ../../PRINT/lua
-bash README.sh
 
 cd $SCRIPT_PATH
 

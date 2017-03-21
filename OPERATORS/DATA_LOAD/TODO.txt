@@ -1,0 +1,9 @@
+- Remove unnecessary ffi definition 
+- Put nils for columns that you do not want to load
+- bufsize should be calculated from c data
+- if column_list[colidx] == nil then continue end
+- remove column_list length, as it might contain null values
+- create list and return that , not this
+- README.sh should be updated to include only the minimal things which is helpful for developer. 
+- Testcase needs to be updated as per the new format
+- It will require changes, once the build through mk_so.lua starts working

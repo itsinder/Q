@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "q_macros.h"
 //STOP_INCLUDES
+#include "_is_valid_chars_for_num.h"
 //START_FUNC_DECL
 bool
 is_valid_chars_for_num(
