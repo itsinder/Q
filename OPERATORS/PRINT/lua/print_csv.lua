@@ -1,4 +1,3 @@
-package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 
 local ffi = require "ffi"
 ffi.cdef
@@ -6,22 +5,29 @@ ffi.cdef
   void *malloc(size_t size);
   void free(void *ptr);
   void *memset(void *str, int c, size_t n);
-  int I1_to_txt(int8_t *in, const char * const fmt, char *X, size_t nX);
-  int I2_to_txt(int16_t *in, const char * const fmt, char *X, size_t nX);
-  int I4_to_txt(int32_t *in, const char * const fmt, char *X, size_t nX);
-  int I8_to_txt(int64_t *in, const char * const fmt, char *X, size_t nX);
-
-  int F4_to_txt(float *in, const char * const fmt, char *X, size_t nX);  
-  int F8_to_txt(double *in, const char * const fmt, char *X, size_t nX);
-
-  int SC_to_txt(char * const in, uint32_t width, char * X, size_t nX);  
 ]]
 
-local c = ffi.load('print.so')
-local q_c_print_lib = ffi.load("q_c_print_functions.so")
+local SC_to_txt = assert(extract_fn_proto("../src/SC_to_txt.c"))
+local I1_to_txt = assert(extract_fn_proto("../gen_src/_I1_to_txt.c"))
+local I2_to_txt = assert(extract_fn_proto("../gen_src/_I2_to_txt.c"))
+local I4_to_txt = assert(extract_fn_proto("../gen_src/_I4_to_txt.c"))
+local I8_to_txt = assert(extract_fn_proto("../gen_src/_I8_to_txt.c"))
+local F4_to_txt = assert(extract_fn_proto("../gen_src/_F4_to_txt.c"))
+local F8_to_txt = assert(extract_fn_proto("../gen_src/_F8_to_txt.c"))
 
-function print_csv(column_list, filter, opfile)    
-  assert(type(column_list) == "table")
+ffi.cdef(SC_to_txt)
+ffi.cdef(I1_to_txt)
+ffi.cdef(I2_to_txt)
+ffi.cdef(I4_to_txt)
+ffi.cdef(I8_to_txt)
+ffi.cdef(F4_to_txt)
+ffi.cdef(F8_to_txt)
+
+function print_csv(column_list, filter, opfile)  
+  
+  local print_csv_lib = ffi.load("print_csv.so")
+
+  assert(type(column_list) == "table","Input should be a table")
   local max_length = column_list[1]:length()
   for i = 1, #column_list do
     assert(type(column_list[i]) == "Column" or type(column_list[i]) == "number", 
@@ -32,11 +38,14 @@ function print_csv(column_list, filter, opfile)
     if is_column then
       assert(column_list[i]:length() == max_length, "All columns should have the same length")
       assert(g_valid_types[column_list[i]:fldtype()] ~= nil, " column should be of valid type")
-      assert(g_qtypes[column_list[i]:fldtype()] ~= nil, " column should be of valid type ")
+      assert(g_qtypes[column_list[i]:fldtype()] ~= "B1", " column type cannot be B1 ")
       assert(g_qtypes[column_list[i]:fldtype()]["width"] ~= nil, " width of column cannot be nil ")
       assert(g_qtypes[column_list[i]:fldtype()]["ctype"] ~= nil, " ctype of column cannot be nil ")
       assert(g_qtypes[column_list[i]:fldtype()]["ctype_to_txt"] ~= nil, " ctype_to_txt of column \
         cannot be nil ")
+      if column_list[i]:fldtype() == "SV" then
+        assert(_G["Q_DICTIONARIES"][column_list[i]:get_meta("dir")]~=nil,"Q_dictionary cannot be nil")
+      end
     end
   end
   
@@ -70,8 +79,8 @@ function print_csv(column_list, filter, opfile)
   end
   
   local bufsz = 1024
-  local buf  = c.malloc(bufsz) -- TODO
-  
+  --local buf  = c.malloc(bufsz) -- TODO
+  local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
   
   local num_cols = #column_list
   local file = nil
@@ -109,9 +118,13 @@ function print_csv(column_list, filter, opfile)
             end
             
             local function_name = g_qtypes[col:fldtype()]["ctype_to_txt"]
-            c.memset(buf, 0, bufsz)
-            local status = q_c_print_lib[function_name](cbuf, second_arg, buf, field_size )
+            ffi.C.memset(buf, 0, bufsz)
+            local status = print_csv_lib[function_name](cbuf, second_arg, buf, field_size )
             temp = ffi.string(buf)
+            if is_SV == true then
+              temp = tonumber(temp)
+              temp = _G["Q_DICTIONARIES"][col:get_meta("dir")]:get_string_by_index(temp)
+            end
           end
         end
         result = result..temp..","
