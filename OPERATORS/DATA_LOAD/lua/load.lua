@@ -81,113 +81,111 @@ function load_csv(
         M[i].num_nulls = 0
         --==============================
         if M[i].qtype == "SV" then
-          dicts[i] = assert(Dictionary(M[i]), 
-          "Error while creating/accessing dictionary for " .. M[i].name )
+          dicts[i] = assert(Dictionary(M[i].name), 
+          "error with dictionary for " .. M[i].name)
         end 
       end    
     end
     assert(max_txt_width > 0)
+    --===========================
+    f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
+    assert(f_map.status == 0 , "Mmap failed")
+    local X = ffi.cast("char *", f_map.ptr_mmapped_file)
+    local nX = tonumber(f_map.ptr_file_size)
+    assert(nX > 0, "File cannot be empty")
 
-      -- TODO Put nils for columns that you do not want to load 
-      --[[local column_list = {
-      Column{field_type="I4", write_vector=true, filename="_i4"},
-      Column{field_type="I2", write_vector=true, filename="_i2"},
-      } --]]
+    local x_idx = 0
+    local out_buf_sz = 1024 -- TODO FIX 
+    local in_buf  = ffi.gc(c.malloc(max_width), c.free)
+    local out_buf = ffi.gc(c.malloc(out_buf_sz), c.free)
+    local is_nn   = ffi.gc(c.malloc(1), c.free)
+    local ncols = #M
+    local row_idx = 1
+    local col_idx = 1
 
-      -- mmap function here
-      f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
-      assert(f_map.status == 0 , "Mmap failed")
-      local X = ffi.cast("char *", f_map.ptr_mmapped_file)
-      local nX = tonumber(f_map.ptr_file_size)
-      assert(nX > 0, "File cannot be empty")
-
-      local x_idx = 0
-      local out_buf_sz = 1024 -- TODO FIX 
-      local in_buf  = ffi.gc(c.malloc(max_width), c.free)
-      local out_buf = ffi.gc(c.malloc(out_buf_sz), c.free)
-      local is_nn   = ffi.gc(c.malloc(1), c.free)
-      local ncols = #M
-      local row_idx = 1
-      local col_idx = 1
-
-      while true do
-        local is_last_col
-        if ( col_idx == ncols ) then
-          is_last_col = true;
-        else
-          is_last_col = false;
+    while true do
+      local is_last_col
+      if ( col_idx == ncols ) then
+        is_last_col = true;
+      else
+        is_last_col = false;
+      end
+      ffi.C.memset(out_buf, 0, out_buf_sz) -- always init to 0
+      ffi.C.memset(in_buf, 0, max_width) -- always init to 0
+      ffi.C.memset(is_nn, 0, 1) -- assume null
+      -- create an error message that might be needed
+      local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+      x_idx = tonumber(
+      c.get_cell(X, nX, x_idx, is_last_col, in_buf, max_width))
+      assert(x_idx > 0 , err_loc)
+      -- print(row_idx, col_idx, ffi.string(buf))
+      local in_buf_len = assert(string.len(ffi.string(in_buf)))
+      -- Process null value case
+      if in_buf_len == 0 then 
+        assert(M[col_idx].has_nulls, 
+        err_loc ..  "Null value found in not null field " ) 
+        M[i].num_nulls = M[i].num_nulls + 1
+      else 
+        ffi.C.memset(is_nn, 1, 1)
+        local qtype = M[col_idx].qtype
+        if qtype == "SV" then 
+          assert(in_buf_len > g_max_width_SV, err_loc .. "string too long ")
+          local stridx = 0
+          if ( M[i].add ) then
+            stridx = dict[i].add(in_buf)
+          else
+            stridx = dict[i].get_index_by_string(in_buf)
+          end
+          assert(stridx > 0, 
+            err_loc .. "dictionary does not have string " .. in_buf)
+          ffi.copy(out_buf, stridx)
+          end   
         end
-        ffi.C.memset(out_buf, 0, out_buf_sz) -- always init to 0
-        ffi.C.memset(in_buf, 0, max_width) -- always init to 0
-        ffi.C.memset(is_nn, 0, 1) -- assume null
-        -- create an error message that might be needed
-        local err_loc = "error in row " .. row_idx .. " column " .. col_idx
-        x_idx = tonumber(
-        c.get_cell(X, nX, x_idx, is_last_col, in_buf, max_width))
-        assert(x_idx > 0 , err_loc)
-        -- print(row_idx, col_idx, ffi.string(buf))
-        local in_buf_len = assert(string.len(ffi.string(in_buf)))
-        -- Process null value case
-        if in_buf_len == 0 then 
-          assert(M[col_idx].has_nulls, 
-          err_loc ..  "Null value found in not null field " ) 
-          M[i].num_nulls = M[i].num_nulls + 1
+        if qtype == "SC" then 
+          assert(in_buf_len > M[i].width, err_loc .. "string too long ")
+        end
+        local function_name = g_qtypes[qtype]["txt_to_ctype"]
+        -- for fixed size string pass the size of string data also
+        local status = 0
+        if qtype == "SC" then
+          status = c[function_name](buf, out_buf, out_buf_sz)
+        elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
+          -- For now second parameter , base is 10 only
+          status = c[function_name](buf, 10, out_buf)
+        elseif qtype == "F4" or qtype == "F8"  then 
+          status = c[function_name](buf, out_buf)
         else 
-          ffi.C.memset(is_nn, 1, 1)
-          local qtype = M[col_idx].qtype
-          if qtype == "SV" then 
-            assert(in_buf_len > g_max_width_SV, err_loc .. "string too long ")
-            -- dictionary throws error if any during the add operation
-            if stringx.strip(ffi.string(buf)) ~= "" then 
-              local ret_number = dict_table[col_idx].dict:add_with_condition(ffi.string(buf), dict_table[col_idx].add_new_value)  
-              ffi.copy(buf, tostring(ret_number))
-            end   
-          end
-          if qtype == "SC" then 
-            assert(in_buf_len > M[i].width, err_loc .. "string too long ")
-          end
-          local function_name = g_qtypes[qtype]["txt_to_ctype"]
-          -- for fixed size string pass the size of string data also
-          local status = 0
-          if qtype == "SC" then
-            status = c[function_name](buf, out_buf, out_buf_sz)
-          elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
-            -- For now second parameter , base is 10 only
-            status = c[function_name](buf, 10, out_buf)
-          elseif qtype == "F4" or qtype == "F8"  then 
-            status = c[function_name](buf, out_buf)
-          else 
-            assert(nil, err_loc .. "Data type" .. qtype .. " Not supported ")
-          end
-          assert( status == 0 , err_loc .. "Invalid data found")
-        end   
-        column_list[col_idx]:put_chunk(1, out_buf, is_nn)
+          assert(nil, err_loc .. "Data type" .. qtype .. " Not supported ")
+        end
+        assert( status == 0 , err_loc .. "Invalid data found")
+      end   
+      column_list[col_idx]:put_chunk(1, out_buf, is_nn)
 
-        if ( is_last_col ) then
-          row_idx = row_idx + 1
-          col_idx = 1;
-        else
-          col_idx = col_idx + 1 
-        end
-        assert(x_idx <= nX) 
+      if ( is_last_col ) then
+        row_idx = row_idx + 1
+        col_idx = 1;
+      else
+        col_idx = col_idx + 1 
       end
-      assert(col_idx == num_cols, "bad number of columns on last line")
-      --======================================
-      for i =1, #M do
-        if ( M[i].is_load ) then assert(cols[i]:eov()) end
+      assert(x_idx <= nX) 
+    end
+    assert(col_idx == num_cols, "bad number of columns on last line")
+    --======================================
+    for i = 1, #M do
+      if ( M[i].is_load ) then assert(cols[i]:eov()) end
+    end
+    --=============================
+    local cols_to_return = {} 
+    local rc_idx = 0
+    for i = 1, #M do
+      if ( M[i].is_load ) then 
+        cols_to_return[rc_idx] = cols[i]
+        cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
+        rc_idx = rc_idx + 1
       end
-      --=============================
-      local cols_to_return = {} 
-      local rc_idx = 0
-      for i =1, #M do
-        if ( M[i].is_load ) then 
-          cols_to_return[rc_idx] = cols[i]
-          cols_to_return[rc_idx].set_meta("num_nulls", M[i].num_nulls)
-          rc_idx = rc_idx + 1
-        end
-      end
-      print("Completed successfully")
-      return cols_to_return
+    end
+    print("Successfully loaded ", row_idx, " rows")
+    return cols_to_return
 
 end
 -- load( "test.csv" , dofile("meta.lua"), nil)
