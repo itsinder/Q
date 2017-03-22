@@ -17,12 +17,15 @@ export LD_LIBRARY_PATH=../../../Q2/code/:../obj/
 
 cd $SCRIPT_PATH/../lua
 # generate _xxx_to_txt.c files
+# it is done in this script, because C files are not getting from build.lua from UTILS now
+# will remove this once build.lua is working
 bash gen_files.sh
 
 cd $SCRIPT_PATH
 
-# simple test to print 5 I4 values = [1,2,3,4,5] from the bin file I4.bin in bin folder.
-# output should print the I4 values
+# simple test to print 5 I4 values = [1,2,3,4,5] and SV values mapped to I4 values
+# from the bin file I4.bin in bin folder.
+# output should print the I4 values and the SV values
 luajit test_print.lua
 
 echo "Completed $0 in $PWD"

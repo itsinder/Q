@@ -1,3 +1,4 @@
+require 'globals'
 
 local ffi = require "ffi"
 ffi.cdef
@@ -7,6 +8,7 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
+-- TODO this should be done in single loop; need way to differentiate "gen" types/code in global
 local SC_to_txt = assert(extract_fn_proto("../src/SC_to_txt.c"))
 local I1_to_txt = assert(extract_fn_proto("../gen_src/_I1_to_txt.c"))
 local I2_to_txt = assert(extract_fn_proto("../gen_src/_I2_to_txt.c"))
@@ -23,29 +25,36 @@ ffi.cdef(I8_to_txt)
 ffi.cdef(F4_to_txt)
 ffi.cdef(F8_to_txt)
 
+-- load print_csv so file
+-- this file is created using compile_so for local testing
+local print_csv_lib = ffi.load("print_csv.so")
+
 function print_csv(column_list, filter, opfile)  
   
-  local print_csv_lib = ffi.load("print_csv.so")
-
   assert(type(column_list) == "table","Input should be a table")
-  local max_length = column_list[1]:length()
+  -- to do unit testing with columns of differet length
+  local max_length = 0
   for i = 1, #column_list do
     assert(type(column_list[i]) == "Column" or type(column_list[i]) == "number", 
       " input can be either Column or number")
       
-    local is_column
-    is_column = type(column_list[i]) == "Column" 
+    local is_column = type(column_list[i]) == "Column" 
     if is_column then
-      assert(column_list[i]:length() == max_length, "All columns should have the same length")
+      --assert(column_list[i]:length() == max_length, "All columns should have the same length")
       assert(g_valid_types[column_list[i]:fldtype()] ~= nil, " column should be of valid type")
       assert(g_qtypes[column_list[i]:fldtype()] ~= "B1", " column type cannot be B1 ")
       assert(g_qtypes[column_list[i]:fldtype()]["width"] ~= nil, " width of column cannot be nil ")
       assert(g_qtypes[column_list[i]:fldtype()]["ctype"] ~= nil, " ctype of column cannot be nil ")
       assert(g_qtypes[column_list[i]:fldtype()]["ctype_to_txt"] ~= nil, " ctype_to_txt of column \
         cannot be nil ")
-      if column_list[i]:fldtype() == "SV" then
+      -- dictionary cannot be null in get_meta for SV data type
+      if column_list[i]:fldtype() == "SV" then 
         assert(_G["Q_DICTIONARIES"][column_list[i]:get_meta("dir")]~=nil,"Q_dictionary cannot be nil")
       end
+      -- Take the maximum length of all columns
+      local tmp = column_list[1]:length()
+      if tmp > max_length then max_length = tmp end
+      
     end
   end
   
@@ -78,8 +87,8 @@ function print_csv(column_list, filter, opfile)
     ub = max_length
   end
   
+  -- TODO - remove hardcoding of 1024
   local bufsz = 1024
-  --local buf  = c.malloc(bufsz) -- TODO
   local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
   
   local num_cols = #column_list
@@ -121,7 +130,8 @@ function print_csv(column_list, filter, opfile)
             ffi.C.memset(buf, 0, bufsz)
             local status = print_csv_lib[function_name](cbuf, second_arg, buf, field_size )
             temp = ffi.string(buf)
-            if is_SV == true then
+            -- get SV data type from dictionary
+            if is_SV == true then 
               temp = tonumber(temp)
               temp = _G["Q_DICTIONARIES"][col:get_meta("dir")]:get_string_by_index(temp)
             end
