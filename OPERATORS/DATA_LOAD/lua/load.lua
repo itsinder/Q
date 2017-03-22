@@ -34,6 +34,39 @@ ffi.cdef([[
 -- RS Use compile_so to create load_csv.so
 local c = ffi.load("load_csv.so")
 
+function mk_out_buf(in_buf, qtype, out_buf)
+    local qtype = M[col_idx].qtype
+    if qtype == "SV" then 
+      assert(in_buf_len <= M[i].max_width, 
+      err_loc .. "string too long ")
+      local stridx = nil
+      if ( M[i].add ) then
+        stridx = dict[i].add(in_buf)
+      else
+        stridx = dict[i].get_index_by_string(in_buf)
+      end
+      assert(stridx,
+      err_loc .. "dictionary does not have string " .. in_buf)
+      ffi.copy(out_buf, stridx) -- TODO is this binary copy
+    end   
+    if qtype == "SC" then 
+      assert(in_buf_len > M[i].width, err_loc .. "string too long ")
+    end
+    local function_name = g_qtypes[qtype]["txt_to_ctype"]
+    -- for fixed size string pass the size of string data also
+    local status = 0
+    if qtype == "SC" then
+      status = c[function_name](buf, out_buf, out_buf_sz)
+    elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
+      -- For now second parameter , base is 10 only
+      status = c[function_name](buf, 10, out_buf)
+    elseif qtype == "F4" or qtype == "F8"  then 
+      status = c[function_name](buf, out_buf)
+    else 
+      assert(nil, err_loc .. "Data type" .. qtype .. " Not supported ")
+    end
+    assert( status == 0 , err_loc .. "Invalid data found")
+end
 
 function load_csv( 
   csv_file_path, 
@@ -119,48 +152,19 @@ function load_csv(
       c.get_cell(X, nX, x_idx, is_last_col, in_buf, max_width))
       assert(x_idx > 0 , err_loc)
       -- print(row_idx, col_idx, ffi.string(buf))
-      local in_buf_len = assert(string.len(ffi.string(in_buf)))
+      -- local in_buf_len = assert(string.len(ffi.string(in_buf)))
+      local is_null = ( in_buf[0] == '\0' )
       -- Process null value case
-      if in_buf_len == 0 then 
+      if is_null then 
         assert(M[col_idx].has_nulls, 
         err_loc ..  "Null value found in not null field " ) 
         M[i].num_nulls = M[i].num_nulls + 1
       else 
-        ffi.C.memset(is_nn, 1, 1)
-        local qtype = M[col_idx].qtype
-        if qtype == "SV" then 
-          assert(in_buf_len > g_max_width_SV, err_loc .. "string too long ")
-          local stridx = 0
-          if ( M[i].add ) then
-            stridx = dict[i].add(in_buf)
-          else
-            stridx = dict[i].get_index_by_string(in_buf)
-          end
-          assert(stridx > 0, 
-            err_loc .. "dictionary does not have string " .. in_buf)
-          ffi.copy(out_buf, stridx)
-          end   
-        end
-        if qtype == "SC" then 
-          assert(in_buf_len > M[i].width, err_loc .. "string too long ")
-        end
-        local function_name = g_qtypes[qtype]["txt_to_ctype"]
-        -- for fixed size string pass the size of string data also
-        local status = 0
-        if qtype == "SC" then
-          status = c[function_name](buf, out_buf, out_buf_sz)
-        elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
-          -- For now second parameter , base is 10 only
-          status = c[function_name](buf, 10, out_buf)
-        elseif qtype == "F4" or qtype == "F8"  then 
-          status = c[function_name](buf, out_buf)
-        else 
-          assert(nil, err_loc .. "Data type" .. qtype .. " Not supported ")
-        end
-        assert( status == 0 , err_loc .. "Invalid data found")
-      end   
+        ffi.C.memset(is_nn, 1, 1) -- value IS Not Null 
+        mk_out_buf(in_buf, qtype, out_buf)
+      end
       column_list[col_idx]:put_chunk(1, out_buf, is_nn)
-
+      --=======================================
       if ( is_last_col ) then
         row_idx = row_idx + 1
         col_idx = 1;
