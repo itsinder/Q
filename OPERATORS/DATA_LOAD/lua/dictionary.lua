@@ -69,7 +69,6 @@ end
 
 -- TODO dont know why you need both these
 require 'utils'
-require 'parser'
 
 function Dictionary:save_to_file(file_path)
     local file = assert(io.open (file_path, "w"))
