@@ -1,5 +1,6 @@
 
-1. implement SV data type.
-2. make a basic print test lua file and run from README.sh
-3. test the print functionality with the so files created from build scripts in UTILS folder.
+1. testing pending with columns of different length
+2. testing required with load test cases.
+3. testing required with border cases.
+
 
