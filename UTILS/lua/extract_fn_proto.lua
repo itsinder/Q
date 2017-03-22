@@ -18,5 +18,5 @@ function extract_fn_proto(infile)
   --=========================================
   return 'extern ' .. trim(z) .. ';'
 end
-y = extract_fn_proto("_foo.c")
-print(y)
+-- y = extract_fn_proto("_foo.c")
+-- print(y)

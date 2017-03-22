@@ -19,6 +19,7 @@ ${out_type_displ}_to_txt(
 definition= [[
 #include "_${out_type_displ}_to_txt.h"
 
+//START_FUNC_DECL
 int
 ${out_type_displ}_to_txt(
     const ${out_type} * const in,
@@ -26,6 +27,7 @@ ${out_type_displ}_to_txt(
     char *X,
     size_t nX
     )
+//STOP_FUNC_DECL
 {
   int status = 0; int nw;
   const char *default_fmt = ${default_fmt};

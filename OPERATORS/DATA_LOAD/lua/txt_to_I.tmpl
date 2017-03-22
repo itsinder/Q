@@ -22,12 +22,14 @@ txt_to_${out_type_displ}(
 definition = [[
 #include "_txt_to_${out_type_displ}.h"
 
+//START_FUNC_DECL
 int
 txt_to_${out_type_displ}(
       char * const X,
       int base,
       ${out_type} *ptr_out
       )
+//STOP_FUNC_DECL
 {
   int status = 0;
   char *endptr;
