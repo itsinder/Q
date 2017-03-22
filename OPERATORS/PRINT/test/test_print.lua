@@ -7,7 +7,6 @@ package.path = package.path.. ";" .. rootdir .. "/OPERATORS/PRINT/lua/?.lua"
 local log = require 'log'
 require 'utils'
 require 'compile_so'
-require 'extract_fn_proto'
 local ffi = require 'ffi'
 local Column = require 'Column'
 local Dictionary = require "dictionary"

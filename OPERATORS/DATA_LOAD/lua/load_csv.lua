@@ -1,5 +1,7 @@
 require "validate_meta"
 require 'globals'
+require 'extract_fn_proto'
+
 local Dictionary = require 'dictionary'
 local plstring = require 'pl.stringx'
 local Column = require 'Column'

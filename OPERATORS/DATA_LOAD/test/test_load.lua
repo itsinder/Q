@@ -7,9 +7,8 @@ package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
 local log = require 'log'
 local plpath = require 'pl.path'
 require 'utils'
-require 'globals'
 require 'compile_so'
-require 'extract_fn_proto'
+
 local ffi = require 'ffi'
 -- Create libload_csv.so
 local incs = {  "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
