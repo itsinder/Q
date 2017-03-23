@@ -106,12 +106,9 @@ setmetatable(Vector, {
     })
 
 function Vector.destructor(data)
-    print "bye" -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
-        print "gc is called directly"
         C.free(data.destructor_ptr)
     else
-        print "using ptr"
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         C.free(data)

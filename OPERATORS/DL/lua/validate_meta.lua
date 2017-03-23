@@ -1,12 +1,15 @@
 package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 require 'globals'
 local pl = require 'pl'
+local dbg = require 'debugger'
 
 function validate_meta(
   M -- meta data table 
   )
+  -- local plpath = require 'pl.path'
+  plpath = require 'pl.path'
   assert(type(M) == "table", "Metadata should be table")
-  assert(pl.path.isdir(_G["Q_META_DATA_DIR"]), 
+  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), 
   "Q_META_DATA_DIR not a directory")
   
   local col_names = {}
@@ -19,13 +22,13 @@ function validate_meta(
     assert(fld_M.qtype, col .. "qtype cannot be null")
     assert(g_qtypes[fld_M.qtype], 
     col ..  "qtype contains invalid q type")
-    if fld_M.has_nulls then 
+    if fld_M.has_nulls ~= nil then 
       assert((fld_M.has_nulls == true  or fld_M.has_nulls == false ), 
       col .. "has_nulls can contain true/false only" )
     else
       fld_M.has_nulls = false
     end
-    if fld_M.is_load then 
+    if fld_M.is_load ~= nil then 
       assert((fld_M.is_load == true  or fld_M.is_load == false ), 
       col .. "is_load can contain true/false only" )
     else

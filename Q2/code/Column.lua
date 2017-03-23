@@ -46,12 +46,10 @@ setmetatable(Column, {
     })
 
 function Column.destructor(data)
-    print "bye" -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Column) then
         print "gc is called directly"
         C.free(data.destructor_ptr)
     else
-        print "using ptr"
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         C.free(data)
@@ -177,13 +175,14 @@ function Column:eov()
 end
 
 g_valid_meta = {}
+-- TODO NOTE Currently we allow any metd data to be set (think about it)
 function Column:get_meta(index)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
+    -- assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]
 end
 
 function Column:set_meta(index, val)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
+    -- assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     self.meta[index] = val
 end
 
