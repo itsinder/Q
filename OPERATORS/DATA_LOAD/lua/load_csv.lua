@@ -1,0 +1,205 @@
+require "validate_meta"
+require 'globals'
+-- RS delete unnecesssary lines when you are done with code
+local Dictionary = require 'dictionary'
+local plstring = require 'pl.stringx'
+local Column = require 'Column'
+local plpath = require 'pl.path'
+local pllist = require 'pl.List'
+
+--RS Use extract_fn_proto for txt_to_xxxx and so on
+--RS Also, you don;t need xxx_to_txt here. You need it in print. Delete
+--RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
+--RS and so on....
+local ffi = require "ffi"
+ffi.cdef([[
+  typedef struct {void* ptr_mmapped_file; size_t ptr_file_size; int status; } mmap_struct;
+  mmap_struct* f_mmap(const char* file_name, bool is_write);
+  int f_munmap(mmap_struct* map);
+
+  extern size_t get_cell(char *X, size_t nX, size_t xidx, bool is_last_col, char *buf, size_t bufsz);
+  
+  int txt_to_I1(const char *X, int base, int8_t *ptr_out);
+  int txt_to_I2(const char *X, int base, int16_t *ptr_out);
+  int txt_to_I4(const char *X, int base, int32_t *ptr_out);
+  int txt_to_I8(const char *X, int base, int64_t *ptr_out);
+  int txt_to_F4(const char *X, float *ptr_out);
+  int txt_to_F8(const char *X, double *ptr_out);
+  int txt_to_SC(const char *X, char *out, size_t sz_out);
+]])
+-- ----------------
+-- load( "CSV file to load", "meta data", "Global Metadata")
+-- Loads the CSV file and stores in the Q internal format
+--
+-- returns : table containing list of files for each column defined in metadata.
+--           If any error was encountered during load operation then negative status code
+-- ----------------
+
+-- validate meta-data & create vector + null vector for each of the file being created
+-- RS Use compile_so to create load_csv.so
+local c = ffi.load("load_csv.so")
+
+
+function load_csv( 
+  csv_file_path, 
+  M,  -- metadata
+  load_global_settings
+  )
+  local column_list = {}
+  local dict_table = {}
+  local col_num_nil = {}
+  local size_of_data_list = {}
+   
+  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),"csv_file_path is not correct")
+  assert( plpath.getsize(csv_file_path) ~= 0, "File should not be empty")
+  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), "Q_DATA_DIR is not pointing to correct directory")
+  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), "Q_META_DATA_DIR is not pointing to correct directory")
+  validate_meta(M)
+   
+
+  for i = 1, #M do 
+    --default to true
+    if M[i].is_load == nil then 
+      M[i].is_load = true
+    end
+      
+    if M[i].is_load == true then
+      if M[i].qtype == "SC" then
+        size_of_data_list[i] = M[i].size
+      else
+        size_of_data_list[i] = g_qtypes[M[i].qtype]["width"]
+      end
+      
+      -- If user does no specify null value, then treat null = true as default
+      if M[i].has_nulls == nil or M[i].has_nulls == "" then
+        M[i].has_nulls = true
+      end
+    
+      column_list[i] = Column{field_type=M[i].qtype, 
+                 field_size=size_of_data_list[i], 
+                 filename= _G["Q_DATA_DIR"] .. "_" .. M[i].name,
+                 write_vector=true,
+                 nn=M[i].has_nulls }
+      col_num_nil[i] = nil
+                 
+      if M[i].qtype == "SV" then
+        dict_table[i] = {}
+        dict_table[i].dict = assert(Dictionary(M[i]), "Error while creating/accessing dictionary for M " )
+        dict_table[i].dict_name = M.dict
+        dict_table[i].add_new_value = M.add or true   
+      end 
+    end    
+  end
+   
+   -- mmap function here
+   f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
+   assert(f_map.status == 0 , "Mmap failed")
+   local X = ffi.cast("char *", f_map.ptr_mmapped_file)
+   local nX = tonumber(f_map.ptr_file_size)
+   assert(nX > 0, "File cannot be empty")
+   
+   local x_idx = 0
+   
+   -- Take the max value from all the types
+   local l = pllist();
+   for i, value in pairs(g_sz) do
+    l:append(value) 
+   end
+   local min, cbuf_sz = l:minmax()  -- max value will be cbuff_sz, since c conversion will be to either one of the types contained in g_sz
+   
+   l:append(g_max_size_SC)
+   l:append(g_max_size_SV)
+   local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
+   
+   local buf = ffi.gc(c.malloc(buf_sz), c.free)
+   local cbuf = ffi.gc(c.malloc(cbuf_sz), c.free)
+   local is_null = ffi.gc(c.malloc(1), c.free)
+   local ncols = #M
+   local row_idx = 0
+   local col_idx = 0
+   
+   while true do
+      local is_last_col
+      if col_idx == (ncols-1) then
+         is_last_col = true;
+      else
+         is_last_col = false;
+      end
+      x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
+
+      assert(x_idx > 0 , "Index has to be valid")
+      -- print(row_idx, col_idx, ffi.string(buf))
+      
+      -- check if the column needs to be skipped while loading or not 
+      if column_list[col_idx  + 1 ] then 
+        ffi.fill(is_null, 1, 255) -- initially will be false = 1
+  
+        if M[col_idx + 1].qtype == "SV" then 
+          if plstring.strip(ffi.string(buf)) ~= "" then 
+            local ret_number = dict_table[col_idx + 1].dict:add_with_condition(ffi.string(buf), dict_table[col_idx + 1].add_new_value)  
+            ffi.copy(buf, tostring(ret_number))
+          end   
+        elseif M[col_idx + 1].qtype == "SC" then 
+          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].size -1, " contains string greater than allowed size. Please correct data or metadata.")  
+        end
+             
+        if ffi.string(buf) == "" then 
+          -- nil values
+          assert( M[col_idx + 1].has_nulls == true, " Null value found in not null field " ) 
+          ffi.fill(is_null, 1,0)
+          if col_num_nil[col_idx + 1] == nil then 
+            col_num_nil[col_idx + 1] =  1 
+          else 
+            col_num_nil[col_idx + 1] = col_num_nil[col_idx + 1] + 1
+          end          
+        end
+        
+        
+        -- for null fields set all bytes to \0
+        if ffi.string(buf) == "" then 
+          ffi.C.memset(cbuf, 0, size_of_data_list[col_idx + 1])
+        else 
+          local status = nil
+          local q_type = M[col_idx + 1].qtype
+          local function_name = g_qtypes[q_type]["txt_to_ctype"]
+          -- for fixed size string pass the size of string data also
+          if q_type == "SC" then
+            local ssize = ffi.cast("size_t", size_of_data_list[col_idx + 1])
+            status = c[function_name](buf, cbuf, ssize)
+          elseif q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV" then
+            -- For now second parameter , base is 10 only
+            status = c[function_name](buf, 10, cbuf)
+          elseif q_type == "F4" or q_type == "F8"  then 
+            status = c[function_name](buf, cbuf)
+          else 
+            error("Data type : " .. q_type .. " Not supported ")
+          end
+          
+          assert( status >= 0 , "Invalid data found")
+        end   
+           
+        column_list[col_idx+1]:put_chunk(1, cbuf, is_null)
+
+        if is_last_col then
+           row_idx = row_idx + 1
+           col_idx = 0;
+        else
+           col_idx = col_idx + 1 
+        end
+        
+        if x_idx >= nX then 
+          break 
+        end
+      end
+   end
+
+   for i, column in pairs(column_list) do
+      column:eov()
+      -- print(column:length())
+   end
+   print("Completed successfully")
+   return column_list
+end
+
+-- load_csv( "test.csv" , dofile("meta.lua"), nil)
+

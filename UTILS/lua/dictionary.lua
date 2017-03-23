@@ -1,4 +1,5 @@
 require 'utils'
+require 'parser'
 
 local Dictionary = {}
 Dictionary.__index = Dictionary
@@ -21,12 +22,23 @@ end
 
 function Dictionary.get_instance(dict_metadata)
   local self = setmetatable({}, Dictionary)
-  assert( (dict_metadata ~= nil and type(dict_metadata) == "table" ) , "Dictionary metadata should not be empty")
-  assert(dict_metadata.dict ~= nil and dict_metadata.dict ~= "", "Please specify correct metadata")
+  assert(type(dict_metadata) == "table" , "Dictionary metadata should not be empty")
+  assert(dict_metadata.dict ~= "", "Metadata is incorrect")
  
   self.dict_name = dict_metadata.dict
-  self.dict_exists = dict_metadata.dict_exists or false  -- default value is false, dictionary does not exist.. create one
-  self.add_new_value = dict_metadata.add or true  -- default value is true, add null values
+  -- default value is false, dictionary does not exist.. create one
+  if dict_metadata.dict_exists then
+    self.dict_exists = dict_metadata.dict_exists
+  else
+    self.dict_exists = false
+  end
+  
+  -- default value is true, add null values  
+  if dict_metadata.dict_exists then 
+    self.add_new_value = dict_metadata.add
+  else
+    self.add_new_value = true
+  end
    
   local dict;
   if self.dict_exists == true then
@@ -81,7 +93,7 @@ end
 -- -------------------------------------------------
 function Dictionary:add_with_condition(text, add_if_not_exists)
 
- assert(text ~= nil and text ~= "", "Cannot add nil or empty string in dictionary") 
+ assert(text ~= "", "Cannot add nil or empty string in dictionary") 
 
   -- default to true for addIfExists condition
  if add_if_not_exists == nil then

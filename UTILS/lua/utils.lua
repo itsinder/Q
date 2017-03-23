@@ -1,4 +1,4 @@
-require 'pl'
+local plpath = require 'pl.path'
 
 function load_file_as_string(fname)
   local f = assert(io.open(fname))
@@ -8,7 +8,7 @@ function load_file_as_string(fname)
 end
 
 function valid_dir(dir_path)
-    if dir_path == nil or not path.isdir(dir_path) then 
+    if dir_path == nil or not plpath.isdir(dir_path) then 
       return false 
     else 
       return true 
@@ -16,7 +16,7 @@ function valid_dir(dir_path)
 end
 
 function valid_file(file_path)
-    if file_path == nil or not path.isfile(file_path)  then 
+    if file_path == nil or not plpath.isfile(file_path)  then 
       return false 
     else 
       return true 

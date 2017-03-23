@@ -6,17 +6,17 @@ function validate_meta(metadata_table)
   -- now look at fields of metadata
   for metadata_idx, metadata in pairs(metadata_table) do
     assert(metadata.name ~= nil, "metadata " .. metadata_idx .. " : name cannot be null")
-    assert(metadata.type ~= nil, "metadata " .. metadata_idx .. " : type cannot be null")
-    assert(g_qtypes[metadata.type] ~= nil, "metadata " .. metadata_idx .. " : type contains invalid q type")
+    assert(metadata.qtype ~= nil, "metadata " .. metadata_idx .. " : type cannot be null")
+    assert(g_qtypes[metadata.qtype] ~= nil, "metadata " .. metadata_idx .. " : type contains invalid q type")
     -- if not null is specified then only true/false is the acceptable value
-    if metadata.null ~= nil then 
-      assert((metadata.null == true  or metadata.null == false ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
+    if metadata.has_nulls ~= nil then 
+      assert((metadata.has_nulls == true  or metadata.has_nulls == false ), "metdata " .. metadata_idx .. " : null can contain true/false only" )
     end
     
     -- check if the same column name is found before in metadata
     if metadata.name ~= "" then 
       assert( col_names[metadata.name] == nil , "metadata " .. metadata_idx .. " : duplicate column name is not allowed") 
-      col_names[metadata.name] = 1 
+      col_names[metadata.name] = 1    
     end
     -- Perform check based on metadata type
    

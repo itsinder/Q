@@ -27,7 +27,7 @@ end
 
 function test_dictionary:test_create_null_name_error()
   lu.assertError(Dictionary, { is_dict = false, add=true})
-  lu.assertErrorMsgContains("Please specify correct metadata", Dictionary, {dict = "", is_dict = false, add=true} ) 
+  lu.assertErrorMsgContains("Metadata is incorrect", Dictionary, {dict = "", is_dict = false, add=true} ) 
 end
 
 function test_dictionary:test_add()
