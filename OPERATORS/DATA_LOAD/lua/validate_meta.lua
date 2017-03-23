@@ -22,15 +22,15 @@ function validate_meta(metadata_table)
     end
     -- Perform check based on metadata type
    
-    if metadata.type == "SC" then 
+    if metadata.qtype == "SC" then 
       assert(metadata.size ~= nil, "metadata " .. metadata_idx .. " : size should be specified for fixed length strings")
       assert(tonumber(metadata.size), "metadata " .. metadata_idx .. " : size should be valid number")
       
-    elseif metadata.type == "SV" then
+    elseif metadata.qtype == "SV" then
       assert(metadata.dict ~= nil, "metadata " .. metadata_idx .. " : dict cannot be null")
-      assert(metadata.dict_exists ~= nil, "metadata " .. metadata_idx .. " : dict_exists cannot be null")
-      assert(metadata.dict_exists == true or metadata.dict_exists == false , "metadata " .. metadata_idx .. " : dict_exists can contain true/false only")
-      if metadata.dict_exists == true then 
+      assert(metadata.is_dict ~= nil, "metadata " .. metadata_idx .. " : dict_exists cannot be null")
+      assert(metadata.is_dict == true or metadata.is_dict == false , "metadata " .. metadata_idx .. " : dict_exists can contain true/false only")
+      if metadata.is_dict == true then 
         assert(metadata.add ~= nil, "metadata " .. metadata_idx .. " : add cannot be null for dictionary which has dict_exists true")
         assert(metadata.add == true or metadata.add == false, "metadata " .. metadata_idx .. " : add can contain true/false only")
       end
