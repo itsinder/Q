@@ -52,41 +52,50 @@ function mk_out_buf(
   out_buf_len,
   err_loc
   )
- 
-  ffi.cdef("size_t strlen(const char *);")
-  -- TODO shouldnt we be using in_buf_len
-  local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
+    ffi.cdef("size_t strlen(const char *);")
+    local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
 
-  if m.qtype == "SV" then 
-    assert(in_buf_len <= m.max_width, err_loc .. "string too long ")
-    local stridx = nil
-    if ( m.add ) then
-      stridx = d.add(in_buf)
-    else
-      stridx = d.get_index_by_string(in_buf)
+    if m.qtype == "SV" then 
+      assert(in_buf_len <= m.max_width, err_loc .. "string too long ")
+      local stridx = nil
+      if ( m.add ) then
+        stridx = d.add(in_buf)
+      else
+        stridx = d.get_index_by_string(in_buf)
+      end
+      assert(stridx,
+      err_loc .. "dictionary does not have string " .. in_buf)
+      ffi.cast("int *", out_buf)[0] = stridx
+    end   
+    --=======================================
+    if m.qtype == "SC" then 
+      assert(in_buf_len <= m.width, err_loc .. "string too long ")
+      ffi.copy(out_buf, in_buf)
     end
-    assert(stridx,
-    err_loc .. "dictionary does not have string " .. in_buf)
-    ffi.cast("int *", out_buf)[0] = stridx
-  end   
-  --=======================================
-  if m.qtype == "SC" then 
-    assert(in_buf_len <= m.width, err_loc .. "string too long ")
-    ffi.copy(out_buf, in_buf)
+    --=======================================
+    local converter = assert(g_qtypes[m.qtype]["txt_to_ctype"])
+    local ctype     = assert(g_qtypes[m.qtype]["ctype"])
+    local status = 0
+    local casted = ffi.cast(ctype .. " *", out_buf)
+    --=====================================
+    if m.qtype == "I1" then status = cee[converter](in_buf, 10, casted) end
+    if m.qtype == "I2" then status = cee[converter](in_buf, 10, casted) end
+    if m.qtype == "I4" then status = cee[converter](in_buf, 10, casted) end
+    if m.qtype == "I8" then status = cee[converter](in_buf, 10, casted) end
+    if m.qtype == "F4" then status = cee[converter](in_buf, casted) end
+    if m.qtype == "F8" then status = cee[converter](in_buf, casted) end
+    --=====================================
+    if m.qtype == "B1" then  -- IMPROVE THIS CODE 
+      local casted = ffi.cast("uint8_t *", out_buf)
+      if ( ffi.string(in_buf) == "1" ) then 
+        casted[0] = 255 
+      else if ( ffi.string(in_buf) == "0" ) then 
+        casted[0] = 0
+      else 
+        status = 1
+      end
+    end
   end
-  --=======================================
-  local converter = assert(g_qtypes[m.qtype]["txt_to_ctype"])
-  local ctype     = assert(g_qtypes[m.qtype]["ctype"])
-  local status = 0
-  local casted = ffi.cast(ctype .. " *", out_buf)
-  --=====================================
-  if m.qtype == "I1" then status = cee[converter](in_buf, 10, casted) end
-  if m.qtype == "I2" then status = cee[converter](in_buf, 10, casted) end
-  if m.qtype == "I4" then status = cee[converter](in_buf, 10, casted) end
-  if m.qtype == "I8" then status = cee[converter](in_buf, 10, casted) end
-  if m.qtype == "F4" then status = cee[converter](in_buf, casted) end
-  if m.qtype == "F8" then status = cee[converter](in_buf, casted) end
-  --=====================================
   assert(status == 0, "text converter failed for qtype " .. m.qtype)
 end
 

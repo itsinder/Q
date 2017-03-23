@@ -14,6 +14,7 @@ gcc -std=gnu99 -fPIC -shared -xc -o libload_csv.so \
    -I../gen_inc \
    -I../../PRINT/gen_inc
 
+echo "Completed $0 in $PWD"
 exit 0
 # Following is to test print/load 
 

@@ -1,6 +1,6 @@
 return {
-{ name = "col1", qtype = "I4" },
-{ name = "col2", qtype = "F4" },
+{ name = "fld21", qtype = "I4" },
+{ name = "fld22", qtype = "F4" },
 { name = "where", qtype = "B1" }
 
 }
