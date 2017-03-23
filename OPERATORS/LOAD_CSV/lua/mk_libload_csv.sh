@@ -1,16 +1,21 @@
 #!/bin/bash
 set -e 
-gcc -fPIC -shared -xc -o libload_csv.so \
-   ../src/get_cell.c ./f_mmap.c \
-   ../src/get_cell.c ./f_munmap.c \
+gcc -std=gnu99 -fPIC -shared -xc -o libload_csv.so \
+   ../src/get_cell.c \
+   ../../../UTILS/src/f_mmap.c \
+   ../../../UTILS/src/f_munmap.c \
    ../gen_src/_txt_to_I4.c \
    ../gen_src/_txt_to_F4.c \
    ../../PRINT/gen_src/_I4_to_txt.c \
   ../../PRINT/gen_src/_F4_to_txt.c \
    ../../../UTILS/src/is_valid_chars_for_num.c \
    -I../../../UTILS/inc \
+   -I../../../UTILS/gen_inc \
    -I../gen_inc \
    -I../../PRINT/gen_inc
+
+exit 0
+# Following is to test print/load 
 
 cd ../../../Q2/code
 make clean
