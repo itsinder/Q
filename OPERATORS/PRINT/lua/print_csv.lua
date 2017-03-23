@@ -1,4 +1,5 @@
 require 'globals'
+require 'extract_fn_proto'
 
 local ffi = require "ffi"
 ffi.cdef

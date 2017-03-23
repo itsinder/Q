@@ -1,3 +1,5 @@
+require 'globals'
+
 function validate_meta(metadata_table)
   assert( metadata_table ~= nil, "Metadata should not be nil")
   assert( type(metadata_table) == "table", "Metadata type should be table")
