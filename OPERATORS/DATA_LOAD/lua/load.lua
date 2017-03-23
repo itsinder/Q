@@ -4,8 +4,8 @@ package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua
 require "validate_meta"
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
---RS Use extract_fn_proto for txt_to_xxxx and so on
---RS Also, you don;t need xxx_to_txt here. You need it in print. Delete
+--RS Use extract_fn_proto for txt_to_* and so on
+--RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
 local ffi = require "ffi"
@@ -24,54 +24,56 @@ ffi.cdef([[
 
 ]])
 -- ----------------
--- load( "CSV file to load", "meta data", "Global Metadata")
--- Loads the CSV file and stores in the Q internal format
---
--- returns : table containing list of Columns for each column defined in metadata.
---           If any error was encountered during load operation then will have
---           asserted out
--- ----------------
 -- RS Use compile_so to create load_csv.so
 local c = ffi.load("load_csv.so")
 
-function mk_out_buf(in_buf, qtype, out_buf)
-    local qtype = M[col_idx].qtype
-    if qtype == "SV" then 
-      assert(in_buf_len <= M[i].max_width, 
-      err_loc .. "string too long ")
-      local stridx = nil
-      if ( M[i].add ) then
-        stridx = dict[i].add(in_buf)
-      else
-        stridx = dict[i].get_index_by_string(in_buf)
-      end
-      assert(stridx,
-      err_loc .. "dictionary does not have string " .. in_buf)
-      ffi.copy(out_buf, stridx) -- TODO is this binary copy
-    end   
-    if qtype == "SC" then 
-      assert(in_buf_len > M[i].width, err_loc .. "string too long ")
+function mk_out_buf(
+  in_buf, 
+  m,  -- m is meta data for field 
+  d,  -- d is dictiomnary for field 
+  out_buf
+  )
+ 
+  ffi.cdef("size_t strlen(const char *);")
+  local in_buf_len = assert( tonumber(c.strlen(in_buf)))
+
+  if m.qtype == "SV" then 
+    assert(out_buf_len <= M[i].max_width, err_loc .. "string too long ")
+    local stridx = nil
+    if ( m.add ) then
+      stridx = dict[i].add(in_buf)
+    else
+      stridx = dict[i].get_index_by_string(in_buf)
     end
-    local function_name = g_qtypes[qtype]["txt_to_ctype"]
-    -- for fixed size string pass the size of string data also
-    local status = 0
-    if qtype == "SC" then
-      status = c[function_name](buf, out_buf, out_buf_sz)
-    elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
-      -- For now second parameter , base is 10 only
-      status = c[function_name](buf, 10, out_buf)
-    elseif qtype == "F4" or qtype == "F8"  then 
-      status = c[function_name](buf, out_buf)
-    else 
-      assert(nil, err_loc .. "Data type" .. qtype .. " Not supported ")
-    end
-    assert( status == 0 , err_loc .. "Invalid data found")
+    assert(stridx,
+    err_loc .. "dictionary does not have string " .. in_buf)
+    -- ffi.copy(out_buf, ffi.new("int", stridx))
+    ffi.cast("int *", outbuf)[0] = stridx
+    ffi.txt_to_I4(tostring(stridx), 10, out_buf)
+  end   
+  --=======================================
+  if m.qtype == "SC" then 
+    assert(out_buf_len <= M[i].width, err_loc .. "string too long ")
+    ffi.copy(out_buf, in_buf)
+  end
+  --=======================================
+  local converter = assert(g_qtypes[qtype]["txt_to_ctype"])
+  local status = 0
+  --=====================================
+  if qtype == "I1" then status = c[function_name](buf, 10, out_buf) end
+  if qtype == "I2" then status = c[function_name](buf, 10, out_buf) end
+  if qtype == "I4" then status = c[function_name](buf, 10, out_buf) end
+  if qtype == "I8" then status = c[function_name](buf, 10, out_buf) end
+  if qtype == "F4" then status = c[function_name](buf, out_buf) end
+  if qtype == "F8" then status = c[function_name](buf, out_buf) end
+  --=====================================
+  assert(status == 0, "text converter failed")
 end
 
 function load_csv( 
-  csv_file_path, 
-  M,  -- metadata
-  load_global_settings
+  infile,   -- input file to read (string)
+  M,  -- metadata (table)
+  global_settings -- TODO unused for now
   )
     local pl = require 'pl'
     assert(pl.path.isdir(_G["Q_DATA_DIR"]))
@@ -80,8 +82,8 @@ function load_csv(
     local cols = {} -- cols[i] is Column used for column i 
     local dicts = {} -- dicts[i] is di ctionary used for column i
 
-    assert(pl.path.isfile(csv_file_path), "input file not found")
-    assert(pl.path.getsize(csv_file_path) > 0, "input file empty")
+    assert(pl.path.isfile(infile), "input file not found")
+    assert(pl.path.getsize(infile) > 0, "input file empty")
     assert(pl.path.isdir(_G["Q_DATA_DIR"]), "directory not found -- Q_DATA_DIR")
     assert(pl.path.isdir(_G["Q_META_DATA_DIR"]), "directory not found -- Q_META_DATA_DIR")
     validate_meta(M)
@@ -121,7 +123,7 @@ function load_csv(
     end
     assert(max_txt_width > 0)
     --===========================
-    f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
+    f_map = ffi.gc( c.f_mmap(infile, false), c.f_munmap)
     assert(f_map.status == 0 , "Mmap failed")
     local X = ffi.cast("char *", f_map.ptr_mmapped_file)
     local nX = tonumber(f_map.ptr_file_size)
@@ -161,7 +163,7 @@ function load_csv(
         M[i].num_nulls = M[i].num_nulls + 1
       else 
         ffi.C.memset(is_nn, 1, 1) -- value IS Not Null 
-        mk_out_buf(in_buf, qtype, out_buf)
+        mk_out_buf(in_buf, M[i], dict[i], out_buf)
       end
       column_list[col_idx]:put_chunk(1, out_buf, is_nn)
       --=======================================
@@ -175,14 +177,14 @@ function load_csv(
     end
     assert(col_idx == num_cols, "bad number of columns on last line")
     --======================================
-    for i = 1, #M do
-      if ( M[i].is_load ) then assert(cols[i]:eov()) end
-    end
-    --=============================
     local cols_to_return = {} 
-    local rc_idx = 0
+    local rc_idx = 1
     for i = 1, #M do
       if ( M[i].is_load ) then 
+        assert(cols[i]:eov()) 
+        if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
+          -- TODO drop the null column
+        end
         cols_to_return[rc_idx] = cols[i]
         cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
         rc_idx = rc_idx + 1
