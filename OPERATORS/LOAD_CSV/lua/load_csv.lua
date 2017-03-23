@@ -58,10 +58,15 @@ function mk_out_buf(
     if m.qtype == "SV" then 
       assert(in_buf_len <= m.max_width, err_loc .. "string too long ")
       local stridx = nil
-      if ( m.add ) then
-        stridx = d.add(in_buf)
-      else
-        stridx = d.get_index_by_string(in_buf)
+      if ( in_buf_len == 0 ) then
+        stridx = 0
+      else 
+        dbg()
+        if ( m.add ) then
+          stridx = d.add(ffi.string(in_buf))
+        else
+          stridx = d.get_index_by_string(ffi.string(in_buf))
+        end
       end
       assert(stridx,
       err_loc .. "dictionary does not have string " .. in_buf)
