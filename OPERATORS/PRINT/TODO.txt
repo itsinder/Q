@@ -4,3 +4,9 @@
 3. testing required with border cases.
 
 
+To run PRINT script , 
+go to PRINT/test folder
+and run
+bash test_print.sh
+
+
