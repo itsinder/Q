@@ -11,3 +11,4 @@ for i, gm in ipairs(T) do
     print("Error:", err)
   end
 end
+print("Successfully completed")

@@ -1,3 +1,3 @@
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH;./;../../../Q2/code/"
-TODO To complete
-luajit test_good.lua test_good_data
+luajit test_good_data.lua good_data.lua
+lua test_good_meta_data.lua good_meta_data.lua

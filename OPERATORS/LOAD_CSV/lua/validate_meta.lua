@@ -43,13 +43,13 @@ function validate_meta(
     if fld_M.qtype == "SC" then 
       assert(
       (tonumber(fld_M.width) >= 2) and 
-      (tonumber(fld_M.width) <= g_width_max_SC), 
+      (tonumber(fld_M.width) <= g_max_width_SC), 
       col .. " : width for SC not valid")
     end
     if fld_M.qtype == "SV" then
       assert(
       (tonumber(fld_M.max_width) >= 2) and 
-      (tonumber(fld_M.max_width) <= g_width_max_SC), 
+      (tonumber(fld_M.max_width) <= g_max_width_SV), 
       col .. " : width for SV not valid")
       
       assert(fld_M.dict, col .. "Must specify dictionary for SV")
