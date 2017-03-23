@@ -14,4 +14,10 @@ if [ $? == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi
 #-- No eoln
 luajit test_get_cell.lua 3 2 bad_get_cell_in2.txt
 if [ $? == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi 
+
+#-- extra cell
+luajit test_get_cell.lua 4 2 bad_get_cell_in3.txt
+if [ $? == 0 ]; then echo "ERROR: $0: $LINENO"; exit 1; fi 
+
+
 echo "Completed $0 in $PWD"
