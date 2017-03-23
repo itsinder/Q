@@ -414,6 +414,7 @@ function Vector:eov()
 end
 
 function Vector:delete()
+    assert(tonumber(C.fclose(self.file)))
     self.f_map = nil -- Causing the file to be unmmapped 
     if self.memoized then
         os.remove(self.file_name)

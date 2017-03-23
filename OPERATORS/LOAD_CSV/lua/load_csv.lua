@@ -61,15 +61,14 @@ function mk_out_buf(
       if ( in_buf_len == 0 ) then
         stridx = 0
       else 
-        dbg()
         if ( m.add ) then
-          stridx = d.add(ffi.string(in_buf))
+          stridx = d:add(ffi.string(in_buf))
         else
-          stridx = d.get_index_by_string(ffi.string(in_buf))
+          stridx = d:get_index_by_string(ffi.string(in_buf))
         end
       end
       assert(stridx,
-      err_loc .. "dictionary does not have string " .. in_buf)
+      err_loc .. "dictionary does not have string " .. ffi.string(in_buf))
       ffi.cast("int *", out_buf)[0] = stridx
     end   
     --=======================================
