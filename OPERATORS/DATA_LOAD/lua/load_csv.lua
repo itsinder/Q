@@ -1,32 +1,36 @@
 require "validate_meta"
 require 'globals'
--- RS delete unnecesssary lines when you are done with code
 local Dictionary = require 'dictionary'
 local plstring = require 'pl.stringx'
 local Column = require 'Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 
---RS Use extract_fn_proto for txt_to_xxxx and so on
---RS Also, you don;t need xxx_to_txt here. You need it in print. Delete
---RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
---RS and so on....
 local ffi = require "ffi"
-ffi.cdef([[
-  typedef struct {void* ptr_mmapped_file; size_t ptr_file_size; int status; } mmap_struct;
-  mmap_struct* f_mmap(const char* file_name, bool is_write);
-  int f_munmap(mmap_struct* map);
 
-  extern size_t get_cell(char *X, size_t nX, size_t xidx, bool is_last_col, char *buf, size_t bufsz);
-  
-  int txt_to_I1(const char *X, int base, int8_t *ptr_out);
-  int txt_to_I2(const char *X, int base, int16_t *ptr_out);
-  int txt_to_I4(const char *X, int base, int32_t *ptr_out);
-  int txt_to_I8(const char *X, int base, int64_t *ptr_out);
-  int txt_to_F4(const char *X, float *ptr_out);
-  int txt_to_F8(const char *X, double *ptr_out);
-  int txt_to_SC(const char *X, char *out, size_t sz_out);
-]])
+local get_cell = assert(extract_fn_proto("../src/get_cell.c"))
+local txt_to_SC = assert(extract_fn_proto("../src/txt_to_SC.c"))
+local txt_to_I1 = assert(extract_fn_proto("../gen_src/_txt_to_I1.c"))
+local txt_to_I2 = assert(extract_fn_proto("../gen_src/_txt_to_I2.c"))
+local txt_to_I4 = assert(extract_fn_proto("../gen_src/_txt_to_I4.c"))
+local txt_to_I8 = assert(extract_fn_proto("../gen_src/_txt_to_I8.c"))
+local txt_to_F4 = assert(extract_fn_proto("../gen_src/_txt_to_F4.c"))
+local txt_to_F8 = assert(extract_fn_proto("../gen_src/_txt_to_F8.c"))
+local f_mmap = assert(extract_fn_proto("../../../UTILS/src/f_mmap.c"))
+local f_munmap = assert(extract_fn_proto("../../../UTILS/src/f_munmap.c"))
+
+ffi.cdef(get_cell)
+ffi.cdef(txt_to_SC)
+ffi.cdef(txt_to_I1)
+ffi.cdef(txt_to_I2)
+ffi.cdef(txt_to_I4)
+ffi.cdef(txt_to_I8)
+ffi.cdef(txt_to_F4)
+ffi.cdef(txt_to_F8)
+ffi.cdef(f_mmap)
+ffi.cdef(f_munmap)
+
+local c = ffi.load("load_csv.so")
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format
@@ -34,11 +38,6 @@ ffi.cdef([[
 -- returns : table containing list of files for each column defined in metadata.
 --           If any error was encountered during load operation then negative status code
 -- ----------------
-
--- validate meta-data & create vector + null vector for each of the file being created
--- RS Use compile_so to create load_csv.so
-local c = ffi.load("load_csv.so")
-
 
 function load_csv( 
   csv_file_path, 
@@ -200,6 +199,3 @@ function load_csv(
    print("Completed successfully")
    return column_list
 end
-
--- load_csv( "test.csv" , dofile("meta.lua"), nil)
-
