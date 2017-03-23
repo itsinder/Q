@@ -26,7 +26,7 @@ ffi.cdef([[
 ]])
 -- ----------------
 -- RS Use compile_so to create load_csv.so
-local c = ffi.load("load_csv.so")
+local cee = ffi.load("load_csv.so")
 
 function mk_out_buf(
   in_buf, 
@@ -39,10 +39,10 @@ function mk_out_buf(
  
   ffi.cdef("size_t strlen(const char *);")
   -- TODO shouldnt we be using in_buf_len
-  local in_buf_len = assert( tonumber(c.strlen(in_buf)))
+  local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
 
   if m.qtype == "SV" then 
-    assert(out_buf_len >= m.max_width, err_loc .. "string too long ")
+    assert(in_buf_len <= m.max_width, err_loc .. "string too long ")
     local stridx = nil
     if ( m.add ) then
       stridx = d.add(in_buf)
@@ -51,27 +51,23 @@ function mk_out_buf(
     end
     assert(stridx,
     err_loc .. "dictionary does not have string " .. in_buf)
-    -- ffi.copy(out_buf, ffi.new("int", stridx))
     ffi.cast("int *", out_buf)[0] = stridx
-    -- Already done on line 54
-    -- ffi.txt_to_I4(tostring(stridx), 10, out_buf)
   end   
   --=======================================
   if m.qtype == "SC" then 
-    assert(out_buf_len >= m.width, err_loc .. "string too long ")
+    assert(in_buf_len <= m.width, err_loc .. "string too long ")
     ffi.copy(out_buf, in_buf)
   end
   --=======================================
   local converter = assert(g_qtypes[qtype]["txt_to_ctype"])
   local status = 0
   --=====================================
-  -- TODO where is function name coming from
-  if m.qtype == "I1" then status = c[function_name](in_buf, 10, out_buf) end
-  if m.qtype == "I2" then status = c[function_name](in_buf, 10, out_buf) end
-  if m.qtype == "I4" then status = c[function_name](in_buf, 10, out_buf) end
-  if m.qtype == "I8" then status = c[function_name](in_buf, 10, out_buf) end
-  if m.qtype == "F4" then status = c[function_name](in_buf, out_buf) end
-  if m.qtype == "F8" then status = c[function_name](in_buf, out_buf) end
+  if m.qtype == "I1" then status = cee[converter](in_buf, 10, out_buf) end
+  if m.qtype == "I2" then status = cee[converter](in_buf, 10, out_buf) end
+  if m.qtype == "I4" then status = cee[converter](in_buf, 10, out_buf) end
+  if m.qtype == "I8" then status = cee[converter](in_buf, 10, out_buf) end
+  if m.qtype == "F4" then status = cee[converter](in_buf, out_buf) end
+  if m.qtype == "F8" then status = cee[converter](in_buf, out_buf) end
   --=====================================
   assert(status == 0, "text converter failed")
 end
@@ -99,12 +95,14 @@ function load_csv(
     local max_txt_width = 0
     for i = 1, #M do 
       if M[i].is_load then 
+        local fld_width = nil
         -- Update max_width
         local fld_max_txt_width = 0
         if M[i].qtype == "SV" then
           -- times 2 to deal with escaping
           fld_max_txt_width = 2 * assert(M[i].max_width)
         elseif M[i].qtype == "SC" then
+          fld_width = M[i].width -- set only for SC
           -- times 2 to deal with escaping
           fld_max_txt_width = 2 * assert(M[i].width)
         else
@@ -113,9 +111,6 @@ function load_csv(
         max_width = ( fld_max_txt_width > max_width ) 
           and fld_max_txt_width or max_width 
           --==============================
-        -- TODO field_size is optional but we can specify it anyway, the
-        -- difference below is that this is binary maybe there is some confusion
-        -- on what to use exactly
         cols[i] = Column{
           field_type=M[i].qtype, 
           field_size=fld_width, 
@@ -133,7 +128,7 @@ function load_csv(
     end
     assert(max_txt_width > 0)
     --===========================
-    f_map = ffi.gc( c.f_mmap(infile, false), c.f_munmap)
+    f_map = ffi.gc( cee.f_mmap(infile, false), cee.f_munmap)
     assert(f_map.status == 0 , "Mmap failed")
     local X = ffi.cast("char *", f_map.ptr_mmapped_file)
     local nX = tonumber(f_map.ptr_file_size)
@@ -141,9 +136,9 @@ function load_csv(
 
     local x_idx = 0
     local out_buf_sz = 1024 -- TODO FIX 
-    local in_buf  = ffi.gc(c.malloc(max_width), c.free)
-    local out_buf = ffi.gc(c.malloc(out_buf_sz), c.free)
-    local is_nn   = ffi.gc(c.malloc(1), c.free)
+    local in_buf  = ffi.gc(cee.malloc(max_width), cee.free)
+    local out_buf = ffi.gc(cee.malloc(out_buf_sz), cee.free)
+    local is_nn   = ffi.gc(cee.malloc(1), cee.free)
     local ncols = #M
     local row_idx = 1
     local col_idx = 1
@@ -161,7 +156,7 @@ function load_csv(
       -- create an error message that might be needed
       local err_loc = "error in row " .. row_idx .. " column " .. col_idx
       x_idx = tonumber(
-      c.get_cell(X, nX, x_idx, is_last_col, in_buf, max_width))
+      cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_width))
       assert(x_idx > 0 , err_loc)
       -- print(row_idx, col_idx, ffi.string(buf))
       -- local in_buf_len = assert(string.len(ffi.string(in_buf)))
@@ -185,9 +180,8 @@ function load_csv(
       end
       assert(x_idx <= nX) 
     end
-    -- TODO whats the condition for stopping x_idx == nX ? also it seems like
-    -- col_idx will be 1 after the last iteration 
-    assert(col_idx == ncols, "bad number of columns on last line")
+    assert(x_idx == nX, "Didn't end up properly")
+    assert(col_idx == 1, "bad number of columns on last line")
     --======================================
     local cols_to_return = {} 
     local rc_idx = 1
@@ -195,7 +189,7 @@ function load_csv(
       if ( M[i].is_load ) then 
         assert(cols[i]:eov()) 
         if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-          -- TODO drop the null column
+          -- TODO drop the null column. Indrajeet to provide
         end
         cols_to_return[rc_idx] = cols[i]
         cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
@@ -206,4 +200,4 @@ function load_csv(
     return cols_to_return
 
 end
--- load( "test.csv" , dofile("meta.lua"), nil)
+load_csv( "test.csv" , dofile("meta.lua"), nil)
