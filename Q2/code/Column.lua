@@ -186,4 +186,13 @@ function Column:set_meta(index, val)
     self.meta[index] = val
 end
 
+-- TODO Serious - Do not perform this operation when multiple people share a column
+-- Make it ref counted in future
+function Column:delete_nn()
+    if self.nn_vec ~= nil then
+        self.nn_vec:delete()
+        self.nn_vec = nil
+    end
+end
+
 return Column

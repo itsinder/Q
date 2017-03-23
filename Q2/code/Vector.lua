@@ -413,4 +413,11 @@ function Vector:eov()
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
 end
 
+function Vector:delete()
+    self.f_map = nil -- Causing the file to be unmmapped 
+    if self.memoized then
+        os.remove(self.file_name)
+    end
+end
+
 return Vector
