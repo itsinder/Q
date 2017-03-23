@@ -4,7 +4,7 @@ package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua
 require "validate_meta"
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
--- local dbg = require 'debugger'
+local dbg = require 'debugger'
 --RS Use extract_fn_proto for txt_to_* and so on
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
@@ -148,8 +148,9 @@ function load_csv(
           M[i].num_nulls = 0
           --==============================
           if M[i].qtype == "SV" then
-            dicts[i] = assert(Dictionary(M[i].name), 
-            "error with dictionary for " .. M[i].name)
+            local x = Dictionary(M[i].dict)
+            dicts[i] = assert(Dictionary(M[i].dict), 
+            "error creating dictionary " .. M[i].dict .. " for " .. M[i].name)
           end 
         end    
       end
@@ -230,7 +231,7 @@ function load_csv(
       return cols_to_return
 
 end
--- _G["Q_DATA_DIR"] = "./"
--- _G["Q_META_DATA_DIR"] = "./"
--- _G["Q_DICTIONARIES"] = {}
--- load_csv( "gm1d1.csv" , dofile("gm1.lua"), nil)
+_G["Q_DATA_DIR"] = "./"
+_G["Q_META_DATA_DIR"] = "./"
+_G["Q_DICTIONARIES"] = {}
+load_csv( "../test/gm3d1.csv" , dofile("../test/gm3.lua"), nil)

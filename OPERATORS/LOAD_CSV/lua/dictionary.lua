@@ -24,7 +24,7 @@ function Dictionary.get_instance(
   )
     local dict = _G["Q_DICTIONARIES"][dict_name]
     if not dict then
-        local dict = setmetatable({}, Dictionary)
+        dict = setmetatable({}, Dictionary)
         _G["Q_DICTIONARIES"][dict_name] = dict
         -- Create a forward map and a reverse map
         dict.string_to_index = {}
