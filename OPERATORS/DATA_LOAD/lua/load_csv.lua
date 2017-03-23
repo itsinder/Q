@@ -10,6 +10,7 @@ local Column = require 'Column'
 --RS and so on....
 local ffi = require "ffi"
 ffi.cdef([[
+  size_t strlen(const char *str);
   void * malloc(size_t size);
   void free(void *ptr);
   extern size_t get_cell(char *X, size_t nX, size_t xidx, bool is_last_col, char *buf, size_t bufsz);
@@ -31,41 +32,46 @@ function mk_out_buf(
   in_buf, 
   m,  -- m is meta data for field 
   d,  -- d is dictiomnary for field 
-  out_buf
+  out_buf,
+  out_buf_len,
+  err_loc
   )
  
   ffi.cdef("size_t strlen(const char *);")
+  -- TODO shouldnt we be using in_buf_len
   local in_buf_len = assert( tonumber(c.strlen(in_buf)))
 
   if m.qtype == "SV" then 
-    assert(out_buf_len <= M[i].max_width, err_loc .. "string too long ")
+    assert(out_buf_len >= m.max_width, err_loc .. "string too long ")
     local stridx = nil
     if ( m.add ) then
-      stridx = dict[i].add(in_buf)
+      stridx = d.add(in_buf)
     else
-      stridx = dict[i].get_index_by_string(in_buf)
+      stridx = d.get_index_by_string(in_buf)
     end
     assert(stridx,
     err_loc .. "dictionary does not have string " .. in_buf)
     -- ffi.copy(out_buf, ffi.new("int", stridx))
-    ffi.cast("int *", outbuf)[0] = stridx
-    ffi.txt_to_I4(tostring(stridx), 10, out_buf)
+    ffi.cast("int *", out_buf)[0] = stridx
+    -- Already done on line 54
+    -- ffi.txt_to_I4(tostring(stridx), 10, out_buf)
   end   
   --=======================================
   if m.qtype == "SC" then 
-    assert(out_buf_len <= M[i].width, err_loc .. "string too long ")
+    assert(out_buf_len >= m.width, err_loc .. "string too long ")
     ffi.copy(out_buf, in_buf)
   end
   --=======================================
   local converter = assert(g_qtypes[qtype]["txt_to_ctype"])
   local status = 0
   --=====================================
-  if qtype == "I1" then status = c[function_name](buf, 10, out_buf) end
-  if qtype == "I2" then status = c[function_name](buf, 10, out_buf) end
-  if qtype == "I4" then status = c[function_name](buf, 10, out_buf) end
-  if qtype == "I8" then status = c[function_name](buf, 10, out_buf) end
-  if qtype == "F4" then status = c[function_name](buf, out_buf) end
-  if qtype == "F8" then status = c[function_name](buf, out_buf) end
+  -- TODO where is function name coming from
+  if m.qtype == "I1" then status = c[function_name](in_buf, 10, out_buf) end
+  if m.qtype == "I2" then status = c[function_name](in_buf, 10, out_buf) end
+  if m.qtype == "I4" then status = c[function_name](in_buf, 10, out_buf) end
+  if m.qtype == "I8" then status = c[function_name](in_buf, 10, out_buf) end
+  if m.qtype == "F4" then status = c[function_name](in_buf, out_buf) end
+  if m.qtype == "F8" then status = c[function_name](in_buf, out_buf) end
   --=====================================
   assert(status == 0, "text converter failed")
 end
@@ -107,9 +113,13 @@ function load_csv(
         max_width = ( fld_max_txt_width > max_width ) 
           and fld_max_txt_width or max_width 
           --==============================
+        -- TODO field_size is optional but we can specify it anyway, the
+        -- difference below is that this is binary maybe there is some confusion
+        -- on what to use exactly
         cols[i] = Column{
           field_type=M[i].qtype, 
-          fld_width, filename= _G["Q_DATA_DIR"] .. "/_" .. M[i].name,
+          field_size=fld_width, 
+          filename= _G["Q_DATA_DIR"] .. "/_" .. M[i].name,
           write_vector=true,
           nn=M[i].has_nulls }
         --==============================
@@ -160,12 +170,12 @@ function load_csv(
       if is_null then 
         assert(M[col_idx].has_nulls, 
         err_loc ..  "Null value found in not null field " ) 
-        M[i].num_nulls = M[i].num_nulls + 1
+        M[col_idx].num_nulls = M[col_idx].num_nulls + 1
       else 
         ffi.C.memset(is_nn, 1, 1) -- value IS Not Null 
-        mk_out_buf(in_buf, M[i], dict[i], out_buf)
+        mk_out_buf(in_buf, M[col_idx], dicts[col_idx], out_buf, out_buf_sz, err_loc)
       end
-      column_list[col_idx]:put_chunk(1, out_buf, is_nn)
+      cols[col_idx]:put_chunk(1, out_buf, is_nn)
       --=======================================
       if ( is_last_col ) then
         row_idx = row_idx + 1
@@ -175,7 +185,9 @@ function load_csv(
       end
       assert(x_idx <= nX) 
     end
-    assert(col_idx == num_cols, "bad number of columns on last line")
+    -- TODO whats the condition for stopping x_idx == nX ? also it seems like
+    -- col_idx will be 1 after the last iteration 
+    assert(col_idx == ncols, "bad number of columns on last line")
     --======================================
     local cols_to_return = {} 
     local rc_idx = 1
