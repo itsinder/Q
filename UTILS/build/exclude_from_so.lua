@@ -3,6 +3,7 @@ return {
   "DEPRECATED",
   "experimental",
   "dyntest",
+  "qsort2",
   ".git",
   "OPERATORS/F_TO_S/test/"
 }

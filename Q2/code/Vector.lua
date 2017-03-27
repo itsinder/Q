@@ -106,12 +106,9 @@ setmetatable(Vector, {
     })
 
 function Vector.destructor(data)
-    print "bye" -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
-        print "gc is called directly"
         C.free(data.destructor_ptr)
     else
-        print "using ptr"
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         C.free(data)
@@ -414,6 +411,14 @@ function Vector:eov()
     self.is_materialized = true
     -- self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
+end
+
+function Vector:delete()
+    assert(tonumber(C.fclose(self.file)))
+    self.f_map = nil -- Causing the file to be unmmapped 
+    if self.memoized then
+        os.remove(self.file_name)
+    end
 end
 
 return Vector
