@@ -27,16 +27,22 @@ function handle_output(status, ret, v)
   if v.output_regex ~= nil then
     output = v.output_regex
   end
-
+  --print(v.meta)
   -- if status not true, then check output error with the expected error.
   -- if match then testcase success, else fail
+  --print(ret)
   if ( not status ) then 
+    if output == nil then
+      print("load API failed, but output_regex is null")
+      number_of_testcases_failed = number_of_testcases_failed + 1
+      return
+    end
     -- get the actual error message from the ret
     local a, b, err = plstring.splitv(ret,':')
     err = plstring.strip(err) -- check it can be used  from utils.
     -- trimming whitespace
+     
     local error_msg = plstring.strip(output) -- check it can be used from utils.
-    assert(output ~= nil, "Output Error Msg Not Found in Lua file")
     
     print("actual error:"..err)
     print("expected error:"..error_msg)

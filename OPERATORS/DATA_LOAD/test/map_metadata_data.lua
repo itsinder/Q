@@ -21,7 +21,7 @@ return {
   { meta= "gm_I4_overflow.lua", data= "I4_overflow.csv", output_regex= g_err.INVALID_DATA_ERROR },
   { meta= "gm_I4_overflow.lua", data= "I8_overflow.csv", output_regex= g_err.INVALID_DATA_ERROR  },
   { meta= "gm_bad_str_in_I1.lua", data= "bad_string_in_I1.csv", output_regex= g_err.INVALID_DATA_ERROR },
-  { meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv",output_regex= g_err.MISSING_DECLARATION_SYMBOL_MEMSET },
+  { meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv"},
   { meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", output_regex= g_err.INVALID_DATA_ERROR },
-  { meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", output_regex= g_err.MISSING_DECLARATION_SYMBOL_MEMSET }
+  { meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv"}
 }
