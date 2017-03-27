@@ -24,8 +24,8 @@ local number_of_testcases_failed = 0
 local 
 function handle_output(status, ret, v)
   local output
-  if v.output ~= nil then
-    output = dofile("output/" .. v.output)
+  if v.output_regex ~= nil then
+    output = v.output_regex
   end
 
   -- if status not true, then check output error with the expected error.
@@ -35,9 +35,8 @@ function handle_output(status, ret, v)
     local a, b, err = plstring.splitv(ret,':')
     err = plstring.strip(err) -- check it can be used  from utils.
     -- trimming whitespace
-    local error_msg = plstring.strip(output.error_msg) -- check it can be used  from utils.
-    assert(output ~= nil, "Output Error Lua file Not Found")
-    assert(output.error_msg ~= nil, "Output Error Msg Not Found in Lua file")
+    local error_msg = plstring.strip(output) -- check it can be used from utils.
+    assert(output ~= nil, "Output Error Msg Not Found in Lua file")
     
     print("actual error:"..err)
     print("expected error:"..error_msg)
