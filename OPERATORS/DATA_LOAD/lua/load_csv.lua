@@ -1,6 +1,7 @@
 require "validate_meta"
 require 'globals'
 require 'extract_fn_proto'
+require("error_code")
 
 local Dictionary = require 'dictionary'
 local plstring = require 'pl.stringx'
@@ -51,10 +52,10 @@ function load_csv(
   local col_num_nil = {}
   local size_of_data_list = {}
    
-  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),"csv_file_path is not correct")
+  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.CSV_FILE_PATH_INCORRECT)
   assert( plpath.getsize(csv_file_path) ~= 0, "File should not be empty")
-  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), "Q_DATA_DIR is not pointing to correct directory")
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), "Q_META_DATA_DIR is not pointing to correct directory")
+  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_INCORRECT)
+  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
   validate_meta(M)
    
 
@@ -85,7 +86,7 @@ function load_csv(
                  
       if M[i].qtype == "SV" then
         dict_table[i] = {}
-        dict_table[i].dict = assert(Dictionary(M[i]), "Error while creating/accessing dictionary for M " )
+        dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].dict_name = M.dict
         dict_table[i].add_new_value = M.add or true   
       end 
@@ -128,7 +129,7 @@ function load_csv(
       end
       x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
-      assert(x_idx > 0 , "Index has to be valid")
+      assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
       -- print(row_idx, col_idx, ffi.string(buf))
       
       -- check if the column needs to be skipped while loading or not 
@@ -141,12 +142,12 @@ function load_csv(
             ffi.copy(buf, tostring(ret_number))
           end   
         elseif M[col_idx + 1].qtype == "SC" then 
-          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].size -1, " contains string greater than allowed size. Please correct data or metadata.")  
+          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].size -1, g_err.STRING_GREATER_THAN_SIZE )  
         end
              
         if ffi.string(buf) == "" then 
           -- nil values
-          assert( M[col_idx + 1].has_nulls == true, " Null value found in not null field " ) 
+          assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD ) 
           ffi.fill(is_null, 1,0)
           if col_num_nil[col_idx + 1] == nil then 
             col_num_nil[col_idx + 1] =  1 
@@ -176,7 +177,7 @@ function load_csv(
             error("Data type : " .. q_type .. " Not supported ")
           end
           
-          assert( status >= 0 , "Invalid data found")
+          assert( status >= 0 , g_err.INVALID_DATA_ERROR )
         end   
            
         column_list[col_idx+1]:put_chunk(1, cbuf, is_null)
