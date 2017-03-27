@@ -1,4 +1,4 @@
--- START: Following is standard stuff for creating a class 
+--== START: Following is standard stuff for creating a class 
 local Dictionary = {}
 Dictionary.__index = Dictionary
 
@@ -17,7 +17,7 @@ type = function( obj )
     end
     return otype
 end
--- STOP: Following is standard stuff for creating a class 
+--== STOP: Following is standard stuff for creating a class 
 
 function Dictionary.get_instance(
   dict_name
