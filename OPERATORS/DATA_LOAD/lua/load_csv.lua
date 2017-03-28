@@ -88,7 +88,8 @@ function load_csv(
       col_num_nil[i] = nil
                  
       if M[i].qtype == "SV" then
-        dict_table[i] = {}
+        -- initialization to {} is required, if not done then in the second statement dict_table[i].dict, dict_table[i] will be nil
+	dict_table[i] = {}
         dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].add_new_value = M.add
       end 
@@ -105,6 +106,8 @@ function load_csv(
    local x_idx = 0
    
    -- Take the max value from all the types
+   -- pllist is a penlight list class, here used to find maximum values among the list of values 
+   -- https://stevedonovan.github.io/Penlight/api/classes/pl.List.html
    local l = pllist()
    for i, value in pairs(g_sz) do
     l:append(value) 
