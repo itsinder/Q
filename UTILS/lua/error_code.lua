@@ -29,3 +29,20 @@ g_err.INVALID_IS_DICT_BOOL_VALUE = " - is_dict can contain true/false only"
 g_err.ADD_DICT_ERROR = " - add cannot be null for dictionary which has is_dict true"
 g_err.INVALID_ADD_BOOL_VALUE = " - add can contain true/false only"
 
+-- print error codes
+
+g_err.INPUT_NOT_TABLE = "Input is not table"
+g_err.INPUT_NOT_COLUMN_NUMBER = "Input is not Column or Number"
+g_err.INVALID_COLUMN_TYPE = "Invalid column field type"
+g_err.COLUMN_B1_ERROR = "Column cannot be B1"
+g_err.NULL_WIDTH_ERROR = "Width of Column cannot be Null"
+g_err.NULL_CTYPE_ERROR = "Ctype of Column cannot be Null"
+g_err.NULL_CTYPE_TO_TXT_ERROR = "Ctype to txt cannot be Null"
+g_err.NULL_DICTIONARY_ERROR = "Q_Dictionay cannot be Null"
+g_err.FILTER_NOT_TABLE_ERROR = "Filter must be a table"
+g_err.FILTER_TYPE_ERROR = "Filter type must be a Vector"
+g_err.FILTER_INVALID_FIELD_TYPE = "Field type of Filter should be B1"
+g_err.INVALID_LOWER_BOUND = "Lower Bound less than zero"
+g_err.UB_GREATER_THAN_LB = "Upper bound less than lower bound"
+g_err.INVALID_UPPER_BOUND = "Upper bound greater than maximum length"
+
