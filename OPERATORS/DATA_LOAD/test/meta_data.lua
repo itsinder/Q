@@ -48,6 +48,10 @@ return {
   { meta= "gm_nil_data_I4.lua" },
   { meta= "gm_nil_data_SV.lua" },
   { meta= "gm_nil_data_file_deletion.lua" },
+  { meta= "gm_metadata_dir_env_nil.lua"},
+  { meta= "gm_metadata_dir_env_invalid.lua"},
+  { meta= "gm_data_dir_env_nil.lua"},
+  { meta= "gm_data_dir_env_invalid.lua"} 
 }
 
 
