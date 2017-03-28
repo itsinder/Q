@@ -27,7 +27,7 @@ function handle_output(status, ret, v)
   if v.output_regex ~= nil then
     output = v.output_regex
   end
-  --print(v.meta)
+  print(v.meta)
   -- if status not true, then check output error with the expected error.
   -- if match then testcase success, else fail
   --print(ret)
@@ -44,14 +44,14 @@ function handle_output(status, ret, v)
      
     local error_msg = plstring.strip(output) -- check it can be used from utils.
     
-    print("actual error:"..err)
-    print("expected error:"..error_msg)
+    print("actual output:"..err)
+    print("expected output:"..error_msg)
     -- check this line can be skipped with the duplicate line below
     if error_msg == err then
       number_of_testcases_passed = number_of_testcases_passed + 1 
     else
       number_of_testcases_failed = number_of_testcases_failed + 1
-      print(v.data)
+      --print(v.data)
     end
   else
   -- if status is true, then check the type of output.
@@ -61,7 +61,7 @@ function handle_output(status, ret, v)
     else
       number_of_testcases_failed = number_of_testcases_failed + 1
     end
-    print("tested success for "..v.data)
+    
   end
 end
 
