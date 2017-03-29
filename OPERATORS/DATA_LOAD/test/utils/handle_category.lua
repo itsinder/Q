@@ -13,6 +13,11 @@ function print_result()
   print("-----------------------------------")
 end
 
+-- this function checks whether the output regex is present or not
+-- it also checks the status returned by load.
+-- for category 1 and category6, if status is false then only testcase will succeed
+-- for category 2, category 3, category 4 and category 5
+-- if status is true then only testcase will succeed
 
 function handle_output_regex(status, v, flag)
   local output
@@ -37,7 +42,7 @@ function handle_output_regex(status, v, flag)
   return output
 end
   
- 
+-- this function handle testcases where error messages are expected output 
 function handle_category1(status, ret, v)
   --print(ret)
   print(v.meta)
@@ -64,7 +69,8 @@ function handle_category1(status, ret, v)
 end
 
 
-
+-- this function handle testcases where table of columns are expected output 
+-- in this table, only one column is present
 function handle_category2(status, ret, v, output_category3)
   
   local output
@@ -128,7 +134,10 @@ function handle_category2(status, ret, v, output_category3)
   return 1
 end
 
-
+-- this function handle testcases where table of columns are expected output 
+-- in this table, multiple columns are present
+-- handle_category2 function is reused
+-- it is called in loop for every column
 function handle_category3(status, ret, v)
   
   print(v.meta)
@@ -156,7 +165,7 @@ function handle_category3(status, ret, v)
   number_of_testcases_passed = number_of_testcases_passed + 1
 end
 
-
+-- check the length of bin files in this testcase 
 function handle_category4(status, ret, v)
   print(v.meta)
   local output = handle_output_regex(status, v, false)
@@ -185,7 +194,8 @@ function handle_category4(status, ret, v)
   number_of_testcases_passed = number_of_testcases_passed + 1
 end
 
-
+-- check whether the null file is present if has_null is true and csv file has no null values
+-- if null file present , then load_csv api should delete that file
 function handle_category5(status, ret, v)
   print(v.meta)
   local output = handle_output_regex(status, v, false)
@@ -216,6 +226,7 @@ function handle_category5(status, ret, v)
   number_of_testcases_passed = number_of_testcases_passed + 1
 end
 
+-- in this testcase , invalid environment values are set
 function handle_input_category6(input_regex)
   
   if input_regex == 1 then _G["Q_DATA_DIR"] = nil end
@@ -225,9 +236,9 @@ function handle_input_category6(input_regex)
   
 end
 
+-- in this testcase , error messages are compared . 
+-- so handle_category1 function is reused
 function handle_category6(status, ret, v)
   --print(v.meta)
   handle_category1(status, ret, v)
-  
- 
 end
