@@ -1,7 +1,8 @@
 require "validate_meta"
 require 'globals'
 require 'extract_fn_proto'
-require("error_code")
+require 'error_code'
+
 
 local Dictionary = require 'dictionary'
 local plstring = require 'pl.stringx'
@@ -58,7 +59,7 @@ function load_csv(
   assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.CSV_FILE_PATH_INCORRECT)
   assert( plpath.getsize(csv_file_path) ~= 0, "File should not be empty")
   assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_INCORRECT)
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
+  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
   validate_meta(M)
    
 
@@ -151,8 +152,10 @@ function load_csv(
         end
              
         ffi.C.memset(cbuf, 0, size_of_data_list[col_idx + 1])
-        
-        if ffi.string(buf) == "" then 
+        --print(ffi.string(buf))
+        local str = plstring.strip(ffi.string(buf))
+        --if ffi.string(buf) == "" then 
+        if str == "" then 
           -- nil values
           assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD ) 
           ffi.fill(is_null, 1,0)
