@@ -111,9 +111,9 @@ end
 
 function Column:sz()
     --size of each entry
-    if self.nn_vec ~= nil then
-        assert(self.vec:sz() == self.nn_vec:sz(), "Null vector and vector should have the same length")
-    end
+    --if self.nn_vec ~= nil then
+    --    assert(self.vec:sz() == self.nn_vec:sz(), "Null vector and vector should have the same length")
+    --end
     return self.vec:sz()
 end
 
@@ -176,7 +176,7 @@ function Column:eov()
     end
 end
 
-g_valid_meta = {}
+--g_valid_meta = {}
 function Column:get_meta(index)
     assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]
