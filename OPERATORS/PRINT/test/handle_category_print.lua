@@ -10,8 +10,12 @@ local number_of_testcases_failed = 0
 
 local failed_testcases = {}
 
-function increment_failed(index, str)
-  print(str)
+function increment_failed(index, v, str)
+  print("testcase name :"..v.name)
+  print("Meta file: "..v.meta)
+  print("csv file: "..v.data)
+  
+  print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
 end
@@ -20,7 +24,7 @@ function handle_category1(index, v, csv_file,ret, status)
   print(v.name) 
   --print(status)
   if not status then
-    increment_failed(index, "testcase failed: in category1, output of print_csv is not success")
+    increment_failed(index, v, "testcase failed: in category1, output of print_csv is not success")
     return nil
   end
   
@@ -29,7 +33,7 @@ function handle_category1(index, v, csv_file,ret, status)
   --print(actual_file_content)
   --print(expected_file_content)
   if actual_file_content ~= expected_file_content then
-     increment_failed(index, "testcase failed: in category1, input and output csv file does not match")
+     increment_failed(index, v, "testcase failed: in category1, input and output csv file does not match")
      return nil
   end
   number_of_testcases_passed = number_of_testcases_passed + 1
@@ -39,7 +43,7 @@ function handle_category2(index, v, csv_file, ret, status)
   print(v.name) 
   
   if status or v.output_regex==nil then
-    increment_failed(index, "testcase failed: in category2, output of print_csv should be false")
+    increment_failed(index, v, "testcase failed: in category2, output of print_csv should be false")
     return nil
   end
   
@@ -51,7 +55,7 @@ function handle_category2(index, v, csv_file, ret, status)
   --print("Actual error:"..err)
   --print("Expected error:"..expected_output)
   if err ~= expected_output then
-     increment_failed(index, "testcase failed: in category2, actual and expected error message does  not match")
+     increment_failed(index, v, "testcase failed: in category2, actual and expected error message does  not match")
      return nil
   end
   number_of_testcases_passed = number_of_testcases_passed + 1
@@ -77,7 +81,7 @@ function handle_category4(index, v, csv_file, ret, status)
   print(v.name) 
   
   if status then
-    increment_failed(index, "testcase failed: in category4, output of print_csv should be false")
+    increment_failed(index, v, "testcase failed: in category4, output of print_csv should be false")
     return nil
   end
   
@@ -89,7 +93,7 @@ function handle_category4(index, v, csv_file, ret, status)
   --print("Expected error:"..expected_output)
   
   if err ~= expected_output then
-     increment_failed(index, "testcase failed: in category 4, actual and expected error does  not match")
+     increment_failed(index, v, "testcase failed: in category 4, actual and expected error does  not match")
      return nil
   end
    number_of_testcases_passed = number_of_testcases_passed + 1
@@ -99,7 +103,7 @@ function handle_category3(index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
-    increment_failed(index, "testcase failed: in category3, output of print_csv should be true")
+    increment_failed(index, v, "testcase failed: in category3, output of print_csv should be true")
     return nil
   end
   
@@ -108,7 +112,7 @@ function handle_category3(index, v, csv_file, ret, status)
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then
-     increment_failed(index, "testcase failed: in category 3, actual and expected output does  not match")
+     increment_failed(index, v, "testcase failed: in category 3, actual and expected output does  not match")
      return nil
   end
   
@@ -120,7 +124,7 @@ function handle_category5(index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
-    increment_failed(index, "testcase failed: in category5, output of print_csv should be true")
+    increment_failed(index, v, "testcase failed: in category5, output of print_csv should be true")
     return nil
   end
   
@@ -129,7 +133,7 @@ function handle_category5(index, v, csv_file, ret, status)
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then
-     increment_failed(index, "testcase failed: in category 5, actual and expected output does  not match")
+     increment_failed(index, v, "testcase failed: in category 5, actual and expected output does  not match")
      return nil
   end
   
@@ -157,7 +161,7 @@ function handle_category6(index, v, M)
   local actual_file_content1 = file.read("./bin/I4.bin")
   local actual_file_content2 = file.read(filename)
   if actual_file_content1 ~= actual_file_content2 then  
-    increment_failed(index, "testcase failed: in category 6, input and output bin files does  not match")
+    increment_failed(index, v, "testcase failed: in category 6, input and output bin files does  not match")
     return nil
   end
   
@@ -175,5 +179,8 @@ function print_testcases_result()
     print(v)
   end
   
+  print("Run bash test_print_csv.sh <testcase_number> for details\n\n")
+  
+   print("-----------------------------------")
   
 end

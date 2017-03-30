@@ -8,8 +8,12 @@ local number_of_testcases_failed = 0
 
 local failed_testcases = {}
 
-function increment_failed_load(index, str)
-  print(str)
+function increment_failed_load(index, v, str)
+  print("testcase name :"..v.name)
+  print("Meta file: "..v.meta)
+  print("csv file: "..v.data)
+  
+  print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
 end
@@ -23,6 +27,8 @@ function print_result()
   for k,v in ipairs(failed_testcases) do
     print(v)
   end
+  print("Run bash test_load_csv.sh <testcase_number> for details\n\n")
+     print("-----------------------------------")
 end
 
 -- this function checks whether the output regex is present or not
@@ -31,21 +37,20 @@ end
 -- for category 2, category 3, category 4 and category 5
 -- if status is true then only testcase will succeed
 
-function handle_output_regex(status, v, flag, category)
+function handle_output_regex(index, status, v, flag, category)
   local output
   if flag then status = status else status = not status end
   -- in category 1 , status = status , flag = true . if status is true, testcase should fail
   -- in category 2,  status = not status, flag = false, if status is false, testcase should fail
   if status then
-   increment_failed_load(index, "testcase failed : in"..category.." , incorrect status value")
+   increment_failed_load(index, v, "testcase failed : in"..category.." , incorrect status value")
    return nil
   end
   
   -- output_regex should be present in map_metadata, 
   -- else testcase should fail
   if v.output_regex == nil then
-    print("testcase failed , output regex nil")
-    number_of_testcases_failed = number_of_testcases_failed + 1
+    increment_failed_load(index, v, "testcase failed , output regex nil")
     return nil
   end  
   
@@ -57,7 +62,7 @@ end
 function handle_category1(index, status, ret, v)
   --print(ret)
   print(v.name)
-  local output = handle_output_regex(status, v, true, "category1")
+  local output = handle_output_regex(index, status, v, true, "category1")
   if output == nil then return end
   
   -- ret is of format <filepath>:<line_number>:<error_msg>
@@ -74,51 +79,52 @@ function handle_category1(index, status, ret, v)
   if error_msg == err then
     number_of_testcases_passed = number_of_testcases_passed + 1 
   else
-    increment_failed_load(index, "testcase category1 failed , actual and expected error message does not match")
+    increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
   end
 end
 
 
 -- this function handle testcases where table of columns are expected output 
 -- in this table, only one column is present
-function handle_category2(index, status, ret, v, output_category3)
+function handle_category2(index, status, ret, v, output_category3, v_category3)
   
   local output
 
   if v then
     print(v.name)
     if type(ret) ~= "table" then
-      increment_failed_load(index, "testcase failed: in category2 , output of load is not a table")
+      increment_failed_load(index, v, "testcase failed: in category2 , output of load is not a table")
       return nil
     end
-    output = handle_output_regex(status, v, false, "category2")
+    output = handle_output_regex(index, status, v, false, "category2")
     ret = ret[1]
   else
+    v = v_category3
     output = output_category3
   end
   
   if output == nil then return end
   
   if type(output) ~= "table" then
-    increment_failed_load(index, "testcase failed: in category2 , output regex is not a table")
+    increment_failed_load(index, v, "testcase failed: in category2 , output regex is not a table")
     return nil
   end
   
   if type(ret) ~= "Column" then
-    increment_failed_load(index, "testcase failed: in category2 , output of load is not a column")
+    increment_failed_load(index, v, "testcase failed: in category2 , output of load is not a column")
     return nil
   end
   --print(ret[1]:length())
   --print(#output)
   if ret:length() ~= #output then
-    increment_failed_load(index, "testcase failed: in category2 , length of Column and output regex does not match")
+    increment_failed_load(index, v, "testcase failed: in category2 , length of Column and output regex does not match")
     return nil
   end
   
   for i=1,#output do
     local status, result = pcall(convert_c_to_txt,ret,i)
     if status == false then
-      increment_failed_load(index, "testcase failed: in category2 "..result)
+      increment_failed_load(index, v, "testcase failed: in category2 "..result)
       return nil
     end
     local is_SC = ret:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
@@ -130,7 +136,7 @@ function handle_category2(index, status, ret, v, output_category3)
     end
         
     if result ~= output[i] then 
-      increment_failed_load(index, "testcase category2 failed , result="..result.." output["..i.."]="..output[i])
+      increment_failed_load(index, v, "testcase category2 failed , result="..result.." output["..i.."]="..output[i])
       return nil
     end
   end
@@ -145,22 +151,22 @@ end
 function handle_category3(index, status, ret, v)
   
   print(v.name)
-  local output = handle_output_regex(status, v, false, "category3")
+  local output = handle_output_regex(index, status, v, false, "category3")
   if output == nil then return end
   
   if type(output) ~= "table" and type(ret) ~= "table" then
-    increment_failed_load(index, "testcase failed: in category3 , output regex and output of load is not a table")
+    increment_failed_load(index, v, "testcase failed: in category3 , output regex and output of load is not a table")
     return nil
   end
   
   if #output ~= #ret then
-    increment_failed_load(index, "testcase failed: in category3 , output regex length is not equal to  output of load ")
+    increment_failed_load(index, v, "testcase failed: in category3 , output regex length is not equal to  output of load ")
     return nil
   end
   
   for i=1,#output do
     --print(type(ret[i]))
-    local ret = handle_category2(index, status, ret[i], nil, output[i])
+    local ret = handle_category2(index, status, ret[i], nil, output[i], v)
     if not ret then return nil end
     number_of_testcases_passed = number_of_testcases_passed - 1
   end
@@ -170,23 +176,23 @@ end
 -- check the length of bin files in this testcase 
 function handle_category4(index, status, ret, v)
   print(v.name)
-  local output = handle_output_regex(status, v, false, "category4")
+  local output = handle_output_regex(index, status, v, false, "category4")
       
   if output == nil then return end
   
   if type(output) ~= "table" and type(ret) ~= "table" then
-    increment_failed_load(index, "testcase failed: in category4 , output regex and output of load is not a table")
+    increment_failed_load(index, v, "testcase failed: in category4 , output regex and output of load is not a table")
     return nil
   end
   local sum = {}
   for i=1,#ret do
     if type(ret[i]) ~= "Column" then
-      increment_failed_load(index, "testcase failed: in category4 , output of load is not a column")
+      increment_failed_load(index, v, "testcase failed: in category4 , output of load is not a column")
       return nil
     end
     sum[i] = ret[i]:length() * ret[i]:sz()
     if sum[i] ~= output[i] then
-      increment_failed_load(index, "testcase failed: in category4 , size of each column not matching with output regex")
+      increment_failed_load(index, v, "testcase failed: in category4 , size of each column not matching with output regex")
       return nil
     end
   end
@@ -197,25 +203,25 @@ end
 -- if null file present , then load_csv api should delete that file
 function handle_category5(index, status, ret, v)
   print(v.name)
-  local output = handle_output_regex(status, v, false, "category5")
+  local output = handle_output_regex(index, status, v, false, "category5")
       
   if output == nil then return end
   
   if type(ret) ~= "table" then
-    increment_failed_load(index, "testcase failed: in category5 , output of load is not a table")
+    increment_failed_load(index, v, "testcase failed: in category5 , output of load is not a table")
     return nil
   end
   
   for i=1,#ret do
     if type(ret[i]) ~= "Column" then
-      increment_failed_load(index, "testcase failed: in category5 , output of load is not a column")
+      increment_failed_load(index, v, "testcase failed: in category5 , output of load is not a column")
       return nil
     end
   end
   
   local is_present = plfile.isfile(_G["Q_DATA_DIR"].."_col2_nn")
   if is_present then
-    increment_failed_load(index, "testcase failed: in category5 , null file still present in data directory")
+    increment_failed_load(index, v, "testcase failed: in category5 , null file still present in data directory")
     return nil
   end
 

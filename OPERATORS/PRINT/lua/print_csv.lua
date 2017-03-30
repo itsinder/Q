@@ -11,7 +11,7 @@ ffi.cdef
 ]]
 
 local rootdir = os.getenv("Q_SRC_ROOT")
-print("***********",rootdir)
+--print("***********",rootdir)
 -- TODO this should be done in single loop; need way to differentiate "gen" types/code in global
 local SC_to_txt = assert(extract_fn_proto(rootdir.."OPERATORS/PRINT/src/SC_to_txt.c"))
 local I1_to_txt = assert(extract_fn_proto(rootdir.."OPERATORS/PRINT/gen_src/_I1_to_txt.c"))

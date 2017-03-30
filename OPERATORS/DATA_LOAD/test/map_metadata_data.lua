@@ -8,6 +8,8 @@ return {
   -- error messages test cases
     { meta= "gm_double_quotes_mismatch.lua",data= "bad_quote_mismatch.csv", category= "category1", 
       output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch" },
+    { meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "invalid 2D data" },
     { meta= "gm_column_is_more.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
       output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more"  },
     { meta= "gm_column_is_less.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
@@ -31,7 +33,9 @@ return {
     { meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
       output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char" },
  
-
+    
+    { meta = "gm_valid_I1.lua", data = "I1_valid_no_last_line.csv", category= "category2",
+      output_regex = {-128,0,127,11}, name = "valid I1 with no last line"  },
     { meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category2",
       output_regex = {-128,0,127,11}, name = "valid_I1_type"  },
     { meta = "gm_valid_I2.lua", data = "I2_valid.csv", category= "category2",
