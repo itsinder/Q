@@ -6,14 +6,8 @@ package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/OPERATORS/PRINT/lua/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/Q2/code/?.lua"
 
+require 'handle_category_print'
 local file = require 'pl.file'
-local plstring = require 'pl.stringx'
-local Vector = require 'Vector'
-require 'load_csv'
-require 'print_csv'
-
-local number_of_testcases_passed = 0
-local number_of_testcases_failed = 0
 
 local test_input_dir = "./test_data/"
 local print_out_dir = "./test_print_data/print_tmp/"
@@ -29,97 +23,23 @@ dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
 
 
-
-function handle_category1(v, csv_file,ret, status)
-  print(v.meta) 
-  --print(status)
-  if not status then
-    print("in category1, status should be true")
-    number_of_testcases_failed = number_of_testcases_failed + 1
-    return nil
-  end
-  
-  local actual_file_content = file.read("test_data/"..v.data)
-  local expected_file_content = file.read(csv_file)
-  print(actual_file_content)
-  print(expected_file_content)
-  if actual_file_content ~= expected_file_content then
-     print("input and output csv file does not match")
-     number_of_testcases_failed = number_of_testcases_failed + 1
-     return nil
-  end
-  number_of_testcases_passed = number_of_testcases_passed + 1
-end
-
-function handle_category2(v, csv_file, ret, status)
-  print(v.name) 
-  
-  if status or v.output_regex==nil then
-    print("in category2, status should be false")
-    number_of_testcases_failed = number_of_testcases_failed + 1
-    return nil
-  end
-  
-  local actual_output = ret
-  local expected_output = v.output_regex
-  
-  local a, b, err = plstring.splitv(actual_output,':')
-  err = plstring.strip(err) 
-  print("Actual error:"..err)
-  print("Expected error:"..expected_output)
-  if err ~= expected_output then
-     print("actual and expected error does  not match")
-     number_of_testcases_failed = number_of_testcases_failed + 1
-     return nil
-  end
-  number_of_testcases_passed = number_of_testcases_passed + 1
-end
-
-
-function handle_input_category4()
-  local v1 = Vector{field_type='I4', field_size = 1/8,chunk_size = 8,
-    filename="./bin/I4.bin",  
-  }
-  return { where = v1 }
-end
-
-function handle_category4(v, csv_file, ret, status)
-  print(v.name) 
-  
-  if status then
-    print("in category4, status should be true")
-    number_of_testcases_failed = number_of_testcases_failed + 1
-    return nil
-  end
-  
-  local expected_output = v.output_regex
-   
-  local a, b, err = plstring.splitv(ret,':')
-  err = plstring.strip(err) 
-  print("Actual error:"..err)
-  print("Expected error:"..expected_output)
-  
-  if err ~= expected_output then
-     print("in category 4, actual and expected error does  not match")
-     number_of_testcases_failed = number_of_testcases_failed + 1
-     return nil
-  end
-   number_of_testcases_passed = number_of_testcases_passed + 1
-end
-
 local handle_function = {}
 -- input and output csv file match testcases
 handle_function["category1"] = handle_category1
--- filter testcases
+-- invalid filter testcases
 handle_function["category2"] = handle_category2
--- filter type is vector 
+-- filter type is vector I4 
 handle_function["category3"] = handle_category3
--- filter type is vector 
+-- filter type is vector B1 
 handle_function["category4"] = handle_category4
+-- valid range filter
+handle_function["category5"] = handle_category5
+-- csv consumable testcase
+handle_function["category6"] = handle_category6
 
 local handle_input_function = {}
 -- input and output csv file match testcases
---handle_input_function["category3"] = handle_input_category3
+handle_input_function["category3"] = handle_input_category3
 -- filter testcases
 handle_input_function["category4"] = handle_input_category4
 
@@ -127,32 +47,41 @@ handle_input_function["category4"] = handle_input_category4
 -- Test Case Start ---------------
 local T = dofile("map_metadata_data.lua")
 for i, v in ipairs(T) do
+  
+  if arg[1] and i ~= tonumber(arg[1]) then 
+    goto skip 
+  end
+  
   local M = dofile("./test_metadata/"..v.meta)
 
   local D = v.data
   local F = v.filter
   local csv_file = v.csv_file
   print("----------------------------------------")
+  if v.category == "category6" then
+    handle_category6(i, v, M)
+    goto skip
+  end
+  
   local status, load_ret = pcall(load_csv,"./test_data/"..D, M)
   if status then
+    -- if handle_input_function is present, then filter is taken from the output of this function
+    -- in other cases , filter object is taken from metadata
     if handle_input_function[v.category] then
       F = handle_input_function[v.category]()
     end
     local status, print_ret = pcall(print_csv, load_ret, F, print_out_dir..csv_file)
     if handle_function[v.category] then
-      handle_function[v.category](v,  print_out_dir..csv_file, print_ret, status)
+      handle_function[v.category](i, v,  print_out_dir..csv_file, print_ret, status)
     end
     
   else
-    
+    print(" testcase failed: load api failed in print testcase. this should not happen")
   end
+  ::skip::
 end
 
-print("-----------------------------------")
-print("No of successfull testcases ",number_of_testcases_passed)
-print("No of failure testcases     ",number_of_testcases_failed)
-print("-----------------------------------")
-
+print_testcases_result()
 
 
 --command cleanup for all testcases

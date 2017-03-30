@@ -18,5 +18,5 @@ cd $SCRIPT_PATH
 rm -rf test_print_data
 
 #run test_load_csv
-luajit test_print_csv.lua
+luajit test_print_csv.lua $1
 

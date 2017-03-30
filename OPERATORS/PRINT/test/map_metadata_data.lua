@@ -22,17 +22,30 @@ return {
     csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, name="Filter type string" },
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = 1 }, category = "category2",
     csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, name="Filter type number" },
-  { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = { 1 } }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, name="Filter type table"},
+  
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = { 1 } }, 
+    category = "category2", csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, 
+    name="Filter type table"},
+  
   { meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
     csv_file = "dummy/single_col.csv", output_regex = g_err.INVALID_FILE_PATH, name="Invalid file path"},
   
-  -- this testcase, bit filter passed is I4
-  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", category = "category4",
-    name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE },
+  -- this testcase, bit filter passed is of type I4
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
+    category = "category4", name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE },
   
-  --{ meta = "gm_csv_consumable.lua", csv_file = "print_out_cons.csv"}, 
-  { meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
+  -- this testcase, bit filter passed is of type B1
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
+    category = "category3", name="bit filter B1", output_regex = "1001\n1002\n1003\n"},
+  
+  { meta = "gm_csv_consumable.lua", csv_file = "print_out_cons.csv", category = "category6",
+    name = "csv consumable testcase"}, 
+  
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 3 }, category = "category5",
+    csv_file = "single_col.csv", output_regex = "1002\n1003\n", name = "range filter test"},
+  
+  
+  --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
 }
 
       
