@@ -47,4 +47,5 @@ g_err.FILTER_INVALID_FIELD_TYPE = "Field type of Filter should be B1"
 g_err.INVALID_LOWER_BOUND = "Lower Bound less than zero"
 g_err.UB_GREATER_THAN_LB = "Upper bound less than lower bound"
 g_err.INVALID_UPPER_BOUND = "Upper bound greater than maximum length"
+g_err.INVALID_FILE_PATH = "standard file is closed"
 

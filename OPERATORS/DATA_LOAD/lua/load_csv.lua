@@ -14,17 +14,17 @@ local ffi = require "ffi"
 ffi.cdef([[
 void *memset(void * str, int c, size_t n);
 ]])
-
-local get_cell = assert(extract_fn_proto("../src/get_cell.c"))
-local txt_to_SC = assert(extract_fn_proto("../src/txt_to_SC.c"))
-local txt_to_I1 = assert(extract_fn_proto("../gen_src/_txt_to_I1.c"))
-local txt_to_I2 = assert(extract_fn_proto("../gen_src/_txt_to_I2.c"))
-local txt_to_I4 = assert(extract_fn_proto("../gen_src/_txt_to_I4.c"))
-local txt_to_I8 = assert(extract_fn_proto("../gen_src/_txt_to_I8.c"))
-local txt_to_F4 = assert(extract_fn_proto("../gen_src/_txt_to_F4.c"))
-local txt_to_F8 = assert(extract_fn_proto("../gen_src/_txt_to_F8.c"))
-local f_mmap = assert(extract_fn_proto("../../../UTILS/src/f_mmap.c"))
-local f_munmap = assert(extract_fn_proto("../../../UTILS/src/f_munmap.c"))
+local rootdir = os.getenv("Q_SRC_ROOT")
+local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/get_cell.c"))
+local txt_to_SC = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/txt_to_SC.c"))
+local txt_to_I1 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I1.c"))
+local txt_to_I2 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I2.c"))
+local txt_to_I4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I4.c"))
+local txt_to_I8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I8.c"))
+local txt_to_F4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F4.c"))
+local txt_to_F8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F8.c"))
+local f_mmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_mmap.c"))
+local f_munmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_munmap.c"))
 
 ffi.cdef(get_cell)
 ffi.cdef(txt_to_SC)
@@ -133,6 +133,7 @@ function load_csv(
       else
          is_last_col = false;
       end
+     
       x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
       assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
