@@ -1,13 +1,13 @@
 return { 
-  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", category = "category1"},
-  { meta = "gm_multi_col.lua",  data ="multi_col_file.csv", csv_file = "multi_col.csv", category = "category1" },
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", category = "category1", name= "single_col" },
+  { meta = "gm_multi_col.lua",  data ="multi_col_file.csv", csv_file = "multi_col.csv", category = "category1", name= "multiple_col" },
   
-  { meta = "gm_print_I1.lua", data ="sample_I1.csv", csv_file = "print_I1.csv", category = "category1" },
-  { meta = "gm_print_I2.lua", data ="sample_I2.csv", csv_file = "print_I2.csv", category = "category1" },
-  { meta = "gm_print_I4.lua", data ="sample_I4.csv", csv_file = "print_I4.csv", category = "category1" },
-  { meta = "gm_print_I8.lua", data ="sample_I8.csv", csv_file = "print_I8.csv", category = "category1"},
-  { meta = "gm_print_SV.lua", data ="sample_varchar.csv", csv_file = "print_SV.csv", category = "category1" },
-  { meta = "gm_print_SC.lua", data ="fix_size_string.csv", csv_file = "print_SC.csv", category = "category1" },
+  { meta = "gm_print_I1.lua", data ="sample_I1.csv", csv_file = "print_I1.csv", category = "category1", name= "print_I1_type" },
+  { meta = "gm_print_I2.lua", data ="sample_I2.csv", csv_file = "print_I2.csv", category = "category1", name= "print_I2_type" },
+  { meta = "gm_print_I4.lua", data ="sample_I4.csv", csv_file = "print_I4.csv", category = "category1", name= "print_I4_type" },
+  { meta = "gm_print_I8.lua", data ="sample_I8.csv", csv_file = "print_I8.csv", category = "category1", name= "print_I8_type" },
+  { meta = "gm_print_SV.lua", data ="sample_varchar.csv", csv_file = "print_SV.csv", category = "category1", name= "print_SV_type" },
+  { meta = "gm_print_SC.lua", data ="fix_size_string.csv", csv_file = "print_SC.csv", category = "category1", name= "print_SC_type" },
   
   
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = "test", category = "category2",
@@ -32,7 +32,7 @@ return {
   
   -- this testcase, bit filter passed is of type I4
   { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
-    category = "category4", name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE },
+    category = "category4", name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE, name= "bit_filter_type_I4" },
   
   -- this testcase, bit filter passed is of type B1
   { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
