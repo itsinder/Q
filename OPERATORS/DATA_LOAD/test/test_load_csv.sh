@@ -22,5 +22,5 @@ bash test_print.sh
 cd $SCRIPT_PATH
 
 #run test_load_csv
-luajit test_load_csv.lua
+luajit test_load_csv.lua $1
 

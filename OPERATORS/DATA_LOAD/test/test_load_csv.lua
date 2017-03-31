@@ -39,6 +39,10 @@ handle_function["category6"] = handle_category6
 -- these testcases output error messages
 local T = dofile("map_metadata_data.lua")
 for i, v in ipairs(T) do
+  if arg[1] and i ~= tonumber(arg[1]) then 
+    goto skip 
+  end
+  
   _G["Q_DICTIONARIES"] = {}
   _G["Q_DATA_DIR"] = "./test_data/out/"
   _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
@@ -54,8 +58,9 @@ for i, v in ipairs(T) do
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
   if handle_function[v.category] then
     --print (handle_function[v.category])
-    handle_function[v.category](status, ret, v)
+    handle_function[v.category](i, status, ret, v)
   end
+  ::skip::
 end
 
 print_result()
