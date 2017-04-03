@@ -1,6 +1,6 @@
 #!/bin/bash
 set env -e 
-cd ../../
+cd ../../../
 export Q_SRC_ROOT="`pwd`"
 cd UTILS/build/
 luajit build.lua
