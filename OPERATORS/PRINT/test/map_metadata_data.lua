@@ -8,7 +8,8 @@ return {
   { meta = "gm_print_I8.lua", data ="sample_I8.csv", csv_file = "print_I8.csv", category = "category1", name= "print_I8_type" },
   { meta = "gm_print_SV.lua", data ="sample_varchar.csv", csv_file = "print_SV.csv", category = "category1", name= "print_SV_type" },
   { meta = "gm_print_SC.lua", data ="fix_size_string.csv", csv_file = "print_SC.csv", category = "category1", name= "print_SC_type" },
-  
+  { meta = "gm_print_null_I4.lua", data ="sample_null_I4.csv", csv_file = "print_null_I4.csv", category = "category1",
+    name= "print_I4_null" },
   
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = "test", category = "category2",
     csv_file = "single_col.csv", output_regex = g_err.FILTER_NOT_TABLE_ERROR, name="Filter_type_not_table" },
