@@ -59,7 +59,7 @@ return {
 
 
     { meta = "gm_valid_escape_char.lua", data = "valid_escape.csv", category= "category2",
-          output_regex = {"This is valid text containing \"quoted\" text and, comma ","ok","Some random valid string","valid data"},          name = "valid_escape_char" 
+          output_regex = {"This is valid text containing \"quoted\" text and , comma ","ok","Some random valid string","valid data"},          name = "valid_escape_char" 
     },
         
     { meta=  "gm_eoln.lua", data= "file_with_eol.csv", category= "category2",
@@ -87,15 +87,15 @@ return {
     { meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv", category= "category3",
       output_regex = {
                         {"hello","hii","","hey"},
-                        {92514.2,9459.1,nil,987548.5}
+                        {92514.2,9459.1,"",987548.5}
                      },
       name = "whole_row_null" 
     },
 
     { meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
       output_regex = {
-                        {111,111,333,nil},
-                        {222,222,nil,123}
+                        {111,111,333,"",444},
+                        {222,222,"",123,444}
                      },
       name = "nil_data_I4" 
     },

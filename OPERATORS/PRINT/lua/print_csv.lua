@@ -52,7 +52,7 @@ function print_csv(column_list, filter, opfile)
       assert(g_qtypes[column_list[i]:fldtype()]["ctype_to_txt"] ~= nil, g_err.NULL_CTYPE_TO_TXT_ERROR)
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
-        assert(_G["Q_DICTIONARIES"][column_list[i]:get_meta("dir")]~=nil,g_err.NULL_DICTIONARY_ERROR)
+        assert(column_list[i]:get_meta("dir")~=nil,g_err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
       local tmp = column_list[1]:length()
@@ -137,7 +137,8 @@ function print_csv(column_list, filter, opfile)
             -- get SV data type from dictionary
             if is_SV == true then 
               temp = tonumber(temp)
-              temp = _G["Q_DICTIONARIES"][col:get_meta("dir")]:get_string_by_index(temp)
+              local dictionary = col:get_meta("dir")
+              temp = dictionary:get_string_by_index(temp)
             end
           end
         end

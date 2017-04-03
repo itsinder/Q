@@ -93,6 +93,7 @@ function load_csv(
 	dict_table[i] = {}
         dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].add_new_value = M.add
+        column_list[i]:set_meta("dir",dict_table[i].dict)
       end 
     end    
   end

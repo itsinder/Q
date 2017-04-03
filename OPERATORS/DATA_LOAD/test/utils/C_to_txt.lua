@@ -57,9 +57,10 @@ function convert_c_to_txt(col, rowidx)
     -- get SV data type from dictionary
     if is_SV == true then 
       temp = tonumber(temp)
-      assert(_G["Q_DICTIONARIES"]~=nil,g_err.NULL_DICTIONARY_ERROR)
+      --assert(_G["Q_DICTIONARIES"]~=nil,g_err.NULL_DICTIONARY_ERROR)
       assert(col:get_meta("dir")~=nil,g_err.COLUMN_GET_META_ERROR)
-      temp = _G["Q_DICTIONARIES"][col:get_meta("dir")]:get_string_by_index(temp)
+      local dictionary = col:get_meta("dir")
+      temp = dictionary:get_string_by_index(temp)
     end
   end
   return temp

@@ -1,4 +1,4 @@
-
+local rootdir = os.getenv("Q_SRC_ROOT")
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 require 'C_to_txt'
@@ -16,6 +16,13 @@ function increment_failed_load(index, v, str)
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
+  
+  print("\n-----Meta Data File------\n")
+  os.execute("cat "..rootdir.."/OPERATORS/DATA_LOAD/test/test_metadata/"..v.meta)
+  print("\n\n-----CSV File-------\n")
+  os.execute("cat "..rootdir.."/OPERATORS/DATA_LOAD/test/test_data/"..v.data)
+  print("\n--------------------\n")
+  
 end
 
 function print_result() 
@@ -39,18 +46,20 @@ end
 
 function handle_output_regex(index, status, v, flag, category)
   local output
+  
   if flag then status = status else status = not status end
   -- in category 1 , status = status , flag = true . if status is true, testcase should fail
   -- in category 2,  status = not status, flag = false, if status is false, testcase should fail
   if status then
-   increment_failed_load(index, v, "testcase failed : in"..category.." , incorrect status value")
-   return nil
+    print("status is ",status) 
+    increment_failed_load(index, v, "testcase failed : in "..category.." , incorrect status value")
+    return nil
   end
   
   -- output_regex should be present in map_metadata, 
   -- else testcase should fail
   if v.output_regex == nil then
-    increment_failed_load(index, v, "testcase failed , output regex nil")
+    increment_failed_load(index, v, "testcase failed : in "..category.." , output regex nil")
     return nil
   end  
   
@@ -114,15 +123,17 @@ function handle_category2(index, status, ret, v, output_category3, v_category3)
     increment_failed_load(index, v, "testcase failed: in category2 , output of load is not a column")
     return nil
   end
-  --print(ret[1]:length())
+  --print(ret[1])
+  --print(ret:length())
   --print(#output)
   if ret:length() ~= #output then
     increment_failed_load(index, v, "testcase failed: in category2 , length of Column and output regex does not match")
     return nil
   end
   
-  for i=1,#output do
+  for i=1,ret:length() do
     local status, result = pcall(convert_c_to_txt,ret,i)
+    
     if status == false then
       increment_failed_load(index, v, "testcase failed: in category2 "..result)
       return nil
@@ -134,9 +145,11 @@ function handle_category2(index, status, ret, v, output_category3, v_category3)
     if not is_string then 
       result = tonumber(result)
     end
-        
+    --print(result, output[i])
+    -- if result is nil, then set to empty string
+    if result == nil then result = "" end
     if result ~= output[i] then 
-      increment_failed_load(index, v, "testcase category2 failed , result="..result.." output["..i.."]="..output[i])
+      increment_failed_load(index, v, "testcase category2 failed , \nresult="..result.." \noutput["..i.."]="..output[i].."\n")
       return nil
     end
   end

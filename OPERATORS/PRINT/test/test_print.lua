@@ -44,10 +44,11 @@ dictionary:add_with_condition("e5")
 -- I4.bin is a binary file contain 5 I4 digits - 1,2,3,4,5
 local column_I4 = Column{field_type="I4", field_size = 4,chunk_size = 5,filename="./bin/I4.bin"}
 local column_SV = Column{field_type="SV", field_size = 4,chunk_size = 5, filename="./bin/I4.bin"}
-column_SV:set_meta("dir","D1")
+column_SV:set_meta("dir", dictionary)
 
 local arr = {column_I4, column_SV}  
 local status,err = pcall(print_csv, arr)
+print(err)
 assert(status == true,"Error in print_csv")
 log.info("All is well")
 

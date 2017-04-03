@@ -1,4 +1,4 @@
-
+local rootdir = os.getenv("Q_SRC_ROOT")
 local plstring = require 'pl.stringx'
 local Vector = require 'Vector'
 local Column = require 'Column'
@@ -18,12 +18,19 @@ function increment_failed(index, v, str)
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
+  
+  print("\n-----Meta Data File------\n")
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_metadata/"..v.meta)
+  print("\n\n-----CSV File-------\n")
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_data/"..v.data)
+  print("\n--------------------\n")
 end
 
 function handle_category1(index, v, csv_file,ret, status)
   print(v.name) 
   --print(status)
   if not status then
+    print(ret)
     increment_failed(index, v, "testcase failed: in category1, output of print_csv is not success")
     return nil
   end
@@ -103,6 +110,7 @@ function handle_category3(index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
+    print(ret)
     increment_failed(index, v, "testcase failed: in category3, output of print_csv should be true")
     return nil
   end
@@ -124,6 +132,7 @@ function handle_category5(index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
+    print(ret)
     increment_failed(index, v, "testcase failed: in category5, output of print_csv should be true")
     return nil
   end
