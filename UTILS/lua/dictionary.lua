@@ -27,21 +27,21 @@ function Dictionary.get_instance(dict_metadata)
  
   self.dict_name = dict_metadata.dict
   -- default value is false, dictionary does not exist.. create one
-  if dict_metadata.dict_exists then
-    self.dict_exists = dict_metadata.dict_exists
+  if dict_metadata.is_dict then
+    self.is_dict = dict_metadata.is_dict
   else
-    self.dict_exists = false
+    self.is_dict = false
   end
   
   -- default value is true, add null values  
-  if dict_metadata.dict_exists then 
+  if dict_metadata.is_dict then 
     self.add_new_value = dict_metadata.add
   else
     self.add_new_value = true
   end
    
   local dict;
-  if self.dict_exists == true then
+  if self.is_dict == true then
     local dict = _G["Q_DICTIONARIES"][self.dict_name] 
     assert(dict ~= nil, "Dictionary does not exist. Aborting the operation")
     --dictionary found in globals, return that dictionary 
