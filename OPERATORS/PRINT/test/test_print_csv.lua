@@ -28,9 +28,9 @@ local handle_function = {}
 handle_function["category1"] = handle_category1
 -- invalid filter testcases
 handle_function["category2"] = handle_category2
--- filter type is vector I4 
-handle_function["category3"] = handle_category3
 -- filter type is vector B1 
+handle_function["category3"] = handle_category3
+-- filter type is vector I4
 handle_function["category4"] = handle_category4
 -- valid range filter
 handle_function["category5"] = handle_category5
@@ -38,9 +38,9 @@ handle_function["category5"] = handle_category5
 handle_function["category6"] = handle_category6
 
 local handle_input_function = {}
--- input and output csv file match testcases
+-- input vector returned is B1
 handle_input_function["category3"] = handle_input_category3
--- filter testcases
+-- input vector retured is I4
 handle_input_function["category4"] = handle_input_category4
 
 
