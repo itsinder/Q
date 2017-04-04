@@ -9,14 +9,15 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
+local rootdir = os.getenv("Q_SRC_ROOT")
 -- TODO this should be done in single loop; need way to differentiate "gen" types/code in global
-local SC_to_txt = assert(extract_fn_proto("../../PRINT/src/SC_to_txt.c"))
-local I1_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_I1_to_txt.c"))
-local I2_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_I2_to_txt.c"))
-local I4_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_I4_to_txt.c"))
-local I8_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_I8_to_txt.c"))
-local F4_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_F4_to_txt.c"))
-local F8_to_txt = assert(extract_fn_proto("../../PRINT/gen_src/_F8_to_txt.c"))
+local SC_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/src/SC_to_txt.c"))
+local I1_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I1_to_txt.c"))
+local I2_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I2_to_txt.c"))
+local I4_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I4_to_txt.c"))
+local I8_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I8_to_txt.c"))
+local F4_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_F4_to_txt.c"))
+local F8_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_F8_to_txt.c"))
 
 ffi.cdef(SC_to_txt)
 ffi.cdef(I1_to_txt)
