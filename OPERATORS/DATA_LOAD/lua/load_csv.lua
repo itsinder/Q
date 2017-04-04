@@ -111,13 +111,13 @@ function load_csv(
    -- pllist is a penlight list class, here used to find maximum values among the list of values 
    -- https://stevedonovan.github.io/Penlight/api/classes/pl.List.html
    local l = pllist()
-   for i, value in pairs(g_sz) do
+   for i, value in pairs(g_width) do
     l:append(value) 
    end
-   l:append(2*g_max_size_SC)
+   l:append(2*g_max_width_SC)
    local min, cbuf_sz = l:minmax()  -- max value will be cbuff_sz, since c conversion will be to either one of the types contained in g_sz
    
-   l:append(2*g_max_size_SV)
+   l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
    local buf = ffi.gc(c.malloc(buf_sz), c.free)

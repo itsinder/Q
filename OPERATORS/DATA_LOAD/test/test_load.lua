@@ -6,6 +6,7 @@ package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
 
 local log = require 'log'
 local plpath = require 'pl.path'
+local dir = require 'pl.dir'
 require 'utils'
 require 'compile_so'
 
