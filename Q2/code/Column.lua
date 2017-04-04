@@ -175,14 +175,24 @@ function Column:eov()
 end
 
 --g_valid_meta = {}
+-- TODO NOTE Currently we allow any meta data to be set (think about it)
 function Column:get_meta(index)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
+    -- assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]
 end
 
 function Column:set_meta(index, val)
-    assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
+    -- assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     self.meta[index] = val
+end
+
+-- TODO Serious - Do not perform this operation when multiple people share a column
+-- Make it ref counted in future
+function Column:delete_nn()
+    if self.nn_vec ~= nil then
+        self.nn_vec:delete()
+        self.nn_vec = nil
+    end
 end
 
 return Column

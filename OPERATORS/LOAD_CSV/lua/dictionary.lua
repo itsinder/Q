@@ -1,4 +1,4 @@
--- START: Following is standard stuff for creating a class 
+--== START: Following is standard stuff for creating a class 
 local Dictionary = {}
 Dictionary.__index = Dictionary
 
@@ -17,12 +17,14 @@ type = function( obj )
     end
     return otype
 end
--- STOP: Following is standard stuff for creating a class 
+--== STOP: Following is standard stuff for creating a class 
 
-function Dictionary.get_instance(dict_name)
+function Dictionary.get_instance(
+  dict_name
+  )
     local dict = _G["Q_DICTIONARIES"][dict_name]
     if not dict then
-        local dict = setmetatable({}, Dictionary)
+        dict = setmetatable({}, Dictionary)
         _G["Q_DICTIONARIES"][dict_name] = dict
         -- Create a forward map and a reverse map
         dict.string_to_index = {}

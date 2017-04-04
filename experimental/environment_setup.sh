@@ -60,6 +60,9 @@ sudo luarocks install luasocket 3.0-rc1
 # install luaunit
 sudo luarocks install luaunit 3.2.1-1
 
+# install luaposix
+sudo luarocks install luaposix
+
 #install penlight 
 sudo luarocks install penlight 1.4.1-1
 
