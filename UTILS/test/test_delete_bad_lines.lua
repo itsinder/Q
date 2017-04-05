@@ -12,4 +12,9 @@ local regexs = {
 }
 delete_bad_lines("dbl_in1.csv", "_dbl_out1.csv", regexs)
 assert(diff("dbl_out1.csv", "_dbl_out1.csv"), "Test failed")
+--===========================
+regexs = { '[0-9\-a-f]*' }
+delete_bad_lines("dbl_in2.csv", "_dbl_out2.csv", regexs)
+assert(diff("dbl_out2.csv", "_dbl_out2.csv"), "Test failed")
+--===========================
 print("Test passed")
