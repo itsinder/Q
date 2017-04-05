@@ -53,13 +53,13 @@ function validate_meta(
       
       assert(fld_M.dict, col .. "Must specify dictionary for SV")
 
-      assert(fld_M.dict_exists == true or fld_M.dict_exists == false, 
-      col .. "dict_exists must be true or false")
+      assert(fld_M.is_dict == true or fld_M.is_dict == false, 
+      col .. "is_dict must be true or false")
 
-      if fld_M.dict_exists == true then 
+      if fld_M.is_dict == true then 
         -- TODO Verify that dictionary exists
         assert(fld_M.add == true or fld_M.add == false, 
-        col .. ":add must be true or false if dict_exists = true for SV")
+        col .. ":add must be true or false if is_dict = true for SV")
       else
         fld_M.add = true
       end
