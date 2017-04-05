@@ -13,3 +13,16 @@ Luajit allows us to cast memory as any data type it knows about (including struc
 
 Conversion rules: http://luajit.org/ext_ffi_semantics.html (Conversions from Lua
 objects to C types) 
+
+--============ When to use C functions and when not to 
+ffi.copy(dst, src, len)
+ffi.copy(dst, str)
+
+Copies the data pointed to by src to dst. dst is converted to a "void *" and src is converted to a "const void *".
+
+In the first syntax, len gives the number of bytes to copy. Caveat: if src is a Lua string, then len must not exceed #src+1.
+
+In the second syntax, the source of the copy must be a Lua string. All bytes of the string plus a zero-terminator are copied to dst (i.e. #src+1 bytes).
+
+Performance notice: ffi.copy() may be used as a faster (inlinable) replacement for the C library functions memcpy(), strcpy() and strncpy().
+ 
