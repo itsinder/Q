@@ -107,7 +107,7 @@ function load_csv(
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   global_settings -- TODO unused for now
-  )
+)
     local plpath = require 'pl.path'
     assert(plpath.isdir(_G["Q_DATA_DIR"]))
     assert(plpath.isdir(_G["Q_META_DATA_DIR"]))
@@ -235,7 +235,7 @@ function load_csv(
       return cols_to_return
 
 end
-_G["Q_DATA_DIR"] = "./"
-_G["Q_META_DATA_DIR"] = "./"
-_G["Q_DICTIONARIES"] = {}
-load_csv( "../test/gm3d1.csv" , dofile("../test/gm3.lua"), nil)
+--_G["Q_DATA_DIR"] = "./"
+--_G["Q_META_DATA_DIR"] = "./"
+--_G["Q_DICTIONARIES"] = {}
+--load_csv( "../test/gm3d1.csv" , dofile("../test/gm3.lua"), nil)
