@@ -13,6 +13,7 @@ function delete_bad_lines(
     assert(type(regex_list) == "table")
 
     local num_cols = #regex_list
+    local num_bad_lines = 0
 
     for line in ifp:lines() do 
       local entry = parse_csv_line(line, ',')
@@ -38,7 +39,10 @@ function delete_bad_lines(
       end
       if skip == false then
         ofp:write(line, "\n") 
+      else
+        num_bad_lines = num_bad_lines + 1
       end 
     end 
     ofp:close()
+    print("Number of bad lines deleted = ", num_bad_lines)
 end
