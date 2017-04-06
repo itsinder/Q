@@ -19,18 +19,6 @@ ${fn}(
 
 #include "_${fn}.h"
 
-static void
-__operation(
-      ${in1type} a,
-      ${in2type} b, 
-      uint64_t *ptr_c
-      )
-      {
-      uint64_t  c;
-      ${c_code_for_operator}
-      *ptr_c = c;
-      }
-
 int
 ${fn}(  
       const ${in1type} * restrict in1,  
@@ -40,22 +28,41 @@ ${fn}(
       )
 
 { 
+/*
+Each of the operators 
+< (less than), 
+> (greater than), 
+<= (less than or equal to), 
+>= (greater than or equal to) 
+shall yield 1 if the specified relation is true and 0 if it is false. 
+The result has type int.
+
+The == (equal to) and != (not equal to) operators are analogous to the
+relational operators except for their lower precedence
+*/
+
   int status = 0;
+  /* calculate number of 64 element sized chunks to process */
+  uint64_t nRprime = nR / 64; 
+  int num_last_block = 64;
+  if ( ( nRprime * 64 ) != nR ) { 
+    num_last_block = nR - ( nRprime * 64);
+    nRprime++; 
+  }
 #pragma omp parallel for 
-  /* TODO: Convince yourself that work is parcelled out on 
-  64 element boundaries */
-  for ( uint64_t i = 0; i < nR; i++ ) {  
-    int bitidx = i % 64;
-    ${in1type} inv1 = in1[i]; 
-    ${in2type} inv2 = in2[i]; 
-    int obval = inv1 ${comparison} inv2;
-    /* TODO: Avoid the if condition */
-    if ( obval == 0 ) { 
-      mcr_set_bit(out[(i/64)], bitidx);
+  for ( uint64_t oidx = 0; oidx < nRprime; oidx++ ) {  
+    uint64_t oval = 0;
+    uint64_t iidx = oidx * 64;
+    int ub = 64;
+    if ( oidx == (nRprime-1) ) { ub = num_last_block; }
+    for ( int bidx = 0; bidx < ub; bidx++, iidx++ ) { 
+      ${in1type} inv1 = in1[iidx]; 
+      ${in2type} inv2 = in2[iidx]; 
+      int obval = inv1 ${comparison} inv2;
+      /* TODO: Avoid the if condition */
+      if ( obval == 1 ) { mcr_set_bit(oval, bidx); }
     }
-    else {
-      mcr_unset_bit(out[(i/64)], bitidx);
-    }
+    out[oidx] = oval;
   }
   return status;
 }
