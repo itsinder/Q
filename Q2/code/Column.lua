@@ -46,8 +46,8 @@ setmetatable(Column, {
     })
 
 function Column.destructor(data)
+    -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Column) then
-        print "gc is called directly"
         C.free(data.destructor_ptr)
     else
         -- local tmp_slf = DestructorLookup[data]
@@ -109,9 +109,9 @@ end
 
 function Column:sz()
     --size of each entry
-    if self.nn_vec ~= nil then
-        assert(self.vec:sz() == self.nn_vec:sz(), "Null vector and vector should have the same length")
-    end
+    --if self.nn_vec ~= nil then
+    --    assert(self.vec:sz() == self.nn_vec:sz(), "Null vector and vector should have the same length")
+    --end
     return self.vec:sz()
 end
 
@@ -174,8 +174,8 @@ function Column:eov()
     end
 end
 
-g_valid_meta = {}
--- TODO NOTE Currently we allow any metd data to be set (think about it)
+--g_valid_meta = {}
+-- TODO NOTE Currently we allow any meta data to be set (think about it)
 function Column:get_meta(index)
     -- assert(g_valid_meta[index] ~= nil, "Invalid key given: ".. index)
     return self.meta[index]

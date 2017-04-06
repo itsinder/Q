@@ -106,6 +106,7 @@ setmetatable(Vector, {
     })
 
 function Vector.destructor(data)
+    -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
         C.free(data.destructor_ptr)
     else

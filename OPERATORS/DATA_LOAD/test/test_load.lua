@@ -6,6 +6,7 @@ package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
 
 local log = require 'log'
 local plpath = require 'pl.path'
+local dir = require 'pl.dir'
 require 'utils'
 require 'compile_so'
 
@@ -45,6 +46,8 @@ preprocess_bool_values(M, "has_nulls", "dict_exists", "add")
 _G["Q_DATA_DIR"] = "./out/"     
 _G["Q_META_DATA_DIR"] = "./metadata/"
 _G["Q_DICTIONARIES"] = {}
+dir.makepath(_G["Q_DATA_DIR"])
+dir.makepath(_G["Q_META_DATA_DIR"])
 
 -- call load function to load the data
 local status, ret = pcall(load_csv, csv_file_path, M )
