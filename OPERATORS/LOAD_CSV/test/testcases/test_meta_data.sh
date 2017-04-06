@@ -8,7 +8,11 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
+
 cd $SCRIPT_PATH/
+
+rm -rf metadata/
+mkdir metadata
 
 luajit test_meta_data.lua $1
 
