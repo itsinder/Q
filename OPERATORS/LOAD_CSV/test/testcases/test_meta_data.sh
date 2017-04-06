@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 
-export Q_SRC_ROOT=../../../
+export Q_SRC_ROOT=../../../../
 
 # get the current directory in $SCRIPT_PATH
 SCRIPT=$(readlink -f "$0")
