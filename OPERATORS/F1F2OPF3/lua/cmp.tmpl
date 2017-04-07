@@ -41,28 +41,40 @@ The == (equal to) and != (not equal to) operators are analogous to the
 relational operators except for their lower precedence
 */
 
+#define VECTOR_LENGTH 4096
   int status = 0;
-  /* calculate number of 64 element sized chunks to process */
-  uint64_t nRprime = nR / 64; 
-  int num_last_block = 64;
-  if ( ( nRprime * 64 ) != nR ) { 
-    num_last_block = nR - ( nRprime * 64);
-    nRprime++; 
+  /* calculate number of VECTOR_LENGTH element sized chunks to process */
+  uint64_t num_blocks = nR / VECTOR_LENGTH; 
+  int num_last_block = VECTOR_LENGTH;
+  if ( ( num_blocks * VECTOR_LENGTH ) != nR ) { 
+    num_last_block = nR - ( num_blocks * VECTOR_LENGTH);
+    num_blocks++; 
   }
 #pragma omp parallel for 
-  for ( uint64_t oidx = 0; oidx < nRprime; oidx++ ) {  
+  for ( uint64_t blk_idx = 0; blk_idx < num_blocks; blk_idx++ ) {  
+    uint64_t lb = blk_idx * VECTOR_LENGTH;;
+    uint64_t ub = lb + VECTOR_LENGTH;;
+    if ( blk_idx == (num_blocks-1) ) { ub = lb + num_last_block; }
+    int bit_idx = 0;
+    uint64_t out_idx = lb / 64;
     uint64_t oval = 0;
-    uint64_t iidx = oidx * 64;
-    int ub = 64;
-    if ( oidx == (nRprime-1) ) { ub = num_last_block; }
-    for ( int bidx = 0; bidx < ub; bidx++, iidx++ ) { 
+    for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
       ${in1type} inv1 = in1[iidx]; 
       ${in2type} inv2 = in2[iidx]; 
-      int obval = inv1 ${comparison} inv2;
+      int rslt = (inv1 ${comparison} inv2);
       /* TODO: Avoid the if condition */
-      if ( obval == 1 ) { mcr_set_bit(oval, bidx); }
+      if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
+      bit_idx++;
+      if ( bit_idx == 64 ) {
+        bit_idx = 0;
+        out[out_idx] = oval;
+        out_idx++;
+        oval = 0;
+      }
     }
-    out[oidx] = oval;
+    if ( bit_idx != 0 ) { 
+      out[out_idx] = oval;
+    }
   }
   return status;
 }
