@@ -21,6 +21,13 @@ require("error_code")
 return { 
   -- error messages test cases
   -- falls in category 1
+    
+    { meta= "gm_double_quotes_mismatch.lua",data= "dummy.csv", category= "category1", 
+      output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found" },
+    
+    { meta= "gm_double_quotes_mismatch.lua",data= "file_empty.csv", category= "category1", 
+      output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty" },
+    
     { meta= "gm_double_quotes_mismatch.lua",data= "bad_quote_mismatch.csv", category= "category1", 
       output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch" },
     { meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
@@ -138,24 +145,29 @@ return {
     },
     
     -- enviornment variable metadata dir null
-    { meta= "gm_metadata_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 1,
-      output_regex=g_err.Q_DATA_DIR_INCORRECT, name = "metadata_dir_env_nil" 
+    { meta= "gm_metadata_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 3,
+      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_nil" 
     },
     
     
     -- enviornment variable metadata dir invalid
-    { meta= "gm_metadata_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 2,
-      output_regex=g_err.Q_DATA_DIR_INCORRECT, name = "metadata_dir_env_invalid" 
+    { meta= "gm_metadata_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 4,
+      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_invalid" 
     },
     
     -- enviornment variable data dir null
-    { meta= "gm_data_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 3,
-      output_regex=g_err.Q_META_DATA_DIR_INCORRECT, name = "data_dir_env_nil" 
+    { meta= "gm_data_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 1,
+      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_nil" 
     },
     
     -- enviornment variable data dir invalid
-    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 4,
-      output_regex=g_err.Q_META_DATA_DIR_INCORRECT, name = "data_dir_env_invalid" 
+    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 2,
+      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_invalid" 
+    }, 
+    
+    -- enviornment variable data dir invalid
+    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 5,
+      output_regex=g_err.NULL_DICTIONARY_ERROR, name = "G_Dictionary NULL testcase" 
     }, 
     
     -- check the size of output binary file is correct, 

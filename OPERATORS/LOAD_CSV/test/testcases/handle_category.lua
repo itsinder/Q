@@ -87,7 +87,7 @@ function handle_category1(index, status, ret, v)
     number_of_testcases_passed = number_of_testcases_passed + 1 
   else
     increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
-    print("actual output:"..ret)
+    print("actual output:"..err)
     print("expected output:"..error_msg)
   
   end
@@ -251,6 +251,7 @@ function handle_input_category6(input_regex)
   if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
   if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
   if input_regex == 4 then _G["Q_META_DATA_DIR"] = "./invalid_dir" end
+  if input_regex == 5 then _G["Q_DICTIONARIES"] = nil end
   
 end
 
