@@ -35,7 +35,7 @@ return require 'code_gen' {
 #include <inttypes.h>
 
 extern void
-qsort_${SORT_ORDER}_${FLDTYPE} (
+qsort_${SORT_ORDER}_${QTYPE} (
 	    void *const pbase, 
 	    ssize_t total_elems
 	    );
@@ -118,7 +118,7 @@ typedef struct
 
 // START FUNC DECL
 void
-${NAME} ( 
+qsort_${SORT_ORDER}_${QTYPE} (
 	    void *const pbase, 
 	    ssize_t total_elems
 	    )

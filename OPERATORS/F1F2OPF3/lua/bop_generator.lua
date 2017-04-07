@@ -1,4 +1,6 @@
-  package.path = package.path.. ";../../../UTILS/lua/?.lua"
+  local rootdir = os.getenv("Q_SRC_ROOT")
+  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
+  package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
   require("aux")
   require("gen_doth")
   require("gen_dotc")
