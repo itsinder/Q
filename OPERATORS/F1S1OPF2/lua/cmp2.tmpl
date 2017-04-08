@@ -7,7 +7,8 @@ return require 'code_gen' {
 extern int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval,
+      ${fldtype} sval1,
+      ${fldtype} sval2,
       uint64_t nR,  
       uint64_t *restrict out 
       ) 
@@ -18,7 +19,8 @@ ${fn}(
 int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval,
+      ${fldtype} sval1,
+      ${fldtype} sval2,
       uint64_t nR,  
       uint64_t * restrict out 
       )
@@ -42,7 +44,7 @@ ${fn}(
     uint64_t oval = 0;
     for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
       ${fldtype} inval = in[iidx]; 
-      int rslt = (inval ${comparison} sval);
+      int rslt = (inval ${comp1} sval1) ${combiner} (inval ${comp2} sval2) ;
       /* TODO: Avoid the if condition */
       if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
       bit_idx++;

@@ -28,20 +28,23 @@
     print(base_name)
     local filename = base_name .. "_specialize.lua"
     local str = 'require \'' .. base_name .. '_specialize\''
-    assert(plpath.isfile(filename))
+    assert(plpath.isfile(filename), "File not found " .. filename)
     loadstring(str)()
     local stat_chk = base_name .. '_specialize'
     local stat_chk_fn = assert(_G[stat_chk], 
     "function not found " .. stat_chk)
     for i, fldtype in ipairs(qtypes) do 
-      local status, subs, tmpl = pcall(
-      stat_chk_fn, in1type, in2type, optargs)
+      local status, subs, tmpl = pcall( stat_chk_fn, fldtype)
       if ( status ) then 
         -- TODO Improve following.
         local T = dofile(tmpl)
         T.fn         = subs.fn
         T.fldtype    = subs.fldtype
         T.c_code_for_operator = subs.c_code_for_operator
+        T.comparison = subs.comparison
+        T.comp1 = subs.comp1
+        T.comp2 = subs.comp2
+        T.combiner = subs.combiner
         gen_doth(T.fn, T, incdir)
         gen_dotc(T.fn, T, srcdir)
         print("Produced ", T.fn)

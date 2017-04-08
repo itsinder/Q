@@ -1,10 +1,18 @@
 return { 
-  "svadd",
-  "svsub",
-  "svmul",
-  "svdiv",
-  "svrem",
-  "svand", -- & 
-  "svor", -- |
-  "svxor", -- ^
+   "vsadd", 
+   "vssub", 
+   "vsmul", 
+   "vsdiv", 
+   "vsrem", 
+   "vsand", 
+   "vsor",  
+   "vsxor", 
+   "vseq",  
+   "vsneq",  
+   "vsgt",  
+   "vslt",  
+   "vsgeq",  
+   "vsleq",  
+   "vsltorgt",  
+   "vsleqorgeq",  
 }

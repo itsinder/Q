@@ -11,8 +11,8 @@ extern int
 ${fn}(  
       const ${fldtype} * restrict in,  
       uint64_t nR,
-      $fldtype sval,
-      const ${fldtype} * out
+      ${fldtype} sval,
+      ${fldtype} * out
       ) 
 ;
 
@@ -36,8 +36,8 @@ int
 ${fn}(  
       const ${fldtype} * restrict in,
       uint64_t nR,  
-      $fldtype sval,
-      const ${fldtype} * out
+      ${fldtype} sval,
+      ${fldtype} * out
       )
 
 {
@@ -46,11 +46,11 @@ ${fn}(
   ${fldtype} outv; 
 
 #pragma omp parallel for 
-  for ( int i = 0; i < nR; i++ ) { 
+  for ( uint64_t i = 0; i < nR; i++ ) { 
     inv = in[i];
-    outv = __operation(inv, sv);
+    __operation(inv, sval, &outv);
+    out[i] = outv;
   } 
-BYE:
   return status;
 }
    ]]
