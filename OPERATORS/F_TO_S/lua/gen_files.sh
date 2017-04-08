@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e 
-bash clean.sh
 rm -f ../gen_src/*
 rm -f ../gen_inc/*
-bash gen_specialize.sh
 lua generator.lua operators.lua
 
 lua _qfns_f_to_s.lua # test syntax of generated lua functions

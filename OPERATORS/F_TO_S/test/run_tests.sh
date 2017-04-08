@@ -3,8 +3,10 @@ set -e
 cd ../lua/
 bash gen_files.sh
 cd - 
-gcc -g -std=gnu99 sum.c -I../gen_inc -I../../../UTILS/inc \
+gcc -g -std=gnu99 test_f_to_s.c -I../gen_inc -I../../../UTILS/inc \
   ../gen_src/_sum_F8.c \
+  ../gen_src/_min_I4.c \
+  ../gen_src/_max_I1.c \
   ../gen_src/_sum_sqr_I8.c \
   -o a.out
 valgrind ./a.out 2>_x

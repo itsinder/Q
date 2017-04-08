@@ -12,6 +12,7 @@
   local operator_file = assert(arg[1])
   assert(plfile.access_time(operator_file))
   local T = dofile(operator_file)
+  
 
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 

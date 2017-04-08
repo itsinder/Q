@@ -11,14 +11,14 @@ function min_specialize(
       subs.fn = "min_" .. intype 
       subs.intype = g_qtypes[intype].ctype
       subs.disp_intype = intype
-      if ( ( intype == "I1" ) or ( intype == "I2" ) or 
-           ( intype == "I4" ) or ( intype == "I8" ) ) then
-        subs.reduce_intype = "uint64_t" 
-        subs.init_val = g_constants.INIT_VAL_FOR_INT_MIN
-      else
-        subs.init_val = g_constants.INIT_VAL_FOR_FLT_MIN
-        subs.reduce_intype = "double" 
-      end
+      subs.reduce_intype = subs.intype
+      if ( intype == "I1" ) then subs.init_val = "INT8_MAX" end
+      if ( intype == "I2" ) then subs.init_val = "INT16_MAX" end
+      if ( intype == "I4" ) then subs.init_val = "INT32_MAX" end
+      if ( intype == "I8" ) then subs.init_val = "INT64_MAX" end
+      if ( intype == "F4" ) then subs.init_val = "FLT_MAX" end
+      if ( intype == "F8" ) then subs.init_val = "DBL_MAX" end
+      assert(subs.init_val)
       subs.reducer = "mcr_min"
       subs.t_reducer = subs.reducer
     end

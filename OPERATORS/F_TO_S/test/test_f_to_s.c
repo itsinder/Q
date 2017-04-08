@@ -2,6 +2,8 @@
 #include "q_macros.h"
 #include "_sum_F8.h"
 #include "_sum_sqr_I8.h"
+#include "_min_I4.h"
+#include "_max_I1.h"
 int
 main(
     int argc,
@@ -12,6 +14,8 @@ main(
   int N = 524288+17;
   double *X = NULL;
   int64_t *Y = NULL;
+  int32_t *Z = NULL;
+  int8_t *W = NULL;
 
   X = malloc(N * sizeof(double));
   return_if_malloc_failed(X);
@@ -42,8 +46,35 @@ main(
     fprintf(stdout, "SUCCESS\n"); 
   }
   //----------------------------
+  Z = malloc(N * sizeof(int32_t));
+  return_if_malloc_failed(Z);
+  for ( int i = 0; i < N; i++ ) { Z[i] = i+1; }
+  REDUCE_I4_ARGS zargs;
+  zargs.cum_val = INT_MAX;
+  status = min_I4(Z, N, &zargs, 0); cBYE(status);
+  if ( zargs.cum_val != 1 ) { 
+    fprintf(stdout, "FAILURE\n");  go_BYE(-1);
+  }
+  else {
+    fprintf(stdout, "SUCCESS\n"); 
+  }
+  //----------------------------
+  W = malloc(N * sizeof(int8_t));
+  return_if_malloc_failed(W);
+  for ( int i = 0; i < N; i++ ) { W[i] = i; }
+  REDUCE_I1_ARGS wargs;
+  wargs.cum_val = SCHAR_MIN;
+  status = max_I1(W, N, &wargs, 0); cBYE(status);
+  if ( wargs.cum_val != SCHAR_MAX ) { 
+    fprintf(stdout, "FAILURE\n");  go_BYE(-1);
+  }
+  else {
+    fprintf(stdout, "SUCCESS\n"); 
+  }
 BYE:
   free_if_non_null(X);
   free_if_non_null(Y);
+  free_if_non_null(Z);
+  free_if_non_null(W);
   return status;
 }
