@@ -40,6 +40,7 @@
       T.fn            = subs.fn
       T.intype        = subs.intype
       T.reducer       = subs.reducer
+      T.t_reducer     = subs.t_reducer
       T.disp_intype   = subs.disp_intype
       T.reduce_intype = subs.reduce_intype
       T.init_val      = subs.init_val     
