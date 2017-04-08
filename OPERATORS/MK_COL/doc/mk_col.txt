@@ -1,0 +1,23 @@
+Sometimes, we need to create a column on the fly, without having 
+to load it from a table. This is usually the case when one has a small number of
+values thay one wants to create a column out of. 
+For example, x = mk_col({10, 20, 30, 40}, "I4") should return a column consisting of
+4 rows, where each cell is a 4-byte integer and the values of 
+x[0] = 10
+x[1] = 20
+x[2] = 30
+x[3] = 40
+
+This should be a simple modification of the functionality in load_csv
+
+Couple of notes. We will support only the following types
+I1
+I2
+I4
+I8
+F4
+F8
+SC -- can be pushed till later if time is short
+
+A column so created, by definition, has no null values.
+
