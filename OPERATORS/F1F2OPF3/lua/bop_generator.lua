@@ -4,13 +4,14 @@
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  local plfile = require 'pl.file'
+  local plpath = require 'pl.path'
 
   dofile '../../../UTILS/lua/globals.lua'
 
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
+  assert(plpath.isfile(operator_file))
   local T = assert(dofile(operator_file))
   local types = { 'B1' }
   for i, base_name in ipairs(T) do

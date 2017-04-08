@@ -6,13 +6,13 @@
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  local plfile = require "pl.file"
+  local plpath = require "pl.path"
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
 
   local operator_file = assert(arg[1])
-  assert(plfile.creation_time(operator_file))
+  assert(plpath.isfile(operator_file))
   local T = dofile(operator_file)
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 

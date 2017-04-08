@@ -7,17 +7,12 @@ return require 'code_gen' {
 #include <unistd.h>
 #include <stdint.h>
 
-typedef struct _reduce_${disp_intype}_args {
-  ${reduce_intype} cum_val;
-  } REDUCE_${disp_intype}_ARGS;
-  
-${includes}
 extern int
 ${fn}(  
-      const ${intype} * restrict in,  
+      const ${fldtype} * restrict in,  
       uint64_t nR,
-      $stype sval,
-      const ${outtype} * out
+      $fldtype sval,
+      const ${fldtype} * out
       ) 
 ;
 
@@ -27,30 +22,28 @@ ${fn}(
 #include "_${fn}.h"
 
 static void __operation(
-  ${intype} a,
-  ${stype} b,
-  ${outtype} *ptr_c
+  ${fldtype} a,
+  ${fldtype} b,
+  ${fldtype} *ptr_c
   )
 {
-  ${outtype} c;
+  ${fldtype} c;
   ${c_code_for_operator}
-  $ptr_c = c;
+  *ptr_c = c;
 }
 
 int
 ${fn}(  
-      const ${intype} * restrict in,
+      const ${fldtype} * restrict in,
       uint64_t nR,  
-      $stype sval,
-      const ${outtype} * out
+      $fldtype sval,
+      const ${fldtype} * out
       )
 
 {
   int status = 0;
-  ${intype} inv; 
-  ${outtype} outv; 
-  REDUCE_${disp_intype}_ARGS *ptr_args;
-  ptr_args = (REDUCE_${disp_intype}_ARGS *)in_ptr_args;
+  ${fldtype} inv; 
+  ${fldtype} outv; 
 
 #pragma omp parallel for 
   for ( int i = 0; i < nR; i++ ) { 

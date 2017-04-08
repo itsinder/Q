@@ -6,8 +6,6 @@
   require("gen_doth")
   require("gen_dotc")
   local pl = require 'pl'
-  -- pl.unlink("_qfns_f1f2opf3.lua")
-
   dofile '../../../UTILS/lua/globals.lua'
 
   local srcdir = "../gen_src/"
