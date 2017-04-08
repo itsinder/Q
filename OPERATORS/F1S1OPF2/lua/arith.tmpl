@@ -1,0 +1,60 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include "q_types.h"
+#include "q_macros.h"
+#include <unistd.h>
+#include <stdint.h>
+
+${includes}
+extern int
+${fn}(  
+      const ${intype} * restrict in,  
+      uint64_t nR,
+      $stype sval,
+      const ${outtype} * out
+      ) 
+;
+
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+static void __operation(
+  ${intype} a,
+  ${stype} b,
+  ${outtype} *ptr_c
+  )
+{
+  ${outtype} c;
+  ${c_code_for_operator}
+  $ptr_c = c;
+}
+
+int
+${fn}(  
+      const ${intype} * restrict in,
+      uint64_t nR,  
+      $stype sval,
+      const ${outtype} * out
+      )
+
+{
+  int status = 0;
+  ${intype} inv; 
+  ${outtype} outv; 
+  REDUCE_${disp_intype}_ARGS *ptr_args;
+  ptr_args = (REDUCE_${disp_intype}_ARGS *)in_ptr_args;
+
+#pragma omp parallel for 
+  for ( int i = 0; i < nR; i++ ) { 
+    inv = in[i];
+    outv = __operation(inv, sv);
+  } 
+BYE:
+  return status;
+}
+   ]]
+}
