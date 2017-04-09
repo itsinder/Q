@@ -16,3 +16,5 @@ rm -f vslt_specialize.lua
 rm -f vsneq_specialize.lua
 
 rm -f vsleqorgeq_specialize.lua
+rm -f vsgeqandleq_specialize.lua
+rm -f vsgtandlt_specialize.lua

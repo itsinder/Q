@@ -55,3 +55,17 @@ cat vsltorgt_specialize.lua | \
   sed s"/comp2 = .*/comp2 = ' >= ' /"g \
   > vsleqorgeq_specialize.lua
 
+cat vsltorgt_specialize.lua | \
+  sed s'/vsltorgt_/vsgeqandleq_/'g | \
+  sed s'/ || / \&\& /'g | \
+  sed s"/comp1 = .*/comp1 = ' >= ' /"g | \
+  sed s"/comp2 = .*/comp2 = ' <= ' /"g \
+  > vsgeqandleq_specialize.lua
+
+cat vsltorgt_specialize.lua | \
+  sed s'/vsltorgt_/vsgtandlt_/'g | \
+  sed s'/ || / \&\& /'g | \
+  sed s"/comp1 = .*/comp1 = ' > ' /"g | \
+  sed s"/comp2 = .*/comp2 = ' < ' /"g \
+  > vsgtandlt_specialize.lua
+

@@ -28,7 +28,7 @@
     print(base_name)
     local filename = base_name .. "_specialize.lua"
     local str = 'require \'' .. base_name .. '_specialize\''
-    assert(plfile.creation_time(filename))
+    assert(plpath.isfile(filename))
     loadstring(str)()
     local stat_chk = base_name .. '_specialize'
     local stat_chk_fn = assert(_G[stat_chk], 

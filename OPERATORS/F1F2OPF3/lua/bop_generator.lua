@@ -24,7 +24,7 @@
     f:close()
     -- ==================
     local str = 'require \'' .. base_name .. '_specialize\''
-    assert(plfile.access_time(base_name .. "_specialize.lua"))
+    assert(plpath.isfile(base_name .. "_specialize.lua"))
     loadstring(str)()
     local stat_chk = base_name .. '_specialize'
     local stat_chk_fn = assert(_G[stat_chk], "function not found " .. stat_chk)

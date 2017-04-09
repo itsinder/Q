@@ -15,4 +15,6 @@ return {
    "vsleq",  
    "vsltorgt",  
    "vsleqorgeq",  
+   "vsgeqandleq",  
+   "vsgtandlt",  
 }

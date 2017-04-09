@@ -10,3 +10,5 @@ vsleq_specialize.lua
 vslt_specialize.lua
 vsneq_specialize.lua
 vsleqorgeq_specialize.lua
+vsgeqandleq_specialize.lua
+vsgtandlt_specialize.lua
