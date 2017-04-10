@@ -1,0 +1,2 @@
+ainb.tmpl needs to be completed
+Have another version that uses binary sort when nB > threshold
