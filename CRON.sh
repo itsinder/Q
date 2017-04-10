@@ -42,6 +42,6 @@ rm $nightly_file
 
 #concat all the 3 variables
 var4="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"
-echo "$var4" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com 
+echo "$var4" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
 
 
