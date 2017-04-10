@@ -38,10 +38,10 @@ main(
     sum += part;
   }
   if ( sum != 524290 ) { 
-    fprintf(stdout, "ERROR\n");  go_BYE(-1);
+    fprintf(stdout, "C: ERROR\n");  go_BYE(-1);
   }
   else {
-    fprintf(stdout, "SUCCESS\n"); go_BYE(-1);
+    fprintf(stdout, "C: SUCCESS\n"); 
   }
 BYE:
   free_if_non_null(X);

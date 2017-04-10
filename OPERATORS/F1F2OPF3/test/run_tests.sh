@@ -10,7 +10,7 @@ valgrind ./a.out 2>_x
 set +e
 grep 'ERROR SUMMARY' _x | grep ' 0 errors' 1>/dev/null 2>&1
 status=$?
-if [ $status != 0 ]; then echo FAILURE; else echo SUCCESS; fi 
+if [ $status != 0 ]; then echo VG: FAILURE; else echo VG: SUCCESS; fi 
 set -e 
 #-------------------
 gcc -g -std=gnu99 eq.c \
@@ -20,7 +20,7 @@ valgrind ./a.out 2>_x
 set +e
 grep 'ERROR SUMMARY' _x | grep ' 0 errors' 1>/dev/null 2>&1
 status=$?
-if [ $status != 0 ]; then echo FAILURE; else echo SUCCESS; fi 
+if [ $status != 0 ]; then echo VG: FAILURE; else echo VG: SUCCESS; fi 
 set -e 
 #-------------------
 rm _x

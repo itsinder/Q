@@ -38,11 +38,11 @@ main(
     if ( vy == 65536 ) { vy = 0; }
     uint64_t vz = ( (uint64_t )vx << 16 ) | vy;
     if ( vz != Z[i] ) { 
-      fprintf(stdout, "FAILURE\n");
+      fprintf(stdout, "C: FAILURE\n");
       go_BYE(-1);
     }
   }  
-  fprintf(stdout, "SUCCESS\n");
+  fprintf(stdout, "C: SUCCESS\n");
   //--------------------------------
 
 BYE:

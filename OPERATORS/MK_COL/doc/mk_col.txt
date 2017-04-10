@@ -26,8 +26,8 @@ A column so created, by definition, has no null values.
 
 SC -- can be pushed till later if time is short. In this case, the
 user does not specify the width, the program will set the width as the
-max width+1. For example, if we load x = mk_col({"a", "bc", "def"} SC"
-), then the width will be 4.
+max width+1. For example, if we load x = mk_col({"a", "bc", "def"}, "SC"), 
+then the width will be 4.
 
 
 

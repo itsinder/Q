@@ -34,7 +34,7 @@ ${fn}(
     for ( int j = 0; j < nB; j++ ) { 
       rslt += (A[i] == B[j]);
     }
-    lX[i] = mcr_min(lX[i], 1);
+    lX[i] = mcr_min(rslt, 1);
   }
 BYE:
   free_if_non_null(lX);

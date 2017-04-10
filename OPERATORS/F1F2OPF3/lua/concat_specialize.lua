@@ -55,9 +55,9 @@ function concat_specialize(
     "concat_" .. f1type .. "_" .. f2type .. "_" .. l_outtype 
     subs.in1type = g_qtypes[f1type].ctype
     subs.in2type = g_qtypes[f2type].ctype
-    subs.outtype = g_qtypes[l_outtype].ctype
+    subs.out_c_type = g_qtypes[l_outtype].ctype
     subs.c_code_for_operator = 
-    " c = ( (" .. subs.outtype .. ")a << " .. shift .. " ) | b; "
+    " c = ( (" .. subs.out_c_type .. ")a << " .. shift .. " ) | b; "
 
     return subs, tmpl
 end
