@@ -39,7 +39,7 @@ function print_result()
   str = str.."Run bash test_load_csv.sh <testcase_number> for details\n\n"
   str = str.."-----------------------------------\n"
   print(str)
-  local file = assert(io.open("nightly_build.txt", "w"), "Nighty build file open error")
+  local file = assert(io.open("nightly_build_load.txt", "w"), "Nighty build file open error")
   assert(io.output(file), "Nightly build file write error")
   assert(io.write(str), "Nightly build file write error")
   assert(io.close(file), "Nighty build file close error")

@@ -52,18 +52,27 @@ for i, m in ipairs(T) do
   end
   ::skip::
 end
-print("-----------------------------------")
-print("No of successfull testcases ",no_of_success)
-print("No of failure testcases     ",no_of_failure)
-print("-----------------------------------")
+
+local str
+
+str = "-------METADATA TEST CASES-------------\n"
+str = str.."No of successfull testcases "..no_of_success.."\n"
+str = str.."No of failure testcases     "..no_of_failure.."\n"
+str = str.."-----------------------------------\n"
 
 if #failed_testcases > 0 then
-  print("---run bash test_meta_data.sh <testcase_number> for more details -------")
-  print("---Testcases failed are -------")
+  str = str.."---run bash test_meta_data.sh <testcase_number> for more details -------\n"
+  str = str.."---Testcases failed are -------\n"
 end
 
 for i=1,#failed_testcases do
-  print(failed_testcases[i])
+  str = str..failed_testcases[i].."\n"
 end
+
+print(str)
+local file = assert(io.open("nightly_build_metadata.txt", "w"), "Nighty build file open error")
+assert(io.output(file), "Nightly build file write error")
+assert(io.write(str), "Nightly build file write error")
+assert(io.close(file), "Nighty build file close error")
 
 
