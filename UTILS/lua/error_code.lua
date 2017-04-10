@@ -1,4 +1,9 @@
 g_err = {}
+-- this function will be used whenever dynamic error codes will be required
+function g_err.GET_CELL_ERROR(row_idx, col_idx)
+  return "get_cell error in row " .. row_idx .. " column " .. col_idx
+end
+
 
 -- load error codes
 g_err.INVALID_DATA_ERROR = "Invalid data found"
@@ -17,6 +22,7 @@ g_err.Q_DATA_DIR_NOT_FOUND = "directory not found -- Q_DATA_DIR"
 g_err.Q_META_DATA_DIR_NOT_FOUND  = "directory not found -- Q_META_DATA_DIR"
 g_err.DID_NOT_END_PROPERLY = "Didn't end up properly"
 g_err.BAD_NUMBER_COLUMNS = "bad number of columns on last line"
+g_err.TYPE_CONVERTER_FAILED = "text converter failed for qtype"
 
 
 -- meta data codes

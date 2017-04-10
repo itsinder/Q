@@ -100,7 +100,7 @@ function mk_out_buf(
       end
     end
   end
-  assert(status == 0, "text converter failed for qtype " .. m.qtype)
+  assert(status == 0, g_err.TYPE_CONVERTER_FAILED .. m.qtype)
 end
 
 function load_csv( 
@@ -189,7 +189,8 @@ function load_csv(
         ffi.C.memset(in_buf, 0, max_txt_width) -- always init to 0
         ffi.C.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
-        local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+        --local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+        local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
         x_idx = tonumber(
         cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc)
