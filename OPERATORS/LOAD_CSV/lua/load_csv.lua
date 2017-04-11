@@ -193,7 +193,8 @@ function load_csv(
         ffi.C.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
         --local err_loc = "error in row " .. row_idx .. " column " .. col_idx
-        local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
+        --local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
+        local err_loc = g_err.INVALID_INDEX_ERROR
         x_idx = tonumber(
         cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc)

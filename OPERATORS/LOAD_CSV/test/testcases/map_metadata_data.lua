@@ -30,10 +30,10 @@ return {
       output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty" },
     -- bad double quote mismatch, string not ending properly with double quotes
     { meta= "gm_double_quotes_mismatch.lua",data= "bad_quote_mismatch.csv", category= "category1", 
-      output_regex= g_err.GET_CELL_ERROR(1,1), name = "double_quotes_mistmatch" },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch" },
     -- testing whether appropriate number of commas are given in the csv file
     { meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
-      output_regex= g_err.GET_CELL_ERROR(3,2), name = "invalid 2D data" },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "invalid 2D data" },
     -- column count in csv file are less than column count specified in metadata 
     { meta= "gm_column_is_more.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
       output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more"  },
@@ -66,7 +66,7 @@ return {
       output_regex= g_err.INVALID_DATA_ERROR, name = "bad_str_in_I1"  },
     -- escaping character in SV field is missing  
     { meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
-      output_regex= g_err.GET_CELL_ERROR(1,1), name = "missing_escape_char" },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char" },
  
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file
