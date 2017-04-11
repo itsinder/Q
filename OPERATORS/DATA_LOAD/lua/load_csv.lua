@@ -4,7 +4,7 @@ require 'extract_fn_proto'
 require 'error_code'
 
 
-local Dictionary = require 'dictionary'
+local Dictionary = require 'dictionary_dataload'
 local plstring = require 'pl.stringx'
 local Column = require 'Column'
 local plpath = require 'pl.path'
@@ -56,10 +56,12 @@ function load_csv(
   local col_num_nil = {}
   local size_of_data_list = {}
    
-  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.CSV_FILE_PATH_INCORRECT)
-  assert( plpath.getsize(csv_file_path) ~= 0, "File should not be empty")
-  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_INCORRECT)
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
+  assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
+   
+  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.INPUT_FILE_NOT_FOUND)
+  assert( plpath.getsize(csv_file_path) ~= 0,g_err.INPUT_FILE_EMPTY)
+  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
   validate_meta(M)
    
 
@@ -71,7 +73,7 @@ function load_csv(
       
     if M[i].is_load == true then
       if M[i].qtype == "SC" then
-        size_of_data_list[i] = M[i].size
+        size_of_data_list[i] = M[i].width
       else
         size_of_data_list[i] = g_qtypes[M[i].qtype]["width"]
       end
@@ -90,7 +92,7 @@ function load_csv(
                  
       if M[i].qtype == "SV" then
         -- initialization to {} is required, if not done then in the second statement dict_table[i].dict, dict_table[i] will be nil
-	dict_table[i] = {}
+        dict_table[i] = {}
         dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].add_new_value = M.add
         column_list[i]:set_meta("dir",dict_table[i].dict)
@@ -134,7 +136,6 @@ function load_csv(
       else
          is_last_col = false;
       end
-     
       x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
       assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
@@ -150,7 +151,7 @@ function load_csv(
             ffi.copy(buf, tostring(ret_number))
           end   
         elseif M[col_idx + 1].qtype == "SC" then 
-          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].size -1, g_err.STRING_GREATER_THAN_SIZE )  
+          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].width -1, g_err.STRING_GREATER_THAN_SIZE )  
         end
              
         ffi.C.memset(cbuf, 0, size_of_data_list[col_idx + 1])

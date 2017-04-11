@@ -1,45 +1,48 @@
 -- RS Delete this line - taken care of by LUA_INIT set up
-package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
- 
+require 'extract_fn_proto'
 require "validate_meta"
+require 'error_code'
+
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
 local dbg = require 'debugger'
+
 --RS Use extract_fn_proto for txt_to_* and so on
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
+
 local ffi = require "ffi"
 ffi.cdef([[
-void *memset(void *s, int c, size_t n);
-typedef struct _mmap_struct {
-    void* ptr_mmapped_file;
-    size_t file_size;
-    int status;
-} mmap_struct;
-extern mmap_struct*
-f_mmap(
-   const char * const file_name,
-   bool is_write
-);
-extern int 
-f_munmap(
-    mmap_struct* map        
-);
+  void *memset(void *s, int c, size_t n);
   size_t strlen(const char *str);
   void * malloc(size_t size);
   void free(void *ptr);
-  extern size_t get_cell(char *X, size_t nX, size_t xidx, bool is_last_col, char *buf, size_t bufsz);
-  
-  int txt_to_I1(const char *X, int base, int8_t *ptr_out);
-  int txt_to_I2(const char *X, int base, int16_t *ptr_out);
-  int txt_to_I4(const char *X, int base, int32_t *ptr_out);
-  int txt_to_I8(const char *X, int base, int64_t *ptr_out);
-  int txt_to_F4(const char *X, float *ptr_out);
-  int txt_to_F8(const char *X, double *ptr_out);
-  int txt_to_SC(const char *X, char *out, size_t sz_out);
+  ]])
 
-]])
+local rootdir = os.getenv("Q_SRC_ROOT")
+local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/src/get_cell.c"))
+local txt_to_SC = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/src/txt_to_SC.c"))
+local txt_to_I1 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I1.c"))
+local txt_to_I2 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I2.c"))
+local txt_to_I4 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c"))
+local txt_to_I8 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I8.c"))
+local txt_to_F4 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_F4.c"))
+local txt_to_F8 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_F8.c"))
+local f_mmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_mmap.c"))
+local f_munmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_munmap.c"))
+
+ffi.cdef(get_cell)
+ffi.cdef(txt_to_SC)
+ffi.cdef(txt_to_I1)
+ffi.cdef(txt_to_I2)
+ffi.cdef(txt_to_I4)
+ffi.cdef(txt_to_I8)
+ffi.cdef(txt_to_F4)
+ffi.cdef(txt_to_F8)
+ffi.cdef(f_mmap)
+ffi.cdef(f_munmap)
+
 -- ----------------
 -- RS Use compile_so to create load_csv.so
 local cee = ffi.load("load_csv.so")
@@ -190,7 +193,8 @@ function load_csv(
         ffi.C.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
         --local err_loc = "error in row " .. row_idx .. " column " .. col_idx
-        local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
+        --local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
+        local err_loc = g_err.INVALID_INDEX_ERROR
         x_idx = tonumber(
         cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc)
