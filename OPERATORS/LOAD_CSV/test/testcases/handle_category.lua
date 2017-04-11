@@ -26,16 +26,23 @@ function increment_failed_load(index, v, str)
 end
 
 function print_result() 
-  print("-----------------------------------")
-  print("No of successfull testcases ",number_of_testcases_passed)
-  print("No of failure testcases     ",number_of_testcases_failed)
-  print("-----------------------------------")
-  print("Testcases failed are     ")
+  local str
+  
+  str = "----------LOAD TEST CASES RESULT----------------\n"
+  str = str.."No of successfull testcases "..number_of_testcases_passed.."\n"
+  str = str.."No of failure testcases     "..number_of_testcases_failed.."\n"
+  str = str.."-----------------------------------\n"
+  str = str.."Testcases failed are     \n"
   for k,v in ipairs(failed_testcases) do
-    print(v)
+    str = str..v.."\n"
   end
-  print("Run bash test_load_csv.sh <testcase_number> for details\n\n")
-     print("-----------------------------------")
+  str = str.."Run bash test_load_csv.sh <testcase_number> for details\n\n"
+  str = str.."-----------------------------------\n"
+  print(str)
+  local file = assert(io.open("nightly_build_load.txt", "w"), "Nighty build file open error")
+  assert(io.output(file), "Nightly build file write error")
+  assert(io.write(str), "Nightly build file write error")
+  assert(io.close(file), "Nighty build file close error")
 end
 
 -- this function checks whether the output regex is present or not
@@ -87,7 +94,7 @@ function handle_category1(index, status, ret, v)
     number_of_testcases_passed = number_of_testcases_passed + 1 
   else
     increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
-    print("actual output:"..ret)
+    print("actual output:"..err)
     print("expected output:"..error_msg)
   
   end
@@ -251,6 +258,7 @@ function handle_input_category6(input_regex)
   if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
   if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
   if input_regex == 4 then _G["Q_META_DATA_DIR"] = "./invalid_dir" end
+  if input_regex == 5 then _G["Q_DICTIONARIES"] = nil end
   
 end
 

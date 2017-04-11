@@ -56,7 +56,7 @@ function mk_out_buf(
     local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
 
     if m.qtype == "SV" then 
-      assert(in_buf_len <= m.max_width, err_loc .. "string too long ")
+      assert(in_buf_len <= m.max_width, err_loc .. g_err.STRING_TOO_LONG)
       local stridx = nil
       if ( in_buf_len == 0 ) then
         stridx = 0
@@ -73,7 +73,7 @@ function mk_out_buf(
     end   
     --=======================================
     if m.qtype == "SC" then 
-      assert(in_buf_len <= m.width, err_loc .. "string too long ")
+      assert(in_buf_len <= m.width, err_loc .. g_err.STRING_TOO_LONG)
       ffi.copy(out_buf, in_buf)
     end
     --=======================================
@@ -100,7 +100,7 @@ function mk_out_buf(
       end
     end
   end
-  assert(status == 0, "text converter failed for qtype " .. m.qtype)
+  assert(status == 0, g_err.TYPE_CONVERTER_FAILED .. m.qtype)
 end
 
 function load_csv( 
@@ -109,16 +109,19 @@ function load_csv(
   global_settings -- TODO unused for now
 )
     local plpath = require 'pl.path'
-    assert(plpath.isdir(_G["Q_DATA_DIR"]))
-    assert(plpath.isdir(_G["Q_META_DATA_DIR"]))
-    assert(type(_G["Q_DICTIONARIES"]) == "table")
+    --assert(plpath.isdir(_G["Q_DATA_DIR"]))
+    --assert(plpath.isdir(_G["Q_META_DATA_DIR"]))
+    assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
     local cols = {} -- cols[i] is Column used for column i 
     local dicts = {} -- dicts[i] is di ctionary used for column i
 
-    assert(plpath.isfile(infile), "input file not found")
-    assert(plpath.getsize(infile) > 0, "input file empty")
-    assert(plpath.isdir(_G["Q_DATA_DIR"]), "directory not found -- Q_DATA_DIR")
-    assert(plpath.isdir(_G["Q_META_DATA_DIR"]), "directory not found -- Q_META_DATA_DIR")
+    --assert(plpath.isfile(infile), g_err.INPUT_FILE_NOT_FOUND)
+    assert( infile ~= nil and plpath.isfile(infile),g_err.INPUT_FILE_NOT_FOUND)
+    assert(plpath.getsize(infile) > 0, g_err.INPUT_FILE_EMPTY)
+    --assert(plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+    assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+    --assert(plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
+    assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
     validate_meta(M)
 
     -- In this loop (1) calculate max_txt_width (2) create Column for each
@@ -161,10 +164,10 @@ function load_csv(
       assert(max_txt_width > 0)
       --===========================
       f_map = ffi.gc( cee.f_mmap(infile, false), cee.f_munmap)
-      assert(f_map.status == 0 , "Mmap failed")
+      assert(f_map.status == 0 , g_err.MMAP_FAILED)
       local X = ffi.cast("char *", f_map.ptr_mmapped_file)
       local nX = tonumber(f_map.ptr_file_size)
-      assert(nX > 0, "File cannot be empty")
+      assert(nX > 0, g_err.FILE_EMPTY)
 
       local x_idx = 0
       local out_buf_sz = 1024 -- TODO FIX 
@@ -186,7 +189,8 @@ function load_csv(
         ffi.C.memset(in_buf, 0, max_txt_width) -- always init to 0
         ffi.C.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
-        local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+        --local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+        local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
         x_idx = tonumber(
         cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc)
@@ -197,7 +201,7 @@ function load_csv(
           -- Process null value case
           if is_null then 
             assert(M[col_idx].has_nulls, 
-            err_loc ..  "Null value found in not null field " ) 
+            err_loc .. g_err.NULL_IN_NOT_NULL_FIELD) 
             M[col_idx].num_nulls = M[col_idx].num_nulls + 1
           else 
             ffi.C.memset(is_nn, 1, 1) -- value IS Not Null 
@@ -215,8 +219,8 @@ function load_csv(
         assert(x_idx <= nX) 
         if  (x_idx >= nX) then break end
       end
-      assert(x_idx == nX, "Didn't end up properly")
-      assert(col_idx == 1, "bad number of columns on last line")
+      assert(x_idx == nX, g_err.DID_NOT_END_PROPERLY)
+      assert(col_idx == 1, g_err.BAD_NUMBER_COLUMNS)
       --======================================
       local cols_to_return = {} 
       local rc_idx = 1

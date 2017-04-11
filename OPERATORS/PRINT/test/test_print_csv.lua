@@ -2,7 +2,7 @@ local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 
 package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
+package.path = package.path.. ";" .. rootdir .. "/OPERATORS/LOAD_CSV/lua/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/OPERATORS/PRINT/lua/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/Q2/code/?.lua"
 
@@ -62,7 +62,6 @@ for i, v in ipairs(T) do
     handle_category6(i, v, M)
     goto skip
   end
-  
   local status, load_ret = pcall(load_csv,"./test_data/"..D, M)
   if status then
     -- if handle_input_function is present, then filter is taken from the output of this function
@@ -76,7 +75,8 @@ for i, v in ipairs(T) do
     end
     
   else
-    print(" testcase failed: load api failed in print testcase. this should not happen")
+    --print(" testcase failed: load api failed in print testcase. this should not happen")
+    increment_failed(i, v, " testcase failed: load api failed in print testcase. this should not happen")
   end
   ::skip::
 end

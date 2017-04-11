@@ -55,6 +55,7 @@ for i, v in ipairs(T) do
   end
   
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
+  --local status, ret = load_csv(test_input_dir..D,  M)
   if handle_function[v.category] then
     --print (handle_function[v.category])
     handle_function[v.category](i, status, ret, v)
@@ -68,5 +69,5 @@ _G["Q_DATA_DIR"] = "./test_data/out/"
 _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 -- common cleanup (TEAR DOWN) for all testcases
 -- clear the output directory 
-dir.rmtree(_G["Q_DATA_DIR"])
-dir.rmtree(_G["Q_META_DATA_DIR"])
+--dir.rmtree(_G["Q_DATA_DIR"])
+--dir.rmtree(_G["Q_META_DATA_DIR"])

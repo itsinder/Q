@@ -12,9 +12,9 @@ cd $SCRIPT_PATH/../../../Q2/code
 make
 
 export Q_SRC_ROOT=../../../
-export LD_LIBRARY_PATH=../../../Q2/code/:../obj/:../../DATA_LOAD/obj
+export LD_LIBRARY_PATH=../../../Q2/code/:../obj/:../../LOAD_CSV/obj
 
-cd $SCRIPT_PATH/../../DATA_LOAD/test
+cd $SCRIPT_PATH/../../LOAD_CSV/test
 bash test_load.sh
 
 cd $SCRIPT_PATH
