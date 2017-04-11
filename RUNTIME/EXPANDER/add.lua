@@ -20,8 +20,10 @@ end
 
 f1f2opf3 = {}
 f1f2opf3.add = "vvadd_specialize"
--- TODO specializer must return a function and an out_c_type
--- 
+f1s1opf2 = {}
+f1s1opf2.add = "vsadd_specialize"
+-- Done doc pending: specializer must return a function and an out_c_type
+-- TODO add to doc 
 function expander_f1f2opf3(a, x ,y )
     -- type checking
     local fn = _G[f1f2opf3[a]]
@@ -30,7 +32,9 @@ function expander_f1f2opf3(a, x ,y )
     assert(status, subs)
     local type_x
     local func_name = assert(subs.fn)
-    local z_type = assert(subs.out_c_type) --TODO fix to out_type in all specialize
+    local z_type = assert(subs.out_c_type)
+    -- TODO globals q lib so set once and forget
+    -- lib = ffi.load("f1f2opf3.so")
     -- Assuming things are done and we have func_name
     --since this subscribes to the f1f2opf3 pattern we can simmply wrap each of
     --them in a coroutine and be done
@@ -38,7 +42,7 @@ function expander_f1f2opf3(a, x ,y )
     local y_coro =  assert(q_wrap(y))
     local gen = coroutine.create(function()
             local x_chunk, y_chunk, x_status, y_status
-            local x_chunk_size = 64
+            local x_chunk_size = 64 -- TODO change in vector class to get chunk size
             local y_chunk_size = 64
             assert(x_chunk_size == y_chunk_size)
             local buff = ffi.gc(ffi.C.malloc(x_chunk_size * ffi.sizeof(z_type)), ffi.C.free) -- ffi.malloc
@@ -52,7 +56,7 @@ function expander_f1f2opf3(a, x ,y )
                     assert(x_status == y_status)
                     assert(x_len == y_len)
                     assert(x_len > 0)
-                    assert(func_name(x_chunk, y_chunk, x_len, buff))
+                    assert(lib[func_name](x_chunk, y_chunk, x_len, buff))
                     coroutine.yield(buff, x_len)
                 end
             end
@@ -89,7 +93,10 @@ function add(x, y)
         assert(status, col)
         return col
     elseif type(x) == "Vector" and type(y) == "number" then
-        
+        status, col = pcall(expander_f1s1opf2, "add", x, y)
+        assert(status, col)
+        return col
+
     else
         assert(false)
     end
