@@ -1,7 +1,8 @@
 require "validate_meta"
 require 'globals'
 require 'extract_fn_proto'
-require("error_code")
+require 'error_code'
+
 
 local Dictionary = require 'dictionary'
 local plstring = require 'pl.stringx'
@@ -13,17 +14,17 @@ local ffi = require "ffi"
 ffi.cdef([[
 void *memset(void * str, int c, size_t n);
 ]])
-
-local get_cell = assert(extract_fn_proto("../src/get_cell.c"))
-local txt_to_SC = assert(extract_fn_proto("../src/txt_to_SC.c"))
-local txt_to_I1 = assert(extract_fn_proto("../gen_src/_txt_to_I1.c"))
-local txt_to_I2 = assert(extract_fn_proto("../gen_src/_txt_to_I2.c"))
-local txt_to_I4 = assert(extract_fn_proto("../gen_src/_txt_to_I4.c"))
-local txt_to_I8 = assert(extract_fn_proto("../gen_src/_txt_to_I8.c"))
-local txt_to_F4 = assert(extract_fn_proto("../gen_src/_txt_to_F4.c"))
-local txt_to_F8 = assert(extract_fn_proto("../gen_src/_txt_to_F8.c"))
-local f_mmap = assert(extract_fn_proto("../../../UTILS/src/f_mmap.c"))
-local f_munmap = assert(extract_fn_proto("../../../UTILS/src/f_munmap.c"))
+local rootdir = os.getenv("Q_SRC_ROOT")
+local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/get_cell.c"))
+local txt_to_SC = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/txt_to_SC.c"))
+local txt_to_I1 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I1.c"))
+local txt_to_I2 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I2.c"))
+local txt_to_I4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I4.c"))
+local txt_to_I8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I8.c"))
+local txt_to_F4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F4.c"))
+local txt_to_F8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F8.c"))
+local f_mmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_mmap.c"))
+local f_munmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_munmap.c"))
 
 ffi.cdef(get_cell)
 ffi.cdef(txt_to_SC)
@@ -58,7 +59,7 @@ function load_csv(
   assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.CSV_FILE_PATH_INCORRECT)
   assert( plpath.getsize(csv_file_path) ~= 0, "File should not be empty")
   assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_INCORRECT)
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
+  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
   validate_meta(M)
    
 
@@ -88,9 +89,11 @@ function load_csv(
       col_num_nil[i] = nil
                  
       if M[i].qtype == "SV" then
-        dict_table[i] = {}
+        -- initialization to {} is required, if not done then in the second statement dict_table[i].dict, dict_table[i] will be nil
+	dict_table[i] = {}
         dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].add_new_value = M.add
+        column_list[i]:set_meta("dir",dict_table[i].dict)
       end 
     end    
   end
@@ -105,14 +108,16 @@ function load_csv(
    local x_idx = 0
    
    -- Take the max value from all the types
+   -- pllist is a penlight list class, here used to find maximum values among the list of values 
+   -- https://stevedonovan.github.io/Penlight/api/classes/pl.List.html
    local l = pllist()
-   for i, value in pairs(g_sz) do
+   for i, value in pairs(g_width) do
     l:append(value) 
    end
-   l:append(2*g_max_size_SC)
+   l:append(2*g_max_width_SC)
    local min, cbuf_sz = l:minmax()  -- max value will be cbuff_sz, since c conversion will be to either one of the types contained in g_sz
    
-   l:append(2*g_max_size_SV)
+   l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
    local buf = ffi.gc(c.malloc(buf_sz), c.free)
@@ -129,6 +134,7 @@ function load_csv(
       else
          is_last_col = false;
       end
+     
       x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
       assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
@@ -148,8 +154,10 @@ function load_csv(
         end
              
         ffi.C.memset(cbuf, 0, size_of_data_list[col_idx + 1])
-        
-        if ffi.string(buf) == "" then 
+        --print(ffi.string(buf))
+        local str = plstring.strip(ffi.string(buf))
+        --if ffi.string(buf) == "" then 
+        if str == "" then 
           -- nil values
           assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD ) 
           ffi.fill(is_null, 1,0)

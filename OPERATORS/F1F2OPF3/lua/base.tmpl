@@ -2,14 +2,14 @@ return require 'code_gen' {
 
    declaration = [[
 
-#include "q_types.h"
+#include "q_incs.h"
 ${includes}
 extern int
 ${fn}(  
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      ${outtype} * restrict out 
+      ${out_c_type} * restrict out 
       ) 
 ;
 
@@ -22,10 +22,10 @@ static void
 __operation(
       ${in1type} a,
       ${in2type} b, 
-      ${outtype} *ptr_c
+      ${out_c_type} *ptr_c
       )
       {
-      ${outtype} c;
+      ${out_c_type} c;
       ${c_code_for_operator}
       *ptr_c = c;
       }
@@ -35,16 +35,16 @@ ${fn}(
       const ${in1type} * restrict in1,  
       const ${in2type} * restrict in2,  
       uint64_t nR,  
-      ${outtype} * restrict out 
+      ${out_c_type} * restrict out 
       )
 
 { 
   int status = 0;
- #pragma omp parallel for 
+#pragma omp parallel for schedule(static, Q_MIN_CHUNK_SIZE_OPENMP)
   for ( uint64_t i = 0; i < nR; i++ ) {  
     ${in1type} inv1 = in1[i]; 
     ${in2type} inv2 = in2[i]; 
-    ${outtype} outv;
+    ${out_c_type} outv;
     __operation(inv1, inv2, &outv);
     out[i] = outv;
   } 

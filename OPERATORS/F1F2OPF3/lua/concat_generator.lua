@@ -1,13 +1,15 @@
-  package.path = package.path.. ";../../../UTILS/lua/?.lua"
+  local rootdir = os.getenv("Q_SRC_ROOT")
+  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
+  package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  local plfile = require 'pl.file'
+  local plpath = require 'pl.path'
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
-  assert(plfile.access_time(operator_file))
+  assert(plpath.isfile(operator_file))
   local T = dofile(operator_file)
   --==================================================
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
@@ -41,6 +43,7 @@
             T.in1type  = subs.in1type
             T.in2type  = subs.in2type
             T.outtype  = subs.outtype
+            T.out_c_type  = subs.out_c_type
             T.argstype = subs.argstype
             T.c_code_for_operator = subs.c_code_for_operator
             gen_doth(T.fn, T, incdir)

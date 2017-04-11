@@ -1,18 +1,6 @@
 g_max_width_SC = 1024 -- 1 char reserved for nullc
 g_max_width_SV = 1024 -- 1 char reserved for nullc
 
-g_constants = {}
-g_constants.INIT_VAL_FOR_INT_MIN = "LLONG_MAX"
-g_constants.INIT_VAL_FOR_FLT_MIN = "DBL_MAX"
-
-g_constants.INIT_VAL_FOR_INT_MAX = "LLONG_MIN"
-g_constants.INIT_VAL_FOR_FLT_MAX = "DBL_MIN"
-
-g_constants.INIT_VAL_FOR_FLT_SUM = "0"
-g_constants.INIT_VAL_FOR_INT_SUM = "0"
-
-g_constants.INIT_VAL_FOR_FLT_SUM_SQR = "0"
-g_constants.INIT_VAL_FOR_INT_SUM_SQR = "0"
 --===========================
 g_width = {}
 g_width["I1"]  = 8;

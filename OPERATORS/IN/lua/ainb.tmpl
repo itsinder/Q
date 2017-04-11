@@ -1,0 +1,44 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+extern int
+${fn}(  
+      const ${atype} * restrict a,  
+      uint64_t nA,
+      const ${btype} * restrict b,  
+      uint16_t nB,
+      uint64_t *x // output 
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(  
+      const ${atype} * restrict A,  
+      uint64_t nA,
+      const ${btype} * restrict B,  
+      uint16_t nB,
+      uint64_t *X // output 
+      )
+{
+  int status = 0;
+  uint64_t *lX = NULL;
+
+#pragma omp parallel for schedule(static, Q_MIN_CHUNK_SIZE_OPENMP)
+  for ( int i = 0; i < nA; i++ ) { 
+    int rslt = 0;
+    for ( int j = 0; j < nB; j++ ) { 
+      rslt += (A[i] == B[j]);
+    }
+    lX[i] = mcr_min(rslt, 1);
+  }
+BYE:
+  free_if_non_null(lX);
+  return status;
+}
+   ]]
+}

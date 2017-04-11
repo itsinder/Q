@@ -2,8 +2,7 @@ return require 'code_gen' {
 
    declaration = [[
 
-#include "q_types.h"
-#include "q_macros.h"
+#include "q_incs.h"
 ${includes}
 extern int
 ${fn}(  
@@ -19,18 +18,6 @@ ${fn}(
 
 #include "_${fn}.h"
 
-static void
-__operation(
-      ${in1type} a,
-      ${in2type} b, 
-      uint64_t *ptr_c
-      )
-      {
-      uint64_t  c;
-      ${c_code_for_operator}
-      *ptr_c = c;
-      }
-
 int
 ${fn}(  
       const ${in1type} * restrict in1,  
@@ -40,21 +27,52 @@ ${fn}(
       )
 
 { 
+/*
+Each of the operators 
+< (less than), 
+> (greater than), 
+<= (less than or equal to), 
+>= (greater than or equal to) 
+shall yield 1 if the specified relation is true and 0 if it is false. 
+The result has type int.
+
+The == (equal to) and != (not equal to) operators are analogous to the
+relational operators except for their lower precedence
+*/
+
+#define VECTOR_LENGTH 4096
   int status = 0;
-#pragma omp parallel for 
-  /* TODO: Convince yourself that work is parcelled out on 
-  64 element boundaries */
-  for ( uint64_t i = 0; i < nR; i++ ) {  
-    int bitidx = i % 64;
-    ${in1type} inv1 = in1[i]; 
-    ${in2type} inv2 = in2[i]; 
-    int obval = inv1 ${comparison} inv2;
-    /* TODO: Avoid the if condition */
-    if ( obval == 0 ) { 
-      mcr_set_bit(out[(i/64)], bitidx);
+  /* calculate number of VECTOR_LENGTH element sized chunks to process */
+  uint64_t num_blocks = nR / VECTOR_LENGTH; 
+  int num_last_block = VECTOR_LENGTH;
+  if ( ( num_blocks * VECTOR_LENGTH ) != nR ) { 
+    num_last_block = nR - ( num_blocks * VECTOR_LENGTH);
+    num_blocks++; 
+  }
+#pragma omp parallel for schedule(static)
+  for ( uint64_t blk_idx = 0; blk_idx < num_blocks; blk_idx++ ) {  
+    uint64_t lb = blk_idx * VECTOR_LENGTH;;
+    uint64_t ub = lb + VECTOR_LENGTH;;
+    if ( blk_idx == (num_blocks-1) ) { ub = lb + num_last_block; }
+    int bit_idx = 0;
+    uint64_t out_idx = lb / 64;
+    uint64_t oval = 0;
+    for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
+      ${in1type} inv1 = in1[iidx]; 
+      ${in2type} inv2 = in2[iidx]; 
+      int rslt = (inv1 ${comparison} inv2);
+      /* TODO: Avoid the if condition */
+      if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
+      bit_idx++;
+      if ( bit_idx == 64 ) {
+        bit_idx = 0;
+        out[out_idx] = oval;
+        out_idx++;
+        oval = 0;
+      }
     }
-    else {
-      mcr_unset_bit(out[(i/64)], bitidx);
+    if ( bit_idx != 0 ) { 
+      out[out_idx] = oval;
     }
   }
   return status;

@@ -12,6 +12,7 @@
   local operator_file = assert(arg[1])
   assert(plfile.access_time(operator_file))
   local T = dofile(operator_file)
+  
 
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
@@ -40,6 +41,7 @@
       T.fn            = subs.fn
       T.intype        = subs.intype
       T.reducer       = subs.reducer
+      T.t_reducer     = subs.t_reducer
       T.disp_intype   = subs.disp_intype
       T.reduce_intype = subs.reduce_intype
       T.init_val      = subs.init_val     

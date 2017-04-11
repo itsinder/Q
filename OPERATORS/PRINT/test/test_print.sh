@@ -8,9 +8,11 @@ echo $SCRIPT_PATH
 
 #Clean all directory first
 rm -rf ../gen_inc ../gen_src ../obj
+#rm -rf ../obj
 
 #create all the required directory
 mkdir ../gen_src ../gen_inc ../obj
+#mkdir ../obj
 
 export Q_SRC_ROOT=../../../
 export LD_LIBRARY_PATH=../../../Q2/code/:../obj/

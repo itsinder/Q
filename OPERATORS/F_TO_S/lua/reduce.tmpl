@@ -2,8 +2,9 @@ return require 'code_gen' {
 
    declaration = [[
 
-#include "q_types.h"
-#include "q_macros.h"
+#include "q_incs.h"
+#include <unistd.h>
+#include <stdint.h>
 
 typedef struct _reduce_${disp_intype}_args {
   ${reduce_intype} cum_val;
@@ -39,10 +40,10 @@ ${fn}(
   ptr_args = (REDUCE_${disp_intype}_ARGS *)in_ptr_args;
 
   ${reduce_intype} curr_val = ptr_args->cum_val;
-  if ( num_threads == 0 ) { go_BYE(-1); }
+  if ( num_threads <= 0 ) { num_threads = sysconf(_SC_NPROCESSORS_ONLN); }
 
   uint64_t block_size = nR / num_threads;
-#pragma omp parallel for 
+#pragma omp parallel for schedule(static)
   for ( int t = 0; t < num_threads; t++ ) { 
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
@@ -54,7 +55,7 @@ ${fn}(
     }
 #pragma omp critical _${fn}
     {
-    curr_val = ${reducer}(curr_val, lval);
+    curr_val = ${t_reducer}(curr_val, lval);
     }
   } 
   ptr_args->cum_val = curr_val;

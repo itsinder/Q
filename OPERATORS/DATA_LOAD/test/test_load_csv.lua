@@ -5,7 +5,8 @@ package.path = package.path.. ";" .. rootdir .. "/Q2/code/?.lua"
 package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
 
 require 'load_csv'
-local plstring = require 'pl.stringx'
+require 'handle_category'
+
 --local Dictionary = require 'dictionary'
 
 local test_input_dir = "./test_data/"
@@ -18,70 +19,51 @@ _G["Q_DICTIONARIES"] = {}
 dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
 
-local number_of_testcases_passed = 0
-local number_of_testcases_failed = 0
 
-local 
-function handle_output(status, ret, v)
-  local output
-  if v.output_regex ~= nil then
-    output = v.output_regex
-  end
-  --print(v.meta)
-  -- if status not true, then check output error with the expected error.
-  -- if match then testcase success, else fail
-  --print(ret)
-  if ( not status ) then 
-    if output == nil then
-      print("load API failed, but output_regex is null")
-      number_of_testcases_failed = number_of_testcases_failed + 1
-      return
-    end
-    -- get the actual error message from the ret
-    local a, b, err = plstring.splitv(ret,':')
-    err = plstring.strip(err) -- check it can be used  from utils.
-    -- trimming whitespace
-     
-    local error_msg = plstring.strip(output) -- check it can be used from utils.
-    
-    print("actual error:"..err)
-    print("expected error:"..error_msg)
-    -- check this line can be skipped with the duplicate line below
-    if error_msg == err then
-      number_of_testcases_passed = number_of_testcases_passed + 1 
-    else
-      number_of_testcases_failed = number_of_testcases_failed + 1
-      print(v.data)
-    end
-  else
-  -- if status is true, then check the type of output.
-  -- if it is a table, then testcase successful, else fail
-    if type(ret) == "table" then
-      number_of_testcases_passed = number_of_testcases_passed + 1
-    else
-      number_of_testcases_failed = number_of_testcases_failed + 1
-    end
-    print("tested success for "..v.data)
-  end
-end
+local handle_function = {}
+-- handle error message testcases
+handle_function["category1"] = handle_category1
+-- handle 1D output regex.
+handle_function["category2"] = handle_category2
+-- handle 2D output_regex
+handle_function["category3"] = handle_category3
+-- handle length of bin files in this testcase
+handle_function["category4"] = handle_category4
+-- handle null file deletion testcase
+handle_function["category5"] = handle_category5
+-- handle environment test cases
+handle_function["category6"] = handle_category6
 
--- Test Case Start ---------------
+-- loop through testcases
+-- these testcases output error messages
 local T = dofile("map_metadata_data.lua")
 for i, v in ipairs(T) do
+  if arg[1] and i ~= tonumber(arg[1]) then 
+    goto skip 
+  end
+  
   _G["Q_DICTIONARIES"] = {}
+  _G["Q_DATA_DIR"] = "./test_data/out/"
+  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
   print("--------------------------------")
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data
+  -- if category6 then set environment in handle_input_category6 function
+  if v.category == "category6" then
+    --print(v.input_regex)
+    handle_input_category6(v.input_regex)
+  end
+  
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
-  handle_output(status, ret, v)
+  if handle_function[v.category] then
+    --print (handle_function[v.category])
+    handle_function[v.category](i, status, ret, v)
+  end
+  ::skip::
 end
 
+print_result()
 
-
-print("-----------------------------------")
-print("No of successfull testcases ",number_of_testcases_passed)
-print("No of failure testcases     ",number_of_testcases_failed)
-print("-----------------------------------")
 
 -- common cleanup (TEAR DOWN) for all testcases
 -- clear the output directory 

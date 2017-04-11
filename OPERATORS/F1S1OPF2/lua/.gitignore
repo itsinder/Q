@@ -1,0 +1,14 @@
+vsdiv_specialize.lua
+vsmul_specialize.lua
+vssub_specialize.lua
+vsand_specialize.lua
+vsor_specialize.lua
+vsxor_specialize.lua
+vsgeq_specialize.lua
+vsgt_specialize.lua
+vsleq_specialize.lua
+vslt_specialize.lua
+vsneq_specialize.lua
+vsleqorgeq_specialize.lua
+vsgeqandleq_specialize.lua
+vsgtandlt_specialize.lua

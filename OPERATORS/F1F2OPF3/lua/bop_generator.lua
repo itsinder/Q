@@ -1,14 +1,17 @@
-  package.path = package.path.. ";../../../UTILS/lua/?.lua"
+  local rootdir = os.getenv("Q_SRC_ROOT")
+  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
+  package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
   require("aux")
   require("gen_doth")
   require("gen_dotc")
-  local plfile = require 'pl.file'
+  local plpath = require 'pl.path'
 
   dofile '../../../UTILS/lua/globals.lua'
 
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
+  assert(plpath.isfile(operator_file))
   local T = assert(dofile(operator_file))
   local types = { 'B1' }
   for i, base_name in ipairs(T) do
@@ -21,7 +24,7 @@
     f:close()
     -- ==================
     local str = 'require \'' .. base_name .. '_specialize\''
-    assert(plfile.access_time(base_name .. "_specialize.lua"))
+    assert(plpath.isfile(base_name .. "_specialize.lua"))
     loadstring(str)()
     local stat_chk = base_name .. '_specialize'
     local stat_chk_fn = assert(_G[stat_chk], "function not found " .. stat_chk)
