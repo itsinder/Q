@@ -28,7 +28,7 @@ end
 function print_result() 
   local str
   
-  str = "----------LOAD TEST CASES RESULT----------------\n"
+  str = "----------DATA_LOAD TEST CASES RESULT----------------\n"
   str = str.."No of successfull testcases "..number_of_testcases_passed.."\n"
   str = str.."No of failure testcases     "..number_of_testcases_failed.."\n"
   str = str.."-----------------------------------\n"
