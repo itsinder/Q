@@ -10,12 +10,16 @@ local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "Q2/code/?.lua"
+paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
+paths[#paths + 1] = "UTILS/lua/globals.lua"
 
 
 local lib_paths = {}
 local lib_sep = ":" .. base_path
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
 lib_paths[#lib_paths + 1 ] = "Q2/code"
+lib_paths[#lib_paths + 1 ] = "OPERTORS/F1F2OPF3/lua"
+
 
 
 
@@ -42,7 +46,7 @@ for _ ,v in pairs(lib_paths) do
 end
 
 if #missing > 0 then
-    if curr_path ~= nil or string.len(curr_path) == 0 then
+    if curr_path ~= nil and string.len(curr_path) ~= 0 then
         print("export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" .. table.concat(missing, ":" ))
     else
       print("export LD_LIBRARY_PATH=" .. table.concat(missing, ":" ))
@@ -52,5 +56,7 @@ end
 
 --stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))
 package.path = table.concat(paths, sep)
+
+require "globals"
 --print(package.path)
 --print(os.getenv("LD_LIBRARY_PATH"))

@@ -16,9 +16,9 @@ function vvadd_specialize(
     local szout = sz1; 
     if ( sz2 > szout )  then szout = sz2 end
     if ( iorf_outtype == "floating_point" ) then 
-      l_outtype = g_fsz_to_fld[szout]
+      l_outtype = g_fwidth_to_fld[szout]
     elseif ( iorf_outtype == "fixed" ) then 
-      l_outtype = g_isz_to_fld[szout]
+      l_outtype = g_iwidth_to_fld[szout]
     else
       assert(false, "Control should not come here")
     end

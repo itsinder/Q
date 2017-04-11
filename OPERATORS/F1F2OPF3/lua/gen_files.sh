@@ -20,8 +20,8 @@ while read line; do
   echo $line
   gcc -c $line $FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
-gcc -shared *.o -o _libfoo.so
-rm -f *.o *.so
+gcc -shared *.o -o libf1f2opf3.so
+rm -f *.o
 rm -f _x
 cd -
 echo "ALL DONE; $0 in $PWD"
