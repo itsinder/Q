@@ -1,4 +1,9 @@
 g_err = {}
+-- this function will be used whenever dynamic error codes will be required
+function g_err.GET_CELL_ERROR(row_idx, col_idx)
+  return "get_cell error in row " .. row_idx .. " column " .. col_idx
+end
+
 
 -- load error codes
 g_err.INVALID_DATA_ERROR = "Invalid data found"
@@ -7,11 +12,18 @@ g_err.NULL_IN_NOT_NULL_FIELD = "Null value found in not null field"
 g_err.CSV_FILE_PATH_INCORRECT = "csv_file_path is not correct"
 g_err.STRING_GREATER_THAN_SIZE = "contains string greater than allowed size. Please correct data or metadata."
 g_err.FILE_EMPTY = "File should not be empty"
-g_err.Q_DATA_DIR_INCORRECT = "Q_DATA_DIR is not pointing to correct directory"
-g_err.Q_META_DATA_DIR_INCORRECT = "Q_META_DATA_DIR is not pointing to correct directory"
 g_err.ERROR_CREATING_ACCESSING_DICT = "Error while creating/accessing dictionary for M" 
 g_err.MMAP_FAILED = "Mmap failed"
 g_err.FILE_EMPTY = "File cannot be empty"
+g_err.STRING_TOO_LONG = "string too long"
+g_err.INPUT_FILE_NOT_FOUND = "input file not found"
+g_err.INPUT_FILE_EMPTY = "input file empty"
+g_err.Q_DATA_DIR_NOT_FOUND = "directory not found -- Q_DATA_DIR"
+g_err.Q_META_DATA_DIR_NOT_FOUND  = "directory not found -- Q_META_DATA_DIR"
+g_err.DID_NOT_END_PROPERLY = "Didn't end up properly"
+g_err.BAD_NUMBER_COLUMNS = "bad number of columns on last line"
+g_err.TYPE_CONVERTER_FAILED = "text converter failed for qtype"
+
 
 -- meta data codes
 g_err.METADATA_NULL_ERROR = "Metadata should not be nil"

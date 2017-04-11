@@ -2,5 +2,5 @@
 return { 
   { name = "empid", has_nulls=true, qtype = "I4" },
   { name = "yoj", qtype ="I2" },
-  { name = "empname", qtype ="SV",dict = "D1", is_dict = false, add=true} 
+  { name = "empname", qtype ="SV", has_nulls=true, dict = "D1", is_dict = false, add=true, max_width = 1024 } 
 }
