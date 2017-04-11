@@ -1,9 +1,14 @@
 #!/bibn/bash
 set -e 
 cd ../lua/
-lua generator.lua 
+bash gen_files.sh
 cd - 
-gcc -g -std=gnu99 test_ainb.c -I../gen_inc -I../../../UTILS/inc \
+gcc -g -std=gnu99 \
+  test_ainb.c \
+  ../../../UTILS/src/bytes_to_bits.c  \
+  -I../gen_inc  \
+  -I../../../UTILS/inc \
+  -I../../../UTILS/gen_inc \
   ../gen_src/_ainb_I4_I8.c \
   -o a.out
 valgrind ./a.out 2>_x

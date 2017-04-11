@@ -3,7 +3,7 @@ return require 'code_gen' {
    declaration = [[
 
 #include "q_incs.h"
-#include "bytes_to_bits.h"
+#include "_bytes_to_bits.h"
 extern int
 ${fn}(  
       const ${atype} * restrict a,  
@@ -27,7 +27,7 @@ ${fn}(
       )
 {
   int status = 0;
-  uint64_t *lX = NULL;
+  uint8_t *lX = NULL;
   lX = malloc(nA * sizeof(uint8_t)); // reduce later on
   return_if_malloc_failed(lX);
 
