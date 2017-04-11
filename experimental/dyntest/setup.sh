@@ -3,7 +3,9 @@ tar -xvzf lua-5.3.3.tar.gz
 cd lua-5.3.3/
 sed -ri 's/MYCFLAGS=/MYCFLAGS= -fPIC/' src/Makefile
 make linux
-cd ../dyncall-0.9/
+cd ../
+tar -xvzf dyncall-0.9.tar.gz
+cd ./dyncall-0.9/
 ./configure
 make
 sudo make install
