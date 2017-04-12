@@ -173,8 +173,8 @@ function load_csv(
           local function_name = g_qtypes[q_type]["txt_to_ctype"]
           -- for fixed size string pass the size of string data also
           if q_type == "SC" then
-            local ssize = ffi.cast("size_t", size_of_data_list[col_idx + 1])
-            status = c[function_name](buf, cbuf, ssize)
+            ffi.copy(cbuf, buf, string.len(ffi.string(buf))) 
+            status = 0 
           elseif q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV" then
             -- For now second parameter , base is 10 only
             status = c[function_name](buf, 10, cbuf)

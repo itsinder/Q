@@ -33,7 +33,7 @@ return {
       output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch" },
     -- testing whether appropriate number of commas are given in the csv file
     { meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
-      output_regex= g_err.INVALID_INDEX_ERROR, name = "invalid 2D data" },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "invalid 2D data" },
     -- column count in csv file are less than column count specified in metadata 
     { meta= "gm_column_is_more.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
       output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more"  },
