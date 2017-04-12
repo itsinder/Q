@@ -5,6 +5,7 @@ local dbg = require 'debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
+file_names = {} -- lists files seen to point out duplication
 -- dbg()
 --=================================
 function recursive_descent(
@@ -28,6 +29,11 @@ function recursive_descent(
       if ( found ) then 
         print("Skipping file " .. v)
       else
+        -- base_file_name = from last / to end
+        -- if ( files[base_file_name] ) then
+        --   files[base_file_name] = true
+        -- end
+
         print("Copying ", v, " to ", destdir)
         plfile.copy(v, destdir)
       end
@@ -87,6 +93,12 @@ local hdir = "/tmp/LUAH/"
 plpath.rmdir(hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, xdir, xfil, hdir)
+  --==========================
+local pattern = "*.h"
+local tdir = "/tmp/TEMPLATES/"
+plpath.rmdir(tdir)
+plpath.mkdir(tdir)
+xcopy(pattern, root, xdir, xfil, tdir)
   --==========================
 
 FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp "
