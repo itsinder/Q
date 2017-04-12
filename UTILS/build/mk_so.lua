@@ -1,38 +1,55 @@
-  package.path = package.path.. ";../../../UTILS/lua/?.lua"
--- local plutils = require 'pl.util'
--- local dbg = require 'debugger'
-local pl = require 'pl'
+local rootdir = os.getenv("Q_SRC_ROOT")
+assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
+package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
+local dbg = require 'debugger'
+local plpath = require 'pl.path'
+local pldir  = require 'pl.dir'
+local plfile = require 'pl.file'
+-- dbg()
 --=================================
 function recursive_descent(
   pattern, 
   root,
-  excludes,
+  xdir,
+  xfil,
   destdir
   )
-  local F = pl.dir.getfiles(root, pattern)
+  local F = pldir.getfiles(root, pattern)
   if ( ( F )  and ( #F > 0 ) ) then 
     for index, v in ipairs(F) do
-      print("Copying ", v, " to ", destdir)
-      pl.file.copy(v, destdir)
+      found = false
+      if ( xfil ) then 
+        for i2, v2 in ipairs(xfil) do
+          if ( string.find(v, v2) ) then 
+            found = true
+          end
+        end
+      end
+      if ( found ) then 
+        print("Skipping file " .. v)
+      else
+        print("Copying ", v, " to ", destdir)
+        plfile.copy(v, destdir)
+      end
     end
   else
     print("no matching files for ", pattern, " in ", root)
   end
-  local D = pl.dir.getdirectories(root)
+  local D = pldir.getdirectories(root)
   for index, v in ipairs(D) do
     found = false
-    if ( excludes ) then 
-      for i2, v2 in ipairs(excludes) do
+    if ( xdir ) then 
+      for i2, v2 in ipairs(xdir) do
         if ( string.find(v, v2) ) then 
           found = true
         end
       end
     end
     if ( found ) then 
-       print("Skipping " .. v)
+       print("Skipping directory " .. v)
      else
       -- print("Descending into ", v)
-      recursive_descent(pattern, v, destdir)
+      recursive_descent(pattern, v, xdir, xfil, destdir)
     end
   end
 end
@@ -40,39 +57,44 @@ end
 function xcopy(
   pattern,
   root,
-  excludes, 
+  xdir, 
+  xfil,
   destdir
   )
-  if ( pl.path.isdir(destdir) ) then 
-    pl.path.rmdir(destdir)
+  -- dbg()
+  print(root, destdir)
+  if ( plpath.isdir(destdir) ) then 
+    plpath.rmdir(destdir)
   end
-  pl.path.mkdir(destdir)
-  recursive_descent(pattern, root, destdir)
+  plpath.mkdir(destdir)
+  recursive_descent(pattern, root, xdir, xfil, destdir)
   end
 --============
 local root = "/home/subramon/WORK/Q/"
-local excludes = dofile("exclude_from_so.lua")
+local xdir = dofile("exclude_dir.lua")
+local xfil = dofile("exclude_fil.lua")
   --==========================
 local tgt = "/tmp/libq.so"
 
 local pattern = "*.c"
 local cdir = "/tmp/LUAC/"
-pl.path.rmdir(cdir)
-pl.path.mkdir(cdir)
-xcopy(pattern, root, cdir)
+plpath.rmdir(cdir)
+plpath.mkdir(cdir)
+xcopy(pattern, root, xdir, xfil, cdir)
   --==========================
 local pattern = "*.h"
 local hdir = "/tmp/LUAH/"
-pl.path.rmdir(hdir)
-pl.path.mkdir(hdir)
-xcopy(pattern, root, excludes, hdir)
+plpath.rmdir(hdir)
+plpath.mkdir(hdir)
+xcopy(pattern, root, xdir, xfil, hdir)
   --==========================
 
 FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp "
 
-command = "gcc " .. FLAGS .. cdir .. "*/.c -I" .. hdir .. 
+print("-----------------------")
+command = "gcc " .. FLAGS .. cdir .. "/*.c -I" .. hdir .. 
   " -shared -o " .. tgt
-print(command)
 status = os.execute(command)
+print(command)
 assert(status, "gcc failed")
-assert(pl.dir.isfile(tgt), "Target not created")
+assert(plpath.isfile(tgt), "Target " .. tgt .. " not created")

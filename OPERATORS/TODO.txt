@@ -1,1 +1,6 @@
 static verus dynamic scheduling for OpenMP
+
+all specializers should return
+1) fn == name of function
+2) proto = function prototype
+3) anything else needed e.g, output type for f1f2opf3 and so on

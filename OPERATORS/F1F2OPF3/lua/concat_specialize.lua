@@ -4,6 +4,7 @@ function concat_specialize(
   f2type, 
   optargs
   )
+    local plfile = require "pl.file"
     local outtype = optargs.outtype -- okay for outtype to be nil
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_outtypes = { I2 = true, I4 = true, I8 = true }
@@ -47,7 +48,7 @@ function concat_specialize(
       "specfiied outputtype not big enough")
       l_outtype = outtype
     end
-    local tmpl = 'base.tmpl'
+    local tmpl = plfile.read('base.tmpl')
     local subs = {}
     -- This includes is just as a demo. Not really needed
     subs.includes = "#include <math.h>\n#include <curl/curl.h>"

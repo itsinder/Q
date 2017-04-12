@@ -29,7 +29,7 @@ ${out_type_displ}_to_txt(
     )
 //STOP_FUNC_DECL
 {
-  int status = 0; int nw;
+  int status = 0; size_t nw;
   const char *default_fmt = ${default_fmt};
   if ( X == NULL ) { go_BYE(-1); }
   memset(X, '\0', nX);

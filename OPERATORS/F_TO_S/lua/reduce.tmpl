@@ -44,7 +44,7 @@ ${fn}(
 
   uint64_t block_size = nR / num_threads;
 #pragma omp parallel for schedule(static)
-  for ( int t = 0; t < num_threads; t++ ) { 
+  for ( uint32_t t = 0; t < num_threads; t++ ) { 
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
     if ( t == (num_threads-1) ) { ub = nR; }
@@ -53,13 +53,12 @@ ${fn}(
       inv = in[i];
       lval = ${reducer}(lval, inv);
     }
-#pragma omp critical _${fn}
+#pragma omp critical (_${fn})
     {
     curr_val = ${t_reducer}(curr_val, lval);
     }
   } 
   ptr_args->cum_val = curr_val;
-BYE:
   return status;
 }
    ]]

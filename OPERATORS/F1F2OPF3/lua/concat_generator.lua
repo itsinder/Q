@@ -1,9 +1,11 @@
   local rootdir = os.getenv("Q_SRC_ROOT")
   assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
   package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
+  package.path = package.path.. ";" .. rootdir .. "/OPERATORS/F1F2OPF3/lua/?.lua"
   require("aux")
   require("gen_doth")
   require("gen_dotc")
+  local dbg = require 'debugger'
   local plpath = require 'pl.path'
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
@@ -37,7 +39,7 @@
           stat_chk_fn, in1type, in2type, optargs)
           if ( status) then
             -- TODO Improve following.
-            local T = dofile(tmpl)
+            local T = loadstring(tmpl)()
             T.fn       = subs.fn
             T.includes = subs.includes
             T.in1type  = subs.in1type

@@ -4,7 +4,7 @@ return {
   "experimental",
   "dyntest",
   "qsort2",
+  "test",
   ".git",
   "OPERATORS/F_TO_S/test/",
-  "gen_inc",
 }

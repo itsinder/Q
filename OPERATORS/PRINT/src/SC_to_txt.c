@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include "q_macros.h"
 //STOP_INCLUDES
+#include "_SC_to_txt.h"
 //START_FUNC_DECL
 int
 SC_to_txt(
@@ -16,7 +17,7 @@ SC_to_txt(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  int sz = 0;
+  size_t sz = 0;
   memset(X, '\0', nX);
   if ( in == NULL ) { go_BYE(-1); }
   for ( char *cptr = in; *cptr != '\0'; cptr++ ) { 

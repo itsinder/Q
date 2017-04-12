@@ -1,4 +1,3 @@
-/* START HDR FILES  */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -13,19 +12,16 @@
 #include <fcntl.h>
 
 #define MAX_LEN_DIR_NAME 1000
-// START FUNC DECL
+#include "mmap_struct.h"
+#include "_vector_mmap.h"
 
-typedef struct {
-    void* ptr_mmapped_file;
-    size_t ptr_file_size;
-    int status;
-} mmap_struct;
-
+//START_FUNC_DECL
 mmap_struct*
 vector_mmap(
    const char* file_name,
    bool is_write
 )
+//STOP_FUNC_DECL
 {
    mmap_struct *map = malloc(sizeof(mmap_struct));
    map->status = -1;
@@ -68,18 +64,6 @@ vector_mmap(
    map->status = 0;
    return map;
 }
-
-int vector_munmap(
-    mmap_struct* map        
-)
-{
-    int rc = munmap(map->ptr_mmapped_file, map->ptr_file_size);
-    if (rc != 0 )
-        return -1;
-    free(map);
-    return 0;
-}
-
 
 #ifdef TEST
 int main() {
