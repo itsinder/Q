@@ -62,11 +62,11 @@ function xcopy(
   destdir
   )
   -- dbg()
-  print(root, destdir)
-  if ( plpath.isdir(destdir) ) then 
-    plpath.rmdir(destdir)
-  end
-  plpath.mkdir(destdir)
+--  print(root, destdir)
+--  if ( plpath.isdir(destdir) ) then 
+--    plpath.rmdir(destdir)
+--  end
+--  plpath.mkdir(destdir)
   recursive_descent(pattern, root, xdir, xfil, destdir)
   end
 --============
@@ -78,7 +78,7 @@ local tgt = "/tmp/libq.so"
 
 local pattern = "*.c"
 local cdir = "/tmp/LUAC/"
-plpath.rmdir(cdir)
+os.execute("rm -r -f " .. cdir)
 plpath.mkdir(cdir)
 xcopy(pattern, root, xdir, xfil, cdir)
   --==========================
@@ -95,6 +95,6 @@ print("-----------------------")
 command = "gcc " .. FLAGS .. cdir .. "/*.c -I" .. hdir .. 
   " -shared -o " .. tgt
 status = os.execute(command)
-print(command)
 assert(status, "gcc failed")
 assert(plpath.isfile(tgt), "Target " .. tgt .. " not created")
+print("Successfully created " .. tgt)
