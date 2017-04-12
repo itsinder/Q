@@ -2,6 +2,7 @@
 set -e 
 
 export Q_SRC_ROOT=../../../../
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 # get the current directory in $SCRIPT_PATH
 SCRIPT=$(readlink -f "$0")

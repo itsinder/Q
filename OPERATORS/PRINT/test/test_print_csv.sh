@@ -13,6 +13,7 @@ make
 
 export Q_SRC_ROOT=../../../
 export LD_LIBRARY_PATH=../../../Q2/code/:../obj/:../../LOAD_CSV/obj
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/../../LOAD_CSV/test
 bash test_load.sh

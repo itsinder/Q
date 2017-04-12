@@ -16,6 +16,7 @@ mkdir ../gen_src ../gen_inc ../obj
 
 export Q_SRC_ROOT=../../../
 export LD_LIBRARY_PATH=../../../Q2/code/:../obj/
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/../lua
 # generate _xxx_to_txt.c files

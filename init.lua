@@ -10,7 +10,9 @@ local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "Q2/code/?.lua"
-
+paths[#paths + 1] = "UTILS/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
 local lib_paths = {}
 local lib_sep = ":" .. base_path
@@ -47,7 +49,7 @@ if #missing > 0 then
     else
       print("export LD_LIBRARY_PATH=" .. table.concat(missing, ":" ))
     end
-    error("Set the path correctly before running Q", 2)
+    --error("Set the path correctly before running Q", 2)
 end
 
 --stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))

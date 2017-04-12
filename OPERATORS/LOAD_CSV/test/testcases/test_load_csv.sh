@@ -8,6 +8,7 @@ echo $SCRIPT_PATH
 
 export Q_SRC_ROOT=../../../../
 export LD_LIBRARY_PATH=../../../../Q2/code/:../../obj/:../../../PRINT/obj
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/../
 bash test_load.sh
