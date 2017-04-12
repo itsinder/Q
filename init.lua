@@ -49,7 +49,7 @@ if #missing > 0 then
     else
       print("export LD_LIBRARY_PATH=" .. table.concat(missing, ":" ))
     end
-    --error("Set the path correctly before running Q", 2)
+    error("Set the path correctly before running Q", 2)
 end
 
 --stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))
