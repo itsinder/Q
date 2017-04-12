@@ -6,7 +6,8 @@ require 'error_code'
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
 local dbg = require 'debugger'
-
+local plstring = require 'pl.stringx'
+local plfile = require 'pl.file'
 --RS Use extract_fn_proto for txt_to_* and so on
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
@@ -77,7 +78,7 @@ function mk_out_buf(
     --=======================================
     if m.qtype == "SC" then 
       assert(in_buf_len <= m.width, err_loc .. g_err.STRING_TOO_LONG)
-      ffi.copy(out_buf, in_buf)
+      ffi.copy(out_buf, in_buf, in_buf_len)
     end
     --=======================================
     local converter = assert(g_qtypes[m.qtype]["txt_to_ctype"])
@@ -103,7 +104,8 @@ function mk_out_buf(
       end
     end
   end
-  assert(status == 0, g_err.TYPE_CONVERTER_FAILED .. m.qtype)
+  --assert(status == 0, g_err.TYPE_CONVERTER_FAILED .. m.qtype)
+  assert(status == 0, g_err.INVALID_DATA_ERROR .. m.qtype)
 end
 
 function load_csv( 
@@ -112,18 +114,13 @@ function load_csv(
   global_settings -- TODO unused for now
 )
     local plpath = require 'pl.path'
-    --assert(plpath.isdir(_G["Q_DATA_DIR"]))
-    --assert(plpath.isdir(_G["Q_META_DATA_DIR"]))
     assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
     local cols = {} -- cols[i] is Column used for column i 
     local dicts = {} -- dicts[i] is di ctionary used for column i
 
-    --assert(plpath.isfile(infile), g_err.INPUT_FILE_NOT_FOUND)
     assert( infile ~= nil and plpath.isfile(infile),g_err.INPUT_FILE_NOT_FOUND)
     assert(plpath.getsize(infile) > 0, g_err.INPUT_FILE_EMPTY)
-    --assert(plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
     assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
-    --assert(plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
     assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
     validate_meta(M)
 
@@ -161,6 +158,7 @@ function load_csv(
             local x = Dictionary(M[i].dict)
             dicts[i] = assert(Dictionary(M[i].dict), 
             "error creating dictionary " .. M[i].dict .. " for " .. M[i].name)
+            cols[i]:set_meta("dir",dicts[i])
           end 
         end    
       end
@@ -192,16 +190,19 @@ function load_csv(
         ffi.C.memset(in_buf, 0, max_txt_width) -- always init to 0
         ffi.C.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
-        --local err_loc = "error in row " .. row_idx .. " column " .. col_idx
+        local err_loc = "error in row " .. row_idx .. " column " .. col_idx
         --local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
-        local err_loc = g_err.INVALID_INDEX_ERROR
+        --local err_loc = g_err.INVALID_INDEX_ERROR
         x_idx = tonumber(
         cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
-        assert(x_idx > 0 , err_loc)
+        assert(x_idx > 0 , err_loc .. g_err.INVALID_INDEX_ERROR)
         if ( M[col_idx].is_load ) then 
           -- print(row_idx, col_idx, ffi.string(buf))
           -- local in_buf_len = assert(string.len(ffi.string(in_buf)))
-          local is_null = ( in_buf[0] == '\0' )
+          local str = plstring.strip(ffi.string(in_buf))
+          --local is_null = ( in_buf[0] == '\0' )
+          local is_null = (str == "")
+          --print("in buf = "..str)
           -- Process null value case
           if is_null then 
             assert(M[col_idx].has_nulls, 
@@ -233,6 +234,8 @@ function load_csv(
           cols[i]:eov()
           if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
             -- TODO drop the null column. Indrajeet to provide
+            local null_file = _G["Q_DATA_DIR"] .. "/_" .. M[i].name .. "_nn"
+            assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
           end
           cols_to_return[rc_idx] = cols[i]
           cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
