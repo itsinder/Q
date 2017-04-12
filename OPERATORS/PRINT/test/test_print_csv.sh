@@ -11,8 +11,10 @@ echo $SCRIPT_PATH
 cd $SCRIPT_PATH/../../../Q2/code
 make
 
-export Q_SRC_ROOT=../../../
-export LD_LIBRARY_PATH=../../../Q2/code/:../obj/:../../LOAD_CSV/obj
+cd $SCRIPT_PATH
+cd ../../../
+export Q_SRC_ROOT="`pwd`"
+export LD_LIBRARY_PATH=$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/../../LOAD_CSV/test
