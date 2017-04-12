@@ -90,7 +90,8 @@ function handle_category1(index, status, ret, v)
   local error_msg = plstring.strip(output) -- check it can be used from utils.
   
   -- check this line can be skipped with the duplicate line below
-  if error_msg == err then
+  local count = plstring.count(err, error_msg)
+  if count > 0 then
     number_of_testcases_passed = number_of_testcases_passed + 1 
   else
     increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
