@@ -5,7 +5,7 @@ function vveq_specialize(
   f1type, 
   f2type
   )
-  local tmpl = 'cmp.tmpl'
+  local tmpl = 'f1f2opf3_cmp.tmpl'
   local subs = {}
   subs.fn = "vveq_" .. f1type .. "_" .. f2type 
   assert(is_base_qtype(f1type), "f1type must be base type")

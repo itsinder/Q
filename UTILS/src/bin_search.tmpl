@@ -13,7 +13,7 @@ return require 'code_gen' {
           uint64_t nX,
           ${ftype} key,
           const char * const str_direction,
-          uint64_t *ptr_pos
+          int64_t *ptr_pos
         ) 
     ;
 
@@ -28,12 +28,12 @@ return require 'code_gen' {
           uint64_t nX,
           ${ftype} key,
           const char * const str_direction,
-          uint64_t *ptr_pos
+          int64_t *ptr_pos
           )
       // STOP FUNC DECL
       {
         int status = 0;
-        long long pos, lb, ub, mid;
+        uint64_t pos, lb, ub, mid;
         int direction;
 
         if ( X == NULL ) go_BYE(-1);
@@ -96,7 +96,7 @@ return require 'code_gen' {
             break;
           default : go_BYE(-1);
         }
-        *ptr_pos = pos;
+        *ptr_pos = (int64_t)pos;
 BYE:
         return status ;
       }

@@ -5,22 +5,31 @@ local function script_path()
     return str:match("(.*/)")
 end
 local base_path = script_path() or "./"
-print (base_path)
+-- print (base_path)
 local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "Q2/code/?.lua"
-
+paths[#paths + 1] = "UTILS/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
 local lib_paths = {}
 local lib_sep = ":" .. base_path
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
 lib_paths[#lib_paths + 1 ] = "Q2/code"
+lib_paths[#lib_paths + 1 ] = "OPERTORS/F1F2OPF3/lua"
+
+
+
+
+-- Check if all the paths are there
 local curr_path = os.getenv("LD_LIBRARY_PATH")
 libs = {}
 if curr_path ~= nil then
     for i in string.gmatch(curr_path, "[^:]+") do
-        print(i)
+        --print(i)
         if string.len(i) > 0 then
             libs[#libs +1] = i
         end
@@ -38,16 +47,17 @@ for _ ,v in pairs(lib_paths) do
 end
 
 if #missing > 0 then
-    print("Set the path correctly before running Q")
-    if curr_path ~= nil then
+    if curr_path ~= nil and string.len(curr_path) ~= 0 then
         print("export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" .. table.concat(missing, ":" ))
     else
       print("export LD_LIBRARY_PATH=" .. table.concat(missing, ":" ))
     end
-    error()
+    error("Set the path correctly before running Q", 2)
 end
 
-stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))
+--stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))
 package.path = table.concat(paths, sep)
-print(package.path)
-print(os.getenv("LD_LIBRARY_PATH"))
+
+require "globals"
+--print(package.path)
+--print(os.getenv("LD_LIBRARY_PATH"))

@@ -28,7 +28,7 @@ end
 function print_result() 
   local str
   
-  str = "----------LOAD TEST CASES RESULT----------------\n"
+  str = "----------LOAD_CSV TEST CASES RESULT----------------\n"
   str = str.."No of successfull testcases "..number_of_testcases_passed.."\n"
   str = str.."No of failure testcases     "..number_of_testcases_failed.."\n"
   str = str.."-----------------------------------\n"
@@ -90,7 +90,9 @@ function handle_category1(index, status, ret, v)
   local error_msg = plstring.strip(output) -- check it can be used from utils.
   
   -- check this line can be skipped with the duplicate line below
-  if error_msg == err then
+  -- if error_msg is subset of err
+  local count = plstring.count(err, error_msg)
+  if count > 0 then
     number_of_testcases_passed = number_of_testcases_passed + 1 
   else
     increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
@@ -138,8 +140,9 @@ function handle_category2(index, status, ret, v, output_category3, v_category3)
     increment_failed_load(index, v, "testcase failed: in category2 , length of Column and output regex does not match")
     return nil
   end
-  
+   
   for i=1,ret:length() do
+   
     local status, result = pcall(convert_c_to_txt,ret,i)
     
     if status == false then

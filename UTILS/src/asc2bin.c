@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "q_macros.h"
-#include "mmap.h"
+#include "_mmap.h"
 #include "_txt_to_SC.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"

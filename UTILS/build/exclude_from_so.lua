@@ -5,5 +5,6 @@ return {
   "dyntest",
   "qsort2",
   ".git",
-  "OPERATORS/F_TO_S/test/"
+  "OPERATORS/F_TO_S/test/",
+  "gen_inc",
 }

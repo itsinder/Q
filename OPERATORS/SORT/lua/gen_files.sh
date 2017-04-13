@@ -1,7 +1,5 @@
 #!/bin/bash
 set -e 
-rm -r -f ../gen_inc/*.h
-rm -r -f ../gen_src/*.h
 lua gen_code.lua 
 cd ../gen_src/
 ls *c > _x

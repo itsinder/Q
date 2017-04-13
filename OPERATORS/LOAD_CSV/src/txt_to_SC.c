@@ -14,7 +14,7 @@ txt_to_SC(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  int sz = 0;
+  size_t sz = 0;
   if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
   for ( char *cptr = X; *cptr != '\0'; cptr++ ) { 
     if ( *cptr == '\\' ) { 

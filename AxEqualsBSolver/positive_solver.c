@@ -10,7 +10,7 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
 #define go_BYE(x) { WHEREAMI; status = x ; goto BYE; }
 #define cBYE(x) { if ( (x) < 0 ) { go_BYE((x)) } }
 #include "positive_solver.h"
-int _positive_solver(
+static int _positive_solver(
     double ** A, 
     double * b, 
     double * x, 
