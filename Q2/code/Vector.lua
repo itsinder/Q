@@ -136,7 +136,6 @@ local function set_generator(self, arg)
     self.field_type = gen.field_type
     self.field_size = gen.field_size
     self.my_length = gen.length
-    self.field_size = gen.field_size
     self.memoized = true
     self.is_materialized = false
     self.input_from_file = false
