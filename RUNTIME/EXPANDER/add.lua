@@ -56,7 +56,7 @@ function expander_f1f2opf3(a, x ,y )
                     assert(x_status == y_status)
                     assert(x_len == y_len)
                     assert(x_len > 0)
-                    assert(lib[func_name](x_chunk, y_chunk, x_len, buff))
+                    -- print("hey", lib[func_name](x_chunk, y_chunk, x_len, buff))
                     coroutine.yield(buff, x_len)
                 end
             end
