@@ -1,5 +1,4 @@
 #!/usr/bin/env lua
-package.path = package.path.. ";../../../UTILS/lua/?.lua"
 local tmpl = dofile 'to_txt.tmpl'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
