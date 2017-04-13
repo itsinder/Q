@@ -14,7 +14,6 @@ function q_wrap(x)
                     i = i + 1
                 end
             end
-            return -1
         end)
 end
 
@@ -23,7 +22,7 @@ f1f2opf3.add = "vvadd_specialize"
 f1s1opf2 = {}
 f1s1opf2.add = "vsadd_specialize"
 -- Done doc pending: specializer must return a function and an out_c_type
--- TODO add to doc 
+-- TODO add to doc
 function expander_f1f2opf3(a, x ,y )
     -- type checking
     local fn = _G[f1f2opf3[a]]
@@ -49,10 +48,10 @@ function expander_f1f2opf3(a, x ,y )
             x_status = true
             while (x_status) do
                 x_status, x_chunk, x_len = coroutine.resume(x_coro)
-                print("x details:", x_status, x_chunk, x_len)
                 y_status, y_chunk, y_len = coroutine.resume(y_coro)
-                print("y details:", y_status, y_chunk, y_len)
                 if x_status  or y_status then
+                    print("x details:", x_status, x_chunk, x_len)
+                    print("y details:", y_status, y_chunk, y_len)
                     assert(x_status == y_status)
                     assert(x_len == y_len)
                     assert(x_len > 0)
@@ -60,45 +59,46 @@ function expander_f1f2opf3(a, x ,y )
                     coroutine.yield(buff, x_len)
                 end
             end
-            return -1
         end)
-      return gen
+    return gen
 
 
 end
 
 function eval(coro)
-   local status = true
-   local chunk
-   local size
-   while status do
-      status, chunk, size = coroutine.resume(coro)
-   print(status, chunk, size)
-   end
+    local status = true
+    local chunk
+    local size
+    while status do
+        status, chunk, size = coroutine.resume(coro)
+        if coroutine.status(coro) ~= "dead" then 
+            print(status, chunk, size)
+        end
+    end
 end
 -- function eval(vec)
---     local status = 0 
+--     local status = 0
 --     local chunk, size
 --     local i = 1
---     while status do 
+--     while status do
 --         status, chunk, size = vec:chunk(i)
 --         i = i + 1
 --     end
 -- end
 
 function add(x, y)
-    
-  if type(x) == "Vector" and type(y) == "Vector" then
-    local status, col = pcall(expander_f1f2opf3, "add", x, y)
-    assert(status)
-    return col
-  end
-  if type(x) == "Vector" and type(y) == "number" then
-    local status, col = pcall(expander_f1s1opf2, "add", x, y)
-    assert(status)
-    return col
-  end
-  assert(false)
+
+    if type(x) == "Vector" and type(y) == "Vector" then
+        local status, col = pcall(expander_f1f2opf3, "add", x, y)
+        assert(status)
+        return col
+    end
+    if type(x) == "Vector" and type(y) == "number" then
+        local status, col = pcall(expander_f1s1opf2, "add", x, y)
+        assert(status)
+        return col
+    end
+    assert(false)
 end
 
 local Vector = require 'Vector'

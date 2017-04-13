@@ -1,7 +1,7 @@
 #!/bin/bash
 # Unit test for ../src/get-cell.c
 set -e 
-export LD_LIBRARY_PATH=$PWD
+ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD"
 luajit test_get_cell.lua 2 4 get_cell_input.txt
 luajit test_get_cell.lua 3 2 get_cell_in2.txt
 #---- cases that should fail 
