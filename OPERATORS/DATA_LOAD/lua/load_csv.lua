@@ -9,6 +9,7 @@ local plstring = require 'pl.stringx'
 local Column = require 'Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
+local plfile = require 'pl.file'
 
 local ffi = require "ffi"
 ffi.cdef([[
@@ -65,7 +66,8 @@ function load_csv(
   validate_meta(M)
    
 
-  for i = 1, #M do 
+  for i = 1, #M do
+    M[i].num_nulls = 0
     --default to true
     if M[i].is_load == nil then 
       M[i].is_load = true
@@ -160,7 +162,8 @@ function load_csv(
         --if ffi.string(buf) == "" then 
         if str == "" then 
           -- nil values
-          assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD ) 
+          assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD )
+          M[col_idx + 1].num_nulls = M[col_idx + 1].num_nulls + 1
           ffi.fill(is_null, 1,0)
           if col_num_nil[col_idx + 1] == nil then 
             col_num_nil[col_idx + 1] =  1 
@@ -205,6 +208,11 @@ function load_csv(
    for i, column in pairs(column_list) do
       column:eov()
       -- print(column:length())
+      -- if no nulls are present, then delete the null file
+      if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
+        local null_file = _G["Q_DATA_DIR"] .. "/_" .. M[i].name .. "_nn"
+        assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
+      end
    end
    print("Completed successfully")
    return column_list

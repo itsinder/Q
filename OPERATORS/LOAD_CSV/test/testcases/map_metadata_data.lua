@@ -107,7 +107,7 @@ return {
     },
     -- CSV file with end of line \n    
     { meta=  "gm_eoln.lua", data= "file_with_eol.csv", category= "category2",
-      output_regex = {"Data having\n","ok","ok","ok"}, name = "file_with_end_of_line" 
+      output_regex = {"Data having","ok","ok","ok"}, name = "file_with_end_of_line" 
     },
     -- if Nil is not present in Nil field  
     { meta = "gm_no_nil_in_nil_field.lua", data = "I4_valid.csv", category= "category2",
