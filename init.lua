@@ -11,6 +11,7 @@ local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "Q2/code/?.lua"
 paths[#paths + 1] = "UTILS/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
