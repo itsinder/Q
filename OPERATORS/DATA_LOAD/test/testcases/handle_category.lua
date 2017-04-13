@@ -18,9 +18,9 @@ function increment_failed_load(index, v, str)
   table.insert(failed_testcases,index)
   
   print("\n-----Meta Data File------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_metadata/"..v.meta)
+  os.execute("cat "..rootdir.."/OPERATORS/DATA_LOAD/test/testcases/test_metadata/"..v.meta)
   print("\n\n-----CSV File-------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_data/"..v.data)
+  os.execute("cat "..rootdir.."/OPERATORS/DATA_LOAD/test/testcases/test_data/"..v.data)
   print("\n--------------------\n")
   
 end
