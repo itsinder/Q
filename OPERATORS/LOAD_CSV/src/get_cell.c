@@ -64,10 +64,6 @@ get_cell(
     //---------------------------------
     if ( X[xidx] == bslash ) {
       xidx++;
-      if ( X[xidx] == 'n' ) { 
-        xidx++;
-        continue;
-      }
       if ( xidx >= nX ) { go_BYE(-1); }
       if ( bufidx >= bufsz ) { go_BYE(-1); }
       buf[bufidx++] = X[xidx++];

@@ -106,9 +106,9 @@ return {
           output_regex = {"This is valid text containing \"quoted\" text and , comma ","ok","Some random valid string","valid data"},          name = "valid_escape_char" 
     },
     -- CSV file with end of line \n    
-    { meta=  "gm_eoln.lua", data= "file_with_eol.csv", category= "category2",
-      output_regex = {"Data having","ok","ok","ok"}, name = "file_with_end_of_line" 
-    },
+    --{ meta=  "gm_eoln.lua", data= "file_with_eol.csv", category= "category2",
+    --  output_regex = {"Data having","ok","ok","ok"}, name = "file_with_end_of_line" 
+    --},
     -- if Nil is not present in Nil field  
     { meta = "gm_no_nil_in_nil_field.lua", data = "I4_valid.csv", category= "category2",
       output_regex = {-2147483648,0,2147483647,11}, name = "no_nil_in_nil_field" 
