@@ -76,7 +76,7 @@ function xcopy(
   recursive_descent(pattern, root, xdir, xfil, destdir)
   end
 --============
-local root = "/home/subramon/WORK/Q/"
+local root = rootdir 
 local xdir = dofile("exclude_dir.lua")
 local xfil = dofile("exclude_fil.lua")
   --==========================
