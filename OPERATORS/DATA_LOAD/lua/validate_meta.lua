@@ -1,4 +1,3 @@
-package.path = package.path .. ";../../../Q2/code/?.lua;../../../UTILS/lua/?.lua"
 require 'globals'
 require 'error_code'
 local pl = require 'pl'

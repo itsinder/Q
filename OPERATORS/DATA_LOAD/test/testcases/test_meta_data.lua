@@ -1,8 +1,3 @@
-local rootdir = os.getenv("Q_SRC_ROOT")
-assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
-
 local plstring = require 'pl.stringx'
 require("validate_meta")
 _G["Q_META_DATA_DIR"] = "./metadata"
