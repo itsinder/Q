@@ -90,13 +90,16 @@ xcopy(pattern, root, xdir, xfil, cdir)
   --==========================
 local pattern = "*.h"
 local hdir = "/tmp/LUAH/"
-plpath.rmdir(hdir)
+os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, xdir, xfil, hdir)
+
+command = "cat " .. hdir .. "*.h > /tmp/q.h"
+os.execute(command)
   --==========================
-local pattern = "*.h"
+local pattern = "*.tmpl"
 local tdir = "/tmp/TEMPLATES/"
-plpath.rmdir(tdir)
+os.execute("rm -r -f " .. tdir)
 plpath.mkdir(tdir)
 xcopy(pattern, root, xdir, xfil, tdir)
   --==========================

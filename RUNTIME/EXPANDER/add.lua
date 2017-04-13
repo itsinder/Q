@@ -88,18 +88,17 @@ end
 
 function add(x, y)
     
-   if type(x) == "Vector" and type(y) == "Vector" then
-        status, col = pcall(expander_f1f2opf3, "add", x, y)
-        assert(status, col)
-        return col
-    elseif type(x) == "Vector" and type(y) == "number" then
-        status, col = pcall(expander_f1s1opf2, "add", x, y)
-        assert(status, col)
-        return col
-
-    else
-        assert(false)
-    end
+  if type(x) == "Vector" and type(y) == "Vector" then
+    local status, col = pcall(expander_f1f2opf3, "add", x, y)
+    assert(status)
+    return col
+  end
+  if type(x) == "Vector" and type(y) == "number" then
+    local status, col = pcall(expander_f1s1opf2, "add", x, y)
+    assert(status)
+    return col
+  end
+  assert(false)
 end
 
 local Vector = require 'Vector'
