@@ -6,6 +6,10 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
+#generate vector_map.so
+cd $SCRIPT_PATH/../../../../Q2/code
+make
+
 cd $SCRIPT_PATH
 cd ../../../../
 export Q_SRC_ROOT="`pwd`"
