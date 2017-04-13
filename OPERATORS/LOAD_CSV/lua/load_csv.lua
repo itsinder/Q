@@ -173,7 +173,7 @@ function load_csv(
 
       local x_idx = 0
       local out_buf_sz = 1024 -- TODO FIX 
-      -- replace the below 3 lines, to fix for performance testing
+      -- replace ffi.cast with ffi.gc, to fix for performance testing
       local in_buf  = ffi.gc(cee.malloc(max_txt_width), cee.free)      
       local out_buf = ffi.gc(cee.malloc(out_buf_sz), cee.free)      
       local is_nn   = ffi.gc(cee.malloc(1), cee.free)
