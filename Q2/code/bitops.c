@@ -111,10 +111,12 @@ write_bits_to_file(
         val = fgetc( fp );
         debug_print( " Position after getting bit =%ld\n", ftell( fp ) );
 
-        if ( !feof( fp ) )
+        if ( !feof( fp )  && ftell(fp) != 0 )
         {
+            int prev_locn = ftell(fp);
             status = fseek( fp, -1, SEEK_CUR );
-            assertc( status == 0,
+            int new_locn = ftell(fp);
+            assertc( prev_locn - new_locn == 1,
                      "Failed to seek pointer back to original position\n" );
             // cBYE(status);
         }
@@ -401,13 +403,16 @@ test_write_bits_to_file(
 
 
     write_bits_to_file( fp, &vec, 4, 8 );
-    //fflush(fp);
     write_bits_to_file( fp, &vec, 3, 4 );
     fseek( fp, 0, SEEK_SET );
     int ret_val = fgetc( fp );
     //debug_print( "WRITE to file should return %d, returned %d\n", 79, ret_val );
     assertc(ret_val = 79, "WRITE to file should return %d, returned %d\n", 79, ret_val);
-    //FILE* fp = fopen(f_name, "wb+");
+    fflush(fp);
+    fclose(fp);
+    remove(f_name);
+    fp = fopen(f_name, "wb+");
+    fseek( fp, 0, SEEK_SET );
     vec = 1;
     write_bits_to_file( fp, &vec, 2, 0 );
     vec = 0;
