@@ -41,7 +41,6 @@ function Generator.new(arg)
                         i = i + 1
                     end
                 end
-                return status
             end
             )
     elseif arg.coro ~= nil then
