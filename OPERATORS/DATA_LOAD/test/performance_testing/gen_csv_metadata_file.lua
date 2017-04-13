@@ -81,13 +81,13 @@ function generate_unique_varchar_strings(meta_info)
       
       --calculating possible unique string limit
       local exp_unique_strings= 0
-      for j=1, meta_info[i]['size']-1 do
+      for j=1, meta_info[i]['max_width']-1 do
         exp_unique_strings = exp_unique_strings + math.pow(#charset, j)
       end
-      --print("For string length ",meta_info[i]['size']-1," value is ",exp_unique_strings)
+      --print("For string length ",meta_info[i]['width']-1," value is ",exp_unique_strings)
       -- before gen unique strings checking if max_unique_value is within possible limit
       assert(meta_info[i]['max_unique_values'] <= exp_unique_strings,"Specified Unique string limit is beyond possible limit value...")
-      unique_string_tables[i] = dict_size_unique_string(meta_info[i]['size'],meta_info[i]['max_unique_values'])
+      unique_string_tables[i] = dict_size_unique_string(meta_info[i]['max_width'],meta_info[i]['max_unique_values'])
     end
   end  
   if is_varchar_col == false then
@@ -112,9 +112,9 @@ function generate_metadata(meta_info)
       metadata_table[idx]['has_nulls'] = meta_info[i]['has_nulls']
       
       if meta_info[i]['qtype']== 'SC' then
-        metadata_table[idx]['size'] = meta_info[i]['size']
+        metadata_table[idx]['width'] = meta_info[i]['width']
       elseif meta_info[i]['qtype']== 'SV' then
-        metadata_table[idx]['size'] = meta_info[i]['size']
+        metadata_table[idx]['max_width'] = meta_info[i]['max_width']
         metadata_table[idx]['add'] = meta_info[i]['add']
         metadata_table[idx]['dict'] = "D"..i
         metadata_table[idx]['unique_table_id']= i
@@ -145,7 +145,7 @@ local function fill_table(column_list, chunk_print_size,unique_string_tables)
       if column_list[j]['qtype']=='SC' then
         func ='random_'..column_list[j]['qtype']
         loadstring("value = " .. func)()
-        local size = column_list[j]['size']-1
+        local size = column_list[j]['width']-1
         table.insert(file_data[ind],value(size))
       elseif column_list[j]['qtype']=='SV' then
         local random_no = math.random(1,column_list[j]['max_unique_values'])
