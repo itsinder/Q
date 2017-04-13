@@ -65,10 +65,15 @@ else
 fi
 rm $nightly_file
 
+var5="-------------------Dictionary TestCases in DATA_LOAD-----------"
+# echo $var5
+var6=$(bash $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/test_dictionary.sh)
+# echo $var6
+
 #concat all the 4 variables
-var5="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"
-#echo "$var5"
-echo "$var5" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com
+var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"
+# echo "$var100"
+echo "$var100" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com
 #projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
 
 

@@ -45,7 +45,8 @@ get_cell(
   }
   //----------------------------
   for ( ; ; ) { 
-    if ( xidx >= nX ) { go_BYE(-1); }
+    if ( xidx > nX ) { go_BYE(-1); }
+    if ( xidx == nX ) { return xidx; }
     if ( X[xidx] == last_char ) {
       xidx++; // jumo over last char;
       if ( start_dquote ) { 
