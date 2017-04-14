@@ -9,7 +9,9 @@ cd ./dyncall-0.9/
 ./configure
 make
 sudo make install
-cd ../bindings/lua/luadc/
+cd ../
+ tar -xvzf bindings.tar.gz
+cd ./bindings/lua/luadc/
 make
 cd testFuncs/
 gcc -shared -fPIC -o libtest.so test.c
