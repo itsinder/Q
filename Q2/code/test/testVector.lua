@@ -1,4 +1,10 @@
 local ffi = require "ffi"
+local print_vector = function(ptr , len)
+   for i=1,len do
+   print( tonumber(ffi.cast("int*", ptr)[i-1]))
+   end
+
+end
 ffi.cdef([[
     typedef struct {
         char *fpos;
@@ -14,8 +20,8 @@ ffi.cdef([[
     int get_bits_from_file(FILE* fp, int* arr, int length);
     int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
     ]])
-local c = ffi.load('print.so')
-local b = ffi.load('vector_mmap.so')
+-- local c = ffi.load('print.so')
+local c = ffi.load('vector_mmap.so')
 local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
@@ -35,17 +41,21 @@ local v2 = Vector{field_type='i',
 filename='test1.txt', }
 
 local x, x_size = v1:chunk(0)
-c.print_vector(x, x_size)
+print_vector(x, x_size)
 local y, y_size = v2:chunk(1)
-c.print_vector(y, y_size)
+print_vector(y, y_size)
 local v1_gen = Generator{vec=v1}
 local i = 0
 while(v1_gen:status() ~= 'dead')
 do
     local status, chunk, size = v1_gen:get_next_chunk()
-    print("Generator chunk number=".. i, "Generator status=" .. tostring(status), "Chunk size=" .. size)
+    if status then
+        print("Generator chunk number=".. i, "Generator status=" .. tostring(status), "Chunk size=" .. size)
+        print_vector(chunk, size)
+    else 
+        print("Generator chunk number=".. i, "Generator status=" .. tostring(status))
+    end
     i = i +1
-    c.print_vector(chunk, size)
 end
 
 --TODO add tests for put to vector
@@ -55,13 +65,13 @@ filename="o.txt", write_vector=true,
 v3:put_chunk(x, x_size)
 v3:eov()
 local z, z_size = v3:chunk(0)
-c.print_vector(z, z_size)
+print_vector(z, z_size)
 local v4 = Vector{field_type='B1',
 filename="test_bits.txt", field_size=1/8}
 local a, a_size = v4:chunk(0)
 print("Vector bit get test")
 local a_int = ffi.gc(c.malloc(ffi.sizeof("int")* a_size), ffi.free)
-b.get_bits_from_array(a, a_int, a_size)
+c.get_bits_from_array(a, a_int, a_size)
 local t2 = Vector{field_type="i", write_vector=true}
 t2:put_chunk(a_int, a_size)
 t2:eov()
@@ -69,7 +79,7 @@ print "**************"
 for i=0,15 do
  print(v4:get_element(i), tonumber(ffi.cast("int*", a_int) + i))
 end
-c.print_vector(a_int, a_size)
+print_vector(a_int, a_size)
 -- add function to print bits:b2
 v5 = Column{field_type='i',
 filename="o2.txt", write_vector=true,
@@ -87,14 +97,14 @@ assert(v6.nn_vec ~= nil , "has an nn vector")
 v6:put_chunk(x_size, x, a )
 v6:eov()
 q_size, q, q_nn = v6:chunk(0)
-c.print_vector(q, q_size)
+print_vector(q, q_size)
 local q_int = ffi.cast( "int*", ffi.gc(c.malloc(ffi.sizeof("int")* q_size), ffi.free) )
-b.get_bits_from_array(q_nn, q_int, q_size)
+c.get_bits_from_array(q_nn, q_int, q_size)
 print "**************"
-c.print_vector(q_int, q_size)
+print_vector(q_int, q_size)
 
 print "**************"
-c.print_vector(a_int, a_size)
+print_vector(a_int, a_size)
 print( v1:length())
 
 print(q_int[0])
