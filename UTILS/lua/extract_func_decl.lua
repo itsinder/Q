@@ -1,7 +1,6 @@
 #!/bin/lua
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Set Q_SRC_ROOT as /home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 require("trim")
 local plpath = require 'pl.path'
 n = #arg

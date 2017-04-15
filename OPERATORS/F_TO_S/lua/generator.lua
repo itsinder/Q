@@ -1,4 +1,3 @@
-  package.path = package.path.. ";../../../UTILS/lua/?.lua"
   local plfile = require 'pl.file'
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
