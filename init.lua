@@ -1,9 +1,11 @@
 -- requires luaposix have to include in our luarocks def
 local stdlib = require("posix.stdlib")
+
 local function script_path()
     local str = debug.getinfo(2, "S").source:sub(2)
     return str:match("(.*/)")
 end
+
 local base_path = script_path() or "./"
 -- print (base_path)
 local paths = {}
@@ -49,12 +51,14 @@ for _ ,v in pairs(lib_paths) do
 end
 
 if #missing > 0 then
+
+	print("\27[31m" .. "\27[4m" .. "\27[1m" .. "error: Execute the next line and try".. "\27[0m")
     if curr_path ~= nil and string.len(curr_path) ~= 0 then
         print("export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" .. table.concat(missing, ":" ))
     else
       print("export LD_LIBRARY_PATH=" .. table.concat(missing, ":" ))
     end
-    error("Set the path correctly before running Q", 2)
+	os.exit(-1)
 end
 
 --stdlib.setenv("LD_LIBRARY_PATH", table.concat(lib_paths, lib_sep))
