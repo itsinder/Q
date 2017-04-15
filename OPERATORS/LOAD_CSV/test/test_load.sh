@@ -13,10 +13,12 @@ make
 cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
-echo $LD_LIBRARY_PATH
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj"
 # echo $LD_LIBRARY_PATH
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
+
+unset LD_LIBRARY_PATH
+`lua | tail -1`
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj"
 
 cd $SCRIPT_PATH/
 rm -rf ../gen_inc ../gen_src 
