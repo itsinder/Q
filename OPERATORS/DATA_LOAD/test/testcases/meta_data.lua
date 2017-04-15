@@ -12,9 +12,7 @@ For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
 
-local rootdir = os.getenv("Q_SRC_ROOT")
-assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
+
 require("error_code")
 
 return {

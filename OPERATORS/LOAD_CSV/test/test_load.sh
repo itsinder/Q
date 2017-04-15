@@ -13,8 +13,8 @@ make
 cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
-export LD_LIBRARY_PATH=$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj
-#echo $LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj
+# echo $LD_LIBRARY_PATH
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/

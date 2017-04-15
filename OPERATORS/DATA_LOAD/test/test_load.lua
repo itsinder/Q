@@ -1,9 +1,3 @@
-local rootdir = os.getenv("Q_SRC_ROOT")
-assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/Q2/code/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
-
 local log = require 'log'
 local plpath = require 'pl.path'
 local dir = require 'pl.dir'
@@ -30,7 +24,7 @@ local tgt = "../obj/libload_csv.so"
 local status = compile_so(incs, srcs, tgt)
 assert(status, "compile of .so failed")
 
-require 'load_csv'
+require 'load_csv_dataload'
 local Column = require 'Column'
 
 assert( #arg == 2 , "Arguments are <metadata_file_path> <csv_file_path>")

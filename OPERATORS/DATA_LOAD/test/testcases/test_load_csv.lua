@@ -1,10 +1,4 @@
-local rootdir = os.getenv("Q_SRC_ROOT")
-assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/Q2/code/?.lua"
-package.path = package.path.. ";" .. rootdir .. "/OPERATORS/DATA_LOAD/lua/?.lua"
-
-require 'load_csv'
+require 'load_csv_dataload'
 require 'handle_category'
 
 --local Dictionary = require 'dictionary'

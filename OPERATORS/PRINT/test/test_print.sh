@@ -17,7 +17,7 @@ mkdir ../gen_src ../gen_inc ../obj
 cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
-export LD_LIBRARY_PATH=$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
 cd $SCRIPT_PATH/../lua

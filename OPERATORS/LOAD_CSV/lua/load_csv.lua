@@ -55,8 +55,9 @@ function mk_out_buf(
   out_buf,
   out_buf_len,
   err_loc
-  )
-    ffi.cdef("size_t strlen(const char *);")
+)
+    -- commented the below line to fix the performance testing
+    --ffi.cdef("size_t strlen(const char *);")
     local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
 
     if m.qtype == "SV" then 
@@ -172,9 +173,10 @@ function load_csv(
 
       local x_idx = 0
       local out_buf_sz = 1024 -- TODO FIX 
-      local in_buf  = ffi.cast("char  *", ffi.gc(cee.malloc(max_txt_width), ffi.C.free))
-      local out_buf = ffi.cast("char *", ffi.gc(cee.malloc(out_buf_sz), ffi.C.free))
-      local is_nn   = ffi.cast("char *", ffi.gc(cee.malloc(1), ffi.C.free))
+      -- replace ffi.cast with ffi.gc, to fix for performance testing
+      local in_buf  = ffi.gc(cee.malloc(max_txt_width), cee.free)      
+      local out_buf = ffi.gc(cee.malloc(out_buf_sz), cee.free)      
+      local is_nn   = ffi.gc(cee.malloc(1), cee.free)
       local ncols = #M
       local row_idx = 1
       local col_idx = 1

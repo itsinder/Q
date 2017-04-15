@@ -1,6 +1,6 @@
 require 'pl'
 require 'gen_csv_metadata_file'
-require 'load_csv_dataload'
+require 'load_csv'
 
 -- file in which performance testing results for each csv file is written
 local performance_file ="./performance_results/performance_measures.txt"
