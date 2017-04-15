@@ -1,6 +1,5 @@
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 
 -- assert(#arg == 2, "Usage is lua ", arg[0], " <file1> <file2> ")
 -- file1 = arg[1]

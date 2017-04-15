@@ -1,4 +1,3 @@
-  package.path = package.path.. ";../lua/?.lua"
   local plpath = require 'pl.path'
   dofile '../lua/globals.lua'
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))

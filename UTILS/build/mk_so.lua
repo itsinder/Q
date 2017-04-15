@@ -1,6 +1,5 @@
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 local dbg = require 'debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
