@@ -1,6 +1,6 @@
   local rootdir = os.getenv("Q_SRC_ROOT")
   assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-  local gen_code = require("gen_code")
+  local gen_code = require 'gen_code'
   local plpath = require "pl.path"
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
@@ -15,14 +15,19 @@
   for i, operator in ipairs(operators) do
     -- ==================
     local sp_fn_name = operator .. "_specialize"
-    local str = "require(" .. sp_fn_name .. ")"
-    local sp_fn = loadstring(str)
-    dbg()
+    local str = "local sp_fn = require '" .. sp_fn_name .. "' "
+    print(str)
+    -- dbg()
+    f = loadstring(str)
+    f()
+    -- local sp_fn = require 'vvadd_specialize'
     assert(type(sp_fn) == "function")
     for i, in1type in ipairs(types) do 
       for j, in2type in ipairs(types) do 
           local status, subs, tmpl = pcall(
           sp_fn, in1type, in2type, optargs)
+          assert(type(subs) == "table")
+          assert(type(tmpl) == "string")
           if ( status ) then 
             -- TODO Improve following.
             local T = dofile(tmpl)
