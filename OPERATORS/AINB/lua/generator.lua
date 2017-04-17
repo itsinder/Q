@@ -3,10 +3,7 @@
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-
-  require("aux")
-  require("gen_doth")
-  require("gen_dotc")
+   local gen_code =  require("gen_code")
   plfile.delete("_qfns_f_to_s.lua")
 
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
@@ -32,8 +29,8 @@
         T.fn           = subs.fn
         T.atype        = subs.atype
         T.btype        = subs.btype
-        gen_doth(T.fn, T, incdir)
-        gen_dotc(T.fn, T, srcdir)
+        gen_code.doth(T.fn, T, incdir)
+        gen_code.dotc(T.fn, T, srcdir)
         print("Generated ", T.fn)
       end
     end

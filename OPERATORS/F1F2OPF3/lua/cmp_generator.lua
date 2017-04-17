@@ -1,9 +1,7 @@
 #!/usr/bin/env lua
   local rootdir = os.getenv("Q_SRC_ROOT")
   assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-  require("aux")
-  require("gen_doth")
-  require("gen_dotc")
+  local gen_code =  require("gen_code")
   local pl = require 'pl'
   dofile '../../../UTILS/lua/globals.lua'
 
@@ -36,8 +34,8 @@
           T.in1type    = subs.in1type
           T.in2type    = subs.in2type
           T.comparison = subs.comparison
-          gen_doth(subs.fn, T, incdir)
-          gen_dotc(subs.fn, T, srcdir)
+          gen_code.doth(subs.fn, T, incdir)
+          gen_code.dotc(subs.fn, T, srcdir)
         end
       end
     end

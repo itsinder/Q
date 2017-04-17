@@ -5,7 +5,7 @@ function vsltorgt_specialize(
     assert(( ftype == "I1" ) or ( ftype == "I2") or ( ftype == "I4" ) or 
        ( ftype == "I8" ) or ( ftype == "F4") or ( ftype == "F8" ),
        "type must be I1/I2/I4/I8/F4/F8")
-    local tmpl = 'cmp2.tmpl'
+    local tmpl = 'f1s1opf2_cmp2.tmpl'
     local subs = {}; 
     if ( scalars ) then 
       assert((type(scalars) == "table"), "Need lb/ub sent as Lua table")

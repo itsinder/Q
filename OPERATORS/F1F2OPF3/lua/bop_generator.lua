@@ -1,8 +1,6 @@
   local rootdir = os.getenv("Q_SRC_ROOT")
   assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-  require("aux")
-  require("gen_doth")
-  require("gen_dotc")
+  local gen_code = require("gen_code")
   local plpath = require 'pl.path'
 
   dofile '../../../UTILS/lua/globals.lua'
@@ -35,8 +33,8 @@
           local T = dofile(tmpl)
           T.fn         = subs.fn
           T.c_code_for_operator = subs.c_code_for_operator
-          gen_doth(subs.fn, T, incdir)
-          gen_dotc(subs.fn, T, srcdir)
+          gen_code.doth(subs.fn, T, incdir)
+          gen_code.dotc(subs.fn, T, srcdir)
           print("Produced ", T.fn)
         end
       end

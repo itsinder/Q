@@ -2,8 +2,6 @@
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-
-  require("aux")
   require("gen_doth")
   require("gen_dotc")
   plfile.delete("_qfns_f_to_s.lua")

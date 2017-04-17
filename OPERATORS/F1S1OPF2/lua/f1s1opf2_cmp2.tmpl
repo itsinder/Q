@@ -7,8 +7,7 @@ return require 'code_gen' {
 extern int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval1,
-      ${fldtype} sval2,
+      ${fldtype} *svals,
       uint64_t nR,  
       uint64_t *restrict out 
       ) 
@@ -19,14 +18,15 @@ ${fn}(
 int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval1,
-      ${fldtype} sval2,
+      ${fldtype} *svals,
       uint64_t nR,  
       uint64_t * restrict out 
       )
 { 
 #define VECTOR_LENGTH 4096
   int status = 0;
+  ${fldtype} range_lb = svals[0];
+  ${fldtype} range_ub = svals[1];
   /* calculate number of VECTOR_LENGTH element sized chunks to process */
   uint64_t num_blocks = nR / VECTOR_LENGTH; 
   int num_last_block = VECTOR_LENGTH;
@@ -44,7 +44,7 @@ ${fn}(
     uint64_t oval = 0;
     for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
       ${fldtype} inval = in[iidx]; 
-      int rslt = (inval ${comp1} sval1) ${combiner} (inval ${comp2} sval2) ;
+      int rslt = (inval ${comp1} range_lb) ${combiner} (inval ${comp2} range_ub) ;
       /* TODO: Avoid the if condition */
       if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
       bit_idx++;
