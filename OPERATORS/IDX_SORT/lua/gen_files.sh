@@ -6,6 +6,14 @@ UDIR="$Q_SRC_ROOT/UTILS/lua"
 test -d $UDIR
 unset LUA_INIT
 export LUA_INIT="@linit.lua"
-lua $UDIR/extract_func_decl.lua get_cell.c ../gen_inc/
-lua $UDIR/extract_func_decl.lua txt_to_SC.c ../gen_inc/
-echo "ALL DONE $0 in $PWD"
+lua gen_code.lua 
+cd ../gen_src/
+ls *c > _x
+while read line; do
+  echo $line
+  gcc -c $line -I../gen_inc -I../../../UTILS/inc/
+done< _x
+rm -f *.o
+rm -f _x
+cd -
+echo "ALL DONE"
