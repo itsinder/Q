@@ -12,5 +12,6 @@ return {
   "positive_solver.c",
   "qsort.c",
   "qsort2.c",
+  "flash_sort.c",
   "tst_sort.c",
 }

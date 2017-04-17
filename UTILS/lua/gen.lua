@@ -1,4 +1,14 @@
-function gen_doth(fn, T, opdir)
+local fns = {}
+
+fns.dotc = function (fn, T, opdir)
+  dotc = T 'definition'
+  local fname = opdir .. "_" .. fn .. ".c", "w"
+  local f = assert(io.open(fname, "w"))
+  f:write(dotc)
+  f:close()
+end
+
+fns.doth = function (fn, T, opdir)
   local plpath = require 'pl.path'
   doth = T 'declaration'
   if ( ( not opdir ) or ( opdir == "" ) ) then 
@@ -11,3 +21,11 @@ function gen_doth(fn, T, opdir)
   f:write(doth)
   f:close()
 end
+
+return fns
+
+--=====
+--
+-- local gen = require 'gen'
+-- gen.dotc(....)
+-- gen.doth(....)

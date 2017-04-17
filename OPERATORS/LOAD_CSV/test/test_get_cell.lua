@@ -1,12 +1,13 @@
 -- TODO IMPORTANT. export LD_LIBRARY_PATH=$PWD
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
+package.path = package.path .. ";" .. rootdir .. "/UTILS/lua/?.lua"
 local plpath  = require 'pl.path'
 local log = require 'log'
 require 'utils'
 require 'compile_so'
 require 'extract_fn_proto'
+-- local dbg = require 'debugger'
 local ffi = require 'ffi'
 local cfile = "../src/get_cell.c"
 local get_cell_h = assert(extract_fn_proto("../src/get_cell.c"))
@@ -47,6 +48,7 @@ local M = assert(f_mmap(infile, 0))
 X = M.ptr_mmapped_file
 nX = tonumber(M.file_size)
 
+-- dbg()
 local xidx = 0
 for rowidx = 1, nrows, 1 do 
   for colidx = 1, ncols, 1 do 
@@ -56,9 +58,11 @@ for rowidx = 1, nrows, 1 do
       is_last_col = false
     end
     xidx = tonumber(get_cell(X, nX, xidx, is_last_col, buf, bufsz))
-    assert(xidx > 0 )
+    assert(xidx > 0, "rowidx/colidx = " .. rowidx .. "/" .. colidx)
   end
 end
-assert(tonumber(xidx) == tonumber(nX))
+assert(tonumber(xidx))
+assert(tonumber(nX))
+assert(tonumber(xidx) == tonumber(nX), "xidx != nX")
 log.info("All is well")
 

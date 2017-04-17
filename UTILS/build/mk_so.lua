@@ -4,6 +4,9 @@ local dbg = require 'debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
+local nargs = assert(#arg == 1, "Arguments are <opdir>")
+local opdir = arg[1]
+assert(plpath.isdir(opdir), "Directory not found: " .. opdir)
 file_names = {} -- lists files seen to point out duplication
 -- dbg()
 --=================================
@@ -79,7 +82,8 @@ local root = rootdir
 local xdir = dofile("exclude_dir.lua")
 local xfil = dofile("exclude_fil.lua")
   --==========================
-local tgt = "/tmp/libq.so"
+local tgt_o = opdir .. "/libq.so"
+local tgt_h = opdir .. "/q.h"
 
 local pattern = "*.c"
 local cdir = "/tmp/LUAC/"
@@ -93,8 +97,10 @@ os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, xdir, xfil, hdir)
 
-command = "cat " .. hdir .. "*.h > /tmp/q.h"
-os.execute(command)
+command = "cat " .. hdir .. "*.h > " .. tgt_h
+local status = os.execute(command)
+status = os.execute(command)
+print("Successfully created " .. tgt_h)
   --==========================
 local pattern = "*.tmpl"
 local tdir = "/tmp/TEMPLATES/"
@@ -107,8 +113,8 @@ FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-pro
 
 print("-----------------------")
 command = "gcc " .. FLAGS .. cdir .. "/*.c -I" .. hdir .. 
-  " -shared -o " .. tgt
+  " -shared -o " .. tgt_o
 status = os.execute(command)
 assert(status, "gcc failed")
-assert(plpath.isfile(tgt), "Target " .. tgt .. " not created")
-print("Successfully created " .. tgt)
+assert(plpath.isfile(tgt_o), "Target " .. tgt_o .. " not created")
+print("Successfully created " .. tgt_o)
