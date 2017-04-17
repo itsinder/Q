@@ -1,0 +1,11 @@
+learn.lua
+	is a terra source file (named it .lua for now so that I can use lua editor for it)
+	contain explorations of terra usage
+
+TODO: Batch script to run it etc.
+---
+Run it by simply saying 
+> terra learn.lua
+
+(give path to terra exec)
+
