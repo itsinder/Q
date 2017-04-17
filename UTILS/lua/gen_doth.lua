@@ -4,7 +4,7 @@ function gen_doth(fn, T, opdir)
   if ( ( not opdir ) or ( opdir == "" ) ) then 
     return doth
   end
-  assert(plpath.isdir(opdir))
+  assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
   -- print("doth = ", doth)
   local fname = opdir .. "_" .. fn .. ".h", "w"
   local f = assert(io.open(fname, "w"))
