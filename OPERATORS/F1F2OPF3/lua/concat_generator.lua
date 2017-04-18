@@ -3,6 +3,7 @@
   local gen_code = require("gen_code")
   local dbg = require 'debugger'
   local plpath = require 'pl.path'
+  local plfile = require 'pl.file'
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
@@ -14,8 +15,8 @@
   for i, operator in ipairs(operators) do
     -- ==================
     -- sp_fn = specializer function 
-    local sp_fn_name = operator .. "_specialize"
-    local str = 'local sp_fn = require "' .. sp_fn_name .. '"'
+    local sp_file = string.format("%s_specialize.lua", operator)
+    local sp_fn = loadstring(plfile.read(sp_file)) -- FAILS
     local sp_fn = require 'concat_specialize'
     for i, in1type in ipairs(types) do 
       for j, in2type in ipairs(types) do 
@@ -26,6 +27,8 @@
           local status, subs, tmpl = pcall(
           sp_fn, in1type, in2type, optargs)
           if ( status) then
+            assert(type(subs) == "table")
+            assert(type(tmpl) == "string")
             -- TODO Improve following.
             local T = loadstring(tmpl)()
             T.fn       = subs.fn
