@@ -24,6 +24,9 @@ function increment_failed_load(index, v, str)
   
 end
 
+-- this function checks whether after passing valid metadata
+-- the return type of Dictionary is Dictionary or not
+
 function handle_category1(index, ret, metadata)
   if type(ret) == "Dictionary" then
     no_of_success = no_of_success + 1 
@@ -33,8 +36,13 @@ function handle_category1(index, ret, metadata)
   end
 end
 
+-- this function handle the testcase where
+-- error messages are expected output
+-- if null or empty string is passed to add dictionary function 
+-- it should give an error
+
 function handle_category2(index, ret, metadata)
-    local status, add_err = pcall(ret.add,"")
+    local status, add_err = pcall(ret.add,metadata.input)
     local a, b, err = plstring.splitv(add_err,':')
     err = plstring.strip(err) 
     
@@ -44,20 +52,23 @@ function handle_category2(index, ret, metadata)
     if count > 0 then
       no_of_success = no_of_success + 1 
     else
-      increment_failed_load(index, metadata, "testcase failed : in category 2 : Error msg not matched with output_regex")
+      increment_failed_load(index, metadata, "testcase failed : in category 2 : Error message not matched with output_regex")
       return nil
     end
 end
 
+-- this function checks whether valid string entries are added in dictionary 
+-- and checking if get_size gives a valid size of a dictionary
+
 function handle_category3(index, ret, metadata)
-  ret:add("entry1")
-  ret:add("entry2")
-  ret:add("entry3")
-  ret:add("entry4")
-  ret:add("entry5")
-  local dict_size = ret:get_size()
   
-  if dict_size == 5 then
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
+  end
+
+  local dict_size = ret:get_size()
+
+  if dict_size == metadata.dict_size then
     no_of_success = no_of_success + 1 
   else
     increment_failed_load(index, metadata, "testcase failed : in category 3 : Not added entries in dictionary properly")
@@ -65,47 +76,42 @@ function handle_category3(index, ret, metadata)
   end
 end
 
+-- this function checks whether a correct index 
+-- of a valid string is returned from a dictionary
+
 function handle_category4(index, ret, metadata)
-  ret:add("String1")
-  ret:add("String2")
-  local index1 = ret:get_index_by_string("String1")
-  local index2 = ret:get_index_by_string("String2")
-  
-  if index1 == 1 and index2 == 2 then
-     no_of_success = no_of_success + 1 
-  else
-    increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid index entry")
-    return nil
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
   end
+  
+  for i=1, #metadata.input do
+    if ret:get_index_by_string(metadata.input[i]) ~= i then
+      increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid index entry")
+      return nil
+    end
+  end
+  
+  no_of_success = no_of_success + 1 
 end
+
+-- this function checks whether a correct string 
+-- of a valid index is returned from a dictionary
 
 function handle_category5(index, ret, metadata)
-  ret:add("entry1")
-  ret:add("entry2")
-  local string1 = ret:get_string_by_index(1)
-  local string2 = ret:get_string_by_index(2)
-  
-  if string1 == "entry1" and string2 == "entry2" then
-    no_of_success = no_of_success + 1 
-  else
-    increment_failed_load(index, metadata, "testcase failed : in category 5 : Invalid string entry")
-    return nil
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
   end
+  
+  for i=1, #metadata.input do
+    if ret:get_string_by_index(i) ~=  metadata.input[i] then
+      increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid string entry")
+      return nil
+    end
+  end
+  
+  no_of_success = no_of_success + 1 
 end
 
-function handle_category6(index, ret, metadata)
-  ret:add("entry1")
-  ret:add("entry2")
-  ret:add("entry3")
-  local dict_size = ret:get_size()
-  
-  if dict_size == 3 then
-    no_of_success = no_of_success + 1 
-  else
-    increment_failed_load(index, metadata, "testcase failed : in category 6 : Invalid size of dictionary")
-    return nil
-  end
-end
 
 
 function print_results()  
@@ -134,14 +140,13 @@ local handle_function = {}
 handle_function["category1"] = handle_category1
 -- checking of invalid dict add to a dictionary
 handle_function["category2"] = handle_category2
--- checking of valid dict add to a dictionary
+-- checking of valid dict add to a dictionary 
+-- and checking valid get size of a dictionary
 handle_function["category3"] = handle_category3
 -- checking valid get index from a dictionary
 handle_function["category4"] = handle_category4
 -- checking valid get string from a dictionary
 handle_function["category5"] = handle_category5
--- checking valid get size of a dictionary
-handle_function["category6"] = handle_category6
 
 
 for i, m in ipairs(T) do
