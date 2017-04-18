@@ -10,28 +10,27 @@
 
   local operator_file = assert(arg[1])
   assert(plpath.isfile(operator_file))
-  local T = dofile(operator_file)
+  local operators = dofile(operator_file)
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
-  for i, base_name in ipairs(T) do
-    -- ==================
-    local str = "function " .. base_name .. "(fld, scalar)\n"
-    str = str .. "  expander(\"f1s1opf2\", \"" .. base_name .. "\", fld, scalar)\n"
-    str = str .. "end\n"
-    local f = assert(io.open("_qfns_f1s1opf2.lua", "a"))
-    f:write(str)
-    f:close()
-    -- ==================
-    print(base_name)
-    local filename = base_name .. "_specialize.lua"
-    local str = 'require \'' .. base_name .. '_specialize\''
-    assert(plpath.isfile(filename), "File not found " .. filename)
-    loadstring(str)()
-    local stat_chk = base_name .. '_specialize'
-    local stat_chk_fn = assert(_G[stat_chk], 
-    "function not found " .. stat_chk)
+  for i, operator in ipairs(operators) do
+    local sp_fn_name = string.format(" require '%s_specialize'", operator)
+    local sp_fn = nil
+    if ( operator == "vsadd" ) then 
+      sp_fn = require 'vsadd_specialize'
+    elseif ( operator == "vssub" ) then 
+      sp_fn = require 'vssub_specialize'
+    elseif ( operator == "vsmul" ) then 
+      sp_fn = require 'vsmul_specialize'
+    elseif ( operator == "vsdiv" ) then 
+      sp_fn = require 'vsdiv_specialize'
+    elseif ( operator == "vsrem" ) then 
+      sp_fn = require 'vsrem_specialize'
+    else
+      assert(nil, "Bad operator")
+    end
     for i, fldtype in ipairs(qtypes) do 
-      local status, subs, tmpl = pcall( stat_chk_fn, fldtype)
+      local status, subs, tmpl = pcall(sp_fn, fldtype)
       if ( status ) then 
         -- TODO Improve following.
         local T = dofile(tmpl)

@@ -1,8 +1,8 @@
-require('is_base_qtype')
-function ainb_specialize(
+return function (
   atype,
   btype
   )
+    local is_base_qtype = require('is_base_qtype')
     local tmpl = 'ainb.tmpl'
     local subs = {}
     assert(is_base_qtype(atype), "type of A must be base type")

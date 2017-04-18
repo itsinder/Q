@@ -1,7 +1,7 @@
-require('is_base_qtype')
-function sum_specialize(
+return function (
   intype
   )
+    local is_base_qtype = require('is_base_qtype')
     local tmpl = 'reduce.tmpl'
     local subs = {}
     if ( intype == "B1" ) then

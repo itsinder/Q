@@ -4,25 +4,12 @@
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
    local gen_code =  require("gen_code")
-  plfile.delete("_qfns_f_to_s.lua")
 
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
-  -- ==================
-  local str = "function ainb(afld, bfld)\n"
-  str = str .. "  expander(\"ainb\",  afld, bfld)\n"
-  str = str .. "end\n"
-  local f = assert(io.open("_qfns_f_to_s.lua", "a"))
-  f:write(str)
-  f:close()
-  -- ==================
-  local str = 'require \'ainb_specialize\''
-  loadstring(str)()
+  local sp_fn = require 'ainb_specialize'
   for i, atype in ipairs(qtypes) do 
     for j, btype in ipairs(qtypes) do 
-      local stat_chk = 'ainb_specialize'
-      local stat_chk_fn = assert(_G[stat_chk], 
-      "function not found " .. stat_chk)
-      local status, subs, tmpl = pcall(stat_chk_fn, atype, btype)
+      local status, subs, tmpl = pcall(sp_fn, atype, btype)
       if ( status ) then 
         -- TODO Improve following.
         local T = dofile(tmpl)

@@ -22,5 +22,6 @@ function vsltorgt_specialize(
     subs.combiner = ' ||  '
     subs.c_lb = 0 -- TODO 
     subs.c_ub = 0 -- TODO 
+    subs.out_c_type = "uint8_t"
     return subs, tmpl
 end
