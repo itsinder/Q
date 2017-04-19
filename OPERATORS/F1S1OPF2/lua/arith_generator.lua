@@ -26,24 +26,57 @@
       sp_fn = require 'vsdiv_specialize'
     elseif ( operator == "vsrem" ) then 
       sp_fn = require 'vsrem_specialize'
+    elseif ( operator == "vsand" ) then 
+      sp_fn = require 'vsand_specialize'
+    elseif ( operator == "vsor" ) then 
+      sp_fn = require 'vsor_specialize'
+    elseif ( operator == "vsxor" ) then 
+      sp_fn = require 'vsxor_specialize'
+    elseif ( operator == "vseq" ) then 
+      sp_fn = require 'vseq_specialize'
+    elseif ( operator == "vsneq" ) then 
+      sp_fn = require 'vsneq_specialize'
+    elseif ( operator == "vsleq" ) then 
+      sp_fn = require 'vsleq_specialize'
+    elseif ( operator == "vsgeq" ) then 
+      sp_fn = require 'vsgeq_specialize'
+    elseif ( operator == "vsgt" ) then 
+      sp_fn = require 'vsgt_specialize'
+    elseif ( operator == "vslt" ) then 
+      sp_fn = require 'vslt_specialize'
+    elseif ( operator == "vsltorgt" ) then 
+      sp_fn = require 'vsltorgt_specialize'
+    elseif ( operator == "vsleqorgeq" ) then 
+      sp_fn = require 'vsleqorgeq_specialize'
+    elseif ( operator == "vsgeqandleq" ) then 
+      sp_fn = require 'vsgeqandleq_specialize'
+    elseif ( operator == "vsgtandlt" ) then 
+      sp_fn = require 'vsgtandlt_specialize'
     else
-      assert(nil, "Bad operator")
+      assert(nil, "Bad operator " .. operator)
     end
     for i, fldtype in ipairs(qtypes) do 
-      local status, subs, tmpl = pcall(sp_fn, fldtype)
-      if ( status ) then 
-        -- TODO Improve following.
-        local T = dofile(tmpl)
-        T.fn         = subs.fn
-        T.fldtype    = subs.fldtype
-        T.c_code_for_operator = subs.c_code_for_operator
-        T.comparison = subs.comparison
-        T.comp1 = subs.comp1
-        T.comp2 = subs.comp2
-        T.combiner = subs.combiner
-        gen_code.doth(T.fn, T, incdir)
-        gen_code.dotc(T.fn, T, srcdir)
-        print("Produced ", T.fn)
+      for j, scalar_type in ipairs(qtypes) do 
+        local status, subs, tmpl = pcall(sp_fn, fldtype, nil, scalar_type)
+        if ( status ) then 
+          assert(type(subs) == "table")
+          assert(type(tmpl) == "string")
+          -- TODO Improve following.
+          local T = dofile(tmpl)
+          T.fn         = subs.fn
+          T.fldtype    = subs.fldtype
+          T.scalar_c_type= subs.scalar_c_type
+          T.out_c_type = subs.out_c_type
+          T.c_code_for_operator = subs.c_code_for_operator
+          T.comparison = subs.comparison
+          T.comp1 = subs.comp1
+          T.comp2 = subs.comp2
+          T.combiner = subs.combiner
+          print(subs)
+          gen_code.doth(T.fn, T, incdir)
+          gen_code.dotc(T.fn, T, srcdir)
+          print("Produced ", T.fn)
+        end
       end
     end
   end

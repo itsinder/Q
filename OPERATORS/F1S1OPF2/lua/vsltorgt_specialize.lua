@@ -1,4 +1,4 @@
-function vsltorgt_specialize(
+return function (
   ftype,
   scalars
   )

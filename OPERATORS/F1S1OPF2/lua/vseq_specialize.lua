@@ -1,4 +1,4 @@
-function vseq_specialize(
+return function (
   ftype,
   scalar
   )

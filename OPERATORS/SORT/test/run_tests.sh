@@ -9,5 +9,5 @@ set +e
 grep 'ERROR SUMMARY' _x1 | grep ' 0 errors' 1>/dev/null 2>&1
 status=$?
 if [ $status != 0 ]; then echo FAILURE; else echo SUCCESS; fi 
-rm _x
+rm -f _*
 echo "Completed $0 in $PWD"
