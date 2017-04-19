@@ -1,0 +1,38 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include <stdint.h>
+   ]],
+   definition = [[
+
+#include "_const_${out_c_type}.h"
+
+extern int
+const_${out_c_type}(
+  ${out_c_type} *X,
+  uint64_t nX,
+  ${out_c_type} *ptr_val
+  );
+
+//START_FUNC_DECL
+int
+const_${out_c_type}(
+  ${out_c_type} *X,
+  uint64_t nX,
+  ${out_c_type} *ptr_val
+  )
+//STOP_FUNC_DECL
+{
+  int status = 0;
+  ${out_c_type} val = *ptr_val;
+#pragma omp parallel for
+  for ( uint64_t i = 0; i < nX; i++ ) { 
+    X[i] = val;
+  }
+  return status;
+}
+
+
+   ]]
+}

@@ -30,6 +30,9 @@ d and return just C.
 Note that in fast mode, we will never return a nn vector. We assume
 that B was a genuine permutation of [0,1, 2, ... n-1]
 
+--=================
 
+Note that this is particularly simple because this does not need an 
+expander like f1f2opf3. It gets going fairly directly.
 
 
