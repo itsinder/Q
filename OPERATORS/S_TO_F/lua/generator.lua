@@ -1,50 +1,27 @@
-  local plfile = require 'pl.file'
-  dofile '../../../UTILS/lua/globals.lua'
-  local srcdir = "../gen_src/"
-  local incdir = "../gen_inc/"
-  local gen_code = require("gen_code")
-  plfile.delete("_qfns_f_to_s.lua")
+#!/usr/bin/env lua
 
-  local operator_file = assert(arg[1])
-  assert(plfile.access_time(operator_file))
-  local operators = dofile(operator_file)
-  
+local rootdir = os.getenv("Q_SRC_ROOT")
+assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
+require 'globals'
+local gen_code = require 'gen_code'
+local srcdir = "../gen_src/"
+local incdir = "../gen_inc/"
 
-  local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+local T = dofile 'const.tmpl'
 
-  args = nil -- not being used just yet
-  for i, operator in ipairs(operators) do
-    local sp_fn_name = string.format(" require '%s_specialize'", operator)
-    local sp_fn = nil
-    if ( operator == "min" ) then 
-      sp_fn = require 'min_specialize'
-    elseif ( operator == "sum" ) then 
-      sp_fn = require 'sum_specialize'
-    elseif ( operator == "max" ) then 
-      sp_fn = require 'max_specialize'
-    elseif ( operator == "sum_sqr" ) then 
-      sp_fn = require 'sum_sqr_specialize'
-    else
-      assert(nil, "Bad operator")
-    end
-    for i, intype in ipairs(types) do 
-      local status, subs, tmpl = pcall(sp_fn, intype)
-      if ( status ) then 
-        assert(type(subs) == "table")
-        assert(type(tmpl) == "string")
-      -- TODO Improve following.
-      local T = dofile(tmpl)
-      T.fn            = subs.fn
-      T.intype        = subs.intype
-      T.reducer       = subs.reducer
-      T.t_reducer     = subs.t_reducer
-      T.disp_intype   = subs.disp_intype
-      T.reduce_intype = subs.reduce_intype
-      T.init_val      = subs.init_val     
-      gen_code.doth(T.fn, T, incdir)
-      gen_code.dotc(T.fn, T, srcdir)
-      print("Generated ", T.fn)
-    else
-    end
-    end
-  end
+local args = {}
+qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
+
+local const_specialize = require 'const_specialize'
+args.val = 1
+args.len = 100
+for i, qtype in ipairs(qtypes) do 
+  args.qtype = qtype
+  status, subs, tmpl = pcall(const_specialize, args)
+  print(subs)
+  assert(status)
+  T.out_c_type = subs.out_c_type
+  fn = subs.fn
+  gen_code.doth(subs.fn, T, incdir)
+  gen_code.dotc(subs.fn, T, srcdir)
+end
