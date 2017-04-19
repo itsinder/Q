@@ -45,7 +45,7 @@ ffi.cdef(f_mmap)
 ffi.cdef(f_munmap)
 
 -- ----------------
--- RS Use compile_so to create load_csv.so
+-- RS TODO Use compile_so to create load_csv.so
 local cee = ffi.load("load_csv.so")
 
 function mk_out_buf(

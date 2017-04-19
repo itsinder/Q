@@ -3,7 +3,6 @@ set -e
 rm -f ../gen_src/_*.c
 rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h
-rm -f _qfns_f1f2opf3.lua
 bash cleanup.sh
 bash gen_specializers.sh
 
@@ -12,7 +11,6 @@ lua arith_generator.lua  arith_operators.lua
 lua bop_generator.lua    bop_operators.lua
 lua cmp_generator.lua    cmp_operators.lua
 
-lua _qfns_f1f2opf3.lua # test syntax of generated lua functions
 cd ../gen_src/
 ls *c > _x
 FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"

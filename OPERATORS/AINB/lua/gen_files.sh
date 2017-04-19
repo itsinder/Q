@@ -8,7 +8,6 @@ cd ../../../UTILS/src/
 bash gen_files.sh
 cd -
 
-lua _qfns_f_to_s.lua # test syntax of generated lua functions
 cd ../gen_src/
 ls *c > _x
 FLAGS=" -std=gnu99 -Wall -fPIC -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp "

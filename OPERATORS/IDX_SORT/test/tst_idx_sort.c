@@ -19,7 +19,7 @@ main(
   idx = malloc(N * sizeof(int32_t)); return_if_malloc_failed(idx);
   for ( int i = 0; i < N; i++ ) { idx[i] = i; }
   //--------------------------------
-  qsort_asc_val_F8_idx_I4(idx, Y, N, NULL); 
+  qsort_asc_val_F8_idx_I4(idx, Y, N);
   for ( int i = 0; i < N; i++, i++ ) { 
     if ( idx[i] != (N-i-1) ) {  
       fprintf(stdout, "C: FAILURE\n"); go_BYE(-1); }
@@ -35,7 +35,7 @@ main(
   idx2 = malloc(N2 * sizeof(int16_t)); return_if_malloc_failed(idx2);
   for ( int i = 0; i < N2; i++ ) { idx2[i] = i; }
   //--------------------------------
-  qsort_dsc_val_I8_idx_I2(idx2, Y2, N2, NULL); 
+  qsort_dsc_val_I8_idx_I2(idx2, Y2, N2);
   for ( int i = 0; i < N2; i++, i++ ) { 
     if ( idx2[i] != N2-i-1 ) { 
       fprintf(stdout, "C: FAILURE\n"); go_BYE(-1); }

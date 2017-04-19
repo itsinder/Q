@@ -2,7 +2,7 @@
 local tmpl = dofile 'to_txt.tmpl'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
-local subs = {}      -- a set to collect authors
+local subs = {}      
 function Entry (b) 
   subs[b.qtype] = b 
 end

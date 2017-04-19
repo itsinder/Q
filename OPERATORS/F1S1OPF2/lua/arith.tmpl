@@ -11,8 +11,8 @@ extern int
 ${fn}(  
       const ${fldtype} * restrict in,  
       uint64_t nR,
-      ${fldtype} sval,
-      ${fldtype} * out
+      ${scalar_c_type} sval,
+      ${out_c_type} * out
       ) 
 ;
 
@@ -23,8 +23,8 @@ ${fn}(
 
 static void __operation(
   ${fldtype} a,
-  ${fldtype} b,
-  ${fldtype} *ptr_c
+  ${scalar_c_type} b,
+  ${out_c_type} *ptr_c
   )
 {
   ${fldtype} c;
@@ -36,14 +36,14 @@ int
 ${fn}(  
       const ${fldtype} * restrict in,
       uint64_t nR,  
-      ${fldtype} sval,
-      ${fldtype} * out
+      ${scalar_c_type} sval,
+      ${out_c_type} * out
       )
 
 {
   int status = 0;
   ${fldtype} inv; 
-  ${fldtype} outv; 
+  ${out_c_type} outv; 
 
 #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) { 

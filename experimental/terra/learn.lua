@@ -69,12 +69,12 @@ initArr(uint8, arr2, 3, {4,5,6})
 
 -- check array contents (similar approach can be used for typ-to-str conversions)
 arrPrinter(uint8)(arr1, 3)
-arrPrinter(uint8)(arr2, 3)
+-- arrPrinter(uint8)(arr2, 3)
 
 -- Invoke add by Approach 1
 mylib["add_uint8_uint8_uint16"](arr1, arr2, res, 3)
-arrPrinter(uint16)(res, 3)
+-- arrPrinter(uint16)(res, 3)
 
 -- Invoke add by Approach 2
 add(&uint8, &uint8, &uint16)(arr1, arr2, res, 3)
-arrPrinter(uint16)(res, 3)
+-- arrPrinter(uint16)(res, 3)

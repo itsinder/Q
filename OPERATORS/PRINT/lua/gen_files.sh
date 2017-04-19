@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e 
-lua gen_code.lua 
+lua print_gen_code.lua 
 FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 #----------------------
 cd ../gen_src/

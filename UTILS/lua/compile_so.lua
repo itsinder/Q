@@ -1,4 +1,4 @@
-function compile_so(incs, srcs, tgt)
+return function (incs, srcs, tgt)
   local plpath = require 'pl.path'
 
   FLAGS = "-g -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic "

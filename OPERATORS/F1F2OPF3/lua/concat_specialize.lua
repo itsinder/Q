@@ -1,5 +1,5 @@
 
-function concat_specialize(
+return function (
   f1type, 
   f2type, 
   optargs
