@@ -3,9 +3,8 @@
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
 
-  require("aux")
-  require("gen_doth")
-  require("gen_dotc")
+  -- require("aux")
+  local gen_code = require("gen")
 
   local tmpl = "bin_search.tmpl"
   assert(plpath.isfile(tmpl))
@@ -15,7 +14,7 @@
      local T = dofile(tmpl)
      T.fn    = "bin_search_" .. qtype
      T.ftype = assert(g_qtypes[qtype].ctype)
-     gen_doth(T.fn, T, incdir)
-     gen_dotc(T.fn, T, srcdir)
+     gen_code.doth(T.fn, T, incdir)
+     gen_code.dotc(T.fn, T, srcdir)
      print("Generated ", T.fn)
   end

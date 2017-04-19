@@ -1,6 +1,6 @@
 local log = require 'log'
 require 'utils'
-require 'compile_so'
+local compile_so = require 'compile_so'
 local ffi = require 'ffi'
 local Column = require 'Column'
 local Dictionary = require "dictionary"
@@ -18,8 +18,7 @@ local srcs = {  "../src/SC_to_txt.c",
        }
          
 local tgt = "../obj/libprint_csv.so"
-local status = compile_so(incs, srcs, tgt)
-assert(status, "compile of .so failed")
+local status = assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 
 -- require print_csv added here because so file needs to be created beforehand
 require 'print_csv'

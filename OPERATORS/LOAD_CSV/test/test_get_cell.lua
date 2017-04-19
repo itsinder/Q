@@ -5,7 +5,7 @@ package.path = package.path .. ";" .. rootdir .. "/UTILS/lua/?.lua"
 local plpath  = require 'pl.path'
 local log = require 'log'
 require 'utils'
-require 'compile_so'
+local compile_so = require 'compile_so'
 require 'extract_fn_proto'
 -- local dbg = require 'debugger'
 local ffi = require 'ffi'
@@ -40,8 +40,7 @@ is_last_col = false
 incs = { "../../../UTILS/inc/", "../../../UTILS/gen_inc/", "../gen_inc/"}
 srcs = { "../src/get_cell.c", "../../../UTILS/src/f_mmap.c" }
 tgt = "libget_cell.so"
-status = compile_so(incs, srcs, tgt)
-assert(status, "compile of .so failed")
+local status = assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 local get_cell = assert(ffi.load("get_cell.so").get_cell)
 local f_mmap   = assert(ffi.load("get_cell.so").f_mmap)
 local M = assert(f_mmap(infile, 0))

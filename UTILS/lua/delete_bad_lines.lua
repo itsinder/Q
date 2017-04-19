@@ -1,7 +1,7 @@
 require 'parser'
 
 
-function delete_bad_lines(
+return function (
   infile, 
   outfile, 
   regex_list
