@@ -7,7 +7,7 @@ local no_of_failure = 0
 local failed_testcases = {}
 
 local T = dofile("map_dictionary.lua")
-  _G["Q_DICTIONARIES"] = {}
+_G["Q_DICTIONARIES"] = {}
 
 
 function increment_failed_load(index, v, str)
@@ -67,7 +67,6 @@ function handle_category3(index, ret, metadata)
   end
 
   local dict_size = ret:get_size()
-
   if dict_size == metadata.dict_size then
     no_of_success = no_of_success + 1 
   else
@@ -85,7 +84,7 @@ function handle_category4(index, ret, metadata)
   end
   
   for i=1, #metadata.input do
-    if ret:get_index_by_string(metadata.input[i]) ~= i then
+    if ret:get_index_by_string(metadata.input[i]) ~= metadata.output_regex[i] then
       increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid index entry")
       return nil
     end
@@ -149,16 +148,36 @@ handle_function["category4"] = handle_category4
 handle_function["category5"] = handle_category5
 
 
-for i, m in ipairs(T) do
-  if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
-  _G["Q_DICTIONARIES"] = {}
+local function calling_dictionary(i ,m)
   print(i,"Testing : " .. m.name)
   local M = dofile("test_metadata/"..m.meta)
   local x = Dictionary(M.dict)
   local ret = assert(Dictionary(M.dict))
   if handle_function[m.category] then
     handle_function[m.category](i,ret, m)
+  end 
+end
+
+
+
+for i, m in ipairs(T) do
+  if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
+  
+  -- for testcase 5 and 7 testcase 4 should be executed for the dictionary to in existence 
+  if arg[1]~= nil and tonumber(arg[1])==5 or tonumber(arg[1])==7 then
+    local no_of_tc = {}
+    if tonumber(arg[1])==5 then no_of_tc = { 4, 5 } end
+    if tonumber(arg[1])==7 then no_of_tc = { 4, 7 } end
+    for j=1,#no_of_tc do
+      i = no_of_tc[j]
+      m = T[i]
+      calling_dictionary(i, m)
+    end
+    goto skip
   end
+  -- normal calling of all the testcases
+  calling_dictionary(i, m)
+  
   ::skip::
 end
 
