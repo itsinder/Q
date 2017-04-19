@@ -25,4 +25,5 @@ T[#T+1] = { dir = "/OPERATORS/PRINT/test/", script = "test_print.sh" }
 
 T[#T+1] = { dir = "/OPERATORS/SORT/test/", scripts = { "run_tests.sh" }}
 -- VJ TODO T[#T+1] = { dir = "/UTILS/test/", scripts = { "RUN_TEST.sh" }}
+T[#T+1] = { dir = "/UTILS/test/", scripts = { "test_bytes_to_bits.sh" }}
 return T

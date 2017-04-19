@@ -4,7 +4,7 @@
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
 
   -- require("aux")
-  local gen_code = require("gen")
+  local gen_code = require("gen_code")
 
   local tmpl = "bin_search.tmpl"
   assert(plpath.isfile(tmpl))
