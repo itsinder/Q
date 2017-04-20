@@ -12,7 +12,7 @@ declaration = [[
 
 extern int
 txt_to_${out_type_displ}(
-      const char * X,
+      const char * const X,
       int base,
       ${out_type} *ptr_out
       );
@@ -25,20 +25,20 @@ definition = [[
 //START_FUNC_DECL
 int
 txt_to_${out_type_displ}(
-      const char * X,
+      const char * const X,
       int base,
       ${out_type} *ptr_out
       )
 //STOP_FUNC_DECL
 {
   int status = 0;
-  char *endptr;
+  char *endptr = NULL;
   errno = 0;
   ${big_out_type} out = 0;
   if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
   if ( !is_valid_chars_for_num(X) ) { go_BYE(-1); }
   out = ${converter}(X, &endptr, base);
-  if ( ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { go_BYE(-1); }
+  if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { go_BYE(-1); }
   if ( ( out < ${min_val} ) || ( out > ${max_val} ) ) { go_BYE(-1); }
   if ( ((errno == ERANGE) && ((out == ${max_val}) || (out == ${min_val})))
       || ((errno != 0) && (out == 0))) {

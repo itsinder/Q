@@ -5,6 +5,8 @@ return function (
   ffi.cdef([[
   void * malloc(size_t size);
   void free(void *ptr);
+  int bar(void *);
+  int printf (const char *__restrict __format, ...);
   ]])
   -- TODO This should be for conv_fn, not hard coded as below
   local extract_fn_proto = require 'extract_fn_proto'
@@ -12,6 +14,7 @@ return function (
   ffi.cdef(str)
   local cee = ffi.load("../gen_src/libs_to_f.so")
 
+  local dbg = require 'debugger'
   assert(type(args) == "table")
   local val   = assert(args.val)
   local qtype = assert(args.qtype)
@@ -36,9 +39,10 @@ return function (
   local out_c_type = g_qtypes[qtype].ctype
   local c_mem = assert(ffi.gc(ffi.C.malloc(ffi.sizeof(out_c_type)), ffi.C.free))
   -- TODO txt_to_I8 shpuld be conv_fn
+  c_mem = ffi.cast(c_mem, "int64_t *")
   ffi.fill(c_mem, 8, 0)
-  print("hello world")
-  local status  = cee.txt_to_I8(tostring(args.val), 10, c_mem)
+  local status  = cee.txt_to_I8("1000", 10, c_mem)
+  cee.bar(c_mem)
   print("hello world")
 --    "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
