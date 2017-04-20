@@ -28,5 +28,6 @@ return function (
     subs.fn = "const_" .. qtype
     subs.c_scalar = c_mem
     subs.out_c_type = g_qtypes[qtype].ctype
+    subs.out_q_type = qtype
     return subs, tmpl
 end

@@ -18,10 +18,12 @@ args.len = 100
 for i, qtype in ipairs(qtypes) do 
   args.qtype = qtype
   status, subs, tmpl = pcall(const_specialize, args)
-  print(subs)
   assert(status)
+  -- TODOA Avoid repeated assignment frm subs to T
   T.out_c_type = subs.out_c_type
+  T.out_q_type = subs.out_q_type
   fn = subs.fn
   gen_code.doth(subs.fn, T, incdir)
   gen_code.dotc(subs.fn, T, srcdir)
+  print("produced ", subs.fn)
 end
