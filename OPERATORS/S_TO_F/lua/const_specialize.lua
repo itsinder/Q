@@ -36,8 +36,11 @@ return function (
   local out_c_type = g_qtypes[qtype].ctype
   local c_mem = assert(ffi.gc(ffi.C.malloc(ffi.sizeof(out_c_type)), ffi.C.free))
   -- TODO txt_to_I8 shpuld be conv_fn
-  local status  = assert(cee.txt_to_I8(tostring(args.val), 10, c_mem), 
-    "Unable to convert to scalar " .. args.val)
+  ffi.fill(c_mem, 8, 0)
+  print("hello world")
+  local status  = cee.txt_to_I8(tostring(args.val), 10, c_mem)
+  print("hello world")
+--    "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
   local subs = {}; -- scalar can be undefined while generating code at compile time 
     subs.fn = "const_" .. qtype
