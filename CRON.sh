@@ -6,6 +6,8 @@ git pull
 
 cd $Q_SRC_ROOT/UTILS/src/
 bash gen_files.sh
+cd $Q_SRC_ROOT/Q2/code/src/
+bash gen_files.sh
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/lua/
 bash gen_files.sh
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/src/
@@ -65,13 +67,19 @@ else
 fi
 rm $nightly_file
 
-var5="-------------------Dictionary TestCases in DATA_LOAD-----------"
-# echo $var5
-var6=$(bash $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/test_dictionary.sh)
-# echo $var6
+#check whether night build txt file for PRINT is present in PRINT/test folder
+nightly_file=$Q_SRC_ROOT/UTILS/test/nightly_build_dictionary.txt
+if [ -f $nightly_file ] 
+then
+ var5=$(cat $nightly_file)
+ #echo "$var5"
+else
+ var5="Error in Creating DICTIONARY TEST CASES"
+fi
+rm $nightly_file
 
 #concat all the 4 variables
-var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"
+var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"
 # echo "$var100"
 echo "$var100" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com
 #projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
