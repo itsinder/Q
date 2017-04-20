@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e 
+mkdir -p ../gen_src
+mkdir -p ../gen_inc
 lua gen_code.lua 
 cd ../gen_src/
 ls *c > _x

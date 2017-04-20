@@ -33,7 +33,7 @@ libncurses5-dev
 ### Building luajit
 wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
 tar -xvzf LuaJIT-2.0.4.tar.gz
-cd LuaJIT
+cd LuaJIT-2.0.4/
 make && sudo make install
 
 
@@ -54,7 +54,14 @@ make linux && sudo make install
 ### Someone needs to test luaffi compilation with lua5.1 alone
 
 
-
+### Setup Env ###
+git clone
+cd Q
+export LUA_INIT="@`pwd`/init.lua"
+`lua |tail -1`
+export Q_SRC_ROOT=`pwd`
+cd UTILS/build
+luajit build.lua gen.lua
 
 -------------------------------------------------------------
 
