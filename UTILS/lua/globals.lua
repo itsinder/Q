@@ -11,7 +11,7 @@ g_width["F4"]   = 32;
 g_width["F8"]  = 64;
 --===========================
 g_iwidth_to_fld = {}
-g_iwidth_to_fld[1]  = "18"
+g_iwidth_to_fld[1] = "I1"
 g_iwidth_to_fld[2] = "I2"
 g_iwidth_to_fld[4] = "I4"
 g_iwidth_to_fld[8] = "I8"

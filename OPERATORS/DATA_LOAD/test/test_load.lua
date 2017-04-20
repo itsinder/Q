@@ -2,7 +2,7 @@ local log = require 'log'
 local plpath = require 'pl.path'
 local dir = require 'pl.dir'
 require 'utils'
-require 'compile_so'
+local compile_so = require 'compile_so'
 
 local ffi = require 'ffi'
 -- Create libload_csv.so
@@ -21,8 +21,7 @@ local srcs = {  "../src/get_cell.c",
        }    
          
 local tgt = "../obj/libload_csv.so"
-local status = compile_so(incs, srcs, tgt)
-assert(status, "compile of .so failed")
+local status = assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 
 require 'load_csv_dataload'
 local Column = require 'Column'

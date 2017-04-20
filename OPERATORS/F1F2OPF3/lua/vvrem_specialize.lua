@@ -1,5 +1,5 @@
 
-function vvrem_specialize(
+return function (
   f1type, 
   f2type
   )

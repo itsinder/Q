@@ -1,4 +1,4 @@
-function vsrem_specialize(
+return function (
   fldtype
   )
   assert((fldtype == "I1" ) or (fldtype == "I2" ) or (fldtype == "I4" ) or 

@@ -2,6 +2,11 @@ local fns = {}
 
 fns.dotc = function (fn, T, opdir)
   dotc = T 'definition'
+  if ( ( not opdir ) or ( opdir == "" ) ) then 
+    return doth
+  end
+  local plpath = require 'pl.path'
+  assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
   local fname = opdir .. "_" .. fn .. ".c", "w"
   local f = assert(io.open(fname, "w"))
   f:write(dotc)
@@ -9,13 +14,12 @@ fns.dotc = function (fn, T, opdir)
 end
 
 fns.doth = function (fn, T, opdir)
-  local plpath = require 'pl.path'
   doth = T 'declaration'
   if ( ( not opdir ) or ( opdir == "" ) ) then 
     return doth
   end
+  local plpath = require 'pl.path'
   assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
-  -- print("doth = ", doth)
   local fname = opdir .. "_" .. fn .. ".h", "w"
   local f = assert(io.open(fname, "w"))
   f:write(doth)
@@ -23,9 +27,3 @@ fns.doth = function (fn, T, opdir)
 end
 
 return fns
-
---=====
---
--- local gen = require 'gen'
--- gen.dotc(....)
--- gen.doth(....)
