@@ -1,7 +1,25 @@
 #!/bin/bash
 set -e 
-luajit generator.lua 
 FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
+
+cd ../../LOAD_CSV/lua/
+bash gen_files.sh
+cd -
+#--------------------
+cd ../../../UTILS/src/
+bash gen_files.sh
+cd -
+#--------------------
+cd ../gen_inc/
+cp ../../LOAD_CSV/gen_inc/*.h .
+cp ../../../UTILS/gen_inc/*.h .
+
+cd ../gen_src/
+cp ../../LOAD_CSV/gen_src/*.c .
+cp ../../../UTILS/gen_src/*.c .
+
+cd ../lua/
+luajit generator.lua 
 cd ../gen_src/
 ls *c > _x
 while read line; do

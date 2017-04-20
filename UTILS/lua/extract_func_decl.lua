@@ -1,5 +1,5 @@
 #!/bin/lua
-require("trim")
+local trim = require 'trim'
 local plpath = require 'pl.path'
 n = #arg
 assert( n == 2, "Specify infile and opdir")

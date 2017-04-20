@@ -1,6 +1,17 @@
 return function (
   args
   )
+  local ffi = require "ffi"
+  ffi.cdef([[
+  void * malloc(size_t size);
+  void free(void *ptr);
+  ]])
+  -- TODO This should be for conv_fn, not hard coded as below
+  local extract_fn_proto = require 'extract_fn_proto'
+  local str = extract_fn_proto("../gen_src/_txt_to_I8.c")
+  ffi.cdef(str)
+  local cee = ffi.load("../gen_src/libs_to_f.so")
+
   assert(type(args) == "table")
   local val   = assert(args.val)
   local qtype = assert(args.qtype)
@@ -22,12 +33,16 @@ return function (
   end
   assert(type(val) == "number")
   local conv_fn = "txt_to_" .. qtype
-  -- local status  = assert(ffi.C.conv_fn(scalar, ...), "Unable to convert to scalar " .. scalar)
+  local out_c_type = g_qtypes[qtype].ctype
+  local c_mem = assert(ffi.gc(ffi.C.malloc(ffi.sizeof(out_c_type)), ffi.C.free))
+  -- TODO txt_to_I8 shpuld be conv_fn
+  local status  = assert(cee.txt_to_I8(tostring(args.val), 10, c_mem), 
+    "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
   local subs = {}; -- scalar can be undefined while generating code at compile time 
     subs.fn = "const_" .. qtype
-    subs.c_scalar = c_mem
-    subs.out_c_type = g_qtypes[qtype].ctype
+    subs.c_mem = c_mem
+    subs.out_c_type = out_c_type
     subs.out_q_type = qtype
     return subs, tmpl
 end
