@@ -6,6 +6,10 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
+#generate vector_map.so
+cd $SCRIPT_PATH/../../../Q2/code/src
+make
+
 cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
@@ -18,9 +22,8 @@ unset LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/DATA_LOAD/obj
 
 cd $SCRIPT_PATH/
-
-rm -rf ../gen_inc ../gen_src ../obj
-mkdir ../gen_inc ../gen_src ../obj
+rm -rf ../obj
+mkdir ../obj
 
 cd $SCRIPT_PATH/../lua
 bash gen_files.sh

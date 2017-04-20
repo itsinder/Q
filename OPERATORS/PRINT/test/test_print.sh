@@ -6,13 +6,9 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
-#Clean all directory first
-rm -rf ../gen_inc ../gen_src ../obj
-#rm -rf ../obj
-
-#create all the required directory
-mkdir ../gen_src ../gen_inc ../obj
-#mkdir ../obj
+#generate vector_map.so
+cd $SCRIPT_PATH/../../../Q2/code/src
+make
 
 cd $SCRIPT_PATH
 cd ../../../
@@ -31,6 +27,8 @@ cd $SCRIPT_PATH/../lua
 bash gen_files.sh
 
 cd $SCRIPT_PATH
+rm -rf ../obj
+mkdir ../obj
 
 # simple test to print 5 I4 values = [1,2,3,4,5] and SV values mapped to I4 values
 # from the bin file I4.bin in bin folder.

@@ -20,10 +20,6 @@ unset LD_LIBRARY_PATH
 `lua | tail -1`
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj"
 
-cd $SCRIPT_PATH/
-rm -rf ../gen_inc ../gen_src 
-mkdir ../gen_inc ../gen_src 
-
 cd $SCRIPT_PATH/../lua
 bash gen_files.sh
 
