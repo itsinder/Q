@@ -1,8 +1,8 @@
 #!/bin/lua
-require 'trim'
-local plpath = require 'pl.path'
-function extract_fn_proto(infile)
+return function (infile)
 
+local trim = require 'trim'
+local plpath = require 'pl.path'
 --  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 --  package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
   assert(plpath.isfile(infile), "Input file not found")

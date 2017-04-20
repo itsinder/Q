@@ -11,7 +11,7 @@ declaration = [[
 
 extern int
 txt_to_${out_type_displ}(
-      char * const X,
+      const char * const X,
       ${out_type} *ptr_out
       );
 
@@ -23,7 +23,7 @@ definition = [[
 //START_FUNC_DECL
 int
 txt_to_${out_type_displ}(
-      char * const X,
+      const char * const X,
       ${out_type} *ptr_out
       )
 //STOP_FUNC_DECL
