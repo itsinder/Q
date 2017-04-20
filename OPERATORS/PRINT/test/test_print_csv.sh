@@ -8,14 +8,17 @@ echo $SCRIPT_PATH
 
 
 #generate vector_map.so
-cd $SCRIPT_PATH/../../../Q2/code
+cd $SCRIPT_PATH/../../../Q2/code/src
 make
 
 cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
+unset LD_LIBRARY_PATH
+`lua | tail -1`
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj
 
 cd $SCRIPT_PATH/../../LOAD_CSV/test
 bash test_load.sh
