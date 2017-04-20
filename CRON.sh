@@ -20,6 +20,9 @@ cd $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/
 bash test_load_csv.sh
 cd $Q_SRC_ROOT/OPERATORS/PRINT/test/
 bash test_print_csv.sh
+cd $Q_SRC_ROOT/UTILS/test/
+bash test_dictionary.sh
+
 
 #check whether night build txt file for metadata is present in LOAD_CSV/test/testcases folder
 nightly_file=$Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/nightly_build_metadata.txt
