@@ -6,24 +6,21 @@ SCRIPT=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
-#generate vector_map.so
-cd $SCRIPT_PATH/../../../Q2/code/src
-make
-
-cd $SCRIPT_PATH
 cd ../../../
 export Q_SRC_ROOT="`pwd`"
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
-
 unset LD_LIBRARY_PATH
 `lua | tail -1`
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/PRINT/obj"
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code:$Q_SRC_ROOT/OPERATORS/PRINT/obj
+# generate vector lib files
+cd $SCRIPT_PATH/../../../Q2/code/src
+bash gen_files.sh
+make
+cd $SCRIPT_PATH/../../../UTILS/src/
+bash gen_files.sh
 
 cd $SCRIPT_PATH/../lua
-# generate _xxx_to_txt.c files
-# it is done in this script, because C files are not getting from build.lua from UTILS now
-# will remove this once build.lua is working
 bash gen_files.sh
 
 cd $SCRIPT_PATH
