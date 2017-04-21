@@ -1,6 +1,5 @@
 #!/bin/bash
 set +e
-# export Q_SRC_ROOT=/home/ubuntu/Q
 export Q_SRC_ROOT="`pwd`"
 cd $Q_SRC_ROOT
 git pull
@@ -102,6 +101,5 @@ var85=$(lua mk_so.lua /tmp/)
 
 var100="${var100}"$'\n\n'"${var80}"$'\n\n'"${var81}"$'\n\n'"${var82}"$'\n\n'"${var83}"$'\n\n'"${var84}"$'\n\n'"${var85}"
 #echo "$var100" 
-echo "$var100" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com
-#projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
+echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
 
