@@ -4,14 +4,6 @@ export Q_SRC_ROOT=/home/ubuntu/Q
 cd $Q_SRC_ROOT
 git pull
 
-cd $Q_SRC_ROOT/UTILS/src/
-bash gen_files.sh
-cd $Q_SRC_ROOT/Q2/code/src/
-bash gen_files.sh
-cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/lua/
-bash gen_files.sh
-cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/src/
-bash gen_files.sh
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
 bash test_meta_data.sh
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
@@ -84,6 +76,7 @@ rm $nightly_file
 #concat all the 4 variables
 var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"
 # echo "$var100"
-echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
+echo "$var100" | /usr/bin/mail -s "Q Unit Tests" vijaykumar.patel@gslab.com
+#projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
 
 
