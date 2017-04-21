@@ -119,13 +119,15 @@ function print_results()
   str = "-----------Dictionary testcases results for LOAD_CSV---------------\n"
   str = str.."No of successfull testcases "..no_of_success.."\n"
   str = str.."No of failure testcases     "..no_of_failure.."\n"
-  str = str.."-----------------------------------\n"
-  str = str.."Testcases failed are     \n"
-  for k,v in ipairs(failed_testcases) do
-    str = str..v.."\n"
-  end
-  str = str.."Run bash test_dictionary.sh <testcase_number> for details\n\n"
-  str = str.."-----------------------------------\n"
+  str = str.."---------------------------------------------------------------\n"
+  if #failed_testcases > 0 then
+    str = str.."Testcases failed are     \n"
+    for k,v in ipairs(failed_testcases) do
+      str = str..v.."\n"
+    end
+    str = str.."Run bash test_dictionary.sh <testcase_number> for details\n\n"
+    str = str.."-------------------------------------------------------------\n"
+  end 
   print(str)
   local file = assert(io.open("nightly_build_dictionary.txt", "w"), "Nighty build file open error")
   assert(io.output(file), "Nightly build file write error")

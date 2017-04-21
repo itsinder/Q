@@ -31,13 +31,15 @@ function print_result()
   str = "----------LOAD_CSV TEST CASES RESULT----------------\n"
   str = str.."No of successfull testcases "..number_of_testcases_passed.."\n"
   str = str.."No of failure testcases     "..number_of_testcases_failed.."\n"
-  str = str.."-----------------------------------\n"
-  str = str.."Testcases failed are     \n"
-  for k,v in ipairs(failed_testcases) do
-    str = str..v.."\n"
-  end
-  str = str.."Run bash test_load_csv.sh <testcase_number> for details\n\n"
-  str = str.."-----------------------------------\n"
+  str = str.."-----------------------------------------------\n"
+  if #failed_testcases > 0 then
+    str = str.."Testcases failed are     \n"
+    for k,v in ipairs(failed_testcases) do
+      str = str..v.."\n"
+    end
+    str = str.."Run bash test_load_csv.sh <testcase_number> for details\n\n"
+    str = str.."---------------------------------------------\n"
+  end 
   print(str)
   local file = assert(io.open("nightly_build_load.txt", "w"), "Nighty build file open error")
   assert(io.output(file), "Nightly build file write error")
