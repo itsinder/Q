@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+mkdir -p ../gen_src
+mkdir -p ../gen_inc
 rm -f ../gen_src/_*.c
 rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h

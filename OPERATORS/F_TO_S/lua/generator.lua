@@ -2,8 +2,7 @@
   dofile '../../../UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-  require("gen_doth")
-  require("gen_dotc")
+  local gen_code = require("gen_code")
   plfile.delete("_qfns_f_to_s.lua")
 
   local operator_file = assert(arg[1])
@@ -42,8 +41,8 @@
       T.disp_intype   = subs.disp_intype
       T.reduce_intype = subs.reduce_intype
       T.init_val      = subs.init_val     
-      gen_doth(T.fn, T, incdir)
-      gen_dotc(T.fn, T, srcdir)
+      gen_code.doth(T.fn, T, incdir)
+      gen_code.dotc(T.fn, T, srcdir)
       print("Generated ", T.fn)
     else
     end

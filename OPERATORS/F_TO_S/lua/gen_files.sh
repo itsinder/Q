@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e 
-rm -f ../gen_src/*
-rm -f ../gen_inc/*
+mkdir -p ../gen_src
+mkdir -p ../gen_inc
+# rm -f ../gen_src/*
+# rm -f ../gen_inc/*
 lua generator.lua operators.lua
 
 cd ../gen_src/
