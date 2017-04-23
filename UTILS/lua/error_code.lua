@@ -23,6 +23,7 @@ g_err.Q_META_DATA_DIR_NOT_FOUND  = "directory not found -- Q_META_DATA_DIR"
 g_err.DID_NOT_END_PROPERLY = "Didn't end up properly"
 g_err.BAD_NUMBER_COLUMNS = "bad number of columns on last line"
 g_err.TYPE_CONVERTER_FAILED = "text converter failed for qtype"
+g_err.ADD_NIL_EMPTY_ERROR_IN_DICT = "Cannot add nil or empty string in dictionary"
 
 
 -- meta data codes
@@ -49,7 +50,6 @@ g_err.COLUMN_DESC_ERROR = " column descriptor must be table"
 g_err.MAX_WIDTH_NULL_ERROR = "max width null error"
 
 -- print error codes
-
 g_err.INPUT_NOT_TABLE = "Input is not table"
 g_err.INPUT_NOT_COLUMN_NUMBER = "Input is not Column or Number"
 g_err.INVALID_COLUMN_TYPE = "Invalid column field type"

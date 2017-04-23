@@ -1,5 +1,9 @@
 #!/bin/bash
 set -e 
+
+rm -rf ../gen_inc ../gen_src 
+mkdir ../gen_inc ../gen_src 
+
 lua print_gen_code.lua 
 FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 #----------------------
