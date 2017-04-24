@@ -1,4 +1,4 @@
-require 'load_csv_dataload'
+local load_csv = require 'load_csv_dataload'
 require 'handle_category'
 
 --local Dictionary = require 'dictionary'

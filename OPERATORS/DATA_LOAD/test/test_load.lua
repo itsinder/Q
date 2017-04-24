@@ -23,7 +23,7 @@ local srcs = {  "../src/get_cell.c",
 local tgt = "../obj/libload_csv.so"
 local status = assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 
-require 'load_csv_dataload'
+local load_csv = require 'load_csv_dataload'
 local Column = require 'Column'
 
 assert( #arg == 2 , "Arguments are <metadata_file_path> <csv_file_path>")

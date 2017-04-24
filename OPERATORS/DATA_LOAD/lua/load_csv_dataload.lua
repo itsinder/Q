@@ -46,7 +46,7 @@ local c = ffi.load("load_csv.so")
 --           If any error was encountered during load operation then negative status code
 -- ----------------
 
-function load_csv( 
+return function ( 
   csv_file_path, 
   M,  -- metadata
   load_global_settings
