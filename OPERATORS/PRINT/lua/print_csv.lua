@@ -141,5 +141,9 @@ return function (column_list, filter, opfile)
   if file then
     io.close(file)
   end
-  return final_result
+  if opfile == nil then
+    return final_result
+  end
+  
+  return true
 end

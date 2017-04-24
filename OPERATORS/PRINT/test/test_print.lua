@@ -10,7 +10,9 @@ local column_I4 = Column{field_type="I4", field_size = 4,chunk_size = 5,filename
 
 local arr = { column_I4, column_I4, column_I4 }  
 local status,err = pcall(print_csv, arr)
-print("final result = "..err)
+if type(err) == "string" then
+  print("final result = "..err)
+end
 assert(status == true,"Error in print_csv")
 log.info("All is well")
 
