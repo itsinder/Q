@@ -1,5 +1,6 @@
 require 'handle_category_print'
 local file = require 'pl.file'
+local print_csv = require 'print_csv'
 
 local test_input_dir = "./test_data/"
 local print_out_dir = "./test_print_data/print_tmp/"

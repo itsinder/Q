@@ -3,7 +3,7 @@ local plstring = require 'pl.stringx'
 local Vector = require 'Vector'
 local Column = require 'Column'
 require 'load_csv'
-require 'print_csv'
+local print_csv = require 'print_csv'
 
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
