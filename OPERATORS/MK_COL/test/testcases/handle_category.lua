@@ -44,6 +44,7 @@ end
 
 function handle_category1(index, v, status, ret)
   print(ret)
+  print(v.name)
   if status ~= false then
     increment_failed_mkcol(index, v, "Mk_col function does not return status = false")
     return nil
@@ -92,16 +93,18 @@ function handle_category2(index, v, status, ret)
     local final_result = str[0]
     local is_float = ret:fldtype() == "F4" or ret:fldtype() == "F8"
     -- to handle the extra decimal values put in case of Float
-    --[[if is_float then
-      final_result = 10 * final_result
-      final_result = math.ceil(final_result)
-      final_result = final_result / 10
+    if is_float then
+      local precision = v.precision
+      precision = math.pow(10,precision)
+      final_result = precision * final_result
+      final_result = math.floor(final_result)
+      final_result = final_result / precision
     end
-    --]]
-    --print(str[0] , v.input[i])
+    
+    -- print(final_result , v.input[i])
     if final_result ~= v.input[i] then
       increment_failed_mkcol(index, v, "Mk_col input output mismatch input = "..v.input[i]..
-        " output = "..str[0])
+        " output = "..final_result)
       return nil
     end
     

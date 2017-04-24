@@ -30,10 +30,10 @@ return {
   { name = "simple I8 values", input = { 1, 3, 5}, qtype = "I8", category= "category2"},
 
 -- simple I4 values given to mk_col
-  { name = "simple F4 values", input = { 1.1, 3.2, 5.3}, qtype = "F4", category= "category2"},
+  { name = "simple F4 values", input = { 1.12, 3.20, 5.30}, qtype = "F4", category= "category2", precision = 2 },
 
 -- simple I8 values given to mk_col
-  { name = "simple F8 values", input = { 1.1, 3.2, 5.3}, qtype = "F8", category= "category2"},
+  { name = "simple F8 values", input = { 1.1, 3.2, 5.3}, qtype = "F8", category= "category2",  precision = 1 },
 
 -- border I1 values given to mk_col
   { name = "border I1 values", input = { 127, -128}, qtype = "I1", category= "category2"},
@@ -54,13 +54,34 @@ return {
   { name = "minimum lua number", input = {-9007199254740992}, qtype = "I8", 
     category= "category1", output_regex = g_err.INVALID_LOWER_BOUND},
 
-
-
 -- border I8 values given to mk_col
   { name = "border I8 values", input = { 9223372036854775807}, qtype = "I8",
     category= "category1", output_regex = g_err.INVALID_UPPER_BOUND},
 
   { name = "border I8 values", input = { -9223372036854775808}, qtype = "I8",
     category= "category1", output_regex = g_err.INVALID_LOWER_BOUND},
-
+  
+  -- Overflow I1 values given to mk_col
+  { name = "Overflow I1 values", input = { 128 }, qtype = "I1", category= "category1",
+    output_regex = g_err.INVALID_UPPER_BOUND},
+  
+  -- Overflow I1 values given to mk_col
+  { name = "Overflow I1 values", input = { -129 }, qtype = "I1", category= "category1",
+    output_regex = g_err.INVALID_LOWER_BOUND},
+  
+  -- Overflow I2 values given to mk_col
+  { name = "Overflow I2 values", input = { 32768 }, qtype = "I2", category= "category1",
+    output_regex = g_err.INVALID_UPPER_BOUND},
+  
+  -- Overflow I2 values given to mk_col
+  { name = "Overflow I2 values", input = { -32769 }, qtype = "I2", category= "category1",
+    output_regex = g_err.INVALID_LOWER_BOUND},
+  
+  -- Overflow I4 values given to mk_col
+  { name = "Overflow I4 values", input = { 2147483648 }, qtype = "I4", category= "category1",
+    output_regex = g_err.INVALID_UPPER_BOUND},
+  
+  -- Overflow I4 values given to mk_col
+  { name = "Overflow I4 values", input = { -2147483649 }, qtype = "I4", category= "category1",
+    output_regex = g_err.INVALID_LOWER_BOUND},
 }
