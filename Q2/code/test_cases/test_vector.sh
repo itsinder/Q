@@ -7,26 +7,21 @@ SCRIPT_PATH=$(dirname "$SCRIPT")
 echo $SCRIPT_PATH
 
 gcc -std=gnu99 -shared \
-  -o libinitialize_vector.so \
+  -o ../src/libinitialize_vector.so \
   initialize_vector.c
 
-#echo "$1"
-#if [ "$1" = "UNIT_TEST" ] 
-#then
-#generate vector_map.so
-cd $SCRIPT_PATH/../
+cd $SCRIPT_PATH/../src
 make
 
+cd ../../../
+export Q_SRC_ROOT="`pwd`"
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 
-cd $SCRIPT_PATH/../../../OPERATORS/PRINT/test
-bash test_print.sh
-#fi
+unset LD_LIBRARY_PATH
+`lua | tail -1`
 
-export Q_SRC_ROOT=../../../
-export LD_LIBRARY_PATH=$Q_SRC_ROOT/Q2/code/:$Q_SRC_ROOT/OPERATORS/PRINT/obj/:.
-
-
-
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/Q2/code/src:$Q_SRC_ROOT/OPERATORS/PRINT/obj"
+echo $LD_LIBRARY_PATH
 cd $SCRIPT_PATH
 luajit test_vector.lua
 
