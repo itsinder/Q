@@ -1,5 +1,5 @@
 -- requires luaposix have to include in our luarocks def
-local stdlib = require("posix.stdlib")
+-- local stdlib = require("posix.stdlib")
 
 local function script_path()
     local str = debug.getinfo(2, "S").source:sub(2)
