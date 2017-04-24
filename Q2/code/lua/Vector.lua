@@ -349,7 +349,7 @@ end
 function Vector:chunk(num)
     assert(type(num) == "number", "Require a number for chunk number")
     assert(is_int(num), "chunks need to be integer type")
-    assert(num >= 0, "Requires a a whole number")
+    -- assert(num >= 0, "Requires a a whole number")
 
     if self:materialized() then
         return get_from_file(self, num)
