@@ -1,6 +1,5 @@
 require 'globals'
 require 'error_code'
-local extract_fn_proto = require 'extract_fn_proto'
 
 local ffi = require "ffi"
 ffi.cdef
@@ -9,31 +8,6 @@ ffi.cdef
   void free(void *ptr);
   void *memset(void *str, int c, size_t n);
 ]]
-
--- Q_SRC_ROOT  to be removed , once extract fn_proto dependency not required
-local rootdir = os.getenv("Q_SRC_ROOT")
-
---print("***********",rootdir)
--- TODO this should be done in single loop; need way to differentiate "gen" types/code in global
-local SC_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/src/SC_to_txt.c"))
-local I1_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I1_to_txt.c"))
-local I2_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I2_to_txt.c"))
-local I4_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I4_to_txt.c"))
-local I8_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_I8_to_txt.c"))
-local F4_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_F4_to_txt.c"))
-local F8_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/gen_src/_F8_to_txt.c"))
-
-ffi.cdef(SC_to_txt)
-ffi.cdef(I1_to_txt)
-ffi.cdef(I2_to_txt)
-ffi.cdef(I4_to_txt)
-ffi.cdef(I8_to_txt)
-ffi.cdef(F4_to_txt)
-ffi.cdef(F8_to_txt)
-
--- load print_csv so file
--- this file is created using compile_so for local testing
--- local print_csv_lib = ffi.load("print_csv.so")
 
 function print_csv(column_list, filter, opfile)  
   
