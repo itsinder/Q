@@ -1,8 +1,7 @@
-require "validate_meta"
 require 'globals'
-require 'extract_fn_proto'
 require 'error_code'
-
+local validate_meta = require "validate_meta"
+local extract_fn_proto = require 'extract_fn_proto'
 
 local Dictionary = require 'dictionary_dataload'
 local plstring = require 'pl.stringx'

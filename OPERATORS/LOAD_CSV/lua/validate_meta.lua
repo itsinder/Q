@@ -4,7 +4,7 @@ local pl = require 'pl'
 local dbg = require 'debugger'
 local plpath = require 'pl.path'
   
-function validate_meta(
+return function (
   M -- meta data table 
 )
   assert(type(M) == "table", g_err.METADATA_TYPE_TABLE)
