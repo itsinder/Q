@@ -1,4 +1,4 @@
-require 'handle_category_print'
+local fns = require 'handle_category_print'
 local file = require 'pl.file'
 local print_csv = require 'print_csv'
 
@@ -16,27 +16,6 @@ dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
 
 
-local handle_function = {}
--- input and output csv file match testcases
-handle_function["category1"] = handle_category1
--- invalid filter testcases
-handle_function["category2"] = handle_category2
--- filter type is vector B1 
-handle_function["category3"] = handle_category3
--- filter type is vector I4
-handle_function["category4"] = handle_category4
--- valid range filter
-handle_function["category5"] = handle_category5
--- csv consumable testcase
-handle_function["category6"] = handle_category6
-
-local handle_input_function = {}
--- input vector returned is B1
-handle_input_function["category3"] = handle_input_category3
--- input vector retured is I4
-handle_input_function["category4"] = handle_input_category4
-
-
 -- Test Case Start ---------------
 local T = dofile("map_metadata_data.lua")
 for i, v in ipairs(T) do
@@ -52,29 +31,32 @@ for i, v in ipairs(T) do
   local csv_file = v.csv_file
   print("----------------------------------------")
   if v.category == "category6" then
-    handle_category6(i, v, M)
+    local key = "handle_"..v.category
+    fns[key](i, v, M)
     goto skip
   end
   local status, load_ret = pcall(load_csv,"./test_data/"..D, M)
   if status then
     -- if handle_input_function is present, then filter is taken from the output of this function
     -- in other cases , filter object is taken from metadata
-    if handle_input_function[v.category] then
-      F = handle_input_function[v.category]()
+    local key = "handle_input_"..v.category
+    if fns[key] then
+      F = fns[key]()
     end
     local status, print_ret = pcall(print_csv, load_ret, F, print_out_dir..csv_file)
-    if handle_function[v.category] then
-      handle_function[v.category](i, v,  print_out_dir..csv_file, print_ret, status)
+    key = "handle_"..v.category
+    if fns[key] then
+      fns[key](i, v,  print_out_dir..csv_file, print_ret, status)
     end
     
   else
     --print(" testcase failed: load api failed in print testcase. this should not happen")
-    increment_failed(i, v, " testcase failed: load api failed in print testcase. this should not happen")
+    fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
   end
   ::skip::
 end
 
-print_testcases_result()
+fns["print_result"]()
 
 
 --command cleanup for all testcases

@@ -1,4 +1,3 @@
-local rootdir = os.getenv("Q_SRC_ROOT")
 local plstring = require 'pl.stringx'
 local Vector = require 'Vector'
 local Column = require 'Column'
@@ -10,7 +9,9 @@ local number_of_testcases_failed = 0
 
 local failed_testcases = {}
 
-function increment_failed(index, v, str)
+local fns = {}
+
+fns.increment_failed = function (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   print("csv file: "..v.data)
@@ -65,7 +66,7 @@ function file_match(file1, file2)
 end
 
 -- in this category input file to load_csv and output file from print_csv is matched
-function handle_category1(index, v, csv_file,ret, status)
+fns.handle_category1 = function (index, v, csv_file,ret, status)
   print(v.name) 
   --print(status)
   -- if status returned is false then this testcase has failed
@@ -88,7 +89,7 @@ end
 
 -- in this category invalid filter input are given 
 -- output expected are error codes as mentioned in UTILS/error_code.lua file
-function handle_category2(index, v, csv_file, ret, status)
+fns.handle_category2 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if status or v.output_regex==nil then
@@ -114,7 +115,7 @@ function handle_category2(index, v, csv_file, ret, status)
 end
 
 -- vector of type I4 is given as filter input for category 4 testcases
-function handle_input_category4()
+fns.handle_input_category4 = function ()
   local v1 = Vector{field_type='I4', field_size = 4,chunk_size = 8,
     filename="./bin/I4.bin",  
   }
@@ -122,7 +123,7 @@ function handle_input_category4()
 end
 
 -- vector of type B1 is given as filter input for category 3 testcases
-function handle_input_category3()
+fns.handle_input_category3 = function ()
   local v1 = Vector{field_type='B1', field_size = 1/8,chunk_size = 8,
     filename="./bin/B1.bin",  
   }
@@ -130,7 +131,7 @@ function handle_input_category3()
 end
 
 -- in this category expected output is FILTER_INVALID_FIELD_TYPE
-function handle_category4(index, v, csv_file, ret, status)
+fns.handle_category4 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if status then
@@ -155,7 +156,7 @@ end
 -- in this testcase bit vector is given as input 
 -- the output of csv file will be only those elements 
 -- whose bits are set in the bit vector
-function handle_category3(index, v, csv_file, ret, status)
+fns.handle_category3 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
@@ -178,7 +179,7 @@ end
 
 -- in this testcase range filter is given as input
 -- the output of print_csv would be only those elements which fall between lower and upper range
-function handle_category5(index, v, csv_file, ret, status)
+fns.handle_category5 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if not status then
@@ -200,7 +201,7 @@ function handle_category5(index, v, csv_file, ret, status)
 end
 
 -- in this testcase, the output csv file from print_csv should be consumable to load_csv
-function handle_category6(index, v, M)
+fns.handle_category6 = function (index, v, M)
   print(v.name)
   
   local col = Column{field_type='I4', field_size = 4,chunk_size = 8,
@@ -229,7 +230,7 @@ function handle_category6(index, v, M)
 end
 
 -- this function prints all the result
-function print_testcases_result()
+fns.print_result = function ()
   local str
   str = "----------PRINT TEST CASES RESULT----------------\n"
   str = str.."No of successfull testcases "..number_of_testcases_passed.."\n"
@@ -250,3 +251,5 @@ function print_testcases_result()
   assert(io.close(file), "Nighty build file close error")
   
 end
+
+return fns
