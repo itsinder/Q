@@ -9,7 +9,7 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
-function print_csv(column_list, filter, opfile)  
+return function (column_list, filter, opfile)  
   
   assert(type(column_list) == "table",g_err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
