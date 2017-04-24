@@ -31,7 +31,7 @@ local min = {
   }
 
 
-function mk_col(input, qtype)
+return function (input, qtype)
   assert( input ~= nil,g_err.INPUT_NOT_TABLE)
   assert( g_valid_types[qtype] ~= nil,g_err.INVALID_COLUMN_TYPE)
   local width = g_qtypes[qtype]["width"]

@@ -9,6 +9,7 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
+local fns = {}
 local failed_testcases = {}
 
 function increment_failed_mkcol(index, v, str)
@@ -18,10 +19,9 @@ function increment_failed_mkcol(index, v, str)
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
-
 end
 
-function print_result() 
+fns.print_result = function () 
   local str
   
   str = "----------MK_COL TEST CASES RESULT----------------\n"
@@ -42,7 +42,7 @@ function print_result()
 end
 
 
-function handle_category1(index, v, status, ret)
+fns.category1 = function (index, v, status, ret)
   print(ret)
   print(v.name)
   if status ~= false then
@@ -73,7 +73,7 @@ function handle_category1(index, v, status, ret)
 
 end
 
-function handle_category2(index, v, status, ret)
+fns.category2 = function (index, v, status, ret)
   print(ret)
   if status ~= true then
     increment_failed_mkcol(index, v, "Mk_col function does not return status = true")
@@ -115,3 +115,4 @@ function handle_category2(index, v, status, ret)
   
 end
 
+return fns
