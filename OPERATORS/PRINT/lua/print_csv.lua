@@ -11,8 +11,12 @@ ffi.cdef
 
 return function (column_list, filter, opfile)  
   
-  assert(type(column_list) == "table",g_err.INPUT_NOT_TABLE)
+  assert(type(column_list) == "table" or type(column_list) == "Column",g_err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
+  if type(column_list) == "Column" then
+    column_list = {column_list}
+  end
+  
   local max_length = 0
   for i = 1, #column_list do
     assert(type(column_list[i]) == "Column" or type(column_list[i]) == "number", 
@@ -77,6 +81,8 @@ return function (column_list, filter, opfile)
     io.output(file)
   end
   
+  local final_result = ""
+  
   lb = lb + 1 -- for Lua style indexing
   for rowidx = lb, ub do
     if where == nil or where:get_element(rowidx -1 ) ~= ffi.NULL then
@@ -129,10 +135,11 @@ return function (column_list, filter, opfile)
       result = string.sub(result,1,-2)
       result = result.."\n"
       assert(io.write(result),g_err.INVALID_FILE_PATH)
+      final_result = final_result..result
     end
   end
   if file then
     io.close(file)
   end
-  return true
+  return final_result
 end
