@@ -23,8 +23,6 @@ function create_col_with_meta(c)
     -- TODO NULLS, nn_vector
 end
 
-idx_qtype = "I4"
-
 function permute(val_col, idx_col)
   assert(type(idx_col) == "Column", g_err.INPUT_NOT_COLUMN) 
   assert(type(val_col) == "Column", g_err.INPUT_NOT_COLUMN) 
@@ -44,9 +42,9 @@ function permute(val_col, idx_col)
   local idx_n = idx_col:length()
   assert(idx_n == val_n, 
   "index array-length should equal column-length in permute")
-  if ( idx_n > 127 ) then assert(qtype != "I1") end
-  if ( idx_n > 32767 ) then assert(qtype != "I2") end
-  if ( idx_n > 2147483647 ) then assert(qtype != "I4") end
+  if ( idx_n > 127 ) then assert(idx_qtype ~= "I1") end
+  if ( idx_n > 32767 ) then assert(idx_qtype ~= "I2") end
+  if ( idx_n > 2147483647 ) then assert(idx_qtype ~= "I4") end
   
   -- get one chunk with everything in it
   local chk_val_n, val_vec, nn_val_vec = val_col:chunk(-1)
@@ -55,13 +53,11 @@ function permute(val_col, idx_col)
   local chk_idx_n, idx_vec, nn_idx_vec = idx_col:chunk(-1)
   assert (chk_idx_n == idx_n, "Didn't get full input array in permute()")
 
-  local idx_arr = Array(terra_types[idx_qtype])(val_n)
-  init_arr(terra_types[idx_qtype], idx_arr, val_n, idx)
   local out_arr = Array(tertyp)(val_n)
   
-  t_permute(tertyp)(vec, idx_arr, out_arr, val_n)
-  local out_col = create_col_with_meta(c)
-  out_col:put_chunk(n, out_arr, nil) 
+  t_permute(tertyp)(val_vec, idx_vec, out_arr, val_n)
+  local out_col = create_col_with_meta(val_col)
+  out_col:put_chunk(val_n, out_arr, nil) 
   out_col:eov()
   return out_col
 end

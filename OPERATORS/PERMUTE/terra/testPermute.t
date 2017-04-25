@@ -42,42 +42,49 @@ package.terrapath = package.terrapath .. ";/home/srinath/Ramesh/Q/OPERATORS/PERM
 --print(package.path)
 require 'globals'
 require 'error_code'
-require 'permute'
+-- require 'permute'
+require 'rs_permute'
 local Column = require 'Column'
 
-local in_col = Column{
-          field_type="I4", 
-          write_vector=true}
-local data = {10, 20, 30, 40, 50, 60}
-local N = #data
-local in_arr = Array(int)(N)
-init_arr(int, in_arr, N, data)
-in_col:put_chunk(N, in_arr, nil)
-in_col:eov()
+local col_from_tab = function(fldtyp, data)
+  local c = Column{
+            field_type=fldtyp, 
+            write_vector=true}
+  
+  local N = #data
+  local arr = Array(int)(N)
+  init_arr(int, arr, N, data)
+  c:put_chunk(N, arr, nil)
+  c:eov()
+  return c
+end
 
 local arr_from_col = function (c, ctype)
-  local sz, vec, nn_vec = c:chunk(0)
+  local sz, vec, nn_vec = c:chunk(-1)
   return ffi.cast(ctype, vec)
 end
 
 local col_as_str = function (c) 
   local s = ""
   local vec = arr_from_col(c, "int *")
+  local N=c:length()
   for i=0,N-1 do
     s = s .. tostring(vec[i]) .. ","
   end
   return s
 end
 
+local in_col = col_from_tab ("I4", {10, 20, 30, 40, 50, 60})
 --print("----")
 --print(col_as_str(in_col))
 
---for i=1,4 do
-local out_col = permute(in_col, {0, 5, 1, 4, 2, 3})
+local idx_col = col_from_tab("I4", {0, 5, 1, 4, 2, 3})
+--print("----")
+--print(col_as_str(idx_col))
+
+local out_col = permute(in_col, idx_col)
 --print("----")
 --print(col_as_str(out_col))
 
 assert(col_as_str(out_col) == "10,60,20,50,30,40,")
---end
-
 print("Tests passed.")
