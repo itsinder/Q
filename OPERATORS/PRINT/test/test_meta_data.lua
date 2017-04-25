@@ -1,4 +1,4 @@
-require("validate_meta")
+local validate_meta =  require("validate_meta")
 require("error_code")
 _G["Q_META_DATA_DIR"] = "./metadata"
 
