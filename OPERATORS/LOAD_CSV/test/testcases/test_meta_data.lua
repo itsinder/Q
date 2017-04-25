@@ -1,5 +1,5 @@
 local plstring = require 'pl.stringx'
-require("validate_meta")
+local validate_meta = require("validate_meta")
 _G["Q_META_DATA_DIR"] = "./metadata"
 local no_of_success = 0
 local no_of_failure = 0
