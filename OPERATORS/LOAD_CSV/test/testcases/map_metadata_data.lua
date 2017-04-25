@@ -88,8 +88,9 @@ return {
     { meta = "gm_valid_F8.lua", data = "F8_valid.csv", category= "category2",
       output_regex = {-9.58,0,9.58,11}, name = "valid_F8_type" },
     -- CSV file with special characters
+    -- the expected output is abc,\" 
     { meta = "gm_valid_escape_character.lua", data = "valid_escape_character.csv", category= "category2",
-      output_regex = {'abc\\,\\\\\\"'}, name = "valid_escape_character" },
+      output_regex = {'abc,\\"'}, name = "valid_escape_character" },
     
     -- CSV file with valid SC type   
     { meta = "gm_valid_SC.lua", data = "SC_valid.csv", category= "category2",

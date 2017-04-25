@@ -1,4 +1,4 @@
-require 'load_csv'
+local load_csv = require 'load_csv'
 require 'handle_category'
 
 local test_input_dir = "./test_data/"
