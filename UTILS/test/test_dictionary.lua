@@ -1,144 +1,186 @@
-package.path = package.path .. ";../lua/?.lua;../../OPERATORS/DATA_LOAD/lua/?.lua"
-
-local lu = require('luaunit')
 local Dictionary = require "dictionary"
+local plstring = require 'pl.stringx'
+local plfile = require 'pl.path'
 
-test_dictionary = {}
+local no_of_success = 0
+local no_of_failure = 0
+local failed_testcases = {}
 
-function test_dictionary:setUp()
-  -- all created dictionaries are stored inside this global variables,
-  _G["Q_DICTIONARIES"] = {} 
-end
-
-function test_dictionary:tearDown()
-end
+local T = dofile("map_dictionary.lua")
+_G["Q_DICTIONARIES"] = {}
 
 
-function test_dictionary:test_create() 
-  local dictionary = Dictionary({dict = "testDictionary", is_dict = false, add=true})
-  lu.assertNotNil(dictionary)
-  lu.assertEquals(type(dictionary), "Dictionary")
-end
-
-function test_dictionary:test_create_null_metadata_error()
-  lu.assertError(Dictionary)
-  lu.assertErrorMsgContains("Dictionary metadata should not be empty", Dictionary ) 
-end
-
-function test_dictionary:test_create_null_name_error()
-  lu.assertError(Dictionary, { is_dict = false, add=true})
-  lu.assertErrorMsgContains("Metadata is incorrect", Dictionary, {dict = "", is_dict = false, add=true} ) 
-end
-
-function test_dictionary:test_add()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local entry1 = dictionary:add_with_condition("Entry1", true)
-  local entry2 =  dictionary:add_with_condition("Entry2")
+function increment_failed_load(index, v, str)
+  print("testcase name :"..v.name)
+  print("Meta file: "..v.meta)
   
-  lu.assertNumber(entry1)
-  lu.assertNumber(entry2)
-  lu.assertEquals("Entry1", dictionary:get_string_by_index(entry1))
-  lu.assertEquals("Entry2", dictionary:get_string_by_index(entry2))
-  lu.assertEquals(entry1, dictionary:get_index_by_string("Entry1"))
-  lu.assertEquals(entry2, dictionary:get_index_by_string("Entry2"))  
-  lu.assertEquals(2, dictionary:get_size())
+  print("reason for failure ::"..str)
+  no_of_failure = no_of_failure + 1
+  table.insert(failed_testcases,index)
+  
+  print("\n-----------------Meta Data File------------\n")
+  os.execute("cat /home/pragati/Desktop/Q/UTILS/test/test_metadata/"..v.meta) 
+  print("\n--------------------------------------------\n")
+  
 end
 
-function test_dictionary:test_add_nil()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  lu.assertError(dictionary.add_with_condition,self,"")
-  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, self,"")
-  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, self, "", false)
-  lu.assertErrorMsgContains("Cannot add nil or empty string in dictionary", dictionary.add_with_condition, self, "", true)  
+-- this function checks whether after passing valid metadata
+-- the return type of Dictionary is Dictionary or not
+
+function handle_category1(index, ret, metadata)
+  if type(ret) == "Dictionary" then
+    no_of_success = no_of_success + 1 
+  else
+    increment_failed_load(index, metadata, "testcase failed : in category 1 : Return type not Dictionary")
+    return nil
+  end
 end
 
-function test_dictionary:test_add_multiple_with_add_false()  
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local entry1 = dictionary:add_with_condition("Entry1", true)
-   
-  lu.assertNumber(entry1)
-  lu.assertErrorMsgContains("Text does not exist in dictionary", dictionary.add_with_condition, dictionary, "Entry2", false)  
+-- this function handle the testcase where
+-- error messages are expected output
+-- if null or empty string is passed to add dictionary function 
+-- it should give an error
+
+function handle_category2(index, ret, metadata)
+    local status, add_err = pcall(ret.add,metadata.input)
+    local a, b, err = plstring.splitv(add_err,':')
+    err = plstring.strip(err) 
+    
+    local expected = metadata.output_regex
+    local count = plstring.count(err, expected )
+  
+    if count > 0 then
+      no_of_success = no_of_success + 1 
+    else
+      increment_failed_load(index, metadata, "testcase failed : in category 2 : Error message not matched with output_regex")
+      return nil
+    end
 end
 
-function test_dictionary:test_add_mutiple_with_tdd_true()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local entry1 = dictionary:add_with_condition("Entry1", true)
-  local entry2 = dictionary:add_with_condition("Entry1", true)
+-- this function checks whether valid string entries are added in dictionary 
+-- and checking if get_size gives a valid size of a dictionary
+
+function handle_category3(index, ret, metadata)
   
-  lu.assertNumber(entry1)
-  lu.assertNumber(entry2)
-  lu.assertEquals(entry1,entry2)
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
+  end
+
+  local dict_size = ret:get_size()
+  if dict_size == metadata.dict_size then
+    no_of_success = no_of_success + 1 
+  else
+    increment_failed_load(index, metadata, "testcase failed : in category 3 : Not added entries in dictionary properly")
+    return nil
+  end
 end
 
-function test_dictionary:test_store_dictionary()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  dictionary:add_with_condition("Entry1")
-  dictionary:add_with_condition("Entry2")
-  dictionary:save_to_file("./serializedD1")
+-- this function checks whether a correct index 
+-- of a valid string is returned from a dictionary
+
+function handle_category4(index, ret, metadata)
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
+  end
   
-  local f = io.open("./serializedD1", "r")
-  local line1 = f:read("*l")
-  local line2 = f:read("*line")
-  local line3 = f:read("*line")
-  lu.assertEquals(line1, "Entry1,1")
-  lu.assertEquals(line2, "Entry2,2")
-  lu.assertNil(line3)      
+  for i=1, #metadata.input do
+    if ret:get_index_by_string(metadata.input[i]) ~= metadata.output_regex[i] then
+      increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid index entry")
+      return nil
+    end
+  end
   
-  f:close()
-  os.remove("./serializedD1")
+  no_of_success = no_of_success + 1 
 end
 
-function test_dictionary:test_read_dictionary_from_file()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  dictionary:add_with_condition("Entry1")
-  dictionary:add_with_condition("Entry2")
-  dictionary:save_to_file("./serializedD2")
-  
-  local restored_dictionary = Dictionary({dict = "D2", is_dict = false, add=true})
-  restored_dictionary:restore_from_file("./serializedD2")
-  
-  local val = restored_dictionary:get_index_by_string("Entry1")
-  
-  lu.assertEquals( restored_dictionary:get_string_by_index(1), "Entry1")
-  lu.assertEquals( restored_dictionary:get_index_by_string("Entry2"), 2)
-  
-  os.remove("./serializedD2")
-end
+-- this function checks whether a correct string 
+-- of a valid index is returned from a dictionary
 
-function test_dictionary:test_increment_number_addition()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  dictionary:add_with_condition("e1")
-  dictionary:add_with_condition("e2")
-  dictionary:add_with_condition("e3")
-  dictionary:add_with_condition("e4")
+function handle_category5(index, ret, metadata)
+  for i=1, #metadata.input do
+    ret:add(metadata.input[i])
+  end
   
-  lu.assertEquals(dictionary:get_string_by_index(1), "e1")
-  lu.assertEquals(dictionary:get_string_by_index(2), "e2")
-  lu.assertEquals(dictionary:get_string_by_index(3), "e3")
-  lu.assertEquals(dictionary:get_string_by_index(4), "e4")
-end
-
-function test_dictionary:test_dictionary_add()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  dictionary:add_with_condition("e1")
-  dictionary:add_with_condition("e2")
-  dictionary:add_with_condition("e3")
-  dictionary:add_with_condition("e4")
-  lu.assertEquals(dictionary:get_size(), 4)
+  for i=1, #metadata.input do
+    if ret:get_string_by_index(i) ~=  metadata.input[i] then
+      increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid string entry")
+      return nil
+    end
+  end
   
-  dictionary:add_with_condition("e5")
-  dictionary:add_with_condition("e6")
-  lu.assertEquals(dictionary:get_size(), 6)    
-end
-
-
-function test_dictionary:test_dictionary_add_backslash()
-  local dictionary = Dictionary({dict = "D1", is_dict = false, add=true})
-  local slash_num = dictionary:add_with_condition("\\")
-  lu.assertEquals(dictionary:get_size(), 1)
-  lu.assertEquals(slash_num, 1)
-  lu.assertEquals(dictionary:get_string_by_index(1), "\\")    
+  no_of_success = no_of_success + 1 
 end
 
 
-os.exit( lu.LuaUnit.run() )
+
+function print_results()  
+  local str
+  
+  str = "-----------Dictionary testcases results for LOAD_CSV---------------\n"
+  str = str.."No of successfull testcases "..no_of_success.."\n"
+  str = str.."No of failure testcases     "..no_of_failure.."\n"
+  str = str.."---------------------------------------------------------------\n"
+  if #failed_testcases > 0 then
+    str = str.."Testcases failed are     \n"
+    for k,v in ipairs(failed_testcases) do
+      str = str..v.."\n"
+    end
+    str = str.."Run bash test_dictionary.sh <testcase_number> for details\n\n"
+    str = str.."-------------------------------------------------------------\n"
+  end 
+  print(str)
+  local file = assert(io.open("nightly_build_dictionary.txt", "w"), "Nighty build file open error")
+  assert(io.output(file), "Nightly build file write error")
+  assert(io.write(str), "Nightly build file write error")
+  assert(io.close(file), "Nighty build file close error")
+  
+end
+
+local handle_function = {}
+-- to test whether return type is Dictionary
+handle_function["category1"] = handle_category1
+-- checking of invalid dict add to a dictionary
+handle_function["category2"] = handle_category2
+-- checking of valid dict add to a dictionary 
+-- and checking valid get size of a dictionary
+handle_function["category3"] = handle_category3
+-- checking valid get index from a dictionary
+handle_function["category4"] = handle_category4
+-- checking valid get string from a dictionary
+handle_function["category5"] = handle_category5
+
+
+local function calling_dictionary(i ,m)
+  print(i,"Testing : " .. m.name)
+  local M = dofile("test_metadata/"..m.meta)
+  local x = Dictionary(M.dict)
+  local ret = assert(Dictionary(M.dict))
+  if handle_function[m.category] then
+    handle_function[m.category](i,ret, m)
+  end 
+end
+
+
+
+for i, m in ipairs(T) do
+  if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
+  
+  -- for testcase 5 and 7 testcase 4 should be executed for the dictionary to in existence 
+  if arg[1]~= nil and tonumber(arg[1])==5 or tonumber(arg[1])==7 then
+    local no_of_tc = {}
+    if tonumber(arg[1])==5 then no_of_tc = { 4, 5 } end
+    if tonumber(arg[1])==7 then no_of_tc = { 4, 7 } end
+    for j=1,#no_of_tc do
+      i = no_of_tc[j]
+      m = T[i]
+      calling_dictionary(i, m)
+    end
+    goto skip
+  end
+  -- normal calling of all the testcases
+  calling_dictionary(i, m)
+  
+  ::skip::
+end
+
+print_results()

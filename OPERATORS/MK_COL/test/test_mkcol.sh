@@ -12,16 +12,13 @@ export Q_SRC_ROOT="`pwd`"
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 unset LD_LIBRARY_PATH
 `lua | tail -1`
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/LOAD_CSV/obj:$Q_SRC_ROOT/OPERATORS/PRINT/obj"
 
-cd $SCRIPT_PATH/../../LOAD_CSV/test
-bash test_load.sh
+# generate vector lib files
+cd $SCRIPT_PATH/../../../Q2/code/src
+bash gen_files.sh
+make
 
-cd $SCRIPT_PATH
-bash test_print.sh
+cd $SCRIPT_PATH/
+luajit test_mkcol.lua 
 
-rm -rf test_print_data
-
-#run test_load_csv
-luajit test_print_csv.lua $1
-
+echo "Completed $0 in $PWD"

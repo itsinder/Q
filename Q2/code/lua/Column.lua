@@ -107,6 +107,14 @@ function Column:fldtype()
     return self.vec:fldtype()
 end
 
+function Column:has_nulls()
+    if self.nn_vec == nil  then
+        return true
+    else
+        return false
+    end
+end
+
 function Column:sz()
     --size of each entry
     --if self.nn_vec ~= nil then

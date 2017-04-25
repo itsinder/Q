@@ -1,5 +1,7 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
+require("error_code")
+
 Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
@@ -42,8 +44,7 @@ function Dictionary:get_index_by_string(text)
 end
 
 function Dictionary:add(text)
-    assert(text and text ~= "", 
-    "Cannot add nil or empty string in dictionary")
+    assert(text and text ~= "", g_err.ADD_NIL_EMPTY_ERROR_IN_DICT )
     local index = self:get_index_by_string(text)
     if not index then
         index = #self.index_to_string + 1

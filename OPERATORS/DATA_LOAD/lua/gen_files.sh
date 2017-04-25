@@ -1,5 +1,9 @@
 #!/bin/bash
 set -e 
+
+rm -rf ../gen_inc ../gen_src
+mkdir ../gen_inc ../gen_src
+
 # generate all primitives
 lua gen_code_I.lua 
 lua gen_code_F.lua 

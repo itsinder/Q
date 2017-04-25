@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e 
+
+rm -rf ../gen_inc ../gen_src 
+mkdir ../gen_inc ../gen_src 
+
 FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 # generate all primitives
+
 lua gen_code_I.lua 
 lua gen_code_F.lua 
 # iterate over all generated code=> should compile without warnings
