@@ -1,6 +1,6 @@
 -- RS Delete this line - taken care of by LUA_INIT set up
 local extract_fn_proto = require 'extract_fn_proto'
-require "validate_meta"
+local validate_meta = require "validate_meta"
 require 'error_code'
 
 local Dictionary = require 'dictionary'

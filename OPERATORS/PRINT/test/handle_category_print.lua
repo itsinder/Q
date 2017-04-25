@@ -11,7 +11,7 @@ local failed_testcases = {}
 
 local fns = {}
 
-fns.increment_failed = function (index, v, str)
+function increment_failed (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   print("csv file: "..v.data)

@@ -1,4 +1,3 @@
-local rootdir = os.getenv("Q_SRC_ROOT")
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 local convert_c_to_txt = require 'C_to_txt'
@@ -8,6 +7,8 @@ local number_of_testcases_failed = 0
 
 local failed_testcases = {}
 
+local fns = {}
+
 function increment_failed_load(index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
@@ -16,16 +17,16 @@ function increment_failed_load(index, v, str)
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
-  
+  --[[
   print("\n-----Meta Data File------\n")
   os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_metadata/"..v.meta)
   print("\n\n-----CSV File-------\n")
   os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_data/"..v.data)
   print("\n--------------------\n")
-  
+  --]]
 end
 
-function print_result() 
+fns.print_result = function () 
   local str
   
   str = "----------LOAD_CSV TEST CASES RESULT----------------\n"
@@ -53,7 +54,7 @@ end
 -- for category 2, category 3, category 4 and category 5
 -- if status is true then only testcase will succeed
 
-function handle_output_regex(index, status, v, flag, category)
+function handle_output_regex (index, status, v, flag, category)
   local output
   
   if flag then status = status else status = not status end
@@ -77,7 +78,7 @@ function handle_output_regex(index, status, v, flag, category)
 end
   
 -- this function handle testcases where error messages are expected output 
-function handle_category1(index, status, ret, v)
+fns.handle_category1 = function (index, status, ret, v)
   print(ret)
   print(v.name)
   local output = handle_output_regex(index, status, v, true, "category1")
@@ -107,7 +108,7 @@ end
 
 -- this function handle testcases where table of columns are expected output 
 -- in this table, only one column is present
-function handle_category2(index, status, ret, v, output_category3, v_category3)
+fns.handle_category2 = function (index, status, ret, v, output_category3, v_category3)
   print(ret)
   local output
 
@@ -174,7 +175,7 @@ end
 -- in this table, multiple columns are present
 -- handle_category2 function is reused
 -- it is called in loop for every column
-function handle_category3(index, status, ret, v)
+fns.handle_category3 = function (index, status, ret, v)
   print(ret)
   print(v.name)
   local output = handle_output_regex(index, status, v, false, "category3")
@@ -192,7 +193,7 @@ function handle_category3(index, status, ret, v)
   
   for i=1,#output do
     --print(type(ret[i]))
-    local ret = handle_category2(index, status, ret[i], nil, output[i], v)
+    local ret = fns.handle_category2(index, status, ret[i], nil, output[i], v)
     if not ret then return nil end
     number_of_testcases_passed = number_of_testcases_passed - 1
   end
@@ -200,7 +201,7 @@ function handle_category3(index, status, ret, v)
 end
 
 -- check the length of bin files in this testcase 
-function handle_category4(index, status, ret, v)
+fns.handle_category4 = function (index, status, ret, v)
   print(ret)
   print(v.name)
   local output = handle_output_regex(index, status, v, false, "category4")
@@ -228,7 +229,7 @@ end
 
 -- check whether the null file is present if has_null is true and csv file has no null values
 -- if null file present , then load_csv api should delete that file
-function handle_category5(index, status, ret, v)
+fns.handle_category5 = function (index, status, ret, v)
   print(ret)
   print(v.name)
   local output = handle_output_regex(index, status, v, false, "category5")
@@ -257,8 +258,7 @@ function handle_category5(index, status, ret, v)
 end
 
 -- in this testcase , invalid environment values are set
-function handle_input_category6(input_regex)
-  
+fns.handle_input_category6 =  function (input_regex)
   if input_regex == 1 then _G["Q_DATA_DIR"] = nil end
   if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
   if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
@@ -269,7 +269,9 @@ end
 
 -- in this testcase , error messages are compared . 
 -- so handle_category1 function is reused
-function handle_category6(index, status, ret, v)
+fns.handle_category6 = function (index, status, ret, v)
   --print(v.name)
-  handle_category1(index, status, ret, v)
+  fns.handle_category1(index, status, ret, v)
 end
+
+return fns
