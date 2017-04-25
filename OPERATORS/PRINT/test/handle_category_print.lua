@@ -1,7 +1,7 @@
 local plstring = require 'pl.stringx'
 local Vector = require 'Vector'
 local Column = require 'Column'
-require 'load_csv'
+local load_csv = require 'load_csv'
 local print_csv = require 'print_csv'
 
 local number_of_testcases_passed = 0
@@ -19,12 +19,13 @@ fns.increment_failed = function (index, v, str)
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
-  
+  --[[
   print("\n-----Meta Data File------\n")
   os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_metadata/"..v.meta)
   print("\n\n-----CSV File-------\n")
   os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_data/"..v.data)
   print("\n--------------------\n")
+  ]]--
 end
 
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 

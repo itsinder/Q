@@ -109,7 +109,7 @@ function mk_out_buf(
   assert(status == 0, g_err.INVALID_DATA_ERROR .. m.qtype)
 end
 
-function load_csv( 
+return function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   global_settings -- TODO unused for now
