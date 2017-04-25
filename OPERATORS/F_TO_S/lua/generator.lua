@@ -1,5 +1,5 @@
   local plfile = require 'pl.file'
-  dofile '../../../UTILS/lua/globals.lua'
+  dofile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local gen_code = require("gen_code")

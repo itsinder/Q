@@ -1,12 +1,5 @@
 local plpath = require 'pl.path'
 
-function load_file_as_string(fname)
-  local f = assert(io.open(fname))
-  local str = f:read("*a")
-  f:close()
-  return str
-end
-
 -- Following code was taken from : http://lua-users.org/wiki/CsvUtils
 -- Used to escape "'s , so that string can be inserted in csv line
 function escape_csv (s)
