@@ -1,6 +1,6 @@
 require 'globals'
 require 'error_code'
-require 'extract_fn_proto'
+local extract_fn_proto = require 'extract_fn_proto'
 
 local ffi = require "ffi"
 ffi.cdef
@@ -10,7 +10,9 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
+-- Q_SRC_ROOT  to be removed , once extract fn_proto dependency not required
 local rootdir = os.getenv("Q_SRC_ROOT")
+
 --print("***********",rootdir)
 -- TODO this should be done in single loop; need way to differentiate "gen" types/code in global
 local SC_to_txt = assert(extract_fn_proto(rootdir.."/OPERATORS/PRINT/src/SC_to_txt.c"))
@@ -31,7 +33,7 @@ ffi.cdef(F8_to_txt)
 
 -- load print_csv so file
 -- this file is created using compile_so for local testing
-local print_csv_lib = ffi.load("print_csv.so")
+-- local print_csv_lib = ffi.load("print_csv.so")
 
 function print_csv(column_list, filter, opfile)  
   
@@ -119,27 +121,32 @@ function print_csv(column_list, filter, opfile)
           else
             local is_SC = col:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
             local is_SV = col:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
-            local field_size
-            local second_arg
-            -- if SC, then field_size is taken from size field, else it is 1024
-            if is_SC == true then 
-              field_size = col:sz()
-              second_arg = field_size
-            else 
-              field_size = bufsz    
-              second_arg = ""
+            local is_I8 = col:fldtype() == "I8" 
+            
+            local ctype =  g_qtypes[col:fldtype()]["ctype"]
+            local str = ffi.cast(ctype.." *",cbuf)
+            temp = tostring(str[0])
+            
+            -- to check if LL is present and then remove LL appended at end of I8 number
+            if is_I8 then
+              local index1, index2 = string.find(temp,"LL")
+              local string_length = #temp
+              if index1 == string_length-1 and index2 == string_length then
+                temp = string.sub(temp, 1, -3) 
+              end
             end
-          
-            local function_name = g_qtypes[col:fldtype()]["ctype_to_txt"]
-            ffi.C.memset(buf, 0, bufsz)
-            local status = print_csv_lib[function_name](cbuf, second_arg, buf, field_size )
-            temp = ffi.string(buf)
-            -- get SV data type from dictionary
+            
+            
+            if is_SC == true then
+              temp = ffi.string(str)
+            end
+            
             if is_SV == true then 
-              temp = tonumber(temp)
-              local dictionary = col:get_meta("dir")
-              temp = dictionary:get_string_by_index(temp)
+               temp = str[0]
+               local dictionary = col:get_meta("dir")
+               temp = dictionary:get_string_by_index(temp)
             end
+            
           end
         end
         result = result..temp..","
