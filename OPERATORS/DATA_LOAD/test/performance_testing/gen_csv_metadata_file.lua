@@ -1,8 +1,11 @@
 require 'globals'
-require 'pl'
 
+-- table for random functions
+local random_func = {}
+
+local fns = {} 
 --to convert row (table) into comma separated line
-local function to_csv (tt)
+local to_csv = function  (tt)
   local s = ""
   for _,p in ipairs(tt) do 
     s = s .. "," .. p
@@ -13,19 +16,19 @@ end
 --placing random seed once at start for generating random no. each time
 math.randomseed(os.time())
 
-function random_int8_t()
+random_func.random_int8_t = function ()
   return math.random(1,127)
 end
 
-function random_int16_t()
+random_func.random_int16_t = function ()
   return math.random(1,32767)
 end
 
-function random_int32_t()
+random_func.random_int32_t = function ()
   return math.random(1,2147483647)
 end
 
-function random_float()
+random_func.random_float = function ()
   return math.random(100000,900000) / 10
 end
 
@@ -35,29 +38,29 @@ for i = 48,  57 do table.insert(charset, string.char(i))  end
 for i = 65,  90 do table.insert(charset, string.char(i))  end
 for i = 97, 122 do table.insert(charset, string.char(i))  end
 
-function random_SC(length_inp)
+random_func.random_SC = function(length_inp)
     local length = length_inp
     if length > 0 then
-        return random_SC(length - 1) .. charset[math.random(1, #charset)]
+        return random_func.random_SC(length - 1) .. charset[math.random(1, #charset)]
     end
     return ""
 end
 
-function random_SV(size)
+random_func.random_SV = function(size)
     random_len = math.random(1,size)
-    string = random_SC(random_len)
+    string = random_func.random_SC(random_len)
     return string
 end
 
 --generating maximum specified unique strings
-local function dict_size_unique_string(max_str_size, max_idx)
+local dict_size_unique_string = function (max_str_size, max_idx)
   local str
   local unique_strings_table = {'""'} --for storing unique strings in table
   local reverse_storing = {'""'} --for searching string in 0(n) time
   local idx = 2
 
   repeat  
-    str = random_SV(max_str_size-1)
+    str = random_func.random_SV(max_str_size-1)
     if(reverse_storing[str] == nil) then 
       --IF generated string is not in the table then insert in both the tables 
       unique_strings_table[idx] = str
@@ -70,7 +73,7 @@ local function dict_size_unique_string(max_str_size, max_idx)
 end
 
 --generating unique strings for each varchar column
-function generate_unique_varchar_strings(meta_info)
+fns.generate_unique_varchar_strings = function(meta_info)
   local unique_string_tables = {}
   local is_varchar_col = false
   
@@ -97,7 +100,7 @@ end
 
 
 --generating metadata table(returns metadata table generated)
-function generate_metadata(meta_info)
+fns.generate_metadata = function(meta_info)
   
   local metadata_table= {}
   local idx=1
@@ -142,10 +145,9 @@ local function fill_table(column_list, chunk_print_size,unique_string_tables)
     file_data[ind] = {}
     for j=1, col_length do
       if column_list[j]['qtype']=='SC' then
-        func ='random_'..column_list[j]['qtype']
-        loadstring("value = " .. func)()
+        local func ='random_'..column_list[j]['qtype']
         local size = column_list[j]['width']-1
-        table.insert(file_data[ind],value(size))
+        table.insert(file_data[ind],random_func[func](size))
       elseif column_list[j]['qtype']=='SV' then
         local random_no = math.random(1,column_list[j]['max_unique_values'])
         local dict_no = column_list[j]['unique_table_id']
@@ -154,8 +156,7 @@ local function fill_table(column_list, chunk_print_size,unique_string_tables)
       else
         local data_type_short_code = column_list[j]['qtype']
         local func ='random_'..g_qtypes[data_type_short_code]['ctype']
-        loadstring("value = " .. func)()
-        table.insert(file_data[ind],value())
+        table.insert(file_data[ind],random_func[func]())
       end
     end
   end
@@ -163,7 +164,7 @@ local function fill_table(column_list, chunk_print_size,unique_string_tables)
 end
 
 --function to write the table data into csv file and then empty the table
-local function write_and_empty_table(chunk_print_size, file_data, file)
+local write_and_empty_table = function (chunk_print_size, file_data, file)
   local final_csv_string = ''
   for ind=1, chunk_print_size do
     --write file data and empty table data
@@ -176,7 +177,7 @@ end
 
 
 --generating csv file based on metadata (this function returns no of rows generated)
-function generate_csv_file(csv_file_name, metadata_table, row_count, chunk_print_size,unique_string_tables)
+fns.generate_csv_file = function(csv_file_name, metadata_table, row_count, chunk_print_size,unique_string_tables)
   local file = assert(io.open(csv_file_name, 'w')) 
   local no_of_chunks = math.floor(row_count/chunk_print_size)
   local chunks = 1
@@ -200,3 +201,5 @@ function generate_csv_file(csv_file_name, metadata_table, row_count, chunk_print
   end
   file:close() --closing csv file
 end
+
+return fns

@@ -1,7 +1,7 @@
 -- RS Delete this line - taken care of by LUA_INIT set up
-require 'extract_fn_proto'
-require "validate_meta"
-require 'error_code'
+local extract_fn_proto = require 'extract_fn_proto'
+local validate_meta = require "validate_meta"
+local error_code = require 'error_code'
 
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
@@ -109,7 +109,7 @@ function mk_out_buf(
   assert(status == 0, g_err.INVALID_DATA_ERROR .. m.qtype)
 end
 
-function load_csv( 
+return function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   global_settings -- TODO unused for now
