@@ -1,5 +1,6 @@
 local load_csv = require 'load_csv_dataload'
 local fns = require 'handle_category'
+local dir = require 'pl.dir'
 
 --local Dictionary = require 'dictionary'
 

@@ -1,4 +1,5 @@
 require 'pl'
+local dir = require 'pl.dir'
 require 'gen_csv_metadata_file'
 require 'load_csv_dataload'
 

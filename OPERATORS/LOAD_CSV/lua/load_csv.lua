@@ -1,7 +1,7 @@
 -- RS Delete this line - taken care of by LUA_INIT set up
 local extract_fn_proto = require 'extract_fn_proto'
 local validate_meta = require "validate_meta"
-require 'error_code'
+local error_code = require 'error_code'
 
 local Dictionary = require 'dictionary'
 local Column = require 'Column'

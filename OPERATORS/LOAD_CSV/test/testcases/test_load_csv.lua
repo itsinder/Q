@@ -1,5 +1,6 @@
 local load_csv = require 'load_csv'
 local fns = require 'handle_category'
+local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
 local test_metadata_dir ="./test_metadata/"

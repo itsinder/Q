@@ -1,5 +1,5 @@
 require 'globals'
-require 'error_code'
+local error_code = require 'error_code'
 local pl = require 'pl'
 local dbg = require 'debugger'
 local plpath = require 'pl.path'

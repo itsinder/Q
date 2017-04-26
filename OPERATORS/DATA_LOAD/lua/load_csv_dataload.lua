@@ -1,5 +1,5 @@
 require 'globals'
-require 'error_code'
+local error_code = require 'error_code'
 local validate_meta = require "validate_meta"
 local extract_fn_proto = require 'extract_fn_proto'
 

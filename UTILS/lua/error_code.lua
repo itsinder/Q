@@ -68,3 +68,4 @@ g_err.UB_GREATER_THAN_LB = "Upper bound less than lower bound"
 g_err.INVALID_UPPER_BOUND = "Upper bound greater than maximum length"
 g_err.INVALID_FILE_PATH = "standard file is closed"
 
+return g_err

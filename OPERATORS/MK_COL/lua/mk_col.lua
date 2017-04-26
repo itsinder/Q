@@ -1,4 +1,4 @@
-require 'error_code'
+local error_code = require 'error_code'
 
 -- local Dictionary = require 'dictionary'
 local Column = require 'Column'   

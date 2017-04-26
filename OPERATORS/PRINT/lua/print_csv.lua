@@ -1,5 +1,5 @@
 require 'globals'
-require 'error_code'
+local error_code = require 'error_code'
 
 local ffi = require "ffi"
 ffi.cdef
