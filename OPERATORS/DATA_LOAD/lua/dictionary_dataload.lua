@@ -1,3 +1,6 @@
+local fns = require 'utils'
+local parser = require 'parser'
+
 local Dictionary = {}
 Dictionary.__index = Dictionary
 
@@ -125,7 +128,7 @@ function Dictionary:save_to_file(file_path)
   local file = assert(io.open (file_path, "w"))
   local separator = ","
   for k,v in pairs(self.text_to_index) do 
-    local s = escape_csv(k) .. separator  .. v
+    local s = fns["escape_csv"](k) .. separator  .. v
     -- print("S is : " .. s)
     -- store the line in the file
      file:write(s, "\n")
@@ -141,7 +144,7 @@ end
 function Dictionary:restore_from_file(file_path)
   local file = assert(io.open(file_path, "r"))
   for line in file:lines() do 
-    local entry= parse_csv_line(line, ',')
+    local entry= parser["parse_csv_line"](line, ',')
     -- each entry is the form string, index
     self.text_to_index[entry[1]] = tonumber(entry[2])
     self.index_to_text[tonumber(entry[2])] = entry[1]

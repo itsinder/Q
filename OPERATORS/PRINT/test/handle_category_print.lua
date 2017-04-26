@@ -28,6 +28,18 @@ local increment_failed = function (index, v, str)
   ]]--
 end
 
+-- match file1 and file2, return true if success
+local file_match = function (file1, file2)
+  local actual_file_content = file.read(file1)
+  local expected_file_content = file.read(file2)
+  --print(actual_file_content)
+  --print(expected_file_content)
+  if actual_file_content ~= expected_file_content then
+     return false
+  end
+  return true
+end
+
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
 local check_again = function (csv_file, meta)
@@ -52,18 +64,6 @@ local check_again = function (csv_file, meta)
   
   number_of_testcases_passed = number_of_testcases_passed + 1
   --print("---check_again done---")
-end
-
--- match file1 and file2, return true if success
-local file_match = function (file1, file2)
-  local actual_file_content = file.read(file1)
-  local expected_file_content = file.read(file2)
-  --print(actual_file_content)
-  --print(expected_file_content)
-  if actual_file_content ~= expected_file_content then
-     return false
-  end
-  return true
 end
 
 -- in this category input file to load_csv and output file from print_csv is matched
