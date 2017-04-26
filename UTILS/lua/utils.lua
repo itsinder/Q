@@ -7,7 +7,6 @@ fns.load_file_as_string = function (fname)
   f:close()
   return str
 end
-
 -- Following code was taken from : http://lua-users.org/wiki/CsvUtils
 -- Used to escape "'s , so that string can be inserted in csv line
 fns.escape_csv = function (s)

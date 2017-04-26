@@ -1,10 +1,7 @@
 #!/usr/bin/env lua
-
-  local rootdir = os.getenv("Q_SRC_ROOT")
-  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
   local gen_code = require("gen_code")
   local plpath = require "pl.path"
-  dofile '../../../UTILS/lua/globals.lua'
+  loadfile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
 

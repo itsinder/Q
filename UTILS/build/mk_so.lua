@@ -86,18 +86,18 @@ local tgt_o = opdir .. "/libq.so"
 local tgt_h = opdir .. "/q.h"
 
 local pattern = "*.c"
-local cdir = "/tmp/LUAC/"
+local cdir = opdir .. "/LUAC/"
 os.execute("rm -r -f " .. cdir)
 plpath.mkdir(cdir)
 xcopy(pattern, root, xdir, xfil, cdir)
   --==========================
 local pattern = "*.h"
-local hdir = "/tmp/LUAH/"
+local hdir = opdir .. "/LUAH/"
 os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, xdir, xfil, hdir)
 
-command = "cat " .. hdir .. "*.h > " .. tgt_h
+command = "cat " .. hdir .. "*.h | grep -v '^#' > " .. tgt_h
 local status = os.execute(command)
 status = os.execute(command)
 print("Successfully created " .. tgt_h)
@@ -118,3 +118,38 @@ status = os.execute(command)
 assert(status, "gcc failed")
 assert(plpath.isfile(tgt_o), "Target " .. tgt_o .. " not created")
 print("Successfully created " .. tgt_o)
+
+--========== Create q_core.so 
+local q_core = dofile('core_c_files.lua')
+plpath.mkdir(cdir .. "/q_core/")
+dst = cdir .. "/q_core/" 
+for i, v in ipairs(q_core) do
+  src = cdir .. "/" .. v
+  pldir.copyfile(src, dst)
+end
+
+tgt_o = opdir .. "/libq_core.so"
+command = "gcc " .. FLAGS .. dst .. "/*.c -I" .. hdir .. 
+  " -shared -o " .. tgt_o
+  print(command)
+dbg = require 'debugger'
+status = os.execute(command)
+
+local T = {}
+local q_core = dofile('core_c_files.lua')
+for i, v in ipairs(q_core) do
+  local x = string.gsub(v, "%.c", ".h") 
+  local f = hdir .. "/" .. x
+  local isfile = plpath.isfile(f)
+  if ( not isfile ) then 
+    local f = hdir .. "/_" .. x
+    assert(plpath.isfile(f), "File not found " .. f)
+  end
+  local y = plfile.read(f)
+  T[#T+1] = y
+end
+
+local q_core_h = table.concat(T, "\n")
+
+local tgt_h = opdir .. "/q_core.h"
+plfile.write(tgt_h, q_core_h)

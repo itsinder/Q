@@ -1,9 +1,6 @@
 #!/usr/bin/env lua
 
-local rootdir = os.getenv("Q_SRC_ROOT")
-assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 require 'globals'
-
 local tmpl = dofile 'qsort.tmpl'
 
 order = { 'asc', 'dsc' }

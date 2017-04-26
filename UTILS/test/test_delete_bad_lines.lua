@@ -4,7 +4,7 @@ package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
 
 require 'parser'
 local dbl = require 'delete_bad_lines'
-require 'diff'
+local diff = require 'diff'
 
 local regexs = {
   "[a-zA-Z]*",

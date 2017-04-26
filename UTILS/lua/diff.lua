@@ -4,7 +4,7 @@ assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 -- assert(#arg == 2, "Usage is lua ", arg[0], " <file1> <file2> ")
 -- file1 = arg[1]
 -- file2 = arg[2]
-function diff(
+return function (
   file1, 
   file2
   )
