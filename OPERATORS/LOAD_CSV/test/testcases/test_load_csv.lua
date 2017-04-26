@@ -31,15 +31,20 @@ for i, v in ipairs(T) do
     local key = "handle_input_"..v.category
     if fns[key] then
       fns[key](v.input_regex)
+    else
+      fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+      goto skip
     end
   end
   
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
   --local status, ret = load_csv(test_input_dir..D,  M)
   local key = "handle_"..v.category
-    if fns[key] then
-      fns[key](i, status, ret, v)
-    end
+  if fns[key] then
+    fns[key](i, status, ret, v)
+  else
+    fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
+  end
   ::skip::
 end
 
