@@ -8,6 +8,7 @@ C = terralib.includec("stdlib.h")
 
 -- TODO belongs in utils
 function Array(typ)
+    -- TODO HOW TO FREE IT ?!
     return terra(N : int)
         var r : &typ = [&typ](C.malloc(sizeof(typ) * N))
         return r
@@ -36,17 +37,20 @@ g_valid_meta = nil
 --- BEGIN SETUP
 --print(package.path)
 package.path = package.path .. ';/home/srinath/Ramesh/Q/Q2/code/lua/?.lua;/home/srinath/Ramesh/Q/UTILS/lua/?.lua'
+
+-- for test data
+package.path = package.path .. ';/home/srinath/Ramesh/Q/OPERATORS/PERMUTE/test/?.lua'
 --- END SETUP
 ffi = require 'ffi'
 package.terrapath = package.terrapath .. ";/home/srinath/Ramesh/Q/OPERATORS/PERMUTE/terra/?.t"
 --print(package.path)
 require 'globals'
 require 'error_code'
--- require 'permute'
-require 'rs_permute'
+require 'permute'
+
 local Column = require 'Column'
 
-local col_from_tab = function(fldtyp, data)
+col_from_tab = function(fldtyp, data)
   local c = Column{
             field_type=fldtyp, 
             write_vector=true}
@@ -74,17 +78,16 @@ local col_as_str = function (c)
   return s
 end
 
-local in_col = col_from_tab ("I4", {10, 20, 30, 40, 50, 60})
---print("----")
---print(col_as_str(in_col))
-
-local idx_col = col_from_tab("I4", {0, 5, 1, 4, 2, 3})
---print("----")
---print(col_as_str(idx_col))
-
-local out_col = permute(in_col, idx_col)
---print("----")
---print(col_as_str(out_col))
-
-assert(col_as_str(out_col) == "10,60,20,50,30,40,")
+local testdata = require 'testdata_permute'
+for k,v in pairs(testdata) do
+  print ("running test " .. k)
+  status, out_col = pcall(permute, unpack(v.input))
+  if v.fail then
+    assert (status == false)
+  else
+    assert (status)
+    assert (col_as_str(out_col) == v.output)
+  end
+  -- TODO assert out_col file size
+end
 print("Tests passed.")
