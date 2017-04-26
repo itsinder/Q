@@ -33,7 +33,11 @@ for i, v in ipairs(T) do
   print("----------------------------------------")
   if v.category == "category6" then
     local key = "handle_"..v.category
-    fns[key](i, v, M)
+    if fns[key] then
+      fns[key](i, v, M)
+    else
+      fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
+    end
     goto skip
   end
   local status, load_ret = pcall(load_csv,"./test_data/"..D, M)
@@ -48,6 +52,8 @@ for i, v in ipairs(T) do
     key = "handle_"..v.category
     if fns[key] then
       fns[key](i, v,  print_out_dir..csv_file, print_ret, status)
+    else
+      fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     end
     
   else

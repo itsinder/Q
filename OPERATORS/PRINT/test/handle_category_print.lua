@@ -11,11 +11,12 @@ local failed_testcases = {}
 
 local fns = {}
 
-local increment_failed = function (index, v, str)
+fns.increment_failed = function (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
-  print("csv file: "..v.data)
-  
+  if v.data then
+    print("csv file: "..v.data)
+  end
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
@@ -42,23 +43,23 @@ end
 
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
-local check_again = function (csv_file, meta)
+local check_again = function (index, csv_file, meta)
   local M = dofile("./test_metadata/"..meta)
   print(csv_file)
   local status_load, load_ret = pcall(load_csv,csv_file, M)
   if status_load == false then
-    increment_failed(index, v, "testcase failed: in category1, output of load_csv fail in second attempt")
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of load_csv fail in second attempt")
     return nil
   end
   
   local status_print, print_ret = pcall(print_csv, load_ret, nil, csv_file..".output")
   if status_print == false then
-    increment_failed(index, v, "testcase failed: in category1, output of print_csv fail in second attempt")
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv fail in second attempt")
     return nil
   end
   
   if file_match(csv_file, csv_file..".output") == false then
-    increment_failed(index, v, "testcase failed: in category1, input and output csv file does not match in second attempt")
+    fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match in second attempt")
     return nil
   end
   
@@ -73,19 +74,19 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
   -- if status returned is false then this testcase has failed
   if not status then
     print(ret)
-    increment_failed(index, v, "testcase failed: in category1, output of print_csv is not success")
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv is not success")
     return nil
   end
   -- match input and output files
   if file_match("test_data/"..v.data, csv_file) == false then
-     increment_failed(index, v, "testcase failed: in category1, input and output csv file does not match")
+     fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match")
      return nil
   end
   --number_of_testcases_passed = number_of_testcases_passed + 1
 
   -- original data -> load -> print -> Data A -> load -> print -> Data B. 
   -- In this function Data A is matched with Data B 
-  check_again(csv_file, v.meta)
+  check_again(index, csv_file, v.meta)
 end
 
 -- in this category invalid filter input are given 
@@ -94,7 +95,7 @@ fns.handle_category2 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if status or v.output_regex==nil then
-    increment_failed(index, v, "testcase failed: in category2, output of print_csv should be false")
+    fns["increment_failed"](index, v, "testcase failed: in category2, output of print_csv should be false")
     return nil
   end
   
@@ -109,7 +110,7 @@ fns.handle_category2 = function (index, v, csv_file, ret, status)
   --print("Actual error:"..err)
   --print("Expected error:"..expected_output)
   if err ~= expected_output then
-     increment_failed(index, v, "testcase failed: in category2, actual and expected error message does  not match")
+     fns["increment_failed"](index, v, "testcase failed: in category2, actual and expected error message does  not match")
      return nil
   end
   number_of_testcases_passed = number_of_testcases_passed + 1
@@ -136,7 +137,7 @@ fns.handle_category4 = function (index, v, csv_file, ret, status)
   print(v.name) 
   
   if status then
-    increment_failed(index, v, "testcase failed: in category4, output of print_csv should be false")
+    fns["increment_failed"](index, v, "testcase failed: in category4, output of print_csv should be false")
     return nil
   end
   
@@ -148,7 +149,7 @@ fns.handle_category4 = function (index, v, csv_file, ret, status)
   --print("Expected error:"..expected_output)
   
   if err ~= expected_output then
-     increment_failed(index, v, "testcase failed: in category 4, actual and expected error does  not match")
+     fns["increment_failed"](index, v, "testcase failed: in category 4, actual and expected error does  not match")
      return nil
   end
    number_of_testcases_passed = number_of_testcases_passed + 1
@@ -162,7 +163,7 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
   
   if not status then
     print(ret)
-    increment_failed(index, v, "testcase failed: in category3, output of print_csv should be true")
+    fns["increment_failed"](index, v, "testcase failed: in category3, output of print_csv should be true")
     return nil
   end
   
@@ -171,7 +172,7 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then
-     increment_failed(index, v, "testcase failed: in category 3, actual and expected output does  not match")
+     fns["increment_failed"](index, v, "testcase failed: in category 3, actual and expected output does  not match")
      return nil
   end
   
@@ -185,7 +186,7 @@ fns.handle_category5 = function (index, v, csv_file, ret, status)
   
   if not status then
     print(ret)
-    increment_failed(index, v, "testcase failed: in category5, output of print_csv should be true")
+    fns["increment_failed"](index, v, "testcase failed: in category5, output of print_csv should be true")
     return nil
   end
   
@@ -194,7 +195,7 @@ fns.handle_category5 = function (index, v, csv_file, ret, status)
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then
-     increment_failed(index, v, "testcase failed: in category 5, actual and expected output does  not match")
+     fns["increment_failed"](index, v, "testcase failed: in category 5, actual and expected output does  not match")
      return nil
   end
   
@@ -223,7 +224,7 @@ fns.handle_category6 = function (index, v, M)
   local actual_file_content1 = file.read("./bin/I4.bin")
   local actual_file_content2 = file.read(filename)
   if actual_file_content1 ~= actual_file_content2 then  
-    increment_failed(index, v, "testcase failed: in category 6, input and output bin files does  not match")
+    fns["increment_failed"](index, v, "testcase failed: in category 6, input and output bin files does  not match")
     return nil
   end
   
