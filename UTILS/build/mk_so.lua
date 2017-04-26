@@ -138,9 +138,13 @@ status = os.execute(command)
 local T = {}
 local q_core = dofile('core_c_files.lua')
 for i, v in ipairs(q_core) do
-  dbg()
   local x = string.gsub(v, "%.c", ".h") 
   local f = hdir .. "/" .. x
+  local isfile = plpath.isfile(f)
+  if ( not isfile ) then 
+    local f = hdir .. "/_" .. x
+    assert(plpath.isfile(f), "File not found " .. f)
+  end
   local y = plfile.read(f)
   T[#T+1] = y
 end

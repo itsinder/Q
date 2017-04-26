@@ -2,7 +2,7 @@
   local dbg = require 'debugger'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
-  dofile 'globals.lua'
+  loadfile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])
