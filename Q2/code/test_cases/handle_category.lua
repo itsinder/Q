@@ -31,7 +31,7 @@ local file_size = function (file)
   return size
 end
 
-local increment_fail_testcases = function (index, v, str)
+fns.increment_fail_testcases = function (index, v, str)
   no_of_fail_testcases = no_of_fail_testcases + 1
   table.insert(failed_testcases, index)
   print("Name of testcase: "..v.name)
@@ -85,7 +85,7 @@ fns.handle_category1 = function (index, v, vector, input_values)
   vector:eov()
   
   if length ~= #input_values then 
-    increment_fail_testcases(index, v, "Length of input is not equal to the number of elements in binary file")
+    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the number of elements in binary file")
     return nil
   end
   
@@ -97,7 +97,7 @@ fns.handle_category1 = function (index, v, vector, input_values)
   file_size = file_size / field_size
   --print(file_size, length)
   if length ~= file_size then
-    increment_fail_testcases(index, v, "Length of input is not equal to the binary file size")
+    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
     return nil
   end
   
@@ -113,7 +113,7 @@ fns.handle_category1 = function (index, v, vector, input_values)
     
     if input_values[i] ~= value then
       print(input_values[i], value)
-      increment_fail_testcases(index, v, "Input value does not match with value in binary file")
+      fns["increment_fail_testcases"](index, v, "Input value does not match with value in binary file")
       return nil
     end
   end

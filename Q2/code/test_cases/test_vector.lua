@@ -29,6 +29,8 @@ for i, v in ipairs(T) do
   local key = "handle_"..v.category  
   if fns[key] then
     fns[key](i,v, v1, arg_input_values)
+  else
+    fns["increment_fail_testcases"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
   end
 end
 

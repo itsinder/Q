@@ -16,6 +16,8 @@ for i, v in ipairs(T) do
   local status, ret = pcall(mk_col,input,qtype)
   if fns[v.category] then
     fns[v.category](i, v, status, ret)
+  else
+    fns["increment_failed_mkcol"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
   end
   ::skip::
 end
