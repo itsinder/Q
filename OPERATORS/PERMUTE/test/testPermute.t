@@ -1,8 +1,15 @@
 ------- BEGIN GLOBALS
 -- TODO check/complete it and move to globals
 terra_types = {} 
-terra_types["I2"] = int
-terra_types["I4"] = int
+terra_types['I1'] = int8
+terra_types['I2'] = int16
+terra_types['I4'] = int32
+terra_types['I8'] = int64
+terra_types['F4'] = float
+terra_types['F8'] = double
+terra_types['SV'] = int32
+-- terra_types['SC'] = "char"
+terra_types['B1'] = uint64  
 
 C = terralib.includec("stdlib.h")
 
@@ -22,10 +29,10 @@ arr_elem_setter = function(typ)
   end
 end
 
-init_arr = function(ctype, a, sz, t)
+init_arr = function(qtyp, a, sz, t)
   -- set array elems (similar approach can be used for str-to-typ conversions)
   for k,v in pairs(t) do
-    arr_elem_setter(ctype)(a, k-1, v)
+    arr_elem_setter(terra_types[qtyp])(a, k-1, v)
   end
 end
 
@@ -50,14 +57,14 @@ require 'permute'
 
 local Column = require 'Column'
 
-col_from_tab = function(fldtyp, data)
+col_from_tab = function(qtyp, data)
   local c = Column{
-            field_type=fldtyp, 
+            field_type=qtyp, 
             write_vector=true}
   
   local N = #data
-  local arr = Array(int)(N)
-  init_arr(int, arr, N, data)
+  local arr = Array(terra_types[qtyp])(N)
+  init_arr(qtyp, arr, N, data)
   c:put_chunk(N, arr, nil)
   c:eov()
   return c
@@ -81,12 +88,13 @@ end
 local testdata = require 'testdata_permute'
 for k,v in pairs(testdata) do
   print ("running test " .. k)
-  status, out_col = pcall(permute, unpack(v.input))
+  status, res = pcall(permute, unpack(v.input))
   if v.fail then
     assert (status == false)
+    assert (string.match(res, v.fail))
   else
     assert (status)
-    assert (col_as_str(out_col) == v.output)
+    assert (col_as_str(res) == v.output)
   end
   -- TODO assert out_col file size
 end

@@ -18,6 +18,6 @@ return {
             col_from_tab ("I4", {10, 20, 30, 40, 50, 60}),
             col_from_tab("F4", {0, 5, 1, 4, 2, 3}),
             false},
-    fail = "<checkErrCodeSomehow?>"
+    fail = "idx column must be integer type"
   }
 }
