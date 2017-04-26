@@ -1,7 +1,7 @@
 local log = require 'log'
 local plpath = require 'pl.path'
 local dir = require 'pl.dir'
-require 'utils'
+local fns = require 'utils'
 local compile_so = require 'compile_so'
 
 local ffi = require 'ffi'
@@ -33,7 +33,7 @@ assert(plpath.isfile(metadata_file_path), "ERROR: Please check metadata_file_pat
 assert(plpath.isfile(csv_file_path), "ERROR: Please check csv_file_path")
  
 local M = dofile(metadata_file_path)
-preprocess_bool_values(M, "has_nulls", "is_dict", "add")
+fns["preprocess_bool_values"](M, "has_nulls", "is_dict", "add")
 
 -- set default values for globals
 _G["Q_DATA_DIR"] = "./out/"     
