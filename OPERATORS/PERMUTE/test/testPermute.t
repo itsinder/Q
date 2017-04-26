@@ -16,14 +16,15 @@ require 'mk_col'
 
 local Column = require 'Column'
 
-local arr_from_col = function (c, ctype)
+local arr_from_col = function (c)
   local sz, vec, nn_vec = c:chunk(-1)
+  local ctype = g_valid_types[c:fldtype()] .. " *"
   return ffi.cast(ctype, vec)
 end
 
 local col_as_str = function (c) 
   local s = ""
-  local vec = arr_from_col(c, "int *")
+  local vec = arr_from_col(c)
   local N=c:length()
   for i=0,N-1 do
     s = s .. tostring(vec[i]) .. ","
@@ -40,7 +41,7 @@ for k,v in pairs(testdata) do
     assert (string.match(res, v.fail))
   else
     assert (status)
-    assert (col_as_str(res) == v.output)
+    assert (col_as_str(res) == v.output, "Expected" .. v.output .. " but was " .. col_as_str(res))
   end
   -- TODO assert out_col file size
 end
