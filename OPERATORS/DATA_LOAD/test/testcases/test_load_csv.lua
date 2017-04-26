@@ -2,8 +2,6 @@ local load_csv = require 'load_csv_dataload'
 local fns = require 'handle_category'
 local dir = require 'pl.dir'
 
---local Dictionary = require 'dictionary'
-
 local test_input_dir = "./test_data/"
 local test_metadata_dir ="./test_metadata/"
 -- common setting (SET UPS) which needs to be done for all test-cases
@@ -29,17 +27,24 @@ for i, v in ipairs(T) do
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data
   -- if category6 then set environment in handle_input_category6 function
-  local key = "handle_input_"..v.category
+  if v.category == "category6" then
+    local key = "handle_input_"..v.category
     if fns[key] then
-      F = fns[key](v.input_regex)
+      fns[key](v.input_regex)
+    else
+      fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+      goto skip
     end
+  end
   
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
   --local status, ret = load_csv(test_input_dir..D,  M)
-  key = "handle_"..v.category
-    if fns[key] then
-      fns[key](i, status, ret, v)
-    end
+  local key = "handle_"..v.category
+  if fns[key] then
+    fns[key](i, status, ret, v)
+  else
+    fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+  end
   ::skip::
 end
 
