@@ -2,8 +2,6 @@
   dofile '../lua/globals.lua'
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
-
-  -- require("aux")
   local gen_code = require("gen_code")
 
   local tmpl = "bin_search.tmpl"
