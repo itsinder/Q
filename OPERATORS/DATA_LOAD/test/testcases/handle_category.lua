@@ -9,7 +9,7 @@ local failed_testcases = {}
 
 local fns = {}
 
-local function increment_failed_load(index, v, str)
+local increment_failed_load = function (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   print("csv file: "..v.data)
@@ -54,7 +54,7 @@ end
 -- for category 2, category 3, category 4 and category 5
 -- if status is true then only testcase will succeed
 
-local function handle_output_regex(index, status, v, flag, category)
+local handle_output_regex = function (index, status, v, flag, category)
   local output
   
   if flag then status = status else status = not status end

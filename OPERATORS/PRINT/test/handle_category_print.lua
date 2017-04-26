@@ -11,7 +11,7 @@ local failed_testcases = {}
 
 local fns = {}
 
-function increment_failed (index, v, str)
+local increment_failed = function (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   print("csv file: "..v.data)
@@ -30,7 +30,7 @@ end
 
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
-function check_again(csv_file, meta)
+local check_again = function (csv_file, meta)
   local M = dofile("./test_metadata/"..meta)
   print(csv_file)
   local status_load, load_ret = pcall(load_csv,csv_file, M)
@@ -55,7 +55,7 @@ function check_again(csv_file, meta)
 end
 
 -- match file1 and file2, return true if success
-function file_match(file1, file2)
+local file_match = function (file1, file2)
   local actual_file_content = file.read(file1)
   local expected_file_content = file.read(file2)
   --print(actual_file_content)

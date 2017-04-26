@@ -12,7 +12,7 @@ ffi.cdef
 local fns = {}
 local failed_testcases = {}
 
-function increment_failed_mkcol(index, v, str)
+local increment_failed_mkcol = function (index, v, str)
   print("testcase name :"..v.name)
   print("qtype: "..v.qtype)
   
