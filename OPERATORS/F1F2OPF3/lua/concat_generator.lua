@@ -1,10 +1,8 @@
-  local rootdir = os.getenv("Q_SRC_ROOT")
-  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
   local gen_code = require("gen_code")
   local dbg = require 'debugger'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
-  dofile '../../../UTILS/lua/globals.lua'
+  dofile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   local operator_file = assert(arg[1])

@@ -6,9 +6,7 @@ ffi.cdef([[
   ]])
 
   -- local dbg = require 'debugger'
-  package.path = package.path .. ";../lua/?.lua"
   local const_specialize = require 'const_specialize'
-
   local plfile = require 'pl.file'
   -- local str = plfile.read("../gen_inc/_const_I8.h")
   local extract_fn_proto = require 'extract_fn_proto'

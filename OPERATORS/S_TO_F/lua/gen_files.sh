@@ -14,6 +14,8 @@ cd ../gen_inc/
 cp ../../LOAD_CSV/gen_inc/*.h ../gen_inc/
 cp ../../../UTILS/gen_inc/*.h ../gen_inc/
 
+mkdir ../gen_src/
+mkdir ../gen_inc/
 cd ../gen_src/
 cp ../../LOAD_CSV/gen_src/*.c ../gen_src/
 cp ../../../UTILS/src/is_valid*.c ../gen_src/
