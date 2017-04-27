@@ -1,3 +1,4 @@
+local ffi = require 'ffi'
 local utils
 utils = {
   arr_from_col = function (c)

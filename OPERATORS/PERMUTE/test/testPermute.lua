@@ -5,20 +5,18 @@ package.path = package.path .. ';/home/srinath/Ramesh/Q/Q2/code/lua/?.lua;/home/
 -- for test data
 package.path = package.path .. ';/home/srinath/Ramesh/Q/OPERATORS/PERMUTE/test/?.lua'
 --- END SETUP
-ffi = require 'ffi'
+
 package.terrapath = package.terrapath .. ";/home/srinath/Ramesh/Q/OPERATORS/PERMUTE/terra/?.t"
 --print(package.path)
 require 'globals'
 require 'terra_globals'
 require 'error_code'
-require 'permute'
+require 'permute' 
 
-local Column = require 'Column'
-
-local testdata = require 'testdata_permute'
+local suite = require 'testdata_permute'
 local testrunner = require 'test_runner'
 
-local failures = testrunner(testdata, permute)
+local failures = testrunner(suite, permute)
 if (#failures > 0) then
   print ("Failed tests: " .. tostring(failures))
 else

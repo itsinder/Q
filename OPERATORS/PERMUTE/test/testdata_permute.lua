@@ -7,8 +7,6 @@ local utils = require 'test_utils'
 local val_qtypes = {"I4"}
 local idx_qtypes = {"I4"}
 
-local data = {}
-
 local assert_valid = function(expected)
   return function (func_res)
     local actual = utils.col_as_str(func_res)
@@ -19,37 +17,54 @@ local assert_valid = function(expected)
   end
 end
 
-local explode_types = function (val_tab, idx_tab, idx_in_src, expected)
-  local expectedOut;
-  for k1,vqt in pairs(val_qtypes) do
-    for k2, iqt in pairs(idx_qtypes) do
-      -- TODOexpectedOut = if/else expr did not work.. TERRA ISSUE?!
-      if (vqt == 'I8') then 
-        expectedOut = string.gsub(expected, ",", "LL,") 
-      else         
-        expectedOut = expected 
-      end      
-      table.insert(data, {
-        input = {mk_col(val_tab, vqt), mk_col(idx_tab, iqt), idx_in_src},
-        check = assert_valid(expectedOut)
-      })
+local create_tests = function() 
+  local tests = {}
+  local explode_types = function (val_tab, idx_tab, idx_in_src, expected)
+    local expectedOut;
+    for k1,vqt in pairs(val_qtypes) do
+      for k2, iqt in pairs(idx_qtypes) do
+        -- TODOexpectedOut = if/else expr did not work.. TERRA ISSUE?!
+        if (vqt == 'I8') then 
+          expectedOut = string.gsub(expected, ",", "LL,") 
+        else         
+          expectedOut = expected 
+        end      
+        table.insert(tests, {
+          input = {mk_col(val_tab, vqt), mk_col(idx_tab, iqt), idx_in_src},
+          check = assert_valid(expectedOut)
+        })
+      end
     end
-  end
+  end  
+  explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, true, "10,60,20,50,30,40,")
+  explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, false, "10,30,50,60,40,20,")
+  --print (table.tostring(tests))
+
+  return {
+    -- add any special test cases here
+    {
+      -- Test level setup/teardown can be specified
+      -- setup = function() print ("failure setup") end,
+      -- teardown = function() print ("failure teardown") end,
+      input = {
+              mk_col ({10, 20, 30, 40, 50, 60}, "I4"),
+              mk_col({0, 5, 1, 4, 2, 3}, "F4"),
+              false},
+      fail = "idx column must be integer type"
+    },
+    -- unpack all the other test cases here
+    unpack(tests)
+  }
 end
 
-explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, true, "10,60,20,50,30,40,")
-explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, false, "10,30,50,70,40,20,")
---print (table.tostring(data))
+local suite = {}
+suite.tests = create_tests()
+-- Suite level setup/teardown can be specified
+suite.setup = function() 
+  -- print ("in setup!!")
+end
+suite.teardown = function()
+  -- print ("in teardown!!")
+end
 
-return {
-  -- add any special test cases here
-  {
-    input = {
-            mk_col ({10, 20, 30, 40, 50, 60}, "I4"),
-            mk_col({0, 5, 1, 4, 2, 3}, "F4"),
-            false},
-    fail = "idx column must be integer type"
-  },
-  -- unpack all the other test cases here
-  unpack(data)
-}
+return suite
