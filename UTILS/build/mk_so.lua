@@ -146,9 +146,15 @@ local extract_fn_proto = require 'extract_fn_proto'
 local T = {}
 local q_core = dofile('core_c_files.lua')
 for i, v in ipairs(q_core) do
-  local x = extract_fn_proto(c_dst .. v)
-  print("Extracting  " .. x .. " from " .. c_dst .. v )
-  T[#T+1] = x
+  local x = string.gsub(v, "%.c", ".h") 
+  local f = hdir .. "/" .. x
+  local isfile = plpath.isfile(f)
+  if ( not isfile ) then 
+    local f = hdir .. "/_" .. x
+    assert(plpath.isfile(f), "File not found " .. f)
+  end
+  local y = plfile.read(f)
+  T[#T+1] = y
 end
 
 local q_core_h = table.concat(T, "\n")

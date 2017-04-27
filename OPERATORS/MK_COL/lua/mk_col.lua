@@ -1,4 +1,4 @@
-require 'error_code'
+local error_code = require 'error_code'
 
 -- local Dictionary = require 'dictionary'
 local Column = require 'Column'   
@@ -31,7 +31,7 @@ local min = {
   }
 
 
-function mk_col(input, qtype)
+return function (input, qtype)
   assert( input ~= nil,g_err.INPUT_NOT_TABLE)
   assert(type(input) == "table", "Input to mk_col must be a table")
   assert(#input > 0, "table has no entries")

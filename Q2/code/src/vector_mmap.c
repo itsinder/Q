@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define MAX_LEN_DIR_NAME 1000
 #include "mmap_struct.h"
@@ -72,7 +73,15 @@ int main() {
     s = vector_mmap(f_name, false);
     printf("%d\n", s->status);
     printf("%s\n", s->ptr_mmapped_file);
-    printf("%d\n", vector_munmap(s));
-
+    int status = vector_munmap(s);
+    printf("%d\n",status );
+    char time_buffer[26];
+	time_t timer;
+    struct tm* tm_info;
+    time(&timer);
+    tm_info = localtime(&timer);
+    strftime(time_buffer, 26, "%d/%m/%y %H:%M", tm_info);
+	printf("__Q_TEST__%s; %s; Vector; testing vector_munmap; %d; %s\n",
+		 time_buffer, __FILE__, status, status==0 ? "SUCCESS": "FAIL");
 }
 #endif

@@ -1,13 +1,5 @@
-require 'mk_col'
-require 'handle_category'
-
-
-
-local handle_function = {}
--- handle error message testcases
-handle_function["category1"] = handle_category1
--- handle 1D output regex.
-handle_function["category2"] = handle_category2
+local mk_col = require 'mk_col'
+local fns = require 'handle_category'
 
 -- loop through testcases
 -- these testcases output error messages
@@ -22,10 +14,12 @@ for i, v in ipairs(T) do
   local qtype = v.qtype
   
   local status, ret = pcall(mk_col,input,qtype)
-  if handle_function[v.category] then
-    handle_function[v.category](i, v, status, ret)
+  if fns[v.category] then
+    fns[v.category](i, v, status, ret)
+  else
+    fns["increment_failed_mkcol"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
   end
   ::skip::
 end
 
-print_result()
+fns["print_result"]()

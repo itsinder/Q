@@ -1,7 +1,7 @@
 local log = require 'log'
 local plpath = require 'pl.path'
 local dir = require 'pl.dir'
-require 'utils'
+local fns = require 'utils'
 local compile_so = require 'compile_so'
 
 local ffi = require 'ffi'
@@ -23,7 +23,7 @@ local srcs = {  "../src/get_cell.c",
 local tgt = "../obj/libload_csv.so"
 local status = assert(compile_so(incs, srcs, tgt), "compile of .so failed")
 
-require 'load_csv'
+local load_csv = require 'load_csv'
 local Column = require 'Column'
 
 assert( #arg == 2 , "Arguments are <metadata_file_path> <csv_file_path>")
@@ -33,7 +33,7 @@ assert(plpath.isfile(metadata_file_path), "ERROR: Please check metadata_file_pat
 assert(plpath.isfile(csv_file_path), "ERROR: Please check csv_file_path")
  
 local M = dofile(metadata_file_path)
-preprocess_bool_values(M, "has_nulls", "is_dict", "add")
+fns["preprocess_bool_values"](M, "has_nulls", "is_dict", "add")
 
 -- set default values for globals
 _G["Q_DATA_DIR"] = "./out/"     

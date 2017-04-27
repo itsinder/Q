@@ -3,7 +3,9 @@
 -- -------------------------------------------------------------------------------------
 require 'pl'
 
-function parse_csv_line(line, sep) 
+local fns = {}
+
+fns.parse_csv_line = function (line, sep) 
     res = {}
     local pos = 1
     sep = sep or ','
@@ -51,3 +53,4 @@ function parse_csv_line(line, sep)
     return res
 end
 
+return fns

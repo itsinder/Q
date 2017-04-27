@@ -1,15 +1,22 @@
 local plpath = require 'pl.path'
+local fns = {}
 
+fns.load_file_as_string = function (fname)
+  local f = assert(io.open(fname))
+  local str = f:read("*a")
+  f:close()
+  return str
+end
 -- Following code was taken from : http://lua-users.org/wiki/CsvUtils
 -- Used to escape "'s , so that string can be inserted in csv line
-function escape_csv (s)
+fns.escape_csv = function (s)
   if string.find(s, '[,"]') then
     s = '"' .. string.gsub(s, '"', '""') .. '"'
   end
   return s
 end
 
-function preprocess_bool_values(metadata_table, ...)
+fns.preprocess_bool_values = function (metadata_table, ...)
   local col_names = {...}
   for i, metadata in pairs(metadata_table) do 
     for j, col_name in pairs(col_names) do
@@ -26,7 +33,7 @@ function preprocess_bool_values(metadata_table, ...)
   end
 end
 
-
+return fns
 --[[ Following contains one liner example of useful tasks, which should be used directly 
 
 - trim the string : stringx.strip(string_data)

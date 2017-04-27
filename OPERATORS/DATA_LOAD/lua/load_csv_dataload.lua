@@ -1,8 +1,7 @@
-require "validate_meta"
 require 'globals'
-require 'extract_fn_proto'
-require 'error_code'
-
+local error_code = require 'error_code'
+local validate_meta = require "validate_meta"
+local extract_fn_proto = require 'extract_fn_proto'
 
 local Dictionary = require 'dictionary_dataload'
 local plstring = require 'pl.stringx'
@@ -47,7 +46,7 @@ local c = ffi.load("load_csv.so")
 --           If any error was encountered during load operation then negative status code
 -- ----------------
 
-function load_csv( 
+return function ( 
   csv_file_path, 
   M,  -- metadata
   load_global_settings

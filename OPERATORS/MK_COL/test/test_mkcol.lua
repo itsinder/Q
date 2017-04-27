@@ -1,4 +1,4 @@
-require 'mk_col'
+local mk_col = require 'mk_col'
 local ffi = require 'ffi'
 
 -- input table of values 1,2,3 of type I4, given to mk_col

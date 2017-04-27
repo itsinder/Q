@@ -19,6 +19,4 @@ return {
   { name = "valid I8", field_type = 'I8', filename="I8.bin", chunk_size = 8, write_vector = true, category = "category1",
     input_values = { 1,2,3,4,5,6,7,8 } 
   },
-  
- 
 }

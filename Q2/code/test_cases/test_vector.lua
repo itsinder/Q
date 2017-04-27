@@ -1,20 +1,12 @@
 require 'globals'
 local dir = require 'pl.dir'
 local Vector = require 'Vector'
-
-require 'handle_category'
+local fns = require 'handle_category'
 
 local bin_file_path = "./bin/"
 
 -- common setting (SET UPS) which needs to be done for all test-cases
 dir.makepath(bin_file_path)
-
-local handle_function = {}
--- handle random file generation testcase
-handle_function["category1"] = handle_category1
--- handle invalid length vectors
-handle_function["category2"] = handle_category2
-
 
 local T = dofile("map_vector.lua")
 for i, v in ipairs(T) do
@@ -30,21 +22,19 @@ for i, v in ipairs(T) do
   local arg_write_vector = v.write_vector
   local arg_input_values = v.input_values
 
+  local v1 = Vector{ field_type = arg_field_type, field_size = arg_field_size, 
+    chunk_size = arg_chunk_size, filename = arg_filename, write_vector = arg_write_vector
+  }
 
-  local v1 = Vector{ field_type = arg_field_type, field_size = arg_field_size, chunk_size = arg_chunk_size,
-                     filename = arg_filename, write_vector = arg_write_vector
-                   }
-
-    
-  if handle_function[v.category] then
-    --print (handle_function[v.category])
-    handle_function[v.category](i,v, v1, arg_input_values)
+  local key = "handle_"..v.category  
+  if fns[key] then
+    fns[key](i,v, v1, arg_input_values)
+  else
+    fns["increment_fail_testcases"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
   end
-
 end
 
-print_result()
-
+fns["print_result"]()
 
 -- common cleanup (TEAR DOWN) for all testcases
 --dir.rmtree(bin_file_path)
