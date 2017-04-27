@@ -1,11 +1,21 @@
 --local val_qtypes = {"I1", "I2", "I4", "I8", "F4", "F8"}
 --local idx_qtypes = {"I1", "I2", "I4", "I8"}
+require 'mk_col'
+local utils = require 'test_utils'
 
 -- mk_col faltering for I2/I8 ??!!
 local val_qtypes = {"I4","I8"}
 local idx_qtypes = {"I4","I8"}
 
 local data = {}
+
+local assert_valid = function(expected)
+  return function (func_res)
+    local actual = utils.col_as_str(func_res)
+    assert (actual == expected, "Expected" .. expected .. " but was " .. actual)
+    -- TODO assert out_col file size  
+  end
+end
 
 local explode_types = function (val_tab, idx_tab, idx_in_src, expected)
   local expectedOut;
@@ -19,7 +29,7 @@ local explode_types = function (val_tab, idx_tab, idx_in_src, expected)
       end      
       table.insert(data, {
         input = {mk_col(val_tab, vqt), mk_col(idx_tab, iqt), idx_in_src},
-        output = expectedOut
+        check = assert_valid(expectedOut)
       })
     end
   end
