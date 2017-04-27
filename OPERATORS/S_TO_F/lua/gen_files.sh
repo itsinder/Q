@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e 
-FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
+FLAGS="-std=gnu99 -Wall -fPIC -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 
 cd ../../LOAD_CSV/lua/
 bash gen_files.sh
@@ -14,8 +14,8 @@ cd ../gen_inc/
 cp ../../LOAD_CSV/gen_inc/*.h ../gen_inc/
 cp ../../../UTILS/gen_inc/*.h ../gen_inc/
 
-mkdir ../gen_src/
-mkdir ../gen_inc/
+mkdir -p ../gen_src/
+mkdir -p ../gen_inc/
 cd ../gen_src/
 cp ../../LOAD_CSV/gen_src/*.c ../gen_src/
 cp ../../../UTILS/src/is_valid*.c ../gen_src/

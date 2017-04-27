@@ -6,7 +6,6 @@ return function (
   void * malloc(size_t size);
   void free(void *ptr);
   int bar(void *);
-  int printf (const char *__restrict __format, ...);
   ]])
   -- TODO This should be for conv_fn, not hard coded as below
   local extract_fn_proto = require 'extract_fn_proto'
