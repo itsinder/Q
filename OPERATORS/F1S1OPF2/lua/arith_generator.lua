@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
   local gen_code = require("gen_code")
   local plpath = require "pl.path"
-  dofile 'globals.lua'
+  loadfile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
 

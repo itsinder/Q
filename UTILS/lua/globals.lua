@@ -1,3 +1,6 @@
+--===========================
+q_core_h = os.getenv("Q_ROOT") .. "/includes/q_core.h"
+q_core_so = os.getenv("Q_ROOT") .. "/lib/q_core.so"
 g_max_width_SC = 1024 -- 1 char reserved for nullc
 g_max_width_SV = 1024 -- 1 char reserved for nullc
 

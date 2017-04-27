@@ -13,16 +13,16 @@ file_names = {} -- lists files seen to point out duplication
 function recursive_descent(
   pattern, 
   root,
-  xdir,
-  xfil,
+  dirs_to_exclude,
+  files_to_exclude,
   destdir
   )
   local F = pldir.getfiles(root, pattern)
   if ( ( F )  and ( #F > 0 ) ) then 
     for index, v in ipairs(F) do
       found = false
-      if ( xfil ) then 
-        for i2, v2 in ipairs(xfil) do
+      if ( files_to_exclude ) then 
+        for i2, v2 in ipairs(files_to_exclude) do
           if ( string.find(v, v2) ) then 
             found = true
           end
@@ -31,11 +31,6 @@ function recursive_descent(
       if ( found ) then 
         print("Skipping file " .. v)
       else
-        -- base_file_name = from last / to end
-        -- if ( files[base_file_name] ) then
-        --   files[base_file_name] = true
-        -- end
-
         print("Copying ", v, " to ", destdir)
         plfile.copy(v, destdir)
       end
@@ -46,8 +41,8 @@ function recursive_descent(
   local D = pldir.getdirectories(root)
   for index, v in ipairs(D) do
     found = false
-    if ( xdir ) then 
-      for i2, v2 in ipairs(xdir) do
+    if ( dirs_to_exclude ) then 
+      for i2, v2 in ipairs(dirs_to_exclude) do
         if ( string.find(v, v2) ) then 
           found = true
         end
@@ -57,7 +52,7 @@ function recursive_descent(
        print("Skipping directory " .. v)
      else
       -- print("Descending into ", v)
-      recursive_descent(pattern, v, xdir, xfil, destdir)
+      recursive_descent(pattern, v, dirs_to_exclude, files_to_exclude, destdir)
     end
   end
 end
@@ -65,8 +60,8 @@ end
 function xcopy(
   pattern,
   root,
-  xdir, 
-  xfil,
+  dirs_to_exclude, 
+  files_to_exclude,
   destdir
   )
   -- dbg()
@@ -75,12 +70,12 @@ function xcopy(
 --    plpath.rmdir(destdir)
 --  end
 --  plpath.mkdir(destdir)
-  recursive_descent(pattern, root, xdir, xfil, destdir)
+  recursive_descent(pattern, root, dirs_to_exclude, files_to_exclude, destdir)
   end
 --============
 local root = rootdir 
-local xdir = dofile("exclude_dir.lua")
-local xfil = dofile("exclude_fil.lua")
+local dirs_to_exclude = dofile("exclude_dir.lua")
+local files_to_exclude = dofile("exclude_fil.lua")
   --==========================
 local tgt_o = opdir .. "/libq.so"
 local tgt_h = opdir .. "/q.h"
@@ -89,13 +84,13 @@ local pattern = "*.c"
 local cdir = opdir .. "/LUAC/"
 os.execute("rm -r -f " .. cdir)
 plpath.mkdir(cdir)
-xcopy(pattern, root, xdir, xfil, cdir)
+xcopy(pattern, root, dirs_to_exclude, files_to_exclude, cdir)
   --==========================
 local pattern = "*.h"
 local hdir = opdir .. "/LUAH/"
 os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
-xcopy(pattern, root, xdir, xfil, hdir)
+xcopy(pattern, root, dirs_to_exclude, files_to_exclude, hdir)
 
 command = "cat " .. hdir .. "*.h | grep -v '^#' > " .. tgt_h
 local status = os.execute(command)
@@ -106,7 +101,7 @@ local pattern = "*.tmpl"
 local tdir = "/tmp/TEMPLATES/"
 os.execute("rm -r -f " .. tdir)
 plpath.mkdir(tdir)
-xcopy(pattern, root, xdir, xfil, tdir)
+xcopy(pattern, root, dirs_to_exclude, files_to_exclude, tdir)
   --==========================
 
 FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp "
@@ -138,7 +133,6 @@ status = os.execute(command)
 local T = {}
 local q_core = dofile('core_c_files.lua')
 for i, v in ipairs(q_core) do
-  dbg()
   local x = string.gsub(v, "%.c", ".h") 
   local f = hdir .. "/" .. x
   local y = plfile.read(f)
