@@ -20,3 +20,4 @@ cd $SCRIPT_PATH
 #run test_load_csv
 luajit test_mkcol.lua $1
 
+rm -f _*

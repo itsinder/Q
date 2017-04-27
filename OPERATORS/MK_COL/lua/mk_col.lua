@@ -33,10 +33,12 @@ local min = {
 
 function mk_col(input, qtype)
   assert( input ~= nil,g_err.INPUT_NOT_TABLE)
+  assert(type(input) == "table", "Input to mk_col must be a table")
+  assert(#input > 0, "table has no entries")
   assert( g_valid_types[qtype] ~= nil,g_err.INVALID_COLUMN_TYPE)
-  local width = g_qtypes[qtype]["width"]
-  assert(width ~= nil, g_err.NULL_WIDTH_ERROR)
+  local width = assert(g_qtypes[qtype]["width"], g_err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
+  assert(qtype ~= "B1", "TODO: To be implemented")
   assert(qtype ~= "SC",g_err.INVALID_COLUMN_TYPE)
   assert(qtype ~= "SV",g_err.INVALID_COLUMN_TYPE)
   -- To do - check max and min value in qtype
@@ -46,6 +48,7 @@ function mk_col(input, qtype)
   for k,v in ipairs(input) do 
     assert(type(v) == "number","Error in index "..k.." - "..g_err.INVALID_DATA_ERROR)
     --print("v = "..string.format("%18.0f",v))
+    -- TODO: Should this be < or <=, > or >= 
     assert(v >= MINIMUM_LUA_NUMBER, g_err.INVALID_LOWER_BOUND) 
     assert(v <= MAXIMUM_LUA_NUMBER, g_err.INVALID_UPPER_BOUND) 
     assert(v >= min[qtype], g_err.INVALID_LOWER_BOUND) 
@@ -66,6 +69,6 @@ function mk_col(input, qtype)
   local chunk = ffi.new(ctype .. "[?]", length, input)
   col:put_chunk(length, chunk)
   col:eov()
-  print("Successfully loaded ")
+  -- print("Successfully loaded ") Use log info for such things
   return col
 end
