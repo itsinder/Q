@@ -42,11 +42,11 @@ for i = 97, 122 do table.insert(charset, string.char(i)) end
 local function random_string(length_inp)
     math.randomseed(os.time())
     local length = length_inp or 11
-    if length > 0 then
-        return random_string(length - 1) .. charset[math.random(1, #charset)]
-    else
-        return ""
-    end
+    local result = {}
+      for loop = 1,length do
+         result[loop] = charset[math.random(1, #charset)]
+      end
+      return table.concat(result)
 end
 
 local function get_new_filename(length)
