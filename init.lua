@@ -6,11 +6,16 @@ local function script_path()
     return str:match("(.*/)")
 end
 
-local q_root = assert(os.getenv("Q_ROOT"))
 local plpath = require 'pl.path'
+
+local q_src_root = assert(os.getenv("Q_SRC_ROOT"))
+assert(plpath.isdir(q_src_root), "Q_SRC_ROOT not found")
+
+local q_root = assert(os.getenv("Q_ROOT"))
 assert(plpath.isdir(q_root), "Q_ROOT not found")
 assert(plpath.isdir(q_root .. "/lib/" ), "Q_ROOT lib not found")
 assert(plpath.isdir(q_root .. "/include/" ), "Q_ROOT include not found")
+
 local base_path = script_path() or "./"
 -- print (base_path)
 local paths = {}

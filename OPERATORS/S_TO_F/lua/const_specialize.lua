@@ -28,6 +28,7 @@ return function (
   else
     assert(nil, "Unknown type " .. qtype)
   end
+  -- local x = ffi.cast(out_c_type .. " *", c_mem); print(x[0])
   assert(status, "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
   local subs = {};
