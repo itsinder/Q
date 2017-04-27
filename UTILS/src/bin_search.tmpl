@@ -22,6 +22,7 @@ return require 'code_gen' {
 
 #include "_${fn}.h"
 
+      //START_FUNC_DECL
       int
       ${fn}(
           const ${ftype} *X,
@@ -30,7 +31,7 @@ return require 'code_gen' {
           const char * const str_direction,
           int64_t *ptr_pos
           )
-      // STOP FUNC DECL
+      //STOP_FUNC_DECL
       {
         int status = 0;
         uint64_t pos, lb, ub, mid;
