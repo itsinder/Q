@@ -1,3 +1,8 @@
+local q_root = os.getenv("Q_ROOT")
+assert(q_root, "Do export Q_ROOT=/home/subramon/Q/ or some such")
+final_h  = q_root .. "/include/"
+final_so = q_root .. "/lib/"
+
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 local dbg = require 'debugger'
@@ -7,6 +12,8 @@ local plfile = require 'pl.file'
 local nargs = assert(#arg == 1, "Arguments are <opdir>")
 local opdir = arg[1]
 assert(plpath.isdir(opdir), "Directory not found: " .. opdir)
+assert(plpath.isdir(final_h), "Directory not found: " .. final_h)
+assert(plpath.isdir(final_so), "Directory not found: " .. final_so)
 file_names = {} -- lists files seen to point out duplication
 -- dbg()
 --=================================
@@ -117,19 +124,25 @@ print("Successfully created " .. tgt_o)
 --========== Create q_core.so 
 local q_core = dofile('core_c_files.lua')
 plpath.mkdir(cdir .. "/q_core/")
-dst = cdir .. "/q_core/" 
+c_dst = cdir .. "/q_core/" 
+assert(plpath.isdir(c_dst))
 for i, v in ipairs(q_core) do
   src = cdir .. "/" .. v
-  pldir.copyfile(src, dst)
+  assert(plpath.isfile(src), "File not found " .. src)
+  pldir.copyfile(src, c_dst)
+  print("Copying " .. src .. " to " .. c_dst)
 end
 
 tgt_o = opdir .. "/libq_core.so"
-command = "gcc " .. FLAGS .. dst .. "/*.c -I" .. hdir .. 
+command = "gcc " .. FLAGS .. c_dst .. "/*.c -I" .. hdir .. 
   " -shared -o " .. tgt_o
   print(command)
 dbg = require 'debugger'
 status = os.execute(command)
+assert(status, "Command failed " .. command)
+pldir.copyfile(tgt_o, final_so)
 
+local extract_fn_proto = require 'extract_fn_proto'
 local T = {}
 local q_core = dofile('core_c_files.lua')
 for i, v in ipairs(q_core) do
@@ -148,3 +161,6 @@ local q_core_h = table.concat(T, "\n")
 
 local tgt_h = opdir .. "/q_core.h"
 plfile.write(tgt_h, q_core_h)
+
+pldir.copyfile(tgt_h, final_h)
+print("Copied " .. tgt_h .. " to " .. final_h)

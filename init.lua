@@ -6,6 +6,11 @@ local function script_path()
     return str:match("(.*/)")
 end
 
+local q_root = assert(os.getenv("Q_ROOT"))
+local plpath = require 'pl.path'
+assert(plpath.isdir(q_root), "Q_ROOT not found")
+assert(plpath.isdir(q_root .. "/lib/" ), "Q_ROOT lib not found")
+assert(plpath.isdir(q_root .. "/include/" ), "Q_ROOT include not found")
 local base_path = script_path() or "./"
 -- print (base_path)
 local paths = {}
@@ -23,10 +28,7 @@ local lib_paths = {}
 local lib_sep = ":" .. base_path
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
 lib_paths[#lib_paths + 1 ] = "Q2/code/src"
-lib_paths[#lib_paths + 1 ] = "OPERTORS/F1F2OPF3/lua"
-
-
-
+lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
 
 -- Check if all the paths are there
 local curr_path = os.getenv("LD_LIBRARY_PATH")

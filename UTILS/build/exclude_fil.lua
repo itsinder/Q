@@ -1,6 +1,5 @@
 return { 
   "asc2bin.c",
-  "bin_search_I4.c",
   "bin2asc.c",
   "bitops.c",
   "concat.c",

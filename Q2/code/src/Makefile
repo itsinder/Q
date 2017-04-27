@@ -22,4 +22,5 @@ all: $(CORE_SO)
 
 clean:
 	$(RM) $(CORESO) $(OBJECTS)
+	rm -f *.o *.so
 
