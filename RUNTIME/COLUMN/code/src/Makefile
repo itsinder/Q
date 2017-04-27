@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := all
 INC_DIR = ../gen_inc/
 CC = gcc
-CFLAGS = -fPIC -std=gnu99 -I$(INC_DIR)
+CFLAGS = ${QC_FLAGS} -I$(INC_DIR)
 LFLAGS = -shared
 RM = rm -f
 SOURCE_FILES = $(wildcard *.c)

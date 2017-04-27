@@ -6,7 +6,7 @@ local function script_path()
     return str:match("(.*/)")
 end
 
-local q_root = assert(os.getenv("Q_ROOT"))
+local q_root = assert(os.getenv("Q_ROOT"), "O_ROOT must be set")
 local plpath = require 'pl.path'
 assert(plpath.isdir(q_root), "Q_ROOT not found")
 assert(plpath.isdir(q_root .. "/lib/" ), "Q_ROOT lib not found")
@@ -16,7 +16,7 @@ local base_path = script_path() or "./"
 local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
-paths[#paths + 1] = "Q2/code/lua/?.lua"
+paths[#paths + 1] = "RUNTIME/COLUMN/code/lua/?.lua"
 paths[#paths + 1] = "UTILS/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
@@ -25,9 +25,9 @@ paths[#paths + 1] = "OPERATORS/MK_COL/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
 local lib_paths = {}
-local lib_sep = ":" .. base_path
+local lib_sep = ":"  
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
-lib_paths[#lib_paths + 1 ] = "Q2/code/src"
+lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
 lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
 
 -- Check if all the paths are there
@@ -45,7 +45,7 @@ end
 local missing = {}
 for _ ,v in pairs(lib_paths) do
     local found = false
-    local entry = base_path .. v
+    local entry = v
     for _,v2 in pairs(libs) do
         if entry == v2 then found = true end
     end

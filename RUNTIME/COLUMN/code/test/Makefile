@@ -40,7 +40,7 @@ all: $(CORE_SO)
 	cp test.txt test1.txt
 	cp test.txt test2.txt
 	echo "Now testing lua bindings"
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:./"
+	export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:./"
 	luajit testVector.lua
 	rm ./*.txt *_nn _* driver bit vec libprint.so
 clean:
