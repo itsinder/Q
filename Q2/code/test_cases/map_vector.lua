@@ -19,4 +19,12 @@ return {
   { name = "valid I8", field_type = 'I8', filename="I8.bin", chunk_size = 8, write_vector = true, category = "category1",
     input_values = { 1,2,3,4,5,6,7,8 } 
   },
+  -- valid b1 testcases with number of elements is multiple of 8
+  { name = "valid B1", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = true, category = "category2",
+    input_values = { 1,0,0,0,0,1,1,1 } 
+  },
+  -- valid b1 testcases with number of elements is not multiple of 8
+  { name = "valid B1 1", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = true, category = "category2",
+    input_values = { 1,0,0,0,0,1,1,1,0 } 
+  },
 }

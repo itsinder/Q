@@ -62,8 +62,7 @@ local create_c_data = function (vector, input_values)
   local chunk = ffi.gc(ffi.C.malloc(length_in_bytes),ffi.C.free)
   chunk = ffi.cast(ctype.. " * ", chunk)
   ffi.C.memset(chunk, 0, length_in_bytes)
-  local function_name = "initialize_vector_"..field_type
-
+  
   for k,v in ipairs(input_values) do
     if field_type == "SC" then
       local v = ffi.cast(ctype.. " * ", v)
@@ -76,6 +75,48 @@ local create_c_data = function (vector, input_values)
 end
 
 
+fns.handle_category2 = function (index, value, vector, input_values)
+  local size
+  local x_size = #input_values
+  if x_size%8 ==0 then 
+    size  = x_size/8
+  else
+    size = (x_size/8) + 1
+  end
+  size = math.floor(size)
+  local x = ffi.gc(ffi.C.malloc(size),ffi.C.free)
+  x = ffi.cast("unsigned char* ", x)
+  ffi.C.memset(x, 0, size)
+
+  for k,v in ipairs(input_values) do
+    if v == 1 then
+      local index = (k-1) / 8
+      index = math.floor(index)
+      x[index] = x[index] + math.pow(2,k-1)
+    end
+  end
+
+  vector:put_chunk(x, x_size)
+  vector:eov()
+  
+  local field_type = vector.field_type
+  local field_size = g_qtypes[field_type].width
+  local file_size = file_size(value.filename)
+  if size ~= file_size then
+    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
+    return nil
+  end
+
+  for k,v in ipairs(input_values) do
+    if v == 0 then v = nil end
+    if v ~= vector:get_element(k-1) then
+      fns["increment_fail_testcases"](index, value, "input value does not match with output")
+      return nil
+    end
+  end
+  no_of_pass_testcases = no_of_pass_testcases + 1
+end
+
 fns.handle_category1 = function (index, v, vector, input_values)
   
   local chunk,length = create_c_data(vector, input_values)
@@ -83,11 +124,6 @@ fns.handle_category1 = function (index, v, vector, input_values)
   
   vector:put_chunk(chunk, length)
   vector:eov()
-  
-  if length ~= #input_values then 
-    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the number of elements in binary file")
-    return nil
-  end
   
   -- file size of bin divided by field width should be equal to length
   local field_type = vector.field_type

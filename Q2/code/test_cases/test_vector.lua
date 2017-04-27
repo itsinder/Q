@@ -10,7 +10,9 @@ dir.makepath(bin_file_path)
 
 local T = dofile("map_vector.lua")
 for i, v in ipairs(T) do
-  
+  if arg[1] and i ~= tonumber(arg[1]) then 
+    goto skip 
+  end
   local arg_field_type = v.field_type
   local arg_field_size = g_qtypes[arg_field_type].width
   local arg_chunk_size = v.chunk_size 
@@ -32,6 +34,7 @@ for i, v in ipairs(T) do
   else
     fns["increment_fail_testcases"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
   end
+  ::skip::
 end
 
 fns["print_result"]()
