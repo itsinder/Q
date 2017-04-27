@@ -18,5 +18,9 @@ local Column = require 'Column'
 local testdata = require 'testdata_permute'
 local testrunner = require 'test_runner'
 
-testrunner(testdata, permute)
-print("Tests passed.")
+local failures = testrunner(testdata, permute)
+if (#failures > 0) then
+  print ("Failed tests: " .. tostring(failures))
+else
+  print("Tests passed.")
+end

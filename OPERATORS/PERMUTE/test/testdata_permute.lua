@@ -4,15 +4,17 @@ require 'mk_col'
 local utils = require 'test_utils'
 
 -- mk_col faltering for I2/I8 ??!!
-local val_qtypes = {"I4","I8"}
-local idx_qtypes = {"I4","I8"}
+local val_qtypes = {"I4"}
+local idx_qtypes = {"I4"}
 
 local data = {}
 
 local assert_valid = function(expected)
   return function (func_res)
     local actual = utils.col_as_str(func_res)
-    assert (actual == expected, "Expected" .. expected .. " but was " .. actual)
+    return actual == expected
+    -- , "Expected" .. expected .. " but was " .. actual)
+    -- print (func_res.vec.filename)
     -- TODO assert out_col file size  
   end
 end
@@ -36,7 +38,7 @@ local explode_types = function (val_tab, idx_tab, idx_in_src, expected)
 end
 
 explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, true, "10,60,20,50,30,40,")
-explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, false, "10,30,50,60,40,20,")
+explode_types({10, 20, 30, 40, 50, 60}, {0, 5, 1, 4, 2, 3}, false, "10,30,50,70,40,20,")
 --print (table.tostring(data))
 
 return {
