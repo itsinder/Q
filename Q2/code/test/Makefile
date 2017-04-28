@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := all
 INC_DIR = ../gen_inc/
 CC = gcc
-CFLAGS = -fPIC -std=gnu99 -I$(INC_DIR)
+# CFLAGS = -fPIC -std=gnu99 -I$(INC_DIR)
+CFLAGS = ${QC_FLAGS}
 LFLAGS = -shared
 RM = rm -f
 SOURCE_FILES = $(wildcard *.c)
@@ -17,7 +18,7 @@ CORE_SO = ../src/libvector_map.so libprint.so
 #	$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(QC_FLAGS) $< -o $@
 
 ../src/libvector_map.so: $(OBJECTS)
 	cd ../src/
@@ -29,12 +30,12 @@ libprint.so: $(OBJECTS)
 all: $(CORE_SO)
 	rm $(OBJECTS)
 	echo "Now testing c function calls"
-	$(CC) driver.c -o driver
+	$(CC) $(QC_FLAGS) driver.c -o driver
 	./driver > /dev/null
 	# $(CC) `pwd`/../src/vector_mmap.c `pwd`/../src/vector_munmap.c -DTEST -I$(INC_DIR) -o vec
-	$(CC) ../src/vector_mmap.c ../src/vector_munmap.c -DTEST -I$(INC_DIR) -o vec
+	$(CC) $(QC_FLAGS) ../src/vector_mmap.c ../src/vector_munmap.c -DTEST -I$(INC_DIR) -o vec
 	./vec
-	$(CC) ../src/bitops.c -DTEST -I$(INC_DIR) -o bit
+	$(CC) $(QC_FLAGS) ../src/bitops.c -DTEST -I$(INC_DIR) -o bit
 	./bit
 	cp test.txt test1.txt
 	cp test.txt test2.txt

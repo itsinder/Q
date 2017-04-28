@@ -21,4 +21,5 @@ make
 cd $SCRIPT_PATH/
 luajit test_mkcol.lua 
 
+rm -f _*
 echo "Completed $0 in $PWD"
