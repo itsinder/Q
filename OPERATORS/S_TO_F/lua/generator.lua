@@ -11,7 +11,7 @@ local args = {}
 qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
 local const_specialize = require 'const_specialize'
-args.val = 1
+args.val = 123
 args.len = 100
 for i, qtype in ipairs(qtypes) do 
   args.qtype = qtype
