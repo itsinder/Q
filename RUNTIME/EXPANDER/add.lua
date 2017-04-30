@@ -21,7 +21,7 @@ f1f2opf3 = {}
 f1f2opf3.add = "vvadd_specialize"
 f1s1opf2 = {}
 f1s1opf2.add = "vsadd_specialize"
--- Done doc pending: specializer must return a function and an out_c_type
+-- Done doc pending: specializer must return a function and an out_ctype
 -- TODO add to doc
 function expander_f1f2opf3(a, x ,y )
     -- type checking
@@ -31,7 +31,7 @@ function expander_f1f2opf3(a, x ,y )
     assert(status, subs)
     local type_x
     local func_name = assert(subs.fn)
-    local z_type = assert(subs.out_c_type)
+    local z_type = assert(subs.out_ctype)
     -- TODO globals q lib so set once and forget
     -- lib = ffi.load("f1f2opf3.so")
     -- Assuming things are done and we have func_name

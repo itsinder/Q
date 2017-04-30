@@ -8,7 +8,7 @@ return function (
   local tmpl = 'bop.tmpl'
   local subs = {} ; 
   subs.fn = "vvand"
-  subs.out_c_type = "uint64_t"
+  subs.out_ctype = "uint64_t"
   subs.outtype = "B1"
   subs.c_code_for_operator = "c = a && b; "
   return subs, tmpl

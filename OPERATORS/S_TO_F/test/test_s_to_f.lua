@@ -30,10 +30,10 @@
   local ctype = g_qtypes[args.qtype].ctype
   local nX = (args.len * ffi.sizeof(ctype))
   local X = ffi_malloc(nX)
-  cee.const_I8(X, args.len, subs.c_mem)
-  -- local x = ffi.cast(subs.out_c_type .. " *", subs.c_mem); print(x[0])
+  cee.const_I8(X, args.len, subs.cmem)
+  -- local x = ffi.cast(subs.out_ctype .. " *", subs.cmem); print(x[0])
   
-  X = ffi.cast(subs.out_c_type .. " * ", X)
+  X = ffi.cast(subs.out_ctype .. " * ", X)
   for i = 1, args.len do 
     assert(tonumber(X[i-1]) == args.val)
   end

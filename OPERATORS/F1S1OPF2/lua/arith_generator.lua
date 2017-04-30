@@ -62,8 +62,8 @@
           local T = dofile(tmpl)
           T.fn         = subs.fn
           T.fldtype    = subs.fldtype
-          T.scalar_c_type= subs.scalar_c_type
-          T.out_c_type = subs.out_c_type
+          T.scalar_ctype= subs.scalar_ctype
+          T.out_ctype = subs.out_ctype
           T.c_code_for_operator = subs.c_code_for_operator
           T.comparison = subs.comparison
           T.comp1 = subs.comp1
