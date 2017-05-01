@@ -11,7 +11,7 @@ return function (
   subs.fn = "vveq_" .. f1type .. "_" .. f2type 
   subs.in1type   = g_qtypes[f1type].ctype
   subs.in2type   = g_qtypes[f2type].ctype
-  subs.out_c_type = "uint64_t"
+  subs.out_ctype = "uint64_t"
   subs.comparison = " == "
   return subs, tmpl
 end

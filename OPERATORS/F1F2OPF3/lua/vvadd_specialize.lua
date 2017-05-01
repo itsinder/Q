@@ -10,7 +10,7 @@ return function (
   subs.fn = "vvadd_" .. f1type .. "_" .. f2type .. "_" .. outtype 
   subs.in1type = g_qtypes[f1type].ctype
   subs.in2type = g_qtypes[f2type].ctype
-  subs.out_c_type = g_qtypes[outtype].ctype
+  subs.out__type = g_qtypes[outtype].ctype
   subs.c_code_for_operator = "c = a + b; "
   return subs, tmpl
 end

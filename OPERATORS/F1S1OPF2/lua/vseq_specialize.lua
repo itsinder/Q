@@ -9,7 +9,7 @@ return function (
     local subs = {}; 
     subs.fn = "vsltorgt_" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
-    subs.out_c_type = "uint8_t"
+    subs.out_ctype = "uint8_t"
     subs.comparison = ' ==  '
     subs.c_mem = 0 -- TODO 
     return subs, tmpl

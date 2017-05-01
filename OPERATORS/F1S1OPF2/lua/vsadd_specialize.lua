@@ -32,7 +32,7 @@ return function (
     subs.fldtype = g_qtypes[ftype].ctype
     subs.c_code_for_operator = "c = a + b; "
     subs.c_scalar = c_mem
-    subs.out_c_type = g_qtypes[out_type].ctype
-    subs.scalar_c_type = g_qtypes[scalar_type].ctype
+    subs.out_ctype = g_qtypes[out_type].ctype
+    subs.scalar_ctype = g_qtypes[scalar_type].ctype
     return subs, tmpl
 end
