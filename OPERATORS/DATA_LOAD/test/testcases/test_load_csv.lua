@@ -1,5 +1,6 @@
 local load_csv = require 'load_csv_dataload'
 local fns = require 'handle_category'
+local utils = require 'utils'
 local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
@@ -26,6 +27,7 @@ for i, v in ipairs(T) do
   print("--------------------------------")
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data
+  local result
   -- if category6 then set environment in handle_input_category6 function
   if v.category == "category6" then
     local key = "handle_input_"..v.category
@@ -41,10 +43,13 @@ for i, v in ipairs(T) do
   --local status, ret = load_csv(test_input_dir..D,  M)
   local key = "handle_"..v.category
   if fns[key] then
-    fns[key](i, status, ret, v)
+    result = fns[key](i, status, ret, v)
+    -- print("see", result)
   else
     fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+    result = false
   end
+  utils["testcase_results"](v, "DATA_LOAD", "UNIT TEST", result)
   ::skip::
 end
 

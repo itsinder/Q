@@ -213,6 +213,6 @@ return function (
         assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
       end
    end
-   print("Completed successfully")
+   -- print("Completed successfully")
    return column_list
 end
