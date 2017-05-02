@@ -13,4 +13,5 @@ return {
   "qsort2.c",
   "flash_sort.c",
   "tst_sort.c",
+  "tmpl_join.c",
 }

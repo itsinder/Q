@@ -171,19 +171,19 @@ return function (
           end          
         else 
           local status = nil
-          local q_type = M[col_idx + 1].qtype
-          local function_name = g_qtypes[q_type]["txt_to_ctype"]
+          local qtype = M[col_idx + 1].qtype
+          local function_name = g_qtypes[qtype]["txt_to_ctype"]
           -- for fixed size string pass the size of string data also
-          if q_type == "SC" then
+          if qtype == "SC" then
             ffi.copy(cbuf, buf, string.len(ffi.string(buf))) 
             status = 0 
-          elseif q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV" then
+          elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
             status = c[function_name](buf, 10, cbuf)
-          elseif q_type == "F4" or q_type == "F8"  then 
+          elseif qtype == "F4" or qtype == "F8"  then 
             status = c[function_name](buf, cbuf)
           else 
-            error("Data type : " .. q_type .. " Not supported ")
+            error("Data type : " .. qtype .. " Not supported ")
           end
           
           assert( status >= 0 , g_err.INVALID_DATA_ERROR )

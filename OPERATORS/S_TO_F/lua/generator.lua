@@ -20,8 +20,8 @@ for i, qtype in ipairs(qtypes) do
   assert(status); 
   assert(type(subs) == "table")
   -- TODOA Avoid repeated assignment frm subs to T
-  T.out_c_type = subs.out_c_type
-  T.out_q_type = subs.out_q_type
+  T.out_ctype = subs.out_ctype
+  T.out_qtype = subs.out_qtype
   fn = subs.fn
   gen_code.doth(subs.fn, T, incdir)
   gen_code.dotc(subs.fn, T, srcdir)

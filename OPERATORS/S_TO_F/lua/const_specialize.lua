@@ -15,7 +15,7 @@ return function (
   assert(len > 0, "vector length must be positive")
   assert((type(val) == "number") or ( type(val) == "string"))
   local conv_fn = "txt_to_" .. qtype
-  local out_c_type = g_qtypes[qtype].ctype
+  local out_ctype = g_qtypes[qtype].ctype
   local width = g_qtypes[qtype].width
   local c_mem = assert(ffi_malloc(width), "malloc failed")
   ffi.fill(c_mem, width, 0)
@@ -28,13 +28,13 @@ return function (
   else
     assert(nil, "Unknown type " .. qtype)
   end
-  -- local x = ffi.cast(out_c_type .. " *", c_mem); print(x[0])
+  -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
   assert(status, "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
   local subs = {};
     subs.fn = "const_" .. qtype
     subs.c_mem = c_mem
-    subs.out_c_type = out_c_type
-    subs.out_q_type = qtype
+    subs.out_ctype = out_ctype
+    subs.out_qtype = qtype
     return subs, tmpl
 end
