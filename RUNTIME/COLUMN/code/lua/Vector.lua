@@ -431,4 +431,9 @@ function Vector:persist()
         return nil
     end
 end
+
+function Vector:__tostring()
+    return self:persist()
+end
+
 return Vector

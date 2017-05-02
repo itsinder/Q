@@ -31,3 +31,6 @@ g_chunk_size = 16
 local v1 = Vector{field_type='i',
 filename='test1.txt', }
 save("vone",v1)
+-- Not a good idea as strings will be quoted when saved and we will have to
+-- deserialize them
+save("vtwo", tostring(v1))

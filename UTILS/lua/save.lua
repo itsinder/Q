@@ -32,7 +32,8 @@ local function save(name, value, saved)
             io.write(saved[value], "\n")
         else
             saved[value] = name
-            local persist_str = value:persist()
+            -- local persist_str = value:persist()
+            local persist_str = tostring(value)
             io.write(persist_str)
             io.write("\n")
             -- elseif type(value) == "Column" then
