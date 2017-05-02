@@ -77,6 +77,18 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
     fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv is not success")
     return nil
   end
+  
+  print(ret)
+  if type(ret) ~= "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv is not string")
+    return nil
+  end
+  
+  print("output regex = ",v.output_regex)
+  if ret ~= v.output_regex then
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv does not match with output_regex")
+    return nil
+  end
   -- match input and output files
   if file_match("test_data/"..v.data, csv_file) == false then
      fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match")
