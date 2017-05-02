@@ -2,6 +2,7 @@ require 'globals'
 local dir = require 'pl.dir'
 local Vector = require 'Vector'
 local fns = require 'handle_category'
+local utils = require 'utils'
 
 local bin_file_path = "./bin/"
 
@@ -16,6 +17,7 @@ for i, v in ipairs(T) do
   local arg_field_type = v.field_type
   local arg_field_size = g_qtypes[arg_field_type].width
   local arg_chunk_size = v.chunk_size 
+  local result
   local arg_filename 
   if v.filename ~= nil then
     arg_filename = bin_file_path..v.filename
@@ -30,10 +32,12 @@ for i, v in ipairs(T) do
 
   local key = "handle_"..v.category  
   if fns[key] then
-    fns[key](i,v, v1, arg_input_values)
+     result = fns[key](i,v, v1, arg_input_values)
   else
     fns["increment_fail_testcases"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+    result = false
   end
+  utils["testcase_results"](v, "test_vector.lua", "VECTOR", "UNIT TEST", result)
   ::skip::
 end
 
