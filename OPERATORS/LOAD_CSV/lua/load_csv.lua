@@ -244,7 +244,7 @@ return function (
           rc_idx = rc_idx + 1
         end
       end
-      print("Successfully loaded ", row_idx, " rows")
+      -- print("Successfully loaded ", row_idx, " rows")
       return cols_to_return
 
 end
