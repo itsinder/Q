@@ -18,6 +18,7 @@ Vector Semantics
                 field_size (optional) - The size of each element, defaults to getting it from g_valid_types
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
+local plpath = require("pl.path")
 local Vector = {}
 Vector.__index = Vector
 local valid_types = {}
@@ -421,4 +422,13 @@ function Vector:delete()
     end
 end
 
+function Vector:persist()
+    -- TODO Add routine to materialize if not already materialized
+    if self.memoized then
+        return string.format("Vector{field_type='%s', filename='%s',}", 
+            self.field_type, plpath.abspath(self.filename))
+    else 
+        return nil
+    end
+end
 return Vector
