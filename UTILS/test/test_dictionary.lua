@@ -29,10 +29,11 @@ end
 
 function handle_category1(index, ret, metadata)
   if type(ret) == "Dictionary" then
-    no_of_success = no_of_success + 1 
+    no_of_success = no_of_success + 1
+    return true
   else
     increment_failed_load(index, metadata, "testcase failed : in category 1 : Return type not Dictionary")
-    return nil
+    return false
   end
 end
 
@@ -50,10 +51,11 @@ function handle_category2(index, ret, metadata)
     local count = plstring.count(err, expected )
   
     if count > 0 then
-      no_of_success = no_of_success + 1 
+      no_of_success = no_of_success + 1
+      return true
     else
       increment_failed_load(index, metadata, "testcase failed : in category 2 : Error message not matched with output_regex")
-      return nil
+      return false
     end
 end
 
@@ -68,10 +70,11 @@ function handle_category3(index, ret, metadata)
 
   local dict_size = ret:get_size()
   if dict_size == metadata.dict_size then
-    no_of_success = no_of_success + 1 
+    no_of_success = no_of_success + 1
+    return true
   else
     increment_failed_load(index, metadata, "testcase failed : in category 3 : Not added entries in dictionary properly")
-    return nil
+    return false
   end
 end
 
@@ -86,11 +89,12 @@ function handle_category4(index, ret, metadata)
   for i=1, #metadata.input do
     if ret:get_index_by_string(metadata.input[i]) ~= metadata.output_regex[i] then
       increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid index entry")
-      return nil
+      return false
     end
   end
   
-  no_of_success = no_of_success + 1 
+  no_of_success = no_of_success + 1
+  return true
 end
 
 -- this function checks whether a correct string 
@@ -104,11 +108,12 @@ function handle_category5(index, ret, metadata)
   for i=1, #metadata.input do
     if ret:get_string_by_index(i) ~=  metadata.input[i] then
       increment_failed_load(index, metadata, "testcase failed : in category 4 : Invalid string entry")
-      return nil
+      return false
     end
   end
   
-  no_of_success = no_of_success + 1 
+  no_of_success = no_of_success + 1
+  return true
 end
 
 
@@ -151,7 +156,7 @@ handle_function["category5"] = handle_category5
 
 
 local function calling_dictionary(i ,m)
-  print(i,"Testing : " .. m.name)
+  -- print(i,"Testing : " .. m.name)
   local M = dofile("test_metadata/"..m.meta)
   local x = Dictionary(M.dict)
   local ret = assert(Dictionary(M.dict))
