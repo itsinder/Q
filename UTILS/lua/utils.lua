@@ -58,7 +58,7 @@ fns.testcase_results = function (v, filename, test_for, test_type, result)
   --print(req_path)
   local test_status
   if result then test_status = "SUCCESS" else test_status = "FAILURE" end
-  print(string.format("%10s ; %s ; %25s ; %10s ; %28s ; %15s ; %8s \n",
+  print(string.format("%10s ; %s ; %25s ; %10s ; %45s ; %15s ; %8s \n",
     "__Q_TEST__", date_time, req_path, test_for, v.name, test_type , test_status))
   -- print("__Q_TEST__"..date_time.." ; "..req_path.." ; LOAD_CSV ; "..v.name.." ; UNIT TEST ; SUCCESS \n")
 end

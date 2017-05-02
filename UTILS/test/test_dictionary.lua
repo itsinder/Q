@@ -1,6 +1,7 @@
 local Dictionary = require "dictionary"
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
+local utils = require 'utils'
 
 local no_of_success = 0
 local no_of_failure = 0
@@ -159,10 +160,15 @@ local function calling_dictionary(i ,m)
   -- print(i,"Testing : " .. m.name)
   local M = dofile("test_metadata/"..m.meta)
   local x = Dictionary(M.dict)
+  local result
   local ret = assert(Dictionary(M.dict))
   if handle_function[m.category] then
-    handle_function[m.category](i,ret, m)
-  end 
+    result = handle_function[m.category](i,ret, m)
+  else
+    fns["increment_failed_load"](i, m, "Handle function for "..m.category.." is not defined in handle_category.lua")
+    result = false
+  end
+   utils["testcase_results"](m, "test_dictionary.lua", "DICTIONARY", "UNIT TEST", result)
 end
 
 
