@@ -104,17 +104,18 @@ fns.handle_category2 = function (index, value, vector, input_values)
   local file_size = file_size(value.filename)
   if size ~= file_size then
     fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
-    return nil
+    return false
   end
 
   for k,v in ipairs(input_values) do
     if v == 0 then v = nil end
     if v ~= vector:get_element(k-1) then
       fns["increment_fail_testcases"](index, value, "input value does not match with output")
-      return nil
+      return false
     end
   end
   no_of_pass_testcases = no_of_pass_testcases + 1
+  return true
 end
 
 fns.handle_category1 = function (index, v, vector, input_values)
@@ -134,7 +135,7 @@ fns.handle_category1 = function (index, v, vector, input_values)
   --print(file_size, length)
   if length ~= file_size then
     fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
-    return nil
+    return false
   end
   
   local is_SC = v.field_type == "SC"
@@ -150,10 +151,11 @@ fns.handle_category1 = function (index, v, vector, input_values)
     if input_values[i] ~= value then
       print(input_values[i], value)
       fns["increment_fail_testcases"](index, v, "Input value does not match with value in binary file")
-      return nil
+      return false
     end
   end
   no_of_pass_testcases = no_of_pass_testcases + 1
+  return true
 end
 
 return fns
