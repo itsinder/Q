@@ -19,21 +19,21 @@ return {
       { name = "create dictionary", category = "category1", meta = "test_create.lua" },
       
       -- checking of invalid dict add to a dictionary by comparing the output_regex error message
-      { name = "invalid(empty string) dict add ", category = "category2", input = "", meta = "test_add_nil.lua", 
+      { name = "empty string ", category = "category2", input = "", meta = "test_add_nil.lua", 
         output_regex = g_err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
       
       -- checking of invalid dict add to a dictionary by comparing the output_regex error message
-      { name = "invalid(nil) dict add ", category = "category2", input = nil, meta = "test_add_nil.lua", 
+      { name = "nil dict ", category = "category2", input = nil, meta = "test_add_nil.lua", 
         output_regex = g_err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
       
       -- checking of adding a valid dictionary entries to a dictionary and checking valid get size from a dictionary
       -- dict name = D2
-      { name = "valid dict add in new dictionary", category = "category3", meta = "test_add_dict.lua", 
+      { name = "addition of new dict ", category = "category3", meta = "test_add_dict.lua", 
         input = {"entry1", "entry2", "entry3", "entry4", "entry5"}, dict_size = 5 },
       
       -- adding new as well as an existing dictionary entries to an existing dictionary and checking its dictionary size
       -- dict name = D2
-      { name = "valid dict add in an existing dictionary", category = "category3", meta = "test_add_in_existing_dict.lua", 
+      { name = "addition of existing dict", category = "category3", meta = "test_add_in_existing_dict.lua", 
        input = {"entry1", "entry6", "entry7", "entry8", "entry9"}, dict_size = 9 }, 
       
       -- checking of valid get index from a dictionary
@@ -43,7 +43,7 @@ return {
       -- checking for adding an existing string ("entry5") in an existing dictionary (D2) 
       -- and checking whether valid index (5) of an existing string is returned
       -- dict name = D2 and string "entry5" maps to index 5 in testcase no. 4
-      { name = "adding of existing entry returns valid index", category = "category4", meta = "test_existing_str_index.lua",
+      { name = "valid addition of string", category = "category4", meta = "test_existing_str_index.lua",
         input = {"entry5"}, output_regex = { 5 } }, 
       
       -- checking of valid get string from a dictionary
