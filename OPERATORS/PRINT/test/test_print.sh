@@ -14,7 +14,7 @@ unset LD_LIBRARY_PATH
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_SRC_ROOT/OPERATORS/PRINT/obj"
 
 # generate vector lib files
-cd $SCRIPT_PATH/../../../Q2/code/src
+cd $SCRIPT_PATH/../../../RUNTIME/COLUMN/code/src
 bash gen_files.sh
 make
 
