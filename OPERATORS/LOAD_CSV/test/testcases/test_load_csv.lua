@@ -49,7 +49,7 @@ for i, v in ipairs(T) do
     fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_load_csv.lua", "LOAD_CSV", "UNIT TEST", result)
+  utils["testcase_results"](v, "test_load_csv.lua", "Load_csv", "Unit Test", result)
   ::skip::
 end
 

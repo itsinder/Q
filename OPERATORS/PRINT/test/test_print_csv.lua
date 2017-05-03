@@ -64,7 +64,7 @@ for i, v in ipairs(T) do
     fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
     result = false
   end
-  utils["testcase_results"](v, "test_print_csv.lua", "PRINT_CSV", "UNIT TEST", result)
+  utils["testcase_results"](v, "test_print_csv.lua", "Print_csv", "Unit Test", result)
   ::skip::
 end
 
