@@ -18,6 +18,6 @@ unset LD_LIBRARY_PATH
 cd $SCRIPT_PATH
 
 #run test_load_csv
-luajit test_mkcol.lua $1
-
+luajit -lluacov test_mkcol.lua $1
+luacov
 rm -f _*
