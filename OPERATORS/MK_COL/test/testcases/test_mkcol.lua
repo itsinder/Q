@@ -22,7 +22,7 @@ for i, v in ipairs(T) do
     fns["increment_failed_mkcol"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_mkcol.lua", "Mk_col", "Unit Test", result)
+  utils["testcase_results"](v, "test_mkcol.lua", "Mk_col", "Unit Test", result, "")
   ::skip::
 end
 
