@@ -115,5 +115,5 @@ var85=$(lua mk_so.lua /tmp/ 2>&1)
 
 var100="${var100}"$'\n\n'"${var80}"$'\n\n'"${var81}"$'\n\n'"${var82}"$'\n\n'"${var83}"$'\n\n'"${var84}"$'\n\n'"${var85}"
 #echo "$var100" 
-echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com -A $Q_SRC_ROOT/Q2/code/test_cases/vector.report.out -A $Q_SRC_ROOT/UTILS/test/dictionary.report.out -A $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.report.out -A $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.report.out -A $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.report.out -A $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.report.out
+echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com -A $Q_SRC_ROOT/Q2/code/test_cases/vector.report.txt -A $Q_SRC_ROOT/UTILS/test/dictionary.report.txt -A $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.report.txt -A $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.report.txt -A $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.report.txt -A $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.report.txt
 
