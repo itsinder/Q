@@ -5,7 +5,6 @@ local print_csv = require 'print_csv'
 local ffi_malloc = require 'ffi_malloc'
 require 'globals'
 g_chunk_size = 1 -- HACK TODO FIX 
-require("vvadd_specialize")
 function q_wrap(x)
     -- TODO use column
     assert(type(x) == "Column")
@@ -116,8 +115,8 @@ function add(x, y)
     assert(false, "Don't know how to expand add")
 end
 
-local Vector = require 'Vector'
-local Column = require "Column"
+-- local Vector = require 'Vector'
+-- local Column = require "Column"
 --local size = 1000
 --create bin file of only ones of type int
 -- local v1 = Vector{field_type='I4', filename='test.bin', }
