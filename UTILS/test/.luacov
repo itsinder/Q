@@ -1,4 +1,3 @@
-
 return {
 
   ["include"] = {"../lua/.*"},
@@ -6,5 +5,7 @@ return {
   ["exclude"] = {
     "/usr/local/share/.*",
     "globals"
-  }
+  },
+  statsfile = "dictionary.stats.out",
+  reportfile = "dictionary.report.out"
 }
