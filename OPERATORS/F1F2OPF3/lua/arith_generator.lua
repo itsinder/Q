@@ -41,7 +41,7 @@
             T.includes   = subs.includes
             T.in1type    = subs.in1type
             T.in2type    = subs.in2type
-            T.outtype    = subs.outtype
+            T.out_qtype  = subs.out_qtype
             T.out_ctype  = subs.out_ctype
             T.argstype   = subs.argstype
             T.c_code_for_operator = subs.c_code_for_operator
