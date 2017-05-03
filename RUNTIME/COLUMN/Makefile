@@ -11,6 +11,9 @@ __check_defined = \
     $(if $(value $1),, \
       $(error Undefined $1$(if $2, ($2))))
 
+all: doc test bin
+	echo "done"
+
 doc:
 	echo "future to make docs"
 
@@ -23,9 +26,6 @@ test: bin
 
 bin: 
 	(cd code/src; make all)
-
-all: doc test bin
-	echo "done"
 
 clean:
 	(cd code/src; make clean)

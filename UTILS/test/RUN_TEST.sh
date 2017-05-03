@@ -8,7 +8,7 @@ ld_library_add() {
     fi
 }
 
-ld_library_add ../../../Q2/code/
+ld_library_add ../../../RUNTIME/COLUMN/code/
 ld_library_add ../obj/
 ld_library_add ../../PRINT/obj/
 

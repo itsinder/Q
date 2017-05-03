@@ -18,11 +18,11 @@ echo "Completed $0 in $PWD"
 exit 0
 # Following is to test print/load 
 
-cd ../../../Q2/code
+cd ../../../RUNTIME/COLUMN/code
 make clean
 make all
 cd -
-export LD_LIBRARY_PATH='./;../../../Q2/code' 
+export LD_LIBRARY_PATH='./;../../../RUNTIME/COLUMN/code' 
 # luajit ./load.lua
 luajit ./print_csv.lua
 

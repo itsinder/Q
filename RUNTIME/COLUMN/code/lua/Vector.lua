@@ -18,6 +18,7 @@ Vector Semantics
                 field_size (optional) - The size of each element, defaults to getting it from g_valid_types
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
+local plpath = require("pl.path")
 local Vector = {}
 Vector.__index = Vector
 local valid_types = {}
@@ -42,11 +43,11 @@ for i = 97, 122 do table.insert(charset, string.char(i)) end
 local function random_string(length_inp)
     math.randomseed(os.time())
     local length = length_inp or 11
-    if length > 0 then
-        return random_string(length - 1) .. charset[math.random(1, #charset)]
-    else
-        return ""
-    end
+    local result = {}
+      for loop = 1,length do
+         result[loop] = charset[math.random(1, #charset)]
+      end
+      return table.concat(result)
 end
 
 local function get_new_filename(length)
@@ -419,6 +420,20 @@ function Vector:delete()
     if self.memoized then
         os.remove(self.file_name)
     end
+end
+
+function Vector:persist()
+    -- TODO Add routine to materialize if not already materialized
+    if self.memoized then
+        return string.format("Vector{field_type='%s', filename='%s',}", 
+            self.field_type, plpath.abspath(self.filename))
+    else 
+        return nil
+    end
+end
+
+function Vector:__tostring()
+    return self:persist()
 end
 
 return Vector

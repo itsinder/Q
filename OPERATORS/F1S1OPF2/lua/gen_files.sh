@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
 bash clean.sh
+
+mkdir -p ../gen_inc/
+mkdir -p ../gen_src/
 bash gen_specializers.sh
 lua arith_generator.lua  arith_operators.lua
 
-mkdir -p ../gen_src/
-mkdir -p ../gen_inc/
 cd ../gen_src/
 ls *c > _x
 FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
