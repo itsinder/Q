@@ -16,6 +16,9 @@ cd $Q_SRC_ROOT/UTILS/test/
 bash test_dictionary.sh
 cd $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/
 bash test_mkcol.sh
+cd $Q_SRC_ROOT/Q2/code/test_cases/
+bash test_vector.sh
+
 
 #check whether night build txt file for metadata is present in LOAD_CSV/test/testcases folder
 nightly_file=$Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/nightly_build_metadata.txt
@@ -85,21 +88,32 @@ else
 fi
 rm $nightly_file
 
+#check whether night build txt file for Vector is present in MK_COL/test/testcases folder
+nightly_file=$Q_SRC_ROOT/Q2/code/test_cases/nightly_build_vector.txt
+if [ -f $nightly_file ] 
+then
+ var7=$(cat $nightly_file)
+ #echo "$var1"
+else
+ var7="Error in Creating Vector TEST CASES"
+fi
+rm $nightly_file
 
-var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"
+
+var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"$'\n\n'"${var7}"
 
 cd $Q_SRC_ROOT/UTILS/build
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 unset LD_LIBRARY_PATH
 `lua | tail -1`
 var80="------------OUTPUT of lua build.lua gen.lua--------------------------------------"
-var81=$(lua build.lua gen.lua)
+var81=$(lua build.lua gen.lua 2>&1)
 var82="------------OUTPUT of lua build.lua tests.lua------------------------------------"
-var83=$(lua build.lua tests.lua)
+var83=$(lua build.lua tests.lua 2>&1)
 var84="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
-var85=$(lua mk_so.lua /tmp/)
+var85=$(lua mk_so.lua /tmp/ 2>&1)
 
 var100="${var100}"$'\n\n'"${var80}"$'\n\n'"${var81}"$'\n\n'"${var82}"$'\n\n'"${var83}"$'\n\n'"${var84}"$'\n\n'"${var85}"
 #echo "$var100" 
-echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com 
+echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com -A $Q_SRC_ROOT/Q2/code/test_cases/vector.report.out -A $Q_SRC_ROOT/UTILS/test/dictionary.report.out -A $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.report.out -A $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.report.out -A $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.report.out -A $Q_SRC_ROOT/OPERATORS/PRINT_CSV/test/print_csv.report.out
 
