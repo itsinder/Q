@@ -24,8 +24,9 @@ f1s1opf2.add = "vsadd_specialize"
 -- Done doc pending: specializer must return a function and an out_ctype
 -- TODO add to doc
 function expander_f1f2opf3(a, x ,y )
-    -- type checking
-    local fn = _G[f1f2opf3[a]]
+    -- Get name of specializer function. By convention
+    local spfn = require(a .. "_specialize" )
+    dbg()
     -- print(type(fn))
     status, subs, tmpl = pcall(fn, x:fldtype(), y:fldtype())
     assert(status, subs)
@@ -106,9 +107,9 @@ local Column = require "Column"
 --local size = 1000
 --create bin file of only ones of type int
 local v1 = Vector{field_type='I4',
-filename='test.txt', }
+filename='test.bin', }
 local v2 = Vector{field_type='I4',
-filename='test.txt', }
+filename='test.bin', }
 
 -- local chunk, size = v1:chunk(0)
 -- for i=1, size do

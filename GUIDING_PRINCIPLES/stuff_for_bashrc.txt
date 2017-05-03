@@ -10,6 +10,6 @@ export LUA_INIT="@$HOME/WORK/Q/init.lua"
 export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
 export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 export Q_SRC_ROOT=$HOME/WORK/Q/
-export Q_ROOT=$HOME/Q/local/
+export Q_ROOT=$HOME/Q/
 
 #--------
