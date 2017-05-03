@@ -17,6 +17,6 @@ unset LD_LIBRARY_PATH
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
 
 cd $SCRIPT_PATH
-luajit test_vector.lua $1
-
+luajit -lluacov test_vector.lua $1
+luacov
 echo "Completed $0 in $PWD"

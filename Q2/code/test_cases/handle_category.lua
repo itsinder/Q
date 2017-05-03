@@ -15,10 +15,26 @@ local no_of_pass_testcases = 0
 local no_of_fail_testcases = 0 
 
 fns.print_result = function () 
-  print("-----------------------------------")
-  print("No of successfull testcases ", no_of_pass_testcases)
-  print("No of failure testcases     ", no_of_fail_testcases)
-  print("-----------------------------------")
+  local str
+  
+  str = "-----------Vector Testcases Results---------------\n"
+  str = str.."No of successfull testcases "..no_of_pass_testcases.."\n"
+  str = str.."No of failure testcases     "..no_of_fail_testcases.."\n"
+  str = str.."---------------------------------------------------------------\n"
+  if #failed_testcases > 0 then
+    str = str.."Testcases failed are     \n"
+    for k,v in ipairs(failed_testcases) do
+      str = str..v.."\n"
+    end
+    str = str.."Run bash test_vector.sh <testcase_number> for details\n\n"
+    str = str.."-------------------------------------------------------------\n"
+  end 
+  print(str)
+  local file = assert(io.open("nightly_build_vector.txt", "w"), "Nighty build file open error")
+  assert(io.output(file), "Nightly build file write error")
+  assert(io.write(str), "Nightly build file write error")
+  assert(io.close(file), "Nighty build file close error")
+  
 end
 
 
