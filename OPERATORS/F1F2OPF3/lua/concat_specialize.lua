@@ -58,7 +58,6 @@ return function (
     subs.in2type = g_qtypes[f2type].ctype
     subs.out_qtype = l_out_qtype
     subs.out_ctype = g_qtypes[l_out_qtype].ctype
-    subs.out_ctype = g_qtypes[l_out_qtype].ctype
     subs.c_code_for_operator = 
     " c = ( (" .. subs.out_ctype .. ")a << " .. shift .. " ) | b; "
 
