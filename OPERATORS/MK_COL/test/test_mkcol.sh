@@ -14,7 +14,7 @@ unset LD_LIBRARY_PATH
 `lua | tail -1`
 
 # generate vector lib files
-cd $SCRIPT_PATH/../../../Q2/code/src
+cd $SCRIPT_PATH/../../../RUNTIME/COLUMN/code/src
 bash gen_files.sh
 make
 
