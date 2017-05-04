@@ -20,6 +20,7 @@ set -e
 # 
 # cd $SCRIPT_PATH/
 luajit test_mkcol.lua 
+if [ $? != 0 ]; then echo FAILURE; exit 1; fi 
 
 rm -f _*
 echo "Completed $0 in $PWD"

@@ -50,7 +50,8 @@ function recursive_descent(
     found = false
     if ( dirs_to_exclude ) then 
       for i2, v2 in ipairs(dirs_to_exclude) do
-        if ( string.find(v, v2) ) then 
+        start, stop =  string.find(v, v2)
+        if ( stop == string.len(v) ) then 
           found = true
         end
       end
@@ -58,7 +59,7 @@ function recursive_descent(
     if ( found ) then 
        print("Skipping directory " .. v)
      else
-      -- print("Descending into ", v)
+      print("Descending into directory ", v)
       recursive_descent(pattern, v, dirs_to_exclude, files_to_exclude, destdir)
     end
   end

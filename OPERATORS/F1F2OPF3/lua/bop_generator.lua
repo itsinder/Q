@@ -30,6 +30,8 @@
           -- TODO Improve following.
           local T = dofile(tmpl)
           T.fn         = subs.fn
+          T.out_qtype  = subs.out_qtype
+          T.out_ctype  = subs.out_ctype
           T.c_code_for_operator = subs.c_code_for_operator
           gen_code.doth(subs.fn, T, incdir)
           gen_code.dotc(subs.fn, T, srcdir)

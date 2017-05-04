@@ -9,7 +9,7 @@ return function (
   local subs = {} ; 
   subs.fn = "vvand"
   subs.out_ctype = "uint64_t"
-  subs.outtype = "B1"
+  subs.out_qtype = "B1"
   subs.c_code_for_operator = "c = a && b; "
   return subs, tmpl
 end
