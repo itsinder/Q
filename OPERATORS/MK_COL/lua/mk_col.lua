@@ -32,18 +32,19 @@ local min = {
 
 
 return function (input, qtype)
-  assert( input ~= nil,g_err.INPUT_NOT_TABLE)
+  assert(input,  g_err.INPUT_NOT_TABLE)
   assert(type(input) == "table", "Input to mk_col must be a table")
   assert(#input > 0, "table has no entries")
-  assert( g_valid_types[qtype] ~= nil,g_err.INVALID_COLUMN_TYPE)
+  assert( g_valid_types[qtype] ~= nil, g_err.INVALID_COLUMN_TYPE)
   local width = assert(g_qtypes[qtype]["width"], g_err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
-  assert(qtype ~= "B1", "TODO: To be implemented")
-  assert(qtype ~= "SC",g_err.INVALID_COLUMN_TYPE)
-  assert(qtype ~= "SV",g_err.INVALID_COLUMN_TYPE)
+  assert( (( qtype == "I1" ) ||( qtype == "I2" ) ||( qtype == "I4" ) ||
+          ( qtype == "I8" ) ||( qtype == "F4" ) ||( qtype == "F8" ) ),
+  g_err.INVALID_COLUMN_TYPE)
+  -- TODO: Support B1 and SC in future
   -- To do - check max and min value in qtype
-  assert(max[qtype] ~= nil,"max value of qtype nil "..g_err.INVALID_COLUMN_TYPE)
-  assert(min[qtype] ~= nil,"min value of qtype nil "..g_err.INVALID_COLUMN_TYPE)
+  assert(max[qtype], "max value of qtype nil " .. g_err.INVALID_COLUMN_TYPE)
+  assert(min[qtype], "min value of qtype nil " .. g_err.INVALID_COLUMN_TYPE)
   
   for k,v in ipairs(input) do 
     assert(type(v) == "number","Error in index "..k.." - "..g_err.INVALID_DATA_ERROR)
