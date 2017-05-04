@@ -2,6 +2,7 @@ local fns = require 'handle_category_print'
 local file = require 'pl.file'
 local print_csv = require 'print_csv'
 local load_csv = require 'load_csv'
+local utils = require 'utils'
 
 local test_input_dir = "./test_data/"
 local print_out_dir = "./test_print_data/print_tmp/"
@@ -30,6 +31,7 @@ for i, v in ipairs(T) do
   local D = v.data
   local F = v.filter
   local csv_file = v.csv_file
+  local result
   print("----------------------------------------")
   if v.category == "category6" then
     local key = "handle_"..v.category
@@ -51,15 +53,18 @@ for i, v in ipairs(T) do
     local status, print_ret = pcall(print_csv, load_ret, F, print_out_dir..csv_file)
     key = "handle_"..v.category
     if fns[key] then
-      fns[key](i, v,  print_out_dir..csv_file, print_ret, status)
+      result = fns[key](i, v,  print_out_dir..csv_file, print_ret, status)
     else
       fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
+      result = false
     end
     
   else
     --print(" testcase failed: load api failed in print testcase. this should not happen")
     fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
+    result = false
   end
+  utils["testcase_results"](v, "test_print_csv.lua", "Print_csv", "Unit Test", result, "")
   ::skip::
 end
 

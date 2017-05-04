@@ -59,11 +59,9 @@ return function (input, qtype)
           
   local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
-  -- VIJAY: Check has been mader earlier assert(length>0, g_err.INPUT_LENGTH_ERROR)
   local length_in_bytes = width * length
   local chunk = ffi.new(ctype .. "[?]", length, input)
   col:put_chunk(length, chunk)
   col:eov()
-  -- print("Successfully loaded ") Use log info for such things
   return col
 end

@@ -15,10 +15,26 @@ local no_of_pass_testcases = 0
 local no_of_fail_testcases = 0 
 
 fns.print_result = function () 
-  print("-----------------------------------")
-  print("No of successfull testcases ", no_of_pass_testcases)
-  print("No of failure testcases     ", no_of_fail_testcases)
-  print("-----------------------------------")
+  local str
+  
+  str = "-----------Vector Testcases Results---------------\n"
+  str = str.."No of successfull testcases "..no_of_pass_testcases.."\n"
+  str = str.."No of failure testcases     "..no_of_fail_testcases.."\n"
+  str = str.."---------------------------------------------------------------\n"
+  if #failed_testcases > 0 then
+    str = str.."Testcases failed are     \n"
+    for k,v in ipairs(failed_testcases) do
+      str = str..v.."\n"
+    end
+    str = str.."Run bash test_vector.sh <testcase_number> for details\n\n"
+    str = str.."-------------------------------------------------------------\n"
+  end 
+  print(str)
+  local file = assert(io.open("nightly_build_vector.txt", "w"), "Nighty build file open error")
+  assert(io.output(file), "Nightly build file write error")
+  assert(io.write(str), "Nightly build file write error")
+  assert(io.close(file), "Nighty build file close error")
+  
 end
 
 
@@ -62,8 +78,7 @@ local create_c_data = function (vector, input_values)
   local chunk = ffi.gc(ffi.C.malloc(length_in_bytes),ffi.C.free)
   chunk = ffi.cast(ctype.. " * ", chunk)
   ffi.C.memset(chunk, 0, length_in_bytes)
-  local function_name = "initialize_vector_"..field_type
-
+  
   for k,v in ipairs(input_values) do
     if field_type == "SC" then
       local v = ffi.cast(ctype.. " * ", v)
@@ -76,6 +91,49 @@ local create_c_data = function (vector, input_values)
 end
 
 
+fns.handle_category2 = function (index, value, vector, input_values)
+  local size
+  local x_size = #input_values
+  if x_size%8 ==0 then 
+    size  = x_size/8
+  else
+    size = (x_size/8) + 1
+  end
+  size = math.floor(size)
+  local x = ffi.gc(ffi.C.malloc(size),ffi.C.free)
+  x = ffi.cast("unsigned char* ", x)
+  ffi.C.memset(x, 0, size)
+
+  for k,v in ipairs(input_values) do
+    if v == 1 then
+      local index = (k-1) / 8
+      index = math.floor(index)
+      x[index] = x[index] + math.pow(2,k-1)
+    end
+  end
+
+  vector:put_chunk(x, x_size)
+  vector:eov()
+  
+  local field_type = vector.field_type
+  local field_size = g_qtypes[field_type].width
+  local file_size = file_size(value.filename)
+  if size ~= file_size then
+    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
+    return false
+  end
+
+  for k,v in ipairs(input_values) do
+    if v == 0 then v = nil end
+    if v ~= vector:get_element(k-1) then
+      fns["increment_fail_testcases"](index, value, "input value does not match with output")
+      return false
+    end
+  end
+  no_of_pass_testcases = no_of_pass_testcases + 1
+  return true
+end
+
 fns.handle_category1 = function (index, v, vector, input_values)
   
   local chunk,length = create_c_data(vector, input_values)
@@ -83,11 +141,6 @@ fns.handle_category1 = function (index, v, vector, input_values)
   
   vector:put_chunk(chunk, length)
   vector:eov()
-  
-  if length ~= #input_values then 
-    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the number of elements in binary file")
-    return nil
-  end
   
   -- file size of bin divided by field width should be equal to length
   local field_type = vector.field_type
@@ -98,7 +151,7 @@ fns.handle_category1 = function (index, v, vector, input_values)
   --print(file_size, length)
   if length ~= file_size then
     fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
-    return nil
+    return false
   end
   
   local is_SC = v.field_type == "SC"
@@ -114,10 +167,11 @@ fns.handle_category1 = function (index, v, vector, input_values)
     if input_values[i] ~= value then
       print(input_values[i], value)
       fns["increment_fail_testcases"](index, v, "Input value does not match with value in binary file")
-      return nil
+      return false
     end
   end
   no_of_pass_testcases = no_of_pass_testcases + 1
+  return true
 end
 
 return fns

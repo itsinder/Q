@@ -6,6 +6,6 @@ return {
     "/usr/local/share/.*",
     "globals"
   },
-  statsfile = "dictionary.stats.txt",
-  reportfile = "dictionary.report.txt"
+  statsfile = "mk_col.stats.txt",
+  reportfile = "mk_col.report.txt"
 }
