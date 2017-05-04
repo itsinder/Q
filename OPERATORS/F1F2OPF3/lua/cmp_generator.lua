@@ -36,6 +36,7 @@
           T.fn         = subs.fn
           T.in1type    = subs.in1type
           T.in2type    = subs.in2type
+          T.out_qtype = subs.out_qtype
           T.out_ctype = subs.out_ctype
           T.comparison = subs.comparison
           gen_code.doth(subs.fn, T, incdir)
