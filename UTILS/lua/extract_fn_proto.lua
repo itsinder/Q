@@ -1,4 +1,3 @@
-#!/bin/lua
 return function (infile)
 
 local trim = require 'trim'

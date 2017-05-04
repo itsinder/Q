@@ -1,25 +1,19 @@
 require 'globals'
 local error_code = require 'error_code'
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
-ffi.cdef
-[[ 
-  void *malloc(size_t size);
-  void free(void *ptr);
-]]
 
 return function (column_list, filter, opfile)  
   
+  assert(type(column_list) == "table" or type(column_list) == "Column",g_err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
   if type(column_list) == "Column" then
     column_list = {column_list}
   end
-  assert(type(column_list) == "table", g_err.INPUT_NOT_TABLE)
   
   local max_length = 0
   for i = 1, #column_list do
-    assert(type(column_list[i]) == "Column" or 
-           type(column_list[i]) == "number", 
+    assert(type(column_list[i]) == "Column" or type(column_list[i]) == "number", 
       g_err.INPUT_NOT_COLUMN_NUMBER)
       
     local is_column = type(column_list[i]) == "Column" 
@@ -70,12 +64,8 @@ return function (column_list, filter, opfile)
     lb = 0
     ub = max_length
   end
-  
-  -- TODO VIJAY - remove hardcoding of 1024
-  local bufsz = 1024
-  local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
-  -- TODO VIJAY: Use ffi_malloc from UTILS/lua/ folder
-  
+  -- to do remove hardcoding of 1024
+  local buf = fn_malloc(1024) 
   local num_cols = #column_list
   local file = nil
   local final_result = nil
@@ -142,17 +132,12 @@ return function (column_list, filter, opfile)
       result = string.sub(result, 1, -2)
       result = result .. "\n"
       assert(io.write(result),g_err.INVALID_FILE_PATH)
-      if ( final_result ) then 
-        final_result = final_result .. result
-      end
+      final_result = final_result .. result
     end
   end
   if file then
     io.close(file)
   end
-  if ( final_result ) then 
-    return final_result
-  else
-    return true
-  end
+  
+  return final_result
 end

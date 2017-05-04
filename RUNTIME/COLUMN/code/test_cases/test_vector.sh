@@ -9,13 +9,14 @@ echo $SCRIPT_PATH
 cd $SCRIPT_PATH/../src
 make
 
-cd ../../../
+cd ../../../../
 export Q_SRC_ROOT="`pwd`"
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 unset LD_LIBRARY_PATH
 `lua | tail -1`
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
 
 cd $SCRIPT_PATH
-luajit test_vector.lua
-
+luajit -lluacov test_vector.lua $1
+luacov
 echo "Completed $0 in $PWD"
