@@ -9,7 +9,7 @@ echo $SCRIPT_PATH
 cd $SCRIPT_PATH/../src
 make
 
-cd ../../../
+cd ../../../../
 export Q_SRC_ROOT="`pwd`"
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 unset LD_LIBRARY_PATH

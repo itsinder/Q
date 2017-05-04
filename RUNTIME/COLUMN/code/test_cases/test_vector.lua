@@ -11,9 +11,8 @@ dir.makepath(bin_file_path)
 
 local T = dofile("map_vector.lua")
 for i, v in ipairs(T) do
-  if arg[1]~= nil and tonumber(arg[1])~=i then 
-    goto skip 
-  end
+  if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
+  
   local arg_field_type = v.field_type
   local arg_field_size = g_qtypes[arg_field_type].width
   local arg_chunk_size = v.chunk_size 
