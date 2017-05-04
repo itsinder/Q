@@ -12,8 +12,8 @@ for k, v in pairs(subs) do
   print("Processing ", k)
   -- TODO: Can we dothis more efficiently?
   tmpl.fn = v.fn
-  tmpl.out_type_displ = v.out_type_displ 
-  tmpl.out_type = v.out_type 
+  tmpl.out_qtype = v.out_qtype 
+  tmpl.out_ctype = v.out_ctype 
   tmpl.default_fmt = v.default_fmt
   -- print(tmpl 'declaration')
   doth = tmpl 'declaration'

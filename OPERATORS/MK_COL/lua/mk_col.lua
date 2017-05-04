@@ -46,7 +46,8 @@ return function (input, qtype)
   assert(min[qtype] ~= nil,"min value of qtype nil "..g_err.INVALID_COLUMN_TYPE)
   
   for k,v in ipairs(input) do 
-    assert(type(v) == "number","Error in index "..k.." - "..g_err.INVALID_DATA_ERROR)
+    assert(type(v) == "number",
+    "Error in index " .. k .. " - " .. g_err.INVALID_DATA_ERROR)
     --print("v = "..string.format("%18.0f",v))
     -- TODO: Should this be < or <=, > or >= 
     assert(v >= MINIMUM_LUA_NUMBER, g_err.INVALID_LOWER_BOUND) 
@@ -61,10 +62,9 @@ return function (input, qtype)
     write_vector=true,
     nn=false }
           
-  local ctype =  g_qtypes[qtype]["ctype"]
-  assert(ctype~= nil, g_err.NULL_CTYPE_ERROR)
+  local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
-  assert(length>0, g_err.INPUT_LENGTH_ERROR)
+  -- VIJAY: Check has been mader earlier assert(length>0, g_err.INPUT_LENGTH_ERROR)
   local length_in_bytes = width * length
   local chunk = ffi.new(ctype .. "[?]", length, input)
   col:put_chunk(length, chunk)
