@@ -38,8 +38,8 @@ return function (input, qtype)
   assert( g_valid_types[qtype] ~= nil, g_err.INVALID_COLUMN_TYPE)
   local width = assert(g_qtypes[qtype]["width"], g_err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
-  assert( (( qtype == "I1" ) ||( qtype == "I2" ) ||( qtype == "I4" ) ||
-          ( qtype == "I8" ) ||( qtype == "F4" ) ||( qtype == "F8" ) ),
+  assert( (( qtype == "I1" ) or ( qtype == "I2" ) or ( qtype == "I4" ) or
+          ( qtype == "I8" ) or ( qtype == "F4" ) or ( qtype == "F8" ) ),
   g_err.INVALID_COLUMN_TYPE)
   -- TODO: Support B1 and SC in future
   -- To do - check max and min value in qtype
@@ -65,11 +65,9 @@ return function (input, qtype)
           
   local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
-  -- VIJAY: Check has been mader earlier assert(length>0, g_err.INPUT_LENGTH_ERROR)
   local length_in_bytes = width * length
   local chunk = ffi.new(ctype .. "[?]", length, input)
   col:put_chunk(length, chunk)
   col:eov()
-  -- print("Successfully loaded ") Use log info for such things
   return col
 end
