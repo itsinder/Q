@@ -1,13 +1,7 @@
 require 'globals'
 local error_code = require 'error_code'
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
-ffi.cdef
-[[ 
-  void *malloc(size_t size);
-  void free(void *ptr);
-  void *memset(void *str, int c, size_t n);
-]]
 
 return function (column_list, filter, opfile)  
   
@@ -70,12 +64,8 @@ return function (column_list, filter, opfile)
     lb = 0
     ub = max_length
   end
-  
-  -- TODO VIJAY - remove hardcoding of 1024
-  local bufsz = 1024
-  local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
-  -- TODO VIJAY: Use ffi_malloc from UTILS/lua/ folder
-  
+  -- to do remove hardcoding of 1024
+  local buf = fn_malloc(1024) 
   local num_cols = #column_list
   local file = nil
   local final_result = nil

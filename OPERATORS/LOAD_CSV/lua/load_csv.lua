@@ -12,14 +12,12 @@ local plfile = require 'pl.file'
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
 ffi.cdef([[
   void *memset(void *s, int c, size_t n);
   size_t strlen(const char *str);
-  void * malloc(size_t size);
-  void free(void *ptr);
-  ]])
+]])
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/src/get_cell.c"))
@@ -173,10 +171,10 @@ return function (
 
       local x_idx = 0
       local out_buf_sz = 1024 -- TODO FIX 
-      -- replace ffi.cast with ffi.gc, to fix for performance testing
-      local in_buf  = ffi.gc(cee.malloc(max_txt_width), ffi.C.free)
-      local out_buf = ffi.gc(cee.malloc(out_buf_sz), ffi.C.free)
-      local is_nn   = ffi.gc(cee.malloc(1), ffi.C.free)
+      -- to do remove hardcoding of 1024
+      local in_buf  = fn_malloc(max_txt_width)
+      local out_buf = fn_malloc(out_buf_sz)
+      local is_nn   = fn_malloc(1)
       local ncols = #M
       local row_idx = 1
       local col_idx = 1

@@ -9,10 +9,10 @@ local Column = require 'Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
 ffi.cdef([[
-void *memset(void * str, int c, size_t n);
+  void *memset(void * str, int c, size_t n);
 ]])
 local rootdir = os.getenv("Q_SRC_ROOT")
 local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/get_cell.c"))
@@ -123,9 +123,9 @@ return function (
    l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
-   local buf = ffi.gc(c.malloc(buf_sz), c.free)
-   local cbuf = ffi.gc(c.malloc(cbuf_sz), c.free)
-   local is_null = ffi.gc(c.malloc(1), c.free)
+   local buf = fn_malloc(buf_sz)
+   local cbuf = fn_malloc(cbuf_sz)
+   local is_null = fn_malloc(1)
    local ncols = #M
    local row_idx = 0
    local col_idx = 0
