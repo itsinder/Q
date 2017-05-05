@@ -2,8 +2,14 @@ require 'globals'
 local error_code = require 'error_code'
 local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
+local plstring = require 'pl.stringx'
 
 return function (column_list, filter, opfile)  
+  
+  -- trimming whitespace if any
+  if opfile ~= nil then
+    opfile = plstring.strip(opfile)
+  end
   
   assert(type(column_list) == "table" or type(column_list) == "Column",g_err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
