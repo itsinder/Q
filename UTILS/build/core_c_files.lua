@@ -3,6 +3,7 @@ return {
 "f_munmap.c",
 "is_valid_chars_for_num.c",
 "mmap.c",
+"get_cell.c",
 "_bin_search_I1.c",
 "_bin_search_I2.c",
 "_bin_search_I4.c",
