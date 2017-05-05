@@ -1,22 +1,6 @@
 local save = require "save"
 local ffi = require "ffi"
-ffi.cdef([[
-    typedef struct {
-        char *fpos;
-        void *base;
-        unsigned short handle;
-        short flags;
-        short unget;
-        unsigned long alloc;
-        unsigned short buffincrement;
-    } FILE;
-    int print_vector(int* ptr, int length);
-    int print_bits(char * file_name, int length);
-    int get_bits_from_file(FILE* fp, int* arr, int length);
-    int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
-    ]])
--- local c = ffi.load('print.so')
-local c = ffi.load('vector_mmap.so')
+local q_core = require "q_core"
 local Vector = require 'Vector'
 local Column = require "Column"
 g_valid_types = {}

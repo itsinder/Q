@@ -4,25 +4,10 @@ local print_vector = function(ptr , len)
    for i=1,len do
    print( tonumber(ffi.cast("int*", ptr)[i-1]))
    end
-
 end
-ffi.cdef([[
-    typedef struct {
-        char *fpos;
-        void *base;
-        unsigned short handle;
-        short flags;
-        short unget;
-        unsigned long alloc;
-        unsigned short buffincrement;
-    } FILE;
-    int print_vector(int* ptr, int length);
-    int print_bits(char * file_name, int length);
-    int get_bits_from_file(FILE* fp, int* arr, int length);
-    int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
-    ]])
--- local c = ffi.load('print.so')
-local c = ffi.load('vector_mmap.so')
+
+local q_core = require 'q_core'
+local ffi_malloc = require 'ffi_malloc'
 local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
@@ -65,21 +50,26 @@ filename="o.txt", write_vector=true,
 }
 v3:put_chunk(x, x_size)
 v3:eov()
+
+
 local z, z_size = v3:chunk(0)
 print_vector(z, z_size)
-local v4 = Vector{field_type='B1',
-filename="test_bits.txt", field_size=1/8}
-local a, a_size = v4:chunk(0)
+
+--[[ INDRAJEET TODO
+local v4 = Vector{field_type='B1', filename="test_bits.txt", field_size=1/8}
+for i=0,15 do
+ print(v4:get_element(i), tonumber(ffi.cast("int*", a_int) + i))
+end
+--]]
+
+local a, a_size = z, z_size
 print("Vector bit get test")
-local a_int = ffi.gc(c.malloc(ffi.sizeof("int")* a_size), ffi.free)
-c.get_bits_from_array(a, a_int, a_size)
+local a_int = ffi_malloc(ffi.sizeof("int")* a_size)
+q_core.get_bits_from_array(a, a_int, a_size)
 local t2 = Vector{field_type="i", write_vector=true}
 t2:put_chunk(a_int, a_size)
 t2:eov()
 print "**************"
-for i=0,15 do
- print(v4:get_element(i), tonumber(ffi.cast("int*", a_int) + i))
-end
 print_vector(a_int, a_size)
 -- add function to print bits:b2
 v5 = Column{field_type='i',
@@ -99,8 +89,8 @@ v6:put_chunk(x_size, x, a )
 v6:eov()
 q_size, q, q_nn = v6:chunk(0)
 print_vector(q, q_size)
-local q_int = ffi.cast( "int*", ffi.gc(c.malloc(ffi.sizeof("int")* q_size), ffi.free) )
-c.get_bits_from_array(q_nn, q_int, q_size)
+local q_int = ffi.cast( "int*", ffi.gc(q_core.malloc(ffi.sizeof("int")* q_size), q_core.free) )
+q_core.get_bits_from_array(q_nn, q_int, q_size)
 print "**************"
 print_vector(q_int, q_size)
 

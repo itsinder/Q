@@ -21,6 +21,7 @@ local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "RUNTIME/COLUMN/code/lua/?.lua"
+paths[#paths + 1] = "/?.lua"
 paths[#paths + 1] = "UTILS/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
@@ -78,7 +79,6 @@ local g_mt = {
 }
 _G = setmetatable(_G, g_mt)
 local signal = require("posix.signal")
-print ("aloha")
 signal.signal(signal.SIGINT, function(signum)
   io.write("biggie baddie \n")
   -- put code to save some stuff here

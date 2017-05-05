@@ -19,6 +19,7 @@ local function chk_cols(column_list)
   local is_SV  = {}
   local is_I8  = {}
   local is_col = {}
+  local max_length = column_list[1]:length()
   for i = 1, #column_list do
     assert( ((type(column_list[i]) == "Column") or 
              (type(column_list[i]) == "number")),
@@ -35,13 +36,14 @@ local function chk_cols(column_list)
         assert(column_list[i]:get_meta("dir"), g_err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
-      local tmp = column_list[1]:length()
-      if tmp > max_length then max_length = tmp end
-      is_SC[i] = col:fldtype() == "SC"    
+      if  column_list[i]:length() > max_length then 
+        max_length = column_list[i]:length() 
+      end
+      is_SC[i] = column_list[i]:fldtype() == "SC"    
             -- if field type is SC , then pass field size, else nil
-      is_SV[i] = col:fldtype() == "SV"    
+      is_SV[i] = column_list[i]:fldtype() == "SV"    
             -- if field type is SV , then get value from dictionary
-      is_I8[i] = col:fldtype() == "I8" 
+      is_I8[i] = column_list[i]:fldtype() == "I8" 
             -- if field type is I8 , then remove LL appended at end
     end
     assert(max_length > 0, "Nothing to print")
@@ -49,7 +51,7 @@ local function chk_cols(column_list)
   end
 end
 
-function process_filter(filter)
+function process_filter(filter, max_length)
   local lb = 0; local ub = 0; local where = nil
   if filter then
     assert(type(filter) == "table", g_err.FILTER_NOT_TABLE_ERROR)
@@ -100,7 +102,7 @@ return function (column_list, filter, opfile)
   -- Initially, all columns had to be same length. That has been relaxed.
 
   local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
-  local where, lb, ub = process_filter(filter)
+  local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
   local buf = ffi_malloc(1024) 
   local num_cols = #column_list
@@ -126,7 +128,7 @@ return function (column_list, filter, opfile)
         local temp = nil
         local col = column_list[colidx]
         -- if input is scalar, assign scalar value
-        if is_col[colidx] then 
+        if not is_col[colidx] then 
           temp = col 
         else
           local cbuf = col:get_element(rowidx-1)          
@@ -151,20 +153,22 @@ return function (column_list, filter, opfile)
         end
         if tbl_rslt then 
           table.insert(tbl_rslt, temp) 
-          table.insert(tbl_rslt, ",") 
+          if ( colidx ~= num_cols ) then 
+            table.insert(tbl_rslt, ",") 
+          else
+            table.insert(tbl_rslt,"\n") 
+          end
         else
           assert(io.write(temp), "Write failed")
-          assert(io.write(","), "Write failed")
+          if ( colidx ~= num_cols ) then 
+            assert(io.write(","), "Write failed")
+          else
+            assert(io.write("\n"), "Write failed") 
+          end
         end
       end
     else
       -- Filter says to skip this row 
-    end
-    -- Put in eoln because row is over
-    if ( tbl_rslt ) then 
-      table.insert(tbl_rslt,"\n") 
-    else
-      assert(io.write("\n"), "Write failed") 
     end
   end
   if ( tbl_rslt ) then 

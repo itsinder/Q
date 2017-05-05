@@ -3,7 +3,6 @@
   loadfile 'globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-  local dbg = require 'debugger'
 
   local operator_file = assert(arg[1])
   assert(plpath.isfile(operator_file))

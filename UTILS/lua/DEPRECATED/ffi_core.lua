@@ -7,7 +7,6 @@ ffi.cdef([[
   } mmap_struct;
   ]])
 return function()
-  -- local dbg = require 'debugger'
   require 'globals'
   local plfile = require 'pl.file'
   local plpath = require 'pl.path'

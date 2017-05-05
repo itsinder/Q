@@ -14,4 +14,5 @@ return {
   "flash_sort.c",
   "tst_sort.c",
   "tmpl_join.c",
+  "tmpl_join.c",
 }
