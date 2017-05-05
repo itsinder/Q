@@ -7,7 +7,7 @@ where
 chunk  -  C data struture of type ctype
 ctype  -  datatype e.g. -  int, char, float etc.
 input  -  Lua table of Lua number
-lenght -  number of elements
+length -  number of elements
 
 Reference link 
 http://luajit.org/ext_ffi.html
