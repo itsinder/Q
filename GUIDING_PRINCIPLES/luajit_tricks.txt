@@ -1,3 +1,11 @@
+ Ramesh: I am going to make a difficult decision, favoring immediate 
+ expediency for long term portability.  Basically, decision is to tie 
+ ourselves to LuaJIT. This means we do *NOT* use features of Lua that 
+ come after 5.3.1
+
+ Andrew: I think the value terra brings alone is probably worth that. 
+
+
 1. Converting number to C's float/int/double and back
 
 Consider two functions with prototypes int f_one(int x); and float f_two(float x); In luajit there exists only 1 type, number which should work with both of them. Therefore when making calls to either of these two prototypes the "number" is mapped to a double, which is then coerced to the type int and float respectively. Also note that the return value is converted back to the number type natively.
