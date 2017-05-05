@@ -150,11 +150,13 @@ return function (column_list, filter, opfile)
         end
         
       end
+
       table.insert(result,"\n") 
       if flag[3] then assert(io.write("\n"),g_err.INVALID_FILE_PATH) end
     end
   end
   
+
   if file then
     io.close(file)
   end
@@ -163,3 +165,17 @@ return function (column_list, filter, opfile)
   if flag[2] then print(final_result) end 
   
 end
+--[[
+However, there is a caveat to be aware of. Since strings in Lua are immutable, each concatenation creates a new string object and copies the data from the source strings to it. That makes successive concatenations to a single string have very poor performance.
+
+The Lua idiom for this case is something like this:
+
+function listvalues(s)
+    local t = { }
+    for k,v in ipairs(s) do
+        t[#t+1] = tostring(v)
+    end
+    return table.concat(t,"\n")
+end
+By collecting the strings to be concatenated in an array t, the standard library routine table.concat can be used to concatenate them all up (along with a separator string between each pair) without unnecessary string copying.
+--]]
