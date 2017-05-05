@@ -33,8 +33,8 @@ end
 local file_match = function (file1, file2)
   local actual_file_content = file.read(file1)
   local expected_file_content = file.read(file2)
-  print(actual_file_content)
-  print(expected_file_content)
+  -- print(actual_file_content)
+  -- print(expected_file_content)
   if actual_file_content ~= expected_file_content then
      return false
   end
