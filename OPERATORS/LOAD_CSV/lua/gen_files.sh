@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e 
 
+INCS="-I..n_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ "
 rm -rf ../gen_inc ../gen_src 
 mkdir ../gen_inc ../gen_src 
 
@@ -13,8 +14,7 @@ lua gen_code_F.lua
 cd ../gen_src/
 ls *c > _x
 while read line; do
-  echo $line
-  gcc -c $FLAGS $line \
+  gcc -c $QC_FLAGS $line \
     -I../gen_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ 
 done< _x
 # cleanup

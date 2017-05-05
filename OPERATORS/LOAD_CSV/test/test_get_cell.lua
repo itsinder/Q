@@ -7,7 +7,6 @@ local log = require 'log'
 require 'utils'
 local compile_so = require 'compile_so'
 require 'extract_fn_proto'
--- local dbg = require 'debugger'
 local ffi = require 'ffi'
 local cfile = "../src/get_cell.c"
 local get_cell_h = assert(extract_fn_proto("../src/get_cell.c"))

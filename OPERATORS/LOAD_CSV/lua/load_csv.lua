@@ -5,7 +5,6 @@ local g_err = require 'error_code'
 
 local Dictionary = require 'dictionary'
 local Column = require 'Column'
-local dbg = require 'debugger'
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.file'
 --RS Use extract_fn_proto for txt_to_* and so on
@@ -13,40 +12,9 @@ local plfile = require 'pl.file'
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
 local fn_malloc = require 'ffi_malloc'
-local ffi = require "ffi"
-ffi.cdef([[
-  void *memset(void *s, int c, size_t n);
-  size_t strlen(const char *str);
-]])
+local q_core = require 'q_core'
 
-local rootdir = os.getenv("Q_SRC_ROOT")
-local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/src/get_cell.c"))
-local txt_to_SC = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/src/txt_to_SC.c"))
-local txt_to_I1 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I1.c"))
-local txt_to_I2 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I2.c"))
-local txt_to_I4 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c"))
-local txt_to_I8 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_I8.c"))
-local txt_to_F4 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_F4.c"))
-local txt_to_F8 = assert(extract_fn_proto(rootdir.."/OPERATORS/LOAD_CSV/gen_src/_txt_to_F8.c"))
-local f_mmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_mmap.c"))
-local f_munmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_munmap.c"))
-
-ffi.cdef(get_cell)
-ffi.cdef(txt_to_SC)
-ffi.cdef(txt_to_I1)
-ffi.cdef(txt_to_I2)
-ffi.cdef(txt_to_I4)
-ffi.cdef(txt_to_I8)
-ffi.cdef(txt_to_F4)
-ffi.cdef(txt_to_F8)
-ffi.cdef(f_mmap)
-ffi.cdef(f_munmap)
-
--- ----------------
--- RS TODO Use compile_so to create load_csv.so
-local cee = ffi.load("load_csv.so")
-
-function mk_out_buf(
+local function mk_out_buf(
   in_buf, 
   m,  -- m is meta data for field 
   d,  -- d is dictiomnary for field 
@@ -56,7 +24,7 @@ function mk_out_buf(
 )
     -- commented the below line to fix the performance testing
     --ffi.cdef("size_t strlen(const char *);")
-    local in_buf_len = assert( tonumber(cee.strlen(in_buf)))
+    local in_buf_len = assert( tonumber(q_core.strlen(in_buf)))
 
     if m.qtype == "SV" then 
       assert(in_buf_len <= m.max_width, err_loc .. g_err.STRING_TOO_LONG)
@@ -163,7 +131,7 @@ return function (
       end
       assert(max_txt_width > 0)
       --===========================
-      f_map = ffi.gc( cee.f_mmap(infile, false), cee.f_munmap)
+      f_map = ffi.gc( q_core.f_mmap(infile, false), q_core.f_munmap)
       assert(f_map.status == 0 , g_err.MMAP_FAILED)
       local X = ffi.cast("char *", f_map.ptr_mmapped_file)
       local nX = tonumber(f_map.ptr_file_size)
@@ -194,7 +162,7 @@ return function (
         --local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
         --local err_loc = g_err.INVALID_INDEX_ERROR
         x_idx = tonumber(
-        cee.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
+        q_core.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc .. g_err.INVALID_INDEX_ERROR)
         if ( M[col_idx].is_load ) then 
           -- print(row_idx, col_idx, ffi.string(buf))

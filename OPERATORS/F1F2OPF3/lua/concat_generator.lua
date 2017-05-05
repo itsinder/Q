@@ -1,5 +1,4 @@
   local gen_code = require("gen_code")
-  local dbg = require 'debugger'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
   loadfile 'globals.lua'

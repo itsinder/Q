@@ -8,7 +8,7 @@ DBGFLAGS= -g -DDEBUG
 OPTFLAGS= -O4
 OPTFLAGS= 
 
-CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
+CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
 all : _libf1f2opf3.so
 	
@@ -77,10 +77,21 @@ clean :
 	rm -r -f ../gen_inc; 
 	mkdir -p ../gen_src/
 	mkdir -p ../gen_inc/
+	rm -f vvsub_specialize.lua 
+	rm -f vvmul_specialize.lua 
+	rm -f vvdiv_specialize.lua 
+	rm -f vvor_specialize.lua 
+	rm -f vvxor_specialize.lua 
+	rm -f vvneq_specialize.lua 
+	rm -f vvgt_specialize.lua 
+	rm -f vvlt_specialize.lua 
+	rm -f vvgeq_specialize.lua 
+	rm -f vvleq_specialize.lua 
+	rm -f vvneq_specialize.lua 
 	rm -f _*
 		
 _libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
-	gcc ../gen_src/*.c -Werror ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
+	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 	cp libf1f2opf3.so ${Q_ROOT}/lib/
 
 _concat_files : 

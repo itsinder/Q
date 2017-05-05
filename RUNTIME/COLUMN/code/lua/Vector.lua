@@ -34,6 +34,7 @@ g_chunk_size = g_chunk_size or self_chunk_size
 g_valid_meta = g_valid_meta or valid_meta
 
 local charset = {}
+local ffi = require 'ffi' -- TODO INDRAJEET CAn this be in q_core
 
 -- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
 for i = 48,  57 do table.insert(charset, string.char(i)) end
@@ -70,35 +71,9 @@ function is_int(n)
   return n == math.floor(n)
 end
 
-local ffi = require 'ffi'
-ffi.cdef([[
-typedef struct {
-  char *fpos;
-  void *base;
-  unsigned short handle;
-  short flags;
-  short unget;
-  unsigned long alloc;
-  unsigned short buffincrement;
-} FILE;
-void * malloc(size_t size);
-void free(void *ptr);
-typedef struct {void* ptr_mmapped_file; size_t ptr_file_size; int status; } mmap_struct;
-mmap_struct* vector_mmap(const char* file_name, bool is_write);
-int vector_munmap(mmap_struct* map);
-FILE *fopen(const char *path, const char *mode);
-int fclose(FILE *stream);
-int fwrite(void *Buffer,int Size,int Count,FILE *ptr);
-int fflush(FILE *stream);
-int write_bits_to_file(FILE* fp, unsigned char* src, int length, int file_size );
-int print_bits(char * file_name, int length);
-int get_bits(FILE* fp, int* arr, int length);
-int get_bits_from_array(unsigned char* input_arr, int* arr, int length);
-int get_bit(unsigned char* x, int i);
-]])
+local q_core = require 'q_core'
+local ffi_malloc = require 'ffi_malloc'
 
-local c = ffi.load('vector_mmap.so')
-local C = ffi.C
 local DestructorLookup = {}
 setmetatable(Vector, {
         __call = function (cls, ...)
@@ -109,11 +84,11 @@ setmetatable(Vector, {
 function Vector.destructor(data)
     -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
-        C.free(data.destructor_ptr)
+        q_core.free(data.destructor_ptr)
     else
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
-        C.free(data)
+        q_core.free(data)
     end
 end
 
@@ -148,14 +123,15 @@ end
 local function read_file_vector(self, arg)
     self.input_from_file = true
     self.filename = assert(arg.filename, "Filename not specified to read from")
-    self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
+    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), 
+      q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    self.my_length = tonumber(self.f_map.file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
     return self
 end
@@ -177,7 +153,7 @@ end
 function Vector.new(arg)
     local vec = setmetatable({}, Vector)
     vec.meta = {}
-    vec.destructor_ptr=ffi.gc(C.malloc(1), Vector.destructor) -- Destructor hack for luajit
+    vec.destructor_ptr= ffi.gc(ffi_malloc(1), Vector.destructor) -- Destructor hack for luajit
     DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     vec.chunk_size = arg.chunk_size or g_chunk_size
@@ -199,12 +175,13 @@ function Vector.new(arg)
             if arg.filename ~= nil then -- filename means read from file
                 read_file_vector(vec, arg)
             else
-                error('No data input to vector. Need either a file or a generator')
+               dbg() 
+               error('No data input to vector. Need either a file or a generator')
             end
         end
     end
     local buff_size = vec.field_size * vec.chunk_size
-    vec.buffer = ffi.gc( C.malloc(buff_size), C.free)
+    vec.buffer = ffi_malloc(buff_size)
     return vec
 end
 
@@ -245,18 +222,18 @@ local function append_to_file(self, ptr, size)
 
     if self.file == nil  or self.file == ffi.NULL then
         if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
-            self.file = C.fopen(self.filename, "wb+")
+            self.file = q_core.fopen(self.filename, "wb+")
         else
-            self.file = C.fopen(self.filename, "ab+")
+            self.file = q_core.fopen(self.filename, "ab+")
         end
         assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
     -- TODO make more general based on field size
     if self.field_type == "B1" then
-        assert(tonumber(c.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
+        assert(tonumber(q_core.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
     else
-        assert(c.fwrite(ptr,self.field_size, size, self.file) == size, "Unable to write to file")
+        assert(q_core.fwrite(ptr,self.field_size, size, self.file) == size, "Unable to write to file")
     end
 end
 
@@ -265,9 +242,10 @@ local function flush_remap_file(self)
     assert(self.filename ~= nil, "Filename should have been set in constructor")
     assert(self.input_from_file ~= true, "No need to mmap a file that is mmap in constructor")
     assert(self.file ~= nil, "No file to mmap to")
-    c.fflush(self.file) -- fflush to current state before mmaping
+    q_core.fflush(self.file) -- fflush to current state before mmaping
     self.file_last_chunk_number = self.last_chunk_number
-    self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
+    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), 
+    q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
 end
@@ -310,7 +288,9 @@ local function get_from_file(self, num)
             local ptr = ffi.cast("unsigned char*", self.cdata)
             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
         else
-            error('Invalid chunk number')
+            -- error('Invalid chunk number')
+            -- TODO Or should i just return a 0 , nil , nil
+            return 0, nil, nil
         end
     else
         return self.cdata, self.my_length -- a mmap to the ramfs file
@@ -335,7 +315,7 @@ function Vector:get_element(num)
       local char_offset = offset / 8
       local bit_offset = offset % 8
       local char_value = chunk + char_offset
-      local bit_value = tonumber( c.get_bit(char_value, bit_offset) )
+      local bit_value = tonumber( q_core.get_bit(char_value, bit_offset) )
       if bit_value == 0 then
          return ffi.NULL
       else
@@ -401,9 +381,9 @@ function Vector:put_chunk(chunk, length)
 end
 
 function Vector:eov()
-    c.fflush(self.file)
+    q_core.fflush(self.file)
     self.input_from_file = true
-    self.f_map = ffi.gc(c.vector_mmap(self.filename, false), c.vector_munmap)
+    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
@@ -415,7 +395,7 @@ function Vector:eov()
 end
 
 function Vector:delete()
-    assert(tonumber(C.fclose(self.file)))
+    assert(tonumber(q_core.fclose(self.file)))
     self.f_map = nil -- Causing the file to be unmmapped 
     if self.memoized then
         os.remove(self.file_name)

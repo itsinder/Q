@@ -21,6 +21,7 @@ local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
 paths[#paths + 1] = "RUNTIME/COLUMN/code/lua/?.lua"
+paths[#paths + 1] = "/?.lua"
 paths[#paths + 1] = "UTILS/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
@@ -31,7 +32,7 @@ paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 local lib_paths = {}
 local lib_sep = ":"  
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
-lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
+-- lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
 lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
 
 -- Check if all the paths are there
@@ -71,5 +72,20 @@ end
 package.path = table.concat(paths, sep)
 
 require "globals"
+local g_mt = {
+   __gc = function()
+      print("byebye")
+   end,
+}
+_G = setmetatable(_G, g_mt)
+local signal = require("posix.signal")
+signal.signal(signal.SIGINT, function(signum)
+  io.write("biggie baddie \n")
+  -- put code to save some stuff here
+  os.exit(128 + signum)
+end)
+-- mk_col = require "mk_col"
+-- print_csv = require "print_csv"
+ -- load_csv = require "load_csv"
 --print(package.path)
 --print(os.getenv("LD_LIBRARY_PATH"))
