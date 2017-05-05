@@ -1,9 +1,15 @@
 require 'globals'
-local error_code = require 'error_code'
+local g_err = require 'error_code'
 local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
+local plstring = require 'pl.stringx'
 
 return function (column_list, filter, opfile)  
+  
+  -- trimming whitespace if any
+  if opfile ~= nil then
+    opfile = plstring.strip(opfile)
+  end
   
   assert(type(column_list) == "table" or type(column_list) == "Column",g_err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
@@ -47,19 +53,20 @@ return function (column_list, filter, opfile)
       assert(where:fldtype() == "B1",g_err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
+      assert(type(lb) == "number", g_err.INVALID_LOWER_BOUND_TYPE )
       lb = assert(tonumber(lb))
       assert(lb >= 0,g_err.INVALID_LOWER_BOUND)
     else
       lb = 0;
     end
     if ( ub ) then
+      assert(type(ub) == "number", g_err.INVALID_UPPER_BOUND_TYPE )
       ub = assert(tonumber(ub))
       assert(ub > lb ,g_err.UB_GREATER_THAN_LB)
       assert(ub <= max_length, g_err.INVALID_UPPER_BOUND)
     else
       ub = max_length
     end
-    -- VIJAY: Check that lb/ub are integers
   else
     lb = 0
     ub = max_length
@@ -68,22 +75,27 @@ return function (column_list, filter, opfile)
   local buf = fn_malloc(1024) 
   local num_cols = #column_list
   local file = nil
-  local final_result = nil
+  local final_result = ""
+  local flag = { }
   if not opfile then 
     final_result = ""  -- we will produce string as output
+    flag[1] = true     -- if input csv file is nil, then set flag[1] to true  
   else
     if ( opfile == "" ) then
       -- we will write to stdout
+      final_result = ""
+      flag[2] = true      -- if input csv file is empty string, then set flag[2] to true
     else
       file = io.open(opfile, "w+")
       io.output(file)
+      flag[3] = true      --  if input csv file is valid, then set flag[3] to true
     end
   end
   
+  local result = { }
   lb = lb + 1 -- for Lua style indexing
   for rowidx = lb, ub do
     if where == nil or where:get_element(rowidx -1 ) ~= ffi.NULL then
-      local result = ""
       for colidx = 1, num_cols do
         local temp
         local col = column_list[colidx]
@@ -126,23 +138,32 @@ return function (column_list, filter, opfile)
             
           end
         end
-        result = result .. temp .. ","
+        
+        table.insert(result, temp) 
+        if colidx ~= num_cols then table.insert(result, ",") end
+        
+        if flag[3] then 
+          assert(io.write(temp),g_err.INVALID_FILE_PATH)
+          if colidx ~= num_cols then 
+            assert(io.write(","),g_err.INVALID_FILE_PATH) 
+          end
+        end
+        
       end
-      -- remove last comma
-      result = string.sub(result, 1, -2)
-      result = result .. "\n"
-      assert(io.write(result),g_err.INVALID_FILE_PATH)
-      if ( final_result ) then 
-        final_result = final_result .. result
-      end
+
+      table.insert(result,"\n") 
+      if flag[3] then assert(io.write("\n"),g_err.INVALID_FILE_PATH) end
     end
   end
-  -- ==== VIJAY TODO Avoid string concatenation. See why below.
+  
+
   if file then
     io.close(file)
   end
+  final_result = table.concat(result)
+  if flag[1] then return final_result end 
+  if flag[2] then print(final_result) end 
   
-  return final_result
 end
 --[[
 However, there is a caveat to be aware of. Since strings in Lua are immutable, each concatenation creates a new string object and copies the data from the source strings to it. That makes successive concatenations to a single string have very poor performance.
@@ -158,4 +179,3 @@ function listvalues(s)
 end
 By collecting the strings to be concatenated in an array t, the standard library routine table.concat can be used to concatenate them all up (along with a separator string between each pair) without unnecessary string copying.
 --]]
-

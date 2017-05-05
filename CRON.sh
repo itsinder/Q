@@ -4,6 +4,17 @@ export Q_SRC_ROOT="`pwd`"
 cd $Q_SRC_ROOT
 git pull
 
+cd $Q_SRC_ROOT/UTILS/build
+export LUA_INIT="@$Q_SRC_ROOT/init.lua"
+unset LD_LIBRARY_PATH
+`lua | tail -1`
+var80="------------OUTPUT of lua build.lua gen.lua--------------------------------------"
+var81=$(lua build.lua gen.lua 2>&1)
+var82="------------OUTPUT of lua build.lua tests.lua------------------------------------"
+var83=$(lua build.lua tests.lua 2>&1)
+var84="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
+var85=$(lua mk_so.lua /tmp/ 2>&1)
+
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
 bash test_meta_data.sh
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
@@ -16,7 +27,7 @@ cd $Q_SRC_ROOT/UTILS/test/
 bash test_dictionary.sh
 cd $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/
 bash test_mkcol.sh
-cd $Q_SRC_ROOT/Q2/code/test_cases/
+cd $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/
 bash test_vector.sh
 
 
@@ -89,7 +100,7 @@ fi
 rm $nightly_file
 
 #check whether night build txt file for Vector is present in MK_COL/test/testcases folder
-nightly_file=$Q_SRC_ROOT/Q2/code/test_cases/nightly_build_vector.txt
+nightly_file=$Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/nightly_build_vector.txt
 if [ -f $nightly_file ] 
 then
  var7=$(cat $nightly_file)
@@ -102,21 +113,10 @@ rm $nightly_file
 
 var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"$'\n\n'"${var7}"
 
-cd $Q_SRC_ROOT/UTILS/build
-export LUA_INIT="@$Q_SRC_ROOT/init.lua"
-unset LD_LIBRARY_PATH
-`lua | tail -1`
-var80="------------OUTPUT of lua build.lua gen.lua--------------------------------------"
-var81=$(lua build.lua gen.lua 2>&1)
-var82="------------OUTPUT of lua build.lua tests.lua------------------------------------"
-var83=$(lua build.lua tests.lua 2>&1)
-var84="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
-var85=$(lua mk_so.lua /tmp/ 2>&1)
-
 var100="${var100}"$'\n\n'"${var80}"$'\n\n'"${var81}"$'\n\n'"${var82}"$'\n\n'"${var83}"$'\n\n'"${var84}"$'\n\n'"${var85}"
 #echo "$var100" 
 
-attach_file=$Q_SRC_ROOT/Q2/code/test_cases/vector.report.txt
+attach_file=$Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.report.txt
 if [ -f $attach_file ] 
 then
  varattach="-A "$attach_file
@@ -157,6 +157,6 @@ then
 fi
 
 # echo $varattach
-
+# echo "$var100"
 echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
 
