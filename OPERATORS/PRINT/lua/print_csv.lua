@@ -47,19 +47,20 @@ return function (column_list, filter, opfile)
       assert(where:fldtype() == "B1",g_err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
+      assert(type(lb) == "number", g_err.INVALID_LOWER_BOUND_TYPE )
       lb = assert(tonumber(lb))
       assert(lb >= 0,g_err.INVALID_LOWER_BOUND)
     else
       lb = 0;
     end
     if ( ub ) then
+      assert(type(ub) == "number", g_err.INVALID_UPPER_BOUND_TYPE )
       ub = assert(tonumber(ub))
       assert(ub > lb ,g_err.UB_GREATER_THAN_LB)
       assert(ub <= max_length, g_err.INVALID_UPPER_BOUND)
     else
       ub = max_length
     end
-    -- VIJAY: Check that lb/ub are integers
   else
     lb = 0
     ub = max_length
@@ -69,14 +70,19 @@ return function (column_list, filter, opfile)
   local num_cols = #column_list
   local file = nil
   local final_result = nil
+  local flag = { }
   if not opfile then 
     final_result = ""  -- we will produce string as output
+    flag[1] = true
   else
     if ( opfile == "" ) then
       -- we will write to stdout
+      final_result = ""
+      flag[2] = true
     else
       file = io.open(opfile, "w+")
       io.output(file)
+      flag[3] = true
     end
   end
   
@@ -131,13 +137,18 @@ return function (column_list, filter, opfile)
       -- remove last comma
       result = string.sub(result, 1, -2)
       result = result .. "\n"
-      assert(io.write(result),g_err.INVALID_FILE_PATH)
-      final_result = final_result .. result
+      if flag[3] then 
+        assert(io.write(result),g_err.INVALID_FILE_PATH)
+      end
+      if flag[1] or flag[2] then
+        final_result = final_result .. result
+      end
     end
   end
   if file then
     io.close(file)
   end
+  if flag[1] then return final_result end 
+  if flag[2] then print(final_result) end 
   
-  return final_result
 end

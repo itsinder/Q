@@ -50,10 +50,16 @@ for i, v in ipairs(T) do
     if fns[key] then
       F = fns[key]()
     end
-    local status, print_ret = pcall(print_csv, load_ret, F, print_out_dir..csv_file)
+    
+    local file_path 
+    if csv_file then
+      file_path = print_out_dir .. csv_file
+    end
+    
+    local status, print_ret = pcall(print_csv, load_ret, F, file_path)
     key = "handle_"..v.category
     if fns[key] then
-      result = fns[key](i, v,  print_out_dir..csv_file, print_ret, status)
+      result = fns[key](i, v,  file_path, print_ret, status)
     else
       fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
       result = false
