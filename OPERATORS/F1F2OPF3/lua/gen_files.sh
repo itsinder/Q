@@ -15,10 +15,8 @@ luajit cmp_generator.lua    cmp_operators.lua
 
 cd ../gen_src/
 ls *c > _x
-FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 while read line; do
-  echo $line
-  gcc -c $line $FLAGS -I../gen_inc -I../../../UTILS/inc/ 
+  gcc -c $line $QC_FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
 gcc -shared *.o -o libf1f2opf3.so
 rm -f *.o
