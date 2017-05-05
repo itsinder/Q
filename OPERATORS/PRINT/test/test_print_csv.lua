@@ -52,9 +52,8 @@ for i, v in ipairs(T) do
     end
     
     local file_path 
-    if csv_file then
-      file_path = print_out_dir .. csv_file
-    end
+    if csv_file then file_path = print_out_dir .. csv_file end
+    if csv_file == "" then file_path = "" end
     
     local status, print_ret = pcall(print_csv, load_ret, F, file_path)
     key = "handle_"..v.category

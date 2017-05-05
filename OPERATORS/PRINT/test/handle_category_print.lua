@@ -33,8 +33,8 @@ end
 local file_match = function (file1, file2)
   local actual_file_content = file.read(file1)
   local expected_file_content = file.read(file2)
-  --print(actual_file_content)
-  --print(expected_file_content)
+  print(actual_file_content)
+  print(expected_file_content)
   if actual_file_content ~= expected_file_content then
      return false
   end
@@ -260,6 +260,8 @@ fns.handle_category7 = function (index, v, csv_file,ret, status)
 
   -- print("output regex = ",v.output_regex)
   if ret ~= v.output_regex then
+    print(ret)
+    print(v.output_regex)
     fns["increment_failed"](index, v, "testcase failed: in category7, output of print_csv does not match with output_regex")
     return false
   end
