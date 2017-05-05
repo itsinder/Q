@@ -33,8 +33,8 @@ end
 local file_match = function (file1, file2)
   local actual_file_content = file.read(file1)
   local expected_file_content = file.read(file2)
-  --print(actual_file_content)
-  --print(expected_file_content)
+  -- print(actual_file_content)
+  -- print(expected_file_content)
   if actual_file_content ~= expected_file_content then
      return false
   end
@@ -78,17 +78,11 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
     return false
   end
   
-  -- print(ret)
-  if type(ret) ~= "string" then
-    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv is not string")
+  if type(ret) == "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv is a string")
     return false
   end
   
-  -- print("output regex = ",v.output_regex)
-  if ret ~= v.output_regex then
-    fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv does not match with output_regex")
-    return false
-  end
   -- match input and output files
   if file_match("test_data/"..v.data, csv_file) == false then
      fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match")
@@ -247,6 +241,51 @@ fns.handle_category6 = function (index, v, M)
   number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
+
+-- in this testcase, the input file is not passed 
+-- and a string is returned by print 
+fns.handle_category7 = function (index, v, csv_file,ret, status)
+  --print(v.name) 
+ 
+  -- if status returned is false then this testcase has failed
+  if not status then
+    fns["increment_failed"](index, v, "testcase failed: in category7, output of print_csv is not success")
+    return false
+  end
+    
+  if type(ret) ~= "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category7, output of print_csv is not string")
+    return false
+  end
+
+  -- print("output regex = ",v.output_regex)
+  if ret ~= v.output_regex then
+    print(ret)
+    print(v.output_regex)
+    fns["increment_failed"](index, v, "testcase failed: in category7, output of print_csv does not match with output_regex")
+    return false
+  end
+  
+  number_of_testcases_passed = number_of_testcases_passed + 1
+  return true
+end
+
+-- in this testcase, the input file passed is empty string
+-- and the output is printed on stdout 
+fns.handle_category8 = function (index, v, csv_file,ret, status)
+  --print(v.name) 
+ 
+  -- if status returned is false then this testcase has failed
+  if not status then
+    fns["increment_failed"](index, v, "testcase failed: in category8, output of print_csv is not success")
+    return false
+  end
+
+  number_of_testcases_passed = number_of_testcases_passed + 1
+  return true
+end
+
+
 
 -- this function prints all the result
 fns.print_result = function ()

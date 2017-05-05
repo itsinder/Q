@@ -12,6 +12,7 @@ category6 - Range filter testcase
 For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
+local g_err = require "error_code"
 
 return { 
   -- testcase for printing single column content
@@ -39,6 +40,12 @@ return {
   -- testing whether lower bound value of filter is valid
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = -1, ub = 4 }, category = "category2",
     csv_file = "single_col.csv", output_regex = g_err.INVALID_LOWER_BOUND, name="Invalid LB" },
+  -- lb passed is passed as string should return an error
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = "1" }, category = "category2",
+    csv_file = "single_col.csv", output_regex = g_err.INVALID_LOWER_BOUND_TYPE, name="Invalid LB type" },
+  -- ub passed is passed as string should return an error
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { ub = "1" }, category = "category2",
+    csv_file = "single_col.csv", output_regex = g_err.INVALID_UPPER_BOUND_TYPE, name="Invalid UB type" },
   -- testing whether upper bound value of filter is greater than lower bound value
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 5, ub = 4 }, category = "category2",
     csv_file = "single_col.csv", output_regex = g_err.UB_GREATER_THAN_LB, name="UB greater than LB"},
@@ -74,6 +81,13 @@ return {
   -- testing whether range filter outputs correct values
   { meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 3 }, category = "category5",
     csv_file = "single_col.csv", output_regex = "1002\n1003\n", name = "range filter test"},
+  -- 
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category7",  
+    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
+  
+    -- 
+  { meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "" , category = "category8",  
+    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
   --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
 }

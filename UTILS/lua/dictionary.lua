@@ -1,6 +1,6 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
-require("error_code")
+local g_err = require("error_code")
 
 Dictionary.__index = Dictionary
 
