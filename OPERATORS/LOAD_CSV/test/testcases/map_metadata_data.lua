@@ -13,7 +13,7 @@ For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
 
-require("error_code")
+local g_err = require("error_code")
 
 return { 
   -- error messages test cases

@@ -13,7 +13,7 @@ In case, you want to add a test case with a new error code, add the error code i
 --]]
 
 
-require("error_code")
+local g_err = require("error_code")
 
 return {
   -- name field is missing in metadata
