@@ -31,7 +31,7 @@ paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 local lib_paths = {}
 local lib_sep = ":"  
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
-lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
+-- lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
 lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
 
 -- Check if all the paths are there

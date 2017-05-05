@@ -1,13 +1,7 @@
 require 'globals'
 local error_code = require 'error_code'
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
-ffi.cdef
-[[ 
-  void *malloc(size_t size);
-  void free(void *ptr);
-  void *memset(void *str, int c, size_t n);
-]]
 
 return function (column_list, filter, opfile)  
   
@@ -32,24 +26,24 @@ return function (column_list, filter, opfile)
       assert(g_qtypes[column_list[i]:fldtype()]["ctype_to_txt"] ~= nil, g_err.NULL_CTYPE_TO_TXT_ERROR)
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
-        assert(column_list[i]:get_meta("dir")~=nil,g_err.NULL_DICTIONARY_ERROR)
+        assert(column_list[i]:get_meta("dir"), g_err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
       local tmp = column_list[1]:length()
       if tmp > max_length then max_length = tmp end
-      
     end
   end
   
   local lb = 0; local ub = 0
   local where
-  if filter ~= nil then
+  if filter then
     assert(type(filter) == "table", g_err.FILTER_NOT_TABLE_ERROR)
     lb = filter.lb
     ub = filter.ub
     where = filter.where
     if ( where ) then
       assert(type(where) == "Vector",g_err.FILTER_TYPE_ERROR)
+      -- VIJAY: Should above be Column instead of Vector?  
       assert(where:fldtype() == "B1",g_err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
@@ -65,23 +59,26 @@ return function (column_list, filter, opfile)
     else
       ub = max_length
     end
+    -- VIJAY: Check that lb/ub are integers
   else
     lb = 0
     ub = max_length
   end
-  
-  -- TODO - remove hardcoding of 1024
-  local bufsz = 1024
-  local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
-  
+  -- to do remove hardcoding of 1024
+  local buf = fn_malloc(1024) 
   local num_cols = #column_list
   local file = nil
-  if opfile ~= nil and opfile ~= "" then
-    file = io.open(opfile, "w+")
-    io.output(file)
+  local final_result = nil
+  if not opfile then 
+    final_result = ""  -- we will produce string as output
+  else
+    if ( opfile == "" ) then
+      -- we will write to stdout
+    else
+      file = io.open(opfile, "w+")
+      io.output(file)
+    end
   end
-  
-  local final_result = ""
   
   lb = lb + 1 -- for Lua style indexing
   for rowidx = lb, ub do
@@ -129,21 +126,36 @@ return function (column_list, filter, opfile)
             
           end
         end
-        result = result..temp..","
+        result = result .. temp .. ","
       end
       -- remove last comma
-      result = string.sub(result,1,-2)
-      result = result.."\n"
+      result = string.sub(result, 1, -2)
+      result = result .. "\n"
       assert(io.write(result),g_err.INVALID_FILE_PATH)
-      final_result = final_result..result
+      if ( final_result ) then 
+        final_result = final_result .. result
+      end
     end
   end
+  -- ==== VIJAY TODO Avoid string concatenation. See why below.
   if file then
     io.close(file)
   end
-  if opfile == nil then
-    return final_result
-  end
   
-  return true
+  return final_result
 end
+--[[
+However, there is a caveat to be aware of. Since strings in Lua are immutable, each concatenation creates a new string object and copies the data from the source strings to it. That makes successive concatenations to a single string have very poor performance.
+
+The Lua idiom for this case is something like this:
+
+function listvalues(s)
+    local t = { }
+    for k,v in ipairs(s) do
+        t[#t+1] = tostring(v)
+    end
+    return table.concat(t,"\n")
+end
+By collecting the strings to be concatenated in an array t, the standard library routine table.concat can be used to concatenate them all up (along with a separator string between each pair) without unnecessary string copying.
+--]]
+

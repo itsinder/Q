@@ -45,3 +45,6 @@
       end
     end
   end
+  file = io.open("_concat", "w+")
+  io.output(file)
+  io.write("Created concat files")

@@ -43,16 +43,16 @@ end
 
 
 fns.category1 = function (index, v, status, ret)
-  print(ret)
-  print(v.name)
+  -- print(ret)
+  -- print(v.name)
   if status ~= false then
     fns["increment_failed_mkcol"](index, v, "Mk_col function does not return status = false")
-    return nil
+    return false
   end
   
   if v.output_regex == nil then
     fns["increment_failed_mkcol"](index, v, "MK_Col : Output regex not given in category1 testcases")
-    return nil
+    return false
   end
   
   
@@ -63,26 +63,28 @@ fns.category1 = function (index, v, status, ret)
   local error_msg = plstring.strip(v.output_regex) -- check it can be used from utils.
   local count = plstring.count(err, error_msg)
   if count > 0 then
-    number_of_testcases_passed = number_of_testcases_passed + 1 
+    number_of_testcases_passed = number_of_testcases_passed + 1
+    return true
   else
     fns["increment_failed_mkcol"](index, v, "testcase category1 failed , actual and expected error message does not match")
-    print("actual output:"..err)
-    print("expected output:"..error_msg)
+    -- print("actual output:"..err)
+    -- print("expected output:"..error_msg)
   
   end
 
 end
 
 fns.category2 = function (index, v, status, ret)
-  print(ret)
+  -- print(ret)
+  
   if status ~= true then
     fns["increment_failed_mkcol"](index, v, "Mk_col function does not return status = true")
-    return nil
+    return false
   end
   
   if type(ret) ~= 'Column' then
     fns["increment_failed_mkcol"](index, v, "Mk_col function does not return Column")
-    return nil
+    return false
   end
   
   
@@ -105,14 +107,14 @@ fns.category2 = function (index, v, status, ret)
     if final_result ~= v.input[i] then
       fns["increment_failed_mkcol"](index, v, "Mk_col input output mismatch input = "..v.input[i]..
         " output = "..final_result)
-      return nil
+      return false
     end
     
   end
   
   number_of_testcases_passed = number_of_testcases_passed + 1
-  print("Testing successful ", v.name)
-  
+  -- print("Testing successful ", v.name)
+  return true
 end
 
 return fns

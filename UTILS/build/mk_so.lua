@@ -5,7 +5,7 @@ final_so = q_root .. "/lib/"
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-local dbg = require 'debugger'
+-- local dbg = require 'debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
@@ -36,14 +36,14 @@ function recursive_descent(
         end
       end
       if ( found ) then 
-        print("Skipping file " .. v)
+        -- print("Skipping file " .. v)
       else
-        print("Copying ", v, " to ", destdir)
+        -- print("Copying ", v, " to ", destdir)
         plfile.copy(v, destdir)
       end
     end
   else
-    print("no matching files for ", pattern, " in ", root)
+    -- print("no matching files for ", pattern, " in ", root)
   end
   local D = pldir.getdirectories(root)
   for index, v in ipairs(D) do
@@ -57,9 +57,9 @@ function recursive_descent(
       end
     end
     if ( found ) then 
-       print("Skipping directory " .. v)
+       -- print("Skipping directory " .. v)
      else
-      print("Descending into directory ", v)
+      -- print("Descending into directory ", v)
       recursive_descent(pattern, v, dirs_to_exclude, files_to_exclude, destdir)
     end
   end
@@ -104,6 +104,7 @@ command = "cat " .. hdir .. "*.h | grep -v '^#' > " .. tgt_h
 local status = os.execute(command)
 status = os.execute(command)
 print("Successfully created " .. tgt_h)
+print("Copied " .. tgt_h .. " to " .. final_h)
   --==========================
 local pattern = "*.tmpl"
 local tdir = "/tmp/TEMPLATES/"
@@ -121,6 +122,7 @@ status = os.execute(command)
 assert(status, "gcc failed")
 assert(plpath.isfile(tgt_o), "Target " .. tgt_o .. " not created")
 print("Successfully created " .. tgt_o)
+pldir.copyfile(tgt_o, final_so)
 
 --========== Create q_core.so 
 local q_core = dofile('core_c_files.lua')
@@ -131,13 +133,12 @@ for i, v in ipairs(q_core) do
   src = cdir .. "/" .. v
   assert(plpath.isfile(src), "File not found " .. src)
   pldir.copyfile(src, c_dst)
-  print("Copying " .. src .. " to " .. c_dst)
+  -- print("Copying " .. src .. " to " .. c_dst)
 end
 
 tgt_o = opdir .. "/libq_core.so"
 command = "gcc " .. FLAGS .. c_dst .. "/*.c -I" .. hdir .. 
   " -shared -o " .. tgt_o
-  print(command)
 dbg = require 'debugger'
 status = os.execute(command)
 assert(status, "Command failed " .. command)

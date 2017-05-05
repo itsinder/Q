@@ -18,7 +18,13 @@ for i, v in ipairs(T) do
   local F = pldir.getfiles(cwd, "*.sh")
   for i, script in ipairs(v.scripts) do
     print(" Executing ", script)
-    status = os.execute("bash " .. script)
+    if ( string.find(script, ".sh") ) then 
+      status = os.execute("bash " .. script)
+    elseif ( string.find(script, ".lua") ) then 
+      status = os.execute("luajit " .. script)
+    else
+      status = os.execute(script)
+    end
     assert ( status == 0, " failure at " .. script, " in ", cwd)
   end
 end

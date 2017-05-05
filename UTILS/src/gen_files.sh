@@ -3,6 +3,8 @@ set -e
 UDIR=${Q_SRC_ROOT}/UTILS/lua
 test -d $UDIR
 rm -f ../gen_inc/*.h
+rm -rf ../gen_src
+mkdir -p ../gen_src
 lua $UDIR/extract_func_decl.lua mmap.c ../gen_inc
 lua $UDIR/extract_func_decl.lua is_valid_chars_for_num.c ../gen_inc
 lua $UDIR/extract_func_decl.lua f_mmap.c ../gen_inc

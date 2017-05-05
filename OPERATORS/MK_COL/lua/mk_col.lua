@@ -3,12 +3,6 @@ local error_code = require 'error_code'
 -- local Dictionary = require 'dictionary'
 local Column = require 'Column'   
 local ffi = require "ffi"
-ffi.cdef
-[[ 
-  void *malloc(size_t size);
-  void free(void *ptr);
-  void *memset(void *str, int c, size_t n);
-]]
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
 local MINIMUM_LUA_NUMBER = -9007199254740991
@@ -32,21 +26,23 @@ local min = {
 
 
 return function (input, qtype)
-  assert( input ~= nil,g_err.INPUT_NOT_TABLE)
+  assert(input,  g_err.INPUT_NOT_TABLE)
   assert(type(input) == "table", "Input to mk_col must be a table")
   assert(#input > 0, "table has no entries")
-  assert( g_valid_types[qtype] ~= nil,g_err.INVALID_COLUMN_TYPE)
+  assert( g_valid_types[qtype] ~= nil, g_err.INVALID_COLUMN_TYPE)
   local width = assert(g_qtypes[qtype]["width"], g_err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
-  assert(qtype ~= "B1", "TODO: To be implemented")
-  assert(qtype ~= "SC",g_err.INVALID_COLUMN_TYPE)
-  assert(qtype ~= "SV",g_err.INVALID_COLUMN_TYPE)
+  assert((( qtype == "I1" )  or ( qtype == "I2" )  or ( qtype == "I4" )  or 
+          ( qtype == "I8" )  or ( qtype == "F4" )  or ( qtype == "F8" ) ),
+  g_err.INVALID_COLUMN_TYPE)
+  -- TODO: Support B1 and SC in future
   -- To do - check max and min value in qtype
-  assert(max[qtype] ~= nil,"max value of qtype nil "..g_err.INVALID_COLUMN_TYPE)
-  assert(min[qtype] ~= nil,"min value of qtype nil "..g_err.INVALID_COLUMN_TYPE)
+  assert(max[qtype], "max value of qtype nil " .. g_err.INVALID_COLUMN_TYPE)
+  assert(min[qtype], "min value of qtype nil " .. g_err.INVALID_COLUMN_TYPE)
   
   for k,v in ipairs(input) do 
-    assert(type(v) == "number","Error in index "..k.." - "..g_err.INVALID_DATA_ERROR)
+    assert(type(v) == "number",
+    "Error in index " .. k .. " - " .. g_err.INVALID_DATA_ERROR)
     --print("v = "..string.format("%18.0f",v))
     -- TODO: Should this be < or <=, > or >= 
     assert(v >= MINIMUM_LUA_NUMBER, g_err.INVALID_LOWER_BOUND) 
@@ -61,14 +57,11 @@ return function (input, qtype)
     write_vector=true,
     nn=false }
           
-  local ctype =  g_qtypes[qtype]["ctype"]
-  assert(ctype~= nil, g_err.NULL_CTYPE_ERROR)
+  local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
-  assert(length>0, g_err.INPUT_LENGTH_ERROR)
   local length_in_bytes = width * length
   local chunk = ffi.new(ctype .. "[?]", length, input)
   col:put_chunk(length, chunk)
   col:eov()
-  -- print("Successfully loaded ") Use log info for such things
   return col
 end

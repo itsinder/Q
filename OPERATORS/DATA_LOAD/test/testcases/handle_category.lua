@@ -79,10 +79,10 @@ end
   
 -- this function handle testcases where error messages are expected output 
 fns.handle_category1 = function (index, status, ret, v)
-  print(ret)
-  print(v.name)
+  -- print(ret)
+  -- print(v.name)
   local output = handle_output_regex(index, status, v, true, "category1")
-  if output == nil then return end
+  if output == nil then return false end
   
   -- ret is of format <filepath>:<line_number>:<error_msg>
   -- get the actual error message from the ret
@@ -93,14 +93,16 @@ fns.handle_category1 = function (index, status, ret, v)
   local error_msg = plstring.strip(output) -- check it can be used from utils.
   
   -- check this line can be skipped with the duplicate line below
+  -- if error_msg is subset of err
   local count = plstring.count(err, error_msg)
   if count > 0 then
     number_of_testcases_passed = number_of_testcases_passed + 1 
+    return true
   else
     fns["increment_failed_load"](index, v, "testcase category1 failed , actual and expected error message does not match")
     print("actual output:"..err)
     print("expected output:"..error_msg)
-  
+    return false
   end
 end
 
@@ -108,14 +110,14 @@ end
 -- this function handle testcases where table of columns are expected output 
 -- in this table, only one column is present
 fns.handle_category2 = function (index, status, ret, v, output_category3, v_category3)
-  print(ret)
+  -- print(ret)
   local output
 
   if v then
-    print(v.name)
+    -- print(v.name)
     if type(ret) ~= "table" then
       fns["increment_failed_load"](index, v, "testcase failed: in category2 , output of load is not a table")
-      return nil
+      return false
     end
     output = handle_output_regex(index, status, v, false, "category2")
     ret = ret[1]
@@ -124,23 +126,23 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     output = output_category3
   end
   
-  if output == nil then return end
+  if output == nil then return false end
   
   if type(output) ~= "table" then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , output regex is not a table")
-    return nil
+    return false
   end
   
   if type(ret) ~= "Column" then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , output of load is not a column")
-    return nil
+    return false
   end
   --print(ret[1])
   --print(ret:length())
   --print(#output)
   if ret:length() ~= #output then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , length of Column and output regex does not match")
-    return nil
+    return false
   end
   
   for i=1,ret:length() do
@@ -148,7 +150,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     
     if status == false then
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
-      return nil
+      return false
     end
     local is_SC = ret:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
     local is_SV = ret:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
@@ -162,11 +164,11 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     if result == nil then result = "" end
     if result ~= output[i] then 
       fns["increment_failed_load"](index, v, "testcase category2 failed , \nresult="..result.." \noutput["..i.."]="..output[i].."\n")
-      return nil
+      return false
     end
   end
   number_of_testcases_passed = number_of_testcases_passed + 1 
-  return 1
+  return true
 end
 
 -- this function handle testcases where table of columns are expected output 
@@ -174,19 +176,19 @@ end
 -- handle_category2 function is reused
 -- it is called in loop for every column
 fns.handle_category3 = function (index, status, ret, v)
-  print(ret)
-  print(v.name)
+  -- print(ret)
+  -- print(v.name)
   local output = handle_output_regex(index, status, v, false, "category3")
-  if output == nil then return end
+  if output == nil then return false end
   
   if type(output) ~= "table" and type(ret) ~= "table" then
     fns["increment_failed_load"](index, v, "testcase failed: in category3 , output regex and output of load is not a table")
-    return nil
+    return false
   end
   
   if #output ~= #ret then
     fns["increment_failed_load"](index, v, "testcase failed: in category3 , output regex length is not equal to  output of load ")
-    return nil
+    return false
   end
   
   for i=1,#output do
@@ -196,68 +198,70 @@ fns.handle_category3 = function (index, status, ret, v)
     number_of_testcases_passed = number_of_testcases_passed - 1
   end
   number_of_testcases_passed = number_of_testcases_passed + 1
+  return true
 end
 
 -- check the length of bin files in this testcase 
 fns.handle_category4 = function (index, status, ret, v)
-  print(ret)
-  print(v.name)
+  -- print(ret)
+  -- print(v.name)
   local output = handle_output_regex(index, status, v, false, "category4")
       
-  if output == nil then return end
+  if output == nil then return false end
   
   if type(output) ~= "table" and type(ret) ~= "table" then
     fns["increment_failed_load"](index, v, "testcase failed: in category4 , output regex and output of load is not a table")
-    return nil
+    return false
   end
   local sum = {}
   for i=1,#ret do
     if type(ret[i]) ~= "Column" then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , output of load is not a column")
-      return nil
+      return false
     end
     sum[i] = ret[i]:length() * ret[i]:sz()
     if sum[i] ~= output[i] then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , size of each column not matching with output regex")
-      return nil
+      return false
     end
   end
   number_of_testcases_passed = number_of_testcases_passed + 1
+  return true
 end
 
 -- check whether the null file is present if has_null is true and csv file has no null values
 -- if null file present , then load_csv api should delete that file
 fns.handle_category5 = function (index, status, ret, v)
-  print(ret)
-  print(v.name)
+  -- print(ret)
+  -- print(v.name)
   local output = handle_output_regex(index, status, v, false, "category5")
       
-  if output == nil then return end
+  if output == nil then return false end
   
   if type(ret) ~= "table" then
     fns["increment_failed_load"](index, v, "testcase failed: in category5 , output of load is not a table")
-    return nil
+    return false
   end
   
   for i=1,#ret do
     if type(ret[i]) ~= "Column" then
       fns["increment_failed_load"](index, v, "testcase failed: in category5 , output of load is not a column")
-      return nil
+      return false
     end
   end
   
   local is_present = plfile.isfile(_G["Q_DATA_DIR"].."_col2_nn")
   if is_present then
     fns["increment_failed_load"](index, v, "testcase failed: in category5 , null file still present in data directory")
-    return nil
+    return false
   end
 
   number_of_testcases_passed = number_of_testcases_passed + 1
+  return true
 end
 
 -- in this testcase , invalid environment values are set
 fns.handle_input_category6 = function (input_regex)
-  
   if input_regex == 1 then _G["Q_DATA_DIR"] = nil end
   if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
   if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
@@ -270,7 +274,8 @@ end
 -- so handle_category1 function is reused
 fns.handle_category6 = function (index, status, ret, v)
   --print(v.name)
-  fns.handle_category1(index, status, ret, v)
+  ret = fns.handle_category1(index, status, ret, v)
+  return ret
 end
 
 return fns
