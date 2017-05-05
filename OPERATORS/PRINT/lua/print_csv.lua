@@ -132,12 +132,30 @@ return function (column_list, filter, opfile)
       result = string.sub(result, 1, -2)
       result = result .. "\n"
       assert(io.write(result),g_err.INVALID_FILE_PATH)
-      final_result = final_result .. result
+      if ( final_result ) then 
+        final_result = final_result .. result
+      end
     end
   end
+  -- ==== VIJAY TODO Avoid string concatenation. See why below.
   if file then
     io.close(file)
   end
   
   return final_result
 end
+--[[
+However, there is a caveat to be aware of. Since strings in Lua are immutable, each concatenation creates a new string object and copies the data from the source strings to it. That makes successive concatenations to a single string have very poor performance.
+
+The Lua idiom for this case is something like this:
+
+function listvalues(s)
+    local t = { }
+    for k,v in ipairs(s) do
+        t[#t+1] = tostring(v)
+    end
+    return table.concat(t,"\n")
+end
+By collecting the strings to be concatenated in an array t, the standard library routine table.concat can be used to concatenate them all up (along with a separator string between each pair) without unnecessary string copying.
+--]]
+

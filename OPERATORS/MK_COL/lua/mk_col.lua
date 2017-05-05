@@ -3,12 +3,6 @@ local error_code = require 'error_code'
 -- local Dictionary = require 'dictionary'
 local Column = require 'Column'   
 local ffi = require "ffi"
-ffi.cdef
-[[ 
-  void *malloc(size_t size);
-  void free(void *ptr);
-  void *memset(void *str, int c, size_t n);
-]]
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
 local MINIMUM_LUA_NUMBER = -9007199254740991
@@ -38,8 +32,8 @@ return function (input, qtype)
   assert( g_valid_types[qtype] ~= nil, g_err.INVALID_COLUMN_TYPE)
   local width = assert(g_qtypes[qtype]["width"], g_err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
-  assert( (( qtype == "I1" ) or ( qtype == "I2" ) or ( qtype == "I4" ) or
-          ( qtype == "I8" ) or ( qtype == "F4" ) or ( qtype == "F8" ) ),
+  assert((( qtype == "I1" )  or ( qtype == "I2" )  or ( qtype == "I4" )  or 
+          ( qtype == "I8" )  or ( qtype == "F4" )  or ( qtype == "F8" ) ),
   g_err.INVALID_COLUMN_TYPE)
   -- TODO: Support B1 and SC in future
   -- To do - check max and min value in qtype

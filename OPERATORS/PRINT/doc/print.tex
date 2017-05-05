@@ -57,6 +57,9 @@ Prints only those rows where the corresponding bit is set.
 
 The destination of a print can be either 
 \be
+\item nil, in this case print\_csv returns a string. 
+In following two cases, print will return true.  This is not meant to be used
+when the output is large. Its  a good aid for quick and dirty testing.
 \item stdout (user does not specify a file name)
 \item a text file 
 \ee

@@ -58,8 +58,10 @@ return function (
     subs.in2type = g_qtypes[f2type].ctype
     subs.out_qtype = l_out_qtype
     subs.out_ctype = g_qtypes[l_out_qtype].ctype
+    -- Note that we are movint int8_t to uint8_t below
+    local cast = "(u" .. subs.out_ctype .. ")"
     subs.c_code_for_operator = 
-    " c = ( (" .. subs.out_ctype .. ")a << " .. shift .. " ) | b; "
+    " c = ( " .. cast .. "a << " .. shift .. " ) | .. " cast " .. b; "
 
     return subs, tmpl
 end
