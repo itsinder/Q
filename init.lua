@@ -71,5 +71,21 @@ end
 package.path = table.concat(paths, sep)
 
 require "globals"
+local g_mt = {
+   __gc = function()
+      print("byebye")
+   end,
+}
+_G = setmetatable(_G, g_mt)
+local signal = require("posix.signal")
+print ("aloha")
+signal.signal(signal.SIGINT, function(signum)
+  io.write("biggie baddie \n")
+  -- put code to save some stuff here
+  os.exit(128 + signum)
+end)
+-- mk_col = require "mk_col"
+-- print_csv = require "print_csv"
+ -- load_csv = require "load_csv"
 --print(package.path)
 --print(os.getenv("LD_LIBRARY_PATH"))

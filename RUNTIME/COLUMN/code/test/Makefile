@@ -39,6 +39,7 @@ all: $(CORE_SO)
 	./bit
 	cp test.txt test1.txt
 	cp test.txt test2.txt
+	cp test.txt test1.txt_nn
 	echo "Now testing lua bindings"
 	export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:./"
 	luajit testVector.lua

@@ -1,3 +1,4 @@
+local dbg = require "debugger"
 local ffi = require "ffi"
 local print_vector = function(ptr , len)
    for i=1,len do
@@ -44,19 +45,19 @@ local x, x_size = v1:chunk(0)
 print_vector(x, x_size)
 local y, y_size = v2:chunk(1)
 print_vector(y, y_size)
-local v1_gen = Generator{vec=v1}
-local i = 0
-while(v1_gen:status() ~= 'dead')
-do
-    local status, chunk, size = v1_gen:get_next_chunk()
-    if status then
-        print("Generator chunk number=".. i, "Generator status=" .. tostring(status), "Chunk size=" .. size)
-        print_vector(chunk, size)
-    else 
-        print("Generator chunk number=".. i, "Generator status=" .. tostring(status))
-    end
-    i = i +1
-end
+-- local v1_gen = Generator{vec=v1}
+-- local i = 0
+-- while(v1_gen:status() ~= 'dead')
+-- do
+--     local status, chunk, size = v1_gen:get_next_chunk()
+--     if status then
+--         print("Generator chunk number=".. i, "Generator status=" .. tostring(status), "Chunk size=" .. size)
+--         print_vector(chunk, size)
+--     else 
+--         print("Generator chunk number=".. i, "Generator status=" .. tostring(status))
+--     end
+--     i = i +1
+-- end
 
 --TODO add tests for put to vector
 local v3 = Vector{field_type='i',
@@ -135,3 +136,24 @@ V7:put_chunk(a, 2)
 
 
 V7:eov()
+-- Column generator
+local gen = v6:wrap()
+local c8 = Column{field_type="i", gen=gen}
+q_size, q, q_nn = c8:chunk(0)
+print(q_size)
+
+local c9_gen = Column{field_type='i',
+filename='test1.txt', }:wrap()
+
+local c10 = Column{field_type="i", gen=c9_gen}
+local i = 0 
+while c10:materialized() == false do
+   q_size, q, q_nn = c10:chunk(i)
+   print(q_size)
+   for j=1,q_size do 
+      print(tonumber(ffi.cast("int*", q)[j-1]))
+   end
+end
+-- q_size, q, q_nn = c8:chunk(1)
+-- print(q_size)
+

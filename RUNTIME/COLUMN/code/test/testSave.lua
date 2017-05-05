@@ -34,3 +34,10 @@ save("vone",v1)
 -- Not a good idea as strings will be quoted when saved and we will have to
 -- deserialize them
 save("vtwo", tostring(v1))
+local c3 = Column{field_type='i',
+filename='test1.txt', }
+save("cthree", tostring(c3))
+local c4 = Column{field_type='i',
+filename='test1.txt', nn=true}
+save("cfour", tostring(c4))
+

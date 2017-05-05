@@ -25,19 +25,17 @@ function Generator.new(arg)
     if type(arg) ~= "table" then
         error("Called constructor with incorrect arguements")
     end
-    if arg.vec ~= nil then
-        local vec = arg.vec
-        assert(type(vec) == 'Vector', "Generators can only use vectors in arg vec")
-        local chunks = vec.max_chunks -1
-
+    if arg.col ~= nil then
+        local col = arg.col
+        assert(type(col) == 'Column', "Generators can only use Column in arg col")
         self.gen = coroutine.create(
             function()
                 local i = 1
                 local status = 0
                 while status do
-                    status, chunk, length = vec:chunk(i)
+                    status, length, chunk, nn_chunk = vec:chunk(i)
                     if status then
-                        coroutine.yield(status, chunk, length)
+                        coroutine.yield(status, length, chunk, nn_chunk)
                         i = i + 1
                     end
                 end
@@ -48,7 +46,6 @@ function Generator.new(arg)
         assert(type(coro) == "thread", "Must be a coroutine")
         self.gen = coro
         self.field_type = assert(arg.field_type, "Requires a field type")
-        
         if arg.field_size == nil then -- for constant length string this cannot be nil
             local type_val =  assert(g_valid_types[self.field_type], "Invalid type")
             self.field_size = ffi.sizeof(type_val)
@@ -65,9 +62,9 @@ function Generator:status()
 end
 
 function Generator:get_next_chunk()
-    local status, buffer, size
-    status, buffer, size = coroutine.resume(self.gen)
-    return status, buffer, size
+    local status, size, buffer, nn_buffer
+    status, size, buffer, nn_buffer = coroutine.resume(self.gen)
+    return status, size, buffer, nn_buffer
 end
 
 return Generator

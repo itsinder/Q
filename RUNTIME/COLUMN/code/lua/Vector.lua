@@ -1,3 +1,4 @@
+local dbg = require "debugger"
 --[[
 Vector Semantics
     1. Pull Semantics
@@ -199,7 +200,8 @@ function Vector.new(arg)
             if arg.filename ~= nil then -- filename means read from file
                 read_file_vector(vec, arg)
             else
-                error('No data input to vector. Need either a file or a generator')
+               dbg() 
+               error('No data input to vector. Need either a file or a generator')
             end
         end
     end
@@ -310,7 +312,9 @@ local function get_from_file(self, num)
             local ptr = ffi.cast("unsigned char*", self.cdata)
             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
         else
-            error('Invalid chunk number')
+            -- error('Invalid chunk number')
+            -- TODO Or should i just return a 0 , nil , nil
+            return 0, nil, nil
         end
     else
         return self.cdata, self.my_length -- a mmap to the ramfs file
