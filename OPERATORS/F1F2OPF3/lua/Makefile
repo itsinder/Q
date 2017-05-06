@@ -97,12 +97,15 @@ _libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 _concat_files : 
 	luajit concat_generator.lua concat_operators.lua
 
-_arith_files : 
+_arith_files : vvadd_specialize.lua vvsub_specialize.lua  \
+  	vvmul_specialize.lua vvdiv_specialize.lua vvrem_specialize.lua
 	luajit arith_generator.lua arith_operators.lua
 
-_bop_files : 
+_bop_files : vvor_specialize.lua vvxor_specialize.lua vvandnot_specialize.lua 
 	luajit bop_generator.lua bop_operators.lua
 
-_cmp_files : 
+_cmp_files : vvgeq_specialize.lua vvleq_specialize.lua  \
+	vvgt_specialize.lua vvlt_specialize.lua vvneq_specialize.lua 
+
 	luajit cmp_generator.lua cmp_operators.lua
 
