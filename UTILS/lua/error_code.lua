@@ -67,4 +67,7 @@ g_err.INVALID_LOWER_BOUND = "Lower Bound less than zero"
 g_err.UB_GREATER_THAN_LB = "Upper bound less than lower bound"
 g_err.INVALID_UPPER_BOUND = "Upper bound greater than maximum length"
 g_err.INVALID_FILE_PATH = "standard file is closed"
+g_err.INVALID_UPPER_BOUND_TYPE = "type of upper is not a number"
+g_err.INVALID_LOWER_BOUND_TYPE = "type of lower is not a number"
 
+return g_err

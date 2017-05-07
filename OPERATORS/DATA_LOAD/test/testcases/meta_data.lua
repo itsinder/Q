@@ -13,7 +13,7 @@ In case, you want to add a test case with a new error code, add the error code i
 --]]
 
 
-require("error_code")
+local g_err = require("error_code")
 
 return {
   -- name field is missing in metadata
@@ -27,7 +27,7 @@ return {
   -- qtype field is missing in metadata
   { meta = "bm_type_missing.lua", output_regex = "Column 1-" .. g_err.METADATA_TYPE_NULL },
   -- invalid qtype specified in metadata
-  { meta = "bm_type_not_q_type.lua", output_regex = "Column 1-" .. g_err.INVALID_QTYPE },
+  { meta = "bm_type_not_qtype.lua", output_regex = "Column 1-" .. g_err.INVALID_QTYPE },
   -- no metadata given i.e. metadata type is nil 
   { meta = "bm_nil.lua", output_regex = g_err.METADATA_TYPE_TABLE },
   -- metadata have duplicate column names 

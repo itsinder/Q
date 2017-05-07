@@ -9,18 +9,19 @@ return function (
     local iorf2 = assert(g_iorf[f2type])
     assert(iorf1 == "fixed", "f1type must be integer. Is" .. f1type)
     assert(iorf2 == "fixed", "f2type must be integer. Is" .. f2type)
-    local outtype = nil
+    local out_qtype = nil
     if ( sz1 < sz2 ) then 
-         outtype = f1type
+         out_qtype = f1type
     else
-         outtype = f2type
+         out_qtype = f2type
     end
     local tmpl = 'base.tmpl'
     local subs = {}
-    subs.fn = "vvrem_" .. f1type .. "_" .. f2type .. "_" .. outtype
+    subs.fn = "vvrem_" .. f1type .. "_" .. f2type .. "_" .. out_qtype
     subs.in1type = assert(g_qtypes[f1type].ctype)
     subs.in2type = assert(g_qtypes[f2type].ctype)
-    subs.out_c_type = assert(g_qtypes[outtype].ctype)
+    subs.out_qtype = out_qtype
+    subs.out_ctype = assert(g_qtypes[out_qtype].ctype)
     subs.c_code_for_operator = " c = a % b ;"
     return subs, tmpl
 end

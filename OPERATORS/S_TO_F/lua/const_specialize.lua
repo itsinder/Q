@@ -1,55 +1,40 @@
 return function (
   args
   )
-  local ffi = require "ffi"
-  ffi.cdef([[
-  void * malloc(size_t size);
-  void free(void *ptr);
-  int bar(void *);
-  int printf (const char *__restrict __format, ...);
-  ]])
-  -- TODO This should be for conv_fn, not hard coded as below
-  local extract_fn_proto = require 'extract_fn_proto'
-  local str = extract_fn_proto("../gen_src/_txt_to_I8.c")
-  ffi.cdef(str)
-  local cee = ffi.load("../gen_src/libs_to_f.so")
+  local ffi = require 'ffi'
+  local tmp = require "ffi_core"
+  local q_core = tmp()
+  local ffi_malloc = require "ffi_malloc"
 
-  local dbg = require 'debugger'
   assert(type(args) == "table")
   local val   = assert(args.val)
   local qtype = assert(args.qtype)
   local len   = assert(args.len)
-  -- following line used for additional asserts for rem 
-  local addnl_asserts = 0
   local is_base_qtype = assert(require 'is_base_qtype')
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
-  local is_global_cdef = false
-
-  if is_global_cdef then 
-    local filename = rootdir .. "/OPERATORS/LOAD_CSV/gen_src/_txt_to_" 
-      .. qtype .. ".c"
-    local plpath = require 'pl.path'
-    assert(plpath.isfile(filename))
-    local txt_to = assert(extract_fn_proto(filename))
-    ffi.cdef(txt_to)
-  end
-  assert(type(val) == "number")
+  assert((type(val) == "number") or ( type(val) == "string"))
   local conv_fn = "txt_to_" .. qtype
-  local out_c_type = g_qtypes[qtype].ctype
-  local c_mem = assert(ffi.gc(ffi.C.malloc(ffi.sizeof(out_c_type)), ffi.C.free))
-  -- TODO txt_to_I8 shpuld be conv_fn
-  c_mem = ffi.cast(c_mem, "int64_t *")
-  ffi.fill(c_mem, 8, 0)
-  local status  = cee.txt_to_I8("1000", 10, c_mem)
-  cee.bar(c_mem)
-  print("hello world")
---    "Unable to convert to scalar " .. args.val)
+  local out_ctype = g_qtypes[qtype].ctype
+  local width = g_qtypes[qtype].width
+  local c_mem = assert(ffi_malloc(width), "malloc failed")
+  ffi.fill(c_mem, width, 0)
+  local conv_fn = q_core["txt_to_" .. qtype]
+  local status = nil
+  if ( g_iorf[qtype] == "fixed" ) then 
+    status = conv_fn(tostring(val), 10, c_mem)
+  elseif ( g_iorf[qtype] == "floating_point" ) then 
+    status  = conv_fn(tostring(val), c_mem)
+  else
+    assert(nil, "Unknown type " .. qtype)
+  end
+  -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
+  assert(status, "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
-  local subs = {}; -- scalar can be undefined while generating code at compile time 
+  local subs = {};
     subs.fn = "const_" .. qtype
     subs.c_mem = c_mem
-    subs.out_c_type = out_c_type
-    subs.out_q_type = qtype
+    subs.out_ctype = out_ctype
+    subs.out_qtype = qtype
     return subs, tmpl
 end

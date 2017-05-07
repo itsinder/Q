@@ -1,4 +1,7 @@
 return { 
+  "GUIDING_PRINCIPLES",
+  "Q2",
+  "PRIMITIVES",
   "QCFunc.c",
   "DEPRECATED",
   "experimental",

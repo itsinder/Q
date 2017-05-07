@@ -1,8 +1,7 @@
-require "validate_meta"
 require 'globals'
-require 'extract_fn_proto'
-require 'error_code'
-
+local g_err = require 'error_code'
+local validate_meta = require "validate_meta"
+local extract_fn_proto = require 'extract_fn_proto'
 
 local Dictionary = require 'dictionary_dataload'
 local plstring = require 'pl.stringx'
@@ -10,10 +9,10 @@ local Column = require 'Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-
+local fn_malloc = require 'ffi_malloc'
 local ffi = require "ffi"
 ffi.cdef([[
-void *memset(void * str, int c, size_t n);
+  void *memset(void * str, int c, size_t n);
 ]])
 local rootdir = os.getenv("Q_SRC_ROOT")
 local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/get_cell.c"))
@@ -47,7 +46,7 @@ local c = ffi.load("load_csv.so")
 --           If any error was encountered during load operation then negative status code
 -- ----------------
 
-function load_csv( 
+return function ( 
   csv_file_path, 
   M,  -- metadata
   load_global_settings
@@ -124,9 +123,9 @@ function load_csv(
    l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
-   local buf = ffi.gc(c.malloc(buf_sz), c.free)
-   local cbuf = ffi.gc(c.malloc(cbuf_sz), c.free)
-   local is_null = ffi.gc(c.malloc(1), c.free)
+   local buf = fn_malloc(buf_sz)
+   local cbuf = fn_malloc(cbuf_sz)
+   local is_null = fn_malloc(1)
    local ncols = #M
    local row_idx = 0
    local col_idx = 0
@@ -172,19 +171,19 @@ function load_csv(
           end          
         else 
           local status = nil
-          local q_type = M[col_idx + 1].qtype
-          local function_name = g_qtypes[q_type]["txt_to_ctype"]
+          local qtype = M[col_idx + 1].qtype
+          local function_name = g_qtypes[qtype]["txt_to_ctype"]
           -- for fixed size string pass the size of string data also
-          if q_type == "SC" then
+          if qtype == "SC" then
             ffi.copy(cbuf, buf, string.len(ffi.string(buf))) 
             status = 0 
-          elseif q_type == "I1" or q_type == "I2" or q_type == "I4" or q_type == "I8" or q_type == "SV" then
+          elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
             status = c[function_name](buf, 10, cbuf)
-          elseif q_type == "F4" or q_type == "F8"  then 
+          elseif qtype == "F4" or qtype == "F8"  then 
             status = c[function_name](buf, cbuf)
           else 
-            error("Data type : " .. q_type .. " Not supported ")
+            error("Data type : " .. qtype .. " Not supported ")
           end
           
           assert( status >= 0 , g_err.INVALID_DATA_ERROR )
@@ -214,6 +213,6 @@ function load_csv(
         assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
       end
    end
-   print("Completed successfully")
+   -- print("Completed successfully")
    return column_list
 end

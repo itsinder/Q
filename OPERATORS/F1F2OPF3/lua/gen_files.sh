@@ -8,20 +8,18 @@ rm -f ../gen_inc/_*.h
 bash cleanup.sh
 bash gen_specializers.sh
 
-lua concat_generator.lua concat_operators.lua
-lua arith_generator.lua  arith_operators.lua
-lua bop_generator.lua    bop_operators.lua
-lua cmp_generator.lua    cmp_operators.lua
+luajit concat_generator.lua concat_operators.lua
+luajit arith_generator.lua  arith_operators.lua
+luajit bop_generator.lua    bop_operators.lua
+luajit cmp_generator.lua    cmp_operators.lua
 
 cd ../gen_src/
 ls *c > _x
-FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 while read line; do
-  echo $line
-  gcc -c $line $FLAGS -I../gen_inc -I../../../UTILS/inc/ 
+  gcc -c $line $QC_FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
 gcc -shared *.o -o libf1f2opf3.so
 rm -f *.o
 rm -f _x
 cd -
-echo "ALL DONE; $0 in $PWD"
+echo "ALL DONE: $0 in $PWD"

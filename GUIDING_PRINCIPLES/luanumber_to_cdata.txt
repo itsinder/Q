@@ -1,0 +1,15 @@
+A simple way to convert Lua Number to C data struture using FFI API is
+
+local chunk = ffi.new(ctype .. "[?]", length, input)
+
+where
+
+chunk  -  C data struture of type ctype
+ctype  -  datatype e.g. -  int, char, float etc.
+input  -  Lua table of Lua number
+length -  number of elements
+
+Reference link 
+http://luajit.org/ext_ffi.html
+
+

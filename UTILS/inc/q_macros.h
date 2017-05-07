@@ -58,4 +58,7 @@
 
 #define mcr_unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
+#define SET_BIT(x,i)  (x)[(i) / 8] |= (1 << ((i) % 8))
+#define CLEAR_BIT(x,i) (x)[(i) / 8] &= ~(1 << ((i) % 8))
+#define GET_BIT(x,i) (((x)[(i) / 8] & (1 << ((i) % 8))) > 0)
 #endif

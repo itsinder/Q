@@ -9,19 +9,19 @@ ffi.cdef
   void *memset(void *str, int c, size_t n);
 ]]
 
+local fns = {}
 local failed_testcases = {}
 
-function increment_failed_mkcol(index, v, str)
+fns.increment_failed_mkcol = function (index, v, str)
   print("testcase name :"..v.name)
   print("qtype: "..v.qtype)
   
   print("reason for failure "..str)
   number_of_testcases_failed = number_of_testcases_failed + 1
   table.insert(failed_testcases,index)
-
 end
 
-function print_result() 
+fns.print_result = function () 
   local str
   
   str = "----------MK_COL TEST CASES RESULT----------------\n"
@@ -42,16 +42,17 @@ function print_result()
 end
 
 
-function handle_category1(index, v, status, ret)
-  print(ret)
+fns.category1 = function (index, v, status, ret)
+  -- print(ret)
+  -- print(v.name)
   if status ~= false then
-    increment_failed_mkcol(index, v, "Mk_col function does not return status = false")
-    return nil
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return status = false")
+    return false
   end
   
   if v.output_regex == nil then
-    increment_failed_mkcol(index, v, "MK_Col : Output regex not given in category1 testcases")
-    return nil
+    fns["increment_failed_mkcol"](index, v, "MK_Col : Output regex not given in category1 testcases")
+    return false
   end
   
   
@@ -62,26 +63,28 @@ function handle_category1(index, v, status, ret)
   local error_msg = plstring.strip(v.output_regex) -- check it can be used from utils.
   local count = plstring.count(err, error_msg)
   if count > 0 then
-    number_of_testcases_passed = number_of_testcases_passed + 1 
+    number_of_testcases_passed = number_of_testcases_passed + 1
+    return true
   else
-    increment_failed_load(index, v, "testcase category1 failed , actual and expected error message does not match")
-    print("actual output:"..err)
-    print("expected output:"..error_msg)
+    fns["increment_failed_mkcol"](index, v, "testcase category1 failed , actual and expected error message does not match")
+    -- print("actual output:"..err)
+    -- print("expected output:"..error_msg)
   
   end
 
 end
 
-function handle_category2(index, v, status, ret)
-  print(ret)
+fns.category2 = function (index, v, status, ret)
+  -- print(ret)
+  
   if status ~= true then
-    increment_failed_mkcol(index, v, "Mk_col function does not return status = true")
-    return nil
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return status = true")
+    return false
   end
   
   if type(ret) ~= 'Column' then
-    increment_failed_mkcol(index, v, "Mk_col function does not return Column")
-    return nil
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return Column")
+    return false
   end
   
   
@@ -92,23 +95,26 @@ function handle_category2(index, v, status, ret)
     local final_result = str[0]
     local is_float = ret:fldtype() == "F4" or ret:fldtype() == "F8"
     -- to handle the extra decimal values put in case of Float
-    --[[if is_float then
-      final_result = 10 * final_result
-      final_result = math.ceil(final_result)
-      final_result = final_result / 10
+    if is_float then
+      local precision = v.precision
+      precision = math.pow(10,precision)
+      final_result = precision * final_result
+      final_result = math.floor(final_result)
+      final_result = final_result / precision
     end
-    --]]
-    --print(str[0] , v.input[i])
+    
+    -- print(final_result , v.input[i])
     if final_result ~= v.input[i] then
-      increment_failed_mkcol(index, v, "Mk_col input output mismatch input = "..v.input[i]..
-        " output = "..str[0])
-      return nil
+      fns["increment_failed_mkcol"](index, v, "Mk_col input output mismatch input = "..v.input[i]..
+        " output = "..final_result)
+      return false
     end
     
   end
   
   number_of_testcases_passed = number_of_testcases_passed + 1
-  print("Testing successful ", v.name)
-  
+  -- print("Testing successful ", v.name)
+  return true
 end
 
+return fns

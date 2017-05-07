@@ -1,7 +1,7 @@
-require 'load_csv_dataload'
-require 'handle_category'
-
---local Dictionary = require 'dictionary'
+local load_csv = require 'load_csv_dataload'
+local fns = require 'handle_category'
+local utils = require 'utils'
+local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
 local test_metadata_dir ="./test_metadata/"
@@ -12,21 +12,6 @@ _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 _G["Q_DICTIONARIES"] = {}
 dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
-
-
-local handle_function = {}
--- handle error message testcases
-handle_function["category1"] = handle_category1
--- handle 1D output regex.
-handle_function["category2"] = handle_category2
--- handle 2D output_regex
-handle_function["category3"] = handle_category3
--- handle length of bin files in this testcase
-handle_function["category4"] = handle_category4
--- handle null file deletion testcase
-handle_function["category5"] = handle_category5
--- handle environment test cases
-handle_function["category6"] = handle_category6
 
 -- loop through testcases
 -- these testcases output error messages
@@ -42,22 +27,33 @@ for i, v in ipairs(T) do
   print("--------------------------------")
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data
+  local result
   -- if category6 then set environment in handle_input_category6 function
   if v.category == "category6" then
-    --print(v.input_regex)
-    handle_input_category6(v.input_regex)
+    local key = "handle_input_"..v.category
+    if fns[key] then
+      fns[key](v.input_regex)
+    else
+      fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+      goto skip
+    end
   end
   
   local status, ret = pcall(load_csv,test_input_dir..D,  M)
   --local status, ret = load_csv(test_input_dir..D,  M)
-  if handle_function[v.category] then
-    --print (handle_function[v.category])
-    handle_function[v.category](i, status, ret, v)
+  local key = "handle_"..v.category
+  if fns[key] then
+    result = fns[key](i, status, ret, v)
+    -- print("see", result)
+  else
+    fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
+    result = false
   end
+  utils["testcase_results"](v, "test_load_csv.lua", "Data_load", "Unit Test", result, "")
   ::skip::
 end
 
-print_result()
+fns["print_result"]()
 
 _G["Q_DATA_DIR"] = "./test_data/out/"
 _G["Q_META_DATA_DIR"] = "./test_data/metadata/"

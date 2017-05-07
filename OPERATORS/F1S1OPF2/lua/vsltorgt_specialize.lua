@@ -13,7 +13,7 @@ return function (
       local ub = assert(scalars.ub, "ub not specified")
       assert((type(lb) == "string"), "lb not specified")
       assert((type(ub) == "string"), "lb not specified")
-      -- TODO  convert lb/ub to appropriate c_types
+      -- TODO  convert lb/ub to appropriate ctypes
     end
     subs.fn = "vsltorgt_" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
@@ -22,6 +22,6 @@ return function (
     subs.combiner = ' ||  '
     subs.c_lb = 0 -- TODO 
     subs.c_ub = 0 -- TODO 
-    subs.out_c_type = "uint8_t"
+    subs.out_ctype = "uint8_t"
     return subs, tmpl
 end

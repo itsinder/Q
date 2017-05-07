@@ -5,13 +5,23 @@ local function script_path()
     local str = debug.getinfo(2, "S").source:sub(2)
     return str:match("(.*/)")
 end
+local plpath = require 'pl.path'
+
+local q_src_root = assert(os.getenv("Q_SRC_ROOT"))
+assert(plpath.isdir(q_src_root), "Q_SRC_ROOT not found")
+
+local q_root = assert(os.getenv("Q_ROOT"), "Q_ROOT must be set")
+assert(plpath.isdir(q_root), "Q_ROOT not found")
+assert(plpath.isdir(q_root .. "/lib/" ), "Q_ROOT/lib not found")
+assert(plpath.isdir(q_root .. "/include/" ), "Q_ROOT/include not found")
 
 local base_path = script_path() or "./"
 -- print (base_path)
 local paths = {}
 local sep = ";" .. base_path
 paths[#paths + 1] = package.path
-paths[#paths + 1] = "Q2/code/lua/?.lua"
+paths[#paths + 1] = "RUNTIME/COLUMN/code/lua/?.lua"
+paths[#paths + 1] = "/?.lua"
 paths[#paths + 1] = "UTILS/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
@@ -20,13 +30,10 @@ paths[#paths + 1] = "OPERATORS/MK_COL/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
 local lib_paths = {}
-local lib_sep = ":" .. base_path
+local lib_sep = ":"  
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
-lib_paths[#lib_paths + 1 ] = "Q2/code/src"
-lib_paths[#lib_paths + 1 ] = "OPERTORS/F1F2OPF3/lua"
-
-
-
+-- lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
+lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
 
 -- Check if all the paths are there
 local curr_path = os.getenv("LD_LIBRARY_PATH")
@@ -43,7 +50,7 @@ end
 local missing = {}
 for _ ,v in pairs(lib_paths) do
     local found = false
-    local entry = base_path .. v
+    local entry = v
     for _,v2 in pairs(libs) do
         if entry == v2 then found = true end
     end
@@ -65,5 +72,20 @@ end
 package.path = table.concat(paths, sep)
 
 require "globals"
+local g_mt = {
+   __gc = function()
+      print("byebye")
+   end,
+}
+_G = setmetatable(_G, g_mt)
+local signal = require("posix.signal")
+signal.signal(signal.SIGINT, function(signum)
+  io.write("biggie baddie \n")
+  -- put code to save some stuff here
+  os.exit(128 + signum)
+end)
+-- mk_col = require "mk_col"
+-- print_csv = require "print_csv"
+ -- load_csv = require "load_csv"
 --print(package.path)
 --print(os.getenv("LD_LIBRARY_PATH"))

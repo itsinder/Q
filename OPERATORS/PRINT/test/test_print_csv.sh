@@ -23,5 +23,6 @@ bash test_print.sh
 rm -rf test_print_data
 
 #run test_load_csv
-luajit test_print_csv.lua $1
+luajit -lluacov test_print_csv.lua $1
+luacov
 

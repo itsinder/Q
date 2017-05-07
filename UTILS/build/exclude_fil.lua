@@ -1,6 +1,5 @@
 return { 
   "asc2bin.c",
-  "bin_search_I4.c",
   "bin2asc.c",
   "bitops.c",
   "concat.c",
@@ -14,4 +13,6 @@ return {
   "qsort2.c",
   "flash_sort.c",
   "tst_sort.c",
+  "tmpl_join.c",
+  "tmpl_join.c",
 }

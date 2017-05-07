@@ -3,12 +3,20 @@ set -e
 UDIR=${Q_SRC_ROOT}/UTILS/lua
 test -d $UDIR
 rm -f ../gen_inc/*.h
+rm -rf ../gen_src
+mkdir -p ../gen_src
 lua $UDIR/extract_func_decl.lua mmap.c ../gen_inc
 lua $UDIR/extract_func_decl.lua is_valid_chars_for_num.c ../gen_inc
 lua $UDIR/extract_func_decl.lua f_mmap.c ../gen_inc
 lua $UDIR/extract_func_decl.lua f_munmap.c ../gen_inc
 lua $UDIR/extract_func_decl.lua bytes_to_bits.c ../gen_inc
 lua $UDIR/extract_func_decl.lua bits_to_bytes.c ../gen_inc
+lua $UDIR/extract_func_decl.lua get_bit.c ../gen_inc
+lua $UDIR/extract_func_decl.lua set_bit.c ../gen_inc
+lua $UDIR/extract_func_decl.lua clear_bit.c ../gen_inc
+lua $UDIR/extract_func_decl.lua copy_bits.c ../gen_inc
+lua $UDIR/extract_func_decl.lua write_bits_to_file.c ../gen_inc
+lua $UDIR/extract_func_decl.lua get_bits_from_array.c ../gen_inc
 lua bin_search_generator.lua
 #--------
 # TODO: Improve below
@@ -17,13 +25,18 @@ echo "mmap.c " >> _x
 echo "is_valid_chars_for_num.c " >> _x
 echo "f_mmap.c " >> _x
 echo "f_munmap.c " >> _x
+echo "get_bit.c " >> _x
+echo "set_bit.c " >> _x
+echo "clear_bit.c " >> _x
+echo "copy_bits.c " >> _x
 echo "bytes_to_bits.c " >> _x
 echo "bits_to_bytes.c " >> _x
-FLAGS="-fPIC -std=gnu99 -Wall -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
+echo "write_bits_to_file.c " >> _x
+echo "get_bits_from_array.c " >> _x
 rm -f *.o
 while read line; do
   echo $line
-  gcc -c $line $FLAGS -I../gen_inc -I../inc/ 
+  gcc -c $line $QC_FLAGS -I../gen_inc -I../inc/ 
 done< _x
 gcc *.o -shared -o _libfoo.so
 rm -f *.o *.so
@@ -34,7 +47,7 @@ rm -f *.o
 ls *.c > _x
 while read line; do
   echo $line
-  gcc -c $line $FLAGS -I../gen_inc -I../inc/ 
+  gcc -c $line $QC_FLAGS -I../gen_inc -I../inc/ 
 done< _x
 gcc *.o -shared -o _libfoo.so
 rm -f *.o *.so
