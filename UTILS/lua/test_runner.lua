@@ -14,8 +14,10 @@ return function (suite, fn, tests_to_run)
     end
   end
   
-  local function myassert(cond, i) 
-    if not cond then failures = failures .. i .. "," end
+  local function myassert(cond, i, msg) 
+    if not cond then 
+      failures = failures .. i .. "[" .. msg .. "],"       
+    end
   end
   
   local test
@@ -26,12 +28,16 @@ return function (suite, fn, tests_to_run)
     test = suite.tests[test_num]
     call_if_exists(test.setup)
     status, res = pcall(fn, unpack(test.input))
+
     if test.fail then
       myassert (status == false, test_num)
       myassert (string.match(res, test.fail), test_num)
     else
-      myassert (status, test_num)
-      myassert (test.check(res), test_num)
+      if status then
+        myassert (test.check(res), test_num)
+      else      
+        myassert (status, test_num, res)
+      end
     end
     call_if_exists(test.teardown)
   end

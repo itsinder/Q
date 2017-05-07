@@ -9,15 +9,15 @@ terra_types['SV'] = int32
 -- terra_types['SC'] = "char"
 terra_types['B1'] = uint64  
 
-C = terralib.includec("stdlib.h")
-
+--local C = terralib.includec("stdlib.h")
+local ffi = require 'ffi'
+  
 -- TODO belongs in utils
-function Array(typ)
-    -- TODO HOW TO FREE IT ?!
-    return terra(N : int)
-        var r : &typ = [&typ](C.malloc(sizeof(typ) * N))
-        return r
-    end
+function t_Array(qtype, N)
+    local r = ffi.C.malloc(g_qtypes[qtype].width * N)
+    r = terralib.cast(&terra_types[qtype], r)
+    ffi.gc(r, ffi.C.free)
+    return r
 end
 
 -- TODO added temporarily for use with Terra due to Vector code; discard later

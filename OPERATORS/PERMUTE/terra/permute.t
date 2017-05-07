@@ -58,7 +58,11 @@ function permute(val_col, idx_col, idx_in_src)
   local chk_idx_n, idx_vec, nn_idx_vec = idx_col:chunk(-1)
   assert (chk_idx_n == idx_n, "Didn't get full input array in permute()")
 
-  local out_arr = Array(tertyp)(val_n)
+  -- TODO setting size as (val_n - 1) also passes test-cases. WHY ??!!!
+  local out_arr = t_Array(val_qtype, val_n)
+  
+  -- Below also works, but GC unclear
+  --local out_arr = terralib.new(tertyp[val_n])
   if idx_in_src == nil then 
     idx_in_src = true 
   end
