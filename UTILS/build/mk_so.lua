@@ -165,4 +165,16 @@ local tgt_h = opdir .. "/q_core.h"
 plfile.write(tgt_h, q_core_h)
 
 pldir.copyfile(tgt_h, final_h)
+-- TODO hack
+local res = {}
+for line in io.lines(tgt_h) do
+   if not string.match(line, "%s*#") then
+      res[#res + 1] = line
+   end
+end
+
+local content = table.concat(res, "\n")
+local f = io.open(final_h .."/q_core.h" , "w")
+f:write(content)
+f:close()
 print("Copied " .. tgt_h .. " to " .. final_h)
