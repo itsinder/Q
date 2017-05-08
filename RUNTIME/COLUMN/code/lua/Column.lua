@@ -1,8 +1,8 @@
 local plpath = require("pl.path")
 local Column = {}
 Column.__index = Column
-local ffi = require 'ffi'
-local C = ffi.C
+local q_core = require 'qcoret'
+local ffi_malloc = require "ffi_malloc"
 local Vector = require "Vector"
 local DestructorLookup = {}
 
@@ -72,7 +72,7 @@ end
 function Column.new(arg)
    local column = setmetatable({}, Column)
    column.meta = {}
-   column.destructor_ptr=ffi.gc(C.malloc(1), Column.destructor) -- Destructor hack for luajit
+   column.destructor_ptr=q_core.gc(ffi_malloc(1), Column.destructor) -- Destructor hack for luajit
    DestructorLookup[column.destructor_ptr] = column
    assert(type(arg) == "table", "Called constructor with incorrect arguements")
    if arg.gen ~= nil then
@@ -152,8 +152,8 @@ function Column:materialized()
 end
 
 function Column:get_element(num)
-   if self.nn_vec ~= nil and self.nn_vec:get_element(num) == ffi.NULL then
-      return ffi.NULL
+   if self.nn_vec ~= nil and self.nn_vec:get_element(num) == q_core.NULL then
+      return q_core.NULL
    else
       return self.vec:get_element(num)
    end

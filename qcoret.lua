@@ -37,9 +37,6 @@ q_core.gc = ffi.gc
 q_core.cast = ffi.cast
 q_core.sizeof = ffi.sizeof
 q_core.NULL = ffi.NULL
-
-
-
 local q_core_mt = {
     __newindex = function(self, key, value)
         print("newindex metamethod called")
@@ -48,7 +45,11 @@ local q_core_mt = {
     __index = function(self, key)
         -- Called only when the string we want to use is an
         -- entry in the table, so our variable names
-      return cee[key]
+      if key == "NULL" then 
+         return ffi.NULL
+      else
+         return cee[key]
+      end
      end,
     __len = function(self)
         print("len metamethod called")
