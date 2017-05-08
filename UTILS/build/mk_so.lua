@@ -165,4 +165,38 @@ local tgt_h = opdir .. "/q_core.h"
 plfile.write(tgt_h, q_core_h)
 
 pldir.copyfile(tgt_h, final_h)
+-- TODO hack
+local res = {}
+-- Adding mmap stuff manually
+for line in io.lines("/tmp/LUAH/mmap_struct.h") do
+ if not string.match(line, "%s*#") then
+      res[#res + 1] = line
+   end
+end
+
+-- Adding mmap stuff manually
+for line in io.lines("/tmp/LUAH/_f_mmap.h") do
+ if not string.match(line, "%s*#") then
+      res[#res + 1] = line
+   end
+end
+
+-- Adding mmap stuff manually
+for line in io.lines("/tmp/LUAH/_f_munmap.h") do
+ if not string.match(line, "%s*#") then
+      res[#res + 1] = line
+   end
+end
+
+
+for line in io.lines(tgt_h) do
+   if not string.match(line, "%s*#") then
+      res[#res + 1] = line
+   end
+end
+
+local content = table.concat(res, "\n")
+local f = io.open(final_h .."/q_core.h" , "w")
+f:write(content)
+f:close()
 print("Copied " .. tgt_h .. " to " .. final_h)

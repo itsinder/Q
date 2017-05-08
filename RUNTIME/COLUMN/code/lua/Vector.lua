@@ -71,7 +71,7 @@ function is_int(n)
   return n == math.floor(n)
 end
 
-local q_core = require 'q_core'
+local q_core = require 'qcoret'
 local ffi_malloc = require 'ffi_malloc'
 
 local DestructorLookup = {}
@@ -123,7 +123,7 @@ end
 local function read_file_vector(self, arg)
     self.input_from_file = true
     self.filename = assert(arg.filename, "Filename not specified to read from")
-    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), 
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), 
       q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
@@ -131,7 +131,7 @@ local function read_file_vector(self, arg)
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.my_length = tonumber(self.f_map.file_size) / self.field_size
+    self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
     return self
 end
@@ -153,7 +153,7 @@ end
 function Vector.new(arg)
     local vec = setmetatable({}, Vector)
     vec.meta = {}
-    vec.destructor_ptr= ffi.gc(ffi_malloc(1), Vector.destructor) -- Destructor hack for luajit
+    vec.destructor_ptr= q_core.gc(ffi_malloc(1), Vector.destructor) -- Destructor hack for luajit
     DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     vec.chunk_size = arg.chunk_size or g_chunk_size
@@ -164,7 +164,7 @@ function Vector.new(arg)
         vec.field_type = arg.field_type
         if arg.field_size == nil then -- for constant length string this cannot be nil
             local type_val =  assert(g_valid_types[arg.field_type], "Invalid type")
-            vec.field_size = ffi.sizeof(type_val)
+            vec.field_size = q_core.sizeof(type_val)
         else
             vec.field_size = arg.field_size
         end
@@ -220,13 +220,13 @@ local function append_to_file(self, ptr, size)
 
     assert(self.input_from_file ~= true, "Cannot write to input file")
 
-    if self.file == nil  or self.file == ffi.NULL then
+    if self.file == nil  or self.file == q_core.NULL then
         if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
             self.file = q_core.fopen(self.filename, "wb+")
         else
             self.file = q_core.fopen(self.filename, "ab+")
         end
-        assert(self.file ~= ffi.NULL, "Unable to open file")
+        assert(self.file ~= q_core.NULL, "Unable to open file")
     end
     -- write out buffer to file
     -- TODO make more general based on field size
@@ -244,7 +244,7 @@ local function flush_remap_file(self)
     assert(self.file ~= nil, "No file to mmap to")
     q_core.fflush(self.file) -- fflush to current state before mmaping
     self.file_last_chunk_number = self.last_chunk_number
-    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), 
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), 
     q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
@@ -285,8 +285,8 @@ local function get_from_file(self, num)
             --return nil --return the mmapped location of the file
             -- TODO change this as we are doing custom types Think in terms of
             -- bytes and bits
-            local ptr = ffi.cast("unsigned char*", self.cdata)
-            return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
+            local ptr = q_core.cast("unsigned char*", self.cdata)
+            return q_core.cast("void *", ptr + self.chunk_size * num * self.field_size), chunk_size
         else
             -- error('Invalid chunk number')
             -- TODO Or should i just return a 0 , nil , nil
@@ -309,7 +309,7 @@ function Vector:get_element(num)
    local chunk, size = self:chunk( math.floor(num / self.chunk_size))
    local offset = num % self.chunk_size
    assert(offset <= size , "element needs to be in current chunk")
-   chunk = ffi.cast("unsigned char*", chunk)
+   chunk = q_core.cast("unsigned char*", chunk)
    if self.field_type == "B1" then
       --first get offset in char and then get the correct bit
       local char_offset = offset / 8
@@ -317,12 +317,12 @@ function Vector:get_element(num)
       local char_value = chunk + char_offset
       local bit_value = tonumber( q_core.get_bit(char_value, bit_offset) )
       if bit_value == 0 then
-         return ffi.NULL
+         return q_core.NULL
       else
          return 1
       end
    else
-      return ffi.cast("void *", chunk +  offset * self.field_size)
+      return q_core.cast("void *", chunk +  offset * self.field_size)
 
    end
 end
@@ -339,16 +339,16 @@ function Vector:chunk(num)
         if num < self:last_chunk() then
             if self.memoized == true then
                 if num > self.file_last_chunk_number then flush_remap_file(self) end
-                local ptr = ffi.cast("unsigned char*", self.cdata)
-                return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
+                local ptr = q_core.cast("unsigned char*", self.cdata)
+                return q_core.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
             else
                 error("Cannot return past chunk for non memoized function")
             end
         elseif num == self:last_chunk() then
             assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
              if num > self.file_last_chunk_number then flush_remap_file(self) end
-             local ptr = ffi.cast("unsigned char*", self.cdata)
-             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
+             local ptr = q_core.cast("unsigned char*", self.cdata)
+             return q_core.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.input_from_generator == true then
                 local status, buffer, size = get_from_generator(self, num)
@@ -383,14 +383,14 @@ end
 function Vector:eov()
     q_core.fflush(self.file)
     self.input_from_file = true
-    self.f_map = ffi.gc(q_core.f_mmap(self.filename, false), q_core.f_munmap)
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    -- self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    -- self.my_length = tonumber(self.f_map.ptr_ptr_file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
 end
 
