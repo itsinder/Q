@@ -10,10 +10,10 @@ unset LD_LIBRARY_PATH
 `lua | tail -1`
 var80="------------OUTPUT of lua build.lua gen.lua--------------------------------------"
 var81=$(lua build.lua gen.lua 2>&1)
-var82="------------OUTPUT of lua build.lua tests.lua------------------------------------"
-var83=$(lua build.lua tests.lua 2>&1)
-var84="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
-var85=$(lua mk_so.lua /tmp/ 2>&1)
+var82="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
+var83=$(lua mk_so.lua /tmp/ 2>&1)
+var84="------------OUTPUT of lua build.lua tests.lua------------------------------------"
+var85=$(lua build.lua tests.lua 2>&1)
 
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
 bash test_meta_data.sh
