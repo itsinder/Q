@@ -38,6 +38,7 @@ q_core.NULL = ffi.NULL
 q_core.string = ffi.string
 q_core.cee = cee
 q_core.copy = ffi.copy
+q_core.new = ffi.new
 q_core.malloc = function(n, free_func)
    assert(n > 0, "Cannot malloc 0 or less bytes")
    local c_mem = nil
