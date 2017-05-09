@@ -3,13 +3,13 @@ ffi.cdef([[
 void *memset(void *s, int c, size_t n);
 size_t strlen(const char *str);
 typedef struct {
-  char *fpos;
-  void *base;
-  unsigned short handle;
-  short flags;
-  short unget;
-  unsigned long alloc;
-  unsigned short buffincrement;
+   char *fpos;
+   void *base;
+   unsigned short handle;
+   short flags;
+   short unget;
+   unsigned long alloc;
+   unsigned short buffincrement;
 } FILE;
 void * malloc(size_t size);
 void free(void *ptr);
@@ -29,4 +29,39 @@ ffi.cdef(plfile.read(incfile))
 
 sofile = q_root .. "/lib/libq_core.so"
 assert(plpath.isfile(sofile))
-return ffi.load(sofile)
+local cee =  ffi.load(sofile)
+local q_core = {}
+q_core.gc = ffi.gc
+q_core.cast = ffi.cast
+q_core.sizeof = ffi.sizeof
+q_core.NULL = ffi.NULL
+q_core.malloc = function(n, free_func)
+   assert(n > 0, "Cannot malloc 0 or less bytes")
+   local c_mem = nil
+   if free_func == nil then
+      c_mem = assert(q_core.gc(ffi.C.malloc(n), ffi.C.free))
+   elseif type(free_func) == "function" then
+      c_mem = assert(q_core.gc(ffi.C.malloc(n), free_func))
+   else
+      error("Invalid free function specified")
+   end
+   return c_mem
+end
+
+local q_core_mt = {
+   __newindex = function(self, key, value)
+      print("newindex metamethod called")
+      print(key, value)
+      error("Assignment to q_core is not allowed")
+   end,
+   __index = function(self, key)
+      -- Called only when the string we want to use is an
+      -- entry in the table, so our variable names
+      if key == "NULL" then
+         return ffi.NULL
+      else
+         return cee[key]
+      end
+   end,
+}
+return setmetatable(q_core, q_core_mt)
