@@ -81,6 +81,16 @@ function xcopy(
   recursive_descent(pattern, root, dirs_to_exclude, files_to_exclude, destdir)
   end
 --============
+local function clean_defs(file) 
+   local res = {}
+   for line in io.lines(file) do
+      if not string.match(line, "%s*#") then
+         res[#res + 1] = line
+      end
+   end
+   return table.concat(res, "\n")
+end
+
 local root = rootdir 
 local dirs_to_exclude = dofile("exclude_dir.lua")
 local files_to_exclude = dofile("exclude_fil.lua")
@@ -100,9 +110,10 @@ os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, dirs_to_exclude, files_to_exclude, hdir)
 
+-- command = string.format("cat %s | grep -v '^#' > %s", hdir.."*.h", tgt_h)
 command = "cat " .. hdir .. "*.h | grep -v '^#' > " .. tgt_h
 local status = os.execute(command)
-status = os.execute(command)
+-- status = os.execute(command)
 print("Successfully created " .. tgt_h)
 print("Copied " .. tgt_h .. " to " .. final_h)
   --==========================
@@ -125,7 +136,7 @@ print("Successfully created " .. tgt_o)
 pldir.copyfile(tgt_o, final_so)
 
 --========== Create q_core.so 
-local q_core = dofile('core_c_files.lua')
+local q_core = dofile('core_c_files.lua')[1]
 plpath.mkdir(cdir .. "/q_core/")
 c_dst = cdir .. "/q_core/" 
 assert(plpath.isdir(c_dst))
@@ -146,57 +157,32 @@ pldir.copyfile(tgt_o, final_so)
 
 local extract_fn_proto = require 'extract_fn_proto'
 local T = {}
-local q_core = dofile('core_c_files.lua')
-for i, v in ipairs(q_core) do
+local q_core = dofile('core_c_files.lua') -- TODO not all c files have an h file . Ramesh please review
+local c_files, h_files = q_core[1], q_core[2]
+for i,v in ipairs(h_files) do
+   local f = hdir .. "/" .. v
+   if not plpath.isfile(f) then
+      f = hdir .. "/_" .. v
+   end
+   assert(plpath.isfile(f), "File not found " .. f)
+   T[#T + 1] = clean_defs(f)
+end
+
+for i, v in ipairs(c_files) do
   local x = string.gsub(v, "%.c", ".h") 
   local f = hdir .. "/" .. x
   local isfile = plpath.isfile(f)
   if ( not isfile ) then 
-    local f = hdir .. "/_" .. x
-    assert(plpath.isfile(f), "File not found " .. f)
+    f = hdir .. "/_" .. x
   end
-  local y = plfile.read(f)
+  assert(plpath.isfile(f), "File not found " .. f)
+  local y = clean_defs(f)
   T[#T+1] = y
 end
-
 local q_core_h = table.concat(T, "\n")
 
 local tgt_h = opdir .. "/q_core.h"
 plfile.write(tgt_h, q_core_h)
 
 pldir.copyfile(tgt_h, final_h)
--- TODO hack
-local res = {}
--- Adding mmap stuff manually
-for line in io.lines("/tmp/LUAH/mmap_struct.h") do
- if not string.match(line, "%s*#") then
-      res[#res + 1] = line
-   end
-end
-
--- Adding mmap stuff manually
-for line in io.lines("/tmp/LUAH/_f_mmap.h") do
- if not string.match(line, "%s*#") then
-      res[#res + 1] = line
-   end
-end
-
--- Adding mmap stuff manually
-for line in io.lines("/tmp/LUAH/_f_munmap.h") do
- if not string.match(line, "%s*#") then
-      res[#res + 1] = line
-   end
-end
-
-
-for line in io.lines(tgt_h) do
-   if not string.match(line, "%s*#") then
-      res[#res + 1] = line
-   end
-end
-
-local content = table.concat(res, "\n")
-local f = io.open(final_h .."/q_core.h" , "w")
-f:write(content)
-f:close()
 print("Copied " .. tgt_h .. " to " .. final_h)

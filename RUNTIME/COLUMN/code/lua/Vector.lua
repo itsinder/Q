@@ -34,7 +34,6 @@ g_chunk_size = g_chunk_size or self_chunk_size
 g_valid_meta = g_valid_meta or valid_meta
 
 local charset = {}
-local ffi = require 'ffi' -- TODO INDRAJEET CAn this be in q_core
 
 -- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
 for i = 48,  57 do table.insert(charset, string.char(i)) end
@@ -71,8 +70,7 @@ function is_int(n)
   return n == math.floor(n)
 end
 
-local q_core = require 'qcoret'
-local ffi_malloc = require 'ffi_malloc'
+local q_core = require 'q_core'
 
 local DestructorLookup = {}
 setmetatable(Vector, {
@@ -131,7 +129,7 @@ local function read_file_vector(self, arg)
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    self.my_length = tonumber(self.f_map.ptr_file_size) / self.field_size
+    self.my_length = tonumber(self.f_map.file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
     return self
 end
@@ -153,7 +151,7 @@ end
 function Vector.new(arg)
     local vec = setmetatable({}, Vector)
     vec.meta = {}
-    vec.destructor_ptr= q_core.gc(ffi_malloc(1), Vector.destructor) -- Destructor hack for luajit
+    vec.destructor_ptr= q_core.malloc(1, Vector.destructor) -- Destructor hack for luajit
     DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     vec.chunk_size = arg.chunk_size or g_chunk_size
@@ -181,7 +179,7 @@ function Vector.new(arg)
         end
     end
     local buff_size = vec.field_size * vec.chunk_size
-    vec.buffer = ffi_malloc(buff_size)
+    vec.buffer = q_core.malloc(buff_size)
     return vec
 end
 
@@ -390,7 +388,7 @@ function Vector:eov()
     --take length of file to be length of vector
     self.memoized = true
     self.is_materialized = true
-    -- self.my_length = tonumber(self.f_map.ptr_ptr_file_size) / self.field_size
+    -- self.my_length = tonumber(self.f_map.file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
 end
 
