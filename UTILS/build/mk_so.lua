@@ -92,6 +92,7 @@ local function clean_defs(file)
 end
 
 local function is_struct_file(file)
+  assert(plpath.isfile(file), "Could not find file " .. file)
     if string.match(plfile.read(file), "struct ") then
         return true
     else
