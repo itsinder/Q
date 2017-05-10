@@ -115,6 +115,7 @@ command = "cat " .. hdir .. "*.h | grep -v '^#' > " .. tgt_h
 local status = os.execute(command)
 -- status = os.execute(command)
 print("Successfully created " .. tgt_h)
+pldir.copyfile(tgt_h, final_h)
 print("Copied " .. tgt_h .. " to " .. final_h)
   --==========================
 local pattern = "*.tmpl"
