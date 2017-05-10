@@ -2,8 +2,7 @@ return function (
   args
   )
   local ffi = require 'ffi'
-  local tmp = require "ffi_core"
-  local q_core = tmp()
+  local q_core = require "q_core"
   local ffi_malloc = require "ffi_malloc"
 
   assert(type(args) == "table")
