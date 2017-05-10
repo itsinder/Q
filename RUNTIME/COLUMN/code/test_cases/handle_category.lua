@@ -83,36 +83,38 @@ local create_c_data = function (vector, input_values)
 end
 
 
-fns.handle_category2 = function (index, value, vector, input_values)
-  local size
-  local x_size = #input_values
-  if x_size%8 ==0 then 
-    size  = x_size/8
-  else
-    size = (x_size/8) + 1
-  end
-  size = math.floor(size)
-  local x = q_core.malloc(size)
-  x = q_core.cast("unsigned char* ", x)
-  q_core.memset(x, 0, size)
-
-  for k,v in ipairs(input_values) do
-    if v == 1 then
-      local index = (k-1) / 8
-      index = math.floor(index)
-      x[index] = x[index] + math.pow(2,k-1)
+fns.handle_category2 = function (index, value, vector, input_values, write_vector)
+  if write_vector then
+    local size
+    local x_size = #input_values
+    if x_size%8 ==0 then 
+      size  = x_size/8
+    else
+      size = (x_size/8) + 1
     end
-  end
+    size = math.floor(size)
+    local x = q_core.malloc(size)
+    x = q_core.cast("unsigned char* ", x)
+    q_core.memset(x, 0, size)
 
-  vector:put_chunk(x, x_size)
-  vector:eov()
-  
-  local field_type = vector.field_type
-  local field_size = g_qtypes[field_type].width
-  local file_size = file_size(value.filename)
-  if size ~= file_size then
-    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
-    return false
+    for k,v in ipairs(input_values) do
+      if v == 1 then
+        local index = (k-1) / 8
+        index = math.floor(index)
+        x[index] = x[index] + math.pow(2,k-1)
+      end
+    end
+
+    vector:put_chunk(x, x_size)
+    vector:eov()
+    
+    local field_type = vector.field_type
+    local field_size = g_qtypes[field_type].width
+    local file_size = file_size(value.filename)
+    if size ~= file_size then
+      fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
+      return false
+    end
   end
 
   for k,v in ipairs(input_values) do
@@ -126,24 +128,28 @@ fns.handle_category2 = function (index, value, vector, input_values)
   return true
 end
 
-fns.handle_category1 = function (index, v, vector, input_values)
+fns.handle_category1 = function (index, v, vector, input_values, write_vector)
+  local chunk, length
+  if write_vector then
+    chunk,length = create_c_data(vector, input_values)
+    assert( chunk~=nil, "chunk cannot be nil" )
   
-  local chunk,length = create_c_data(vector, input_values)
-  assert( chunk~=nil, "chunk cannot be nil" )
-  
-  vector:put_chunk(chunk, length)
-  vector:eov()
-  
-  -- file size of bin divided by field width should be equal to length
-  local field_type = vector.field_type
-  local field_size = g_qtypes[field_type].width
-  
-  local file_size = file_size(v.filename)
-  file_size = file_size / field_size
-  --print(file_size, length)
-  if length ~= file_size then
-    fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
-    return false
+    vector:put_chunk(chunk, length)
+    vector:eov()
+   
+    -- file size of bin divided by field width should be equal to length
+    local field_type = vector.field_type
+    local field_size = g_qtypes[field_type].width
+    
+    local file_size = file_size(v.filename)
+    file_size = file_size / field_size
+    --print(file_size, length)
+    if length ~= file_size then
+      fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
+      return false
+    end
+  else
+    length = #input_values
   end
   
   local is_SC = v.field_type == "SC"
