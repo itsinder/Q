@@ -3,7 +3,6 @@ return function (
   )
   local ffi = require 'ffi'
   local q_core = require "q_core"
-  local ffi_malloc = require "ffi_malloc"
 
   assert(type(args) == "table")
   local val   = assert(args.val)
@@ -16,7 +15,7 @@ return function (
   local conv_fn = "txt_to_" .. qtype
   local out_ctype = g_qtypes[qtype].ctype
   local width = g_qtypes[qtype].width
-  local c_mem = assert(ffi_malloc(width), "malloc failed")
+  local c_mem = assert(q_core.malloc(width), "malloc failed")
   ffi.fill(c_mem, width, 0)
   local conv_fn = q_core["txt_to_" .. qtype]
   local status = nil

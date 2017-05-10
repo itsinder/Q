@@ -206,7 +206,7 @@ local q_core_cmd = string.format("gcc %s %s -I %s -shared -o %s", FLAGS, q_core_
 q_core_cmd = "cd " .. cdir .. "; " .. q_core_cmd
 local status = os.execute(q_core_cmd)
 assert(status, "gcc failed")
-assert(plpath.isfile(tgt_o), "Target " .. q_core_o .. " not created")
+assert(plpath.isfile(q_core_o), "Target " .. q_core_o .. " not created")
 print("Successfully created " .. q_core_o)
 pldir.copyfile(q_core_o, final_so)
 print("Copied " .. q_core_o .. " to " .. final_so)
@@ -229,7 +229,7 @@ local q_cmd = string.format("gcc %s %s -I %s -shared -o %s", FLAGS, q_c, hdir, q
 q_cmd = "cd " .. cdir .. "; " .. q_cmd
 local status = os.execute(q_cmd)
 assert(status, "gcc failed")
-assert(plpath.isfile(tgt_o), "Target " .. q_o .. " not created")
+assert(plpath.isfile(q_o), "Target " .. q_o .. " not created")
 print("Successfully created " .. q_o)
 pldir.copyfile(q_o, final_so)
 print("Copied " .. q_o .. " to " .. final_so)
