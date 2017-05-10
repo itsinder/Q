@@ -26,7 +26,7 @@ fn = string.gsub(fn, ".c$", "")
 print(fn)
 if ( opdir ~= "" ) then 
   local basefile = string.gsub(infile, "^.*/", "") 
-  opfile = opdir .. "/" .. fn .. ".h"
+  opfile = opdir .. "/_" .. fn .. ".h"
   io.open(opfile, "w+")
   io.output(opfile)
 end
@@ -38,6 +38,7 @@ end
 
 io.write('extern ' .. z .. ';\n') 
 -- io.write("#endif\n")
+return true
 end
 
 --[[
