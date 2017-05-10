@@ -48,11 +48,11 @@ setmetatable(Column, {
 function Column.destructor(data)
    -- Works with Lua but not luajit so adding a little hack
    if type(data) == type(Column) then
-      C.free(data.destructor_ptr)
+      q_core.free(data.destructor_ptr)
    else
       -- local tmp_slf = DestructorLookup[data]
       DestructorLookup[data] = nil
-      C.free(data)
+      q_core.free(data)
    end
 end
 
