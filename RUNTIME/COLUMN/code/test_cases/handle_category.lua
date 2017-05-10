@@ -1,16 +1,8 @@
-local ffi = require 'ffi'
+local q_core = require 'q_core'
 local convert_c_to_txt = require 'C_to_txt'
 
-ffi.cdef [[
-  void *malloc(size_t size);
-  void free(void *ptr);
-  void *memset(void *str, int c, size_t n);
-  void *memcpy(void *dest, const void *src, size_t n);
-]]
-  
 local fns = { }
 local failed_testcases = { }
-
 local no_of_pass_testcases = 0
 local no_of_fail_testcases = 0 
 
@@ -75,14 +67,14 @@ local create_c_data = function (vector, input_values)
 
   local length = table.getn(input_values)
   local length_in_bytes = field_size * length
-  local chunk = ffi.gc(ffi.C.malloc(length_in_bytes),ffi.C.free)
-  chunk = ffi.cast(ctype.. " * ", chunk)
-  ffi.C.memset(chunk, 0, length_in_bytes)
+  local chunk = q_core.malloc(length_in_bytes)
+  chunk = q_core.cast(ctype.. " * ", chunk)
+  q_core.memset(chunk, 0, length_in_bytes)
   
   for k,v in ipairs(input_values) do
     if field_type == "SC" then
-      local v = ffi.cast(ctype.. " * ", v)
-      ffi.C.memcpy(chunk + (k-1)*field_size, v, field_size)
+      local v = q_core.cast(ctype.. " * ", v)
+      q_core.memcpy(chunk + (k-1)*field_size, v, field_size)
     else
       chunk[k-1] = v
     end
@@ -100,9 +92,9 @@ fns.handle_category2 = function (index, value, vector, input_values)
     size = (x_size/8) + 1
   end
   size = math.floor(size)
-  local x = ffi.gc(ffi.C.malloc(size),ffi.C.free)
-  x = ffi.cast("unsigned char* ", x)
-  ffi.C.memset(x, 0, size)
+  local x = q_core.malloc(size)
+  x = q_core.cast("unsigned char* ", x)
+  q_core.memset(x, 0, size)
 
   for k,v in ipairs(input_values) do
     if v == 1 then
