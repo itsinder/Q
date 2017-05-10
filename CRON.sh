@@ -8,11 +8,11 @@ cd $Q_SRC_ROOT/UTILS/build
 export LUA_INIT="@$Q_SRC_ROOT/init.lua"
 unset LD_LIBRARY_PATH
 `lua | tail -1`
-var80="------------OUTPUT of lua build.lua gen.lua--------------------------------------"
+var80="------------OUTPUT of build scripts--------------------------------------"
 var81=$(lua build.lua gen.lua 2>&1)
-var82="------------OUTPUT of lua mk_so.lua /tmp/----------------------------------------"
+var82="------------OUTPUT of library scripts----------------------------------------"
 var83=$(lua mk_so.lua /tmp/ 2>&1)
-var84="------------OUTPUT of lua build.lua tests.lua------------------------------------"
+var84="------------OUTPUT of test scripts------------------------------------"
 var85=$(lua build.lua tests.lua 2>&1)
 
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/

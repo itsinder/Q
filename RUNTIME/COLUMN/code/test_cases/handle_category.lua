@@ -67,7 +67,7 @@ local create_c_data = function (vector, input_values)
 
   local length = table.getn(input_values)
   local length_in_bytes = field_size * length
-  local chunk = q_core.gc(q_core.malloc(length_in_bytes),q_core.free)
+  local chunk = q_core.malloc(length_in_bytes)
   chunk = q_core.cast(ctype.. " * ", chunk)
   q_core.memset(chunk, 0, length_in_bytes)
   
@@ -92,7 +92,7 @@ fns.handle_category2 = function (index, value, vector, input_values)
     size = (x_size/8) + 1
   end
   size = math.floor(size)
-  local x = q_core.gc(q_core.malloc(size),q_core.free)
+  local x = q_core.malloc(size)
   x = q_core.cast("unsigned char* ", x)
   q_core.memset(x, 0, size)
 

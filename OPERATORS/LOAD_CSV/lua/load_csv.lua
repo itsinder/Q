@@ -49,12 +49,12 @@ local function mk_out_buf(
     local status = 0
     local casted = q_core.cast(ctype .. " *", out_buf)
     --=====================================
-    if m.qtype == "I1" then status = q_core.cee[converter](in_buf, 10, casted) end
-    if m.qtype == "I2" then status = q_core.cee[converter](in_buf, 10, casted) end
-    if m.qtype == "I4" then status = q_core.cee[converter](in_buf, 10, casted) end
-    if m.qtype == "I8" then status = q_core.cee[converter](in_buf, 10, casted) end
-    if m.qtype == "F4" then status = q_core.cee[converter](in_buf, casted) end
-    if m.qtype == "F8" then status = q_core.cee[converter](in_buf, casted) end
+    if m.qtype == "I1" then status = q_core[converter](in_buf, 10, casted) end
+    if m.qtype == "I2" then status = q_core[converter](in_buf, 10, casted) end
+    if m.qtype == "I4" then status = q_core[converter](in_buf, 10, casted) end
+    if m.qtype == "I8" then status = q_core[converter](in_buf, 10, casted) end
+    if m.qtype == "F4" then status = q_core[converter](in_buf, casted) end
+    if m.qtype == "F8" then status = q_core[converter](in_buf, casted) end
     --=====================================
     if m.qtype == "B1" then  -- IMPROVE THIS CODE 
       local casted = q_core.cast("uint8_t *", out_buf)
