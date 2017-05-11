@@ -84,8 +84,6 @@ end
 require 'globals'
 require 'terra_globals'
 require 'error_code'
-require 'permute' 
-require 'pl.path'
 
 print ("Function under test: " .. arg[1])
 print ("Test suite: " .. arg[2])
