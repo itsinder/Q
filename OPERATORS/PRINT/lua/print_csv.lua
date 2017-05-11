@@ -1,7 +1,6 @@
 require 'globals'
 local g_err = require 'error_code'
-local ffi_malloc = require 'ffi_malloc'
-local ffi = require "ffi"
+local q_core = require 'q_core'
 local plstring = require 'pl.stringx'
 
 local function strip_trailing_LL(temp)
@@ -24,7 +23,7 @@ local function chk_cols(column_list)
     assert( ((type(column_list[i]) == "Column") or 
              (type(column_list[i]) == "number")),
       g_err.INPUT_NOT_COLUMN_NUMBER)
-      
+    
     is_col[i] = type(column_list[i]) == "Column" 
     if is_col[i] then
       assert(g_valid_types[column_list[i]:fldtype()], 
@@ -47,8 +46,8 @@ local function chk_cols(column_list)
             -- if field type is I8 , then remove LL appended at end
     end
     assert(max_length > 0, "Nothing to print")
-    return is_SC, is_SV, is_I8, is_col, max_length
   end
+  return is_SC, is_SV, is_I8, is_col, max_length
 end
 
 function process_filter(filter, max_length)
@@ -104,7 +103,7 @@ return function (column_list, filter, opfile)
   local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
-  local buf = ffi_malloc(1024) 
+  local buf = q_core.malloc(1024) 
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
@@ -115,34 +114,37 @@ return function (column_list, filter, opfile)
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
       io.output(fp)
-      destination = "file"
+    else
+      io.output(io.stdout)
     end
+    
   end
   
   lb = lb + 1 -- for Lua style indexing
   -- recall that upper bounds are inclusive in Lua
   for rowidx = lb, ub do
     if ( ( where == nil ) or 
-         ( where:get_element(rowidx -1 ) ~= ffi.NULL ) ) then
-      for colidx = 1, num_cols do
+         ( where:get_element(rowidx -1 ) ~= q_core.NULL ) ) then
+      for col_idx = 1, num_cols do
+        
         local temp = nil
-        local col = column_list[colidx]
+        local col = column_list[col_idx]
         -- if input is scalar, assign scalar value
-        if not is_col[colidx] then 
+        if not is_col[col_idx] then 
           temp = col 
         else
           local cbuf = col:get_element(rowidx-1)          
-          if cbuf == ffi.NULL then
+          if cbuf == q_core.NULL then
             temp = ""
           else
             local ctype =  assert(g_qtypes[col:fldtype()]["ctype"])
-            local str = ffi.cast(ctype.." *",cbuf)
+            local str = q_core.cast(ctype.." *",cbuf)
             temp = tostring(str[0])
             if is_I8[col_idx] then
               temp = strip_trailing_LL(temp)
             end
             if is_SC[col_idx] then
-              temp = ffi.string(str)
+              temp = q_core.string(str)
             end
             if is_SV[col_idx] then 
                temp = str[0]
@@ -153,14 +155,14 @@ return function (column_list, filter, opfile)
         end
         if tbl_rslt then 
           table.insert(tbl_rslt, temp) 
-          if ( colidx ~= num_cols ) then 
+          if ( col_idx ~= num_cols ) then 
             table.insert(tbl_rslt, ",") 
           else
             table.insert(tbl_rslt,"\n") 
           end
         else
           assert(io.write(temp), "Write failed")
-          if ( colidx ~= num_cols ) then 
+          if ( col_idx ~= num_cols ) then 
             assert(io.write(","), "Write failed")
           else
             assert(io.write("\n"), "Write failed") 

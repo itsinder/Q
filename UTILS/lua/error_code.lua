@@ -70,4 +70,7 @@ g_err.INVALID_FILE_PATH = "standard file is closed"
 g_err.INVALID_UPPER_BOUND_TYPE = "type of upper is not a number"
 g_err.INVALID_LOWER_BOUND_TYPE = "type of lower is not a number"
 
+-- ffi error
+g_err.FFI_NEW_ERROR = "ffi new api failed"
+
 return g_err

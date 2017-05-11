@@ -1,43 +1,13 @@
 require 'globals'
 local g_err = require 'error_code'
 local validate_meta = require "validate_meta"
-local extract_fn_proto = require 'extract_fn_proto'
-
 local Dictionary = require 'dictionary_dataload'
 local plstring = require 'pl.stringx'
 local Column = require 'Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-local fn_malloc = require 'ffi_malloc'
-local ffi = require "ffi"
-ffi.cdef([[
-  void *memset(void * str, int c, size_t n);
-]])
-local rootdir = os.getenv("Q_SRC_ROOT")
-local get_cell = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/get_cell.c"))
-local txt_to_SC = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/src/txt_to_SC.c"))
-local txt_to_I1 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I1.c"))
-local txt_to_I2 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I2.c"))
-local txt_to_I4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I4.c"))
-local txt_to_I8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_I8.c"))
-local txt_to_F4 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F4.c"))
-local txt_to_F8 = assert(extract_fn_proto(rootdir.."/OPERATORS/DATA_LOAD/gen_src/_txt_to_F8.c"))
-local f_mmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_mmap.c"))
-local f_munmap = assert(extract_fn_proto(rootdir.."/UTILS/src/f_munmap.c"))
-
-ffi.cdef(get_cell)
-ffi.cdef(txt_to_SC)
-ffi.cdef(txt_to_I1)
-ffi.cdef(txt_to_I2)
-ffi.cdef(txt_to_I4)
-ffi.cdef(txt_to_I8)
-ffi.cdef(txt_to_F4)
-ffi.cdef(txt_to_F8)
-ffi.cdef(f_mmap)
-ffi.cdef(f_munmap)
-
-local c = ffi.load("load_csv.so")
+local q_core = require 'q_core'
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format
@@ -102,10 +72,10 @@ return function (
   end
    
    -- mmap function here
-   f_map = ffi.gc( c.f_mmap(csv_file_path, false), c.f_munmap)
+   local f_map = q_core.gc(q_core.f_mmap(csv_file_path, false), q_core.f_munmap)
    assert(f_map.status == 0 , "Mmap failed")
-   local X = ffi.cast("char *", f_map.ptr_mmapped_file)
-   local nX = tonumber(f_map.ptr_file_size)
+   local X = q_core.cast("char *", f_map.ptr_mmapped_file)
+   local nX = tonumber(f_map.file_size)
    assert(nX > 0, "File cannot be empty")
    
    local x_idx = 0
@@ -123,9 +93,9 @@ return function (
    l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
-   local buf = fn_malloc(buf_sz)
-   local cbuf = fn_malloc(cbuf_sz)
-   local is_null = fn_malloc(1)
+   local buf = q_core.malloc(buf_sz)
+   local cbuf = q_core.malloc(cbuf_sz)
+   local is_null = q_core.malloc(1)
    local ncols = #M
    local row_idx = 0
    local col_idx = 0
@@ -137,33 +107,32 @@ return function (
       else
          is_last_col = false;
       end
-      x_idx = tonumber( c.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
+      x_idx = tonumber( q_core.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
       assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
-      -- print(row_idx, col_idx, ffi.string(buf))
       
       -- check if the column needs to be skipped while loading or not 
       if column_list[col_idx  + 1 ] then 
-        ffi.fill(is_null, 1, 255) -- initially will be false = 1
+        q_core.fill(is_null, 1, 255) -- initially will be false = 1
   
         if M[col_idx + 1].qtype == "SV" then 
-          if plstring.strip(ffi.string(buf)) ~= "" then 
-            local ret_number = dict_table[col_idx + 1].dict:add_with_condition(ffi.string(buf), dict_table[col_idx + 1].add_new_value)  
-            ffi.copy(buf, tostring(ret_number))
+          if plstring.strip(q_core.string(buf)) ~= "" then 
+            local ret_number = dict_table[col_idx + 1].dict:add_with_condition(q_core.string(buf),
+              dict_table[col_idx + 1].add_new_value)  
+            q_core.copy(buf, tostring(ret_number))
           end   
         elseif M[col_idx + 1].qtype == "SC" then 
-          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].width -1, g_err.STRING_GREATER_THAN_SIZE )  
+          assert( string.len(q_core.string(buf)) <= M[col_idx + 1].width -1, g_err.STRING_GREATER_THAN_SIZE )  
         end
              
-        ffi.C.memset(cbuf, 0, size_of_data_list[col_idx + 1])
-        --print(ffi.string(buf))
-        local str = plstring.strip(ffi.string(buf))
-        --if ffi.string(buf) == "" then 
+        q_core.memset(cbuf, 0, size_of_data_list[col_idx + 1])
+        local str = plstring.strip(q_core.string(buf))
+        --if q_core.string(buf) == "" then 
         if str == "" then 
           -- nil values
           assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD )
           M[col_idx + 1].num_nulls = M[col_idx + 1].num_nulls + 1
-          ffi.fill(is_null, 1,0)
+          q_core.fill(is_null, 1,0)
           if col_num_nil[col_idx + 1] == nil then 
             col_num_nil[col_idx + 1] =  1 
           else 
@@ -175,13 +144,13 @@ return function (
           local function_name = g_qtypes[qtype]["txt_to_ctype"]
           -- for fixed size string pass the size of string data also
           if qtype == "SC" then
-            ffi.copy(cbuf, buf, string.len(ffi.string(buf))) 
+            q_core.copy(cbuf, buf, string.len(q_core.string(buf))) 
             status = 0 
           elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
-            status = c[function_name](buf, 10, cbuf)
+            status = q_core[function_name](buf, 10, cbuf)
           elseif qtype == "F4" or qtype == "F8"  then 
-            status = c[function_name](buf, cbuf)
+            status = q_core[function_name](buf, cbuf)
           else 
             error("Data type : " .. qtype .. " Not supported ")
           end
