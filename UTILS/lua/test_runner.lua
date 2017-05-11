@@ -27,54 +27,6 @@ Expected to be run as a command line program; takes below arguments
 This test_runner program runs all tests, and logs all failed test-cases with their number (index in tests array)
 --]]
 
-local call_if_exists = function (f)
-  if type(f) == 'function' then
-    f()
-  end
-end
-
-local suite_runner = function (suite, fn, tests_to_run)
-  local status, res
-  local failures = ""
-  if tests_to_run == nil then
-    tests_to_run = {}
-    for i=1,#suite.tests do 
-      table.insert(tests_to_run, i)
-    end
-  end
-  
-  local function myassert(cond, i, msg) 
-    if not cond then 
-      failures = failures .. i
-      if msg then failures = failures .. "[" .. msg .. "],\n" end
-    end
-  end
-  
-  local test
-  call_if_exists(suite.setup)
-  
-  for k,test_num in pairs(tests_to_run) do
-    print ("running test " .. test_num)
-    test = suite.tests[test_num]
-    call_if_exists(test.setup)
-    status, res = pcall(fn, unpack(test.input))
-
-    if test.fail then
-      myassert (status == false, test_num)
-      myassert (string.match(res, test.fail), test_num)
-    else
-      if status then
-        myassert (test.check(res), test_num)
-      else      
-        myassert (status, test_num, res)
-      end
-    end
-    call_if_exists(test.teardown)
-  end
-  call_if_exists(suite.teardown)
-  return failures
-end
-
 --print ("LUA PATH " .. package.path)
 --print ("TERRA PATH" .. package.terrapath)
 
@@ -86,6 +38,7 @@ local pretty = require 'pl.pretty'
 print ("Function under test: " .. arg[1])
 print ("Test suite: " .. arg[2])
 
+local suite_runner = require 'suite_runner'
 local fn = require (arg[1])
 local suite = require (arg[2])
 local tests_to_run = arg[3]
