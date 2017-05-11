@@ -1,16 +1,26 @@
 --[[
 Expected to be run as a command line program; takes two arguments
 "funcUnderTest" and "testSuite".
-Convention assumption: "funcUnderTest".lua is a module that returns the function to be tested. This is in accordance with the convention we're following for Q modules.
 
-"testSuite": When this is "require"d it should return an array of "test"s, where
+"funcUnderTest": is a module that returns the function to be tested. This is in accordance with the convention we're following for Q modules.
+
+"testSuite": When this is "require"d it should return a "suite" as defined below
 "test" is as defined below.
+--------
+"suite": is a table with below structure
+{
+  "tests": {... array of "test" objects, see "test" definition below}
+  "setup": <OPTIONAL; function to be called before the tests are executed>
+  "teardown": <OPTIONAL; function to be called after the tests are executed>
+}
 
 "test": A test is table with below structure
 {
   "input": {...array of parameters to test function ...}
   "fail": "<expected substring of error message in case of a failure test-case>"
   "check": <callback function that is called with the output of invoking test-function>
+  "setup": <OPTIONAL; function to be called before this test is executed>
+  "teardown": <OPTIONAL; function to be called after this test is executed>
 }
 "fail" and "check" are mutually exclusive, exactly one of them should be present in a test.
 
