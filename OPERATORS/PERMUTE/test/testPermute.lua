@@ -1,6 +1,6 @@
 --- BEGIN SETUP
 --print(package.path)
-package.path = package.path .. ';/home/srinath/Ramesh/Q/Q2/code/lua/?.lua;/home/srinath/Ramesh/Q/UTILS/lua/?.lua;/home/srinath/Ramesh/Q/OPERATORS/MK_COL/lua/?.lua'
+package.path = package.path .. ';/home/srinath/Ramesh/Q/RUNTIME/COLUMN/code/lua/?.lua;/home/srinath/Ramesh/Q/UTILS/lua/?.lua;/home/srinath/Ramesh/Q/OPERATORS/MK_COL/lua/?.lua'
 
 -- for test data
 package.path = package.path .. ';/home/srinath/Ramesh/Q/OPERATORS/PERMUTE/test/?.lua'
@@ -12,6 +12,7 @@ require 'globals'
 require 'terra_globals'
 require 'error_code'
 require 'permute' 
+require 'pl.path'
 
 local suite = require 'testdata_permute'
 local testrunner = require 'test_runner'
