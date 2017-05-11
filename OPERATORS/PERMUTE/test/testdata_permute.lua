@@ -1,6 +1,6 @@
 --local val_qtypes = {"I1", "I2", "I4", "I8", "F4", "F8"}
 --local idx_qtypes = {"I1", "I2", "I4", "I8"}
-require 'mk_col'
+local mk_col = require 'mk_col'
 local utils = require 'test_utils'
 
 -- mk_col faltering for I2/I8 ??!!
