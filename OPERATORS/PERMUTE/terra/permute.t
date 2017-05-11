@@ -28,7 +28,7 @@ function create_col_with_meta(c)
     -- TODO NULLS, nn_vector
 end
 
-function permute(val_col, idx_col, idx_in_src)
+return function(val_col, idx_col, idx_in_src)
   assert(type(idx_col) == "Column", g_err.INPUT_NOT_COLUMN) 
   assert(type(val_col) == "Column", g_err.INPUT_NOT_COLUMN) 
   assert(idx_col:has_nulls(), "Index column cannot have nulls")
