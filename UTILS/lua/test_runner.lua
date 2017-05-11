@@ -1,11 +1,8 @@
 --[[
-Expected to be run as a command line program; takes two arguments
-"funcUnderTest" and "testSuite".
-
-"funcUnderTest": is a module that returns the function to be tested. This is in accordance with the convention we're following for Q modules.
-
-"testSuite": When this is "require"d it should return a "suite" as defined below
-"test" is as defined below.
+Expected to be run as a command line program; takes below arguments
+    "funcUnderTest": Mandatory; is a module that returns the function to be tested. This is in accordance with the convention we're following for Q modules.
+    "testSuite": Mandatory; this parameter, when "require"d, should return a "suite" as defined below
+    "testsToRun": Optional; string representation of lua table-array e.g. {1,3} indicating which specific tests should be run from the suite. Note: if running from shell script, escape the braces e.g. \{1,3\}
 --------
 "suite": is a table with below structure
 {
@@ -84,14 +81,20 @@ end
 require 'globals'
 require 'terra_globals'
 require 'error_code'
+local pretty = require 'pl.pretty'
 
 print ("Function under test: " .. arg[1])
 print ("Test suite: " .. arg[2])
 
 local fn = require (arg[1])
 local suite = require (arg[2])
+local tests_to_run = arg[3]
 
-local failures = suite_runner(suite, fn)
+if tests_to_run ~= nil then
+  tests_to_run = assert(pretty.read(tests_to_run))
+end
+
+local failures = suite_runner(suite, fn, tests_to_run)
 if (#failures > 0) then
   print ("Failed tests: " .. tostring(failures))
 else
