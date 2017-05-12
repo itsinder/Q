@@ -1,5 +1,5 @@
-/* To build: 
- * gcc -std=gnu99 driver.c positive_solver.c -Wall -O4 -pedantic -o driver 
+/* To build:
+ * gcc -std=gnu99 driver.c positive_solver.c -Wall -O4 -pedantic -o driver
  * To execute:
  * ./driver <n> # for some positive integer n
  * */
@@ -7,10 +7,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <time.h>
 #include "macros.h"
 #include "aux_driver.h"
+#include "matrix_helpers.h"
 #include "positive_solver.h"
-int 
+int
 main(
     int argc,
     char **argv
@@ -18,108 +20,135 @@ main(
 {
   int status = 0;
   double **A = NULL;
-  double **AT = NULL; // A transpose
   double **AAT = NULL; // A times A transpose
-  double **Aprime = NULL;
+  double **AATcopy = NULL;
   double *x_expected = NULL;
-  double *x = NULL; 
+  double *x_slow = NULL;
+  double *x_fast = NULL;
   double *b = NULL;
-  double *bprime = NULL;
-  double *b_solver = NULL; // since solver messes up original b
+  double *bcopy = NULL;
+  double *b_slow = NULL;
+  double *b_fast = NULL;
   int n = 0;
   srand48(RDTSC());
   fprintf(stderr, "Usage is ./driver <n> \n");
-  switch ( argc ) { 
+  switch ( argc ) {
     case 2 : n = atoi(argv[1]); break;
     default : go_BYE(-1); break;
   }
-  status = alloc_matrix(&A, n); cBYE(status);
-  status = alloc_matrix(&AT, n); cBYE(status);
-  status = alloc_matrix(&AAT, n); cBYE(status);
+  status = alloc_symm_matrix(&A, n); cBYE(status);
+  status = alloc_symm_matrix(&AAT, n); cBYE(status);
+  status = alloc_symm_matrix(&AATcopy, n); cBYE(status);
 
-  /* Note that A is symmetric. We define top half */
   for ( int i = 0; i < n; i++ )  {
-    for ( int j = i; j < n; j++ ) {
-      A[i][j] = llabs(lrand48() % 4) + 1;
+    for ( int j = 0; j < n - i; j++ ) {
+      A[i][j] = (drand48() - 0.5) * 100;
     }
   }
-  /* Now we copy top right half to bottom left half */
-  for ( int i = 0; i < n; i++ )  {
-    for ( int j = 0; j < i; j++ ) {
-      A[i][j] = A[j][i];
-    }
-  }
-  transpose(A, AT, n);
-  multiply(A, AT, AAT, n);
-  b_solver = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b_solver);
-  bprime = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(bprime);
+  square_symm_matrix(A, AAT, n);
   b = (double *) malloc(n * sizeof(double));
   return_if_malloc_failed(b);
+  bcopy = (double *) malloc(n * sizeof(double));
+  return_if_malloc_failed(bcopy);
+  b_slow = (double *) malloc(n * sizeof(double));
+  return_if_malloc_failed(b_slow);
+  b_fast = (double *) malloc(n * sizeof(double));
+  return_if_malloc_failed(b_fast);
   x_expected = (double *) malloc(n * sizeof(double));
   return_if_malloc_failed(x_expected);
+  x_slow = (double *) malloc(n * sizeof(double));
+  return_if_malloc_failed(x_slow);
+  x_fast = (double *) malloc(n * sizeof(double));
+  return_if_malloc_failed(x_fast);
   // Initialize x
   for ( int i = 0; i < n; i++ )  {
     x_expected[i] = (lrand48() % 16) - 16/2;
   }
-  multiply_matrix_vector(AAT, x_expected, n, b);
-  status = convert_matrix_for_solver(AAT, n, &Aprime);
-  //-- Solver modifies b in place. hence we make a copy
-  for ( int i = 0; i < n; i++ ) { 
-    b_solver[i] = b[i];
-  }
-  print_input(AAT, Aprime, x_expected, b_solver, n);
-  x = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(x);
-  status = positive_solver(Aprime, x, b_solver, n);
-  cBYE(status);
+  multiply_symm_matrix_vector(AAT, x_expected, n, b);
 
-  fprintf(stderr, "x from solver is [ ");
+  // make copies manually so we can compare performance of fast and slow versions
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n - i; j++) {
+      AATcopy[i][j] = AAT[i][j];
+    }
+    bcopy[i] = b[i];
+  }
+
+  print_input(AAT, x_expected, b, n);
+  clock_t begin_slow = clock();
+  status = positive_solver(AAT, x_slow, b, n);
+  cBYE(status);
+  clock_t end_slow = clock();
+  double time_spent_slow = (double)(end_slow - begin_slow) / CLOCKS_PER_SEC;
+
+  clock_t begin_fast = clock();
+  status = positive_solver_fast(AATcopy, x_fast, bcopy, n);
+  cBYE(status);
+  clock_t end_fast = clock();
+  double time_spent_fast = (double)(end_fast - begin_fast) / CLOCKS_PER_SEC;
+
+
+  fprintf(stderr, "x from slow solver is [ ");
   for (int i=0; i < n; i++) {
-    fprintf(stderr, " %lf ", x[i]);
+    fprintf(stderr, " %lf ", x_slow[i]);
+  }
+  fprintf(stderr, "].\nx from fast solver is [ ");
+  for (int i=0; i < n; i++) {
+    fprintf(stderr, " %lf ", x_fast[i]);
   }
   fprintf(stderr, "].\nChecking commences \n");
-  // Compute bprime
-  multiply_matrix_vector(AAT, x, n, bprime);
-  bool error = false;
-  fprintf(stderr, "x(good) x(computed) b(good), b(solver) \n");
+  // Compute new bs
+  multiply_symm_matrix_vector(AAT, x_slow, n, b_slow);
+  multiply_symm_matrix_vector(AAT, x_fast, n, b_fast);
+  bool slow_error = false;
+  bool fast_error = false;
+  fprintf(stderr, "x(good) x(slow) x(fast), b(good) b(slow) b(fast) \n");
   for (int i=0; i < n; i++) {
-    fprintf(stderr, " %lf %lf %lf %lf ", 
-        x_expected[i], x[i], b[i], bprime[i]);
-    if ( abs(bprime[i] - b[i]) < 0.001 ) { 
-      fprintf(stderr, " MATCH \n");
+    fprintf(stderr, " %lf %lf %lf, %lf %lf %lf ",
+            x_expected[i], x_slow[i], x_fast[i], b[i], b_slow[i], b_fast[i]);
+    if ( abs(b_slow[i] - b[i]) < 0.001 ) {
+      fprintf(stderr, " SLOW_MATCH, ");
     }
     else {
-      error = true; 
-      fprintf(stderr, " ERROR \n");
+      slow_error = true;
+      fprintf(stderr, " SLOW_ERROR, ");
+    }
+    if ( abs(b_fast[i] - b[i]) < 0.001 ) {
+      fprintf(stderr, "FAST_MATCH\n");
+    }
+    else {
+      fast_error = true;
+      fprintf(stderr, "FAST_ERROR\n ");
     }
   }
-  if ( error ) {
-    fprintf(stderr, "FAILURE\n");
+  if ( slow_error ) {
+    fprintf(stderr, "SLOW_FAILURE, ");
   }
   else {
-    fprintf(stderr, "SUCCESS\n");
+    fprintf(stderr, "SLOW_SUCCESS, ");
   }
+  if ( fast_error ) {
+    fprintf(stderr, "FAST_FAILURE\n");
+  }
+  else {
+    fprintf(stderr, "FAST_SUCCESS\n");
+  }
+  fprintf(stderr, "slow solver took %0.4fs, fast solver took %0.4fs\n", time_spent_slow, time_spent_fast);
 BYE:
   free_matrix(A, n);
-  free_matrix(AT, n);
   free_matrix(AAT, n);
-  if ( Aprime != NULL ) { 
-    for ( int i = 0; i < n; i++ ) { 
-      free_if_non_null(Aprime[i]);
-    }
-  }
-  free_if_non_null(Aprime);
-  free_if_non_null(x);
+  free_matrix(AATcopy, n);
+  free_if_non_null(x_slow);
+  free_if_non_null(x_fast);
   free_if_non_null(x_expected);
   free_if_non_null(b);
-  free_if_non_null(bprime);
-  free_if_non_null(b_solver);
+  free_if_non_null(bcopy);
+  free_if_non_null(b_slow);
+  free_if_non_null(b_fast);
   return status;
 }
 /*
-My initial checking failed. 
+My initial checking failed.
 
 Andrew: Ok, the problem is that if A isn’t positive, there are
 multiple solutions. Rather than checking that x is what you expect,

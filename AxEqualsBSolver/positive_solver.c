@@ -1,21 +1,33 @@
-/* 
+/*
  * Andrew Winkler
 It has the virtue of dramatic simplicity - there's no need to explicitly construct the cholesky decomposition, no need to do the explicit backsubstitutions.
 Yet it's essentially equivalent to that more labored approach, so its performance/stability/memory, etc. should be at least as good.
 
 */
+
+/* expects the upper (equivalently lower) triangular elements of a symmetric, positive semidefinite matrix A,
+   so if the matrix is
+   [ 1, 2, 3 ]
+   [ 2, 4, 5 ]
+   [ 3, 5, 6 ]
+   A should be
+   A[0] = [ 1, 2, 3 ]
+   A[1] = [    4, 5 ]
+   A[2] = [       6 ]
+ */
 #include <stdlib.h>
 #include <stdio.h>
-#define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__);  }
-#define go_BYE(x) { WHEREAMI; status = x ; goto BYE; }
-#define cBYE(x) { if ( (x) < 0 ) { go_BYE((x)) } }
+#include <inttypes.h>
+#include <malloc.h>
+#include "matrix_helpers.h"
 #include "positive_solver.h"
-static int _positive_solver(
-    double ** A, 
-    double * b, 
-    double * x, 
+#include "macros.h"
+static int _positive_solver_rec(
+    double ** A,
+    double * x,
+    double * b,
     int n
-    ) 
+    )
 {
   int status = 0;
   /// printf("The alpha is %f\n", A[0][0]);
@@ -45,7 +57,7 @@ static int _positive_solver(
     }
   } /* else check that Avec is 0 */
 
-  status = _positive_solver(Asub, bvec, xvec, m);
+  status = _positive_solver_rec(Asub, xvec, bvec, m);
   cBYE(status);
   if ( status < 0 ) { return status; }
 
@@ -55,7 +67,7 @@ static int _positive_solver(
       return status;
   }
 
-  double p = 0; 
+  double p = 0;
   for ( int k = 0; k < m; k++ ) {
     p += Avec[k] * xvec[k];
   }
@@ -66,16 +78,47 @@ BYE:
   return status;
 }
 
-#include <malloc.h>
-int positive_solver(
-    double ** A, 
-    double *x,
-    double * b, 
+/* destructively updates its input.
+ */
+int positive_solver_fast(
+    double ** A,
+    double * x,
+    double * b,
     int n
-    ) 
+    )
+{
+  return _positive_solver_rec(A, x, b, n);
+}
+
+/* preserves its input.
+ */
+int positive_solver(
+    double ** A,
+    double * x,
+    double * b,
+    int n
+    )
 {
   int status = 0;
-  status = _positive_solver(A, b, x, n); cBYE(status);
+  // create a copy of A and b
+  double ** Acopy = NULL;
+  double * bcopy = NULL;
+
+  status = alloc_symm_matrix(&Acopy, n); cBYE(status);
+  bcopy = malloc(n * sizeof(double));
+  return_if_malloc_failed(bcopy);
+
+  for ( int i = 0; i < n; i++ ) {
+    for ( int j = 0; j < n-i; j++ ) {
+      Acopy[i][j] = A[i][j];
+    }
+    bcopy[i] = b[i];
+  }
+
+  status = _positive_solver_rec(Acopy, x, bcopy, n);
+
 BYE:
+  free_matrix(Acopy, n);
+  free_if_non_null(bcopy);
   return status;
 }
