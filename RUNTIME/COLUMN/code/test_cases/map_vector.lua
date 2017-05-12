@@ -1,3 +1,22 @@
+--[[ Guideline for adding new testcases in this file
+File : map_vector.lua
+In this file, all the testcases are written in the format
+name = name of testcase
+field_type = qtype of Vector 
+filename = binary file of Vector
+chunk_size = number of elements in a chunk
+write_vector - true, if write mode , else false in read mode
+input_values = data to be written to binary file
+input_argument = argument to constructor of Vector. If present, will override the above arugments.
+
+They are added as a row in the below LUA table.
+category1 - successful testcase except B1 data types. Has both write and read mode cases
+category2 - successful testcases on B1 data types. Has both write and read mode cases
+category3 - error code testcases
+For all the error codes , refer to UTILS/lua/error_codes.lua
+In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
+--]]
+
 return {
   
   -- checks the name of the binary file created by calling eov function in vector class
