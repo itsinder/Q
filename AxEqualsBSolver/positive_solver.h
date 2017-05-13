@@ -1,14 +1,20 @@
-extern int positive_solver(
+extern int semi_def_positive_solver(
     double ** A,
     double * x,
     double * b,
     int n
     );
 
-// destructively updates A and b
-extern int positive_solver_fast(
-    double ** A, 
-    double * x, 
-    double * b, 
+extern int semi_def_positive_solver_fast(
+    double ** A,
+    double * x,
+    double * b,
+    int n
+    );
+
+extern int positive_solver(
+    double ** A,
+    double * x,
+    double * b,
     int n
     );
