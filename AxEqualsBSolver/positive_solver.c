@@ -143,7 +143,6 @@ int positive_solver(
   Atb = malloc(n * sizeof(double));
   return_if_malloc_failed(Atb);
 
-
   transpose_and_multiply(A, AtA, n);
   transpose_and_multiply_matrix_vector(A, b, n, Atb);
   status = semi_def_positive_solver_fast(AtA, x, Atb, n); cBYE(status);

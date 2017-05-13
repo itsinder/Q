@@ -5,7 +5,8 @@
 #include "macros.h"
 #include "matrix_helpers.h"
 
-/* some utilities */
+/* some utilities.
+   NOTE: matrices are assumed to be stored as columns. */
 extern void
 free_matrix(
       double **A,
@@ -98,7 +99,7 @@ multiply_matrix_vector(
   for ( int i = 0; i < n; i++ ) {
     double sum = 0;
     for ( int j = 0; j < n; j++ ) {
-      sum += A[i][j] * x[j];
+      sum += A[j][i] * x[j];
     }
     b[i] = sum;
   }
@@ -115,8 +116,7 @@ transpose_and_multiply_matrix_vector(
   for ( int i = 0; i < n; i++ ) {
     double sum = 0;
     for ( int j = 0; j < n; j++ ) {
-      // swap index
-      sum += A[j][i] * x[j];
+      sum += A[i][j] * x[j];
     }
     b[i] = sum;
   }
@@ -143,22 +143,6 @@ BYE:
   return status;
 }
 
-static void
-transpose(
-          double **A,
-          int n
-          )
-{
-  int tmp = 0;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j ++) {
-      tmp = A[i][j];
-      A[i][j] = A[j][i];
-      A[j][i] = tmp;
-    }
-  }
-}
-
 // TODO: use an actual matrix multiplication algo
 extern void
 transpose_and_multiply(
@@ -167,7 +151,6 @@ transpose_and_multiply(
     int n
     )
 {
-  transpose(A, n);
   for ( int i = 0; i < n; i++ ) {
     for ( int j = 0; j < n - i; j++ ) {
       double sum = 0;
@@ -179,5 +162,4 @@ transpose_and_multiply(
       B[i][j] = sum;
     }
   }
-  transpose(A, n);
 }
