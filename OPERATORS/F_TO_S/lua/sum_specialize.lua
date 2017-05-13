@@ -1,22 +1,23 @@
 return function (
-  intype
+  qtype
   )
     local is_base_qtype = require('is_base_qtype')
     local tmpl = 'reduce.tmpl'
     local subs = {}
-    if ( intype == "B1" ) then
+    if ( qtype == "B1" ) then
       assert(nil, "TODO")
     else
-      assert(is_base_qtype(intype), "intype must be base type")
-      subs.fn = "sum_" .. intype 
-      subs.intype = g_qtypes[intype].ctype
-      subs.disp_intype = intype
+      assert(is_base_qtype(qtype), "qtype must be base type")
+      subs.op = "sum_"
+      subs.fn = subs.op .. "_" .. qtype 
+      subs.ctype = g_qtypes[qtype].ctype
+      subs.qtype = qtype
       subs.init_val = 0
-      if ( ( intype == "I1" ) or ( intype == "I2" ) or 
-           ( intype == "I4" ) or ( intype == "I8" ) ) then
-        subs.reduce_intype = "uint64_t" 
+      if ( ( ctype == "I1" ) or ( ctype == "I2" ) or 
+           ( ctype == "I4" ) or ( ctype == "I8" ) ) then
+        subs.reduce_ctype = "uint64_t" 
       else
-        subs.reduce_intype = "double" 
+        subs.reduce_ctype = "double" 
       end
       subs.reducer = "mcr_sum"
       subs.t_reducer = subs.reducer

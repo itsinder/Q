@@ -6,14 +6,14 @@ return require 'code_gen' {
 #include <unistd.h>
 #include <stdint.h>
 
-typedef struct _reduce_${disp_intype}_args {
-  ${reduce_intype} cum_val;
-  } REDUCE_${disp_intype}_ARGS;
+typedef struct _reduce_${op}_${qtype}_args {
+  ${reduce_ctype} cum_val;
+  } REDUCE_${op}_${qtype}_ARGS;
   
 ${includes}
 extern int
 ${fn}(  
-      const ${intype} * restrict in,  
+      const ${ctype} * restrict in,  
       uint64_t nR,
       void *ptr_args,
       uint32_t num_threads
@@ -27,7 +27,7 @@ ${fn}(
 
 int
 ${fn}(  
-      const ${intype} * restrict in,
+      const ${ctype} * restrict in,
       uint64_t nR,  
       void *in_ptr_args,
       uint32_t num_threads
@@ -35,11 +35,11 @@ ${fn}(
 
 {
   int status = 0;
-  ${intype} inv; 
-  REDUCE_${disp_intype}_ARGS *ptr_args;
-  ptr_args = (REDUCE_${disp_intype}_ARGS *)in_ptr_args;
+  ${ctype} inv; 
+  REDUCE_${op}_${qtype}_ARGS *ptr_args;
+  ptr_args = (REDUCE_${op}_${qtype}_ARGS *)in_ptr_args;
 
-  ${reduce_intype} curr_val = ptr_args->cum_val;
+  ${reduce_ctype} curr_val = ptr_args->cum_val;
   if ( num_threads <= 0 ) { num_threads = sysconf(_SC_NPROCESSORS_ONLN); }
 
   uint64_t block_size = nR / num_threads;
@@ -48,7 +48,7 @@ ${fn}(
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
     if ( t == (num_threads-1) ) { ub = nR; }
-    ${reduce_intype} lval = ${init_val};
+    ${reduce_ctype} lval = ${init_val};
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       lval = ${reducer}(lval, inv);
