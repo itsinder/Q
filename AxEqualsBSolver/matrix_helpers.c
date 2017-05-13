@@ -143,6 +143,22 @@ BYE:
   return status;
 }
 
+static void
+transpose(
+          double **A,
+          int n
+          )
+{
+  int tmp = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j ++) {
+      tmp = A[i][j];
+      A[i][j] = A[j][i];
+      A[j][i] = tmp;
+    }
+  }
+}
+
 // TODO: use an actual matrix multiplication algo
 extern void
 transpose_and_multiply(
@@ -151,15 +167,17 @@ transpose_and_multiply(
     int n
     )
 {
+  transpose(A, n);
   for ( int i = 0; i < n; i++ ) {
     for ( int j = 0; j < n - i; j++ ) {
       double sum = 0;
       for ( int k = 0; k < n; k++ ) {
         // a normal mat mult would use A[i][k],
         // but since we're computing A^tA we write A[k][i]
-        sum += A[k][i] * A[k][j+i];
+        sum += A[i][k] * A[j+i][k];
       }
       B[i][j] = sum;
     }
   }
+  transpose(A, n);
 }

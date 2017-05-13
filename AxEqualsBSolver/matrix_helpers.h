@@ -58,10 +58,3 @@ transpose_and_multiply_matrix_vector(
     int n,
     double *b
     );
-
-extern void
-transpose(
-    double **A,
-    double **B,
-    int n
-    );
