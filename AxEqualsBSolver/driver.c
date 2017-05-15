@@ -1,6 +1,4 @@
-/* To build:
- * gcc -std=gnu99 driver.c positive_solver.c -Wall -O4 -pedantic -o driver
- * To execute:
+/* To execute:
  * ./driver <n> # for some positive integer n
  * */
 #include <stdio.h>
@@ -12,6 +10,16 @@
 #include "aux_driver.h"
 #include "matrix_helpers.h"
 #include "positive_solver.h"
+
+/* testing and benchmarking for AxEqualsB solver.
+ * generates a random matrix A, and tests the positive semidefinite solver
+ * by running iton AtA and tests the full solver by running it on A.
+ *
+ * the current method of generating random matrices isn't perfect, but it's
+ * better than it seems because solving Ax = b is independent of any scaling
+ * factor, so the size of the matrix is irrelevant.
+ */
+
 int
 main(
     int argc,
@@ -19,20 +27,20 @@ main(
     )
 {
   int status = 0;
-  double **A = NULL;
-  double **AAT = NULL; // A times A transpose
-  double **AATcopy = NULL;
-  double *x_expected = NULL;
-  double *x_slow = NULL;
-  double *x_fast = NULL;
-  double *x_normal = NULL;
-  double *b = NULL;
-  double *bcopy = NULL;
-  double *b_slow = NULL;
-  double *b_fast = NULL;
-  double *b_normal = NULL;
-  double *b_normal_ret = NULL;
-  int n = 0;
+  int n = 0;                    // dimension of matrices
+  double **A = NULL;            // randomly generated n * n matrix
+  double **AtA = NULL;          // A transpose times A
+  double **AtA_copy = NULL;     // copy for testing solver that modifies input
+  double *x_expected = NULL;    // randomly generated solution
+  double *x_posdef_slow = NULL; // solution returned by slow compact form posdef solver
+  double *x_posdef_fast = NULL; // solution returned by fast compact from posdef solver
+  double *x_full = NULL;        // solution returned by full, non-posdef solver
+  double *b_posdef = NULL;      // AtA * x_expected
+  double *b_posdef_copy = NULL; // copy for testing solver that modifies input
+  double *b_posdef_slow = NULL; // AtA * x_posdef_slow
+  double *b_posdef_fast = NULL; // AtA * x_posdef_fast
+  double *b_full = NULL;        // A * x_expected
+  double *b_full_ret = NULL;    // A * x_full
   srand48(RDTSC());
   fprintf(stderr, "Usage is ./driver <n> \n");
   switch ( argc ) {
@@ -40,151 +48,118 @@ main(
     default : go_BYE(-1); break;
   }
   status = alloc_matrix(&A, n); cBYE(status);
-  status = alloc_symm_matrix(&AAT, n); cBYE(status);
-  status = alloc_symm_matrix(&AATcopy, n); cBYE(status);
+  status = alloc_symm_matrix(&AtA, n); cBYE(status);
+  status = alloc_symm_matrix(&AtA_copy, n); cBYE(status);
 
   for ( int i = 0; i < n; i++ )  {
     for ( int j = 0; j < n; j++ ) {
       A[i][j] = (drand48() - 0.5) * 100;
     }
   }
-  transpose_and_multiply(A, AAT, n);
-  b = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b);
-  bcopy = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(bcopy);
-  b_slow = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b_slow);
-  b_fast = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b_fast);
-  b_normal = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b_normal);
-  b_normal_ret = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(b_normal_ret);
-  x_expected = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(x_expected);
-  x_slow = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(x_slow);
-  x_fast = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(x_fast);
-  x_normal = (double *) malloc(n * sizeof(double));
-  return_if_malloc_failed(x_normal);
-  // Initialize x
+  transpose_and_multiply(A, AtA, n);
+  b_posdef = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef);
+  b_posdef_copy = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_copy);
+  b_posdef_slow = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_slow);
+  b_posdef_fast = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_fast);
+  b_full = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_full);
+  b_full_ret = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_full_ret);
+  x_expected = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_expected);
+  x_posdef_slow = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_posdef_slow);
+  x_posdef_fast = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_posdef_fast);
+  x_full = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_full);
+
+  // Initialize x and b
   for ( int i = 0; i < n; i++ )  {
     x_expected[i] = (lrand48() % 16) - 16/2;
   }
-  multiply_symm_matrix_vector(AAT, x_expected, n, b);
-  multiply_matrix_vector(A, x_expected, n, b_normal);
+  multiply_symm_matrix_vector(AtA, x_expected, n, b_posdef);
+  multiply_matrix_vector(A, x_expected, n, b_full);
 
-  // make copies manually so we can compare performance of fast and slow versions
+  // make copies manually so we can test functions that modify their input
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n - i; j++) {
-      AATcopy[i][j] = AAT[i][j];
+      AtA_copy[i][j] = AtA[i][j];
     }
-    bcopy[i] = b[i];
+    b_posdef_copy[i] = b_posdef[i];
   }
 
-  print_input(AAT, x_expected, b, n);
+  print_input(AtA, x_expected, b_posdef, n);
+
+  // time computations for each solver
   clock_t begin_slow = clock();
-  status = semi_def_positive_solver(AAT, x_slow, b, n);
-  cBYE(status);
+  status = posdef_positive_solver(AtA, x_posdef_slow, b_posdef, n);
   clock_t end_slow = clock();
+  cBYE(status);
   double time_spent_slow = (double)(end_slow - begin_slow) / CLOCKS_PER_SEC;
 
   clock_t begin_fast = clock();
-  status = semi_def_positive_solver_fast(AATcopy, x_fast, bcopy, n);
-  cBYE(status);
+  status = posdef_positive_solver_fast(AtA_copy, x_posdef_fast, b_posdef_copy, n);
   clock_t end_fast = clock();
+  cBYE(status);
   double time_spent_fast = (double)(end_fast - begin_fast) / CLOCKS_PER_SEC;
 
-  clock_t begin_normal = clock();
-  status = positive_solver(A, x_normal, b_normal, n);
+  clock_t begin_full = clock();
+  status = positive_solver(A, x_full, b_full, n);
+  clock_t end_full = clock();
   cBYE(status);
-  clock_t end_normal = clock();
-  double time_spent_normal = (double)(end_normal - begin_normal) / CLOCKS_PER_SEC;
+  double time_spent_full = (double)(end_full - begin_full) / CLOCKS_PER_SEC;
 
+  // Compute new bs for comparison
+  multiply_symm_matrix_vector(AtA, x_posdef_slow, n, b_posdef_slow);
+  multiply_symm_matrix_vector(AtA, x_posdef_fast, n, b_posdef_fast);
+  multiply_matrix_vector(A, x_full, n, b_full_ret);
 
-  fprintf(stderr, "x from slow solver is [ ");
-  for (int i=0; i < n; i++) {
-    fprintf(stderr, " %lf ", x_slow[i]);
-  }
-  fprintf(stderr, "].\nx from fast solver is [ ");
-  for (int i=0; i < n; i++) {
-    fprintf(stderr, " %lf ", x_fast[i]);
-  }
-  fprintf(stderr, "].\nx from normal solver is [ ");
-  for (int i=0; i < n; i++) {
-    fprintf(stderr, " %lf ", x_normal[i]);
-  }
-  fprintf(stderr, "].\nChecking commences \n");
-  // Compute new bs
-  multiply_symm_matrix_vector(AAT, x_slow, n, b_slow);
-  multiply_symm_matrix_vector(AAT, x_fast, n, b_fast);
-  multiply_matrix_vector(A, x_normal, n, b_normal_ret);
-  bool slow_error = false;
-  bool fast_error = false;
-  bool normal_error = false;
-  fprintf(stderr, "x(good) x(SD_slow) x(SD_fast) x(normal_ret), b(SD_good) b(SD_slow) b(SD_fast) b(normal) b(normal_ret) \n");
+  // check for errors and print output
+  bool slow_posdef_error = false;
+  bool fast_posdef_error = false;
+  bool full_error = false;
+  fprintf(stderr, "x(orig) x(PD_slow) x(PD_fast) x(full), b(PD_good) b(PD_slow) b(PD_fast) b(full) b(full_ret) \n");
   for (int i=0; i < n; i++) {
     fprintf(stderr, " %lf %lf %lf %lf, %lf %lf %lf %lf %lf ",
-            x_expected[i], x_slow[i], x_fast[i], x_normal[i], b[i], b_slow[i], b_fast[i], b_normal[i], b_normal_ret[i]);
-    if ( abs(b_slow[i] - b[i]) < 0.001 ) {
-      fprintf(stderr, " SLOW_MATCH, ");
+            x_expected[i], x_posdef_slow[i], x_posdef_fast[i], x_full[i],
+            b_posdef[i], b_posdef_slow[i], b_posdef_fast[i], b_full[i], b_full_ret[i]);
+    if ( abs(b_posdef_slow[i] - b_posdef[i]) < 0.001 ) {
+      fprintf(stderr, " SLOW_POSDEF_MATCH, ");
     }
     else {
-      slow_error = true;
-      fprintf(stderr, " SLOW_ERROR, ");
+      slow_posdef_error = true;
+      fprintf(stderr, " SLOW_POSDEF_ERROR, ");
     }
-    if ( abs(b_fast[i] - b[i]) < 0.001 ) {
-      fprintf(stderr, "FAST_MATCH, ");
-    }
-    else {
-      fast_error = true;
-      fprintf(stderr, "FAST_ERROR,  ");
-    }
-    if ( abs(b_normal_ret[i] - b_normal[i]) < 0.001 ) {
-      fprintf(stderr, "NORMAL_MATCH\n");
+    if ( abs(b_posdef_fast[i] - b_posdef[i]) < 0.001 ) {
+      fprintf(stderr, "FAST_POSDEF_MATCH, ");
     }
     else {
-      normal_error = true;
-      fprintf(stderr, "NORMAL_ERROR\n ");
+      fast_posdef_error = true;
+      fprintf(stderr, "FAST_POSDEF_ERROR,  ");
+    }
+    if ( abs(b_full_ret[i] - b_full[i]) < 0.001 ) {
+      fprintf(stderr, "FULL_MATCH\n");
+    }
+    else {
+      full_error = true;
+      fprintf(stderr, "FULL_ERROR\n ");
     }
   }
-  if ( slow_error ) {
-    fprintf(stderr, "SLOW_FAILURE, ");
-  }
-  else {
-    fprintf(stderr, "SLOW_SUCCESS, ");
-  }
-  if ( fast_error ) {
-    fprintf(stderr, "FAST_FAILURE, ");
-  }
-  else {
-    fprintf(stderr, "FAST_SUCCESS, ");
-  }
-  if ( normal_error ) {
-    fprintf(stderr, "NORMAL_FAILURE\n");
-  }
-  else {
-    fprintf(stderr, "NORMAL_SUCCESS\n");
-  }
+  fprintf(stderr, slow_posdef_error ? "SLOW_POSDEF_FAILURE, " : "SLOW_POSDEF_SUCCESS, ");
+  fprintf(stderr, fast_posdef_error ? "FAST_POSDEF_FAILURE, " : "FAST_POSDEF_SUCCESS, ");
+  fprintf(stderr, full_error ? "FULL_FAILURE\n" : "FULL_SUCCESS\n");
   fprintf(stderr, "slow solver took %0.4fs, fast solver took %0.4fs, normal solver took %0.4fs\n",
-          time_spent_slow, time_spent_fast, time_spent_normal);
+          time_spent_slow, time_spent_fast, time_spent_full);
 
 BYE:
   free_matrix(A, n);
-  free_matrix(AAT, n);
-  free_matrix(AATcopy, n);
-  free_if_non_null(x_slow);
-  free_if_non_null(x_fast);
-  free_if_non_null(x_normal);
+  free_matrix(AtA, n);
+  free_matrix(AtA_copy, n);
+  free_if_non_null(x_posdef_slow);
+  free_if_non_null(x_posdef_fast);
+  free_if_non_null(x_full);
   free_if_non_null(x_expected);
-  free_if_non_null(b);
-  free_if_non_null(bcopy);
-  free_if_non_null(b_slow);
-  free_if_non_null(b_fast);
-  free_if_non_null(b_normal);
-  free_if_non_null(b_normal_ret);
+  free_if_non_null(b_posdef);
+  free_if_non_null(b_posdef_copy);
+  free_if_non_null(b_posdef_slow);
+  free_if_non_null(b_posdef_fast);
+  free_if_non_null(b_full);
+  free_if_non_null(b_full_ret);
   return status;
 }
 /*
@@ -207,3 +182,44 @@ Ramesh Subramonian: ahah! remind me not to trust Google when I have a
 professional mathematician to rely on!
 
 */
+
+static void
+print_input(
+            double **A,
+            double *x,
+            double *b,
+            int n
+            )
+{
+  for ( int i = 0; i < n; i++ ) {
+    fprintf(stderr, "[ ");
+    for ( int j = 0; j < n; j++ ) {
+      if ( j == 0 ) {
+        fprintf(stderr, " %2d ", (int)index_symm_matrix(A, i, j));
+      }
+      else {
+        fprintf(stderr, ", %2d ", (int)index_symm_matrix(A, i, j));
+      }
+    }
+    fprintf(stderr, "] ");
+    // print x
+    fprintf(stderr, " [ ");
+    fprintf(stderr, " %2d ", (int)x[i]);
+    fprintf(stderr, "] ");
+    // print b
+    fprintf(stderr, "  = [ ");
+    fprintf(stderr, " %3d ", (int)b[i]);
+    fprintf(stderr, "] ");
+
+    fprintf(stderr, "\n");
+  }
+}
+
+/* assembly code to read the TSC */
+static uint64_t
+RDTSC(void)
+{
+  unsigned int hi, lo;
+  __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+}

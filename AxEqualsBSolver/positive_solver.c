@@ -5,8 +5,10 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
 
 */
 
-/* expects the upper (equivalently lower) triangular elements of a symmetric, positive semidefinite matrix A,
-   so if the matrix is
+/* unless otherwise specified, these functions expect
+   the lower (equivalently upper) triangular elements
+   of a symmetric, positive semidefinite matrix A,
+   e.g. if the matrix is
    [ 1, 2, 3 ]
    [ 2, 4, 5 ]
    [ 3, 5, 6 ]
@@ -15,6 +17,7 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
    A[1] = [    4, 5 ]
    A[2] = [       6 ]
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -80,7 +83,7 @@ BYE:
 
 /* destructively updates its input.
  */
-int semi_def_positive_solver_fast(
+int posdef_positive_solver_fast(
     double ** A,
     double * x,
     double * b,
@@ -92,7 +95,7 @@ int semi_def_positive_solver_fast(
 
 /* preserves its input.
  */
-int semi_def_positive_solver(
+int posdef_positive_solver(
     double ** A,
     double * x,
     double * b,
@@ -123,7 +126,7 @@ BYE:
   return status;
 }
 
-/* preserves its input.
+/* expects the columns of a full matrix. preserves its input.
    up to caller to determine if solution is valid,
    since one is not guaranteed to exist.
  */
@@ -136,16 +139,15 @@ int positive_solver(
 {
   int status = 0;
 
-  double ** AtA = NULL;
-  double * Atb = NULL;
-
+  double ** AtA = NULL; // A transpose * A
+  double * Atb = NULL; // A transpose * b
   status = alloc_symm_matrix(&AtA, n); cBYE(status);
   Atb = malloc(n * sizeof(double));
   return_if_malloc_failed(Atb);
 
   transpose_and_multiply(A, AtA, n);
   transpose_and_multiply_matrix_vector(A, b, n, Atb);
-  status = semi_def_positive_solver_fast(AtA, x, Atb, n); cBYE(status);
+  status = posdef_positive_solver_fast(AtA, x, Atb, n); cBYE(status);
 
 BYE:
   free_matrix(AtA, n);

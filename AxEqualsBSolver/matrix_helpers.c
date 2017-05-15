@@ -7,6 +7,7 @@
 
 /* some utilities.
    NOTE: matrices are assumed to be stored as columns. */
+
 extern void
 free_matrix(
       double **A,
