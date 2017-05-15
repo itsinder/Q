@@ -5,7 +5,7 @@ final_so = q_root .. "/lib/"
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
--- local dbg = require 'debugger'
+local dbg = require 'debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
@@ -82,13 +82,17 @@ function xcopy(
 end
 --============
 local function clean_defs(file)
-    local res = {}
-    for line in io.lines(file) do
-        if not string.match(line, "%s*#") then
-            res[#res + 1] = line
-        end
-    end
-    return table.concat(res, "\n")
+   local cmd = string.format("cat %s | grep -v '#include'| cpp | grep -v '^#'", file)
+   local handle = io.popen(cmd)
+   local res = handle:read("*a")
+   handle:close()
+   return res
+    -- for line in io.lines(file) do
+    --     if not string.match(line, "%s*#") then
+    --         res[#res + 1] = line
+    --     end
+    -- end
+    -- return table.concat(res, "\n")
 end
 
 local function is_struct_file(file)
