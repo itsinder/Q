@@ -25,6 +25,7 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
 #include "matrix_helpers.h"
 #include "positive_solver.h"
 #include "macros.h"
+
 static int _positive_solver_rec(
     double ** A,
     double * x,

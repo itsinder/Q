@@ -1,11 +1,11 @@
-driver: positive_solver.c matrix_helpers.c aux_driver.c driver.c macros.h positive_solver.h matrix_helpers.h aux_driver.h
-	gcc -O4 matrix_helpers.c positive_solver.c aux_driver.c driver.c -std=gnu99 -o driver
+test_driver: positive_solver.c matrix_helpers.c test_driver.c macros.h positive_solver.h matrix_helpers.h
+	gcc -O4 matrix_helpers.c positive_solver.c test_driver.c -std=gnu99 -o test_driver
 
-debug: positive_solver.c matrix_helpers.c aux_driver.c driver.c macros.h positive_solver.h matrix_helpers.h aux_driver.h
-	gcc -O4 -g matrix_helpers.c positive_solver.c aux_driver.c driver.c -std=gnu99 -o driver
+debug: positive_solver.c matrix_helpers.c test_driver.c macros.h positive_solver.h matrix_helpers.h
+	gcc -O4 -g matrix_helpers.c positive_solver.c test_driver.c -std=gnu99 -o test_driver
 
-test: driver
-	valgrind ./driver 100
+test: test_driver
+	valgrind ./test_driver 100
 
 clean:
-	rm driver
+	rm test_driver

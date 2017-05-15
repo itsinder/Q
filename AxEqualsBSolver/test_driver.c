@@ -7,7 +7,6 @@
 #include <inttypes.h>
 #include <time.h>
 #include "macros.h"
-#include "aux_driver.h"
 #include "matrix_helpers.h"
 #include "positive_solver.h"
 
@@ -19,6 +18,47 @@
  * better than it seems because solving Ax = b is independent of any scaling
  * factor, so the size of the matrix is irrelevant.
  */
+
+static void
+_print_input(
+            double **A,
+            double *x,
+            double *b,
+            int n
+            )
+{
+  for ( int i = 0; i < n; i++ ) {
+    fprintf(stderr, "[ ");
+    for ( int j = 0; j < n; j++ ) {
+      if ( j == 0 ) {
+        fprintf(stderr, " %2d ", (int)index_symm_matrix(A, i, j));
+      }
+      else {
+        fprintf(stderr, ", %2d ", (int)index_symm_matrix(A, i, j));
+      }
+    }
+    fprintf(stderr, "] ");
+    // print x
+    fprintf(stderr, " [ ");
+    fprintf(stderr, " %2d ", (int)x[i]);
+    fprintf(stderr, "] ");
+    // print b
+    fprintf(stderr, "  = [ ");
+    fprintf(stderr, " %3d ", (int)b[i]);
+    fprintf(stderr, "] ");
+
+    fprintf(stderr, "\n");
+  }
+}
+
+/* assembly code to read the TSC */
+static uint64_t
+_RDTSC(void)
+{
+  unsigned int hi, lo;
+  __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+}
 
 int
 main(
@@ -41,7 +81,7 @@ main(
   double *b_posdef_fast = NULL; // AtA * x_posdef_fast
   double *b_full = NULL;        // A * x_expected
   double *b_full_ret = NULL;    // A * x_full
-  srand48(RDTSC());
+  srand48(_RDTSC());
   fprintf(stderr, "Usage is ./driver <n> \n");
   switch ( argc ) {
     case 2 : n = atoi(argv[1]); break;
@@ -83,7 +123,7 @@ main(
     b_posdef_copy[i] = b_posdef[i];
   }
 
-  print_input(AtA, x_expected, b_posdef, n);
+  _print_input(AtA, x_expected, b_posdef, n);
 
   // time computations for each solver
   clock_t begin_slow = clock();
@@ -182,44 +222,3 @@ Ramesh Subramonian: ahah! remind me not to trust Google when I have a
 professional mathematician to rely on!
 
 */
-
-static void
-print_input(
-            double **A,
-            double *x,
-            double *b,
-            int n
-            )
-{
-  for ( int i = 0; i < n; i++ ) {
-    fprintf(stderr, "[ ");
-    for ( int j = 0; j < n; j++ ) {
-      if ( j == 0 ) {
-        fprintf(stderr, " %2d ", (int)index_symm_matrix(A, i, j));
-      }
-      else {
-        fprintf(stderr, ", %2d ", (int)index_symm_matrix(A, i, j));
-      }
-    }
-    fprintf(stderr, "] ");
-    // print x
-    fprintf(stderr, " [ ");
-    fprintf(stderr, " %2d ", (int)x[i]);
-    fprintf(stderr, "] ");
-    // print b
-    fprintf(stderr, "  = [ ");
-    fprintf(stderr, " %3d ", (int)b[i]);
-    fprintf(stderr, "] ");
-
-    fprintf(stderr, "\n");
-  }
-}
-
-/* assembly code to read the TSC */
-static uint64_t
-RDTSC(void)
-{
-  unsigned int hi, lo;
-  __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-  return ((uint64_t)hi << 32) | lo;
-}
