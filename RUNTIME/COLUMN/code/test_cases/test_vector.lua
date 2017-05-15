@@ -20,7 +20,7 @@ for i, v in ipairs(T) do
   local arg_filename 
   if v.filename ~= nil then
     arg_filename = bin_file_path..v.filename
-    v.filename= arg_filename
+    v.filename = arg_filename
   end
   local arg_write_vector = v.write_vector
   local arg_input_values = v.input_values

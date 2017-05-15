@@ -1,6 +1,5 @@
 local q_core = require 'q_core'
 local convert_c_to_txt = require 'C_to_txt'
-local plfile = require 'pl.file'
 local fns = { }
 local failed_testcases = { }
 local no_of_pass_testcases = 0
@@ -118,7 +117,6 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
         x[index] = x[index] + math.pow(2,k-1)
       end
     end
-
     vector:put_chunk(x, x_size)
     vector:eov()
     
@@ -151,11 +149,8 @@ fns.handle_category1 = function (index, v, status, vector, input_values, write_v
   if write_vector then
     chunk,length = create_c_data(vector, input_values)
     assert( chunk~=nil, "chunk cannot be nil" )
-  
     vector:put_chunk(chunk, length)
-    if v.non_materialized then
-      plfile.delete(v.filename)
-    else
+    if not v.non_materialized then
       vector:eov()
     end
     
