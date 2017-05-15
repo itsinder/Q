@@ -129,13 +129,6 @@ return {
   { name = "second valid B1 read", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = false, category = "category2", field_size = 1/8,
     input_values = B1_odd_data 
   },
-  -- testcase in which the input values are not materialized.
-  -- filename I1.bin is not created by this testcase
-  --[[
-  { name = "non materialized", field_type = 'I1', filename="I1.bin", chunk_size = 8, write_vector = true, category = "category1",
-    input_values = I1_data, non_materialized = true
-  },
-  --]]
   -- error testcases
   -- field type not present
   { name = "nil field type", filename="I1.bin", write_vector = true, category = "category3",
@@ -147,6 +140,10 @@ return {
   -- no generator input, no filename input and write vector not present 
   { name = "No write_vector filename generator", field_type = 'I4', category = "category3"
   },
-
+-- testcase in which the input values are not materialized.
+  -- filename I1.bin is not created by this testcase
+  { name = "non materialized", field_type = 'I1', filename="I1.bin", chunk_size = 8, write_vector = true, category = "category1",
+    input_values = I1_data, non_materialized = true
+  },
   
 }
