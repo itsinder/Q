@@ -13,12 +13,12 @@ return function (
       subs.ctype = g_qtypes[qtype].ctype
       subs.qtype = qtype
       subs.reduce_ctype = subs.ctype
-      if ( ctype == "I1" ) then subs.init_val = "INT8_MIN" end
-      if ( ctype == "I2" ) then subs.init_val = "INT16_MIN" end
-      if ( ctype == "I4" ) then subs.init_val = "INT32_MIN" end
-      if ( ctype == "I8" ) then subs.init_val = "INT64_MIN" end
-      if ( ctype == "F4" ) then subs.init_val = "FLT_MIN" end
-      if ( ctype == "F8" ) then subs.init_val = "DBL_MIN" end
+      if ( qtype == "I1" ) then subs.init_val = "INT8_MIN" end
+      if ( qtype == "I2" ) then subs.init_val = "INT16_MIN" end
+      if ( qtype == "I4" ) then subs.init_val = "INT32_MIN" end
+      if ( qtype == "I8" ) then subs.init_val = "INT64_MIN" end
+      if ( qtype == "F4" ) then subs.init_val = "FLT_MIN" end
+      if ( qtype == "F8" ) then subs.init_val = "DBL_MIN" end
       assert(subs.init_val)
       subs.reducer = "mcr_max"
       subs.t_reducer = subs.reducer

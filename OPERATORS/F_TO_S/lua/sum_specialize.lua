@@ -8,7 +8,7 @@ return function (
       assert(nil, "TODO")
     else
       assert(is_base_qtype(qtype), "qtype must be base type")
-      subs.op = "sum_"
+      subs.op = "sum"
       subs.fn = subs.op .. "_" .. qtype 
       subs.ctype = g_qtypes[qtype].ctype
       subs.qtype = qtype
