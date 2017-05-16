@@ -1,7 +1,7 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
 local g_err = require("error_code")
-
+_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
 Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
@@ -26,7 +26,7 @@ function Dictionary.get_instance(
   )
     local dict = _G["Q_DICTIONARIES"][dict_name]
     if not dict then
-        local dict = setmetatable({}, Dictionary)
+        dict = setmetatable({}, Dictionary)
         _G["Q_DICTIONARIES"][dict_name] = dict
         -- Create a forward map and a reverse map
         dict.string_to_index = {}
