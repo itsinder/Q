@@ -127,6 +127,65 @@ BYE:
   return status;
 }
 
+/* expects a symmetric, positive semidefinite matrix with each column fully specified.
+ * destructively updates its input.
+ */
+int full_posdef_positive_solver_fast(
+    double ** A,
+    double * x,
+    double * b,
+    int n
+    )
+{
+  int status = 0;
+  for (int i = 0; i < n; i++) {
+    A[i] += i;
+  }
+
+  status = _positive_solver_rec(A, x, b, n); cBYE(status);
+
+BYE:
+  for (int i = 0; i < n; i++) {
+    A[i] -= i;
+  }
+  return status;
+}
+
+/* expects a symmetric, positive semidefinite matrix with each column fully specified.
+ * preserves its input.
+ */
+int full_posdef_positive_solver(
+    double ** A,
+    double * x,
+    double * b,
+    int n
+    )
+{
+  int status = 0;
+  // create a copy of A and b
+  double ** Acopy = NULL;
+  double * bcopy = NULL;
+
+  status = alloc_symm_matrix(&Acopy, n); cBYE(status);
+  bcopy = malloc(n * sizeof(double));
+  return_if_malloc_failed(bcopy);
+
+  for ( int i = 0; i < n; i++ ) {
+    for ( int j = 0; j < n-i; j++ ) {
+      Acopy[i][j] = A[i][j + i];
+    }
+    bcopy[i] = b[i];
+  }
+
+  status = _positive_solver_rec(Acopy, x, bcopy, n);
+
+ BYE:
+  free_matrix(Acopy, n);
+  free_if_non_null(bcopy);
+  return status;
+}
+
+
 /* expects the columns of a full matrix. preserves its input.
    up to caller to determine if solution is valid,
    since one is not guaranteed to exist.
