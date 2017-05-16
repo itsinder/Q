@@ -247,6 +247,10 @@ function Column:wrap()
    end)
 end
 
+function Column:persist(name)
+ return string.format("Column{field_type='%s', filename='%s', nn=%s,}",self.vec.field_type, plpath.abspath(self.vec.filename), tostring(self.nn_vec ~=nil) )
+end
+
 function Column:__tostring()
  return string.format("Column{field_type='%s', filename='%s', nn=%s,}",self.vec.field_type, plpath.abspath(self.vec.filename), tostring(self.nn_vec ~=nil) )
 end

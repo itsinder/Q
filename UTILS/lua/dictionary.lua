@@ -1,7 +1,7 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
 local g_err = require("error_code")
-
+_G["Q_DICTIONARIES"] = {}
 Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
@@ -26,11 +26,12 @@ function Dictionary.get_instance(
   )
     local dict = _G["Q_DICTIONARIES"][dict_name]
     if not dict then
-        local dict = setmetatable({}, Dictionary)
+        dict = setmetatable({}, Dictionary)
         _G["Q_DICTIONARIES"][dict_name] = dict
         -- Create a forward map and a reverse map
         dict.string_to_index = {}
         dict.index_to_string = {}
+        dict.name = dict_name
     end
     return dict
 end
@@ -56,6 +57,15 @@ end
 
 function Dictionary:get_size()
     return #self.index_to_string
+end
+
+function Dictionary:persist(var_name)
+    ret_table= {}
+    ret_table[#ret_table + 1] = string.format('Dictionary{"%s"}', self.name)
+    for k,v in ipairs(self.index_to_string) do
+        ret_table[#ret_table + 1] = string.format("%s.add('%s')", var_name, v)
+    end
+    return table.concat(ret_table, "\n")
 end
 
 return Dictionary
