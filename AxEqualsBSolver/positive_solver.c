@@ -54,9 +54,9 @@ static int _positive_solver_rec(
   int m = n -1;
 
   if (A[0][0] != 0.0) {
-    for(int j=0; j < m; j++){
-      bvec[j] -= Avec[j] * b[0] / A[0][0];
-      for(int i=0; i < m - j; i++)
+    for(int i=0; i < m; i++){
+      bvec[i] -= Avec[i] * b[0] / A[0][0];
+      for(int j=0; j < m - i; j++)
         Asub[i][j] -= Avec[i] * Avec[i+j] / A[0][0];
     }
   } /* else check that Avec is 0 */
