@@ -1,7 +1,7 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
 local g_err = require("error_code")
-_G["Q_DICTIONARIES"] = {}
+_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
 Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
