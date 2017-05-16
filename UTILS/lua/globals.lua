@@ -2,7 +2,7 @@ g_q_core_h = os.getenv("Q_ROOT") .. "/include/q_core.h"
 --===========================
 g_max_width_SC = 1024 -- 1 char reserved for nullc
 g_max_width_SV = 1024 -- 1 char reserved for nullc
-
+g_chunk_size = 64
 --===========================
 g_width = {}
 g_width["I1"]  = 8;

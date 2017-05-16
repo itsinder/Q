@@ -1,10 +1,7 @@
 --[[
 Vector Semantics
     1. Pull Semantics
-        1.1 Generator
-            Params
-                generator - The generator that is the source of data
-        1.2 Read file
+        1.1 Read file
             Params
                 chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
                 field_type - The field type used, which must be present in g_valid_types
@@ -18,57 +15,12 @@ Vector Semantics
                 field_size (optional) - The size of each element, defaults to getting it from g_valid_types
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
+require 'globals'
 local plpath = require("pl.path")
+local get_new_filename = require "random_filename"
+
 local Vector = {}
 Vector.__index = Vector
-local valid_types = {}
-valid_types['i'] = 'int'
-valid_types['f'] = 'float'
-valid_types['d'] = 'double'
-valid_types['c'] = 'char'
-local self_chunk_size = 64
-local valid_meta = {}
-valid_meta["dir"] = 1
-g_valid_types = g_valid_types or valid_types
-g_chunk_size = g_chunk_size or self_chunk_size
-g_valid_meta = g_valid_meta or valid_meta
-
-local charset = {}
-
--- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
-for i = 48,  57 do table.insert(charset, string.char(i)) end
-for i = 65,  90 do table.insert(charset, string.char(i)) end
-for i = 97, 122 do table.insert(charset, string.char(i)) end
-
-local function random_string(length_inp)
-    math.randomseed(os.time())
-    local length = length_inp or 11
-    local result = {}
-      for loop = 1,length do
-         result[loop] = charset[math.random(1, #charset)]
-      end
-      return table.concat(result)
-end
-
-local function get_new_filename(length)
-    local name = nil
-    while (name == nil)
-    do
-        name = "_" .. random_string(length)
-        local f=io.open(name,"r")
-        if f ~=nil then
-            io.close(f)
-            name = nil
-        else
-            return name
-        end
-    end
-    return name
-end
-
-function is_int(n)
-  return n == math.floor(n)
-end
 
 local q_core = require 'q_core'
 
@@ -100,22 +52,6 @@ type = function( obj )
         return "Vector"
     end
     return otype
-end
-
-local function set_generator(self, arg)
-    local gen = arg.gen
-    assert(type(gen) == "Generator", "Expected a generator set to gen")
-    self.generator = gen
-    self.input_from_generator = true
-    self.field_type = gen.field_type
-    self.field_size = gen.field_size
-    self.my_length = gen.length
-    self.memoized = true
-    self.is_materialized = false
-    self.input_from_file = false
-    self.filename = arg.filename or get_new_filename(10) -- file name to write to
-    return self
-
 end
 
 local function read_file_vector(self, arg)
@@ -155,27 +91,22 @@ function Vector.new(arg)
     DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     vec.chunk_size = arg.chunk_size or g_chunk_size
-    if arg.generator ~= nil then -- generator as input
-        set_generator(vec, arg)
-    else -- No generator
-        assert(arg.field_type ~= nil and g_valid_types[arg.field_type] ~= nil, "Valid type not given")
-        vec.field_type = arg.field_type
-        if arg.field_size == nil then -- for constant length string this cannot be nil
-            local type_val =  assert(g_valid_types[arg.field_type], "Invalid type")
-            vec.field_size = q_core.sizeof(type_val)
-        else
-            vec.field_size = arg.field_size
-        end
+    assert(arg.field_type ~= nil and g_valid_types[arg.field_type] ~= nil, "Valid type not given")
+    vec.field_type = arg.field_type
+    if arg.field_size == nil then -- for constant length string this cannot be nil
+        local type_val =  assert(g_valid_types[arg.field_type], "Invalid type")
+        vec.field_size = q_core.sizeof(type_val)
+    else
+        vec.field_size = arg.field_size
+    end
 
-        if arg.write_vector == true then
-            write_file_vector(vec, arg)
+    if arg.write_vector == true then
+        write_file_vector(vec, arg)
+    else
+        if arg.filename ~= nil then -- filename means read from file
+            read_file_vector(vec, arg)
         else
-            if arg.filename ~= nil then -- filename means read from file
-                read_file_vector(vec, arg)
-            else
-               dbg() 
-               error('No data input to vector. Need either a file or a generator')
-            end
+           error('No data input to vector.')
         end
     end
     local buff_size = vec.field_size * vec.chunk_size
@@ -231,7 +162,7 @@ local function append_to_file(self, ptr, size)
     if self.field_type == "B1" then
         assert(tonumber(q_core.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
     else
-        assert(q_core.fwrite(ptr,self.field_size, size, self.file) == size, "Unable to write to file")
+        assert(q_core.fwrite(ptr, self.field_size, size, self.file) == size, "Unable to write to file")
     end
 end
 
@@ -250,27 +181,6 @@ end
 
 function Vector:materialized()
     return self.is_materialized
-end
-
-local function get_from_generator(self, num)
-    assert(self.generator:status() ~= "dead", "Cannot get more data from generator")
-    local status, buffer, size = self.generator:get_next_chunk()
-    assert(status, buffer)
-
-    self.last_chunk_number = num
-    -- if memoized then add to file
-    if self.memoized then
-        append_to_file(self, self.last_chunk_buf, self.last_chunk_size)
-    end
-    self.last_chunk_buf = buffer
-    self.last_chunk_size = size
-    -- now check if the materialization is complete
-    if self.generator:status() == "dead" then
-        assert(math.ceil(self.my_length/self.chunk_size) - 1  == num)
-        self.is_materialized = true
-        flush_remap_file(self)
-    end
-    return self.last_chunk_buf, self.last_chunk_size
 end
 
 local function get_from_file(self, num)
@@ -302,7 +212,7 @@ end
 
 function Vector:get_element(num)
    -- assert(num <= self.my_length, "The element queried should be in the vector")
-   assert(is_int(num), "chunks need to be integer type")
+   assert(num == math.floor(num), "chunks need to be integer type")
    assert(num >= 0, "Requires a a whole number")
    local chunk, size = self:chunk( math.floor(num / self.chunk_size))
    local offset = num % self.chunk_size
@@ -327,7 +237,7 @@ end
 
 function Vector:chunk(num)
     assert(type(num) == "number", "Require a number for chunk number")
-    assert(is_int(num), "chunks need to be integer type")
+    assert(num == math.floor(num), "chunks need to be integer type")
     -- assert(num >= 0, "Requires a a whole number")
 
     if self:materialized() then
@@ -344,22 +254,11 @@ function Vector:chunk(num)
             end
         elseif num == self:last_chunk() then
             assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
-             if num > self.file_last_chunk_number then flush_remap_file(self) end
+             if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
              local ptr = q_core.cast("unsigned char*", self.cdata)
              return q_core.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
         elseif num == self:last_chunk() + 1 then
-            if self.input_from_generator == true then
-                local status, buffer, size = get_from_generator(self, num)
-                assert(status, "No chunk found: " .. buffer)
-                if self.memoized == true then
-                    append_to_file(self, buffer, size)
-                    self.my_length = self.my_length + size -- memoized
-                else
-                    self.my_length = size -- non memoized
-                end
-                update_max_chunks(self)
-                return buffer, size
-            elseif self.output_to_file == true then
+            if self.output_to_file == true then
                 error("Vector does not support pull semantics in this mode")
             elseif self.input_from_file then
                 error("I should not be here")
@@ -372,10 +271,11 @@ function Vector:chunk(num)
 end
 
 function Vector:put_chunk(chunk, length)
-     assert(self.output_to_file == true,  "Cannot be write to non output vector")
-     assert(self.is_materialized ~= true, "The vector is already materialized")
+    assert(self.output_to_file == true,  "Cannot be write to non output vector")
+    assert(self.is_materialized ~= true, "The vector is already materialized")
     append_to_file(self, chunk, length)
     self.my_length = self.my_length + length
+    update_max_chunks(self)
 end
 
 function Vector:eov()
