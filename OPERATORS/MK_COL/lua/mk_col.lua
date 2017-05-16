@@ -1,8 +1,6 @@
 local g_err = require 'error_code'
-
--- local Dictionary = require 'dictionary'
 local Column = require 'Column'   
-local ffi = require "ffi"
+local q_core = require 'q_core'
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
 local MINIMUM_LUA_NUMBER = -9007199254740991
@@ -60,7 +58,7 @@ return function (input, qtype)
   local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
   local length_in_bytes = width * length
-  local chunk = ffi.new(ctype .. "[?]", length, input)
+  local chunk = assert(q_core.new(ctype .. "[?]", length, input),g_err.FFI_NEW_ERROR)
   col:put_chunk(length, chunk)
   col:eov()
   return col

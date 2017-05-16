@@ -1,6 +1,5 @@
 local log = require 'log'
 require 'utils'
-local ffi = require 'ffi'
 local Column = require 'Column'
 local Dictionary = require "dictionary"
 local print_csv = require 'print_csv'
