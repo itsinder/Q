@@ -140,8 +140,7 @@ return {
   -- no generator input, no filename input and write vector not present 
   { name = "No write_vector filename generator", field_type = 'I4', category = "category3"
   },
--- testcase in which the input values are not materialized.
-  -- filename I1.bin is not created by this testcase
+  -- testcase in which the input values are not materialized.
   { name = "non materialized", field_type = 'I1', filename="I1.bin", chunk_size = 8, write_vector = true, category = "category1",
     input_values = I1_data, non_materialized = true
   },

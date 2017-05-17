@@ -81,6 +81,7 @@ local create_c_data = function (vector, input_values)
   return chunk,length
 end
 
+-- category3 - error code testcases. in this call to vector constructor should return error codes
 fns.handle_category3 = function (index, value, status, vector, input_values, write_vector)
   print(status, vector)
   if status then
@@ -92,6 +93,9 @@ fns.handle_category3 = function (index, value, status, vector, input_values, wri
   return true
 end
 
+-- category2 - successful testcases on B1 data types. Has both write and read mode cases
+-- in this binary files should be created . and reading of vector elements should match with 
+-- the values written in binary file
 fns.handle_category2 = function (index, value, status, vector, input_values, write_vector)
   if not status then
     fns["increment_fail_testcases"](index, value, "incorrect status value in category 2")
@@ -139,6 +143,10 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
   no_of_pass_testcases = no_of_pass_testcases + 1
   return true
 end
+
+--category1 - successful testcase except B1 data types. Has both write and read mode cases
+-- in this binary files should be created . and reading of vector elements should match with 
+-- the values written in binary file
 
 fns.handle_category1 = function (index, v, status, vector, input_values, write_vector)
   if not status then
