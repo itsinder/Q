@@ -63,15 +63,6 @@ LUA_INIT_PATH="@`echo $Q_SRC_ROOT`/init.lua"
 # echo $LUA_INIT_PATH
 export LUA_INIT="${LUA_INIT:=$LUA_INIT_PATH}"
 echo "LUA_INIT: $LUA_INIT"
-# Setting ld library path based on lua init
-#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
-set +m
-lua -e "print('hey')" &>/dev/null
-RET=`echo $?`
-if [[ "$RET" -ne "0" ]]; then
-    `lua| tail -1`
-fi
-echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
 echo "QC_FLAGS: $QC_FLAGS"
@@ -81,4 +72,13 @@ echo "Q_DATA_DIR: $Q_DATA_DIR"
 mkdir -p $Q_ROOT/meta
 export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
 echo "Q_METADATA_DIR: $Q_METADATA_DIR"
+# Setting ld library path based on lua init
+#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
+set +m
+lua -e "print('hey')" &>/dev/null
+RET=`echo $?`
+if [[ "$RET" -ne "0" ]]; then
+    `lua| tail -1`
+fi
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
