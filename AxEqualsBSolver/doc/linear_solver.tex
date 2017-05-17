@@ -4,6 +4,8 @@
 \title{A Simple Solver for Matrix Equations}
 \author{Andrew Winkler, Ph.~D.}
 
+\newcommand{\bmat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+
 \begin{document}
 
 \maketitle
@@ -55,22 +57,22 @@ algorithm in the next section.
 Let $A$ be a symmetric and positive semidefinite matrix in $n$ dimensions. We want to find a solution to
 $Ax = b$.
 
-We write $A = A_n$ as $\begin{bmatrix}\alpha_n & a^*_{n - 1} \\ a_{n - 1} & A_{n
-    - 1}\end{bmatrix}$, tagging each element with their dimension.
+We write $A = A_n$ as $\bmat{\alpha_n & a^*_{n - 1} \\ a_{n - 1} & A_{n
+    - 1}}$, tagging each element with their dimension.
 If $n = 1$, then all expressions involving $A_{n-1}$, $a_{n - 1}$, or $b_{n - 1]}$ are
 empty sums, and therefore 0. Otherwise, $A_{n - 1}$ is $n-1$ by $n-1$, and $a_{n
 - 1}$ and $b_{n - 1}$ are $n-1$ column vectors, while $\alpha_n$ is a scalar.
 
 Since $A_n=A^*_n$, we have
-$$ \begin{bmatrix}\alpha_n & a^*_{n-1} \\ a_{n - 1} & A_{n - 1}\end{bmatrix} = 
-   \begin{bmatrix}\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}\end{bmatrix}^* = 
-   \begin{bmatrix}\alpha_n^* & a_{n-1}^* \\ a_{n-1} & A_{n-1}\end{bmatrix} $$
+$$ \bmat{\alpha_n & a^*_{n-1} \\ a_{n - 1} & A_{n - 1}} = 
+   \bmat{\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}}^* = 
+   \bmat{\alpha_n^* & a_{n-1}^* \\ a_{n-1} & A_{n-1}} $$
 and it follows that $\alpha_n^*=\alpha_n$, $A_{n-1}^{*} = A_{n-1}$.
 
 Moreover, 
 $$
-0 \leq \begin{bmatrix}1\\0\end{bmatrix}^*\begin{bmatrix}\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}\end{bmatrix}\begin{bmatrix}1\\0\end{bmatrix}
-= \begin{bmatrix}1&0\end{bmatrix}\begin{bmatrix}\alpha_n \\ a_{n-1}\end{bmatrix}
+0 \leq \bmat{1\\0}^*\bmat{\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}}\bmat{1\\0}
+= \bmat{1&0}\bmat{\alpha_n \\ a_{n-1}}
 = \alpha_n
 $$
 There are then two cases to consider, $\alpha = 0$ and $\alpha > 0$. In either
@@ -82,8 +84,8 @@ the problem is solved.
 Suppose $\alpha_n=0$. Then in fact it's also true that $a_{n-1}=0$, since for
 any $\chi$ we must have
 \begin{align*}
-  0 &\leq \begin{bmatrix}\chi\\a_{n-1}\end{bmatrix}^*\begin{bmatrix}0 & a_{n-1}^*
-  \\ a_{n-1} & A_{n-1}\end{bmatrix}\begin{bmatrix}\chi\\a_{n - 1}\end{bmatrix} \\&= \begin{bmatrix}\chi^* & a_{n-1}^*\end{bmatrix} \begin{bmatrix}a_{n-1}^*a_{n-1}\\a_{n-1}\chi+A_{n-1}a_{n-1}\end{bmatrix}
+  0 &\leq \bmat{\chi\\a_{n-1}}^*\bmat{0 & a_{n-1}^*
+  \\ a_{n-1} & A_{n-1}}\bmat{\chi\\a_{n - 1}} \\&= \bmat{\chi^* & a_{n-1}^*} \bmat{a_{n-1}^*a_{n-1}\\a_{n-1}\chi+A_{n-1}a_{n-1}}
 \\&= \chi^*a_{n-1}^*a_{n-1} + a_{n-1}^*a_{n-1}\chi + a_{n-1}^*A_{n-1}a_{n-1}
 \end{align*}
 
@@ -95,20 +97,20 @@ be zero.
 
 Our equation then simplifies to 
 $
-\begin{bmatrix}0 & 0 \\ 0 & A_{n-1}\end{bmatrix}\begin{bmatrix}\chi_n\\x_{n-1}\end{bmatrix} =\begin{bmatrix}\beta_n\\b_{n-1}\end{bmatrix}
+\bmat{0 & 0 \\ 0 & A_{n-1}}\bmat{\chi_n\\x_{n-1}} =\bmat{\beta_n\\b_{n-1}}
 $, or $0=\beta_n$, and
 $A_{n-1}x_{n-1}=b_{n-1} $. The first equation tells us that there can be no solution unless
 $\beta_n=0$. If, however, it is, then any solution $x_{n-1}$ of the
 second equation, which we note, satisfies the same properties we required of 
 $A_n$, can be combined with any number $z_n$ into a solution,
-$A_n\begin{bmatrix}z_n\\x_{n-1}\end{bmatrix} = b_n$
+$A_n\bmat{z_n\\x_{n-1}} = b_n$
 
 In particular, we can always take $z_n$ to be 0.
 
 \subsection{Case 2}
 Suppose $\alpha_n>0$. Then
 \begin{align*}
-&\begin{bmatrix}\alpha_n & a_{n-1}^* \\ a_n & A_{n-1}\end{bmatrix}\begin{bmatrix}\chi_n\\x_{n-1}\end{bmatrix}=\begin{bmatrix}\beta_n\\b_{n-1}\end{bmatrix}
+&\bmat{\alpha_n & a_{n-1}^* \\ a_n & A_{n-1}}\bmat{\chi_n\\x_{n-1}}=\bmat{\beta_n\\b_{n-1}}
 \\\iff&
 \alpha_n\chi_n + a_{n-1}^*x_{n-1} = \beta_n &\text{ and }\hspace{2em}&
 a_n\chi_n + A_{n-1}x_{n-1} = b_{n-1}
@@ -123,7 +125,7 @@ a_n\alpha_n^{-1}(\beta_n - a_{n-1}^*x_{n-1}) + A_{n-1}x_{n-1} = b_{n-1}
 a_n\alpha_n^{-1}(- a_{n-1}^*x_{n-1}) + A_{n-1}x_{n-1} = b_{n-1}-a\alpha_n^{-1}\beta_n
 \\\iff&
 \chi_n= \alpha_n^{-1}(\beta_n - a_{n-1}^*x_{n-1}) &\text{ and }\hspace{2em}&
-(A_{n-1} - a_n\alpha_n^{-1}a_{n-1}^*)x_{n-1} = b_{n-1}-a_{n-1}\alpha_n^{-1}\beta_n
+(A_{n-1} - a_{n-1}\alpha_n^{-1}a_{n-1}^*)x_{n-1} = b_{n-1}-a_{n-1}\alpha_n^{-1}\beta_n
 \end{align*}
 
   
@@ -139,13 +141,51 @@ A_{n-1} - a_{n-1}\alpha_n^{-1}a_{n-1}^*
 \end{gather}
 and moreover, for any vector $x$ we have
 \begin{gather}{}
-0 \leq \begin{bmatrix}-\alpha_n^{-1}a_{n-1}^*x\\x\end{bmatrix}^*\begin{bmatrix}\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}\end{bmatrix}\begin{bmatrix}-\alpha_n^{-1}a_{n-1}^*x\\x\end{bmatrix}
+0 \leq \bmat{-\alpha_n^{-1}a_{n-1}^*x\\x}^*\bmat{\alpha_n & a_{n-1}^* \\ a_{n-1} & A_{n-1}}\bmat{-\alpha_n^{-1}a_{n-1}^*x\\x}
 = 
 x^*(A_{n-1} - a_{n-1}\alpha_n^{-1}a_{n-1}^*)x
 \end{gather} So the derived submatrix is nonnegative, and positive if the original matrix is.
 
 As in either case we have reduced to either the base case of dimension one or to a similar problem in one dimension smaller, the solution, whether it exists or
 not, and whether or not multiple solutions exist, is complete.
+\newpage  
+\section{Example}
+
+We'll run the algorithm to find a solution to the following equation:
+$$ Ax = \bmat{1 & -4 & 3\\-2 & 3 & 0\\3 & 1 & 1}x = \bmat{ 2\\ -3 \\ 1 } = b $$
+
+We first compute
+$$A^*A = \bmat{14 & -7 & 6\\ -7 & 26 & -11\\6 & -11 & 10} = A_3 \hspace{5em} A^*b =
+\bmat{11\\ -16\\ 7} = \bmat{\beta_3\\b_2}$$
+and then we have
+$$\alpha_3 = 14 \hspace{3em} a_2 = \bmat{-7\\6} \hspace{3em} A_2 = \bmat{26 &
+  -11\\-11 & 10}$$
+Since $\alpha_3 > 0$, we're in case 2, which tells us that that $\chi_n$, the
+first entry in $x$, will be equal to $\alpha_3^{-1}(\beta_3 - a^*_2x_2) = (11 -
+\bmat{-7 & 6}x_2)/14$, and we can find $x_2$ by solving the smaller equation
+$$ (A_2 - a_2\alpha_3^{-1}a_2^*)x_2 = b_2 - a_2\alpha_3^{-1}\beta_3$$
+We compute
+$$ A_2 - a_2\alpha_3^{-1} a_2^* = \bmat{26 & -11\\-11 & 10} - \bmat{-7 \\
+  6}\bmat{-7&6}/14 = \bmat{26 & -11\\-11 & 10} - \bmat{7/2 & -3\\-3 & 18/7} =
+\bmat{45/2 & -8\\-8 & 52/7}$$
+and
+$$ b_2 - a_2\alpha_3^{-1}\beta_3 = \bmat{-16\\7} - \tfrac{11}{14}\bmat{-7\\6} =
+\bmat{-21/2\\ 16/7} = \bmat{\beta_2\\b_1} $$
+
+We now have $\alpha_2 = 45/2$, $a_1 = -8$, $A_1 = 52/7$, and from case 2
+we know $\chi_2 = \alpha_2(\beta_2 - a_1x_1)$ and $(A_1 - a_1^2/\alpha_2)x_1
+= b_1 - a_1\beta_2/\alpha_2$. This is a linear equation which we can solve to
+get
+$$ x_1 = \frac{16/7 - (-8)(-21/2)/(45/2)}{52/7 - (-8)^2/(45/2)} =
+\frac{-6}{19} $$
+Substituting $x_1$ into our above equation for $\chi_2$, we find
+$$ \alpha_2^{-1}(\beta_2 - a_1x_1) = (-21/2 - (-8)(-6/19))/(45/2) = \frac{-11}{19} $$
+Plugging everything back into the first equation for $\chi_3$ we find
+$$(\beta_3 - a_2^*x_2)/\alpha_3 = (11 - \bmat{-7 & 6}\bmat{-11/19\\-6/19})/14
+= 12/19$$
+It remains to check that this solution is valid for $A$ and $b$, and indeed
+$$ \bmat{1 & -4 & 3\\-2 & 3 & 0\\3 & 1 & 1}\bmat{12/19\\-11/19\\-6/19} =
+\bmat{2\\ -3 \\ 1}  $$
 
 \section{Preliminaries}
 
