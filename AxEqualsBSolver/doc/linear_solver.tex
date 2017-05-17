@@ -187,26 +187,25 @@ It remains to check that this solution is valid for $A$ and $b$, and indeed
 $$ \bmat{1 & -4 & 3\\-2 & 3 & 0\\3 & 1 & 1}\bmat{12/19\\-11/19\\-6/19} =
 \bmat{2\\ -3 \\ 1}  $$
 
-\section{Preliminaries}
+\section{Generalizing}
 
-We consider the linear system $Ax=b$. If your only interest is in the real numbers,
-you can skip the rest of this section with the notation that $A^*$ means the transpose of the matrix $A$. In particular a number, which can be seen as a 1x1 matrix, is its own transpose.
+We'll here describe how to generalize the algorithm to fields beyond the reals.
+$A^*$ now denotes the adjoint operation, which is transposing and then
+conjugating the elements of a matrix. If $a$ is a single number, then $a^*$ is
+just its conjugate.
 
-The algorithm we describe works perfectly well for finite dimensional Hilbert spaces over various fields, to be described. However, since the method implicitly constructs a basis for the vector space, for ease of exposition and with no real loss of generality, we assume already chosen an orthonormal basis, with respect to which A is a matrix, and x and b are column vectors.
+The algorithm works perfectly well for finite dimensional Hilbert spaces over various fields, to be described. However, since the method implicitly constructs a basis for the vector space, for ease of exposition and with no real loss of generality, we assume already chosen an orthonormal basis, with respect to which A is a matrix, and x and b are column vectors.
 
 We can view rational numbers as lying in the larger field of real numbers; likewise the real numbers in the complex numbers, and the complex numbers in the quaternions. A quaternion satisfies $(a + bi +cj + dk)^* = (a -bi -cj -dk)$, from which it is immediate that $q^*q = a^2 + b^2 + c^2 + d^2 >= 0$. Moreover if $q^*q =0$ then $q =0$.
 $q* = q$ if and only if $q$ is real.
 
 The algorithm assumes only that the field is some subfield of the quaternions, which is closed under this conjugation operation, which is the same thing as saying that if $\alpha$ is in the field, so is $\alpha^*\alpha$, or equivalently $\alpha + \alpha^*$. This is of course true of the rationals, the reals, any subfield of the reals, the complexes, and the quaternions.
 
-Recall that the adjoint of a matrix $A$, denoted $A^*$, is the transpose of the matrix obtained from $A$ by replacing each number $a_{ij}$ by its complex/quaternion conjugate $a_{ij}^*$.
-
-
 \section{After-thought}
 This section can be safely skipped by anyone whose interest is confined to
 the real numbers, the complex numbers, the rational numbers, or even the quaternions.
 
-The method works provided the scalars are taken from any subfield of the
+As described above, the method works provided the scalars are taken from any subfield of the
 quaternions which is closed under the * operation. More precisely, we really
 need $\alpha^* = \alpha$ if and only if $\alpha$ is real, that $\alpha^*\alpha >= 0$, and that 
 $\alpha^*\alpha = 0$ only if $\alpha=0$.
@@ -214,7 +213,7 @@ $\alpha^*\alpha = 0$ only if $\alpha=0$.
 But the method works, at least in some cases, even if the field is not *-closed.We can take the *-closure of any subfield of the quaternions, by intersecting all *-closed subfields containing it. Since the quaternions are *-closed, that *-closure is a *-closed subfield of the quaternions. We can then find all solutions composed of vectors having entries in the closure; it remains to determine
 which of those solutions, if any, lie in the original field. In the case where
 $A$ is positive, the solution is unique, and a solution whose entries lie in the original field does exist, so must coincide with the solution obtained by this method, which then must necessarily also have entries lying in the original field.
-
+\newpage
 \section{Implementation Notes}
 At each level of recursion, we only need to retain
 $a$,
@@ -232,70 +231,24 @@ We conclude with a C-language implementation of a solver for the positive semi-d
 $x^*Ax >=0 $ for all $x$.
 
 \begin{verbatim}
-$ cat positive_solver.h 
-extern
-double * positive_solver(double ** A, double * b, int n);
-
-$ cat positive_solver.c
-/* 
- * Andrew Winkler
-
-This code solves the equation Ax=b, where A is a positive
-semi-definite matrix, so that x^t A x >= 0 for all x,
-provided a solution exists. If A is positive definite,
-it will be an isomorphism, but in general conditions
-must be imposed on b, for it to lie in the range of A.
-
-It has the virtue of dramatic simplicity - there's no need
-to explicitly construct the Cholesky decomposition, no need
-to do the explicit back-substitutions.  Yet it's essentially
-equivalent to that more labored approach, so its
-performance/stability/memory, etc. should be at least as good.
-
-There are two kinds of checks, both of which are disabled.
-This means that a solution will be generated; it is up to
-the caller to verify that the equation Ax=b is satisfied to
-the desired precision. If it does not, then no solution exists.
-
-The first kind of check is that Avec is 0 whenever A[0][0]
-is 0, which will always be true if A is positive semi-definite,
-but which could become false because of any small perturbation
-caused by roundoff error upstream in the computation of A.
-The second kind of check is that b[0] is 0 whenever A[0][0] is 0,
-which is necessary for b to lie in the range of A. The checks are
-disabled because the code does not deal with real numbers,
-but rather floating point numbers; it's up to the user to decide
-what is "close enough" to zero.
-
-*/
-
-#include <stdlib.h>
-#include <stdio.h>
-#include "positive_solver.h"
-
-void _consistency_checker(double * v, int n) {
-    for (int i=0; i<n; i++) {
-        if ( v[i] != 0.0 ) exit(-1);
-    }
-}
-
-void _positive_solver(
-    double ** A, 
-    double * b, 
-    double * x, 
+static int _positive_solver_rec(
+    double ** A,
+    double * x,
+    double * b,
     int n
-    ) 
+    )
 {
-  if (n < 1) exit(-1);
-
+  int status = 0;
+  /// printf("The alpha is %f\n", A[0][0]);
+  if (n < 1) { go_BYE(-1); }
   if (n == 1) {
     if (A[0][0] == 0.0) {
-        /* _consistency_checker(b, 1); */
+        if (b[0] != 0.0) { go_BYE(-1); }
         x[0] = 0.0;
-        return;
+        return 0;
     }
     x[0] = b[0] / A[0][0];
-    return;
+    return 0;
   }
 
   double * bvec = b + 1;
@@ -305,44 +258,33 @@ void _positive_solver(
 
   int m = n -1;
 
-  if (A[0][0] == 0.0) {
-      /*
-      _consistency_checker(b, 1);
-      _consistency_checker(Avec, m);
-      */
-  } else {
-      for(int j=0; j < m; j++){
-        bvec[j] -= Avec[j] * b[0] / A[0][0];
-        for(int i=0; i < m - j; i++)
-          Asub[i][j] -= Avec[i] * Avec[i+j] / A[0][0];
-      }
-  }
+  if (A[0][0] != 0.0) {
+    for(int i=0; i < m; i++){
+      bvec[i] -= Avec[i] * b[0] / A[0][0];
+      for(int j=0; j < m - i; j++)
+        Asub[i][j] -= Avec[i] * Avec[i+j] / A[0][0];
+    }
+  } /* else check that Avec is 0 */
 
-  _positive_solver(Asub, bvec, xvec, m);
+  status = _positive_solver_rec(Asub, xvec, bvec, m);
+  cBYE(status);
+  if ( status < 0 ) { return status; }
 
   if (A[0][0] == 0.0) {
+      if (b[0] != 0.0) { go_BYE(-1); }  /* or close enough... */
       x[0] = 0.0;
-      return;
+      return status;
   }
 
-  double p = 0; for(int k=0; k<m; k++) p += Avec[k] * xvec[k];
+  double p = 0;
+  for ( int k = 0; k < m; k++ ) {
+    p += Avec[k] * xvec[k];
+  }
 
   x[0] = (b[0] - p) / A[0][0];
 
-  return;
+BYE:
+  return status;
 }
-
-#include <malloc.h>
-double * positive_solver(
-    double ** A, 
-    double * b, 
-    int n
-    ) 
-{
-  double * x = (double *) malloc(n * sizeof(double));
-  _positive_solver(A, b, x, n);
-  return x;
-}
-
 \end{verbatim}
 \end{document}
