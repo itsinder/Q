@@ -135,10 +135,10 @@ run_lapack_tests(
     for (int j = 0; j < n; j++) {
       A_unrolled[n * i + j] = A[i][j];
     }
-    for (int j = 0; j < n - i; j++) {
-      AtA_unrolled[n * i + j] = AtA[i][j];
+    for (int j = 0; j <= i; j++) {
+      AtA_unrolled[n * i + j] = AtA[j][i - j];
     }
-    for (int j = n - i; j < n; j++) {
+    for (int j = i + 1; j < n; j++) {
       AtA_unrolled[n * i + j] = 0;
     }
   }
@@ -150,9 +150,9 @@ run_lapack_tests(
   _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", verbose, n, runtime);
 
   begin = clock();
-  LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', N, NRHS, AtA_unrolled, LDA, b_AtA_copy, LDB);
+  LAPACKE_dposv(LAPACK_COL_MAJOR, 'U', N, NRHS, AtA_unrolled, LDA, b_AtA_copy, LDB);
   runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
-  multiply_matrix_vector(A, b_AtA_copy, n, b_returned);
+  multiply_symm_matrix_vector(AtA, b_AtA_copy, n, b_returned);
   _print_result(x_expected, b_AtA_copy, b_AtA, b_returned, "LAPACK_POSDEF", verbose, n, runtime);
 
 BYE:
