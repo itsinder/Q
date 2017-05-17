@@ -26,7 +26,7 @@ c4:set_meta("bye", {1,2,3})
 my_dict = dictionary("hello")
 my_dict:add("please")
 save("_try.txt")
-for line in io.lines("_try.txt") do
+for line in io.lines(os.getenv("Q_METADATA_DIR") .. "/_try.txt") do
    print(line)
 end
 

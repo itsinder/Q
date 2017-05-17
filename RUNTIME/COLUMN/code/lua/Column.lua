@@ -125,10 +125,11 @@ function Column:sz()
 end
 
 function Column:memo(bool)
-   self.vec:memo(bool)
+   local res = self.vec:memo(bool)
    if self.nn_vec ~= nil then
-      self.nn_vec(bool)
+      assert(res == self.nn_vec(bool))
    end
+   return res
 end
 
 function Column:ismemo()
@@ -136,14 +137,14 @@ function Column:ismemo()
 end
 
 function Column:last_chunk()
-   local vec, size = self.vec:last_chunk()
-   local nn_vec , nn_size = nil, nil
+   local vec_num = self.vec:last_chunk()
+   local nn_num = nil
    if self.nn_vec ~= nil then
-      nn_vec , nn_size = self.nn_vec:last_chunk()
-      assert(size == nn_size, "Size of both chunks is the same")
+      nn_num = self.nn_vec:last_chunk()
+      assert(vec_num == nn_num, "Position of both vectors has to be the same")
       assert(vec ~= nn_vec, "The vectors are different")
    end
-   return size, vec, nn_vec
+   return vec_num
 end
 
 function Column:materialized()
@@ -247,8 +248,20 @@ function Column:wrap()
    end)
 end
 
+function Column:eval()
+   if self.gen ~= nil and self:memo() == true then
+        -- Drain the column
+    local index = self:last_chunk() or 0 
+    while self:materialized() == false do
+        self:chunk(index)
+        index = index + 1
+    end
+   end
+end
+
 function Column:persist(name)
- return string.format("Column{field_type='%s', filename='%s', nn=%s,}",self.vec.field_type, plpath.abspath(self.vec.filename), tostring(self.nn_vec ~=nil) )
+ 
+    return string.format("Column{field_type='%s', filename='%s', nn=%s,}",self.vec.field_type, plpath.abspath(self.vec.filename), tostring(self.nn_vec ~=nil) )
 end
 
 function Column:__tostring()

@@ -80,8 +80,9 @@ local function save(name, value, saved, file)
     end
 end
 
-local function save_global(filepath)
-    assert(filepath ~= nil, "A valid filepath has to be given")
+local function save_global(filename)
+    assert(filename ~= nil, "A valid filename has to be given")
+    local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
     local saved = {}
     -- TODO get requires in place to be added in v2 like require "Vector"
@@ -91,5 +92,6 @@ local function save_global(filepath)
         end
     end
     file:close()
+    print("Saved to " .. filepath)
 end
 return save_global
