@@ -8,7 +8,7 @@ end
 
 local q_core = require 'q_core'
 local ffi_malloc = require 'ffi_malloc'
-local Generator = require "Generator"
+-- local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
 g_valid_types = {}
@@ -139,7 +139,8 @@ local c10 = Column{field_type="i", gen=c9_gen}
 local i = 0 
 while c10:materialized() == false do
    q_size, q, q_nn = c10:chunk(i)
-   print(q_size)
+   print(i, q_size)
+   i = i+ 1 
    for j=1,q_size do 
       print(tonumber(ffi.cast("int*", q)[j-1]))
    end
