@@ -1,8 +1,8 @@
-  local gen_code = require("gen_code")
+  local gen_code = require 'gen_code'
   local plpath = require 'pl.path'
   loadfile 'globals.lua'
-  local srcdir = "../gen_src/"
-  local incdir = "../gen_inc/"
+  local srcdir = '../gen_src/'
+  local incdir = '../gen_inc/'
   local operator_file = assert(arg[1])
   assert(plpath.isfile(operator_file))
   local operators = assert(dofile(operator_file))

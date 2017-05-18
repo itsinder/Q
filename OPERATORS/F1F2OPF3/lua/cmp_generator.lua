@@ -1,11 +1,11 @@
 #!/usr/bin/env lua
-  local gen_code =  require("gen_code")
+  local gen_code = require 'gen_code'
   local pl = require 'pl'
   loadfile 'globals.lua'
 
-  local srcdir = "../gen_src/"
-  local incdir = "../gen_inc/"
-  local operators = dofile 'cmp_operators.lua' 
+  local srcdir = '../gen_src/'
+  local incdir = '../gen_inc/'
+  local operators = assert(dofile 'cmp_operators.lua')
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
   args = nil -- not being used just yet
