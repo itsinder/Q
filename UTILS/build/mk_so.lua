@@ -118,13 +118,13 @@ local tgt_o = opdir .. "/libq.so"
 local tgt_h = opdir .. "/q.h"
 
 local pattern = "*.c"
-local cdir = opdir .. "/LUAC/"
+local cdir = opdir .. "/LUAC"
 os.execute("rm -r -f " .. cdir)
 plpath.mkdir(cdir)
 xcopy(pattern, root, dirs_to_exclude, files_to_exclude, cdir)
 --==========================
 local pattern = "*.h"
-local hdir = opdir .. "/LUAH/"
+local hdir = opdir .. "/LUAH"
 os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, dirs_to_exclude, files_to_exclude, hdir)
@@ -144,7 +144,6 @@ for i,v in ipairs(h_files) do
     if not plpath.isfile(f) then
         f = hdir .. "/_" .. v
     end
-
     if is_struct_file(f) then
         q_core_struct_files[#q_core_struct_files + 1 ] = f
     else
@@ -168,6 +167,9 @@ for i, v in ipairs(c_files) do
     end
     q_core_h_set[f] = true
 end
+--. for k,v in pairs(q_core_h_set) do
+--.    print ("q_core", k)
+--. end
 q_core_h = add_files_to_list(q_core_h, q_core_struct_files)
 q_core_h = add_files_to_list(q_core_h, q_core_h_files)
 q_core_h = table.concat(q_core_h, "\n")
@@ -181,6 +183,7 @@ local q_struct_files = {}
 local q_h = {}
 local q_h_files = {}
 local q_c_files = {}
+local q_h_set = {} 
 local h_files = pldir.getfiles(hdir, "*.h")
 for num=1,#h_files do
     local file_path = h_files[num]
@@ -190,8 +193,13 @@ for num=1,#h_files do
         else
             q_h_files[#q_h_files + 1] = file_path
         end
+        q_h_set[file_path] = true
     end
 end
+--. for k,v in pairs(q_h_set) do
+--.    print ("q", k)
+--. end
+
 q_h = add_files_to_list(q_h, q_struct_files)
 q_h = add_files_to_list(q_h, q_h_files)
 q_h = table.concat(q_h, "\n")

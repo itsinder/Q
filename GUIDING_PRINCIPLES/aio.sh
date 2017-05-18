@@ -21,11 +21,11 @@
 # sudo luarocks install luaposix
 # 
 #  ######## Build Q #########
-# source ../setup.sh -f 
-# cd ../UTILS/build
-# lua build.lua gen.lua
-# lua mk_so.lua /tmp/
-# cd - 
+source ../setup.sh -f 
+cd ../UTILS/build
+lua build.lua gen.lua
+lua mk_so.lua /tmp/
+cd - 
 PROG="
 q_core = require 'q_core'
 q = require 'q'
@@ -36,6 +36,16 @@ mk_col = require 'mk_col'
 save = require 'save'
 print('SUCCESS')
 "
+# load csv
+# mk col
+# print csv
+# save
+
+# number 2
+# restore
+# print csv
+
+# performance test stretch goal - add 
 luajit -e "$PROG" &>/dev/null
 RES=$?
 if [[ $RES -eq 0 ]] ; then

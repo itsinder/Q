@@ -1,3 +1,4 @@
+local q_core = require 'q_core'
 local ffi = require "ffi"
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
@@ -25,6 +26,7 @@ local q_mt = {
          return ffi.NULL
       else
          return cee[key]
+         -- TODO: indrajeet add q_core function if not exists
       end
    end,
 }

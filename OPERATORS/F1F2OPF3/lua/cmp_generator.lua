@@ -31,17 +31,9 @@
       for j, in2type in ipairs(types) do 
         local status, subs, tmpl = pcall(sp_fn, in1type, in2type)
         if ( status ) then 
-          -- TODO Improve following.
-          local T = dofile(tmpl)
-          T.fn         = subs.fn
-          T.in1type    = subs.in1type
-          T.in2type    = subs.in2type
-          T.out_qtype = subs.out_qtype
-          T.out_ctype = subs.out_ctype
-          T.comparison = subs.comparison
-          gen_code.doth(subs.fn, T, incdir)
-          gen_code.dotc(subs.fn, T, srcdir)
-          print("Produced ", T.fn)
+          gen_code.doth(subs, tmpl, incdir)
+          gen_code.dotc(subs, tmpl, srcdir)
+          print("Produced ", subs.fn)
         end
       end
     end
