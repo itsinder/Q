@@ -17,7 +17,6 @@ and certain other scalars. It is related to the Cholesky decomposition, but side
 to directly construct the solution. We include a C implementation of the most important case, that where
 real numbers are represented as double precision numbers and the matrix $A$ is symmetric and positive semi-definite.
 
-
 \section{Definitions}
 
 The adjoint of a matrix, denoted $A^*$, is equivalent to the transpose when the
@@ -96,14 +95,13 @@ values are horizontal, so the slope $2a_{n-1}^*a_{n-1}$ must be zero, which mean
 be zero.
 
 Our equation then simplifies to 
-$
-\bmat{0 & 0 \\ 0 & A_{n-1}}\bmat{\chi_n\\x_{n-1}} =\bmat{\beta_n\\b_{n-1}}
-$, or $0=\beta_n$, and
-$A_{n-1}x_{n-1}=b_{n-1} $. The first equation tells us that there can be no solution unless
-$\beta_n=0$. If, however, it is, then any solution $x_{n-1}$ of the
-second equation, which we note, satisfies the same properties we required of 
-$A_n$, can be combined with any number $z_n$ into a solution,
-$A_n\bmat{z_n\\x_{n-1}} = b_n$
+$$\bmat{0 & 0 \\ 0 & A_{n-1}}\bmat{\chi_n\\x_{n-1}} =\bmat{\beta_n\\b_{n-1}}$$,
+or $0=\beta_n$, and$A_{n-1}x_{n-1}=b_{n-1} $. The first equation tells us that
+there can be no solution unless $\beta_n=0$. If, however, it is, then any
+solution $x_{n-1}$ of the second equation, which we note, satisfies the same
+properties we required of $A_n$, can be combined with any number $z_n$ into a
+solution, $A_n\bmat{z_n\\x_{n-1}} = b_n$
+
 
 In particular, we can always take $z_n$ to be 0.
 
@@ -216,15 +214,15 @@ $A$ is positive, the solution is unique, and a solution whose entries lie in the
 \newpage
 \section{Implementation Notes}
 At each level of recursion, we only need to retain
-$a$,
-$\alpha$
+$a_n$,
+$\alpha_n$
 and
-$\beta$, allowing us to overwrite
-$A^{'}$
-with $(A^{'} - a\alpha^{-1}a^*)$
+$\beta_n$, allowing us to overwrite
+$A_{n-1}$
+with $(A_{n-1} - a_n\alpha_n^{-1}a_n^*)$
 and
-$b^{'}$ with
-$b^{'}-a\alpha^{-1}\beta$
+$b_{n-1}$ with
+$b_{n-1}-a_n\alpha_n^{-1}\beta_n$
 .
 
 We conclude with a C-language implementation of a solver for the positive semi-definite case, where
