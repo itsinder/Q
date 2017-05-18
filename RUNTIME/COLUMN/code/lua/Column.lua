@@ -92,8 +92,6 @@ function Column.new(arg)
          nn_vec_args.nn = nil
          nn_vec_args.filename = nn_vec_args.nn_filename or (nn_vec_args.filename .. "_nn")
          nn_vec_args.field_type= "B1"
-         -- TODO integrate with Ramesh and remove this
-         nn_vec_args.field_size = 1/8
          column.nn_vec = Vector(nn_vec_args)
       end
    end

@@ -11,19 +11,14 @@ local ffi_malloc = require 'ffi_malloc'
 -- local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
-g_valid_types = {}
-g_valid_types['i'] = 'int'
-g_valid_types['f'] = 'float'
-g_valid_types['d'] = 'double'
-g_valid_types['c'] = 'char'
-g_valid_types['B1'] = 'unsigned char'
+require 'globals'
 g_chunk_size = 16
 --local size = 1000
 --create bin file of only ones of type int
-local v1 = Vector{field_type='i',
+local v1 = Vector{field_type='I4',
 filename='test1.txt', }
 
-local v2 = Vector{field_type='i',
+local v2 = Vector{field_type='I4',
 filename='test1.txt', }
 
 local x, x_size = v1:chunk(0)
@@ -45,7 +40,7 @@ print_vector(y, y_size)
 -- end
 
 --TODO add tests for put to vector
-local v3 = Vector{field_type='i',
+local v3 = Vector{field_type='I4',
 filename="o.txt", write_vector=true, 
 }
 v3:put_chunk(x, x_size)
@@ -66,13 +61,13 @@ local a, a_size = z, z_size
 print("Vector bit get test")
 local a_int = ffi_malloc(ffi.sizeof("int")* a_size)
 q_core.get_bits_from_array(a, a_int, a_size)
-local t2 = Vector{field_type="i", write_vector=true}
+local t2 = Vector{field_type='I4', write_vector=true}
 t2:put_chunk(a_int, a_size)
 t2:eov()
 print "**************"
 print_vector(a_int, a_size)
 -- add function to print bits:b2
-v5 = Column{field_type='i',
+v5 = Column{field_type='I4',
 filename="o2.txt", write_vector=true,
  }
  v5:put_chunk(x_size, x )
@@ -81,7 +76,7 @@ t1 = Vector{filename="t1.txt", field_type="B1", write_vector=true}
 t1:put_chunk(a,x_size)
 t1:eov()
 
-v6 = Column{field_type='i',
+v6 = Column{field_type='I4',
 filename="o3.txt", write_vector=true, nn=true
  }
 assert(v6.nn_vec ~= nil , "has an nn vector")
@@ -128,14 +123,14 @@ V7:put_chunk(a, 2)
 V7:eov()
 -- Column generator
 local gen = v6:wrap()
-local c8 = Column{field_type="i", gen=gen}
+local c8 = Column{field_type='I4', gen=gen}
 q_size, q, q_nn = c8:chunk(0)
 print(q_size)
 
-local c9_gen = Column{field_type='i',
+local c9_gen = Column{field_type='I4',
 filename='test1.txt', }:wrap()
 
-local c10 = Column{field_type="i", gen=c9_gen}
+local c10 = Column{field_type='I4', gen=c9_gen}
 local i = 0 
 while c10:materialized() == false do
    q_size, q, q_nn = c10:chunk(i)
