@@ -37,7 +37,7 @@ return require 'code_gen' {
 extern void
 qsort_${SORT_ORDER}_${FLDTYPE} (
 	    ${FLDTYPE} f1, 
-	    ssize_t total_elems
+	    size_t total_elems
 	    );
 ]],
 definition = [[
@@ -104,7 +104,7 @@ typedef struct
 void
 ${NAME} ( 
 	    ${FLDTYPE} *f1,
-	    ssize_t total_elems
+	    size_t total_elems
 	    )
 // STOP FUNC DECL
 {

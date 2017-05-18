@@ -32,7 +32,6 @@
       if ( status ) then 
         assert(type(subs) == "table")
         assert(type(tmpl) == "string")
-        -- TODO Improve following.
         gen_code.doth(subs, tmpl, incdir)
         gen_code.dotc(subs, tmpl, srcdir)
         print("Generated ", subs.fn)
