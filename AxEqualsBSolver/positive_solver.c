@@ -1,23 +1,3 @@
-/*
- * Andrew Winkler
-It has the virtue of dramatic simplicity - there's no need to explicitly construct the cholesky decomposition, no need to do the explicit backsubstitutions.
-Yet it's essentially equivalent to that more labored approach, so its performance/stability/memory, etc. should be at least as good.
-
-*/
-
-/* unless otherwise specified, these functions expect
-   the lower (equivalently upper) triangular elements
-   of a symmetric, positive semidefinite matrix A,
-   e.g. if the matrix is
-   [ 1, 2, 3 ]
-   [ 2, 4, 5 ]
-   [ 3, 5, 6 ]
-   A should be
-   A[0] = [ 1, 2, 3 ]
-   A[1] = [    4, 5 ]
-   A[2] = [       6 ]
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -26,6 +6,10 @@ Yet it's essentially equivalent to that more labored approach, so its performanc
 #include "positive_solver.h"
 #include "macros.h"
 
+/* Andrew Winkler
+ It has the virtue of dramatic simplicity - there's no need to explicitly construct the cholesky decomposition, no need to do the explicit backsubstitutions.
+ Yet it's essentially equivalent to that more labored approach, so its performance/stability/memory, etc. should be at least as good.
+*/
 static int _positive_solver_rec(
     double ** A,
     double * x,
@@ -82,8 +66,6 @@ BYE:
   return status;
 }
 
-/* destructively updates its input.
- */
 int posdef_positive_solver_fast(
     double ** A,
     double * x,
@@ -94,8 +76,6 @@ int posdef_positive_solver_fast(
   return _positive_solver_rec(A, x, b, n);
 }
 
-/* preserves its input.
- */
 int posdef_positive_solver(
     double ** A,
     double * x,
@@ -104,32 +84,29 @@ int posdef_positive_solver(
     )
 {
   int status = 0;
-  // create a copy of A and b
-  double ** Acopy = NULL;
-  double * bcopy = NULL;
+  // copoies of A and b to preserve input.
+  double ** A_copy = NULL;
+  double * b_copy = NULL;
 
-  status = alloc_symm_matrix(&Acopy, n); cBYE(status);
-  bcopy = malloc(n * sizeof(double));
-  return_if_malloc_failed(bcopy);
+  status = alloc_symm_matrix(&A_copy, n); cBYE(status);
+  b_copy = malloc(n * sizeof(double));
+  return_if_malloc_failed(b_copy);
 
   for ( int i = 0; i < n; i++ ) {
     for ( int j = 0; j < n-i; j++ ) {
-      Acopy[i][j] = A[i][j];
+      A_copy[i][j] = A[i][j];
     }
-    bcopy[i] = b[i];
+    b_copy[i] = b[i];
   }
 
-  status = _positive_solver_rec(Acopy, x, bcopy, n);
+  status = _positive_solver_rec(A_copy, x, b_copy, n);
 
 BYE:
-  free_matrix(Acopy, n);
-  free_if_non_null(bcopy);
+  free_matrix(A_copy, n);
+  free_if_non_null(b_copy);
   return status;
 }
 
-/* expects a symmetric, positive semidefinite matrix with each column fully specified.
- * destructively updates its input.
- */
 int full_posdef_positive_solver_fast(
     double ** A,
     double * x,
@@ -151,9 +128,6 @@ BYE:
   return status;
 }
 
-/* expects a symmetric, positive semidefinite matrix with each column fully specified.
- * preserves its input.
- */
 int full_posdef_positive_solver(
     double ** A,
     double * x,
@@ -162,34 +136,28 @@ int full_posdef_positive_solver(
     )
 {
   int status = 0;
-  // create a copy of A and b
-  double ** Acopy = NULL;
-  double * bcopy = NULL;
+  // copies of A and b in order to preserve input.
+  double ** A_copy = NULL;
+  double * b_copy = NULL;
 
-  status = alloc_symm_matrix(&Acopy, n); cBYE(status);
-  bcopy = malloc(n * sizeof(double));
-  return_if_malloc_failed(bcopy);
+  status = alloc_symm_matrix(&A_copy, n); cBYE(status);
+  b_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_copy);
 
   for ( int i = 0; i < n; i++ ) {
     for ( int j = 0; j < n-i; j++ ) {
-      Acopy[i][j] = A[i][j + i];
+      A_copy[i][j] = A[i][j + i];
     }
-    bcopy[i] = b[i];
+    b_copy[i] = b[i];
   }
 
-  status = _positive_solver_rec(Acopy, x, bcopy, n);
+  status = _positive_solver_rec(A_copy, x, b_copy, n);
 
  BYE:
-  free_matrix(Acopy, n);
-  free_if_non_null(bcopy);
+  free_matrix(A_copy, n);
+  free_if_non_null(b_copy);
   return status;
 }
 
-
-/* expects the columns of a full matrix. preserves its input.
-   up to caller to determine if solution is valid,
-   since one is not guaranteed to exist.
- */
 int positive_solver(
     double ** A,
     double * x,
@@ -199,11 +167,10 @@ int positive_solver(
 {
   int status = 0;
 
-  double ** AtA = NULL; // A transpose * A
-  double * Atb = NULL; // A transpose * b
+  double ** AtA = NULL;
+  double * Atb = NULL;
   status = alloc_symm_matrix(&AtA, n); cBYE(status);
-  Atb = malloc(n * sizeof(double));
-  return_if_malloc_failed(Atb);
+  Atb = malloc(n * sizeof(double)); return_if_malloc_failed(Atb);
 
   transpose_and_multiply(A, AtA, n);
   transpose_and_multiply_matrix_vector(A, b, n, Atb);

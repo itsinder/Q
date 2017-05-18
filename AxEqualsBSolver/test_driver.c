@@ -255,19 +255,36 @@ main(
 {
   int status = 0;
   int n = 0;                 // dimension of matrices
-  int verbose = 0;
+  bool verbose = false;
   double **A = NULL;         // randomly generated n * n matrix
   double **A_posdef = NULL;  // randomly generated positive definite matrix (right now just A transpose * A)
   double *x_expected = NULL; // randomly generated solution
   double *b_posdef = NULL;   // A_posdef * x_expected
   double *b_full = NULL;     // A * x_expected
+
   srand48(_RDTSC());
-  fprintf(stderr, "Usage is ./driver <n> [-v] \n");
+
+  bool print_usage = false;
   switch ( argc ) {
-  case 3 : verbose = strcmp("-d", argv[2]) == 0;
-  case 2 : n = atoi(argv[1]); break;
-  default : go_BYE(-1); break;
+  case 3 :
+    if (strcmp("-v", argv[2]) == 0) {
+      verbose = true;
+    } else {
+      print_usage = true;
+    } // fall through
+  case 2 :
+    n = atoi(argv[1]);
+    break;
+  default :
+    print_usage = true;
+    break;
   }
+  if (print_usage || n <= 0) {
+    printf("Usage: ./test_driver <n> [-v]\n");
+    printf("where n is a positive integer and -v provides verbose output.\n");
+    go_BYE(-1);
+  }
+
   status = alloc_matrix(&A, n); cBYE(status);
   status = alloc_symm_matrix(&A_posdef, n); cBYE(status);
 
@@ -305,23 +322,3 @@ BYE:
 
   return status;
 }
-/*
-My initial checking failed.
-
-Andrew: Ok, the problem is that if A isn’t positive, there are
-multiple solutions. Rather than checking that x is what you expect,
-instead check that Ax = b There’s no reason why the algorithm would
-come up with the same solution when it’s not unique And since these
-random matrices aren’t being compelled to be positive, there will be
-multiple solutions
-
-Ramesh Subramonian: BTW, is this correct: A positive matrix is a matrix
-in which all the elements are greater than zero.
-
-Andrew Winkler: No, a positive matrix is one for which xtAx > 0 unless
-x is 0
-
-Ramesh Subramonian: ahah! remind me not to trust Google when I have a
-professional mathematician to rely on!
-
-*/
