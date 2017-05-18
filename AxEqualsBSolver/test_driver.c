@@ -99,12 +99,93 @@ _print_result(double *x_expected, double *x_returned,
 }
 
 static int
-run_lapack_tests(
+_run_our_tests(
     double **A,
     double *x_expected,
     double *b,
-    double **AtA,
-    double *b_AtA,
+    double **A_posdef,
+    double *b_posdef,
+    int n,
+    bool verbose
+    )
+{
+  int status = 0;
+
+  double **A_posdef_copy = NULL;
+  double **A_posdef_full = NULL;
+  double *b_posdef_copy = NULL;
+  double *b_returned = NULL;
+  double *x_returned = NULL;
+  clock_t begin;
+  double runtime;
+
+  status = alloc_symm_matrix(&A_posdef_copy, n); cBYE(status);
+  status = alloc_matrix(&A_posdef_full, n); cBYE(status);
+  b_posdef_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_copy);
+  b_returned = malloc(n * sizeof(double)); return_if_malloc_failed(b_returned);
+  x_returned = malloc(n * sizeof(double)); return_if_malloc_failed(x_returned);
+
+  for (int i = 0; i < n; i++) {
+    b_posdef_copy[i] = b_posdef[i];
+    for(int j = 0; j < n; j++) {
+      A_posdef_full[i][j] = index_symm_matrix(A_posdef, i, j);
+      if (j < n - i) {
+        A_posdef_copy[i][j] = A_posdef[i][j];
+      }
+    }
+  }
+
+  // time computations for each solver
+  begin = clock();
+  status = posdef_positive_solver(A_posdef, x_returned, b_posdef, n); cBYE(status);
+  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", verbose, n, runtime);
+
+  begin = clock();
+  status = posdef_positive_solver_fast(A_posdef_copy, x_returned, b_posdef_copy, n); cBYE(status); cBYE(status);
+  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", verbose, n, runtime);
+
+  begin = clock();
+  status = full_posdef_positive_solver(A_posdef_full, x_returned, b_posdef, n); cBYE(status);
+  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", verbose, n, runtime);
+
+  for (int i = 0; i < n; i++) {
+    b_posdef_copy[i] = b_posdef[i];
+  }
+  begin = clock();
+  status = full_posdef_positive_solver_fast(A_posdef_full, x_returned, b_posdef_copy, n); cBYE(status);
+  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", verbose, n, runtime);
+
+  begin = clock();
+  status = positive_solver(A, x_returned, b, n); cBYE(status);
+  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  multiply_matrix_vector(A, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b, b_returned, "FULL", verbose, n, runtime);
+
+BYE:
+  free_matrix(A_posdef_copy, n);
+  free_matrix(A_posdef_full, n);
+  free_if_non_null(b_posdef_copy);
+  free_if_non_null(b_returned);
+  free_if_non_null(x_returned);
+
+  return status;
+}
+
+static int
+_run_lapack_tests(
+    double **A,
+    double *x_expected,
+    double *b,
+    double **A_posdef,
+    double *b_posdef,
     int n,
     bool verbose
     )
@@ -116,30 +197,30 @@ run_lapack_tests(
   lapack_int LDB = N;
 
   double *A_unrolled = NULL;
-  double *AtA_unrolled = NULL;
+  double *A_posdef_unrolled = NULL;
   double *b_copy = NULL;
-  double *b_AtA_copy = NULL;
+  double *b_posdef_copy = NULL;
   double *b_returned = NULL;
   lapack_int *ipiv = NULL;
 
   A_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_unrolled);
-  AtA_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(AtA_unrolled);
+  A_posdef_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_posdef_unrolled);
   b_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_copy);
-  b_AtA_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_AtA_copy);
+  b_posdef_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_copy);
   b_returned = malloc(n * sizeof(double)); return_if_malloc_failed(b_returned);
   ipiv = malloc(n * sizeof(lapack_int)); return_if_malloc_failed(ipiv);
 
   for (int i = 0; i < n; i++) {
     b_copy[i] = b[i];
-    b_AtA_copy[i] = b_AtA[i];
+    b_posdef_copy[i] = b_posdef[i];
     for (int j = 0; j < n; j++) {
       A_unrolled[n * i + j] = A[i][j];
     }
     for (int j = 0; j <= i; j++) {
-      AtA_unrolled[n * i + j] = AtA[j][i - j];
+      A_posdef_unrolled[n * i + j] = A_posdef[j][i - j];
     }
     for (int j = i + 1; j < n; j++) {
-      AtA_unrolled[n * i + j] = 0;
+      A_posdef_unrolled[n * i + j] = 0;
     }
   }
 
@@ -150,16 +231,16 @@ run_lapack_tests(
   _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", verbose, n, runtime);
 
   begin = clock();
-  LAPACKE_dposv(LAPACK_COL_MAJOR, 'U', N, NRHS, AtA_unrolled, LDA, b_AtA_copy, LDB);
+  LAPACKE_dposv(LAPACK_COL_MAJOR, 'U', N, NRHS, A_posdef_unrolled, LDA, b_posdef_copy, LDB);
   runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(AtA, b_AtA_copy, n, b_returned);
-  _print_result(x_expected, b_AtA_copy, b_AtA, b_returned, "LAPACK_POSDEF", verbose, n, runtime);
+  multiply_symm_matrix_vector(A_posdef, b_posdef_copy, n, b_returned);
+  _print_result(x_expected, b_posdef_copy, b_posdef, b_returned, "LAPACK_POSDEF", verbose, n, runtime);
 
 BYE:
   free_if_non_null(A_unrolled);
-  free_if_non_null(AtA_unrolled);
+  free_if_non_null(A_posdef_unrolled);
   free_if_non_null(b_copy);
-  free_if_non_null(b_AtA_copy);
+  free_if_non_null(b_posdef_copy);
   free_if_non_null(b_returned);
   free_if_non_null(ipiv);
 
@@ -173,18 +254,13 @@ main(
     )
 {
   int status = 0;
-  int n = 0;                       // dimension of matrices
+  int n = 0;                 // dimension of matrices
   int verbose = 0;
-  double **A = NULL;               // randomly generated n * n matrix
-  double **AtA = NULL;             // A transpose times A
-  double **AtA_copy = NULL;        // copy for testing solver that modifies input
-  double **AtA_full = NULL;        // A transpose times A
-  double *x_expected = NULL;       // randomly generated solution
-  double *x_returned = NULL;       // solution returned by full, non-posdef solver
-  double *b_posdef = NULL;         // AtA * x_expected
-  double *b_posdef_copy = NULL;    // copy for testing solver that modifies input
-  double *b_full = NULL;           // A * x_expected
-  double *b_returned = NULL;       // A * x_expected
+  double **A = NULL;         // randomly generated n * n matrix
+  double **A_posdef = NULL;  // randomly generated positive definite matrix (right now just A transpose * A)
+  double *x_expected = NULL; // randomly generated solution
+  double *b_posdef = NULL;   // A_posdef * x_expected
+  double *b_full = NULL;     // A * x_expected
   srand48(_RDTSC());
   fprintf(stderr, "Usage is ./driver <n> [-v] \n");
   switch ( argc ) {
@@ -193,102 +269,40 @@ main(
   default : go_BYE(-1); break;
   }
   status = alloc_matrix(&A, n); cBYE(status);
-  status = alloc_symm_matrix(&AtA, n); cBYE(status);
-  status = alloc_symm_matrix(&AtA_copy, n); cBYE(status);
-  status = alloc_matrix(&AtA_full, n); cBYE(status);
+  status = alloc_symm_matrix(&A_posdef, n); cBYE(status);
 
   for ( int i = 0; i < n; i++ )  {
     for ( int j = 0; j < n; j++ ) {
       A[i][j] = (drand48() - 0.5) * 100;
     }
   }
-  transpose_and_multiply(A, AtA, n);
+  transpose_and_multiply(A, A_posdef, n);
   b_posdef = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef);
-  b_posdef_copy = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_posdef_copy);
   b_full = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_full);
-  b_returned = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(b_returned);
   x_expected = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_expected);
-  x_returned = (double *) malloc(n * sizeof(double)); return_if_malloc_failed(x_returned);
 
   // Initialize x and b
   for ( int i = 0; i < n; i++ )  {
     x_expected[i] = (lrand48() % 16) - 16/2;
   }
-  multiply_symm_matrix_vector(AtA, x_expected, n, b_posdef);
+  multiply_symm_matrix_vector(A_posdef, x_expected, n, b_posdef);
   multiply_matrix_vector(A, x_expected, n, b_full);
 
-  // make copies manually so we can test functions that modify their input
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n - i; j++) {
-      AtA_copy[i][j] = AtA[i][j];
-      AtA_full[i][i + j] = AtA[i][j];
-      AtA_full[i + j][i] = AtA[i][j];
-    }
-    b_posdef_copy[i] = b_posdef[i];
-  }
-
   if (verbose) {
-    _print_input(AtA, x_expected, b_posdef, n);
+    _print_input(A_posdef, x_expected, b_posdef, n);
   }
 
-  clock_t begin, end;
-  double runtime;
+  _run_our_tests(A, x_expected, b_full, A_posdef, b_posdef, n, verbose);
 
-  // time computations for each solver
-  begin = clock();
-  status = posdef_positive_solver(AtA, x_returned, b_posdef, n); cBYE(status);
-  end = clock();
-  runtime = (double)(end - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(AtA, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", verbose, n, runtime);
-
-  begin = clock();
-  status = posdef_positive_solver_fast(AtA_copy, x_returned, b_posdef_copy, n); cBYE(status);
-  end = clock();
-  runtime = (double)(end - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(AtA, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", verbose, n, runtime);
-
-  begin = clock();
-  status = full_posdef_positive_solver(AtA_full, x_returned, b_posdef, n);
-  end = clock();
-  cBYE(status);
-  multiply_symm_matrix_vector(AtA, x_returned, n, b_returned);
-  runtime = (double)(end - begin) / CLOCKS_PER_SEC;
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", verbose, n, runtime);
-
-  for (int i = 0; i < n; i++) {
-    b_posdef_copy[i] = b_posdef[i];
-  }
-  begin = clock();
-  status = full_posdef_positive_solver_fast(AtA_full, x_returned, b_posdef_copy, n);
-  end = clock();
-  cBYE(status);
-  multiply_symm_matrix_vector(AtA, x_returned, n, b_returned);
-  runtime = (double)(end - begin) / CLOCKS_PER_SEC;
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", verbose, n, runtime);
-
-  begin = clock();
-  status = positive_solver(A, x_returned, b_full, n);
-  end = clock();
-  cBYE(status);
-  multiply_matrix_vector(A, x_returned, n, b_returned);
-  runtime = (double)(end - begin) / CLOCKS_PER_SEC;
-  _print_result(x_expected, x_returned, b_full, b_returned, "FULL", verbose, n, runtime);
-
-  run_lapack_tests(A, x_expected, b_full, AtA, b_posdef, n, verbose);
+  _run_lapack_tests(A, x_expected, b_full, A_posdef, b_posdef, n, verbose);
 
 BYE:
   free_matrix(A, n);
-  free_matrix(AtA, n);
-  free_matrix(AtA_copy, n);
-  free_matrix(AtA_full, n);
+  free_matrix(A_posdef, n);
   free_if_non_null(x_expected);
-  free_if_non_null(x_returned);
   free_if_non_null(b_posdef);
-  free_if_non_null(b_posdef_copy);
   free_if_non_null(b_full);
-  free_if_non_null(b_returned);
+
   return status;
 }
 /*
