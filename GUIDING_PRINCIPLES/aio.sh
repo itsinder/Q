@@ -86,6 +86,8 @@ PROG_RESTORE="
 dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
 print(type(x))
 print(x:length())
+print_csv = require 'print_csv'
+print_csv(x, nil, "")
 "
 # load csv
 # mk col
