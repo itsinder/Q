@@ -1,31 +1,68 @@
 #!/bin/bash
+COLOR_RED='\e[0;91m'
+COLOR_GREEN='\e[0;92m'
+COLOR_NORMAL='\e[0m'
+my_print(){
+   if [ -z "$2" ] ; then
+      echo -e "$COLOR_GREEN AIO: $1 $COLOR_NORMAL"
+   else
+      echo -e "$COLOR_RED AIO: $1 $COLOR_NORMAL"
+   fi
+}
+
+
+
 ###Install lua , luajit and luarocks
 ### Install lua ####
-# sudo apt-get install lua5.1 -y
-# sudo apt-get install liblua5.1-dev -y
-# sudo apt-get install unzip -y # for luarocks
-# 
+which lua &> /dev/null
+RES=$?
+if [[ $RES -ne 0 ]] ; then
+   my_print "Installing lua from apt-get"
+   sudo apt-get install lua5.1 -y
+   sudo apt-get install liblua5.1-dev -y
+   sudo apt-get install unzip -y # for luarocks
+else
+   my_print "Lua is already installed"
+fi
 # ######## Lua JIT #########
-# wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
-# tar -xvf LuaJIT-2.0.4.tar.gz
-# cd LuaJIT-2.0.4/
-# make
-# udo make install
-# 
+
+which luajit &> /dev/null
+RES=$?
+if [[ $RES -ne 0 ]] ; then
+   my_print "Installing luajit from source"
+   wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
+   tar -xvf LuaJIT-2.0.4.tar.gz
+   cd LuaJIT-2.0.4/
+   make
+   sudo make install
+   cd ../
+   rm -rf LuaJIT-2.0.4
+else
+   my_print "luajit is already installed"
+fi
 # ######## Luarocks #########
-# wget https://luarocks.org/releases/luarocks-2.4.1.tar.gz
-# tar zxpf luarocks-2.4.1.tar.gz
-# cd luarocks-2.4.1
-# ./configure; sudo make bootstrap
-# sudo luarocks install penlight
-# sudo luarocks install luaposix
-# 
+which luarocks &> /dev/null
+RES=$?
+if [[ %RES -ne 0 ]] ; then
+   my_print "Installing lua rocks"
+   wget https://luarocks.org/releases/luarocks-2.4.1.tar.gz
+   tar zxpf luarocks-2.4.1.tar.gz
+   cd luarocks-2.4.1
+   ./configure; sudo make bootstrap
+   cd ../
+   rm -rf luarocks-2.4.1
+   sudo luarocks install penlight
+   sudo luarocks install luaposix
+else
+   my_print "luarocks is already installed"
+fi
 #  ######## Build Q #########
-source ../setup.sh -f 
+my_print "Building Q"
+source ../setup.sh -f
 cd ../UTILS/build
 lua build.lua gen.lua
 lua mk_so.lua /tmp/
-cd - 
+cd -
 PROG="
 q_core = require 'q_core'
 q = require 'q'
@@ -34,7 +71,7 @@ load_csv = require 'load_csv'
 print_csv = require 'print_csv'
 mk_col = require 'mk_col'
 save = require 'save'
-print('SUCCESS')
+print('S')
 "
 # load csv
 # mk col
@@ -45,11 +82,11 @@ print('SUCCESS')
 # restore
 # print csv
 
-# performance test stretch goal - add 
+# performance test stretch goal - add
 luajit -e "$PROG" &>/dev/null
 RES=$?
 if [[ $RES -eq 0 ]] ; then
-    echo "SUCCESS"
+   my_print "SUCCESS in loading all libs"
 else
-    echo "FAIL"
+   my_print "FAIL" "error"
 fi
