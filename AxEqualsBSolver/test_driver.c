@@ -21,6 +21,10 @@
  * factor, so the size of the matrix is irrelevant.
  */
 
+static int _bench_drop_n = 0;
+static int _bench_iters = 1;
+static bool _verbose = false;
+
 static void
 _print_input(
             double **A,
@@ -54,7 +58,7 @@ _print_input(
 }
 
 /* assembly code to read the TSC */
-static uint64_t
+static inline uint64_t
 _RDTSC(void)
 {
   unsigned int hi, lo;
@@ -65,27 +69,27 @@ _RDTSC(void)
 static void
 _print_result(double *x_expected, double *x_returned,
               double *b_expected, double *b_returned,
-              char *name, bool verbose, int n, double runtime)
+              char *name, int n, double runtime)
 {
   bool error = false;
   fprintf(stderr, "CHECKING %s RESULTS\n", name);
-  if (verbose) {
+  if (_verbose) {
     fprintf(stderr, "x(expect), x(%s), b(expect), b(%s)\n", name, name);
   }
   for (int i=0; i < n; i++) {
-    if (verbose) {
+    if (_verbose) {
       fprintf(stderr, " %lf, %lf, %lf, %lf",
               x_expected[i], x_returned[i], b_expected[i], b_returned[i]);
     }
 
     if ( abs(b_returned[i] - b_expected[i]) < 0.001 ) {
-      if (verbose) {
+      if (_verbose) {
         fprintf(stderr, " %s_MATCH\n", name);
       }
     }
     else {
       error = true;
-      if (verbose) {
+      if (_verbose) {
         fprintf(stderr, " %s_ERROR\n", name);
       }
     }
@@ -95,7 +99,7 @@ _print_result(double *x_expected, double *x_returned,
   } else {
     fprintf(stderr, "%s_SUCCESS", name);
   }
-  fprintf(stderr, " in %0.4fs\n\n", runtime);
+  fprintf(stderr, " in %.3e cycles\n\n", runtime);
 }
 
 static int
@@ -105,8 +109,7 @@ _run_our_tests(
     double *b,
     double **A_posdef,
     double *b_posdef,
-    int n,
-    bool verbose
+    int n
     )
 {
   int status = 0;
@@ -116,8 +119,8 @@ _run_our_tests(
   double *b_posdef_copy = NULL;
   double *b_returned = NULL;
   double *x_returned = NULL;
-  clock_t begin;
-  double runtime;
+  uint64_t begin, total;
+  double avg_cycles;
 
   status = alloc_symm_matrix(&A_posdef_copy, n); cBYE(status);
   status = alloc_matrix(&A_posdef_full, n); cBYE(status);
@@ -136,38 +139,82 @@ _run_our_tests(
   }
 
   // time computations for each solver
-  begin = clock();
-  status = posdef_positive_solver(A_posdef, x_returned, b_posdef, n); cBYE(status);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", verbose, n, runtime);
-
-  begin = clock();
-  status = posdef_positive_solver_fast(A_posdef_copy, x_returned, b_posdef_copy, n); cBYE(status); cBYE(status);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", verbose, n, runtime);
-
-  begin = clock();
-  status = full_posdef_positive_solver(A_posdef_full, x_returned, b_posdef, n); cBYE(status);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
-  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", verbose, n, runtime);
-
-  for (int i = 0; i < n; i++) {
-    b_posdef_copy[i] = b_posdef[i];
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    begin = _RDTSC();
+    status = posdef_positive_solver(A_posdef, x_returned, b_posdef, n); cBYE(status);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
   }
-  begin = clock();
-  status = full_posdef_positive_solver_fast(A_posdef_full, x_returned, b_posdef_copy, n); cBYE(status);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", verbose, n, runtime);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", n, avg_cycles);
 
-  begin = clock();
-  status = positive_solver(A, x_returned, b, n); cBYE(status);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    for (int i = 0; i < n; i++) {
+      b_posdef_copy[i] = b_posdef[i];
+      for(int j = 0; j < n - i; j++) {
+        A_posdef_copy[i][j] = A_posdef[i][j];
+      }
+    }
+    begin = _RDTSC();
+    status = posdef_positive_solver_fast(A_posdef_copy, x_returned, b_posdef_copy, n); cBYE(status); cBYE(status);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
+  }
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", n, avg_cycles);
+
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    for (int i = 0; i < n; i++) {
+      for(int j = 0; j < n; j++) {
+        A_posdef_full[i][j] = index_symm_matrix(A_posdef, i, j);
+      }
+    }
+    begin = _RDTSC();
+    status = full_posdef_positive_solver(A_posdef_full, x_returned, b_posdef, n); cBYE(status);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
+  }
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", n, avg_cycles);
+
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    for (int i = 0; i < n; i++) {
+      b_posdef_copy[i] = b_posdef[i];
+      for(int j = 0; j < n; j++) {
+        A_posdef_full[i][j] = index_symm_matrix(A_posdef, i, j);
+      }
+    }
+    begin = _RDTSC();
+    status = full_posdef_positive_solver_fast(A_posdef_full, x_returned, b_posdef_copy, n); cBYE(status);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
+  }
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
+  multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", n, avg_cycles);
+
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    begin = _RDTSC();
+    status = positive_solver(A, x_returned, b, n); cBYE(status);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
+  }
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_matrix_vector(A, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b, b_returned, "FULL", verbose, n, runtime);
+  _print_result(x_expected, x_returned, b, b_returned, "FULL", n, avg_cycles);
 
 BYE:
   free_matrix(A_posdef_copy, n);
@@ -186,8 +233,7 @@ _run_lapack_tests(
     double *b,
     double **A_posdef,
     double *b_posdef,
-    int n,
-    bool verbose
+    int n
     )
 {
   int status = 0;
@@ -203,6 +249,9 @@ _run_lapack_tests(
   double *b_returned = NULL;
   lapack_int *ipiv = NULL;
 
+  uint64_t begin, total;
+  double avg_cycles;
+
   A_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_unrolled);
   A_posdef_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_posdef_unrolled);
   b_copy = malloc(n * sizeof(double)); return_if_malloc_failed(b_copy);
@@ -210,31 +259,45 @@ _run_lapack_tests(
   b_returned = malloc(n * sizeof(double)); return_if_malloc_failed(b_returned);
   ipiv = malloc(n * sizeof(lapack_int)); return_if_malloc_failed(ipiv);
 
-  for (int i = 0; i < n; i++) {
-    b_copy[i] = b[i];
-    b_posdef_copy[i] = b_posdef[i];
-    for (int j = 0; j < n; j++) {
-      A_unrolled[n * i + j] = A[i][j];
+
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    for (int i = 0; i < n; i++) {
+      b_copy[i] = b[i];
+      for (int j = 0; j < n; j++) {
+        A_unrolled[n * i + j] = A[i][j];
+      }
     }
-    for (int j = 0; j <= i; j++) {
-      A_posdef_unrolled[n * i + j] = A_posdef[j][i - j];
-    }
-    for (int j = i + 1; j < n; j++) {
-      A_posdef_unrolled[n * i + j] = 0;
+    begin = _RDTSC();
+    LAPACKE_dgesv(LAPACK_COL_MAJOR, N, NRHS, A_unrolled, LDA, ipiv, b_copy, LDB);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
     }
   }
-
-  clock_t begin = clock();
-  LAPACKE_dgesv(LAPACK_COL_MAJOR, N, NRHS, A_unrolled, LDA, ipiv, b_copy, LDB);
-  double runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_matrix_vector(A, b_copy, n, b_returned);
-  _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", verbose, n, runtime);
+  _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", n, avg_cycles);
 
-  begin = clock();
-  LAPACKE_dposv(LAPACK_COL_MAJOR, 'U', N, NRHS, A_posdef_unrolled, LDA, b_posdef_copy, LDB);
-  runtime = (double)(clock() - begin) / CLOCKS_PER_SEC;
+  total = 0;
+  for (int i = 0; i < _bench_iters; i++) {
+    for (int i = 0; i < n; i++) {
+      b_posdef_copy[i] = b_posdef[i];
+      for (int j = 0; j <= i; j++) {
+        A_posdef_unrolled[n * i + j] = A_posdef[j][i - j];
+      }
+      for (int j = i + 1; j < n; j++) {
+        A_posdef_unrolled[n * i + j] = 0;
+      }
+    }
+    begin = _RDTSC();
+    LAPACKE_dposv(LAPACK_COL_MAJOR, 'U', N, NRHS, A_posdef_unrolled, LDA, b_posdef_copy, LDB);
+    if (i >= _bench_drop_n) {
+      total += _RDTSC() - begin;
+    }
+  }
+  avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, b_posdef_copy, n, b_returned);
-  _print_result(x_expected, b_posdef_copy, b_posdef, b_returned, "LAPACK_POSDEF", verbose, n, runtime);
+  _print_result(x_expected, b_posdef_copy, b_posdef, b_returned, "LAPACK_POSDEF", n, avg_cycles);
 
 BYE:
   free_if_non_null(A_unrolled);
@@ -255,7 +318,6 @@ main(
 {
   int status = 0;
   int n = 0;                 // dimension of matrices
-  bool verbose = false;
   double **A = NULL;         // randomly generated n * n matrix
   double **A_posdef = NULL;  // randomly generated positive definite matrix (right now just A transpose * A)
   double *x_expected = NULL; // randomly generated solution
@@ -264,11 +326,16 @@ main(
 
   srand48(_RDTSC());
 
-  bool print_usage = false;
+  bool print_usage = false, bench = false;
   switch ( argc ) {
   case 3 :
-    if (strcmp("-v", argv[2]) == 0) {
-      verbose = true;
+    if (strcmp("-vb", argv[2]) == 0 || strcmp("-bv", argv[2]) == 0) {
+      _verbose = true;
+      bench = true;
+    } else if (strcmp("-v", argv[2]) == 0) {
+      _verbose = true;
+    } else if (strcmp("-b", argv[2]) == 0) {
+      bench = true;
     } else {
       print_usage = true;
     } // fall through
@@ -283,6 +350,10 @@ main(
     printf("Usage: ./test_driver <n> [-v]\n");
     printf("where n is a positive integer and -v provides verbose output.\n");
     go_BYE(-1);
+  }
+  if (bench == true) {
+    _bench_iters = 15;
+    _bench_drop_n = 3;
   }
 
   status = alloc_matrix(&A, n); cBYE(status);
@@ -305,13 +376,13 @@ main(
   multiply_symm_matrix_vector(A_posdef, x_expected, n, b_posdef);
   multiply_matrix_vector(A, x_expected, n, b_full);
 
-  if (verbose) {
+  if (_verbose) {
     _print_input(A_posdef, x_expected, b_posdef, n);
   }
 
-  _run_our_tests(A, x_expected, b_full, A_posdef, b_posdef, n, verbose);
+  _run_our_tests(A, x_expected, b_full, A_posdef, b_posdef, n);
 
-  _run_lapack_tests(A, x_expected, b_full, A_posdef, b_posdef, n, verbose);
+  _run_lapack_tests(A, x_expected, b_full, A_posdef, b_posdef, n);
 
 BYE:
   free_matrix(A, n);
