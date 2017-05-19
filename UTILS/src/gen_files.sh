@@ -2,21 +2,22 @@
 set -e 
 UDIR=${Q_SRC_ROOT}/UTILS/lua
 test -d $UDIR
-rm -f ../gen_inc/*.h
+rm -rf ../gen_inc/
 rm -rf ../gen_src
 mkdir -p ../gen_src
-lua $UDIR/extract_func_decl.lua mmap.c ../gen_inc
-lua $UDIR/extract_func_decl.lua is_valid_chars_for_num.c ../gen_inc
-lua $UDIR/extract_func_decl.lua f_mmap.c ../gen_inc
-lua $UDIR/extract_func_decl.lua f_munmap.c ../gen_inc
-lua $UDIR/extract_func_decl.lua bytes_to_bits.c ../gen_inc
-lua $UDIR/extract_func_decl.lua bits_to_bytes.c ../gen_inc
-lua $UDIR/extract_func_decl.lua get_bit.c ../gen_inc
-lua $UDIR/extract_func_decl.lua set_bit.c ../gen_inc
-lua $UDIR/extract_func_decl.lua clear_bit.c ../gen_inc
-lua $UDIR/extract_func_decl.lua copy_bits.c ../gen_inc
-lua $UDIR/extract_func_decl.lua write_bits_to_file.c ../gen_inc
-lua $UDIR/extract_func_decl.lua get_bits_from_array.c ../gen_inc
+mkdir -p ../gen_inc/
+lua $UDIR/cli_extract_func_decl.lua mmap.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua is_valid_chars_for_num.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua f_mmap.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua f_munmap.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua bytes_to_bits.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua bits_to_bytes.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua get_bit.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua set_bit.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua clear_bit.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua copy_bits.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua write_bits_to_file.c ../gen_inc
+lua $UDIR/cli_extract_func_decl.lua get_bits_from_array.c ../gen_inc
 lua bin_search_generator.lua
 #--------
 # TODO: Improve below

@@ -58,21 +58,10 @@
         if ( status ) then 
           assert(type(subs) == "table")
           assert(type(tmpl) == "string")
-          -- TODO Improve following.
-          local T = dofile(tmpl)
-          T.fn         = subs.fn
-          T.fldtype    = subs.fldtype
-          T.scalar_ctype= subs.scalar_ctype
-          T.out_ctype = subs.out_ctype
-          T.c_code_for_operator = subs.c_code_for_operator
-          T.comparison = subs.comparison
-          T.comp1 = subs.comp1
-          T.comp2 = subs.comp2
-          T.combiner = subs.combiner
           print(subs)
-          gen_code.doth(T.fn, T, incdir)
-          gen_code.dotc(T.fn, T, srcdir)
-          print("Produced ", T.fn)
+          gen_code.doth(subs,tmpl, incdir)
+          gen_code.dotc(subs, tmpl, srcdir)
+          print("Produced ", subs.fn)
         end
       end
     end

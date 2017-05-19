@@ -21,7 +21,7 @@ main(
   return_if_malloc_failed(X);
   for ( int i = 0; i < N; i++ ) { X[i] = i+1; }
   //----------------------------
-  REDUCE_F8_ARGS xargs;
+  REDUCE_sum_F8_ARGS xargs;
   xargs.cum_val = 0;
   status = sum_F8(X, N, &xargs, 0); cBYE(status);
   double dN = (double)N;
@@ -35,7 +35,7 @@ main(
   Y = malloc(N * sizeof(int64_t));
   return_if_malloc_failed(Y);
   for ( int i = 0; i < N; i++ ) { Y[i] = i+1; }
-  REDUCE_I8_ARGS yargs;
+  REDUCE_sum_sqr_I8_ARGS yargs;
   yargs.cum_val = 0;
   status = sum_sqr_I8(Y, N, &yargs, 0); cBYE(status);
   uint64_t lN = (uint64_t)N;
@@ -49,7 +49,7 @@ main(
   Z = malloc(N * sizeof(int32_t));
   return_if_malloc_failed(Z);
   for ( int i = 0; i < N; i++ ) { Z[i] = i+1; }
-  REDUCE_I4_ARGS zargs;
+  REDUCE_min_I4_ARGS zargs;
   zargs.cum_val = INT_MAX;
   status = min_I4(Z, N, &zargs, 0); cBYE(status);
   if ( zargs.cum_val != 1 ) { 
@@ -62,7 +62,7 @@ main(
   W = malloc(N * sizeof(int8_t));
   return_if_malloc_failed(W);
   for ( int i = 0; i < N; i++ ) { W[i] = i; }
-  REDUCE_I1_ARGS wargs;
+  REDUCE_max_I1_ARGS wargs;
   wargs.cum_val = SCHAR_MIN;
   status = max_I1(W, N, &wargs, 0); cBYE(status);
   if ( wargs.cum_val != SCHAR_MAX ) { 

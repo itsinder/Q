@@ -32,19 +32,11 @@
       if ( status ) then 
         assert(type(subs) == "table")
         assert(type(tmpl) == "string")
-      -- TODO Improve following.
-      local T = dofile(tmpl)
-      T.fn            = subs.fn
-      T.intype        = subs.intype
-      T.reducer       = subs.reducer
-      T.t_reducer     = subs.t_reducer
-      T.disp_intype   = subs.disp_intype
-      T.reduce_intype = subs.reduce_intype
-      T.init_val      = subs.init_val     
-      gen_code.doth(T.fn, T, incdir)
-      gen_code.dotc(T.fn, T, srcdir)
-      print("Generated ", T.fn)
-    else
-    end
+        gen_code.doth(subs, tmpl, incdir)
+        gen_code.dotc(subs, tmpl, srcdir)
+        print("Generated ", subs.fn)
+      else
+        print("Failed ", intype, subs)
+      end
     end
   end

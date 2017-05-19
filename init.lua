@@ -15,6 +15,10 @@ assert(plpath.isdir(q_root), "Q_ROOT not found")
 assert(plpath.isdir(q_root .. "/lib/" ), "Q_ROOT/lib not found")
 assert(plpath.isdir(q_root .. "/include/" ), "Q_ROOT/include not found")
 
+local q_data_dir = assert(os.getenv("Q_DATA_DIR"))
+assert(plpath.isdir(q_data_dir), "Q_DATA_DIR not found")
+local q_metadata_dir =assert(os.getenv("Q_METADATA_DIR"))
+assert(plpath.isdir(q_metadata_dir), "Q_METADATA_DIR not found")
 local base_path = script_path() or "./"
 -- print (base_path)
 local paths = {}
@@ -30,7 +34,7 @@ paths[#paths + 1] = "OPERATORS/MK_COL/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 
 local lib_paths = {}
-local lib_sep = ":"  
+-- local lib_sep = ":"  
 -- lib_paths[#lib_paths + 1 ] = os.getenv("LD_LIBRARY_PATH") or "./"
 -- lib_paths[#lib_paths + 1 ] = base_path .. "RUNTIME/COLUMN/code/src"
 lib_paths[#lib_paths + 1 ] = q_root .. "/lib/"
@@ -48,10 +52,10 @@ if curr_path ~= nil then
 end
 
 local missing = {}
-for _ ,v in pairs(lib_paths) do
+for _, v in pairs(lib_paths) do
     local found = false
     local entry = v
-    for _,v2 in pairs(libs) do
+    for _2, v2 in pairs(libs) do
         if entry == v2 then found = true end
     end
     if not found then missing[#missing + 1] = entry end
@@ -72,18 +76,18 @@ end
 package.path = table.concat(paths, sep)
 
 require "globals"
-local g_mt = {
-   __gc = function()
-      print("byebye")
-   end,
-}
-_G = setmetatable(_G, g_mt)
-local signal = require("posix.signal")
-signal.signal(signal.SIGINT, function(signum)
-  io.write("biggie baddie \n")
-  -- put code to save some stuff here
-  os.exit(128 + signum)
-end)
+-- local g_mt = {
+--    __gc = function()
+--       print("byebye")
+--    end,
+-- }
+-- _G = setmetatable(_G, g_mt)
+-- local signal = require("posix.signal")
+-- signal.signal(signal.SIGINT, function(signum)
+--   -- put code to save some stuff here
+--   print("exiting with " .. tostring(signum))
+--   os.exit(128 + signum)
+-- end)
 -- mk_col = require "mk_col"
 -- print_csv = require "print_csv"
  -- load_csv = require "load_csv"

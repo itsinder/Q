@@ -1,22 +1,18 @@
 #!/bin/bash
 set -e 
-mkdir -p ../gen_src
-mkdir -p ../gen_inc
-# rm -f ../gen_src/*
-# rm -f ../gen_inc/*
+test -d $Q_ROOT
+rm -r -f ../gen_src/; mkdir -p ../gen_src
+rm -r -f ../gen_inc/; mkdir -p ../gen_inc
 lua generator.lua operators.lua
 
 cd ../gen_src/
 ls *c > _x
-FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 while read line; do
-  echo $line
-  gcc -c $line $FLAGS -I../gen_inc -I../../../UTILS/inc/  -std=gnu99
+  gcc -c $line $QC_FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
-echo "Done compiling"
-exit
-gcc -fPIC -shared *.o -o _libfoo.so
-rm -f *.o *.so
+gcc -fPIC -shared *.o -o libf_to_s.so
+mv libf_to_s.so $Q_ROOT/lib/
+rm -f *.o 
 rm -f _x
 cd -
 echo "ALL DONE: $0 in $PWD"

@@ -17,7 +17,7 @@ Vector Semantics
 ]]
 require 'globals'
 local plpath = require("pl.path")
-local get_new_filename = require "random_filename"
+local get_new_filename = require "random_data_file"
 
 local Vector = {}
 Vector.__index = Vector

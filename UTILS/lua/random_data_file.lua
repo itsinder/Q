@@ -20,7 +20,7 @@ return function(length)
     local name = nil
     while (name == nil)
     do
-        name = "_" .. random_string(length)
+        name = string.format(  "%s/_%s" ,os.getenv("Q_DATA_DIR"), random_string(length))
         local f=io.open(name,"r")
         if f ~=nil then
             io.close(f)
