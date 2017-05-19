@@ -213,6 +213,7 @@ which of those solutions, if any, lie in the original field. In the case where
 $A$ is positive, the solution is unique, and a solution whose entries lie in the original field does exist, so must coincide with the solution obtained by this method, which then must necessarily also have entries lying in the original field.
 \newpage
 \section{Implementation Notes}
+\subsection{Code}
 At each level of recursion, we only need to retain
 $a_n$,
 $\alpha_n$
@@ -285,4 +286,32 @@ BYE:
   return status;
 }
 \end{verbatim}
+
+\subsection{Benchmarks}
+
+In the following table, $n$ is the dimension of the matrix,
+POSDEF refers to solvers that only work on positive
+semi-definite matrices, FULL refers to solvers that work on any matrix, and SLOW
+and FAST differentiates whether the solver copies its input to avoid destroying
+it.
+
+The numbers given are in CPU cycles, as reported by the RDTSC function.
+
+There are two additional functions in the API not included in the table, which
+work on fully specified positive definite matrices (rather than the compact
+symmetric form which our work function expects). Their performance was
+equivalent to the corresponding POSDEF functions.\\
+
+\makebox[\textwidth][c]{
+  \begin{tabular}{c | c | c | c | c | c}
+    $n$ & POSDEF\_SLOW & POSDEF\_FAST & LAPACK\_POSDEF & FULL & LAPACK\_FULL\\\hline
+    $2^6$ & 3.145e05 & 2.767e05 & 1.344e05 & 5.400e05 & 2.295e05\\
+    $2^7$ & 2.082e06 & 2.245e06 & 0.816e06 & 4.860e06 & 1.522e06\\
+    $2^8$ & 1.705e07 & 1.645e07 & 0.679e07 & 3.560e07 & 1.176e07\\
+    $2^9$ & 1.280e08 & 1.252e08 & 0.520e08 & 2.822e08 & 0.833e08\\
+    $2^{10}$ & 1.010e09 & 0.995e09 & 0.420e09 & 2.288e09 & 0.683e09\\
+    $2^{11}$ & 7.709e09 & 7.784e09 & 3.281e09 & 17.73e09 & 4.674e09\\
+    $2^{12}$ & 6.115e10 & 6.152e10 & 2.742e10 & 14.63e10 & 4.039e10
+  \end{tabular}
+}
 \end{document}
