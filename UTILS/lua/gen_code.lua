@@ -1,6 +1,7 @@
 local plpath = require 'pl.path'
 
-local fns = {}
+local section = { c = 'selection', h = 'definition' }
+
 local function do_replacements(tmpl, subs)
    local T = dofile(tmpl)
    for k,v in pairs(subs) do
@@ -10,33 +11,28 @@ local function do_replacements(tmpl, subs)
 end
 
 
-fns.dotc = function (subs, tmpl, opdir)
+local _dotfile = function(subs, tmpl, opdir, ext)
   local T = do_replacements(tmpl, subs)
-  local dotc = T 'definition'
+  local dotfile = T(section[ext])
   if ( ( not opdir ) or ( opdir == "" ) ) then 
-    return dotc
+    return dotfile
   end
   assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
-  local fname = opdir .. "_" .. subs.fn .. ".c", "w"
+  local fname = opdir .. "_" .. subs.fn .. "." .. ext, "w"
   local f = assert(io.open(fname, "w"))
-  f:write(dotc)
+  f:write(dotfile)
   f:close()
+
+end
+
+local fns = {}
+
+fns.dotc = function (subs, tmpl, opdir)
+  _dotfile(subs, tmpl, opdir, 'c')
 end
 
 fns.doth = function (subs, tmpl, opdir)
-  local T = do_replacements(tmpl, subs)
-  local doth = T 'declaration'
-  if ( ( not opdir ) or ( opdir == "" ) ) then 
-    return doth
-  end
-  assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
-  local fname = opdir .. "_" .. subs.fn .. ".h", "w"
-  local f = assert(io.open(fname, "w"))
-  f:write(doth)
-  f:close()
+  _dotfile(subs, tmpl, opdir, 'h')
 end
-
-
-
 
 return fns
