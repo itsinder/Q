@@ -86,7 +86,7 @@ local function save_global(filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
     file:write("local Column = require 'Column'\n")
     file:write("local Vector = require 'Vector'\n")
-    file:write("local Dictionary = require 'Dictionary'\n")
+    -- file:write("local Dictionary = require 'Dictionary'\n")
 
 
 
