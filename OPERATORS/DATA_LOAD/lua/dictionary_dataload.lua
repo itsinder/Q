@@ -1,6 +1,6 @@
 local fns = require 'utils'
 local parser = require 'parser'
-
+_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
 local Dictionary = {}
 Dictionary.__index = Dictionary
 

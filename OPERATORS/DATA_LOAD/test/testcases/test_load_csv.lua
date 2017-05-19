@@ -9,7 +9,6 @@ local test_metadata_dir ="./test_metadata/"
 --set environment variables for test-case
 _G["Q_DATA_DIR"] = "./test_data/out/"
 _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-_G["Q_DICTIONARIES"] = {}
 dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
 

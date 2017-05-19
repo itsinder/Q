@@ -12,7 +12,6 @@ dir.makepath("./test_print_data/print_tmp/")
 --set environment variables for test-case (LOAD CSV) 
 _G["Q_DATA_DIR"] = "./test_data/out/"
 _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-_G["Q_DICTIONARIES"] = {}
 
 dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
