@@ -17,7 +17,7 @@ Vector Semantics
 ]]
 require 'globals'
 local plpath = require("pl.path")
-local get_new_filename = require "random_filename"
+local get_new_filename = require "random_data_file"
 
 local Vector = {}
 Vector.__index = Vector
@@ -94,9 +94,10 @@ function Vector.new(arg)
     assert(arg.field_type ~= nil and g_valid_types[arg.field_type] ~= nil, "Valid type not given")
     vec.field_type = arg.field_type
     if arg.field_size == nil then -- for constant length string this cannot be nil
-        local type_val =  assert(g_valid_types[arg.field_type], "Invalid type")
-        vec.field_size = q_core.sizeof(type_val)
+        local type_val =  assert(g_valid_types[vec.field_type], "Invalid type")
+        vec.field_size = g_qtypes[vec.field_type].width
     else
+        assert(vec.field_type == "SC", "A variable field size can only be specified for SC")
         vec.field_size = arg.field_size
     end
 

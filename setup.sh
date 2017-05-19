@@ -3,7 +3,8 @@ usage(){
 	echo "Usage: $0 [-f|-h] -- program to set the env variables for running Q" 1>&2
 	echo "where:" 1>&2
 	echo "	-h	shows this message" 1>&2
-	echo "	-f	sets all the parameters to their default values. Namely Q_SRC_ROOT Q_ROOT LUA_INIT LD_LIBRARY_PATH QC_FLAGS are set to the default values" 1>&2
+	echo "	-f	sets all the parameters to their default values. Namely
+   Q_SRC_ROOT Q_ROOT LUA_INIT LD_LIBRARY_PATH QC_FLAGS Q_DATA_DIR Q_METADATA_DIR are set to the default values" 1>&2
 	echo "Note: To have the changes reflect in your env, use: source $0 [-f]" 1>&2
 	exit 1 ;
 }
@@ -30,7 +31,9 @@ do
 			unset LUA_INIT
 			unset LD_LIBRARY_PATH
 			unset QC_FLAGS
-			echo "Unset all params" 
+			unset Q_DATA_DIR
+         unset Q_METADATA_DIR
+         echo "Unset all params" 
 			;;
 		\?)
 			echo "Invalid option: -$OPTARG" 1>&2
@@ -60,6 +63,15 @@ LUA_INIT_PATH="@`echo $Q_SRC_ROOT`/init.lua"
 # echo $LUA_INIT_PATH
 export LUA_INIT="${LUA_INIT:=$LUA_INIT_PATH}"
 echo "LUA_INIT: $LUA_INIT"
+C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
+export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
+echo "QC_FLAGS: $QC_FLAGS"
+mkdir -p $Q_ROOT/data
+export Q_DATA_DIR="${Q_DATA_DIR:=${Q_ROOT}/data}"
+echo "Q_DATA_DIR: $Q_DATA_DIR"
+mkdir -p $Q_ROOT/meta
+export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
+echo "Q_METADATA_DIR: $Q_METADATA_DIR"
 # Setting ld library path based on lua init
 #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 set +m
@@ -69,8 +81,4 @@ if [[ "$RET" -ne "0" ]]; then
     `lua| tail -1`
 fi
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
-export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
-echo "QC_FLAGS: $QC_FLAGS"
-
 

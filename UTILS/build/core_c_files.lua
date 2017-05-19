@@ -1,4 +1,8 @@
 return { -- ordering is VERY VERY important
+   { -- The doth files
+      "mmap_types.h"
+   }
+   ,
    { --The dotc file
       "f_mmap.c",
       "f_munmap.c",
@@ -25,7 +29,4 @@ return { -- ordering is VERY VERY important
       "_txt_to_F8.c",
    }
    ,
-   { -- The doth files
-      "mmap_types.h"
-   }
-}
+  }

@@ -1,8 +1,9 @@
+local save = require "save"
 local dbg = require "debugger"
-local ffi = require "ffi"
+local q_core = require 'q_core'
 local print_vector = function(ptr , len)
    for i=1,len do
-   print( tonumber(ffi.cast("int*", ptr)[i-1]))
+   print( tonumber(q_core.cast("int*", ptr)[i-1]))
    end
 end
 
@@ -11,19 +12,14 @@ local ffi_malloc = require 'ffi_malloc'
 -- local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
-g_valid_types = {}
-g_valid_types['i'] = 'int'
-g_valid_types['f'] = 'float'
-g_valid_types['d'] = 'double'
-g_valid_types['c'] = 'char'
-g_valid_types['B1'] = 'unsigned char'
+require 'globals'
 g_chunk_size = 16
 --local size = 1000
 --create bin file of only ones of type int
-local v1 = Vector{field_type='i',
+local v1 = Vector{field_type='I4',
 filename='test1.txt', }
 
-local v2 = Vector{field_type='i',
+local v2 = Vector{field_type='I4',
 filename='test1.txt', }
 
 local x, x_size = v1:chunk(0)
@@ -45,7 +41,7 @@ print_vector(y, y_size)
 -- end
 
 --TODO add tests for put to vector
-local v3 = Vector{field_type='i',
+local v3 = Vector{field_type='I4',
 filename="o.txt", write_vector=true, 
 }
 v3:put_chunk(x, x_size)
@@ -58,21 +54,21 @@ print_vector(z, z_size)
 --[[ INDRAJEET TODO
 local v4 = Vector{field_type='B1', filename="test_bits.txt", field_size=1/8}
 for i=0,15 do
- print(v4:get_element(i), tonumber(ffi.cast("int*", a_int) + i))
+ print(v4:get_element(i), tonumber(q_core.cast("int*", a_int) + i))
 end
 --]]
 
 local a, a_size = z, z_size
 print("Vector bit get test")
-local a_int = ffi_malloc(ffi.sizeof("int")* a_size)
+local a_int = q_core.malloc(q_core.sizeof("int")* a_size)
 q_core.get_bits_from_array(a, a_int, a_size)
-local t2 = Vector{field_type="i", write_vector=true}
+local t2 = Vector{field_type='I4', write_vector=true}
 t2:put_chunk(a_int, a_size)
 t2:eov()
 print "**************"
 print_vector(a_int, a_size)
 -- add function to print bits:b2
-v5 = Column{field_type='i',
+v5 = Column{field_type='I4',
 filename="o2.txt", write_vector=true,
  }
  v5:put_chunk(x_size, x )
@@ -81,7 +77,7 @@ t1 = Vector{filename="t1.txt", field_type="B1", write_vector=true}
 t1:put_chunk(a,x_size)
 t1:eov()
 
-v6 = Column{field_type='i',
+v6 = Column{field_type='I4',
 filename="o3.txt", write_vector=true, nn=true
  }
 assert(v6.nn_vec ~= nil , "has an nn vector")
@@ -89,7 +85,7 @@ v6:put_chunk(x_size, x, a )
 v6:eov()
 q_size, q, q_nn = v6:chunk(0)
 print_vector(q, q_size)
-local q_int = ffi.cast( "int*", ffi.gc(q_core.malloc(ffi.sizeof("int")* q_size), q_core.free) )
+local q_int = q_core.cast( "int*", q_core.malloc(q_core.sizeof("int")* q_size) )
 q_core.get_bits_from_array(q_nn, q_int, q_size)
 print "**************"
 print_vector(q_int, q_size)
@@ -128,23 +124,29 @@ V7:put_chunk(a, 2)
 V7:eov()
 -- Column generator
 local gen = v6:wrap()
-local c8 = Column{field_type="i", gen=gen}
+local c8 = Column{field_type='I4', gen=gen}
 q_size, q, q_nn = c8:chunk(0)
 print(q_size)
 
-local c9_gen = Column{field_type='i',
+local c9_gen = Column{field_type='I4',
 filename='test1.txt', }:wrap()
 
-local c10 = Column{field_type="i", gen=c9_gen}
+local c10 = Column{field_type='I4', gen=c9_gen}
 local i = 0 
 while c10:materialized() == false do
    q_size, q, q_nn = c10:chunk(i)
    print(i, q_size)
    i = i+ 1 
    for j=1,q_size do 
-      print(tonumber(ffi.cast("int*", q)[j-1]))
+      print(tonumber(q_core.cast("int*", q)[j-1]))
    end
 end
+local c11_gen = Column{field_type='I4',
+filename='test1.txt', }:wrap()
+
+
+c11 = Column{field_type='I4', gen=c11_gen}
+save("_try2.txt")
 -- q_size, q, q_nn = c8:chunk(1)
 -- print(q_size)
 

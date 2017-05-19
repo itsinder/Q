@@ -1,5 +1,5 @@
   local plpath = require 'pl.path'
-  dofile '../lua/globals.lua'
+  require 'globals'
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
   local gen_code = require("gen_code")
@@ -9,10 +9,10 @@
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   -- ==================
   for i, qtype in ipairs(qtypes) do 
-     local T = dofile(tmpl)
-     T.fn    = "bin_search_" .. qtype
-     T.ftype = assert(g_qtypes[qtype].ctype)
-     gen_code.doth(T.fn, T, incdir)
-     gen_code.dotc(T.fn, T, srcdir)
-     print("Generated ", T.fn)
+     local subs = {} 
+     subs.fn    = "bin_search_" .. qtype
+     subs.ftype = assert(g_qtypes[qtype].ctype)
+     gen_code.doth(subs, tmpl, incdir)
+     gen_code.dotc(subs, tmpl, srcdir)
+     print("Generated ", subs.fn)
   end

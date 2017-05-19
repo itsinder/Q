@@ -2,10 +2,10 @@ local dbg = require "debugger"
 local ffi = require "ffi"
 local mk_col = require 'mk_col'
 local print_csv = require 'print_csv'
-local ffi_malloc = require 'ffi_malloc'
+local q_core = require 'q_core'
 local Column = require "Column"
+local q = require "q"
 require 'globals'
--- g_chunk_size = 1 -- HACK TODO FIX 
 
 f1f2opf3 = {}
 f1f2opf3.add = "vvadd_specialize"
@@ -36,10 +36,10 @@ function expander_f1f2opf3(a, x ,y )
             local x_chunk_size = x:chunk_size()
             local y_chunk_size = y:chunk_size()
             assert(x_chunk_size == y_chunk_size)
-            local buff = ffi_malloc(x_chunk_size * z_width)
+            local buff = q_core.malloc(x_chunk_size * z_width)
             local nn_buff = nil -- Will be created if nulls in input
             if x:has_nulls() or y:has_nulls() then
-               nn_buff = ffi_malloc(math.ceil(x_chunk_size * 1/8)) -- TODO Change to B1
+               nn_buff = q_core.malloc(math.ceil(x_chunk_size * 1/8)) -- TODO Change to B1
             end
             x_status = true
             while (x_status) do
@@ -52,6 +52,7 @@ function expander_f1f2opf3(a, x ,y )
                     assert(x_len == y_len)
                     assert(x_len > 0)
                     -- TODO do the actual computation
+                   q[func_name](x_chunk, y_chunk, x_len, buff) 
                     -- print("hey", lib[func_name](x_chunk, y_chunk, x_len, buff))
                     coroutine.yield(x_len, buff, nn_buff)
                 end
@@ -73,6 +74,10 @@ function eval(col)
         if size > 0  then 
             chunk_num = chunk_num + 1
             print(size, chunk, nn_chunk)
+            local iter = q_core.cast("int*", chunk) -- TODO make general
+            for i=1,size do 
+                print(tonumber(iter[i-1]))
+            end
         end
     end
 end
@@ -108,8 +113,10 @@ end
 --create bin file of only ones of type int
 -- local v1 = Vector{field_type='I4', filename='test.bin', }
 -- local v2 = Vector{field_type='I4', filename='test.bin', }
+print("hi",require'posix'.clock_gettime())
 local c1 = mk_col( {1,2,3,4,5,6,7,8}, "I4")
-local c2 = mk_col( {1,2,3,4,5,6,7,8}, "I4")
+local c2 = mk_col( {8,7,6,5,4,3,2,1}, "I4")
+print("make column done", require'posix'.clock_gettime())
 
 -- local chunk, size = v1:chunk(0)
 -- for i=1, size do
@@ -121,4 +128,5 @@ local c2 = mk_col( {1,2,3,4,5,6,7,8}, "I4")
 z = add(c1, c2)
 -- print(type(z))
 eval(z)
-print_csv( {z}, nil, "_foo.txt")
+print("eval done", require'posix'.clock_gettime())
+print_csv( {z}, nil, "_foo.txt", require'posix'.clock_gettime())

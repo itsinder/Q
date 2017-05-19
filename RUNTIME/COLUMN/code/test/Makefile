@@ -40,6 +40,7 @@ all:
 	luajit testVector.lua
 	luajit testSave.lua
 	rm -f ./*.txt *_nn _* driver bit vec libprint.so
+	rm -f ${Q_DATA_DIR}/_* ${Q_METADATA_DIR}/_*
 clean:
 	$(RM) $(CORESO) $(OBJECTS)
 

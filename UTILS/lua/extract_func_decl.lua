@@ -1,15 +1,13 @@
 #!/bin/lua
+return function(infile, opdir)
 local trim = require 'trim'
 local plpath = require 'pl.path'
-n = #arg
-assert( n == 2, "Specify infile and opdir")
-infile = arg[1]
-opdir  = arg[2]
+local plstr = require 'pl.stringx'
+local opdir = plstr.strip(opdir)
 assert(plpath.isfile(infile), "Input file not found")
 assert(plpath.isdir(opdir), "Output directory not found")
 io.input(infile)
 code = io.read("*all")
-io.close()
 --=========================================
 incs = string.match(code, "//START_INCLUDES.*//STOP_INCLUDES")
 if ( incs ) then 
@@ -21,20 +19,27 @@ z = string.match(code, "//START_FUNC_DECL.*//STOP_FUNC_DECL")
 assert(z ~= "", "Could not find stuff in START_FUNC_DECL .. STOP_FUNC_DECL")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
+z = plstr.strip(z)
 --=========================================
-opfile = opdir .. "/_" .. string.gsub(infile, ".c$", ".h")
-io.output(opfile)
+fn = string.gsub(infile, "^.*/", "")
+fn = string.gsub(fn, ".c$", "")
+print(fn)
+if ( opdir ~= "" ) then 
+  local basefile = string.gsub(infile, "^.*/", "") 
+  opfile = opdir .. "/_" .. fn .. ".h"
+  io.open(opfile, "w+")
+  io.output(opfile)
+end
 if ( incs ) then 
   io.write(incs)
 end
-fn = string.gsub(infile, ".c$", "")
-io.write("#ifndef __" .. fn .. "\n")
-io.write("#define __" .. fn .. "\n")
+-- io.write("#ifndef __" .. fn .. "\n")
+-- io.write("#define __" .. fn .. "\n")
 
-io.write('extern ' .. trim(z) .. ';\n') 
-io.write("#endif\n")
-io.close()
-os.exit()
+io.write('extern ' .. z .. ';\n') 
+-- io.write("#endif\n")
+return true
+end
 
 --[[
 foreach 
