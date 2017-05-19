@@ -12,6 +12,7 @@ local ffi_malloc = require 'ffi_malloc'
 -- local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
+require 'globals'
 g_chunk_size = 16
 --local size = 1000
 --create bin file of only ones of type int
@@ -61,7 +62,7 @@ local a, a_size = z, z_size
 print("Vector bit get test")
 local a_int = q_core.malloc(q_core.sizeof("int")* a_size)
 q_core.get_bits_from_array(a, a_int, a_size)
-local t2 = Vector{field_type="I4", write_vector=true}
+local t2 = Vector{field_type='I4', write_vector=true}
 t2:put_chunk(a_int, a_size)
 t2:eov()
 print "**************"
