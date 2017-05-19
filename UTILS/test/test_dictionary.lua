@@ -8,7 +8,7 @@ local no_of_failure = 0
 local failed_testcases = {}
 
 local T = dofile("map_dictionary.lua")
-_G["Q_DICTIONARIES"] = {}
+--_G["Q_DICTIONARIES"] = {}
 
 
 function increment_failed_load(index, v, str)
@@ -159,7 +159,6 @@ handle_function["category5"] = handle_category5
 local function calling_dictionary(i ,m)
   -- print(i,"Testing : " .. m.name)
   local M = dofile("test_metadata/"..m.meta)
-  local x = Dictionary(M.dict)
   local result
   local ret = assert(Dictionary(M.dict))
   if handle_function[m.category] then

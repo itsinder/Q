@@ -9,7 +9,6 @@ local test_metadata_dir ="./test_metadata/"
 --set environment variables for test-case
 _G["Q_DATA_DIR"] = "./test_data/out/"
 _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-_G["Q_DICTIONARIES"] = {}
 dir.makepath(_G["Q_DATA_DIR"])
 dir.makepath(_G["Q_META_DATA_DIR"])
 
@@ -21,9 +20,6 @@ for i, v in ipairs(T) do
     goto skip 
   end
   
-  _G["Q_DICTIONARIES"] = {}
-  _G["Q_DATA_DIR"] = "./test_data/out/"
-  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
   print("--------------------------------")
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data

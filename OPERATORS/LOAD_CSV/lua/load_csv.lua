@@ -118,7 +118,6 @@ return function (
           M[i].num_nulls = 0
           --==============================
           if M[i].qtype == "SV" then
-            local x = Dictionary(M[i].dict)
             dicts[i] = assert(Dictionary(M[i].dict), 
             "error creating dictionary " .. M[i].dict .. " for " .. M[i].name)
             cols[i]:set_meta("dir",dicts[i])

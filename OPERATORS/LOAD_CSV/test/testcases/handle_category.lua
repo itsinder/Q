@@ -276,6 +276,12 @@ end
 fns.handle_category6 = function (index, status, ret, v)
   --print(v.name)
   ret = fns.handle_category1(index, status, ret, v)
+  
+  -- resetting the enviornment variables. These enviornment variables were set 
+  -- to invalid values for category 6 testcase
+  _G["Q_DICTIONARIES"] = {}
+  _G["Q_DATA_DIR"] = "./test_data/out/"
+  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
   return ret
 end
 

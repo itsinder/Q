@@ -5,7 +5,6 @@ test_dictionary = {}
 
 function test_dictionary:setUp()
   -- all created dictionaries are stored inside this global variables,
-  _G["Q_DICTIONARIES"] = {} 
 end
 
 function test_dictionary:tearDown()
