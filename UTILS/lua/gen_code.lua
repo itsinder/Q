@@ -2,6 +2,15 @@ local plpath = require 'pl.path'
 
 local section = { c = 'selection', h = 'definition' }
 
+local function do_replacements(tmpl, subs)
+   local T = dofile(tmpl)
+   for k,v in pairs(subs) do
+      T[k] = v
+   end
+   return T
+end
+
+
 local _dotfile = function(subs, tmpl, opdir, ext)
   local T = do_replacements(tmpl, subs)
   local dotfile = T(section[ext])
@@ -17,14 +26,6 @@ local _dotfile = function(subs, tmpl, opdir, ext)
 end
 
 local fns = {}
-local function do_replacements(tmpl, subs)
-   local T = dofile(tmpl)
-   for k,v in pairs(subs) do
-      T[k] = v
-   end
-   return T
-end
-
 
 fns.dotc = function (subs, tmpl, opdir)
   _dotfile(subs, tmpl, opdir, 'c')
