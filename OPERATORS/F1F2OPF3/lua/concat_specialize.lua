@@ -59,7 +59,7 @@ return function (
     subs.out_qtype = l_out_qtype
     subs.out_ctype = "u" .. g_qtypes[l_out_qtype].ctype
     -- Note that we are movint int8_t to uint8_t below
-    subs.c_code_for_operator = " c = ((" .. subs_outctype .. "a) << " .. shift .. " ) | b; "
+    subs.c_code_for_operator = " c = ((" .. subs.out_ctype .. ")a << " .. shift .. " ) | b; "
 
     return subs, tmpl
 end
