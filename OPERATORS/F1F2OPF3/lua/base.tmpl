@@ -6,8 +6,8 @@ return require 'code_gen' {
 ${includes}
 extern int
 ${fn}(  
-      const ${in1type} * restrict in1,  
-      const ${in2type} * restrict in2,  
+      const ${in1_ctype} * restrict in1,  
+      const ${in2_ctype} * restrict in2,  
       uint64_t nR,  
       ${out_ctype} * restrict out 
       ) 
@@ -20,8 +20,8 @@ ${fn}(
 
 static void
 __operation(
-      ${in1type} a,
-      ${in2type} b, 
+      ${in1_ctype} a,
+      ${in2_ctype} b, 
       ${out_ctype} *ptr_c
       )
       {
@@ -32,8 +32,8 @@ __operation(
 
 int
 ${fn}(  
-      const ${in1type} * restrict in1,  
-      const ${in2type} * restrict in2,  
+      const ${in1_ctype} * restrict in1,  
+      const ${in2_ctype} * restrict in2,  
       uint64_t nR,  
       ${out_ctype} * restrict out 
       )
@@ -42,8 +42,8 @@ ${fn}(
   int status = 0;
 // #pragma omp parallel for schedule(static, Q_MIN_CHUNK_SIZE_OPENMP)
   for ( uint64_t i = 0; i < nR; i++ ) {  
-    ${in1type} inv1 = in1[i]; 
-    ${in2type} inv2 = in2[i]; 
+    ${in1_ctype} inv1 = in1[i]; 
+    ${in2_ctype} inv2 = in2[i]; 
     ${out_ctype} outv;
     __operation(inv1, inv2, &outv);
     out[i] = outv;

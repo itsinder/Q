@@ -23,19 +23,9 @@
           if ( status) then
             assert(type(subs) == "table")
             assert(type(tmpl) == "string")
-            -- TODO Improve following.
-            local T = loadstring(tmpl)()
-            T.fn       = subs.fn
-            T.includes = subs.includes
-            T.in1type  = subs.in1type
-            T.in2type  = subs.in2type
-            T.out_qtype  = subs.out_qtype
-            T.out_ctype  = subs.out_ctype
-            T.argstype = subs.argstype
-            T.c_code_for_operator = subs.c_code_for_operator
-            gen_code.doth(T.fn, T, incdir)
-            gen_code.dotc(T.fn, T, srcdir)
-            print("Produced ", T.fn)
+            gen_code.doth(subs, tmpl, incdir)
+            gen_code.dotc(subs, tmpl, srcdir)
+            print("Produced ", subs.fn)
           end
         end
       end
