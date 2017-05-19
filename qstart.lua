@@ -8,16 +8,17 @@ local function gatherResults(success, ...)
   return success, { n = n, ... }
 end
 
-local function printResults(results)
+local function printResults(results, should_colorize)
   for i = 1, results.n do
-    results[i] = require('luv_utils').dump(results[i])
+    results[i] = require('luv_utils').dump(results[i], nil, should_colorize)
   end
-  print(table.concat(results, '\t'))
+  --print(table.concat(results, '\t'))
+  return table.concat(results, '\t')
 end
 
 prompt = "q>"
 
-function evaluateLine(line)
+function evaluateLine(line, should_print)
   if line == "<3\n" then
     print("I " .. c("Bred") .. "♥" .. c() .. " you too!")
     return '>'
@@ -29,32 +30,33 @@ function evaluateLine(line)
     f, err = loadstring(chunk, 'REPL') -- try again without return
   end
 
+  local outs
   if f then
     buffer = ''
     local success, results = gatherResults(xpcall(f, debug.traceback))
-
     if success then
       -- successful call
       if results.n > 0 then
-        printResults(results)
+        outs = printResults(results, should_print)
       end
     else
       -- error
-      print(results[1])
+      -- print(results[1])
+      outs = results[1]
     end
   else
-
     if err:match "'<eof>'$" then
       -- Lua expects some more input; stow it away for next time
       buffer = chunk .. '\n'
       return '>>'
     else
-      print(err)
+      -- print(err)
+      outs = err
       buffer = ''
     end
   end
-
-  return prompt
+  if outs and should_print then print (outs) end
+  return prompt, outs
 end
 
 require 'q_httpserver'

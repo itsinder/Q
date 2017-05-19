@@ -41,59 +41,63 @@ function utils.color(color_name)
   end
 end
 
-function utils.colorize(color_name, string, reset_name)
-  return utils.color(color_name) .. tostring(string) .. utils.color(reset_name)
+function utils.colorize(color_name, string, reset_name, should_colorize)
+  if should_colorize then
+    return utils.color(color_name) .. tostring(string) .. utils.color(reset_name)
+  else
+    return tostring(string)
+  end
 end
 
 local backslash, null, newline, carriage, tab, quote, quote2, obracket, cbracket
 
 function utils.loadColors(n)
   if n ~= nil then usecolors = n end
-  backslash = utils.colorize("Bgreen", "\\\\", "green")
-  null      = utils.colorize("Bgreen", "\\0", "green")
-  newline   = utils.colorize("Bgreen", "\\n", "green")
-  carriage  = utils.colorize("Bgreen", "\\r", "green")
-  tab       = utils.colorize("Bgreen", "\\t", "green")
-  quote     = utils.colorize("Bgreen", '"', "green")
-  quote2    = utils.colorize("Bgreen", '"')
-  obracket  = utils.colorize("B", '[')
-  cbracket  = utils.colorize("B", ']')
+  backslash = utils.colorize("Bgreen", "\\\\", "green", true)
+  null      = utils.colorize("Bgreen", "\\0", "green", true)
+  newline   = utils.colorize("Bgreen", "\\n", "green", true)
+  carriage  = utils.colorize("Bgreen", "\\r", "green", true)
+  tab       = utils.colorize("Bgreen", "\\t", "green", true)
+  quote     = utils.colorize("Bgreen", '"', "green", true)
+  quote2    = utils.colorize("Bgreen", '"', true)
+  obracket  = utils.colorize("B", '[', true)
+  cbracket  = utils.colorize("B", ']', true)
 end
 
 utils.loadColors()
 
-function utils.dump(o, depth)
+function utils.dump(o, depth, should_colorize)
   local t = type(o)
   if t == 'string' then
     return quote .. o:gsub("\\", backslash):gsub("%z", null):gsub("\n", newline):gsub("\r", carriage):gsub("\t", tab) .. quote2
   end
   if t == 'nil' then
-    return utils.colorize("Bblack", "nil")
+    return utils.colorize("Bblack", "nil", nil, should_colorize)
   end
   if t == 'boolean' then
-    return utils.colorize("yellow", tostring(o))
+    return utils.colorize("yellow", tostring(o), nil, should_colorize)
   end
   if t == 'number' then
-    return utils.colorize("blue", tostring(o))
+    return utils.colorize("blue", tostring(o), nil, should_colorize)
   end
   if t == 'userdata' then
-    return utils.colorize("magenta", tostring(o))
+    return utils.colorize("magenta", tostring(o), nil, should_colorize)
   end
   if t == 'thread' then
-    return utils.colorize("Bred", tostring(o))
+    return utils.colorize("Bred", tostring(o), nil, should_colorize)
   end
   if t == 'function' then
-    return utils.colorize("cyan", tostring(o))
+    return utils.colorize("cyan", tostring(o), nil, should_colorize)
   end
   if t == 'cdata' then
-    return utils.colorize("Bmagenta", tostring(o))
+    return utils.colorize("Bmagenta", tostring(o), nil, should_colorize)
   end
   if t == 'table' then
     if type(depth) == 'nil' then
       depth = 0
     end
     if depth > 1 then
-      return utils.colorize("yellow", tostring(o))
+      return utils.colorize("yellow", tostring(o), nil, should_colorize)
     end
     local indent = ("  "):rep(depth)
 
@@ -119,10 +123,10 @@ function utils.dump(o, depth)
         if type(k) == "string" and k:find("^[%a_][%a%d_]*$") then
           s = k .. ' = '
         else
-          s = '[' .. utils.dump(k, 100) .. '] = '
+          s = '[' .. utils.dump(k, 100, should_colorize) .. '] = '
         end
       end
-      s = s .. utils.dump(v, depth + 1)
+      s = s .. utils.dump(v, depth + 1, should_colorize)
       lines[i] = s
       estimated = estimated + #s
       i = i + 1

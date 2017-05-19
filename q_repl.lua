@@ -22,7 +22,7 @@ end
 local function onread(err, line)
   if err then error(err) end
   if line then
-    local prompt = evaluateLine(line)
+    local prompt = evaluateLine(line, true)
     displayPrompt(prompt)
   else
     uv.close(stdin)
