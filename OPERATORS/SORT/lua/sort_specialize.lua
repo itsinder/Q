@@ -8,7 +8,7 @@ return function(in_qtype, ordr)
   subs.SORT_ORDER = ordr
   subs.QTYPE = in_qtype
   subs.fn = "qsort_" .. ordr .. "_" .. in_qtype
-  tmpl.FLDTYPE = g_qtypes[f].ctype
+  subs.FLDTYPE = g_qtypes[in_qtype].ctype
   -- TODO Check below is correct order/comparator combo
   if ordr == "asc" then c = "<" end
   if ordr == "dsc" then c = ">" end
