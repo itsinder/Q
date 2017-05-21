@@ -1,8 +1,6 @@
 function sort(x, ordr)
 
   assert(type(x) == "Column", "error")
-  assert(type(ordr) == "string", "error")
-  assert( ( ( ordr == "asc") or ( ordr == "dsc" ) ), "error")
   local spfn = require("sort_specialize" )
   status, subs, tmpl = pcall(spfn, x:fldtype(), ordr)
   assert(status, "error")
