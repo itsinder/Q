@@ -10,6 +10,7 @@ return function(in_qtype, ordr)
   subs.fn = "qsort_" .. ordr .. "_" .. in_qtype
   subs.FLDTYPE = g_qtypes[in_qtype].ctype
   -- TODO Check below is correct order/comparator combo
+  local c = ""
   if ordr == "asc" then c = "<" end
   if ordr == "dsc" then c = ">" end
   subs.COMPARATOR = c

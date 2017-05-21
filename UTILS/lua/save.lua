@@ -1,9 +1,11 @@
 --==== From https://www.lua.org/pil/12.1.2.html
 local function basicSerialize (o)
-    if type(o) == "number" then
+    if type(o) == "number" or type(o) == "boolean" then
         return tostring(o)
-    else   -- assume it is a string
+    elseif type(o) == "string" then  
         return string.format("%q", o)
+    else
+        assert(nil)
     end
 end
 
@@ -49,7 +51,9 @@ local function save(name, value, saved, file)
     saved = saved or {}       -- initial value
     file = file or io
     file:write(name, " = ")
-    if type(value) == "number" or type(value) == "string" then
+    if type(value) == "number" or 
+       type(value) == "string" or 
+       type(value) == "boolean" then
         file:write(basicSerialize(value), "\n")
     elseif type(value) == "table" then
         if saved[value] then    -- value already saved?
@@ -94,7 +98,8 @@ local function save_global(filename)
     -- TODO get requires in place to be added in v2 like require "Vector"
     for k,v in pairs(_G) do
         if not is_g_exception(k,v) then
-            save(k, v, saved, file)
+          print("Saving ", k, v)
+          save(k, v, saved, file)
         end
     end
     file:close()
