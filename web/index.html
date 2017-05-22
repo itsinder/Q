@@ -1,35 +1,109 @@
 <!DOCTYPE html>
 <html>
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script>
-function sendRequest() {
-	//console.log("Request to be sent");
-	var data = document.getElementById("input").value;
-	if(data==="") {
-	alert("Invalid input");
-	return;
-	}
-	//console.log("data- " + data);
-	var xhr = new XMLHttpRequest();
-	xhr.addEventListener("readystatechange", function () {
-	  if (this.readyState === 4) {
-	    //console.log(this.responseText);
-	    document.getElementById("div1").innerHTML = "<h2>" + this.responseText + "</h2>";
-	  }
-	});
-	xhr.open("POST", "http://localhost:3000/Q");
-	xhr.send(data);
-}
-</script>
-</head>
-<body>
-<h2>q&gt;</h2>
-<input id='input' style="width:300px;margin:20px;" />
-<button onclick="sendRequest()">Submit</button>
-<h2>Output</h2>
-<div id="div1" style="width:300px;height:300px;border:1px solid black;margin:20px;"></div>
-
-</body>
+    <head>
+        <style type="text/css">
+            .float_right{
+            position:absolute;
+            top:30%;
+            left:50%;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
+            function postRequest() {
+            var data = document.getElementById("input").value;
+            addOption();
+            if(data==="") {
+            alert("Invalid input");
+            return;
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+            document.getElementById("output").innerHTML = "<h4>" + this.responseText + "</h4>";
+            }
+            });
+            xhr.open("POST", "http://localhost:3000/Q");
+            xhr.send(data);
+            }
+            function addOption() {
+            var option = document.createElement("option");
+            option.text = document.getElementById("input").value;
+            if(!optionExists(document.getElementById("input").value, document.getElementById("past"))) {
+            document.getElementById("past").size = document.getElementById("past").size + 1;
+            document.getElementById("past").add(option);
+            commands = localStorage.getItem("commands") + option.text + "____";
+            commands = localStorage.setItem("commands", commands);
+            }
+            }
+            function clearHistory() {
+            localStorage.removeItem("commands");
+            document.getElementById('past').innerHTML = "";
+            commands = "";
+            document.getElementById("past").size = 0;
+            initialize();
+            }
+            function choose() {
+            var select = document.getElementById("past");
+            var _value = select.options[select.selectedIndex].value;
+            document.getElementById("input").value = _value;
+            }
+            function optionExists(needle, haystack)
+            {
+            var optionExists = false;
+            var optionsLength = haystack.length;
+            while (optionsLength--)
+            {
+            if ( haystack.options[ optionsLength ].value === needle )
+            {
+            optionExists = true;
+            break;
+            }
+            }
+            return optionExists;
+            }
+            function initialize() {
+            if (localStorage.getItem("commands") !== null) {
+            commands = localStorage.getItem("commands");
+            commands = commands.slice(0, -4);
+            var items = commands.split('____');
+            for(var index = 0; index < items.length; index++) {
+            var option = document.createElement("option");
+            option.text = items[index].replace("null", "");
+            document.getElementById("past").size = document.getElementById("past").size + 1;
+            document.getElementById("past").add(option);
+            }
+            }
+            else {
+			commands = "";
+            /*
+            var option = document.createElement("option");
+            option.text = "one";
+            document.getElementById("past").size = document.getElementById("past").size + 1;
+            document.getElementById("past").add(option);
+            commands = commands + option.text + "____";
+            option = document.createElement("option");
+            option.text = "two";
+            document.getElementById("past").size = document.getElementById("past").size + 1;
+            document.getElementById("past").add(option);
+            commands = commands + option.text + "____";
+            option = document.createElement("option");
+            option.text = "three";
+            document.getElementById("past").size = document.getElementById("past").size + 1;
+            document.getElementById("past").add(option);
+            commands = commands + option.text + "____";
+            */
+            }
+            }
+        </script>
+    </head>
+    <body onload="initialize()">
+        <select class="float_right" onclick="choose()" id="past" size="0">
+        </select>
+        q&gt;<input id='input' style="width:300px;margin:20px;" />
+        <button onclick="postRequest()">Submit</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" onclick="clearHistory()">Clear History</button></br>
+        <h4>Output</h4>
+        <div id="output" style="width:300px;height:300px;border:1px solid black;margin:20px;"></div>
+    </body>
 </html>
-
