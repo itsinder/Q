@@ -51,7 +51,6 @@ return function (input, qtype)
   
   local col = Column{
     field_type=qtype, 
-    field_size=width, 
     write_vector=true,
     nn=false }
           
