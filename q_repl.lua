@@ -10,6 +10,7 @@ if uv.guess_handle(0) ~= "tty" or
   error "stdio must be a tty"
 end
 local stdin = uv.new_tty(0, true)
+--uv.tty_set_mode(stdin, 1)
 local stdout = utils.stdout
 
 local debug = require('debug')

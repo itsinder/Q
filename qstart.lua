@@ -1,6 +1,6 @@
 --local utils = require('lib/utils')
--- dofile 'init.lua'
-
+dofile 'init.lua'
+print 'Welcome Q-ser !!'
 local buffer = ''
 
 local function gatherResults(success, ...)
@@ -61,5 +61,7 @@ end
 
 require 'q_httpserver'
 require 'q_repl'
--- We also need to explicitly start the libuv event loop.
+--require 'q_repl_ln'
+
 require('luv').run()
+-- We also need to explicitly start the libuv event loop.

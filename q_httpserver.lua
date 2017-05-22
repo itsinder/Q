@@ -18,14 +18,14 @@ require('weblit-app')
   .use(require('weblit-logger'))
   .use(require('weblit-auto-headers'))
   .use(require('weblit-etag-cache'))
-
+  .use(require('weblit-static')('/home/srinath/Ramesh/Q/web'))
   -- This is a custom route handler
   .route({
     method = "POST", -- Filter on HTTP verb
     path = "/Q", -- Filter on url patterns and capture some parameters.
   }, function (req, res)
     --p(req) -- Log the entire request table for debugging fun
-   
+    --print ('REQ' .. req.body)
     --res.body = "Hello " .. req.params.name .. "\n"
     tmp, res.body = evaluateLine(req.body)
     res.code = 200

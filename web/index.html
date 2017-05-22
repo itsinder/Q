@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+function sendRequest() {
+	//console.log("Request to be sent");
+	var data = document.getElementById("input").value;
+	if(data==="") {
+	alert("Invalid input");
+	return;
+	}
+	//console.log("data- " + data);
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener("readystatechange", function () {
+	  if (this.readyState === 4) {
+	    //console.log(this.responseText);
+	    document.getElementById("div1").innerHTML = "<h2>" + this.responseText + "</h2>";
+	  }
+	});
+	xhr.open("POST", "http://localhost:3000/Q");
+	xhr.send(data);
+}
+</script>
+</head>
+<body>
+<h2>q&gt;</h2>
+<input id='input' style="width:300px;margin:20px;" />
+<button onclick="sendRequest()">Submit</button>
+<h2>Output</h2>
+<div id="div1" style="width:300px;height:300px;border:1px solid black;margin:20px;"></div>
+
+</body>
+</html>
+
