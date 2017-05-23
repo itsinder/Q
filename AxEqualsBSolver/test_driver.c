@@ -69,7 +69,7 @@ _RDTSC(void)
 static void
 _print_result(double *x_expected, double *x_returned,
               double *b_expected, double *b_returned,
-              char *name, int n, double runtime)
+              char *name, int n, double runtime, bool checker_success)
 {
   bool error = false;
   fprintf(stderr, "CHECKING %s RESULTS\n", name);
@@ -94,12 +94,11 @@ _print_result(double *x_expected, double *x_returned,
       }
     }
   }
-  if (error) {
-    fprintf(stderr, "%s_FAILURE", name);
-  } else {
-    fprintf(stderr, "%s_SUCCESS", name);
-  }
-  fprintf(stderr, " in %.3e cycles\n\n", runtime);
+  fprintf(stderr, "%s %s in %.3e cycles, checker said %s.\n\n",
+          name,
+          error ? "FAILED" : "SUCCEEDED",
+          runtime,
+          checker_success ? "SUCCEEDED" : "FAILED");
 }
 
 static int
@@ -121,6 +120,7 @@ _run_our_tests(
   double *x_returned = NULL;
   uint64_t begin, total;
   double avg_cycles;
+  bool checker_success;
 
   status = alloc_symm_matrix(&A_posdef_copy, n); cBYE(status);
   status = alloc_matrix(&A_posdef_full, n); cBYE(status);
@@ -149,7 +149,8 @@ _run_our_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", n, avg_cycles);
+  checker_success = symm_positive_solver_check(A_posdef, x_returned, b_posdef, n, 0.0);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_SLOW", n, avg_cycles, checker_success);
 
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
@@ -167,7 +168,8 @@ _run_our_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", n, avg_cycles);
+  checker_success = symm_positive_solver_check(A_posdef, x_returned, b_posdef, n, 0.0);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "POSDEF_FAST", n, avg_cycles, checker_success);
 
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
@@ -184,7 +186,8 @@ _run_our_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", n, avg_cycles);
+  checker_success = symm_positive_solver_check(A_posdef, x_returned, b_posdef, n, 0.0);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_SLOW", n, avg_cycles, checker_success);
 
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
@@ -202,7 +205,8 @@ _run_our_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", n, avg_cycles);
+  checker_success = symm_positive_solver_check(A_posdef, x_returned, b_posdef, n, 0.0);
+  _print_result(x_expected, x_returned, b_posdef, b_returned, "FULL_POSDEF_FAST", n, avg_cycles, checker_success);
 
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
@@ -214,7 +218,8 @@ _run_our_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_matrix_vector(A, x_returned, n, b_returned);
-  _print_result(x_expected, x_returned, b, b_returned, "FULL", n, avg_cycles);
+  checker_success = full_positive_solver_check(A, x_returned, b, n, 0.0);
+  _print_result(x_expected, x_returned, b, b_returned, "FULL", n, avg_cycles, checker_success);
 
 BYE:
   free_matrix(A_posdef_copy, n);
@@ -251,6 +256,7 @@ _run_lapack_tests(
 
   uint64_t begin, total;
   double avg_cycles;
+  bool checker_success;
 
   A_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_unrolled);
   A_posdef_unrolled = malloc(n * n * sizeof(double)); return_if_malloc_failed(A_posdef_unrolled);
@@ -276,7 +282,8 @@ _run_lapack_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_matrix_vector(A, b_copy, n, b_returned);
-  _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", n, avg_cycles);
+  checker_success = full_positive_solver_check(A, b_copy, b, n, 0.0);
+  _print_result(x_expected, b_copy, b, b_returned, "LAPACK_FULL", n, avg_cycles, checker_success);
 
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
@@ -297,7 +304,8 @@ _run_lapack_tests(
   }
   avg_cycles = (double)total / (_bench_iters - _bench_drop_n);
   multiply_symm_matrix_vector(A_posdef, b_posdef_copy, n, b_returned);
-  _print_result(x_expected, b_posdef_copy, b_posdef, b_returned, "LAPACK_POSDEF", n, avg_cycles);
+  checker_success = symm_positive_solver_check(A_posdef, b_posdef_copy, b_posdef, n, 0.0);
+  _print_result(x_expected, b_posdef_copy, b_posdef, b_returned, "LAPACK_POSDEF", n, avg_cycles, checker_success);
 
 BYE:
   free_if_non_null(A_unrolled);
