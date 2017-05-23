@@ -6,6 +6,8 @@ dofile 'luvit-loader.lua' -- Enable require to find lit packages
 -- This returns a table that is the app instance.
 -- All it's functions return the same table for chaining calls.
 local tmp
+local webpath = os.getenv("Q_SRC_ROOT") .. "/web"
+
 require('weblit-app')
 
   -- Bind to localhost on port 3000 and listen for connections.
@@ -18,7 +20,7 @@ require('weblit-app')
   .use(require('weblit-logger'))
   .use(require('weblit-auto-headers'))
   .use(require('weblit-etag-cache'))
-  .use(require('weblit-static')('/home/srinath/Ramesh/Q/web'))
+  .use(require('weblit-static')(webpath))
   -- This is a custom route handler
   .route({
     method = "POST", -- Filter on HTTP verb
