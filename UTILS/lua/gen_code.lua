@@ -2,11 +2,11 @@ local plpath = require 'pl.path'
 
 local fns = {}
 local function do_replacements(tmpl, subs)
-	local T = dofile(tmpl)
-	for k,v in pairs(subs) do
-		T[k] = v
-	end
-	return T
+   local T = dofile(tmpl)
+   for k,v in pairs(subs) do
+      T[k] = v
+   end
+   return T
 end
 
 
