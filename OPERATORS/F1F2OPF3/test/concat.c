@@ -30,7 +30,7 @@ main(
   vx = vy = 0;
   Z = malloc(N * sizeof(uint32_t));
   return_if_malloc_failed(Z);
-  status = concat_I1_I2_I4((int8_t *)X, (int16_t *)Y, N, (int32_t *)Z); cBYE(status);
+  status = concat_I1_I2_I4((uint8_t *)X, (uint16_t *)Y, N, (uint32_t *)Z); cBYE(status);
   for ( int i = 0; i < N; i++, vx++, vy++ ) { 
     if ( vx == 255 ) { vx = 0; }
     if ( vy == 65535 ) { vy = 0; }

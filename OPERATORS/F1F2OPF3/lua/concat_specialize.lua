@@ -1,7 +1,7 @@
 
 return function (
-  f1type, 
-  f2type, 
+  in1_qtype, 
+  in2_qtype, 
   optargs
   )
     local plfile = require "pl.file"
@@ -9,30 +9,30 @@ return function (
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_out_qtypes = { I2 = true, I4 = true, I8 = true }
 
-    assert(ok_intypes[f1type], "input type " .. f1type .. " not acceptable")
-    assert(ok_intypes[f2type], "input type " .. f2type .. " not acceptable")
+    assert(ok_intypes[in1_qtype], "input type " .. in1_qtype .. " not acceptable")
+    assert(ok_intypes[in2_qtype], "input type " .. in2_qtype .. " not acceptable")
 
-    local w1   = assert(g_qtypes[f1type].width)
-    local w2   = assert(g_qtypes[f2type].width)
+    local w1   = assert(g_qtypes[in1_qtype].width)
+    local w2   = assert(g_qtypes[in2_qtype].width)
 
     local shift = w2 * 8 -- convert bytes to bits 
     local l_out_qtype = nil
-    if ( f1type == "I4" ) then 
+    if ( in1_qtype == "I4" ) then 
       l_out_qtype = "I8"
-    elseif( f1type == "I2" ) then 
-      if ( f2type == "I4" ) then
+    elseif( in1_qtype == "I2" ) then 
+      if ( in2_qtype == "I4" ) then
         l_out_qtype = "I8"
-      elseif( f2type == "I2" ) then
+      elseif( in2_qtype == "I2" ) then
         l_out_qtype = "I4"
-      elseif( f2type == "I1" ) then
+      elseif( in2_qtype == "I1" ) then
         l_out_qtype = "I4"
       end
-    elseif( f1type == "I1" ) then 
-      if ( f2type == "I4" ) then
+    elseif( in1_qtype == "I1" ) then 
+      if ( in2_qtype == "I4" ) then
         l_out_qtype = "I8"
-      elseif( f2type == "I2" ) then
+      elseif( in2_qtype == "I2" ) then
         l_out_qtype = "I4"
-      elseif( f2type == "I1" ) then
+      elseif( in2_qtype == "I1" ) then
         l_out_qtype = "I2"
       end
     end
@@ -48,20 +48,18 @@ return function (
       "specfiied outputtype not big enough")
       l_out_qtype = out_qtype
     end
-    local tmpl = plfile.read('base.tmpl')
+    local tmpl = 'base.tmpl'
     local subs = {}
     -- This includes is just as a demo. Not really needed
-    subs.includes = "#include <math.h>\n#include <curl/curl.h>"
+    subs.includes = "#include <math.h>\n"
     subs.fn = 
-    "concat_" .. f1type .. "_" .. f2type .. "_" .. l_out_qtype 
-    subs.in1type = g_qtypes[f1type].ctype
-    subs.in2type = g_qtypes[f2type].ctype
+    "concat_" .. in1_qtype .. "_" .. in2_qtype .. "_" .. l_out_qtype 
+    subs.in1_ctype = "u" .. g_qtypes[in1_qtype].ctype
+    subs.in2_ctype = "u" .. g_qtypes[in2_qtype].ctype
     subs.out_qtype = l_out_qtype
-    subs.out_ctype = g_qtypes[l_out_qtype].ctype
+    subs.out_ctype = "u" .. g_qtypes[l_out_qtype].ctype
     -- Note that we are movint int8_t to uint8_t below
-    local cast = "(u" .. subs.out_ctype .. ")"
-    subs.c_code_for_operator = 
-    " c = ( " .. cast .. "a << " .. shift .. " ) | .. " cast " .. b; "
+    subs.c_code_for_operator = " c = ((" .. subs.out_ctype .. ")a << " .. shift .. " ) | b; "
 
     return subs, tmpl
 end

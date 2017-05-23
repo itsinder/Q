@@ -8,7 +8,6 @@ local print_vector = function(ptr , len)
 end
 
 local q_core = require 'q_core'
-local ffi_malloc = require 'ffi_malloc'
 -- local Generator = require "Generator"
 local Vector = require 'Vector'
 local Column = require "Column"
