@@ -216,7 +216,7 @@ end
 fns.handle_category6 = function (index, v, M)
   -- print(v.name)
   
-  local col = Column{field_type='I4', field_size = 4,chunk_size = 8,
+  local col = Column{field_type='I4',chunk_size = 8,
     filename="./bin/I4.bin",  
   }
   
