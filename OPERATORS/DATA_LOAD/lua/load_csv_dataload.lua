@@ -43,7 +43,9 @@ return function (
     end
       
     if M[i].is_load == true then
+      local fld_width = nil
       if M[i].qtype == "SC" then
+        fld_width = M[i].width
         size_of_data_list[i] = M[i].width
       else
         size_of_data_list[i] = g_qtypes[M[i].qtype]["width"]
@@ -55,7 +57,7 @@ return function (
       end
     
       column_list[i] = Column{field_type=M[i].qtype, 
-                 field_size=size_of_data_list[i], 
+                 field_size=fld_width,
                  filename= _G["Q_DATA_DIR"] .. "_" .. M[i].name,
                  write_vector=true,
                  nn=M[i].has_nulls }
