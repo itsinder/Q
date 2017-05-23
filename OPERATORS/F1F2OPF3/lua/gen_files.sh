@@ -19,6 +19,7 @@ while read line; do
   gcc -c $line $QC_FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
 gcc -shared *.o -o libf1f2opf3.so
+cp libf1f2opf3.so $Q_ROOT/lib/
 rm -f *.o
 rm -f _x
 cd -

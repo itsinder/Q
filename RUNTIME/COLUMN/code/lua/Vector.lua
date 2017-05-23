@@ -54,10 +54,10 @@ type = function( obj )
     return otype
 end
 
-local function read_file_vector(self, arg)
+local function read_file_vector(self, arg) -- TODO indrajeet rename as now its a read write vector`but fixed length`
     self.input_from_file = true
     self.filename = assert(arg.filename, "Filename not specified to read from")
-    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), 
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, true), 
       q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
@@ -174,7 +174,7 @@ local function flush_remap_file(self)
     assert(self.file ~= nil, "No file to mmap to")
     q_core.fflush(self.file) -- fflush to current state before mmaping
     self.file_last_chunk_number = self.last_chunk_number
-    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), 
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, true), 
     q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
@@ -282,7 +282,7 @@ end
 function Vector:eov()
     q_core.fflush(self.file)
     self.input_from_file = true
-    self.f_map = q_core.gc(q_core.f_mmap(self.filename, false), q_core.f_munmap)
+    self.f_map = q_core.gc(q_core.f_mmap(self.filename, true), q_core.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file

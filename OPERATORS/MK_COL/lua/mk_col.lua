@@ -48,7 +48,7 @@ return function (input, qtype)
     assert(v >= min[qtype], g_err.INVALID_LOWER_BOUND) 
     assert(v <= max[qtype], g_err.INVALID_UPPER_BOUND)
   end
-  
+  if field_type ~= "SC" then width=nil end
   local col = Column{
     field_type=qtype, 
     write_vector=true,
@@ -56,7 +56,7 @@ return function (input, qtype)
           
   local ctype =  assert(g_qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
-  local length_in_bytes = width * length
+  local length_in_bytes = col:sz() * length
   local chunk = assert(q_core.new(ctype .. "[?]", length, input),g_err.FFI_NEW_ERROR)
   col:put_chunk(length, chunk)
   col:eov()

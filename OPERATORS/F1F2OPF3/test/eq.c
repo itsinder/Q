@@ -3,8 +3,6 @@
 #include "_vveq_F4_F8.h"
 int
 main(
-    int argc,
-    char **argv
     )
 {
   int status = 0;
