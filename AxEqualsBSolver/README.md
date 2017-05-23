@@ -23,3 +23,11 @@ Documentation
 
 To build the documentation, any LaTeX installation with the `pdflatex` command should be sufficient, then:
     pdflatex linear_solver.tex
+
+Notes
+-----
+
+It seems that OpenMP does not play nicely with Valgrind. Unless Valgrind reports
+that memory is definitely lost, there is probably no issue. You can make sure by running Valgrind
+with the options `--leak-check=full --show-leak-kinds=all`, and confirming that each individual
+item reported by Valgrind is related to OpenMP.
