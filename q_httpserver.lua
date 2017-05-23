@@ -11,7 +11,7 @@ require('weblit-app')
   -- Bind to localhost on port 3000 and listen for connections.
   .bind({
     host = "0.0.0.0",
-    port = 3000
+    port = 8343
   })
 
   -- Include a few useful middlewares.  Weblit uses a layered approach.
