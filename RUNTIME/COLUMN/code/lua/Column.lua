@@ -4,6 +4,7 @@ Column.__index = Column
 local q_core = require 'q_core'
 local Vector = require "Vector"
 local DestructorLookup = {}
+-- local dbg = require 'debugger'
 
 --TODO move to utils
 local function clone (t) -- deep-copy a table
@@ -247,10 +248,11 @@ function Column:wrap()
 end
 
 function Column:eval()
-   if self.gen ~= nil and self:memo() == true then
+   if self.gen ~= nil and self:ismemo() == true then
         -- Drain the column
     local index = self:last_chunk() or 0 
     while self:materialized() == false do
+        -- dbg()
         self:chunk(index)
         index = index + 1
     end

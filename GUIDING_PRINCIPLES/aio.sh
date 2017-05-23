@@ -63,7 +63,7 @@ cd ../UTILS/build
 lua build.lua gen.lua
 lua mk_so.lua /tmp/
 cd -
-PROG="
+PROG_START="
 q_core = require 'q_core'
 q = require 'q'
 require 'globals'
@@ -71,7 +71,23 @@ load_csv = require 'load_csv'
 print_csv = require 'print_csv'
 mk_col = require 'mk_col'
 save = require 'save'
-print('S')
+"
+PROG_SAVE="
+local q = require'q'
+local q_core = require 'q_core'
+local mk_col = require 'mk_col'
+local save = require 'save'
+x = mk_col({10, 20, 30, 40}, 'I4')
+print(type(x))
+print(x:length())
+save('tmp.save')
+"
+PROG_RESTORE="
+dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
+print(type(x))
+print(x:length())
+print_csv = require 'print_csv'
+print_csv(x, nil, "")
 "
 # load csv
 # mk col
@@ -90,3 +106,23 @@ if [[ $RES -eq 0 ]] ; then
 else
    my_print "FAIL" "error"
 fi
+
+luajit -e "$PROG_SAVE"
+RES=$?
+if [[ $RES -eq 0 ]] ; then
+   my_print "SUCCESS in saving"
+else
+   my_print "FAIL" "error"
+fi
+
+luajit -e "$PROG_RESTORE"
+RES=$?
+if [[ $RES -eq 0 ]] ; then
+   my_print "SUCCESS in restoring"
+else
+   my_print "FAIL" "error"
+fi
+
+
+
+

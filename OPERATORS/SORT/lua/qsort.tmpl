@@ -35,14 +35,14 @@ return require 'code_gen' {
 #include <inttypes.h>
 
 extern void
-qsort_${SORT_ORDER}_${QTYPE} (
+${fn} (
 	    void *const pbase, 
 	    size_t total_elems
 	    );
 ]],
 definition = [[
 
-#include "_${NAME}.h"
+#include "_${fn}.h"
 
 /* Byte-wise swap two items of size SIZE. */
 /*
@@ -118,7 +118,7 @@ typedef struct
 
 // START FUNC DECL
 void
-qsort_${SORT_ORDER}_${QTYPE} (
+${fn} (
 	    void *const pbase, 
 	    size_t total_elems
 	    )
