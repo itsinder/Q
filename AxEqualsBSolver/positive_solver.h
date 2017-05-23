@@ -16,7 +16,12 @@
    Since these operations aren't always guaranteed to find a solution
    but the operations are on floating numbers, it is up to the caller
    to confirm that the returned solution is correct up to their desired
-   level of accuracy.
+   level of accuracy using the provided checker functions.
+
+   Passing a positive floating point value to a function which expects
+   an epsilon parameter will check that the solution produced by the
+   algorithm is within epsilon of the original target. Passing a non-positive
+   value will use a default value.
 */
 
 /* Expects a compact positive semidefinite matrix.
@@ -66,5 +71,24 @@ extern int positive_solver(
     double ** A,
     double * x,
     double * b,
-    int n
+    int n,
+    double eps
+    );
+
+/* Preserves its input. */
+extern bool full_positive_solver_check(
+    double **A,
+    double *x,
+    double *b,
+    int n,
+    double eps
+    );
+
+/* Preserves its input. */
+extern bool symm_positive_solver_check(
+    double **A,
+    double *x,
+    double *b,
+    int n,
+    double eps
     );

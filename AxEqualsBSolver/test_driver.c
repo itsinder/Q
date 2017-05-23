@@ -207,7 +207,7 @@ _run_our_tests(
   total = 0;
   for (int i = 0; i < _bench_iters; i++) {
     begin = _RDTSC();
-    status = positive_solver(A, x_returned, b, n); cBYE(status);
+    status = positive_solver(A, x_returned, b, n, 0); cBYE(status);
     if (i >= _bench_drop_n) {
       total += _RDTSC() - begin;
     }

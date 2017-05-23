@@ -3,9 +3,12 @@
 #include <inttypes.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "matrix_helpers.h"
 #include "positive_solver.h"
 #include "macros.h"
+
+#define DEFAULT_EPS 0.001
 
 /* Andrew Winkler
  It has the virtue of dramatic simplicity - there's no need to explicitly construct the cholesky decomposition, no need to do the explicit backsubstitutions.
@@ -71,6 +74,68 @@ static int _positive_solver_rec(
 BYE:
   return status;
 }
+
+static bool _positive_solver_check(
+    double **A,
+    double *x,
+    double *b,
+    int n,
+    double eps,
+    bool is_symm
+    )
+{
+  int status = 0;
+  bool result = false;
+
+  double *b_prime = NULL;
+  b_prime = malloc(n * sizeof(double)); return_if_malloc_failed(b_prime);
+
+  if (is_symm) {
+    multiply_symm_matrix_vector(A, x, n, b_prime);
+  } else {
+    multiply_matrix_vector(A, x, n, b_prime);
+  }
+
+  result = true;
+  for (int i = 0; i < n; i++) {
+    if (abs(b_prime[i] - b[i]) > eps) {
+      result = false;
+      break;
+    }
+  }
+
+ BYE:
+  free_if_non_null(b_prime);
+  if (status != 0) result = false;
+  return result;
+}
+
+bool full_positive_solver_check(
+    double **A,
+    double *x,
+    double *b,
+    int n,
+    double eps
+    )
+{
+  bool is_symm = false;
+  if (0 < eps) eps = DEFAULT_EPS;
+  return _positive_solver_check(A, x, b, n, eps, is_symm);
+}
+
+bool symm_positive_solver_check(
+    double **A,
+    double *x,
+    double *b,
+    int n,
+    double eps
+    )
+{
+  bool is_symm = true;
+  if (0 < eps) eps = DEFAULT_EPS;
+  return _positive_solver_check(A, x, b, n, eps, is_symm);
+}
+
 
 int posdef_positive_solver_fast(
     double ** A,
@@ -168,10 +233,12 @@ int positive_solver(
     double ** A,
     double * x,
     double * b,
-    int n
+    int n,
+    double eps
     )
 {
   int status = 0;
+  bool solution_exists = false;
 
   double ** AtA = NULL;
   double * Atb = NULL;
@@ -181,9 +248,13 @@ int positive_solver(
   transpose_and_multiply(A, AtA, n);
   transpose_and_multiply_matrix_vector(A, b, n, Atb);
   status = posdef_positive_solver_fast(AtA, x, Atb, n); cBYE(status);
+  solution_exists = full_positive_solver_check(A, x, b, n, eps);
 
 BYE:
   free_matrix(AtA, n);
-  free(Atb);
+  free_if_non_null(Atb);
+  if (status == 0 && !solution_exists) {
+    status = 1;
+  }
   return status;
 }
