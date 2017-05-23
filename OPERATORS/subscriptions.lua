@@ -40,7 +40,7 @@ return
      expand_as = { "f1f2opf3", "f1s1opf2" }, 
      sig = "function gt(x, y)" },
    concat = { 
-     expand_as = { "f1f2opf3", "f1s1opf2" }, 
+     expand_as = { "f1f2opf3" },
      sig = "function concat(x, y, z)" },
  }
 

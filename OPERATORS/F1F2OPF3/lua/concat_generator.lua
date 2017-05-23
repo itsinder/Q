@@ -26,8 +26,6 @@
             gen_code.doth(subs, tmpl, incdir)
             gen_code.dotc(subs, tmpl, srcdir)
             print("Produced ", subs.fn)
-          else
-            print(subs)
           end
         end
       end

@@ -8,6 +8,7 @@ function sort(x, ordr)
   local func_name = assert(subs.fn)
 
   local x_len, x_chunk, nn_x_chunk = x:chunk(-1)
+  assert(nn_x_chunk == nil, "Cannot sort with null values")
   q[func_name](x_chunk, x_len)
 
 end
