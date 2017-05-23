@@ -70,6 +70,8 @@ sudo luarocks install cluacov
 #install penlight 
 sudo luarocks install penlight 1.4.1-1
 
+#install luv
+sudo luarocks install luv
 
 #installation of luaffi
 if [ -f /usr/local/lib/lua/5.1/ffi.so ] ;then
