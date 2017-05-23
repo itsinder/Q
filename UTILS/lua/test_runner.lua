@@ -49,7 +49,7 @@ end
 
 local failures = suite_runner(suite, fn, tests_to_run)
 if (#failures > 0) then
-  print ("Failed tests: " .. tostring(failures))
+  print ("Failed testcases are: \n" .. tostring(failures))
 else
   print("Tests passed.")
 end
