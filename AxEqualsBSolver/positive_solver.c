@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <malloc.h>
+#include <unistd.h>
 #include "matrix_helpers.h"
 #include "positive_solver.h"
 #include "macros.h"
@@ -38,10 +39,15 @@ static int _positive_solver_rec(
   int m = n -1;
 
   if (A[0][0] != 0.0) {
-    for(int i=0; i < m; i++){
-      bvec[i] -= Avec[i] * b[0] / A[0][0];
-      for(int j=0; j < m - i; j++)
-        Asub[i][j] -= Avec[i] * Avec[i+j] / A[0][0];
+    int nT = sysconf(_SC_NPROCESSORS_ONLN);
+    #pragma omp parallel for
+    for (int t = 0; t < nT; t++) {
+      for(int i=0; i < m; i++){
+        if ((i - i / nT) % nT != t) continue;
+        bvec[i] -= Avec[i] * b[0] / A[0][0];
+        for(int j=0; j < m - i; j++)
+          Asub[i][j] -= Avec[i] * Avec[i+j] / A[0][0];
+      }
     }
   } /* else check that Avec is 0 */
 
