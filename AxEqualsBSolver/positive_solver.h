@@ -22,6 +22,10 @@
    an epsilon parameter will check that the solution produced by the
    algorithm is within epsilon of the original target. Passing a non-positive
    value will use a default value.
+
+   NOTE: checking a solution's validity currently (i.e. until we write a good
+   matrix multiplication) takes a similar amount of computation as finding it,
+   so it shouldn't be done unless necessary if performance is critical.
 */
 
 /* Expects a compact positive semidefinite matrix.
