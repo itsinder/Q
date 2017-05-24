@@ -53,3 +53,4 @@ if (#failures > 0) then
 else
   print("Tests passed.")
 end
+os.exit() -- For LuaJIT
