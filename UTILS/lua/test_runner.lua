@@ -31,7 +31,7 @@ This test_runner program runs all tests, and logs all failed test-cases with the
 --print ("TERRA PATH" .. package.terrapath)
 
 require 'globals'
-require 'terra_globals'
+--require 'terra_globals'
 require 'error_code'
 local pretty = require 'pl.pretty'
 

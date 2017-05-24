@@ -20,7 +20,7 @@ return function(operation, qtype_input1, qtype_input2, input1, input2, qtype)
   local convertor 
   local length = #input1
   --print(qtype)
-  if qtype == 0 then
+  if qtype == "uint64_t" then
     length = math.floor(#input1 / 64)
     if ((length * 64 ) ~= #input1) then length = length + 1 end
     --print("length = " ,length)
