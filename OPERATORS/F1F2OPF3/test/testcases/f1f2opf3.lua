@@ -18,9 +18,13 @@ return function(operation, qtype_input1, qtype_input2, input1, input2, qtype)
   
   local chunk
   local convertor 
-  
+  local length = #input1
+  --print(qtype)
   if qtype == 0 then
-    chunk = assert(q_core.new("uint64_t[?]", #input1), g_err.FFI_NEW_ERROR)
+    length = math.floor(#input1 / 64)
+    if ((length * 64 ) ~= #input1) then length = length + 1 end
+    --print("length = " ,length)
+    chunk = assert(q_core.new("uint64_t[?]", length), g_err.FFI_NEW_ERROR)
     convertor = operation .. "_" .. qtype_input1 .. "_" .. qtype_input2
   else
     chunk = assert(q_core.new(g_qtypes[qtype].ctype .. "[?]", #input1), g_err.FFI_NEW_ERROR)
@@ -28,11 +32,11 @@ return function(operation, qtype_input1, qtype_input2, input1, input2, qtype)
   end
   
   -- convertor will be of the format -- e.g. - vvadd_I1_I1_I1
-  print(convertor)
+  --print(convertor)
   assert(q[convertor], g_err.CONVERTOR_FUNCTION_NULL)
   q[convertor](chunk1, chunk2, #input1, chunk)
   local ret = {}
-  for i=1,#input1 do
+  for i=1, length do
     table.insert(ret,chunk[i-1])
     --print(chunk[i-1])
   end

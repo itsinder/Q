@@ -11,6 +11,7 @@ end
 
 fns.assert_bit = function(expected)
   return function (ret)
+    --print ( ret[1], expected[1])
     return ret[1] == expected[1]
   end
 end
