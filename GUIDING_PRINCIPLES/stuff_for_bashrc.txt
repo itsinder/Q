@@ -13,3 +13,4 @@ export Q_SRC_ROOT=$HOME/WORK/Q/
 export Q_ROOT=$HOME/Q/
 
 #--------
+export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "

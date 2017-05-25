@@ -13,11 +13,13 @@ return function (
       subs.ctype = g_qtypes[qtype].ctype
       subs.qtype = qtype
       subs.init_val = 0
-      if ( ( ctype == "I1" ) or ( ctype == "I2" ) or 
-           ( ctype == "I4" ) or ( ctype == "I8" ) ) then
+      if ( ( qtype == "I1" ) or ( qtype == "I2" ) or 
+           ( qtype == "I4" ) or ( qtype == "I8" ) ) then
         subs.reduce_ctype = "uint64_t" 
+      elseif ( ( qtype == "F4" ) or ( qtype == "F8" ) ) then
+        subs.reduce_ctype = "double"
       else
-        subs.reduce_ctype = "double" 
+        assert(nil, "Invalid qtype " .. qtype)
       end
       subs.reducer = "mcr_sum_sqr"
       subs.t_reducer = "mcr_sum"
