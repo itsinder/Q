@@ -3,13 +3,11 @@ local Column = require 'Column'
 local dbg = require 'debugger'
 
 -- TODO doc pending: specializer must return a function and an out_qtype
-return function (a, x , y, optargs )
+function expander_f1f2opf3(a, x , y, optargs )
     -- Get name of specializer function. By convention
     local spfn = require(a .. "_specialize" )
-    -- print(type(fn))
     status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype())
     assert(status, subs)
-    dbg()
     local func_name = assert(subs.fn)
     local z_qtype = assert(subs.out_qtype)
     local z_width = g_qtypes[z_qtype].width
@@ -43,6 +41,7 @@ return function (a, x , y, optargs )
         end
       end
     end)
+    print("================")
     return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}
 end
 
