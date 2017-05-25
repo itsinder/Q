@@ -23,4 +23,5 @@ if [ $status != 0 ]; then echo VG: FAILURE; else echo VG: SUCCESS; fi
 set -e 
 #-------------------
 rm -f _*
+rm -f a.out
 echo "Completed $0 in $PWD"
