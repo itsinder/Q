@@ -23,7 +23,10 @@
             document.getElementById("output").innerHTML = "<h4>" + this.responseText + "</h4>";
             }
             });
-            xhr.open("POST", "http://localhost:3000/Q");
+	//console.log(window.location.hostname);
+	//console.log(window.location.protocol);
+	//console.log(window.location.port);
+            xhr.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/Q");
             xhr.send(data);
             }
             function addOption() {
@@ -112,6 +115,7 @@
         <div id="output" style="width:300px;height:300px;border:1px solid black;margin:20px;"></div>
 
 <!--      <div id="terminal"></div>   -->
+<!--
       <script>
 function sendRequestTerm(term, data) {
 	//console.log("data- " + data);
@@ -204,6 +208,6 @@ function execCmd(cmd) {
 			}
 		});
       </script>
-
+-->
     </body>
 </html>
