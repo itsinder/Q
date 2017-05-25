@@ -1,19 +1,10 @@
-local fns = {}
 
-fns.assert_qtype = function(expected)
+return function(expected)
   return function (ret)
     for k,v in ipairs(ret) do
+      --print ( ret[k], expected[k])
       if ret[k] ~= expected[k] then return false end
     end
     return true
   end
 end
-
-fns.assert_bit = function(expected)
-  return function (ret)
-    --print ( ret[1], expected[1])
-    return ret[1] == expected[1]
-  end
-end
-
-return fns
