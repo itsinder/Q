@@ -52,7 +52,7 @@ return function (suite, fn, tests_to_run)
         myassert (result, test_num, res, test.name)
       end
     end
-    utils["testcase_results"](test, suite.filename, suite.test_for, suite.test_type, result, "")
+    utils["testcase_results"](test, suite.test_for, suite.test_type, result, "")
     call_if_exists(test.teardown)
   end
   call_if_exists(suite.teardown)
