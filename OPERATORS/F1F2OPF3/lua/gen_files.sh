@@ -7,7 +7,7 @@ rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h
 rm -f  $Q_ROOT/lib/libf1f2opf3.so 
 bash cleanup.sh
-bash gen_specializers.sh
+lua gen_specializers.lua
 
 luajit concat_generator.lua concat_operators.lua
 luajit arith_generator.lua  arith_operators.lua
