@@ -16,5 +16,6 @@ status=$?
 if [ $status != 0 ]; then echo FAILURE; else echo SUCCESS; fi 
 set -e 
 #-------------------
-# rm _x
+rm _x
+rm -f a.out
 echo "Completed $0 in $PWD"
