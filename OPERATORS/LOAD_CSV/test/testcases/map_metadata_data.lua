@@ -64,6 +64,8 @@ return {
     -- escaping character in SV field is missing  
     { meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
       output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char" },
+    { meta = "gm_invalid_SC_width.lua", data = "invalid_SC_width.csv", category= "category1",
+      output_regex= g_err.STRING_TOO_LONG, name = "SC width value is invalid" },
  
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file
