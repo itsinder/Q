@@ -2,12 +2,9 @@
 local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x)
-  if type(x) == "Column" then
-    local status, numer, denom = pcall(expander_f_to_s, <<operator>>, x)
-    if ( not status ) then print(col) end
-    assert(status, "Could not execute <<operator>>")
-    return numer, denom
-  end
+  local status, col = pcall(expander_s_to_f, <<operator>>, x)
+  assert(status, "Could not execute <<operator>>" .. col)
+  return col
 end
 T.<<operator>> = <<operator>>
     ]===]
