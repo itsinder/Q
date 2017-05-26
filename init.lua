@@ -31,6 +31,7 @@ paths[#paths + 1] = "OPERATORS/F1F2OPF3/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/LOAD_CSV/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/DATA_LOAD/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/MK_COL/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/S_TO_F/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/SORT/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
 

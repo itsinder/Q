@@ -4,7 +4,7 @@ return require 'code_gen' {
 
 #include <stdint.h>
 extern int
-const_${out_qtype}(
+rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   ${out_ctype} *ptr_val
@@ -12,12 +12,12 @@ const_${out_qtype}(
    ]],
    definition = [[
 
-#include "_const_${out_qtype}.h"
+#include "_rand_${out_qtype}.h"
 
 
 //START_FUNC_DECL
 int
-const_${out_qtype}(
+rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   ${out_ctype} *ptr_val
@@ -26,7 +26,7 @@ const_${out_qtype}(
 {
   int status = 0;
   ${out_ctype} val = *ptr_val;
-// #pragma omp parallel for
+#pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
     X[i] = val;
   }
