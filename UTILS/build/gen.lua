@@ -11,4 +11,5 @@ T[#T+1] = { dir = "/OPERATORS/PRINT/src/", scripts = { "gen_files.sh" }}
 T[#T+1] = { dir = "/OPERATORS/F_TO_S/lua/", scripts = { "gen_files.sh"}}
 T[#T+1] = { dir = "/OPERATORS/SORT/lua/", scripts = { "gen_files.sh"}}
 T[#T+1] = { dir = "/OPERATORS/IDX_SORT/lua/", scripts = { "gen_files.sh"}}
+T[#T+1] = { dir = "/OPERATORS/AX_EQUALS_B/", scripts = { "make clean && make" } }
 return T
