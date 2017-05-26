@@ -33,6 +33,7 @@ paths[#paths + 1] = "OPERATORS/DATA_LOAD/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/MK_COL/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/SORT/lua/?.lua"
 paths[#paths + 1] = "OPERATORS/PRINT/lua/?.lua"
+paths[#paths + 1] = "OPERATORS/AX_EQUALS_B/src/?.lua"
 
 local lib_paths = {}
 -- local lib_sep = ":"  
