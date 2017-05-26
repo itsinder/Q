@@ -1,8 +1,8 @@
 local plpath = require("pl.path")
 local Column = {}
 Column.__index = Column
-local q_core = require 'q_core'
-local Vector = require "Vector"
+local q_core = require 'Q/UTILS/lua/q_core'
+local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
 -- local dbg = require 'debugger'
 
@@ -267,4 +267,5 @@ end
 function Column:__tostring()
  return string.format("Column{field_type='%s', filename='%s', nn=%s,}",self.vec.field_type, plpath.abspath(self.vec.filename), tostring(self.nn_vec ~=nil) )
 end
-return Column
+
+return require('Q/q_export').export('Column', Column)

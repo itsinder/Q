@@ -1,16 +1,16 @@
 -- RS Delete this line - taken care of by LUA_INIT set up
-local validate_meta = require "validate_meta"
-local g_err = require 'error_code'
+local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
+local g_err = require 'Q/UTILS/lua/error_code'
 
-local Dictionary = require 'dictionary'
-local Column = require 'Column'
+local Dictionary = require 'Q/UTILS/lua/dictionary'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.file'
 --RS Use extract_fn_proto for txt_to_* and so on
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
-local q_core = require 'q_core'
+local q_core = require 'Q/UTILS/lua/q_core'
 
 local function mk_out_buf(
   in_buf, 
@@ -71,7 +71,7 @@ local function mk_out_buf(
   assert(status == 0, g_err.INVALID_DATA_ERROR .. m.qtype)
 end
 
-return function ( 
+load_csv = function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   global_settings -- TODO unused for now
@@ -83,8 +83,9 @@ return function (
 
     assert( infile ~= nil and plpath.isfile(infile),g_err.INPUT_FILE_NOT_FOUND)
     assert(plpath.getsize(infile) > 0, g_err.INPUT_FILE_EMPTY)
-    assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
-    assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
+    -- Sri: Think this isn't needed; such stuff shoul be ensured by library loading; trust our own :) ?
+    --assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+    --assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
     validate_meta(M)
 
     -- In this loop (1) calculate max_txt_width (2) create Column for each
@@ -111,7 +112,7 @@ return function (
         cols[i] = Column{
           field_type=M[i].qtype, 
           field_size=fld_width, 
-          filename= _G["Q_DATA_DIR"] .. "/_" .. M[i].name,
+          filename= require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name,
           write_vector=true,
           nn=M[i].has_nulls }
           --==============================
@@ -195,7 +196,7 @@ return function (
           cols[i]:eov()
           if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
             -- TODO drop the null column. Indrajeet to provide
-            local null_file = _G["Q_DATA_DIR"] .. "/_" .. M[i].name .. "_nn"
+            local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
             assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
           end
           cols_to_return[rc_idx] = cols[i]
@@ -207,6 +208,9 @@ return function (
       return cols_to_return
 
 end
+
+return require('Q/q_export').export('load_csv', load_csv)
+
 --_G["Q_DATA_DIR"] = "./"
 --_G["Q_META_DATA_DIR"] = "./"
 --_G["Q_DICTIONARIES"] = {}
