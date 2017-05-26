@@ -1,6 +1,5 @@
-local ffi = require 'ffi'
-local ffi_malloc = require 'ffi_malloc'
 local q = require 'q'
+local q_core = require 'q_core'
 
 function ax_equals_b(A, b)
   assert(type(A) == "table", "A should be a table of columns")
@@ -14,8 +13,8 @@ function ax_equals_b(A, b)
   assert(nn_b_chunk == nil, "b should have no nil elements")
 
   assert(#A == b_len, "A should have same width as b")
-  local A_chunks = ffi.cast('double**', ffi_malloc(b_len * ffi.sizeof('double*')))
-  local x_returned = ffi.cast('double*', ffi_malloc(b_len * ffi.sizeof('double')))
+  local A_chunks = q_core.cast('double**', q_core.malloc(b_len * q_core.sizeof('double*')))
+  local x_returned = q_core.cast('double*', q_core.malloc(b_len * q_core.sizeof('double')))
   for i = 1, b_len do
     local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:chunk(-1)
     assert(Ai_len == b_len, "A["..i.."] should have same height as b")
