@@ -68,4 +68,4 @@ function Dictionary:persist(var_name)
     return table.concat(ret_table, "\n")
 end
 
-return Dictionary
+return require('Q/q_export').export('Dictionary', Dictionary)
