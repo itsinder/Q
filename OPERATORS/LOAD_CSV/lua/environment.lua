@@ -1,4 +1,4 @@
-require 'dictionary'
+require 'Q/UTILS/lua/dictionary'
 
 function set_environment()
 -- check Q_DATA_DIR, Q_META_DATA_DIR variable exists

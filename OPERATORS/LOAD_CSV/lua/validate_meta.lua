@@ -1,5 +1,5 @@
-require 'globals'
-local g_err = require 'error_code'
+require 'Q/UTILS/lua/globals'
+local g_err = require 'Q/UTILS/lua/error_code'
 local pl = require 'pl'
 local plpath = require 'pl.path'
   
@@ -7,7 +7,8 @@ return function (
   M -- meta data table 
 )
   assert(type(M) == "table", g_err.METADATA_TYPE_TABLE)
-  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
+-- Sri: this should be ensured by library loading; trust our own
+--  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_INCORRECT)
   
   local col_names = {}
   -- now look at fields of metadata
