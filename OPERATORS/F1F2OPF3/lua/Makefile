@@ -90,6 +90,35 @@ clean :
 	rm -f vvneq_specialize.lua 
 	rm -f _*
 		
+vvadd_specialize.lua : arith_specialize.tmpl
+	lua gen_specializers.lua
+vvsub_specialize.lua : arith_specialize.tmpl
+	lua gen_specializers.lua
+vvmul_specialize.lua : arith_specialize.tmpl
+	lua gen_specializers.lua
+vvdiv_specialize.lua : arith_specialize.tmpl
+	lua gen_specializers.lua
+vvrem_specialize.lua : arith_specialize.tmpl
+	lua gen_specializers.lua
+vvor_specialize.lua  : bop_specialize.tmpl
+	lua gen_specializers.lua
+vvxor_specialize.lua  : bop_specialize.tmpl
+	lua gen_specializers.lua
+vvandnot_specialize.lua  : bop_specialize.tmpl
+	lua gen_specializers.lua
+vveq_specialize.lua  : cmp_specialize.tmpl
+	lua gen_specializers.lua
+vvneq_specialize.lua  : cmp_specialize.tmpl
+	lua gen_specializers.lua
+vvgeq_specialize.lua  : cmp_specialize.tmpl
+	lua gen_specializers.lua
+vvleq_specialize.lua   : cmp_specialize.tmpl
+	lua gen_specializers.lua
+vvgt_specialize.lua  : cmp_specialize.tmpl
+	lua gen_specializers.lua
+vvlt_specialize.lua  : cmp_specialize.tmpl
+	lua gen_specializers.lua
+
 _libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 	cp libf1f2opf3.so ${Q_ROOT}/lib/
@@ -97,8 +126,7 @@ _libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 _concat_files : 
 	luajit concat_generator.lua concat_operators.lua
 
-_arith_files : vvadd_specialize.lua vvsub_specialize.lua  \
-  	vvmul_specialize.lua vvdiv_specialize.lua vvrem_specialize.lua
+_arith_files : vvadd_specialize.lua vvsub_specialize.lua vvmul_specialize.lua vvdiv_specialize.lua vvrem_specialize.lua
 	luajit arith_generator.lua arith_operators.lua
 
 _bop_files : vvor_specialize.lua vvxor_specialize.lua vvandnot_specialize.lua 

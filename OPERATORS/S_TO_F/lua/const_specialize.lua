@@ -30,9 +30,9 @@ return function (
   assert(status, "Unable to convert to scalar " .. args.val)
   local tmpl = 'const.tmpl'
   local subs = {};
-    subs.fn = "const_" .. qtype
-    subs.c_mem = c_mem
-    subs.out_ctype = out_ctype
-    subs.out_qtype = qtype
-    return subs, tmpl
+  subs.fn = "const_" .. qtype
+  subs.c_mem = c_mem
+  subs.out_ctype = out_ctype
+  subs.out_qtype = qtype
+  return subs, tmpl
 end
