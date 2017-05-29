@@ -1,7 +1,7 @@
-local Dictionary = require "dictionary"
+local Dictionary = require "Q/UTILS/lua/dictionary"
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
-local utils = require 'utils'
+local utils = require 'Q/UTILS/lua/utils'
 
 local no_of_success = 0
 local no_of_failure = 0
