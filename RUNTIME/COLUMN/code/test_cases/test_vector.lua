@@ -1,8 +1,8 @@
-require 'globals'
+require 'Q/UTILS/lua/globals'
 local dir = require 'pl.dir'
-local Vector = require 'Vector'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
+local fns = require 'Q/RUNTIME/COLUMN/code/test_cases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 
 local bin_file_path = "./bin/"
 
