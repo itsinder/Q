@@ -1,13 +1,13 @@
-require 'globals'
-local g_err = require 'error_code'
-local validate_meta = require "validate_meta"
-local Dictionary = require 'dictionary_dataload'
+require 'Q/UTILS/lua/globals'
+local g_err = require 'Q/UTILS/lua/error_code'
+local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
+local Dictionary = require 'Q/OPERATORS/DATA_LOAD/lua/dictionary_dataload'
 local plstring = require 'pl.stringx'
-local Column = require 'Column'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-local q_core = require 'q_core'
+local q_core = require 'Q/UTILS/lua/q_core'
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format

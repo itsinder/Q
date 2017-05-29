@@ -1,6 +1,6 @@
-local load_csv = require 'load_csv_dataload'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local load_csv = require 'Q/OPERATORS/DATA_LOAD/lua/load_csv_dataload'
+local fns = require 'Q/OPERATORS/DATA_LOAD/test/testcases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
