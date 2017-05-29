@@ -1,8 +1,8 @@
 local plstring = require 'pl.stringx'
-local Vector = require 'Vector'
-local Column = require 'Column'
-local load_csv = require 'load_csv'
-local print_csv = require 'print_csv'
+local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
