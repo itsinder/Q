@@ -1,5 +1,5 @@
-local mk_col = require 'mk_col'
-local q_core = require 'q_core'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local q_core = require 'Q/UTILS/lua/q_core'
 
 -- input table of values 1,2,3 of type I4, given to mk_col
 local status, ret = pcall(mk_col, {1,3,4}, "I4")
