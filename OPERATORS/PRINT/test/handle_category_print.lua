@@ -125,7 +125,7 @@ end
 
 -- vector of type I4 is given as filter input for category 4 testcases
 fns.handle_input_category4 = function ()
-  local v1 = Vector{field_type='I4', field_size = 4,chunk_size = 8,
+  local v1 = Vector{field_type='I4',chunk_size = 8,
     filename="./bin/I4.bin",  
   }
   return { where = v1 }
@@ -133,7 +133,7 @@ end
 
 -- vector of type B1 is given as filter input for category 3 testcases
 fns.handle_input_category3 = function ()
-  local v1 = Vector{field_type='B1', field_size = 1/8,chunk_size = 8,
+  local v1 = Vector{field_type='B1',chunk_size = 8,
     filename="./bin/B1.bin",  
   }
   return { where = v1 }
