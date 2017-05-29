@@ -39,7 +39,7 @@ assert(plpath.isfile(incfile))
 ffi.cdef(plfile.read(incfile))
 
 -- TODO issue with load indicates install issue; but is separate flow... is check needed?
-local cee =  ffi.load('libq_core.so')
+local cee =  ffi.load('libq.so')
 local q_core = {}
 q_core.Q_ROOT = Q_ROOT
 q_core.gc = ffi.gc
