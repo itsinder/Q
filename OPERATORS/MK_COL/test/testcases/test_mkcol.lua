@@ -1,6 +1,6 @@
-local mk_col = require 'mk_col'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local fns = require 'Q/OPERATORS/MK_COL/test/testcases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 
 -- loop through testcases
 -- these testcases output error messages
