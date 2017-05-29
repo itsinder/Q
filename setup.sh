@@ -59,10 +59,6 @@ mkdir -p $Q_ROOT/lib
 # export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
 export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
 echo "Q_SRC_ROOT: $Q_SRC_ROOT"
-LUA_INIT_PATH="@`echo $Q_SRC_ROOT`/init.lua"
-# echo $LUA_INIT_PATH
-export LUA_INIT="${LUA_INIT:=$LUA_INIT_PATH}"
-echo "LUA_INIT: $LUA_INIT"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
 echo "QC_FLAGS: $QC_FLAGS"

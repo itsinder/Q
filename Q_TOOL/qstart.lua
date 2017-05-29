@@ -1,9 +1,6 @@
--- temporary check/fix till packaging is in place
--- assumes if LUA_INIT is set, then that would've taken care of init
-if not os.getenv("LUA_INIT") then
-  dofile 'init.lua'
-end
-
+-- ensure Q library is installed
+-- TODO better err msg needed?
+assert(require('Q'))
 print 'Welcome Q-ser !!'
 local buffer = ''
 

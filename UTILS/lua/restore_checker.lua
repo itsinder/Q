@@ -27,7 +27,7 @@ return function(meta_data_name)
       end
       used_table[v] = 1
    end
-   local files_in_dir = pldir.getfiles(os.getenv("Q_DATA_DIR")) 
+   local files_in_dir = pldir.getfiles(require('Q/q_export').Q_DATA_DIR) 
    local orphaned_files = {}
    for _, file in ipairs(files_in_dir) do
       if used_table[file] == nil then

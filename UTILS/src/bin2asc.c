@@ -27,7 +27,7 @@ typedef enum _qtype_type { I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
 
 #define BUFLEN 1024
 
-// START FUNC DECL
+//START_FUNC_DECL
 int
 bin2asc(
     char *infile,
@@ -35,7 +35,7 @@ bin2asc(
     int in_width, // for SC
     char *outfile
      )
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 {
   int status = 0;
   qtype_type qtype;

@@ -1,6 +1,6 @@
-require 'globals'
-local g_err = require 'error_code'
-local q_core = require 'q_core'
+require 'Q/UTILS/lua/globals'
+local g_err = require 'Q/UTILS/lua/error_code'
+local q_core = require 'Q/UTILS/lua/q_core'
 local plstring = require 'pl.stringx'
 
 local function strip_trailing_LL(temp)
@@ -50,7 +50,8 @@ local function chk_cols(column_list)
   return is_SC, is_SV, is_I8, is_col, max_length
 end
 
-function process_filter(filter, max_length)
+--Sri 27/05/17 TODO WHY ISN'T this local?? making it for now, to see if something breaks
+local function process_filter(filter, max_length)
   local lb = 0; local ub = 0; local where = nil
   if filter then
     assert(type(filter) == "table", g_err.FILTER_NOT_TABLE_ERROR)
@@ -84,7 +85,7 @@ function process_filter(filter, max_length)
   return where, lb, ub
 end
 
-return function (column_list, filter, opfile)  
+local print_csv = function (column_list, filter, opfile)  
   
   -- trimming whitespace if any
   if opfile ~= nil then
@@ -180,6 +181,8 @@ return function (column_list, filter, opfile)
     return true
   end
 end
+
+return require('Q/q_export').export('print_csv', print_csv)
 --[[
 However, there is a caveat to be aware of. Since strings in Lua are immutable, each concatenation creates a new string object and copies the data from the source strings to it. That makes successive concatenations to a single string have very poor performance.
 
