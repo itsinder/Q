@@ -1,3 +1,5 @@
+gen_src/
+gen_inc/
 vvdiv_static_checker.lua
 vvdiv_white_list.lua
 vvmul_static_checker.lua

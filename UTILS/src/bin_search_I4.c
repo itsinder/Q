@@ -4,7 +4,7 @@
 #define BSEARCH_HIGHEST 2
 #define BSEARCH_DONTCARE 3
 /*-------------------------------------------------------------------*/
-// START FUNC DECL
+//START_FUNC_DECL
 int
 wip_bin_search_I4(
 	   const int *X,
@@ -13,7 +13,7 @@ wip_bin_search_I4(
 	   const char * const str_direction,
 	   uint64_t *ptr_pos
 	   )
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 {
   int status = 0;
   long long pos, lb, ub, mid;

@@ -23,7 +23,7 @@
 #define MAXLINE 64
 
 typedef enum _qtype_type { I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
-// START FUNC DECL
+//START_FUNC_DECL
 int
 asc2bin(
     char *infile,
@@ -31,7 +31,7 @@ asc2bin(
     char *outfile,
     int outlen // for SC
      )
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 {
   int status = 0;
   qtype_type qtype;
