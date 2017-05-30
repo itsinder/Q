@@ -9,7 +9,7 @@ test -d $Q_SRC_ROOT
 UDIR=$Q_SRC_ROOT/UTILS/lua/
 test -d $UDIR
 lua $UDIR/cli_extract_func_decl.lua ../src/SC_to_txt.c ../gen_inc/
-lua gen_c_code_for_print.lua 
+lua generator.lua 
 #----------------------
 cd ../src/
 gcc -c $QC_FLAGS SC_to_txt.c $INCS

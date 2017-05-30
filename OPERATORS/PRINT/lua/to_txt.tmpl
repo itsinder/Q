@@ -9,20 +9,20 @@ return require 'Q/UTILS/lua/code_gen' {
 #include "q_macros.h"
 
 extern int
-${out_qtype}_to_txt(
-    const ${out_ctype} * const in,
+${qtype}_to_txt(
+    const ${ctype} * const in,
     const char * const fmt,
     char *X,
     size_t nX
     );
   ]],
 definition= [[
-#include "_${out_qtype}_to_txt.h"
+#include "_${qtype}_to_txt.h"
 
 //START_FUNC_DECL
 int
-${out_qtype}_to_txt(
-    const ${out_ctype} * const in,
+${qtype}_to_txt(
+    const ${ctype} * const in,
     const char * const fmt,
     char *X,
     size_t nX
