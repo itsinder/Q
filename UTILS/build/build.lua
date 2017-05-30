@@ -8,7 +8,7 @@ local nargs = assert(#arg == 1, "Arguments are <infile>")
 local infile = arg[1]
 assert(plpath.isfile(infile), "File not found: " .. infile)
 
-local log = require 'UTILS/lua/log'
+local log = require 'Q/UTILS/lua/log'
 
 local T = dofile("gen.lua")
 for i, v in ipairs(T) do 

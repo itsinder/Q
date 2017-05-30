@@ -3,11 +3,11 @@ return function (
   scalar_val,
   scalar_type
   )
-  local is_base_qtype = assert(require 'UTILS/lua/is_base_qtype')
+  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(ftype))
   assert(is_base_qtype(scalar_type))
   --===========================================
-  local promote = require 'UTILS/lua/promote'
+  local promote = require 'Q/UTILS/lua/promote'
   local out_type = assert(promote(ftype, scalar_type))
   assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
   local conv_fn = "txt_to_" .. scalar_type

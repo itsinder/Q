@@ -1,9 +1,9 @@
 #!/usr/bin/env lua
 
-require 'UTILS/lua/globals'
+require 'Q/UTILS/lua/globals'
 incdir = "../gen_inc/"
 srcdir = "../gen_src/"
-local gen_code = require 'UTILS/lua/gen_code'
+local gen_code = require 'Q/UTILS/lua/gen_code'
 local tmpl = dofile 'qsort.tmpl'
 
 order = { 'asc', 'dsc' }

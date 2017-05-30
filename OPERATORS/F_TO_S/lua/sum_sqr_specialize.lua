@@ -1,7 +1,7 @@
 return function (
   qtype
   )
-  local is_base_qtype = require('UTILS/lua/is_base_qtype')
+  local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
     local tmpl = 'reduce.tmpl'
     local subs = {}
     if ( qtype == "B1" ) then

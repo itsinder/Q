@@ -1,8 +1,8 @@
   local plpath = require 'pl.path'
-  require 'UTILS/lua/globals'
+  require 'Q/UTILS/lua/globals'
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
-  local gen_code = require("UTILS/lua/gen_code")
+  local gen_code = require("Q/UTILS/lua/gen_code")
 
   local tmpl = "bin_search.tmpl"
   assert(plpath.isfile(tmpl))
