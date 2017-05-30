@@ -1,8 +1,8 @@
-local fns = require 'handle_category_print'
+local fns = require 'Q/OPERATORS/PRINT/test/handle_category_print'
 local file = require 'pl.file'
-local print_csv = require 'print_csv'
-local load_csv = require 'load_csv'
-local utils = require 'utils'
+local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local utils = require 'Q/UTILS/lua/utils'
 
 local test_input_dir = "./test_data/"
 local print_out_dir = "./test_print_data/print_tmp/"
@@ -68,7 +68,7 @@ for i, v in ipairs(T) do
     fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
     result = false
   end
-  utils["testcase_results"](v, "test_print_csv.lua", "Print_csv", "Unit Test", result, "")
+  utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
   ::skip::
 end
 

@@ -1,49 +1,59 @@
-local expand_tests = require 'expand_tests'
-local assert_valid = require 'assert_valid'
+-- list of qtypes to be operated on
+local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+-- data for each operator will be placed in test_<operator>.lua file
+-- e.g. data for add operation is placed in test_vvadd.lua
+local operators = {"vvadd", "vveq"}
 
-local a_add = {10, 20, 30, 40, 50, 60}
-local b_add = {70, 80, 90, 10, 60, 60}
-local z_add = "80,100,120,50,110,120,"
-  
-local a_sub = {70, 80, 90, 10, 60, 60}
-local b_sub = {10, 20, 30, 40, 50, 60}
-local z_sub = "60,60,60,-30,10,0,"
-  
-local a_mul = {1, 2, 3, 4, 5, 6}
-local b_mul = {7, 8, 9, 1, 6, 6}
-local z_mul = "7,16,27,4,30,36,"
- 
-local a_div = {70, 80, 90, 10, 60, 60}
-local b_div = {10, 20, 30, 40, 50, 60}
-local z_div = "7,4,3,0,1,1,"
-  
- 
+
+-- assert function, to compare the expected and actual output 
+local assert_valid = function(expected)
+  return function (ret)
+    for k,v in ipairs(ret) do
+      --print ( ret[k], expected[k])
+      if ret[k] ~= expected[k] then return false end
+    end
+    return true
+  end
+end
+                   
 local create_tests = function() 
-  local tests = {}
+  local tests = {}  
+  for i in pairs(operators) do -- traverse every operation
+    local M = dofile("test_" .. operators[i] .. ".lua")
+    for m, n in pairs(M.data) do
+      local q_type
+      if n.qtype then q_type = n.qtype else q_type = all_qtype end
+      for j in ipairs(q_type) do -- traverse every qtype
+        for k in ipairs(q_type) do -- traverse every qtype
+          local input_type1 = q_type[j]
+          local input_type2 = q_type[k]
+          local test_name = operators[i] .. "_" .. input_type1 .. "_" .. input_type2
+          local expectedOut = n.z
+          table.insert(tests, {
+            input = {operators[i], input_type1, input_type2, n.a, n.b, M.output_ctype},
+            check = assert_valid(expectedOut),
+            --fail = fail_str,
+            name = test_name
+          })                      
+        end
+      end
+    end
+  end
   
-  -- addition testcases
-  expand_tests(tests, "vvadd", {a_add, b_add}, {"I1", "I1"}, "I1", z_add, assert_valid)
-  -- substraction testcases
-  expand_tests(tests, "vvsub", {a_sub, b_sub}, {"I1", "I1"}, "I1", z_sub, assert_valid)
-  -- multiplication testcases
-  expand_tests(tests, "vvmul", {a_mul, b_mul}, {"I1", "I1"}, "I1", z_mul, assert_valid)
-  -- division testcases
-  expand_tests(tests, "vvdiv", {a_div, b_div}, {"I1", "I1"}, "I1", z_div, assert_valid)
-  
-  
-  return {
-    unpack(tests)
-  }
+  return tests
 end
 
 local suite = {}
 suite.tests = create_tests()
-require 'pl'
+--require 'pl'
 --pretty.dump(suite.tests)
 -- Suite level setup/teardown can be specified
 suite.setup = function() 
   -- print ("in setup!!")
 end
+
+suite.test_for = "F1F2OPF3"
+suite.test_type = "Unit Test"
 suite.teardown = function()
   -- print ("in teardown!!")
 end

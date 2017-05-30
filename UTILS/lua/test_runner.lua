@@ -31,7 +31,7 @@ This test_runner program runs all tests, and logs all failed test-cases with the
 --print ("TERRA PATH" .. package.terrapath)
 
 require 'globals'
-require 'terra_globals'
+--require 'terra_globals'
 require 'error_code'
 local pretty = require 'pl.pretty'
 
@@ -49,7 +49,8 @@ end
 
 local failures = suite_runner(suite, fn, tests_to_run)
 if (#failures > 0) then
-  print ("Failed tests: " .. tostring(failures))
+  print ("Failed testcases are: \n" .. tostring(failures))
 else
   print("Tests passed.")
 end
+os.exit() -- For LuaJIT

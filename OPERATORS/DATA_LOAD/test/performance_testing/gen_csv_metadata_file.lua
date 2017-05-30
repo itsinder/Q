@@ -1,4 +1,4 @@
-require 'globals'
+require 'Q/UTILS/lua/globals'
 
 -- table for random functions
 local random_func = {}

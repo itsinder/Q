@@ -1,6 +1,6 @@
-local load_csv = require 'load_csv'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local fns = require 'Q/OPERATORS/LOAD_CSV/test/testcases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
@@ -45,7 +45,7 @@ for i, v in ipairs(T) do
     fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_load_csv.lua", "Load_csv", "Unit Test", result, "")
+  utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
   ::skip::
 end
 

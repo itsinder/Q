@@ -1,3 +1,5 @@
+local utils = require 'utils'
+
 local call_if_exists = function (f)
   if type(f) == 'function' then
     f()
@@ -20,9 +22,9 @@ return function (suite, fn, tests_to_run)
     end
   end
   
-  local function myassert(cond, i, msg) 
+  local function myassert(cond, i, name, msg) 
     if not cond then 
-      failures = failures .. i
+      failures = failures .. i .. ' - ' .. name .. '\n'
       if msg then failures = failures .. "[" .. msg .. "],\n" end
     end
   end
@@ -35,17 +37,22 @@ return function (suite, fn, tests_to_run)
     test = suite.tests[test_num]
     call_if_exists(test.setup)
     status, res = pcall(fn, unpack(test.input))
+    local result
 
     if test.fail then
-      myassert (status == false, test_num)
-      myassert (string.match(res, test.fail), test_num)
+      result = string.match(res, test.fail)
+      myassert (status == false, test_num, test.name)
+      myassert (result, test_num, test.name)
     else
       if status then
-        myassert (test.check(res), test_num)
+        result = test.check(res)
+        myassert (result, test_num, test.name)
       else      
-        myassert (status, test_num, res)
+        result = status
+        myassert (result, test_num, res, test.name)
       end
     end
+    utils["testcase_results"](test, suite.test_for, suite.test_type, result, "")
     call_if_exists(test.teardown)
   end
   call_if_exists(suite.teardown)

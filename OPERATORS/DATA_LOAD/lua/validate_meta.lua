@@ -1,5 +1,5 @@
-require 'globals'
-local g_err = require 'error_code'
+require 'Q/UTILS/lua/globals'
+local g_err = require 'Q/UTILS/lua/error_code'
 local pl = require 'pl'
 local plpath = require 'pl.path'
   

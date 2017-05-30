@@ -1,6 +1,6 @@
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
-local convert_c_to_txt = require 'C_to_txt'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0

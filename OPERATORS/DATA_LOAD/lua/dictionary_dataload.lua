@@ -1,5 +1,5 @@
-local fns = require 'utils'
-local parser = require 'parser'
+local fns = require 'Q/UTILS/lua/utils'
+local parser = require 'Q/UTILS/lua/parser'
 _G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
 local Dictionary = {}
 Dictionary.__index = Dictionary
