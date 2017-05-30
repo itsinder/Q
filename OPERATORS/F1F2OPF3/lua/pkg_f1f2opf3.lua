@@ -12,6 +12,10 @@ end
 T.<<operator>> = <<operator>>
     ]===]
 
+-- add this to template above
+-- require('Q/q_export').export('<<operator>>', <<operator>>)
+-- use loadstring()
+
 io.output("_f1f2opf3.lua")
 io.write("local T = {} \n")
 local ops = assert(require 'operators')
