@@ -35,7 +35,9 @@ for i, v in ipairs(T) do
   if v.category == "category6" then
     local key = "handle_"..v.category
     if fns[key] then
-      fns[key](i, v, M)
+      local status = fns[key](i, v, M)
+      if status then result = true else status = false end
+      utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
     else
       fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     end
