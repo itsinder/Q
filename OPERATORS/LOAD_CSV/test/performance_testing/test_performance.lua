@@ -1,7 +1,7 @@
 local dir = require 'pl.dir'
-local fns = require 'gen_csv_metadata_file'
-local load_csv = require 'load_csv'
-local utils = require 'utils'
+local fns = require 'Q/OPERATORS/LOAD_CSV/test/performance_testing/gen_csv_metadata_file'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local utils = require 'Q/UTILS/lua/utils'
 
 -- file in which performance testing results for each csv file is written
 local performance_file ="./performance_results/performance_measures.txt"

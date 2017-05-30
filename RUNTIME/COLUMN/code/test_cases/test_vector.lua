@@ -1,8 +1,8 @@
-require 'globals'
+require 'Q/UTILS/lua/globals'
 local dir = require 'pl.dir'
-local Vector = require 'Vector'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
+local fns = require 'Q/RUNTIME/COLUMN/code/test_cases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 
 local bin_file_path = "./bin/"
 
@@ -41,7 +41,7 @@ for i, v in ipairs(T) do
     fns["increment_fail_testcases"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_vector.lua", "Vector", "Unit Test", result, "")
+  utils["testcase_results"](v, "Vector", "Unit Test", result, "")
   ::skip::
 end
 

@@ -13,7 +13,7 @@ For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
 
-local g_err = require("error_code")
+local g_err = require 'Q/UTILS/lua/error_code'
 
 return { 
   -- error messages test cases
@@ -64,6 +64,8 @@ return {
     -- escaping character in SV field is missing  
     { meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
       output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char" },
+    { meta = "gm_invalid_SC_width.lua", data = "invalid_SC_width.csv", category= "category1",
+      output_regex= g_err.STRING_GREATER_THAN_SIZE, name = "SC width value is invalid" },
  
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file

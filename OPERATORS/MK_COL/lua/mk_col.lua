@@ -49,10 +49,9 @@ local mk_col = function (input, qtype)
     assert(v >= min[qtype], g_err.INVALID_LOWER_BOUND) 
     assert(v <= max[qtype], g_err.INVALID_UPPER_BOUND)
   end
-  if field_type ~= "SC" then width=nil end
+  --if field_type ~= "SC" then width=nil end
   local col = Column{
     field_type=qtype, 
-    field_size=width, 
     write_vector=true,
     nn=false }
           

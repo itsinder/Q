@@ -44,15 +44,12 @@ end
 
 -- ]]
 
-fns.testcase_results = function (v, filename, test_for, test_type, result, spare)
+fns.testcase_results = function (v, test_for, test_type, result, spare)
   
   local date = os.date("%d/%m/%Y")
   local time = os.date("%H:%M")
   
-  -- absolute path of filename
-  local abs_path = plpath.abspath(filename)
-  -- split path into dir path and filename
-  local dir_path , filname= plpath.splitpath(abs_path)
+  local dir_path = plpath.currentdir()
   dir_path = dir_path.."/"
   -- find start and end index of /Q/ or //Q//in dir path to get relative path from Q
   local start_index, end_index 
