@@ -7,10 +7,10 @@ local test_input_dir = "./test_data/"
 local test_metadata_dir ="./test_metadata/"
 -- common setting (SET UPS) which needs to be done for all test-cases
 --set environment variables for test-case
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 -- loop through testcases
 -- these testcases output error messages
@@ -54,8 +54,8 @@ end
 
 fns["print_result"]()
 
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 -- common cleanup (TEAR DOWN) for all testcases
 -- clear the output directory 
 --dir.rmtree(_G["Q_DATA_DIR"])
