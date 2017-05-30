@@ -10,11 +10,11 @@ local print_out_dir = "./test_print_data/print_tmp/"
 -- command setting which needs to be done for all test-cases
 dir.makepath("./test_print_data/print_tmp/")
 --set environment variables for test-case (LOAD CSV) 
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 
 -- Test Case Start ---------------
