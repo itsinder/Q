@@ -3,7 +3,7 @@ return function(
   ftype1,
   ftype2
   )
-  local is_base_qtype = require 'is_base_qtype'
+  local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   assert(is_base_qtype(ftype1), "Not a valid fldtype" .. ftype1)
   assert(is_base_qtype(ftype2), "Not a valid fldtype" .. ftype2)
 

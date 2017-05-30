@@ -1,5 +1,4 @@
-#!/usr/bin/env lua
-  require 'globals'
+  require 'Q/UTILS/lua/globals'
 
   local tmpl = dofile 'idx_qsort.tmpl'
 
