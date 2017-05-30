@@ -15,11 +15,11 @@ return function (
       assert((type(ub) == "string"), "lb not specified")
       -- TODO  convert lb/ub to appropriate ctypes
     end
-    subs.fn = "vsltorgt_" .. ftype 
+    subs.fn = "<<operator>>" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
-    subs.comp1 = ' <  '
-    subs.comp2 = ' >  '
-    subs.combiner = ' ||  '
+    subs.comp1 = ' <<comparator1>>  '
+    subs.comp2 = ' <<comparator2>>  '
+    subs.combiner = ' <<combiner>>  '
     subs.c_lb = 0 -- TODO 
     subs.c_ub = 0 -- TODO 
     subs.out_ctype = "uint8_t"

@@ -1,12 +1,13 @@
-  local gen_code = require 'gen_code'
+  local gen_code = require 'UTILS/lua/gen_code'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
-  loadfile 'globals.lua'
+  require 'UTILS/lua/globals'
   local srcdir = '../gen_src/'
   local incdir = '../gen_inc/'
   local operator_file = assert(arg[1])
   assert(plpath.isfile(operator_file))
   local operators = assert(dofile(operator_file))
+  local num_produced = 0
   --==================================================
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   for i, operator in ipairs(operators) do
@@ -26,11 +27,10 @@
             gen_code.doth(subs, tmpl, incdir)
             gen_code.dotc(subs, tmpl, srcdir)
             print("Produced ", subs.fn)
+            num_produced = num_produced + 1
           end
         end
       end
     end
   end
-  file = io.open("_concat", "w+")
-  io.output(file)
-  io.write("Created concat files")
+  assert(num_produced > 0)
