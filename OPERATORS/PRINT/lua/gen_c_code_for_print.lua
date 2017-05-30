@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
-local tmpl = dofile 'to_txt.tmpl'
+local tmpl = require 'to_txt.tmpl'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
 local subs = {}      
