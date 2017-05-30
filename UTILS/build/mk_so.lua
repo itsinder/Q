@@ -5,7 +5,7 @@ final_so = q_root .. "/lib/"
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-local dbg = require 'debugger'
+local dbg = require 'Q/UTILS/lua.debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
