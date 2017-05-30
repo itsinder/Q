@@ -5,7 +5,9 @@ INCS="-I..n_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ "
 rm -rf ../gen_inc ../gen_src 
 mkdir ../gen_inc ../gen_src 
 
-FLAGS="-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
+cd ../src/
+bash gen_files.sh
+cd -
 # generate all primitives
 
 lua gen_code_I.lua 
@@ -17,6 +19,8 @@ while read line; do
   gcc -c $QC_FLAGS $line \
     -I../gen_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ 
 done< _x
+gcc ../gen_src/*.o ../src/*.o -shared -o libload_csv.so
+cp libload_csv.so $Q_ROOT/lib/
 # cleanup
 rm -f *.o
 rm -f _x

@@ -1,6 +1,5 @@
 return function (infile)
 
-local trim = require 'trim'
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 --  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
@@ -14,5 +13,5 @@ local plfile = require 'pl.file'
   z = string.gsub(z, "//START_FUNC_DECL", "")
   z = string.gsub(z, "//STOP_FUNC_DECL", "")
   --=========================================
-  return 'extern ' .. trim(z) .. ';'
+  return 'extern ' .. stringx.strip(z) .. ';'
 end

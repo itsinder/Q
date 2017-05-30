@@ -19,6 +19,8 @@
           gen_code.dotc(subs, tmpl, srcdir)
           print("Produced ", subs.fn)
           num_produced = num_produced + 1
+        else
+          print(subs)
         end
       end
     end
