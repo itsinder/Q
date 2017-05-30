@@ -261,28 +261,4 @@ fns.handle_category5 = function (index, status, ret, v)
   return true
 end
 
--- in this testcase , invalid environment values are set
-fns.handle_input_category6 = function (input_regex)
-  if input_regex == 1 then _G["Q_DATA_DIR"] = nil end
-  if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
-  if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
-  if input_regex == 4 then _G["Q_META_DATA_DIR"] = "./invalid_dir" end
-  if input_regex == 5 then _G["Q_DICTIONARIES"] = nil end
-  
-end
-
--- in this testcase , error messages are compared . 
--- so handle_category1 function is reused
-fns.handle_category6 = function (index, status, ret, v)
-  --print(v.name)
-  ret = fns.handle_category1(index, status, ret, v)
-  
-  -- resetting the enviornment variables. These enviornment variables were set 
-  -- to invalid values for category 6 testcase
-  _G["Q_DICTIONARIES"] = {}
-  _G["Q_DATA_DIR"] = "./test_data/out/"
-  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-  return ret
-end
-
 return fns
