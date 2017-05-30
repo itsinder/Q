@@ -5,8 +5,8 @@ return {
   div = "vvdiv_specialize",
   rem = "vvrem_specialize",
 
-  band = "vvand_specialize",
-  bor = "vvor_specialize",
+  b_and = "vvand_specialize",
+  b_or = "vvor_specialize",
   xor = "vvxor_specialize",
   andnot = "vvandnot_specialize",
 

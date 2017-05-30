@@ -13,53 +13,7 @@ f1s1opf2 = {}
 f1s1opf2.add = "vsadd_specialize"
 -- Done doc pending: specializer must return a function and an out_ctype
 -- TODO add to doc
-function expander_f1f2opf3(a, x ,y )
-    -- Get name of specializer function. By convention
-    local spfn = require(a .. "_specialize" )
-    -- print(type(fn))
-    status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype())
-    assert(status, subs)
-    local type_x
-    local func_name = assert(subs.fn)
-    local z_ctype = assert(subs.out_ctype)
-    local z_qtype = assert(subs.out_qtype)
-    local z_width = g_qtypes[z_qtype].width
-    -- TODO globals q lib so set once and forget
-    -- lib = ffi.load("f1f2opf3.so")
-    -- Assuming things are done and we have func_name
-    --since this subscribes to the f1f2opf3 pattern we can simmply wrap each of
-    --them in a coroutine and be done
-    local x_coro = assert(x:wrap(), "wrap failed for x")
-    local y_coro = assert(y:wrap(), "wrap failed for y")
-    local coro = coroutine.create(function()
-            local x_chunk, y_chunk, x_status, y_status
-            local x_chunk_size = x:chunk_size()
-            local y_chunk_size = y:chunk_size()
-            assert(x_chunk_size == y_chunk_size)
-            local buff = q_core.malloc(x_chunk_size * z_width)
-            local nn_buff = nil -- Will be created if nulls in input
-            if x:has_nulls() or y:has_nulls() then
-               nn_buff = q_core.malloc(math.ceil(x_chunk_size * 1/8)) -- TODO Change to B1
-            end
-            x_status = true
-            while (x_status) do
-                x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(x_coro)
-                y_status, y_len, y_chunk, nn_y_chunk = coroutine.resume(y_coro)
-                assert(x_status == y_status)
-                if x_status then
-                    print("x details:", x_status, x_chunk, x_len)
-                    print("y details:", y_status, y_chunk, y_len)
-                    assert(x_len == y_len)
-                    assert(x_len > 0)
-                    -- TODO do the actual computation
-                   q[func_name](x_chunk, y_chunk, x_len, buff) 
-                    -- print("hey", lib[func_name](x_chunk, y_chunk, x_len, buff))
-                    coroutine.yield(x_len, buff, nn_buff)
-                end
-            end
-        end)
-    return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}
-end
+expander_f1f2opf3 = require 'expander_f1f2opf3'
 
 function eval(col)
     local chunk

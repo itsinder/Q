@@ -131,7 +131,7 @@ return {
   },
   -- error testcases
   -- field type not present
-  { name = "nil field type", filename="I1.bin", write_vector = true, category = "category3",
+  { name = "null field type", filename = "I1.bin", write_vector = true, category = "category3",
     input_values = I1_data 
   },
   -- input argument to vector not table
@@ -144,5 +144,34 @@ return {
   { name = "non materialized", field_type = 'I1', filename="I1.bin", chunk_size = 8, write_vector = true, category = "category1",
     input_values = I1_data, non_materialized = true
   },
+  -- field size provided for I1 q_type
+  { name = "field_size for I1", filename = "I1.bin", field_type = 'I1', write_vector = true, category = "category3",
+    input_values = I1_data, field_size = 5  
+  },
+  -- field size provided for I2 q_type
+  { name = "field_size for I2", filename = "I2.bin", field_type = 'I2', write_vector = true, category = "category3",
+    input_values = I2_data, field_size = 5  
+  },
+  -- field size provided for I4 q_type
+  { name = "field_size for I4", filename = "I4.bin", field_type = 'I4', write_vector = true, category = "category3",
+    input_values = I4_data, field_size = 5  
+  },
+  -- field size provided for I8 q_type
+  { name = "field_size for I8", filename = "I8.bin", field_type = 'I8', write_vector = true, category = "category3",
+    input_values = I8_data, field_size = 5  
+  },
+  -- field size provided for F4 q_type
+  { name = "field_size for F4", filename ="F4.bin", field_type = 'F4', write_vector = true, category = "category3",
+    input_values = F4_data, field_size = 5  
+  },
+  -- field size provided for F8 q_type
+  { name = "field_size for F8", filename = "F8.bin", field_type = 'F8', write_vector = true, category = "category3",
+    input_values = F8_data, field_size = 5  
+  },
+   -- incorrect field type provided 
+  { name = "invalid field_type", filename = "I3.bin", field_type = 'I3', write_vector = true, category = "category3",
+    input_values = F8_data, field_size = 5  
+  },
+
   
 }

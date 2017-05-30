@@ -1,4 +1,4 @@
-require 'globals'
+require 'Q/UTILS/lua/globals'
 local ffi = require "ffi"
 
 return function (col, rowidx)

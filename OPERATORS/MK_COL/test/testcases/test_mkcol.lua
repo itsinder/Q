@@ -1,6 +1,6 @@
-local mk_col = require 'mk_col'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local fns = require 'Q/OPERATORS/MK_COL/test/testcases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 
 -- loop through testcases
 -- these testcases output error messages
@@ -22,7 +22,7 @@ for i, v in ipairs(T) do
     fns["increment_failed_mkcol"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_mkcol.lua", "Mk_col", "Unit Test", result, "")
+  utils["testcase_results"](v, "Mk_col", "Unit Test", result, "")
   ::skip::
 end
 
