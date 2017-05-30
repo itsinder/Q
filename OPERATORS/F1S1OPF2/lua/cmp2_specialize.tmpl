@@ -7,14 +7,14 @@ return function (
        "type must be I1/I2/I4/I8/F4/F8")
     local tmpl = 'f1s1opf2_cmp2.tmpl'
     local subs = {}; 
-    if ( scalars ) then 
-      assert((type(scalars) == "table"), "Need lb/ub sent as Lua table")
-      local lb = assert(scalars.lb, "lb not specified")
-      local ub = assert(scalars.ub, "ub not specified")
-      assert((type(lb) == "string"), "lb not specified")
-      assert((type(ub) == "string"), "lb not specified")
-      -- TODO  convert lb/ub to appropriate ctypes
-    end
+    assert((type(scalars) == "table"), "Need lb/ub sent as Lua table")
+    local lb = assert(scalars.lb, "lb not specified")
+    local ub = assert(scalars.ub, "ub not specified")
+    assert( ((type(lb) == "string") or (type(lb) == "number")), 
+    "lb not specified")
+    assert( ((type(ub) == "string") or (type(ub) == "number")), 
+    "lb not specified")
+    -- TODO  convert lb/ub to appropriate ctypes
     subs.fn = "<<operator>>" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
     subs.comp1 = ' <<comparator1>>  '
