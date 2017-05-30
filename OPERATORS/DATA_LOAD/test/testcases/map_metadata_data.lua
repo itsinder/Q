@@ -156,32 +156,6 @@ return {
       name = "nil_data_SV"
     },
     
-    -- enviornment variable metadata dir null
-    { meta= "gm_metadata_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 3,
-      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_nil" 
-    },
-    
-    
-    -- enviornment variable metadata dir invalid
-    { meta= "gm_metadata_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 4,
-      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_invalid" 
-    },
-    
-    -- enviornment variable data dir null
-    { meta= "gm_data_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 1,
-      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_nil" 
-    },
-    
-    -- enviornment variable data dir invalid
-    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 2,
-      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_invalid" 
-    }, 
-    
-    -- enviornment variable data dir invalid
-    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 5,
-      output_regex=g_err.NULL_DICTIONARY_ERROR, name = "G_Dictionary NULL testcase" 
-    }, 
-    
     -- check the size of output binary file is correct, 
     { meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
       output_regex= {12, 6, 12}, name = "valid_bin_file_size" 

@@ -10,11 +10,11 @@ local print_out_dir = "./test_print_data/print_tmp/"
 -- command setting which needs to be done for all test-cases
 dir.makepath("./test_print_data/print_tmp/")
 --set environment variables for test-case (LOAD CSV) 
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 
 -- Test Case Start ---------------
@@ -35,7 +35,9 @@ for i, v in ipairs(T) do
   if v.category == "category6" then
     local key = "handle_"..v.category
     if fns[key] then
-      fns[key](i, v, M)
+      local status = fns[key](i, v, M)
+      if status then result = true else status = false end
+      utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
     else
       fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     end
