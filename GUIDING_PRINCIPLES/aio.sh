@@ -61,22 +61,29 @@ fi
 #  ######## Build Q #########
 my_print "Building Q"
 source ../setup.sh -f
-cd ../UTILS/build
-lua build.lua gen.lua
-lua mk_so.lua /tmp/
-cd -
+####  cd ../ #cleaning up all files
+####  find . -name "*.o" -o -name "_*" -exec rm {} \;
+####  cd - 
+####  cd ../UTILS/build
+####  lua build.lua gen.lua
+####  lua mk_so.lua /tmp/
+####  cd -
 PROG_START="
-q_core = require 'q_core'
+q_core = require 'Q/UTILS/lua/q_core'
 require 'globals'
 load_csv = require 'load_csv'
 print_csv = require 'print_csv'
-mk_col = require 'mk_col'
-save = require 'save'
+mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+save = require 'Q/UTILS/lua/save'
 "
+:q
+:q
+:q
+:wq
 PROG_SAVE="
-local q_core = require 'q_core'
-local mk_col = require 'mk_col'
-local save = require 'save'
+local q_core = require 'Q/UTILS/lua/q_core'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local save = require 'Q/UTILS/lua/save'
 x = mk_col({10, 20, 30, 40}, 'I4')
 print(type(x))
 print(x:length())
@@ -86,7 +93,7 @@ PROG_RESTORE="
 dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
 print(type(x))
 print(x:length())
-print_csv = require 'print_csv'
+print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 print_csv(x, nil, '')
 "
 # load csv
