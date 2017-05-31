@@ -54,6 +54,7 @@ if [[ %RES -ne 0 ]] ; then
    rm -rf luarocks-2.4.1
    sudo luarocks install penlight
    sudo luarocks install luaposix
+   sudo luarocks install luv
 else
    my_print "luarocks is already installed"
 fi
@@ -66,7 +67,6 @@ lua mk_so.lua /tmp/
 cd -
 PROG_START="
 q_core = require 'q_core'
-q = require 'q'
 require 'globals'
 load_csv = require 'load_csv'
 print_csv = require 'print_csv'
@@ -74,7 +74,6 @@ mk_col = require 'mk_col'
 save = require 'save'
 "
 PROG_SAVE="
-local q = require'q'
 local q_core = require 'q_core'
 local mk_col = require 'mk_col'
 local save = require 'save'
