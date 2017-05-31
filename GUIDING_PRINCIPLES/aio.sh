@@ -10,6 +10,16 @@ my_print(){
    fi
 }
 
+cleanup(){
+   if [ -z "$1" ]; then
+      my_print "No directory passed to cleanup" 1
+      exit 1
+   fi
+   my_print $1
+   find $1 -name "*.o" -o -name "_*" | xargs rm
+}
+
+my_print "Stating the all in one script"
 
 
 ###Install lua , luajit and luarocks
@@ -33,7 +43,7 @@ if [[ $RES -ne 0 ]] ; then
    wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
    tar -xvf LuaJIT-2.0.4.tar.gz
    cd LuaJIT-2.0.4/
-   make
+   make TARGET_FLAGS=-pthread
    sudo make install
    cd ../
    rm -rf LuaJIT-2.0.4
@@ -53,30 +63,32 @@ if [[ %RES -ne 0 ]] ; then
    rm -rf luarocks-2.4.1
    sudo luarocks install penlight
    sudo luarocks install luaposix
+   sudo luarocks install luv
 else
    my_print "luarocks is already installed"
 fi
 #  ######## Build Q #########
 my_print "Building Q"
 source ../setup.sh -f
+cleanup ../ #cleaning up all files
+
+#build files
 cd ../UTILS/build
 lua build.lua gen.lua
 lua mk_so.lua /tmp/
 cd -
 PROG_START="
-q_core = require 'q_core'
-q = require 'q'
+q_core = require 'Q/UTILS/lua/q_core'
 require 'globals'
 load_csv = require 'load_csv'
 print_csv = require 'print_csv'
-mk_col = require 'mk_col'
-save = require 'save'
+mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+save = require 'Q/UTILS/lua/save'
 "
 PROG_SAVE="
-local q = require'q'
-local q_core = require 'q_core'
-local mk_col = require 'mk_col'
-local save = require 'save'
+local q_core = require 'Q/UTILS/lua/q_core'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local save = require 'Q/UTILS/lua/save'
 x = mk_col({10, 20, 30, 40}, 'I4')
 print(type(x))
 print(x:length())
@@ -86,7 +98,7 @@ PROG_RESTORE="
 dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
 print(type(x))
 print(x:length())
-print_csv = require 'print_csv'
+print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 print_csv(x, nil, '')
 "
 # load csv

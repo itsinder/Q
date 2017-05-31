@@ -2,6 +2,7 @@ return function (infile)
 
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
+local plstr = require 'pl.stringx'
 --  assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 --  package.path = package.path.. ";" .. rootdir .. "/UTILS/lua/?.lua"
   assert(plpath.isfile(infile), "Input file not found " .. infile)
@@ -13,5 +14,5 @@ local plfile = require 'pl.file'
   z = string.gsub(z, "//START_FUNC_DECL", "")
   z = string.gsub(z, "//STOP_FUNC_DECL", "")
   --=========================================
-  return 'extern ' .. stringx.strip(z) .. ';'
+  return 'extern ' .. plstr.strip(z) .. ';'
 end

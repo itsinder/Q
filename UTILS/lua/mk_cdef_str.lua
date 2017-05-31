@@ -1,5 +1,5 @@
 function mk_cdef_str(dir)
-  local extract_fn_proto = require 'extract_fn_proto'
+  local extract_fn_proto = require 'Q/UTILS/lua/extract_fn_proto'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
   local pldir  = require 'pl.dir'

@@ -88,8 +88,8 @@ local function save_global(filename)
     assert(filename ~= nil, "A valid filename has to be given")
     local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
-    file:write("local Column = require 'Column'\n")
-    file:write("local Vector = require 'Vector'\n")
+    file:write("local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'\n")
+    file:write("local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'\n")
     -- file:write("local Dictionary = require 'Dictionary'\n")
 
 
