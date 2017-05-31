@@ -1,20 +1,21 @@
 -- TODO REMOVE THIS FILE ??!
 
-local q_core = require 'q_core'
+local q_core = require 'Q/UTILS/lua/q_core'
 local ffi = require "ffi"
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local q_root = os.getenv("Q_ROOT")
 assert(plpath.isdir(q_root))
 
-incfile = q_root .. "/include/q.h"
+local incfile = q_root .. "/include/q.h"
 assert(plpath.isfile(incfile))
 ffi.cdef(plfile.read(incfile))
 
-sofile = q_root .. "/lib/libq.so"
+local sofile = q_root .. "/lib/libq.so"
 assert(plpath.isfile(sofile))
 local cee =  ffi.load(sofile)
 local q = {}
+local function access(lib,symbol) return lib[symbol] end
 local q_mt = {
    __newindex = function(self, key, value)
       print("newindex metamethod called")
@@ -27,7 +28,9 @@ local q_mt = {
       if key == "NULL" then
          return ffi.NULL
       else
-         return cee[key]
+         local status, val = pcall(access, cee, key)
+         if status ~= false then return val end
+         return q_core[key]
          -- TODO: indrajeet add q_core function if not exists
       end
    end,
