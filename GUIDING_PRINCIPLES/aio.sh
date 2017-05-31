@@ -10,6 +10,15 @@ my_print(){
    fi
 }
 
+cleanup(){
+   if [ -z "$1" ]; then
+      my_print "No directory passed to cleanup" 1
+      exit 1
+   fi
+   my_print $1
+   find $1 -name "*.o" -o -name "_*" | xargs rm
+}
+
 my_print "Stating the all in one script"
 
 
@@ -61,13 +70,13 @@ fi
 #  ######## Build Q #########
 my_print "Building Q"
 source ../setup.sh -f
-####  cd ../ #cleaning up all files
-####  find . -name "*.o" -o -name "_*" -exec rm {} \;
-####  cd - 
-####  cd ../UTILS/build
-####  lua build.lua gen.lua
-####  lua mk_so.lua /tmp/
-####  cd -
+cleanup ../ #cleaning up all files
+
+#build files
+cd ../UTILS/build
+lua build.lua gen.lua
+lua mk_so.lua /tmp/
+cd -
 PROG_START="
 q_core = require 'Q/UTILS/lua/q_core'
 require 'globals'
@@ -76,10 +85,6 @@ print_csv = require 'print_csv'
 mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 save = require 'Q/UTILS/lua/save'
 "
-:q
-:q
-:q
-:wq
 PROG_SAVE="
 local q_core = require 'Q/UTILS/lua/q_core'
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
