@@ -228,8 +228,9 @@ fns.handle_category6 = function (index, v, M)
     --print(status, load_ret)
   end
   --print(M[1].name)
-  local filename = _G["Q_DATA_DIR"].."_"..M[1].name
-  --print(filename)
+  -- local filename = _G["Q_DATA_DIR"].."_"..M[1].name
+  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
+  --print(filename) /home/pragati/Q/DATA_DIR/
   
   local actual_file_content1 = file.read("./bin/I4.bin")
   local actual_file_content2 = file.read(filename)

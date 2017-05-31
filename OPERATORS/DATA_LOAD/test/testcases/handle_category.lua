@@ -250,7 +250,7 @@ fns.handle_category5 = function (index, status, ret, v)
     end
   end
   
-  local is_present = plfile.isfile(_G["Q_DATA_DIR"].."_col2_nn")
+  local is_present = plfile.isfile(require('Q/q_export').Q_DATA_DIR .. "/_" .."_col2_nn")
   if is_present then
     fns["increment_failed_load"](index, v, "testcase failed: in category5 , null file still present in data directory")
     return false
@@ -258,24 +258,6 @@ fns.handle_category5 = function (index, status, ret, v)
 
   number_of_testcases_passed = number_of_testcases_passed + 1
   return true
-end
-
--- in this testcase , invalid environment values are set
-fns.handle_input_category6 = function (input_regex)
-  if input_regex == 1 then _G["Q_DATA_DIR"] = nil end
-  if input_regex == 2 then _G["Q_DATA_DIR"] = "./invalid_dir" end
-  if input_regex == 3 then _G["Q_META_DATA_DIR"] = nil end
-  if input_regex == 4 then _G["Q_META_DATA_DIR"] = "./invalid_dir" end
-  if input_regex == 5 then _G["Q_DICTIONARIES"] = nil end
-  
-end
-
--- in this testcase , error messages are compared . 
--- so handle_category1 function is reused
-fns.handle_category6 = function (index, status, ret, v)
-  --print(v.name)
-  ret = fns.handle_category1(index, status, ret, v)
-  return ret
 end
 
 return fns

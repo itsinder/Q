@@ -77,7 +77,7 @@ load_csv = function (
   global_settings -- TODO unused for now
 )
     local plpath = require 'pl.path'
-    assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
+    --assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
     local cols = {} -- cols[i] is Column used for column i 
     local dicts = {} -- dicts[i] is di ctionary used for column i
 

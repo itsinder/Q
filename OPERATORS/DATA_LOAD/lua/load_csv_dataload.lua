@@ -26,12 +26,12 @@ return function (
   local col_num_nil = {}
   local size_of_data_list = {}
    
-  assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
+  -- assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
    
   assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.INPUT_FILE_NOT_FOUND)
   assert( plpath.getsize(csv_file_path) ~= 0,g_err.INPUT_FILE_EMPTY)
-  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
+  -- assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+  -- assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
   validate_meta(M)
    
 
@@ -58,7 +58,7 @@ return function (
     
       column_list[i] = Column{field_type=M[i].qtype, 
                  field_size=fld_width,
-                 filename= _G["Q_DATA_DIR"] .. "_" .. M[i].name,
+                 filename= require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name,
                  write_vector=true,
                  nn=M[i].has_nulls }
       col_num_nil[i] = nil
@@ -180,7 +180,7 @@ return function (
       -- print(column:length())
       -- if no nulls are present, then delete the null file
       if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        local null_file = _G["Q_DATA_DIR"] .. "/_" .. M[i].name .. "_nn"
+        local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
         assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
       end
    end
