@@ -30,7 +30,7 @@ local function script_path()
 end
 
 local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
-print (Q_ROOT)
+-- print (Q_ROOT)
 -- Sri 27/05/17: why global decl for infile, sofile? making local to see if something breaks
 
 local incfile = Q_ROOT .. "/include/q_core.h"
