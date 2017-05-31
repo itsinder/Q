@@ -3,9 +3,11 @@ local q_core = require 'q_core'
 return function(A, b)
   assert(type(A) == "table", "A should be a table of columns")
   assert(type(b) == "Column", "b should be a column")
+  assert(b:fldtype() == "F8", "b should be a column of doubles")
 
   for i, v in ipairs(A) do
     assert(type(v) == "Column", "A["..i.."] should be a column")
+    assert(v:fldtype() == "F8", "A["..i.."] should be a column of doubles")
   end
 
   local b_len, b_chunk, nn_b_chunk = b:chunk(-1)
