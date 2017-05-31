@@ -10,6 +10,7 @@ my_print(){
    fi
 }
 
+my_print "Stating the all in one script"
 
 
 ###Install lua , luajit and luarocks
@@ -33,7 +34,7 @@ if [[ $RES -ne 0 ]] ; then
    wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
    tar -xvf LuaJIT-2.0.4.tar.gz
    cd LuaJIT-2.0.4/
-   make
+   make TARGET_FLAGS=-pthread
    sudo make install
    cd ../
    rm -rf LuaJIT-2.0.4
