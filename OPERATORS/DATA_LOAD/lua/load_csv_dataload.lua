@@ -1,13 +1,13 @@
-require 'globals'
-local g_err = require 'error_code'
-local validate_meta = require "validate_meta"
-local Dictionary = require 'dictionary_dataload'
+require 'Q/UTILS/lua/globals'
+local g_err = require 'Q/UTILS/lua/error_code'
+local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
+local Dictionary = require 'Q/OPERATORS/DATA_LOAD/lua/dictionary_dataload'
 local plstring = require 'pl.stringx'
-local Column = require 'Column'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-local q_core = require 'q_core'
+local q_core = require 'Q/UTILS/lua/q_core'
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format
@@ -26,12 +26,12 @@ return function (
   local col_num_nil = {}
   local size_of_data_list = {}
    
-  assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
+  -- assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
    
   assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.INPUT_FILE_NOT_FOUND)
   assert( plpath.getsize(csv_file_path) ~= 0,g_err.INPUT_FILE_EMPTY)
-  assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
-  assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
+  -- assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
+  -- assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
   validate_meta(M)
    
 
@@ -43,7 +43,9 @@ return function (
     end
       
     if M[i].is_load == true then
+      local fld_width = nil
       if M[i].qtype == "SC" then
+        fld_width = M[i].width
         size_of_data_list[i] = M[i].width
       else
         size_of_data_list[i] = g_qtypes[M[i].qtype]["width"]
@@ -55,8 +57,8 @@ return function (
       end
     
       column_list[i] = Column{field_type=M[i].qtype, 
-                 field_size=size_of_data_list[i], 
-                 filename= _G["Q_DATA_DIR"] .. "_" .. M[i].name,
+                 field_size=fld_width,
+                 filename= require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name,
                  write_vector=true,
                  nn=M[i].has_nulls }
       col_num_nil[i] = nil
@@ -178,7 +180,7 @@ return function (
       -- print(column:length())
       -- if no nulls are present, then delete the null file
       if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        local null_file = _G["Q_DATA_DIR"] .. "/_" .. M[i].name .. "_nn"
+        local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
         assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
       end
    end

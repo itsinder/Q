@@ -1,0 +1,38 @@
+return require 'code_gen' {
+
+   declaration = [[
+
+#include <stdint.h>
+extern int
+rand_${out_qtype}(
+  ${out_ctype} *X,
+  uint64_t nX,
+  ${out_ctype} *ptr_val
+  );
+   ]],
+   definition = [[
+
+#include "_rand_${out_qtype}.h"
+
+
+//START_FUNC_DECL
+int
+rand_${out_qtype}(
+  ${out_ctype} *X,
+  uint64_t nX,
+  ${out_ctype} *ptr_val
+  )
+//STOP_FUNC_DECL
+{
+  int status = 0;
+  ${out_ctype} val = *ptr_val;
+#pragma omp parallel for
+  for ( uint64_t i = 0; i < nX; i++ ) { 
+    X[i] = val;
+  }
+  return status;
+}
+
+
+   ]]
+}

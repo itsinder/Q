@@ -1,0 +1,96 @@
+local plfile = require 'pl.file'
+local plpath = require 'pl.path'
+--=======================
+assert(plpath.isfile("arith_specialize.tmpl"), "File not found")
+local x = plfile.read("arith_specialize.tmpl")
+
+y = string.gsub(x, "<<operator>>", "vsadd")
+y = string.gsub(y, "<<c_code>>", "c = a + b")
+plfile.write("vsadd_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vssub")
+y = string.gsub(y, "<<c_code>>", "c = a - b")
+plfile.write("vssub_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsmul")
+y = string.gsub(y, "<<c_code>>", "c = a * b")
+plfile.write("vsmul_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsdiv")
+y = string.gsub(y, "<<c_code>>", "c = a / b")
+plfile.write("vsdiv_specialize.lua", y)
+--=======================
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++
+assert(plpath.isfile("rem_specialize.tmpl"), "File not found")
+local x = plfile.read("rem_specialize.tmpl")
+
+y = string.gsub(x, "<<operator>>", "vsrem")
+y = string.gsub(y, "<<c_code>>", "c = a % b")
+plfile.write("vsrem_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsand")
+y = string.gsub(y, "<<c_code>>", "c = a & b")
+plfile.write("vsand_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsor")
+y = string.gsub(y, "<<c_code>>", "c = a | b")
+plfile.write("vsor_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsxor")
+y = string.gsub(y, "<<c_code>>", "c = a ^ b")
+plfile.write("vsxor_specialize.lua", y)
+--=======================
+assert(plpath.isfile("cmp_specialize.tmpl"), "File not found")
+local x = plfile.read("cmp_specialize.tmpl")
+
+y = string.gsub(x, "<<operator>>", "vseq")
+y = string.gsub(y, "<<comparison>>", " == " )
+plfile.write("vseq_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsneq")
+y = string.gsub(y, "<<comparison>>", " != " )
+plfile.write("vsneq_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsleq")
+y = string.gsub(y, "<<comparison>>", " <= " )
+plfile.write("vsleq_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsgeq")
+y = string.gsub(y, "<<comparison>>", " >= " )
+plfile.write("vsgeq_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsgt")
+y = string.gsub(y, "<<comparison>>", " == " )
+plfile.write("vsgt_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vslt")
+y = string.gsub(y, "<<comparison>>", " == " )
+plfile.write("vslt_specialize.lua", y)
+--=======================
+assert(plpath.isfile("cmp2_specialize.tmpl"), "File not found")
+local x = plfile.read("cmp2_specialize.tmpl")
+
+y = string.gsub(x, "<<operator>>", "vsltorgt")
+y = string.gsub(y, "<<comparator1>>", " < " )
+y = string.gsub(y, "<<comparator2>>", " > " )
+y = string.gsub(y, "<<combiner>>", " || " )
+plfile.write("vsltorgt_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsleqorgeq")
+y = string.gsub(y, "<<comparator1>>", " <= " )
+y = string.gsub(y, "<<comparator2>>", " >= " )
+y = string.gsub(y, "<<combiner>>", " || " )
+plfile.write("vsleqorgeq_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsgtandlt")
+y = string.gsub(y, "<<comparator1>>", " > " )
+y = string.gsub(y, "<<comparator2>>", " < " )
+y = string.gsub(y, "<<combiner>>", " && " )
+plfile.write("vsgtandlt_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "vsgeqandleq")
+y = string.gsub(y, "<<comparator1>>", " >= " )
+y = string.gsub(y, "<<comparator2>>", " <= " )
+y = string.gsub(y, "<<combiner>>", " && " )
+plfile.write("vsgeqandleq_specialize.lua", y)
+--=======================

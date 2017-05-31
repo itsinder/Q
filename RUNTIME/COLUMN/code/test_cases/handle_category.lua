@@ -1,5 +1,5 @@
-local q_core = require 'q_core'
-local convert_c_to_txt = require 'C_to_txt'
+local q_core = require 'Q/UTILS/lua/q_core'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 local fns = { }
 local failed_testcases = { }
 local no_of_pass_testcases = 0

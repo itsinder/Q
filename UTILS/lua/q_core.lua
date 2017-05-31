@@ -21,17 +21,27 @@ int fflush(FILE *stream);
 ]])
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
-local q_root = os.getenv("Q_ROOT")
-assert(plpath.isdir(q_root))
 
-incfile = q_root .. "/include/q_core.h"
+-- requires luaposix have to include in our luarocks def
+-- local stdlib = require("posix.stdlib")
+local function script_path()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)")
+end
+
+-- TODO this is ugly?
+local Q_ROOT = script_path() .. "../../"
+print (Q_ROOT)
+-- Sri 27/05/17: why global decl for infile, sofile? making local to see if something breaks
+
+local incfile = Q_ROOT .. "q_core.h"
 assert(plpath.isfile(incfile))
 ffi.cdef(plfile.read(incfile))
 
-sofile = q_root .. "/lib/libq_core.so"
-assert(plpath.isfile(sofile))
-local cee =  ffi.load(sofile)
+-- TODO issue with load indicates install issue; but is separate flow... is check needed?
+local cee =  ffi.load('libq.so')
 local q_core = {}
+q_core.Q_ROOT = Q_ROOT
 q_core.gc = ffi.gc
 q_core.cast = ffi.cast
 q_core.sizeof = ffi.sizeof

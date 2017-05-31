@@ -5,8 +5,15 @@ dofile 'luvit-loader.lua' -- Enable require to find lit packages
 
 -- This returns a table that is the app instance.
 -- All it's functions return the same table for chaining calls.
+
+-- TODO this is copy-paste but worth it for now...
+local function script_path()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)")
+end
+
 local tmp
-local webpath = os.getenv("Q_SRC_ROOT") .. "/web"
+local webpath = script_path() .. "/web"
 
 require('weblit-app')
 

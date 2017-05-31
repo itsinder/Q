@@ -1,6 +1,7 @@
-local g_err = require 'error_code'
-local Column = require 'Column'   
-local q_core = require 'q_core'
+local Q = require 'Q/q_export'
+local g_err = require 'Q/UTILS/lua/error_code'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'   
+local q_core = require 'Q/UTILS/lua/q_core'
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
 local MINIMUM_LUA_NUMBER = -9007199254740991
@@ -23,7 +24,7 @@ local min = {
   }
 
 
-return function (input, qtype)
+local mk_col = function (input, qtype)
   assert(input,  g_err.INPUT_NOT_TABLE)
   assert(type(input) == "table", "Input to mk_col must be a table")
   assert(#input > 0, "table has no entries")
@@ -48,10 +49,9 @@ return function (input, qtype)
     assert(v >= min[qtype], g_err.INVALID_LOWER_BOUND) 
     assert(v <= max[qtype], g_err.INVALID_UPPER_BOUND)
   end
-  if field_type ~= "SC" then width=nil end
+  --if field_type ~= "SC" then width=nil end
   local col = Column{
     field_type=qtype, 
-    field_size=width, 
     write_vector=true,
     nn=false }
           
@@ -63,3 +63,5 @@ return function (input, qtype)
   col:eov()
   return col
 end
+
+return require('Q/q_export').export('mk_col', mk_col)

@@ -1,8 +1,8 @@
 local plstring = require 'pl.stringx'
-local Vector = require 'Vector'
-local Column = require 'Column'
-local load_csv = require 'load_csv'
-local print_csv = require 'print_csv'
+local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
@@ -125,7 +125,7 @@ end
 
 -- vector of type I4 is given as filter input for category 4 testcases
 fns.handle_input_category4 = function ()
-  local v1 = Vector{field_type='I4', field_size = 4,chunk_size = 8,
+  local v1 = Vector{field_type='I4',chunk_size = 8,
     filename="./bin/I4.bin",  
   }
   return { where = v1 }
@@ -133,7 +133,7 @@ end
 
 -- vector of type B1 is given as filter input for category 3 testcases
 fns.handle_input_category3 = function ()
-  local v1 = Vector{field_type='B1', field_size = 1/8,chunk_size = 8,
+  local v1 = Vector{field_type='B1',chunk_size = 8,
     filename="./bin/B1.bin",  
   }
   return { where = v1 }
@@ -216,7 +216,7 @@ end
 fns.handle_category6 = function (index, v, M)
   -- print(v.name)
   
-  local col = Column{field_type='I4', field_size = 4,chunk_size = 8,
+  local col = Column{field_type='I4',chunk_size = 8,
     filename="./bin/I4.bin",  
   }
   
@@ -228,8 +228,9 @@ fns.handle_category6 = function (index, v, M)
     --print(status, load_ret)
   end
   --print(M[1].name)
-  local filename = _G["Q_DATA_DIR"].."_"..M[1].name
-  --print(filename)
+  -- local filename = _G["Q_DATA_DIR"].."_"..M[1].name
+  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
+  --print(filename) /home/pragati/Q/DATA_DIR/
   
   local actual_file_content1 = file.read("./bin/I4.bin")
   local actual_file_content2 = file.read(filename)

@@ -214,7 +214,7 @@ local FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissi
 local q_o, q_h, q_core_o, q_core_h = opdir .. "/libq.so", opdir .. "/q.h", opdir .. "/libq_core.so", opdir .. "/q_core.h"
 
 local q_core_c = table.concat(q_core_c_files, " ")
-local q_core_cmd = string.format("gcc %s %s -I %s -shared -o %s", FLAGS, q_core_c, hdir, q_core_o)
+local q_core_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_core_c, hdir, q_core_o)
 q_core_cmd = "cd " .. cdir .. "; " .. q_core_cmd
 local status = os.execute(q_core_cmd)
 assert(status, "gcc failed")
@@ -237,7 +237,7 @@ for index=1,#all_c_files do
 end
 
 local q_c = table.concat(q_c_files, " ")
-local q_cmd = string.format("gcc %s %s -I %s -shared -o %s", FLAGS, q_c, hdir, q_o)
+local q_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_c, hdir, q_o)
 q_cmd = "cd " .. cdir .. "; " .. q_cmd
 local status = os.execute(q_cmd)
 assert(status, "gcc failed")

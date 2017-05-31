@@ -15,14 +15,14 @@ Vector Semantics
                 field_size (optional) - The size of each element, defaults to getting it from g_valid_types
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
-require 'globals'
+require 'Q/UTILS/lua/globals'
 local plpath = require("pl.path")
-local get_new_filename = require "random_data_file"
+local get_new_filename = require "Q/UTILS/lua/random_data_file"
 
 local Vector = {}
 Vector.__index = Vector
 
-local q_core = require 'q_core'
+local q_core = require 'Q/UTILS/lua/q_core'
 
 local DestructorLookup = {}
 setmetatable(Vector, {
@@ -73,6 +73,7 @@ end
 local function write_file_vector(self, arg)
     self.output_to_file = true
     self.filename = arg.filename or get_new_filename(10)
+    --print ("VEC FILE NAME CREATE " .. self.filename)
     -- ensure the file is empty to avoid confusion
 	local f = io.open(self.filename,"r")
 	if f ~= nil then
@@ -149,7 +150,7 @@ local function append_to_file(self, ptr, size)
     size = size or self.chunk_size
 
     assert(self.input_from_file ~= true, "Cannot write to input file")
-
+    --print ("VECTOR FILE NAME" .. self.filename)
     if self.file == nil  or self.file == q_core.NULL then
         if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
             self.file = q_core.fopen(self.filename, "wb+")
@@ -315,4 +316,4 @@ function Vector:__tostring()
     return self:persist()
 end
 
-return Vector
+return require('Q/q_export').export('Vector', Vector)

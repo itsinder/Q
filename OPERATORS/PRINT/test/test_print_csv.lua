@@ -1,8 +1,8 @@
-local fns = require 'handle_category_print'
+local fns = require 'Q/OPERATORS/PRINT/test/handle_category_print'
 local file = require 'pl.file'
-local print_csv = require 'print_csv'
-local load_csv = require 'load_csv'
-local utils = require 'utils'
+local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local utils = require 'Q/UTILS/lua/utils'
 
 local test_input_dir = "./test_data/"
 local print_out_dir = "./test_print_data/print_tmp/"
@@ -10,11 +10,11 @@ local print_out_dir = "./test_print_data/print_tmp/"
 -- command setting which needs to be done for all test-cases
 dir.makepath("./test_print_data/print_tmp/")
 --set environment variables for test-case (LOAD CSV) 
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 
 -- Test Case Start ---------------
@@ -35,7 +35,9 @@ for i, v in ipairs(T) do
   if v.category == "category6" then
     local key = "handle_"..v.category
     if fns[key] then
-      fns[key](i, v, M)
+      local status = fns[key](i, v, M)
+      if status then result = true else status = false end
+      utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
     else
       fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
     end
@@ -68,7 +70,7 @@ for i, v in ipairs(T) do
     fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
     result = false
   end
-  utils["testcase_results"](v, "test_print_csv.lua", "Print_csv", "Unit Test", result, "")
+  utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
   ::skip::
 end
 

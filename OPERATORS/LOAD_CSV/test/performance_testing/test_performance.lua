@@ -1,7 +1,7 @@
 local dir = require 'pl.dir'
-local fns = require 'gen_csv_metadata_file'
-local load_csv = require 'load_csv'
-local utils = require 'utils'
+local fns = require 'Q/OPERATORS/LOAD_CSV/test/performance_testing/gen_csv_metadata_file'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local utils = require 'Q/UTILS/lua/utils'
 
 -- file in which performance testing results for each csv file is written
 local performance_file ="./performance_results/performance_measures.txt"
@@ -9,12 +9,12 @@ local meta_info_dir_path = "./meta_info/"
 
 dir.makepath("./performance_results/")
 --set environment variables for test-case
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-_G["Q_DICTIONARIES"] = {}
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DICTIONARIES"] = {}
   
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 -- opening the performance result file
 local filep = assert(io.open(performance_file, 'a')) -- append mode so that all testcases writes their result in this file
@@ -27,7 +27,7 @@ filep:close()
 local T = dofile("map_meta_info_data.lua")
 for i, v in ipairs(T) do
   
-  _G["Q_DICTIONARIES"] = {}
+  -- _G["Q_DICTIONARIES"] = {}
   filep = assert(io.open(performance_file, 'a')) -- append mode so that all testcases writes their result in this file
   print("Testing "..v.name)
   
@@ -69,5 +69,5 @@ for i, v in ipairs(T) do
 end  
 
 -- clear the output directory 
-dir.rmtree(_G["Q_DATA_DIR"])
-dir.rmtree(_G["Q_META_DATA_DIR"])
+-- dir.rmtree(_G["Q_DATA_DIR"])
+-- dir.rmtree(_G["Q_META_DATA_DIR"])

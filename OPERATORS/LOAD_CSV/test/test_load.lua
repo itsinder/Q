@@ -1,9 +1,9 @@
-local log = require 'log'
+local log = require 'Q/UTILS/lua/log'
 local plpath = require 'pl.path'
 local dir = require 'pl.dir'
-local fns = require 'utils'
-local q_core = require 'q_core'
-local load_csv = require 'load_csv'
+local fns = require 'Q/UTILS/lua/utils'
+local q_core = require 'Q/UTILS/lua/q_core'
+local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 
 assert( #arg == 2 , "Arguments are <metadata_file_path> <csv_file_path>")
 local metadata_file_path = arg[1]

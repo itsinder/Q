@@ -13,7 +13,7 @@ For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
 
-local g_err = require("error_code")
+local g_err = require 'Q/UTILS/lua/error_code'
 
 return { 
   -- error messages test cases
@@ -64,6 +64,8 @@ return {
     -- escaping character in SV field is missing  
     { meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
       output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char" },
+    { meta = "gm_invalid_SC_width.lua", data = "invalid_SC_width.csv", category= "category1",
+      output_regex= g_err.STRING_GREATER_THAN_SIZE, name = "SC width value is invalid" },
  
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file
@@ -153,32 +155,6 @@ return {
                      },
       name = "nil_data_SV"
     },
-    
-    -- enviornment variable metadata dir null
-    { meta= "gm_metadata_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 3,
-      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_nil" 
-    },
-    
-    
-    -- enviornment variable metadata dir invalid
-    { meta= "gm_metadata_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 4,
-      output_regex=g_err.Q_META_DATA_DIR_NOT_FOUND, name = "metadata_dir_env_invalid" 
-    },
-    
-    -- enviornment variable data dir null
-    { meta= "gm_data_dir_env_nil.lua", data= "sample.csv", category= "category6", input_regex = 1,
-      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_nil" 
-    },
-    
-    -- enviornment variable data dir invalid
-    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 2,
-      output_regex=g_err.Q_DATA_DIR_NOT_FOUND, name = "data_dir_env_invalid" 
-    }, 
-    
-    -- enviornment variable data dir invalid
-    { meta= "gm_data_dir_env_invalid.lua", data= "sample.csv", category= "category6", input_regex = 5,
-      output_regex=g_err.NULL_DICTIONARY_ERROR, name = "G_Dictionary NULL testcase" 
-    }, 
     
     -- check the size of output binary file is correct, 
     { meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",

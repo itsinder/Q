@@ -1,8 +1,8 @@
   local plfile = require 'pl.file'
-  loadfile 'globals.lua'
+  require 'UTILS/lua/globals.lua'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
-   local gen_code =  require("gen_code")
+  local gen_code =  require("UTILS/lua/gen_code")
 
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   local sp_fn = require 'ainb_specialize'

@@ -1,7 +1,7 @@
-local Dictionary = require "dictionary"
+local Dictionary = require "Q/UTILS/lua/dictionary"
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
-local utils = require 'utils'
+local utils = require 'Q/UTILS/lua/utils'
 
 local no_of_success = 0
 local no_of_failure = 0
@@ -167,7 +167,7 @@ local function calling_dictionary(i ,m)
     fns["increment_failed_load"](i, m, "Handle function for "..m.category.." is not defined in handle_category.lua")
     result = false
   end
-   utils["testcase_results"](m, "test_dictionary.lua", "Dictionary", "Unit Test", result, "")
+   utils["testcase_results"](m, "Dictionary", "Unit Test", result, "")
 end
 
 

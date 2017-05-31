@@ -1,4 +1,4 @@
-return require 'code_gen' {
+return require 'UTILS/lua/code_gen' {
 
    declaration = [[
 
@@ -26,7 +26,6 @@ const_${out_qtype}(
 {
   int status = 0;
   ${out_ctype} val = *ptr_val;
-// TODO: Why seg fault when following uncommented?
 // #pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
     X[i] = val;

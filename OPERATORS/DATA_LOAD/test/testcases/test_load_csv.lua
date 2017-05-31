@@ -1,16 +1,16 @@
-local load_csv = require 'load_csv_dataload'
-local fns = require 'handle_category'
-local utils = require 'utils'
+local load_csv = require 'Q/OPERATORS/DATA_LOAD/lua/load_csv_dataload'
+local fns = require 'Q/OPERATORS/DATA_LOAD/test/testcases/handle_category'
+local utils = require 'Q/UTILS/lua/utils'
 local dir = require 'pl.dir'
 
 local test_input_dir = "./test_data/"
 local test_metadata_dir ="./test_metadata/"
 -- common setting (SET UPS) which needs to be done for all test-cases
 --set environment variables for test-case
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
-dir.makepath(_G["Q_DATA_DIR"])
-dir.makepath(_G["Q_META_DATA_DIR"])
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- dir.makepath(_G["Q_DATA_DIR"])
+-- dir.makepath(_G["Q_META_DATA_DIR"])
 
 -- loop through testcases
 -- these testcases output error messages
@@ -48,14 +48,14 @@ for i, v in ipairs(T) do
     fns["increment_failed_load"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
     result = false
   end
-  utils["testcase_results"](v, "test_load_csv.lua", "Data_load", "Unit Test", result, "")
+  utils["testcase_results"](v, "Data_load", "Unit Test", result, "")
   ::skip::
 end
 
 fns["print_result"]()
 
-_G["Q_DATA_DIR"] = "./test_data/out/"
-_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./test_data/out/"
+-- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
 -- common cleanup (TEAR DOWN) for all testcases
 -- clear the output directory 
 --dir.rmtree(_G["Q_DATA_DIR"])
