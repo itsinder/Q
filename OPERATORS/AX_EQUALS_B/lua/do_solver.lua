@@ -1,6 +1,6 @@
 local Q = require 'Q/UTILS/lua/q'
-local mk_col = (require 'Q').mk_col
 local Q_core = require 'Q/UTILS/lua/q_core'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 
 return function(func_name, A, b)
   assert(type(A) == "table", "A should be a table of columns")
