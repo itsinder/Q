@@ -1,7 +1,8 @@
 function sort(x, ordr)
 
+  local q = require 'Q/UTILS/lua/q'
   assert(type(x) == "Column", "error")
-  local spfn = require("sort_specialize" )
+  local spfn = require("Q/OPERATORS/SORT/lua/sort_specialize" )
   local status, subs, tmpl = pcall(spfn, x:fldtype(), ordr)
   assert(status, "error")
   assert(type(subs) == "table", "error")
