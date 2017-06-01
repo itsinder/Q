@@ -20,6 +20,8 @@ local function is_g_exception(k,v)
     if type(v) == "cdata" then return true end
     if k == "coroutine" then return true end
     if k == "io" then return true end
+    if k == "utils" then return true end
+    if k == "Q" then return true end
     if k == "Column" then return true end
     if k == "Vector" then return true end
     if k == "ffi" then return true end

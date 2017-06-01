@@ -10,6 +10,6 @@ while read line
 do
   gcc -c $QC_FLAGS $INCS "${Q_SRC_ROOT}/$line"
 done < core_c_files.txt
-gcc *.o $Q_LINK_FLAGS -o libqcore.so
+gcc *.o $Q_LINK_FLAGS -o libq_core.so
 rm -f *.o
-cp libqcore.so $Q_ROOT/lib/libq.so
+cp libq_core.so $Q_ROOT/lib/
