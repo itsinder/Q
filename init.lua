@@ -7,5 +7,6 @@ require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"
 require "Q/OPERATORS/MM/lua/mvmul"
 require "Q/UTILS/lua/save"
+require "Q/OPERATORS/F1F2OPF3/lua/f1f2opf3"
 
 return require 'Q/q_export'

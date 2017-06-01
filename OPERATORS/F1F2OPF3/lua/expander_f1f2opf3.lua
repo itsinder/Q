@@ -1,11 +1,11 @@
-require 'globals'
-local Column = require 'Column'
-local dbg = require 'debugger'
+require 'Q/UTILS/lua/globals'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
 -- TODO doc pending: specializer must return a function and an out_qtype
-function expander_f1f2opf3(a, x , y, optargs )
+local function expander_f1f2opf3(a, x , y, optargs )
     -- Get name of specializer function. By convention
-    local spfn = require(a .. "_specialize" )
+    sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
+    local spfn = require(sp_fn_name)
     status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype())
     assert(status, subs)
     local func_name = assert(subs.fn)
@@ -42,6 +42,9 @@ function expander_f1f2opf3(a, x , y, optargs )
       end
     end)
     print("================")
+    local dbg = require 'Q/UTILS/lua/debugger'
+    dbg()
     return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}
 end
 
+return expander_f1f2opf3
