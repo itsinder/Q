@@ -233,12 +233,10 @@ int positive_solver(
     double ** A,
     double * x,
     double * b,
-    int n,
-    double eps
+    int n
     )
 {
   int status = 0;
-  bool solution_exists = false;
 
   double ** AtA = NULL;
   double * Atb = NULL;
@@ -248,13 +246,9 @@ int positive_solver(
   transpose_and_multiply(A, AtA, n);
   transpose_and_multiply_matrix_vector(A, b, n, Atb);
   status = posdef_positive_solver_fast(AtA, x, Atb, n); cBYE(status);
-  solution_exists = full_positive_solver_check(A, x, b, n, eps);
 
 BYE:
   free_matrix(AtA, n);
   free_if_non_null(Atb);
-  if (status == 0 && !solution_exists) {
-    status = 1;
-  }
   return status;
 }

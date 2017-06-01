@@ -18,4 +18,4 @@ test: test_driver
 	valgrind ./test_driver 100
 
 clean:
-	rm test_driver
+	rm -f test_driver

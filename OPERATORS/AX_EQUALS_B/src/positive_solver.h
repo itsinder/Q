@@ -75,8 +75,7 @@ extern int positive_solver(
     double ** A,
     double * x,
     double * b,
-    int n,
-    double eps
+    int n
     );
 
 /* Preserves its input. */
