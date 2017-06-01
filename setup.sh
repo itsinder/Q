@@ -60,6 +60,7 @@ mkdir -p $Q_ROOT/lib
 export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
 echo "Q_SRC_ROOT: $Q_SRC_ROOT"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
+
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
 echo "QC_FLAGS: $QC_FLAGS"
 mkdir -p $Q_ROOT/data
@@ -70,11 +71,19 @@ export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
 echo "Q_METADATA_DIR: $Q_METADATA_DIR"
 # Setting ld library path based on lua init
 #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
-set +m
-lua -e "print('hey')" &>/dev/null
-RET=`echo $?`
-if [[ "$RET" -ne "0" ]]; then
-    `lua| tail -1`
-fi
+# set +m
+# lua -e "print('hey')" &>/dev/null
+# RET=`echo $?`
+# if [[ "$RET" -ne "0" ]]; then
+#     `lua| tail -1`
+# fi
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-
+export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm " 
+echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
+CURR_PATH=`pwd`
+cd $BASE_PATH
+cd ../
+export LUA_PATH="`pwd`/?.lua;;"
+cd $CURR_PATH
+echo "LUA_PATH: $LUA_PATH"

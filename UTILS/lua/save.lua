@@ -20,6 +20,8 @@ local function is_g_exception(k,v)
     if type(v) == "cdata" then return true end
     if k == "coroutine" then return true end
     if k == "io" then return true end
+    if k == "utils" then return true end
+    if k == "Q" then return true end
     if k == "Column" then return true end
     if k == "Vector" then return true end
     if k == "ffi" then return true end
@@ -88,8 +90,8 @@ local function save_global(filename)
     assert(filename ~= nil, "A valid filename has to be given")
     local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
-    file:write("local Column = require 'Column'\n")
-    file:write("local Vector = require 'Vector'\n")
+    file:write("local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'\n")
+    file:write("local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'\n")
     -- file:write("local Dictionary = require 'Dictionary'\n")
 
 

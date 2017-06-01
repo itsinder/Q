@@ -29,17 +29,16 @@ local function script_path()
    return str:match("(.*/)")
 end
 
--- TODO this is ugly?
-local Q_ROOT = script_path() .. "../../"
-print (Q_ROOT)
+local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
+-- print (Q_ROOT)
 -- Sri 27/05/17: why global decl for infile, sofile? making local to see if something breaks
 
-local incfile = Q_ROOT .. "q_core.h"
-assert(plpath.isfile(incfile))
+local incfile = Q_ROOT .. "/include/q_core.h"
+assert(plpath.isfile(incfile), "File not found " .. incfile)
 ffi.cdef(plfile.read(incfile))
 
 -- TODO issue with load indicates install issue; but is separate flow... is check needed?
-local cee =  ffi.load('libq.so')
+local cee =  ffi.load('libq_core.so')
 local q_core = {}
 q_core.Q_ROOT = Q_ROOT
 q_core.gc = ffi.gc
