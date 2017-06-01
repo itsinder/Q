@@ -53,7 +53,7 @@ fi
 # ######## Luarocks #########
 which luarocks &> /dev/null
 RES=$?
-if [[ %RES -ne 0 ]] ; then
+if [[ $RES -ne 0 ]] ; then
    my_print "Installing lua rocks"
    wget https://luarocks.org/releases/luarocks-2.4.1.tar.gz
    tar zxpf luarocks-2.4.1.tar.gz
