@@ -70,32 +70,29 @@ BYE:
 }
 
 int 
-mm_fast_1d(
+mvmul_a(
     double ** x, 
-    double ** y, 
-    double ** z, 
+    double * y, 
+    double * z, 
     int m,
-    int k,
-    int n
+    int k
     )
 {
   int status = 0;
   int nT = sysconf(_SC_NPROCESSORS_ONLN);
 
-  printf("fast multiply 1D");
   //n = 1 in this special case
   for ( int i = 0; i < k; i++ ) {
-    double scale = y[0][i];
+    double scale = y[i];
     double *x_i = x[i];
     int block_size = m / nT;
 //#pragma omp parallel for schedule(static, 1)
     for ( int t = 0; t < nT; t++ ) { 
-      double *z_0 = z[0];
       int lb = t * block_size;
       int ub = lb + block_size;
       if ( t == (nT-1) ) { ub = m; }
       for ( int j = lb; j < ub; j++ ) {
-        z_0[j] += scale * x_i[j];
+        z[j] += scale * x_i[j];
       }
     }
       

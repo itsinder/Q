@@ -43,11 +43,10 @@ mm_fast_1d_alt(
     int n
     );
 extern int 
-mm_fast_1d(
+mvmul_a(
     double ** x, 
-    double ** y, 
-    double ** z, 
+    double * y, 
+    double * z, 
     int m,
-    int k,
-    int n
+    int k
     );
