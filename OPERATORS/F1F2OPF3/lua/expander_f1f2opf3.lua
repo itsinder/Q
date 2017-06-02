@@ -1,4 +1,5 @@
 require 'Q/UTILS/lua/globals'
+q = require 'Q/UTILS/lua/q'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
 -- TODO doc pending: specializer must return a function and an out_qtype
