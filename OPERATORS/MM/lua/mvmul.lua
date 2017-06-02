@@ -1,6 +1,7 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local ffi = require 'ffi'
 local q = require 'Q/UTILS/lua/q'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 require 'Q/UTILS/lua/globals'
 
 local mvmul = function(X, Y)
@@ -36,8 +37,10 @@ local mvmul = function(X, Y)
     Xptr[xidx-1] = ffi.cast("double *", xptr)
   end
   -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
+  local dbg = require 'Q/UTILS/lua/debugger'
+  dbg()
   q["mvmul_a"](Xptr, yptr, zptr, m, k);
-  local zcol = Q.Column({field_type = "F8", write_vector = true})
+  local zcol = Column({field_type = "F8", write_vector = true})
   zcol:put_chunk(m, zptr)
   zcol:eov()
   return zcol
