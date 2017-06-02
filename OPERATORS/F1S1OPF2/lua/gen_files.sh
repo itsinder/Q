@@ -5,8 +5,9 @@ bash clean.sh
 rm -r -f ../gen_inc; mkdir -p ../gen_inc/
 rm -r -f ../gen_src; mkdir -p ../gen_src/
 lua gen_specializers.lua
-lua generator.lua  arith_operators.lua
-lua generator.lua  cmp_operators.lua
+lua generator0.lua  operators0.lua
+lua generator1.lua  arith_operators.lua
+lua generator1.lua  cmp_operators.lua
 lua generator2.lua  cmp2_operators.lua
 
 cd ../gen_src/
