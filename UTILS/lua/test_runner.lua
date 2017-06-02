@@ -30,15 +30,15 @@ This test_runner program runs all tests, and logs all failed test-cases with the
 --print ("LUA PATH " .. package.path)
 --print ("TERRA PATH" .. package.terrapath)
 
-require 'globals'
+require 'Q/UTILS/lua/globals'
 --require 'terra_globals'
-require 'error_code'
+require 'Q/UTILS/lua/error_code'
 local pretty = require 'pl.pretty'
 
 print ("Function under test: " .. arg[1])
 print ("Test suite: " .. arg[2])
 
-local suite_runner = require 'suite_runner'
+local suite_runner = require 'Q/UTILS/lua/suite_runner'
 local fn = require (arg[1])
 local suite = require (arg[2])
 local tests_to_run = arg[3]
