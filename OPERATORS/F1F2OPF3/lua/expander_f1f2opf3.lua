@@ -42,6 +42,7 @@ local function expander_f1f2opf3(a, x , y, optargs )
         end
       end
     end)
+    print("xxxxxxxxxxxxxx")
     return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}
 end
 
