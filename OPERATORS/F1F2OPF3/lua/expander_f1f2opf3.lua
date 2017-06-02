@@ -41,9 +41,6 @@ local function expander_f1f2opf3(a, x , y, optargs )
         end
       end
     end)
-    print("================")
-    local dbg = require 'Q/UTILS/lua/debugger'
-    dbg()
     return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}
 end
 
