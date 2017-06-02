@@ -5,6 +5,7 @@ local q_core = require 'Q/UTILS/lua/q_core'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
 -- local dbg = require 'debugger'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 
 --TODO move to utils
 local function clone (t) -- deep-copy a table
@@ -248,11 +249,10 @@ function Column:wrap()
 end
 
 function Column:eval()
-   if self.gen ~= nil and self:ismemo() == true then
+    if self.gen ~= nil and self:ismemo() ~= false  then
         -- Drain the column
     local index = self:last_chunk() or 0 
     while self:materialized() == false do
-        -- dbg()
         self:chunk(index)
         index = index + 1
     end

@@ -32,6 +32,7 @@ local mvmul = function(X, Y)
   Xptr = ffi.cast("double **", Xptr)
   for xidx = 1, #X do
     local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
+    assert(nn_xptr == nil, "Don't support null values")
     Xptr[xidx-1] = ffi.cast("double *", xptr)
   end
   -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
