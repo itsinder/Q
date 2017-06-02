@@ -1,7 +1,6 @@
 Q = require 'Q'
 local Q_core = require 'Q/UTILS/lua/q_core'
-local posdef = require 'Q/OPERATORS/AX_EQUALS_B/lua/posdef_linear_solver'
-local general = require 'Q/OPERATORS/AX_EQUALS_B/lua/general_linear_solver'
+local linear_solver = require 'Q/OPERATORS/AX_EQUALS_B/lua/linear_solver'
 
 local mk_cols = function(A)
   local B = {}
@@ -21,7 +20,7 @@ local A = mk_cols(A_bare)
 b_bare = { 3, 0, 7, 10 }
 local b = Q.mk_col(b_bare, 'F8')
 
-local x = general(A, b)
+local x = linear_solver.general(A, b)
 local b_new = Q.mvmul(A, x)
 
 local _, b_new_chunk, _ = b:chunk(-1)
