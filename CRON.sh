@@ -10,10 +10,10 @@ cd $Q_SRC_ROOT/UTILS/build
 
 source $Q_SRC_ROOT/setup.sh -f
 
-var82="------------OUTPUT of library scripts----------------------------------------"
-var83=$(lua mk_so.lua /tmp/ 2>&1)
 var80="------------OUTPUT of build scripts--------------------------------------"
 var81=$(lua build.lua gen.lua 2>&1)
+var82="------------OUTPUT of library scripts----------------------------------------"
+var83=$(lua mk_so.lua /tmp/ 2>&1)
 var84="------------OUTPUT of test scripts------------------------------------"
 var85=$(lua build.lua tests.lua 2>&1)
 
