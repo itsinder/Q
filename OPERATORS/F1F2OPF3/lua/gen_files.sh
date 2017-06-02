@@ -25,5 +25,5 @@ rm -f *.o
 rm -f _x
 cd -
 lua pkg_f1f2opf3.lua
-test -f _f1f2opf3.lua
+test -f f1f2opf3.lua
 echo "ALL DONE: $0 in $PWD"
