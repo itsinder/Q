@@ -14,7 +14,7 @@ require('Q/q_export').export('<<operator>>', <<operator>>)
 
 io.output("f1f2opf3.lua")
 io.write("local T = {} \n")
-local ops = assert(require 'operators')
+local ops = assert(require 'Q/OPERATORS/F1F2OPF3/lua/operators')
 local T = {}
 for i, op in ipairs(ops) do
   T[#T+1] = string.gsub(s, "<<operator>>", op)
@@ -24,3 +24,4 @@ local x = table.concat(T, "\n")
 io.write(x)
 io.write("\nreturn T\n")
 io.close()
+-- TODO Is it necessary to create a file? Will the loadstring be enough
