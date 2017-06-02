@@ -1,11 +1,22 @@
 return function (
   ftype,
-  scalar_val,
-  scalar_type
+  scalar
   )
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(ftype))
-  assert(is_base_qtype(scalar_type))
+
+  if ( type(scalar) == "table" ) then 
+    scalar_val = scalar.value
+    if ( scalar.field_type ) then 
+      scalar_type = scalar.field_type
+    else
+      scalar_type = ftype
+    end
+  else
+    assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
+    scalar_val = scalar
+    scalar_type = ftype
+  end
   --===========================================
   local promote = require 'Q/UTILS/lua/promote'
   local out_type = assert(promote(ftype, scalar_type))
