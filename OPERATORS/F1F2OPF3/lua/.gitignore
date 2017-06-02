@@ -12,3 +12,4 @@ vvadd_specialize.lua
 vvand_specialize.lua
 vvandnot_specialize.lua
 vveq_specialize.lua
+f1f2opf3.lua

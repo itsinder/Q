@@ -4,7 +4,7 @@ local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 -- TODO doc pending: specializer must return a function and an out_qtype
 local function expander_f1f2opf3(a, x , y, optargs )
     -- Get name of specializer function. By convention
-    sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
+    local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
     local spfn = require(sp_fn_name)
     status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype())
     assert(status, subs)
