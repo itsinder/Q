@@ -94,3 +94,26 @@ y = string.gsub(y, "<<comparator2>>", " <= " )
 y = string.gsub(y, "<<combiner>>", " && " )
 plfile.write("vsgeqandleq_specialize.lua", y)
 --=======================
+assert(plpath.isfile("f1opf2_specialize.tmpl"), "File not found")
+local x = plfile.read("f1opf2_specialize.tmpl")
+
+y = string.gsub(x, "<<operator>>", "exp")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = exp((double)a);")
+y = string.gsub(y, "<<out_qtype>>", '"F8"')
+plfile.write("exp_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "log")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = log((double)a);")
+y = string.gsub(y, "<<out_qtype>>", '"F8"')
+plfile.write("log_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "incr")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = a + 1;")
+y = string.gsub(y, "<<out_qtype>>", "in_qtype")
+plfile.write("incr_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "decr")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = a - 1;")
+y = string.gsub(y, "<<out_qtype>>", "in_qtype")
+plfile.write("decr_specialize.lua", y)
+--=======================

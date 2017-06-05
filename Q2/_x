@@ -1,0 +1,8 @@
+rm -f .
+rm -f ./GLUE/.travis
+rm -f ./GLUE/.travis.yml
+rm -f ./GLUE/src/.gitignore
+rm -f ./JSMN/.hg_archival.txt
+rm -f ./DOC/.meta
+rm -f ./BAK.4.23.2015.PARSER/.qgrammar.l.swp
+rm -f ./.meta
