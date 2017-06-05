@@ -24,3 +24,6 @@ decr_specialize.lua
 exp_specialize.lua
 incr_specialize.lua
 log_specialize.lua
+logit_specialize.lua
+logit2_specialize.lua
+
