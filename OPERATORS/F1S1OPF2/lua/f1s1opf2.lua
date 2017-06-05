@@ -10,7 +10,7 @@ local function vsadd(x, optargs)
 end
 T.vsadd = vsadd
 require('Q/q_export').export('vsadd', vsadd)
-    
+   
 
 local function vssub(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
@@ -48,7 +48,6 @@ end
 T.vsdiv = vsdiv
 require('Q/q_export').export('vsdiv', vsdiv)
     
-
 local function vsltorgt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
   if type(x) == "Column" then 
@@ -217,7 +216,6 @@ end
 T.decr = decr
 require('Q/q_export').export('decr', decr)
     
-
 local function logit(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
   if type(x) == "Column" then 
