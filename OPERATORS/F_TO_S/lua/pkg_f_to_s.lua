@@ -3,7 +3,7 @@ local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x)
   if type(x) == "Column" then
-    local status, numer, denom = pcall(expander_f_to_s, <<operator>>, x)
+    local status, numer, denom = pcall(expander_f_to_s, "<<operator>>", x)
     if ( not status ) then print(col) end
     assert(status, "Could not execute <<operator>>")
     return numer, denom
@@ -14,7 +14,7 @@ T.<<operator>> = <<operator>>
 require('Q/q_export').export('<<operator>>', <<operator>>)
     ]===]
 
-io.output("f_to_s.lua")
+io.output("_f_to_s.lua")
 io.write("local T = {} \n")
 local ops = assert(require 'Q/OPERATORS/F_TO_S/lua/operators')
 local T = {}

@@ -1,12 +1,12 @@
-require 'globals'
+require 'Q/UTILS/lua/globals'
 local Column = require 'Column'
-local dbg = require 'debugger'
-
-assert(nil, "WORK IN PROGRESS")
+local dbg = require 'Q/UTILS/lua/debugger'
 
 function expander_f_to_s(a, x )
     -- Get name of specializer function. By convention
-    local spfn = require(a .. "_specialize" )
+    local filename = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
+    local spfn = require(filename)
+    assert(type(x) == "Column", "input should be a column")
     status, subs, tmpl = pcall(spfn, x:fldtype())
     assert(status, subs)
     local func_name = assert(subs.fn)
