@@ -4,8 +4,7 @@ Column.__index = Column
 local q_core = require 'Q/UTILS/lua/q_core'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
--- local dbg = require 'debugger'
--- local dbg = require 'Q/UTILS/lua/debugger'
+-- dbg = require 'Q/UTILS/lua/debugger'
 
 --TODO move to utils
 local function clone (t) -- deep-copy a table

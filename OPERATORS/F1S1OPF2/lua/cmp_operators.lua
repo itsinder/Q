@@ -5,8 +5,4 @@ return {
   "vslt",
   "vsgeq",
   "vsleq",
---  "vsltorgt", 
---  "vsleqorgeq", 
---  "vsgeqandleq", 
---  "vsgtandlt", 
 }

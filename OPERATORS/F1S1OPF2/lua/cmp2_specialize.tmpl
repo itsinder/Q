@@ -17,6 +17,7 @@ return function (
     -- TODO  convert lb/ub to appropriate ctypes
     subs.fn = "<<operator>>" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
+    subs.out_qtype = "B1"
     subs.comp1 = ' <<comparator1>>  '
     subs.comp2 = ' <<comparator2>>  '
     subs.combiner = ' <<combiner>>  '

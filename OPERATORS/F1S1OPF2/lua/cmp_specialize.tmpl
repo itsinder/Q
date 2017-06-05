@@ -9,7 +9,7 @@ return function (
     local subs = {}; 
     subs.fn = "<<operator>>" .. ftype 
     subs.fldtype = g_qtypes[ftype].ctype
-    subs.out_ctype = "uint8_t"
+    subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
     subs.c_mem = 0 -- TODO 
     return subs, tmpl
