@@ -8,7 +8,7 @@ local z = Q.vvadd(c3, c2, "junk")
 -- local dbg = require 'Q/UTILS/lua/debugger'
 z:eval()
 -- print(z:length())
-Q.print_csv(c3, { lb = 1, ub = 4} , "")
+Q.print_csv(z, { lb = 1, ub = 4} , "")
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

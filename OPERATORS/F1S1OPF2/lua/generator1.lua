@@ -17,7 +17,7 @@
         -- NOTE: Provide legit scalar_val for each scalar_type
         -- For 6 basic types, 1 is fine but will need to do better
         -- for B1, SC, ...
-        local status, subs, tmpl = pcall(sp_fn, fldtype, { value = 1, field_type = fldtype })
+        local status, subs, tmpl = pcall(sp_fn, fldtype, { value = 1, field_type = scalar_type })
         if ( status ) then 
           assert(type(subs) == "table")
           assert(type(tmpl) == "string")

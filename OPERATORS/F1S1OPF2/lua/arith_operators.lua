@@ -1,8 +1,8 @@
 return { 
   "vsadd", 
-  "vssub", 
-  "vsmul", 
-  "vsdiv", 
+-- TODO  "vssub", 
+-- TODO  "vsmul", 
+-- TODO  "vsdiv", 
 --TODO  "vsrem", 
 --TODO  "vsand", 
 --TODO  "vsor",  

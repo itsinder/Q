@@ -1,10 +1,15 @@
 local Q = require 'Q'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 local z = Q.vsadd(c1, 10 , "junk")
--- local dbg = require 'Q/UTILS/lua/debugger'
 z:eval()
--- print(z:length())
-Q.print_csv(z, { lb = 1, ub = 4} , "")
+Q.print_csv(z, nil, "")
+--===========================
+local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "F8")
+local z = Q.exp(c1)
+z:eval()
+Q.print_csv(z, nil, "")
+--===========================
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

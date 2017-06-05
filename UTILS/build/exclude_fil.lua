@@ -16,4 +16,5 @@ return {
   "tmpl_join.c",
   "mm_helpers.c",
   "driver_mm.c",
+  "driver.c",
 }

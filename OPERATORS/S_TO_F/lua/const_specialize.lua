@@ -32,6 +32,7 @@ return function (
   subs.fn = "const_" .. qtype
   subs.c_mem = c_mem
   subs.out_ctype = out_ctype
+  subs.len = len
   subs.out_qtype = qtype
   return subs, tmpl
 end
