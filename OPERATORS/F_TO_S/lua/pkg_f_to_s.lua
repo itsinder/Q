@@ -3,7 +3,8 @@ local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x)
   if type(x) == "Column" then
-    local status, numer, denom = pcall(expander_f_to_s, "<<operator>>", x)
+    local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_f_to_s')
+    local status, numer, denom = pcall(expander, "<<operator>>", x)
     if ( not status ) then print(col) end
     assert(status, "Could not execute <<operator>>")
     return numer, denom
