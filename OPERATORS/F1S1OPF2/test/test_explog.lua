@@ -10,6 +10,16 @@ local z = Q.exp(c1)
 z:eval()
 Q.print_csv(z, nil, "")
 --===========================
+local c1 = Q.mk_col( {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8}, "F8")
+local z = Q.logit(c1)
+z:eval()
+Q.print_csv(z, nil, "")
+--===========================
+local c1 = Q.mk_col( {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8}, "F8")
+local z = Q.logit2(c1)
+z:eval()
+Q.print_csv(z, nil, "")
+--===========================
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

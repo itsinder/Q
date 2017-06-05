@@ -11,42 +11,6 @@ end
 T.vsadd = vsadd
 require('Q/q_export').export('vsadd', vsadd)
     
-local function vssub(x, optargs)
-  local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
-    local status, col = pcall(expander, "vssub", x, optargs)
-    if ( not status ) then print(col) end
-    assert(status, "Could not execute vssub")
-    return col
-  end
-end
-T.vssub = vssub
-require('Q/q_export').export('vssub', vssub)
-    
-local function vsmul(x, optargs)
-  local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
-    local status, col = pcall(expander, "vsmul", x, optargs)
-    if ( not status ) then print(col) end
-    assert(status, "Could not execute vsmul")
-    return col
-  end
-end
-T.vsmul = vsmul
-require('Q/q_export').export('vsmul', vsmul)
-    
-local function vsdiv(x, optargs)
-  local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
-    local status, col = pcall(expander, "vsdiv", x, optargs)
-    if ( not status ) then print(col) end
-    assert(status, "Could not execute vsdiv")
-    return col
-  end
-end
-T.vsdiv = vsdiv
-require('Q/q_export').export('vsdiv', vsdiv)
-    
 local function vsltorgt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
   if type(x) == "Column" then 
@@ -214,5 +178,29 @@ local function decr(x, optargs)
 end
 T.decr = decr
 require('Q/q_export').export('decr', decr)
+    
+local function logit(x, optargs)
+  local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
+  if type(x) == "Column" then 
+    local status, col = pcall(expander, "logit", x, optargs)
+    if ( not status ) then print(col) end
+    assert(status, "Could not execute logit")
+    return col
+  end
+end
+T.logit = logit
+require('Q/q_export').export('logit', logit)
+    
+local function logit2(x, optargs)
+  local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
+  if type(x) == "Column" then 
+    local status, col = pcall(expander, "logit2", x, optargs)
+    if ( not status ) then print(col) end
+    assert(status, "Could not execute logit2")
+    return col
+  end
+end
+T.logit2 = logit2
+require('Q/q_export').export('logit2', logit2)
     
 return T

@@ -4,4 +4,5 @@ return {
   "incr", 
   "decr", 
   "logit", 
+  "logit2"
 }
