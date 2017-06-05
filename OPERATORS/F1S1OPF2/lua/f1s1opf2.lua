@@ -11,6 +11,7 @@ end
 T.vsadd = vsadd
 require('Q/q_export').export('vsadd', vsadd)
     
+
 local function vssub(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
   if type(x) == "Column" then 
