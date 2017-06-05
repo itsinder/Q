@@ -1,8 +1,8 @@
 local ffi = require "ffi"
-local g_err = require 'error_code'
-local q = require 'q'
-local q_core = require 'q_core'
-local promote = require 'promote'
+local g_err = require 'Q/UTILS/lua/error_code'
+local q = require 'Q/UTILS/lua/q'
+local q_core = require 'Q/UTILS/lua/q_core'
+local promote = require 'Q/UTILS/lua/promote'
  
 -- allocate chunk and prepare convertor function for calling C apis 
  local get_chunk = function(qtype_input1, qtype_input2, operation, ctype, input1)
