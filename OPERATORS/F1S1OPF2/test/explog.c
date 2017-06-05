@@ -1,48 +1,66 @@
 #include <stdio.h>
 #include "q_macros.h"
-#include "_concat_I1_I2_I4.h"
+#include "_expF8.h"
+#include "_logF8.h"
+#include "_logitF8.h"
+#include "_logit2F8.h"
+#include <math.h>
 int
 main(
     )
 {
   int status = 0;
-#define N 1048576
-  uint8_t *X = NULL;
-  uint16_t *Y = NULL;
-  uint32_t *Z = NULL;
-  //--------------------------------
-  uint8_t vx = 0;
-  X = malloc(N * sizeof(uint8_t));
+#define N 100
+  double *X = NULL;
+  double *Y = NULL;
+  double *Z = NULL;
+  //--------MALLOC X----------------
+  X = malloc(N * sizeof(double));
   return_if_malloc_failed(X);
-  for ( int i = 0; i < N; i++, vx++ ) { 
-    if ( vx == 255 ) { vx = 0; }
+  double vx = 1.3;
+  for ( int i = 0; i < N; i++ ) {
     X[i] = vx;
+    vx = vx + 1.0;
   }
-  //--------------------------------
-  uint16_t vy = 0;
-  Y = malloc(N * sizeof(uint16_t));
+  //---------MALLOC Y AND Z----------------
+  Y = malloc(N * sizeof(double));
   return_if_malloc_failed(Y);
-  for ( int i = 0; i < N; i++, vy++ ) { 
-    if ( vy == 65535 ) { vy = 0; }
-    Y[i] = vy;
-  }
-  //--------------------------------
-  vx = vy = 0;
-  Z = malloc(N * sizeof(uint32_t));
-  return_if_malloc_failed(Z);
-  status = concat_I1_I2_I4((uint8_t *)X, (uint16_t *)Y, N, (uint32_t *)Z); cBYE(status);
-  for ( int i = 0; i < N; i++, vx++, vy++ ) { 
-    if ( vx == 255 ) { vx = 0; }
-    if ( vy == 65535 ) { vy = 0; }
-    uint64_t vz = ( (uint64_t )vx << 16 ) | vy;
-    if ( vz != Z[i] ) { 
-      fprintf(stdout, "C: FAILURE\n");
-      go_BYE(-1);
-    }
-  }  
-  fprintf(stdout, "C: SUCCESS\n");
-  //--------------------------------
+  Z = malloc(N * sizeof(double));
+  return_if_malloc_failed(Y);
+  //-----------TESTING-------------
+  status = expF8(X, N, NULL, Y);
+  status = logF8(Y, N, NULL, Z);
+  double threshold = 0.01;
 
+  for ( int i = 0; i < N; i++ ) {
+    if ( fabs(X[i] - Z[i] ) > threshold ) {
+      printf("FAILURE\n");
+      return 1;
+    }
+  }
+  printf("EXP LOG SUCCESS\n");
+  int xidx = 0;
+  for ( double x = 0.01; xidx < 100; xidx++, x = x + 0.01 ) { 
+    X[xidx] = x;
+  }
+  status = logitF8(X, N, NULL, Y);
+  for ( xidx = 0; xidx < N; xidx++ ) { 
+    double temp = exp(X[xidx]) / (1 + exp(X[xidx]));
+    if ( fabs(temp - Y[xidx]) > threshold) {
+        printf("FAILURE\n");
+        return 1;
+    }
+  }
+  printf("LOGIT SUCCESS\n");
+  status = logit2F8(X, N, NULL, Y);
+  for ( xidx = 0; xidx < N; xidx++ ) { 
+    double temp = exp(X[xidx]) / ((1 + exp(X[xidx]))*(1 + exp(X[xidx])));
+    if ( fabs(temp - Y[xidx]) > threshold) {
+        printf("FAILURE\n");
+        return 1;
+    }
+  }
+  printf("LOGIT2 SUCCESS\n");
 BYE:
   free_if_non_null(X);
   free_if_non_null(Y);

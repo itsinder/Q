@@ -8,7 +8,7 @@ if [ $? != 0 ]; then
   cd -
 fi
 #---------------
-gcc -g ${INCS} ${QC_FLAGS} -Werror explog.c ../gen_src/libf1s1opf2.so
+gcc -g ${INCS} ${QC_FLAGS} -Werror explog.c ../gen_src/libf1s1opf2.so -lm
 valgrind ./a.out 2>_x
 set +e
 grep 'ERROR SUMMARY' _x | grep ' 0 errors' 1>/dev/null 2>&1
