@@ -7,7 +7,7 @@ return require 'Q/UTILS/lua/code_gen' {
 extern int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval,
+      ${fldtype} *ptr_sval,
       uint64_t nR,  
       uint64_t *restrict out 
       ) 
@@ -18,11 +18,12 @@ ${fn}(
 int
 ${fn}(  
       const ${fldtype} * restrict in,  
-      ${fldtype} sval,
+      ${fldtype} *ptr_sval,
       uint64_t nR,  
       uint64_t * restrict out 
       )
 { 
+  ${fldtype} sval = *ptr_sval;
 #define VECTOR_LENGTH 4096
   int status = 0;
   /* calculate number of VECTOR_LENGTH element sized chunks to process */

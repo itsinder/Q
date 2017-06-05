@@ -7,9 +7,10 @@ local function <<operator>>(x)
   return col
 end
 T.<<operator>> = <<operator>>
+require('Q/q_export').export('<<operator>>', <<operator>>)
     ]===]
 
-io.output("_f_to_s.lua")
+io.output("s_to_f.lua")
 io.write("local T = {} \n")
 local ops = assert(require 'operators')
 local T = {}
