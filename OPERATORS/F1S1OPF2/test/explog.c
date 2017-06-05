@@ -2,6 +2,7 @@
 #include "q_macros.h"
 #include "_expF8.h"
 #include "_logF8.h"
+#include "_logitF8.h"
 #include <math.h>
 int
 main(
@@ -36,7 +37,20 @@ main(
       return 1;
     }
   }
-  printf("SUCCESS\n");
+  printf("EXP LOG SUCCESS\n");
+  int xidx = 0;
+  for ( double x = 0.01; xidx < 100; xidx++, x = x + 0.01 ) { 
+    X[xidx] = x;
+  }
+  status = logitF8(X, N, Y);
+  for ( xidx = 0; xidx < N; xidx++ ) { 
+    double temp = exp(X[xidx]) / (1 + exp(X[xidx]));
+    if ( fabs(temp - Y[xidx]) > threshold) {
+        printf("FAILURE\n");
+        return 1;
+    }
+  }
+  printf("LOGIT SUCCESS\n");
 BYE:
   free_if_non_null(X);
   free_if_non_null(Y);

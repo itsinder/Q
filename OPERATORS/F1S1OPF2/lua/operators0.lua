@@ -3,4 +3,5 @@ return {
   "log", 
   "incr", 
   "decr", 
+  "logit", 
 }
