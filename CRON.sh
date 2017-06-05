@@ -4,16 +4,23 @@ export Q_SRC_ROOT="`pwd`"
 cd $Q_SRC_ROOT
 git pull
 
+export LUA_PATH="$Q_SRC_ROOT/../?.lua;;"
+
 cd $Q_SRC_ROOT/UTILS/build
-export LUA_INIT="@$Q_SRC_ROOT/init.lua"
-unset LD_LIBRARY_PATH
-`lua | tail -1`
+
+source $Q_SRC_ROOT/setup.sh -f
+
 var80="------------OUTPUT of build scripts--------------------------------------"
 var81=$(lua build.lua gen.lua 2>&1)
 var82="------------OUTPUT of library scripts----------------------------------------"
 var83=$(lua mk_so.lua /tmp/ 2>&1)
 var84="------------OUTPUT of test scripts------------------------------------"
 var85=$(lua build.lua tests.lua 2>&1)
+
+unset LUA_PATH
+
+cd $Q_SRC_ROOT
+sudo bash q_install.sh
 
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
 bash test_meta_data.sh
@@ -29,7 +36,6 @@ cd $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/
 bash test_mkcol.sh
 cd $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/
 bash test_vector.sh
-
 
 #check whether night build txt file for metadata is present in LOAD_CSV/test/testcases folder
 nightly_file=$Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/nightly_build_metadata.txt
@@ -159,4 +165,3 @@ fi
 # echo $varattach
 # echo "$var100"
 echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
-
