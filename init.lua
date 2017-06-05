@@ -10,5 +10,6 @@ require "Q/UTILS/lua/save"
 require "Q/OPERATORS/F1F2OPF3/lua/f1f2opf3"
 require "Q/OPERATORS/F1S1OPF2/lua/f1s1opf2"
 require "Q/OPERATORS/S_TO_F/lua/s_to_f"
+require "Q/OPERATORS/_FOT_S/lua/f_to_s"
 
 return require 'Q/q_export'
