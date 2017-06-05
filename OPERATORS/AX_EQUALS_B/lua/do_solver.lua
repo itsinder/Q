@@ -32,10 +32,8 @@ return function(func_name, A, b)
   assert(Q_core["full_positive_solver_check"](A_chunks, x_chunk, b_chunk, n, 0),
          "solution returned by solver "..func_name.." is invalid")
 
-  local x = {}
-  for i = 1, n do
-    x[i] = x_chunk[i-1]
-  end
-
-  return mk_col(x, "F8")
+  local x_col = Column({field_type = "F8", write_vector = true})
+  x_col:put_chunk(m, x_chunk)
+  x_col:eov()
+  return x_col
 end

@@ -13,9 +13,15 @@ local function inner_loop(X, y, beta)
       A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
     end
   end
-  b = Q.mk_col(b)
+  local b_col = Column({field_type = "F8", write_vector = true})
+  b_col:put_chunk(m, b)
+  b_col:eov()
+  b = b_col
   for i = 1, #A do
-    A[i] = Q.mk_col(A[i])
+    local Ai_col = Column({field_type = "F8", write_vector = true})
+    Ai_col:put_chunk(m, A[i])
+    Ai_col:eov()
+    A[i] = Ai_col
   end
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
@@ -23,8 +29,8 @@ local function inner_loop(X, y, beta)
 end
 
 local function do_regression(X, y, iters)
-  X[#X + 1] = Q.const_F8(1, y:length())
-  local beta = Q.const_F8(0, #X)
+  X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
+  local beta = Q.const({ val = 0, len = #X, qtype = 'F8' })
   for i = 1, iters do
     beta = inner_loop(X, y, beta)
   end
