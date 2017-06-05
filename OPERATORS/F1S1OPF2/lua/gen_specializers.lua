@@ -117,3 +117,8 @@ y = string.gsub(y, "<<c_code_for_operator>>", "c = a - 1;")
 y = string.gsub(y, "<<out_qtype>>", "in_qtype")
 plfile.write("decr_specialize.lua", y)
 --=======================
+y = string.gsub(x, "<<operator>>", "logit")
+y = string.gsub(y, "<<c_code_for_operator>>", "double temp = exp((double)a); c = temp/(1+temp);")
+y = string.gsub(y, "<<out_qtype>>", '"F8"')
+plfile.write("logit_specialize.lua", y)
+--=======================
