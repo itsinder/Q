@@ -10,7 +10,7 @@ assert(plpath.isfile(infile), "File not found: " .. infile)
 
 local log = require 'Q/UTILS/lua/log'
 
-local T = dofile("gen.lua")
+local T = dofile(arg[1])
 for i, v in ipairs(T) do 
   plpath.chdir(rootdir .. "/" .. v.dir)
   local cwd = assert(plpath.currentdir())
