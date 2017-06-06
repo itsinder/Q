@@ -36,7 +36,8 @@ txt_to_${out_type_displ}(
   errno = 0;
   ${big_out_type} out = 0;
   if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
-  if ( !is_valid_chars_for_num(X) ) { go_BYE(-1); }
+  if ( !is_valid_chars_for_num(X) ) { 
+  fprintf(stderr, "Invalid number [%s]\n", X); go_BYE(-1); }
   out = ${converter}(X, &endptr, base);
   if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { go_BYE(-1); }
   if ( ( out < ${min_val} ) || ( out > ${max_val} ) ) { go_BYE(-1); }

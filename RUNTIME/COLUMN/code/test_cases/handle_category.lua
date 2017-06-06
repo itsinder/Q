@@ -83,7 +83,7 @@ end
 
 -- category3 - error code testcases. in this call to vector constructor should return error codes
 fns.handle_category3 = function (index, value, status, vector, input_values, write_vector)
-  print(status, vector)
+  -- print(status, vector)
   if status then
     fns["increment_fail_testcases"](index, value, "incorrect status value in category 3")
     return false

@@ -2,14 +2,17 @@
 local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x)
-  local status, col = pcall(expander_s_to_f, <<operator>>, x)
-  assert(status, "Could not execute <<operator>>" .. col)
+  local expander = require 'Q/OPERATORS/S_TO_F/lua/expander_s_to_f'
+  local status, col = pcall(expander, "<<operator>>", x)
+  if ( not status ) then if ( col ) then print(col) end end
+  assert(status, "Could not execute <<operator>>")
   return col
 end
 T.<<operator>> = <<operator>>
+require('Q/q_export').export('<<operator>>', <<operator>>)
     ]===]
 
-io.output("_f_to_s.lua")
+io.output("_s_to_f.lua")
 io.write("local T = {} \n")
 local ops = assert(require 'operators')
 local T = {}

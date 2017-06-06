@@ -60,7 +60,7 @@ relational operators except for their lower precedence
     for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
       ${in1type} inv1 = in1[iidx]; 
       ${in2type} inv2 = in2[iidx]; 
-      int rslt = (inv1 ${comparison} inv2);
+      int rslt = (inv1 ${comparator} inv2);
       /* TODO: Avoid the if condition */
       if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
       bit_idx++;

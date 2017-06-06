@@ -1,27 +1,53 @@
 return function (
   ftype,
-  scalar_val,
-  scalar_type
+  scalar
   )
+  require "Q/UTILS/lua/globals"
+  local qc = require "Q/UTILS/lua/q_core"
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(ftype))
-  assert(is_base_qtype(scalar_type))
+  local scalar_val = nil
+  local scala_type = nil
+
+  if ( type(scalar) == "table" ) then 
+    scalar_val = scalar.value
+    if ( scalar.field_type ) then 
+      scalar_type = scalar.field_type
+    else
+      scalar_type = ftype
+    end
+  else
+    scalar_val = scalar
+    assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
+    scalar_type = ftype
+  end
   --===========================================
   local promote = require 'Q/UTILS/lua/promote'
-  local out_type = assert(promote(ftype, scalar_type))
-  assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
-  local conv_fn = "txt_to_" .. scalar_type
-  local c_mem = 0 -- TODO FIX 
-  --[[ TODO local status  = assert(ffi.C.conv_fn(scalar, ...),
-    "Unable to convert to scalar " .. scalar_val)
-  --]]
+  local out_qtype = assert(promote(ftype, scalar_type))
+  --=========================
+  local conv_fn = "txt_to_" .. out_qtype
+  local scalar_width = g_qtypes[out_qtype].width
+  local c_mem = assert(qc.malloc(scalar_width), "malloc failed")
+  qc.fill(c_mem, scalar_width, 0)
+  local conv_fn = qc["txt_to_" .. out_qtype]
+  local status = nil
+  if ( g_iorf[out_qtype] == "fixed" ) then 
+    status = conv_fn(tostring(scalar_val), 10, c_mem)
+  elseif ( g_iorf[out_qtype] == "floating_point" ) then 
+    status  = conv_fn(tostring(scalar_val), c_mem)
+  else
+    assert(nil, "Unknown type " .. out_qtype)
+  end
+  --=========================
+
   local tmpl = 'arith.tmpl'
   local subs = {}; 
   subs.fn = "<<operator>>" .. ftype .. "_" .. scalar_type
   subs.fldtype = g_qtypes[ftype].ctype
   subs.c_code_for_operator = "<<c_code>>;"
-  subs.c_scalar = c_mem
-  subs.out_ctype = g_qtypes[out_type].ctype
+  subs.c_mem = c_mem
+  subs.out_qtype = out_qtype
+  subs.out_ctype = g_qtypes[out_qtype].ctype
   subs.scalar_ctype = g_qtypes[scalar_type].ctype
   return subs, tmpl
 end

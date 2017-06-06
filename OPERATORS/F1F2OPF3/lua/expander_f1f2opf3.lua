@@ -1,7 +1,6 @@
 require 'Q/UTILS/lua/globals'
 q = require 'Q/UTILS/lua/q'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-
 -- TODO doc pending: specializer must return a function and an out_qtype
 local function expander_f1f2opf3(a, x , y, optargs )
     -- Get name of specializer function. By convention
@@ -39,7 +38,7 @@ local function expander_f1f2opf3(a, x , y, optargs )
                     assert(x_len > 0)
                     q[func_name](x_chunk, y_chunk, x_len, buff)
                     coroutine.yield(x_len, buff, nn_buff)
-                end
+                  end
             end
         end)
     return Column{gen=coro, nn=(nn_buf ~= nil), field_type=z_qtype}

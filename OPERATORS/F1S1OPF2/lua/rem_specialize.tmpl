@@ -7,6 +7,7 @@ return function (
     local subs = {}
     subs.fn = "vsrem_" .. fldtype 
     subs.fldtype = assert(g_qtypes[fldtype].ctype)
+    subs.out_qtype = "TODO"
     subs.c_code_for_operator = " c = a % b ;"
     return subs, tmpl
 end
