@@ -1,9 +1,12 @@
 local Q = require 'Q'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
+local T = {}
+
 local function inner_loop(X, y, beta)
   local Xbeta = Q.mvmul(X, beta)
-  local p, w = Q.logit(Xbeta)
+  local p = Q.logit(Xbeta)
+  local w = Q.logit2(Xbeta)
   local ysubp = Q.vvsub(y, p)
   local A = {}
   local b = {}
@@ -36,22 +39,6 @@ local function outer_loop(X, y, iters)
     beta = inner_loop(X, y, beta)
   end
   return beta
-end
-
-local function train_multinomial(X, y, classes, iters)
-  local out_betas = {}
-  for i = 1, #classes - 1 do
-    -- TODO: vvec should be replaced by Q.vseq when it is available
-    local vvec = Q.const({ val = classes[i], len = y:length(), qtype = 'F8' })
-    out_betas[i] = outer_loop(X, Q.vveq(y, vvec), iters)
-  end
-  return out_betas, package_betas(out_betas)
-end
-
-local function train_binary(X, y, iters)
-  out_betas, get_class, get_prob = train_multinomial(X, y, {0, 1}, iters)
-
-  return out_betas[1], get_class, function(x) return get_prob(x, 2) end
 end
 
 local function package_betas(betas)
@@ -102,3 +89,25 @@ local function package_betas(betas)
 
   return get_class, get_prob
 end
+
+local function train_multinomial(X, y, classes, iters)
+  local out_betas = {}
+  for i = 1, #classes - 1 do
+    -- TODO: vvec should be replaced by Q.vseq when it is available
+    local vvec = Q.const({ val = classes[i], len = y:length(), qtype = 'F8' })
+    out_betas[i] = outer_loop(X, Q.vveq(y, vvec), iters)
+  end
+  return out_betas, package_betas(out_betas)
+end
+T.train_multinomial = train_multinomial
+require('Q/q_export').export('train_multinomial_logistic_regression', train_multinomial)
+
+local function train_binary(X, y, iters)
+  out_betas, get_class, get_prob = train_multinomial(X, y, {0, 1}, iters)
+
+  return out_betas[1], get_class, function(x) return get_prob(x, 2) end
+end
+T.train_binary = train_binary
+require('Q/q_export').export('train_binary_logistic_regression', train_binary)
+
+return T
