@@ -1,5 +1,6 @@
 local Q_core = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 
 return function(func_name, A, b)
@@ -33,7 +34,7 @@ return function(func_name, A, b)
          "solution returned by solver "..func_name.." is invalid")
 
   local x_col = Column({field_type = "F8", write_vector = true})
-  x_col:put_chunk(m, x_chunk)
+  x_col:put_chunk(n, x_chunk)
   x_col:eov()
   return x_col
 end
