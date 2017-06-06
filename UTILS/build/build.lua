@@ -29,7 +29,5 @@ local function foo (T)
 end
 
 local log = require 'Q/UTILS/lua/log'
-local T, Tc = dofile("gen.lua")
-
-foo (Tc)
+local T = dofile(infile)
 foo (T)
