@@ -74,8 +74,9 @@ cleanup ../ #cleaning up all files
 
 #build files
 cd ../UTILS/build
-lua build.lua gen.lua
-lua mk_so.lua /tmp/
+bash build.sh
+#lua build.lua gen.lua
+#lua mk_so.lua /tmp/
 cd -
 PROG_START="
 q_core = require 'Q/UTILS/lua/q_core'
