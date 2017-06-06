@@ -3,23 +3,21 @@ BASE_PATH=$(abspath ../../ )
 
 libq.so: libq_core.so q.h
 
-q.h: q_core.h
-
-
 all: q_core
 	cd ${BASE_PATH}
 
 q_core: libq_core.so q_core.h
+	luajit mk_so.lua /tmp/
 	echo "all done for q_core"
 
 q: libq.so q.h
 	echo "all done for q"
 
 q_core.h: column utils load_csv
-
+	echo "all done for q_core.h"
 
 libq_core.so: column utils load_csv q_core.h
-	
+	luajit mk_core.lua /tmp/
 	# get files in q_core.h
 	# we need to first make everything needed for the file
 
@@ -57,9 +55,15 @@ print:
 		bash gen_files.sh;\
 		echo "print done"
 
+operators: f1f2opf3 f1s1opf2 sort idx_sort s_to_f ax_equals_b
+	echo "all done for operators"
+
+
 f1f2opf3: q_core
 		cd ${BASE_PATH};\
 		cd OPERATORS/F1F2OPF3/lua;\
 		make clean && make;\
 		luajit pkg_f1f2opf3.lua;\
-		echo "f1f2opf3 done"	
+		echo "f1f2opf3 done"
+
+
