@@ -1,5 +1,4 @@
 local Q = require 'Q'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
 local T = {}
 
@@ -17,12 +16,12 @@ local function inner_loop(X, y, beta)
       A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
     end
   end
-  local b_col = Column({field_type = "F8", write_vector = true})
+  local b_col = Q.Column({field_type = "F8", write_vector = true})
   b_col:put_chunk(#b, b)
   b_col:eov()
   b = b_col
   for i = 1, #A do
-    local Ai_col = Column({field_type = "F8", write_vector = true})
+    local Ai_col = Q.Column({field_type = "F8", write_vector = true})
     Ai_col:put_chunk(#A[i], A[i])
     Ai_col:eov()
     A[i] = Ai_col
