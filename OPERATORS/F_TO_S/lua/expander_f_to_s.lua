@@ -13,18 +13,21 @@ return function (a, x )
     assert(status, subs)
     local func_name = assert(subs.fn)
     local x_coro = assert(x:wrap(), "wrap failed for x")
-    local buff = q.malloc(1024) -- TODO P3 fix amount to be allocated
-    local is_first = true
-    local coro = coroutine.create(function()
-      local x_chunk, x_status
+    local red_str = string.format("REDUCE_%s_ARGS", func_name)
+    print("red", red_str, q.sizeof(red_str))
+    local buff = q.cast(red_str .. "*", q.malloc(q.sizeof(red_str))) -- TODO P3 fix amount to be allocated
+    return coroutine.create(function()
+      local x_chunk, x_status, nn_buf
+
       x_status = true
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(x_coro)
         if x_status then
           assert(x_len > 0)
-          q[func_name](x_chunk, x_len, buff, is_first);
-          is_first = false
-          coroutine.yield(x_len, buff, nn_buff)
+          print("XXXXXXXXXX")
+          print(func_name)
+          q[func_name](x_chunk, x_len, buff, 0);
+          coroutine.yield(buff)
         end
       end
     end)

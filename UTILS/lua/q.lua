@@ -5,6 +5,7 @@ local ffi = require "ffi"
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local q_root = os.getenv("Q_ROOT")
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 assert(plpath.isdir(q_root))
 
 local incfile = q_root .. "/include/q.h"
@@ -15,6 +16,7 @@ local sofile = q_root .. "/lib/libq.so"
 assert(plpath.isfile(sofile))
 local cee =  ffi.load(sofile)
 local q = {}
+q.Column = Column
 local function access(lib,symbol) return lib[symbol] end
 local q_mt = {
    __newindex = function(self, key, value)

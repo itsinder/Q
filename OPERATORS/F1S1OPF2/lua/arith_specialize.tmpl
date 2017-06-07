@@ -1,29 +1,29 @@
 return function (
-  ftype,
+  in_qtype,
   scalar
   )
   require "Q/UTILS/lua/globals"
   local qc = require "Q/UTILS/lua/q_core"
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
-  assert(is_base_qtype(ftype))
+  assert(is_base_qtype(in_qtype))
   local scalar_val = nil
-  local scala_type = nil
+  local scalar_type = nil
 
   if ( type(scalar) == "table" ) then 
     scalar_val = scalar.value
     if ( scalar.field_type ) then 
       scalar_type = scalar.field_type
     else
-      scalar_type = ftype
+      scalar_type = in_qtype
     end
   else
     scalar_val = scalar
     assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
-    scalar_type = ftype
+    scalar_type = in_qtype
   end
   --===========================================
   local promote = require 'Q/UTILS/lua/promote'
-  local out_qtype = assert(promote(ftype, scalar_type))
+  local out_qtype = assert(promote(in_qtype, scalar_type))
   --=========================
   local conv_fn = "txt_to_" .. out_qtype
   local scalar_width = g_qtypes[out_qtype].width
@@ -42,8 +42,8 @@ return function (
 
   local tmpl = 'arith.tmpl'
   local subs = {}; 
-  subs.fn = "<<operator>>" .. ftype .. "_" .. scalar_type
-  subs.fldtype = g_qtypes[ftype].ctype
+  subs.fn = "<<operator>>" .. in_qtype .. "_" .. scalar_type
+  subs.in_ctype = g_qtypes[in_qtype].ctype
   subs.c_code_for_operator = "<<c_code>>;"
   subs.c_mem = c_mem
   subs.out_qtype = out_qtype

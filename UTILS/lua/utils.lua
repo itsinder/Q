@@ -1,5 +1,13 @@
 local plpath = require 'pl.path'
+local timer = require 'posix.time'
 local fns = {}
+
+fns.timeit = function(f_name, ...)
+   local t1 = timer.clock_gettime(0)
+   f_name(...)
+   local t2 = timer.clock_gettime(0)
+   return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6
+end
 
 fns.load_file_as_string = function (fname)
   local f = assert(io.open(fname))
