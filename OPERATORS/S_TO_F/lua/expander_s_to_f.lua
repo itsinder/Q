@@ -18,13 +18,14 @@ return function (a, x )
   local buff =  assert(q.malloc(g_chunk_size*w))
   local num_blocks = math.ceil(subs.len / g_chunk_size)
   local coro = coroutine.create(function()
-    for i in 1, num_blocks do
+    local x_len
+    for i =1,num_blocks do
       if ( i == num_blocks ) then 
-        x_len = subs.len - (num_blocks-1)*g_chunk_size
+        x_len = subs.len % g_chunk_size
       else
         x_len = g_chunk_size
       end
-      q[func_name](x_chunk, x_len, subs.c_mem)
+      q[func_name](buff, x_len, subs.c_mem)
       coroutine.yield(x_len, buff, nil)
     end
   end)

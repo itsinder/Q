@@ -137,7 +137,10 @@ function Vector:memo(bool)
 end
 
 function Vector:ismemo()
-    return self.memoized
+    if self.memoized ~= nil then
+        return self.memoized
+    end
+    return true
 end
 
 function Vector:last_chunk()
@@ -182,7 +185,10 @@ local function flush_remap_file(self)
 end
 
 function Vector:materialized()
-    return self.is_materialized
+    if self.is_materialized ~= nil then
+        return self.is_materialized
+    end
+    return false
 end
 
 local function get_from_file(self, num)
