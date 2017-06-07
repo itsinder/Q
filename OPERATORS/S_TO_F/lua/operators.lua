@@ -2,5 +2,5 @@ return {
   "const",
 --  "sequence",
 --  "period",
---  "random",
+  "random"
 }
