@@ -14,8 +14,8 @@ local promote = require 'Q/UTILS/lua/promote'
     chunk = assert(q_core.new(g_qtypes[qtype].ctype .. "[?]", length), g_err.FFI_NEW_ERROR)
     convertor = operation .. "_" .. qtype_input1 .. "_" .. qtype_input2 .. "_" .. qtype
   else
-    length = math.floor(length/ 64)
-    if ((length * 64 ) ~= length) then length = length + 1 end
+    local input_length = math.floor(length/ 64)
+    if ((input_length * 64 ) ~= length) then length = input_length + 1 end
     --print("length = " ,length)
     chunk = assert(q_core.new("uint64_t[?]", length), g_err.FFI_NEW_ERROR)
     convertor = operation .. "_" .. qtype_input1 .. "_" .. qtype_input2
