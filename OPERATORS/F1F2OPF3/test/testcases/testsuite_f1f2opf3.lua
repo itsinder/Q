@@ -2,7 +2,10 @@
 local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
 -- data for each operator will be placed in test_<operator>.lua file
 -- e.g. data for add operation is placed in test_vvadd.lua
-local operators = { "vvadd", "vveq", "vvsub", "vvmul", "vvdiv", "vvgeq", "vvgt", "vvleq", "vvlt", "vvneq" } 
+local operators = { "vvadd", "vveq", "vvsub", "vvmul", "vvdiv", 
+                    "vvgeq", "vvgt", "vvleq", "vvlt", "vvneq",
+                    "vvrem"
+                  } 
 
 
 -- assert function, to compare the expected and actual output 
