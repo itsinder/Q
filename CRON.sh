@@ -4,11 +4,38 @@ export Q_SRC_ROOT="`pwd`"
 cd $Q_SRC_ROOT
 git pull
 
+pre_build_cleanup(){
+   rm -f /tmp/libq*
+   rm -f /tmp/q_core.h
+   rm -f /tmp/q.h
+   rm -rf /tmp/LUA*
+   rm -rf $Q_ROOT/include/*
+   rm -rf $Q_ROOT/lib/*
+}
+
+report_files_cleanup(){
+   rm -f $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.stats.txt
+   rm -f $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.report.txt
+   rm -f $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.stats.txt
+   rm -f $Q_SRC_ROOT/UTILS/test/dictionary.report.txt
+   rm -f $Q_SRC_ROOT/UTILS/test/dictionary.stats.txt
+}
+
+
 export LUA_PATH="$Q_SRC_ROOT/../?.lua;;"
 
 cd $Q_SRC_ROOT/UTILS/build
 
 source $Q_SRC_ROOT/setup.sh -f
+
+pre_build_cleanup
 
 var80="------------OUTPUT of build scripts--------------------------------------"
 var81=$(lua build.lua gen.lua 2>&1)
@@ -165,3 +192,7 @@ fi
 # echo $varattach
 # echo "$var100"
 echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
+
+sleep 2
+
+report_files_cleanup

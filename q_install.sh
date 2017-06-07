@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo rm -rf /usr/local/share/lua/5.1/Q
+sudo rm -rf /usr/lib/libq.so
 sudo mkdir /usr/local/share/lua/5.1/Q
 sudo cp -r ./OPERATORS /usr/local/share/lua/5.1/Q
 sudo cp -r ./UTILS /usr/local/share/lua/5.1/Q
