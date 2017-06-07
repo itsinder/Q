@@ -2,32 +2,14 @@ local ffi = require "ffi"
 local g_err = require 'Q/UTILS/lua/error_code'
 local q = require 'Q/UTILS/lua/q'
 local q_core = require 'Q/UTILS/lua/q_core'
-local promote = require 'Q/UTILS/lua/promote'
- 
--- get output qtype. in case of vvrem, logic is different from others
-local get_output_qtype = function(operation, qtype_input1, qtype_input2)  
-  local qtype
-  if operation == "vvrem" then
-    local sz1 = assert(g_qtypes[qtype_input1].width)
-    local sz2 = assert(g_qtypes[qtype_input2].width)
-    if ( sz1 < sz2 ) then 
-      qtype = qtype_input1  
-    else
-      qtype = qtype_input2
-    end
-  else
-    qtype = promote(qtype_input1, qtype_input2)
-  end
-  return qtype  
-end
- 
+
 -- allocate chunk and prepare convertor function for calling C apis 
- local get_chunk = function(qtype_input1, qtype_input2, operation, ctype, input1)
+ local get_chunk = function(qtype_input1, qtype_input2, operation, qtype_fn, input1)
   local chunk
   local convertor
   local length = #input1
-  if ctype == "auto" then
-    local qtype = get_output_qtype(operation, qtype_input1, qtype_input2)
+  if qtype_fn then
+    local qtype = qtype_fn(qtype_input1, qtype_input2)
     chunk = assert(q_core.new(g_qtypes[qtype].ctype .. "[?]", length), g_err.FFI_NEW_ERROR)
     convertor = operation .. "_" .. qtype_input1 .. "_" .. qtype_input2 .. "_" .. qtype
   else
@@ -52,12 +34,12 @@ end
 
 
 
-return function(operation, qtype_input1, qtype_input2, input1, input2, ctype)
+return function(operation, qtype_input1, qtype_input2, input1, input2, qtype_fn)
 
   local chunk1 = assert(q_core.new(g_qtypes[qtype_input1].ctype .. "[?]", #input1, input1), g_err.FFI_NEW_ERROR)
   local chunk2 = assert(q_core.new(g_qtypes[qtype_input2].ctype .. "[?]", #input2, input2), g_err.FFI_NEW_ERROR)
   
-  local chunk, length, convertor = get_chunk(qtype_input1, qtype_input2, operation, ctype, input1)
+  local chunk, length, convertor = get_chunk(qtype_input1, qtype_input2, operation, qtype_fn, input1)
   
   -- convertor will be of the format -- e.g. - vvadd_I1_I1_I1
   --print(convertor)

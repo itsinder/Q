@@ -1,10 +1,10 @@
--- data for sub operation
+-- data for div operation
 -- data field contains inputs in table 'a' and table 'b'
 -- and output in table 'z'
 local qtype = require 'Q/OPERATORS/F1F2OPF3/test/testcases/output_qtype'
 return { 
   data = {
-    { a = {20,40,30,100}, b = {10,20,10,10}, z = {10,20,20,90} }, -- simple values
+    { a = {1,52,37,92}, b = {1,5,3,10}, z = {4,2,1,2}, qtype = {"I1", "I2"} }, -- simple values
   },
-  output_qtype = qtype["promote"]
+  output_qtype = qtype["concat"]
 }

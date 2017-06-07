@@ -9,6 +9,5 @@ return {
     { a = {20,30,90,20}, b = {10,20,30,40}, z = {7} }, -- 4th not greater than
     { a = {50,60,10,80}, b = {10,20,30,40}, z = {11} }, -- 3rd not greater than
     { a = {100,8,110,90}, b = {10,20,30,40}, z = {13} }, -- 2nd not greater than
-  },
-  output_ctype = "uint64_t"
+  }
 }
