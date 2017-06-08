@@ -20,6 +20,7 @@ return function (
   ffi.fill(c_mem, width, 0)
   local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
   local status = nil
+
   status = conv_fn(tostring(val), c_mem)
   assert(status, "Unable to convert to scalar " .. args.val)
 

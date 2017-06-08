@@ -1,26 +1,11 @@
-return require 'Q/UTILS/lua/code_gen' {
-
-   declaration = [[
-
-#include <limits.h>
-#include <math.h>
-#include "q_macros.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
-extern int
-rand_${out_qtype}(
-  ${out_ctype} *X,
-  uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
-  bool is_first
-  );
-   ]],
-
-   definition = [[
-
-#include "_rand_${out_qtype}.h"
+#include <limits.h>
+#include <math.h>
+#include "q_macros.h"
+#include "tmpl_rand.h"
 
 static inline uint64_t RDTSC()
 {
@@ -29,12 +14,11 @@ static inline uint64_t RDTSC()
       return ((uint64_t)hi << 32) | lo;
 }
 
-//START_FUNC_DECL
 int
-random_${out_qtype}(
-  ${out_ctype} *X,
+random_F8(
+  double *X,
   uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
+  RANDOM_F8_REC_TYPE *ptr_in,
   bool is_first
   )
 //STOP_FUNC_DECL
@@ -42,18 +26,18 @@ random_${out_qtype}(
   int status = 0;
 
   uint64_t seed = ptr_in->seed;
-  ${out_ctype} lb = ptr_in->lb;
-  ${out_ctype} ub = ptr_in->ub;
+  double lb = ptr_in->lb;
+  double ub = ptr_in->ub;
   if ( is_first ) { //seed has not yet been set
     if ( seed == 0 ) {
      seed = RDTSC();
     }
     srand48(seed);
   }
-  ${out_ctype} range = ub - lb;
+  double range = ub - lb;
   for ( uint64_t i = 0; i < nX; i++ ) { 
-    ${gen_type} x = ${generator}();
-    X[i] = (${out_ctype}) (lb + (${scaling_code}) );
+    double x = drand48();
+    X[i] = (double) (lb + (range * x) );
 #ifdef DEBUG
     if ( ( X[i] < lb ) || ( X[i] > ub ) ) { 
       go_BYE(-1);
@@ -62,7 +46,4 @@ random_${out_qtype}(
   }
 BYE:
   return status;
-}
-
-   ]]
 }
