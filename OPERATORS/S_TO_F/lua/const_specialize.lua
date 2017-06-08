@@ -2,7 +2,7 @@ return function (
   args
   )
   local qc = require "Q/UTILS/lua/q_core"
-
+  local ffi = require 'Q/UTILS/lua/q_ffi'
   assert(type(args) == "table")
   local val   = assert(args.val)
   local qtype = assert(args.qtype)
@@ -14,8 +14,8 @@ return function (
   local conv_fn = "txt_to_" .. qtype
   local out_ctype = g_qtypes[qtype].ctype
   local width = g_qtypes[qtype].width
-  local c_mem = assert(qc.malloc(width), "malloc failed")
-  qc.fill(c_mem, width, 0)
+  local c_mem = assert(ffi.malloc(width), "malloc failed")
+  ffi.fill(c_mem, width, 0)
   local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
   local status = nil
   status = conv_fn(tostring(val), c_mem)

@@ -10,7 +10,8 @@ local plfile = require 'pl.file'
 --RS Also, you don;t need *_to_txt here. You need it in print. Delete
 --RS Don't have stuff you do not need. DO you need FILE> Do you need fopen?
 --RS and so on....
-local q_core = require 'Q/UTILS/lua/q_core'
+local qc = require 'Q/UTILS/lua/q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 
 local function mk_out_buf(
   in_buf, 
@@ -20,7 +21,7 @@ local function mk_out_buf(
   out_buf_len,
   err_loc
 )
-    local in_buf_len = assert( tonumber(q_core.strlen(in_buf)))
+    local in_buf_len = assert( tonumber(qc.strlen(in_buf)))
 
     if m.qtype == "SV" then 
       assert(in_buf_len <= m.max_width, err_loc .. g_err.STRING_TOO_LONG)
@@ -29,38 +30,38 @@ local function mk_out_buf(
         stridx = 0
       else 
         if ( m.add ) then
-          stridx = d:add(q_core.string(in_buf))
+          stridx = d:add(ffi.string(in_buf))
         else
-          stridx = d:get_index_by_string(q_core.string(in_buf))
+          stridx = d:get_index_by_string(ffi.string(in_buf))
         end
       end
       assert(stridx,
-      err_loc .. "dictionary does not have string " .. q_core.string(in_buf))
-      q_core.cast("int *", out_buf)[0] = stridx
+      err_loc .. "dictionary does not have string " .. ffi.string(in_buf))
+      ffi.cast("int *", out_buf)[0] = stridx
     end   
     --=======================================
     if m.qtype == "SC" then 
       assert(in_buf_len <= m.width, err_loc .. g_err.STRING_TOO_LONG)
-      q_core.copy(out_buf, in_buf, in_buf_len)
+      qc.copy(out_buf, in_buf, in_buf_len)
     end
     --=======================================
     local converter = assert(g_qtypes[m.qtype]["txt_to_ctype"])
     local ctype     = assert(g_qtypes[m.qtype]["ctype"])
     local status = 0
-    local casted = q_core.cast(ctype .. " *", out_buf)
+    local casted = ffi.cast(ctype .. " *", out_buf)
     --=====================================
-    if m.qtype == "I1" then status = q_core[converter](in_buf, 10, casted) end
-    if m.qtype == "I2" then status = q_core[converter](in_buf, 10, casted) end
-    if m.qtype == "I4" then status = q_core[converter](in_buf, 10, casted) end
-    if m.qtype == "I8" then status = q_core[converter](in_buf, 10, casted) end
-    if m.qtype == "F4" then status = q_core[converter](in_buf, casted) end
-    if m.qtype == "F8" then status = q_core[converter](in_buf, casted) end
+    if m.qtype == "I1" then status = qc[converter](in_buf, 10, casted) end
+    if m.qtype == "I2" then status = qc[converter](in_buf, 10, casted) end
+    if m.qtype == "I4" then status = qc[converter](in_buf, 10, casted) end
+    if m.qtype == "I8" then status = qc[converter](in_buf, 10, casted) end
+    if m.qtype == "F4" then status = qc[converter](in_buf, casted) end
+    if m.qtype == "F8" then status = qc[converter](in_buf, casted) end
     --=====================================
     if m.qtype == "B1" then  -- IMPROVE THIS CODE 
-      local casted = q_core.cast("uint8_t *", out_buf)
-      if ( q_core.string(in_buf) == "1" ) then 
+      local casted = ffi.cast("uint8_t *", out_buf)
+      if ( ffi.string(in_buf) == "1" ) then 
         casted[0] = 255 
-      else if ( q_core.string(in_buf) == "0" ) then 
+      else if ( ffi.string(in_buf) == "0" ) then 
         casted[0] = 0
       else 
         status = 1
@@ -127,18 +128,18 @@ load_csv = function (
       end
       assert(max_txt_width > 0)
       --===========================
-      local f_map = q_core.gc(q_core.f_mmap(infile, false), q_core.f_munmap)
+      local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
       assert(f_map.status == 0 , g_err.MMAP_FAILED)
-      local X = q_core.cast("char *", f_map.ptr_mmapped_file)
+      local X = ffi.cast("char *", f_map.ptr_mmapped_file)
       local nX = tonumber(f_map.file_size)
       assert(nX > 0, g_err.FILE_EMPTY)
 
       local x_idx = 0
       local out_buf_sz = 1024 -- TODO FIX 
       -- to do remove hardcoding of 1024
-      local in_buf  = q_core.malloc(max_txt_width)
-      local out_buf = q_core.malloc(out_buf_sz)
-      local is_nn   = q_core.malloc(1)
+      local in_buf  = ffi.malloc(max_txt_width)
+      local out_buf = ffi.malloc(out_buf_sz)
+      local is_nn   = ffi.malloc(1)
       local ncols = #M
       local row_idx = 1
       local col_idx = 1
@@ -150,18 +151,19 @@ load_csv = function (
         else
           is_last_col = false;
         end
-        q_core.memset(out_buf, 0, out_buf_sz) -- always init to 0
-        q_core.memset(in_buf, 0, max_txt_width) -- always init to 0
-        q_core.memset(is_nn, 0, 1) -- assume null
+        -- TODO ramesh should this be fill instead?
+        ffi.memset(out_buf, 0, out_buf_sz) -- always init to 0
+        ffi.memset(in_buf, 0, max_txt_width) -- always init to 0
+        ffi.memset(is_nn, 0, 1) -- assume null
         -- create an error message that might be needed
         local err_loc = "error in row " .. row_idx .. " column " .. col_idx
         --local err_loc = g_err.GET_CELL_ERROR(row_idx, col_idx)
         --local err_loc = g_err.INVALID_INDEX_ERROR
         x_idx = tonumber(
-        q_core.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
+        qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
         assert(x_idx > 0 , err_loc .. g_err.INVALID_INDEX_ERROR)
         if ( M[col_idx].is_load ) then 
-          local str = plstring.strip(q_core.string(in_buf))
+          local str = plstring.strip(ffi.string(in_buf))
           --local is_null = ( in_buf[0] == '\0' )
           local is_null = (str == "")
           --print("in buf = "..str)
@@ -171,7 +173,7 @@ load_csv = function (
             err_loc .. g_err.NULL_IN_NOT_NULL_FIELD) 
             M[col_idx].num_nulls = M[col_idx].num_nulls + 1
           else 
-            q_core.memset(is_nn, 1, 1) -- value IS Not Null 
+            qc.memset(is_nn, 1, 1) -- value IS Not Null 
             mk_out_buf(in_buf, M[col_idx], dicts[col_idx], out_buf, out_buf_sz, err_loc)
           end
           cols[col_idx]:put_chunk(1, out_buf, is_nn)

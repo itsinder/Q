@@ -1,6 +1,6 @@
 require 'Q/UTILS/lua/globals'
 local g_err = require 'Q/UTILS/lua/error_code'
-local q_core = require 'Q/UTILS/lua/q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local plstring = require 'pl.stringx'
 
 local function strip_trailing_LL(temp)
@@ -104,7 +104,7 @@ local print_csv = function (column_list, filter, opfile)
   local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
-  local buf = q_core.malloc(1024) 
+  local buf = ffi.malloc(1024) 
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
@@ -125,7 +125,7 @@ local print_csv = function (column_list, filter, opfile)
   -- recall that upper bounds are inclusive in Lua
   for rowidx = lb, ub do
     if ( ( where == nil ) or 
-         ( where:get_element(rowidx -1 ) ~= q_core.NULL ) ) then
+         ( where:get_element(rowidx -1 ) ~= ffi.NULL ) ) then
       for col_idx = 1, num_cols do
         
         local temp = nil
@@ -135,17 +135,17 @@ local print_csv = function (column_list, filter, opfile)
           temp = col 
         else
           local cbuf = col:get_element(rowidx-1)          
-          if cbuf == q_core.NULL then
+          if cbuf == ffi.NULL then
             temp = ""
           else
             local ctype =  assert(g_qtypes[col:fldtype()]["ctype"])
-            local str = q_core.cast(ctype.." *",cbuf)
+            local str = ffi.cast(ctype.." *",cbuf)
             temp = tostring(str[0])
             if is_I8[col_idx] then
               temp = strip_trailing_LL(temp)
             end
             if is_SC[col_idx] then
-              temp = q_core.string(str)
+              temp = ffi.string(str)
             end
             if is_SV[col_idx] then 
                temp = str[0]

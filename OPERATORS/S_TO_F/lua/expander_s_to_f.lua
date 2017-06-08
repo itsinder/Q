@@ -1,5 +1,6 @@
 require 'Q/UTILS/lua/globals'
-q = require 'Q/UTILS/lua/q'
+local qc = require 'Q/UTILS/lua/q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 -- local dbg = require 'debugger'
 
@@ -11,11 +12,11 @@ return function (a, x )
   assert(status, subs)
   local func_name = assert(subs.fn)
   local out_qtype = assert(x.qtype)
-  assert(q[func_name], "Function not found " .. func_name)
+  assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
   local w =  assert(g_qtypes[out_qtype].width)
 
-  local buff =  assert(q.malloc(g_chunk_size*w))
+  local buff =  assert(ffi.malloc(g_chunk_size*w))
   local num_blocks = math.ceil(subs.len / g_chunk_size)
   local coro = coroutine.create(function()
     local x_len
@@ -25,7 +26,7 @@ return function (a, x )
       else
         x_len = g_chunk_size
       end
-      q[func_name](buff, x_len, subs.c_mem)
+      qc[func_name](buff, x_len, subs.c_mem)
       coroutine.yield(x_len, buff, nil)
     end
   end)

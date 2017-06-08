@@ -1,5 +1,5 @@
 require 'Q/UTILS/lua/globals'
-local ffi = require "ffi"
+local ffi = require "Q/UTILS/lua/q_ffi"
 
 return function (col, rowidx)
   local temp=""

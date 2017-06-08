@@ -1,6 +1,6 @@
 require 'Q/UTILS/lua/globals'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-local q = require 'Q/UTILS/lua/q'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
@@ -14,8 +14,8 @@ return function (a, x )
     local func_name = assert(subs.fn)
     local x_coro = assert(x:wrap(), "wrap failed for x")
     local red_str = string.format("REDUCE_%s_ARGS", func_name)
-    print("red", red_str, q.sizeof(red_str))
-    local buff = q.cast(red_str .. "*", q.malloc(q.sizeof(red_str))) -- TODO P3 fix amount to be allocated
+    print("red", red_str, ffi.sizeof(red_str))
+    local buff = ffi.cast(red_str .. "*", ffi.malloc(ffi.sizeof(red_str))) -- TODO P3 fix amount to be allocated
     return coroutine.create(function()
       local x_chunk, x_status, nn_buf
 

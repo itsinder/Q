@@ -1,6 +1,5 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
-local ffi = require 'ffi'
-local q = require 'Q/UTILS/lua/q'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 require 'Q/UTILS/lua/globals'
 
@@ -24,12 +23,12 @@ local mvmul = function(X, Y)
   assert(k == Y:length(), "Y must have same length as num cols of X")
   assert(Y:fldtype() == "F8", "Currently we only support F8")
   -- STOP: verify inputs
-  local zptr = assert(q.malloc(g_qtypes["F8"].width * m), "malloc failed")
+  local zptr = assert(ffi.malloc(g_qtypes["F8"].width * m), "malloc failed")
   local y_len, yptr, nn_yptr = Y:chunk(-1)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
-  local Xptr = assert(q.malloc(ffi.sizeof("double *") * m), "malloc failed")
+  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
   Xptr = ffi.cast("double **", Xptr)
   for xidx = 1, #X do
     local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)

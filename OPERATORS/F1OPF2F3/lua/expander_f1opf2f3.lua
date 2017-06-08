@@ -1,6 +1,6 @@
 require 'Q/UTILS/lua/globals'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local function expander_f1opf2f3(a, x, optargs )
     -- Get name of specializer function. By convention
     local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"

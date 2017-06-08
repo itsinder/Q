@@ -1,5 +1,5 @@
   require 'Q/UTILS/lua/globals'
-  local q = require 'Q/UTILS/lua/q'
+  local ffi = require 'Q/UTILS/lua/q_ffi'
   local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
   local function expander_f1s1opf2(a, x, y, optargs )
@@ -19,8 +19,8 @@
     local f1_coro = assert(x:wrap(), "wrap failed for x")
     local f2_coro = coroutine.create(function()
       local x_chunk, x_status
-      local buff = q.malloc(x:chunk_size() * out_width)
-      -- TODO Not needed I think buff = q.cast(out_ctype .. " * ", buff)
+      local buff = ffi.malloc(x:chunk_size() * out_width)
+      -- TODO Not needed I think buff = ffi.cast(out_ctype .. " * ", buff)
       assert(x:has_nulls() == true, "Not set up for nulls as yet")
       x_status = true
       while (x_status) do

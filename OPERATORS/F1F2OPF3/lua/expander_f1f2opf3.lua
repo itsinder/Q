@@ -1,5 +1,5 @@
   require 'Q/UTILS/lua/globals'
-  q = require 'Q/UTILS/lua/q'
+  local ffi = require 'Q/UTILS/lua/q_ffi'
   local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
   -- TODO doc pending: specializer must return a function and an out_qtype
   local function expander_f1f2opf3(a, f1 , f2, optargs )
@@ -22,12 +22,12 @@
       local f1_chunk_size = f1:chunk_size()
       local f2_chunk_size = f2:chunk_size()
       assert(f1_chunk_size == f2_chunk_size)
-      local buff = q.malloc(f1_chunk_size * z_width)
+      local buff = ffi.malloc(f1_chunk_size * z_width)
       local nn_buff = nil -- Will be created if nulls in input
       if f1:has_nulls() or f2:has_nulls() then
         local width = g_qtypes["B1"].width
         local size = math.ceil(width/8) * 8
-        nn_buff = q.malloc(size)
+        nn_buff = ffi.malloc(size)
       end
       f1_status = true
       while (f1_status) do
