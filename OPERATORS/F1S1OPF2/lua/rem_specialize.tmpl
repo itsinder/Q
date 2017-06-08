@@ -1,8 +1,8 @@
 return function (
   in_qtype
   )
-  local is_int_type = require 'Q/UTILS/lua/is_int_type'
-  asssert(is_int_type(in_qtype), "in_qtype must be integer")
+  local qconsts  = require 'Q/UTILS/lua/q_consts'
+  asssert(qconsts.iorf[in_qtype] == "fixed", "in_qtype must be integer")
   local tmpl = 'arith.tmpl'
   local subs = {}
   subs.fn = "<<operator>>_" .. in_qtype 
