@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 terra_types = {} 
 terra_types['I1'] = int8
 terra_types['I2'] = int16
@@ -14,12 +15,11 @@ local ffi = require 'ffi'
   
 -- TODO belongs in utils
 function t_Array(qtype, N)
-    local r = ffi.C.malloc(g_qtypes[qtype].width * N)
+    local r = ffi.C.malloc(qconsts.qtypes[qtype].width * N)
     r = terralib.cast(&terra_types[qtype], r)
     ffi.gc(r, ffi.C.free)
     return r
 end
 
 -- TODO added temporarily for use with Terra due to Vector code; discard later
-g_chunk_size = nil
-g_valid_meta = nil
+qconsts.chunk_size = nil

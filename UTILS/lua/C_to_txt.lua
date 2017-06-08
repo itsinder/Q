@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 require 'Q/UTILS/lua/globals'
 local ffi = require "Q/UTILS/lua/q_ffi"
+=======
+local qconsts = require 'Q/UTILS/lua/q_const'
+local ffi     = require "Q/UTILS/lua/q_ffi"
+>>>>>>> 2c2ab21ae174c5bd88c575d491415619b499f319
 
 return function (col, rowidx)
   local temp=""
@@ -15,7 +20,7 @@ return function (col, rowidx)
     local is_SV = col:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
     local is_I8 = col:fldtype() == "I8" 
     
-    local ctype =  g_qtypes[col:fldtype()]["ctype"]
+    local ctype =  qconsts.qtypes[col:fldtype()]["ctype"]
     local str = ffi.cast(ctype.." *",cbuf)
     temp = tostring(str[0])
             

@@ -1,8 +1,10 @@
 return function (
   args
   )
-  local qc = require "Q/UTILS/lua/q_core"
-  local ffi = require 'Q/UTILS/lua/q_ffi'
+  local qc      = require "Q/UTILS/lua/q_core"
+  local ffi     = require 'Q/UTILS/lua/q_ffi'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+
   assert(type(args) == "table")
   local val   = assert(args.val)
   local qtype = assert(args.qtype)
@@ -12,8 +14,8 @@ return function (
   assert(len > 0, "vector length must be positive")
   assert((type(val) == "number") or ( type(val) == "string"))
   local conv_fn = "txt_to_" .. qtype
-  local out_ctype = g_qtypes[qtype].ctype
-  local width = g_qtypes[qtype].width
+  local out_ctype = qconsts.qtypes[qtype].ctype
+  local width = qconsts.qtypes[qtype].width
   local c_mem = assert(ffi.malloc(width), "malloc failed")
   ffi.fill(c_mem, width, 0)
   local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
