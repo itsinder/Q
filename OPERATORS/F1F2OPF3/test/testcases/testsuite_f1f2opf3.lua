@@ -6,16 +6,20 @@ local operators = { "vvadd", "vveq", "vvsub", "vvmul", "vvdiv", "vvgeq", "vvgt",
 
 
 -- assert function, to compare the expected and actual output 
-local assert_valid = function(expected)
+local assert_valid = function(expected, precision)
   return function (ret)
     for k,v in ipairs(ret) do
-      --print ( ret[k], expected[k])
-      if ret[k] ~= expected[k] then return false end
+      -- print ( ret[k], expected[k])
+      local final_result = tonumber(ret[k])
+      local mult = 10^(precision or 0)
+      local value = math.floor( final_result * mult + 0.5 ) / mult
+      -- print ( ret[k], value, expected[k], precision)
+      if value ~= expected[k] then return false end
     end
     return true
   end
 end
-                   
+              
 local create_tests = function() 
   local tests = {}  
   for i in pairs(operators) do -- traverse every operation
@@ -31,7 +35,7 @@ local create_tests = function()
           local expectedOut = n.z
           table.insert(tests, {
             input = {operators[i], input_type1, input_type2, n.a, n.b, M.output_ctype},
-            check = assert_valid(expectedOut),
+            check = assert_valid(expectedOut, n.precision),
             --fail = fail_str,
             name = test_name
           })                      
