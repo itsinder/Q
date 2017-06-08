@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-require 'Q/UTILS/lua/globals'
-local ffi = require "Q/UTILS/lua/q_ffi"
-=======
 local qconsts = require 'Q/UTILS/lua/q_const'
 local ffi     = require "Q/UTILS/lua/q_ffi"
->>>>>>> 2c2ab21ae174c5bd88c575d491415619b499f319
 
 return function (col, rowidx)
   local temp=""
