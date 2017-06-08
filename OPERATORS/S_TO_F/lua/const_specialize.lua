@@ -16,17 +16,11 @@ return function (
   local width = g_qtypes[qtype].width
   local c_mem = assert(qc.malloc(width), "malloc failed")
   qc.fill(c_mem, width, 0)
-  local conv_fn = qc["txt_to_" .. qtype]
+  local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
   local status = nil
-  if ( g_iorf[qtype] == "fixed" ) then 
-    status = conv_fn(tostring(val), 10, c_mem)
-  elseif ( g_iorf[qtype] == "floating_point" ) then 
-    status  = conv_fn(tostring(val), c_mem)
-  else
-    assert(nil, "Unknown type " .. qtype)
-  end
-  -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
+  status = conv_fn(tostring(val), c_mem)
   assert(status, "Unable to convert to scalar " .. args.val)
+
   local tmpl = 'const.tmpl'
   local subs = {};
   subs.fn = "const_" .. qtype

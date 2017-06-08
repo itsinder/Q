@@ -1,13 +1,14 @@
 return function (
   in_qtype
   )
-  assert((in_qtype == "I1" ) or (in_qtype == "I2" ) or (in_qtype == "I4" ) or 
-         (in_qtype == "I8" ), "in_qtype must be I1/I2/I4/I8")
-    local tmpl = 'arith.tmpl'
-    local subs = {}
-    subs.fn = "<<operator>>_" .. in_qtype 
-    subs.in_ctype = assert(g_qtypes[in_qtype].ctype)
-    subs.out_qtype = subs.in_ctype
-    subs.c_code_for_operator = " c = a % b ;"
-    return subs, tmpl
+  local is_int_type = require 'Q/UTILS/lua/is_int_type'
+  asssert(is_int_type(in_qtype), "in_qtype must be integer")
+  local tmpl = 'arith.tmpl'
+  local subs = {}
+  subs.fn = "<<operator>>_" .. in_qtype 
+  subs.in_ctype = assert(g_qtypes[in_qtype].ctype)
+  subs.out_qtype = subs.in_ctype
+  subs.out_ctype = assert(g_qtypes[out_qtype].ctype)
+  subs.c_code_for_operator = " <<c_code>> "
+  return subs, tmpl
 end
