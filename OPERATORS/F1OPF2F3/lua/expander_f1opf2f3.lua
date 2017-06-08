@@ -1,4 +1,4 @@
-require 'Q/UTILS/lua/globals'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local function expander_f1opf2f3(a, x, optargs )

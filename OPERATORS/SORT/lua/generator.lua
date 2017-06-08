@@ -1,6 +1,4 @@
 #!/usr/bin/env lua
-
-require 'Q/UTILS/lua/globals'
 incdir = "../gen_inc/"
 srcdir = "../gen_src/"
 local gen_code = require 'Q/UTILS/lua/gen_code'

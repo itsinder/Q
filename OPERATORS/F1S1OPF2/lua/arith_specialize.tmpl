@@ -2,7 +2,7 @@ return function (
   in_qtype,
   scalar
   )
-  require "Q/UTILS/lua/globals"
+  local qconsts = require "Q/UTILS/lua/q_consts"
   local qc = require "Q/UTILS/lua/q_core"
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(in_qtype))
@@ -27,8 +27,8 @@ return function (
   --=========================
   local conv_fn = "txt_to_" .. out_qtype
   local scalar_width = g_qtypes[out_qtype].width
-  local c_mem = assert(qc.malloc(scalar_width), "malloc failed")
-  qc.fill(c_mem, scalar_width, 0)
+  local c_mem = assert(ffi.malloc(scalar_width), "malloc failed")
+  ffi.fill(c_mem, scalar_width, 0)
   local conv_fn = assert(qc["txt_to_" .. out_qtype], "No converter function")
   local status 
   status = conv_fn(tostring(scalar_val), c_mem)

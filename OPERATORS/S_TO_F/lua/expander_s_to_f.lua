@@ -1,4 +1,3 @@
-require 'Q/UTILS/lua/globals'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
