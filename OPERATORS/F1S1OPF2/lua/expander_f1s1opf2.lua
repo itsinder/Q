@@ -1,6 +1,6 @@
-  require 'Q/UTILS/lua/globals'
-  local ffi = require 'Q/UTILS/lua/q_ffi'
-  local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+  local ffi     = require 'Q/UTILS/lua/q_ffi'
+  local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
   local function expander_f1s1opf2(a, x, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
