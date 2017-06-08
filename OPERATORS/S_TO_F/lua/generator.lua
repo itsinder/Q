@@ -14,21 +14,28 @@ local operators = dofile(operator_file)
 -- local args = {}
 qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
--- local const_specialize = require 'const_specialize'
--- args.val = 123 -- just to test const_specialize
--- args.len = 100 -- just to test const_specialize
-
 local num_produced = 0
+local args = {}
+args.len = 100
 for i, operator in ipairs(operators) do
   local sp_fn = assert(require(operator .. "_specialize"))
   for i, qtype in ipairs(qtypes) do 
     -- args.qtype = qtype
-    status, subs, tmpl = pcall(sp_fn, qtype)
+    args.qtype = qtype
+    if ( operator == "const" ) then 
+      args.val = 1
+    elseif ( operator == "rand" ) then 
+      args.lb = 10
+      args.ub = 20
+      args.seed = 30
+    else
+      assert(nil, "Control should not come here")
+    end
+    status, subs, tmpl = pcall(sp_fn, args)
     assert(status, subs)
     gen_code.doth(subs, tmpl, incdir)
     gen_code.dotc(subs, tmpl, srcdir)
     print("produced ", subs.fn)
   end
 end
-
-assert(num_produced > 0)
+--assert(num_produced >= 0)
