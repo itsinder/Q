@@ -6,8 +6,8 @@ return require 'Q/UTILS/lua/code_gen' {
 #include "q_macros.h"
 extern int
 ${fn}(  
-      const ${fldtype} * restrict in,  
-      ${fldtype} *ptr_sval,
+      const ${in_ctype} * restrict in,  
+      ${in_ctype} *ptr_sval,
       uint64_t nR,  
       uint64_t *restrict out 
       ) 
@@ -17,13 +17,13 @@ ${fn}(
 #include "_${fn}.h"
 int
 ${fn}(  
-      const ${fldtype} * restrict in,  
-      ${fldtype} *ptr_sval,
+      const ${in_ctype} * restrict in,  
+      ${in_ctype} *ptr_sval,
       uint64_t nR,  
       uint64_t * restrict out 
       )
 { 
-  ${fldtype} sval = *ptr_sval;
+  ${in_ctype} sval = *ptr_sval;
 #define VECTOR_LENGTH 4096
   int status = 0;
   /* calculate number of VECTOR_LENGTH element sized chunks to process */
@@ -42,7 +42,7 @@ ${fn}(
     uint64_t out_idx = lb / 64;
     uint64_t oval = 0;
     for ( uint64_t iidx = lb; iidx < ub; iidx++ ) {
-      ${fldtype} inval = in[iidx]; 
+      ${in_ctype} inval = in[iidx]; 
       int rslt = (inval ${comparison} sval);
       /* TODO: Avoid the if condition */
       if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }

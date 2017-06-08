@@ -1,7 +1,7 @@
 local q_root = os.getenv("Q_ROOT")
 assert(q_root, "Do export Q_ROOT=/home/subramon/Q/ or some such")
-final_h  = q_root .. "/include/"
-final_so = q_root .. "/lib/"
+local final_h  = q_root .. "/include/"
+local final_so = q_root .. "/lib/"
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")

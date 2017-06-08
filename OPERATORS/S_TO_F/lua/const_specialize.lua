@@ -1,7 +1,9 @@
 return function (
   args
   )
-  local qc = require "Q/UTILS/lua/q_core"
+  local qc      = require "Q/UTILS/lua/q_core"
+  local ffi     = require 'Q/UTILS/lua/q_ffi'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
 
   assert(type(args) == "table")
   local val   = assert(args.val)
@@ -12,21 +14,16 @@ return function (
   assert(len > 0, "vector length must be positive")
   assert((type(val) == "number") or ( type(val) == "string"))
   local conv_fn = "txt_to_" .. qtype
-  local out_ctype = g_qtypes[qtype].ctype
-  local width = g_qtypes[qtype].width
-  local c_mem = assert(qc.malloc(width), "malloc failed")
-  qc.fill(c_mem, width, 0)
-  local conv_fn = qc["txt_to_" .. qtype]
+  local out_ctype = qconsts.qtypes[qtype].ctype
+  local width = qconsts.qtypes[qtype].width
+  local c_mem = assert(ffi.malloc(width), "malloc failed")
+  ffi.fill(c_mem, width, 0)
+  local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
   local status = nil
-  if ( g_iorf[qtype] == "fixed" ) then 
-    status = conv_fn(tostring(val), c_mem)
-  elseif ( g_iorf[qtype] == "floating_point" ) then 
-    status  = conv_fn(tostring(val), c_mem)
-  else
-    assert(nil, "Unknown type " .. qtype)
-  end
-  -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
-  assert(status == 0, "Unable to convert to scalar " .. args.val)
+
+  status = conv_fn(tostring(val), c_mem)
+  assert(status, "Unable to convert to scalar " .. args.val)
+
   local tmpl = 'const.tmpl'
   local subs = {};
   subs.fn = "const_" .. qtype

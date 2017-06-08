@@ -1,4 +1,4 @@
-local q_core = require 'q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 
 return function(X, Y)
   assert(type(X) == "table", "X should be a table of columns")
@@ -14,8 +14,8 @@ return function(X, Y)
     assert(v:fldtype() == "F8", "Y["..i.."] should be a column of doubles")
   end
 
-  local X_chunks = q_core.cast('double**', q_core.mallloc(#X * q_core.sizeof('double*')))
-  local Y_chunks = q_core.cast('double**', q_core.mallloc(#Y * q_core.sizeof('double*')))
+  local X_chunks = ffi.cast('double**', ffi.mallloc(#X * ffi.sizeof('double*')))
+  local Y_chunks = ffi.cast('double**', ffi.mallloc(#Y * ffi.sizeof('double*')))
   
   return X_chunks, Y_chunks
 end

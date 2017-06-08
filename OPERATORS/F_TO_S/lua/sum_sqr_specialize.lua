@@ -12,7 +12,7 @@ return function (
       subs.fn = subs.op .. "_" .. qtype 
       subs.ctype = g_qtypes[qtype].ctype
       subs.qtype = qtype
-      subs.init_val = 0
+      subs.initial_val = 0
       if ( ( qtype == "I1" ) or ( qtype == "I2" ) or 
            ( qtype == "I4" ) or ( qtype == "I8" ) ) then
         subs.reduce_ctype = "uint64_t" 

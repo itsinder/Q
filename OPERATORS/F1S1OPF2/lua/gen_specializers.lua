@@ -25,15 +25,15 @@ assert(plpath.isfile("rem_specialize.tmpl"), "File not found")
 local x = plfile.read("rem_specialize.tmpl")
 
 y = string.gsub(x, "<<operator>>", "vsrem")
-y = string.gsub(y, "<<c_code>>", "c = a % b")
+y = string.gsub(y, "<<c_code>>", 'c = a %% b;')
 plfile.write("vsrem_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsand")
-y = string.gsub(y, "<<c_code>>", "c = a & b")
+y = string.gsub(y, "<<c_code>>", "c = a & b;")
 plfile.write("vsand_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsor")
-y = string.gsub(y, "<<c_code>>", "c = a | b")
+y = string.gsub(y, "<<c_code>>", "c = a | b;")
 plfile.write("vsor_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsxor")

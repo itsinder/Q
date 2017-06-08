@@ -2,9 +2,8 @@ local dbg = require "debugger"
 local ffi = require "ffi"
 local mk_col = require 'mk_col'
 local print_csv = require 'print_csv'
-local q_core = require 'q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local Column = require "Column"
-local q = require "q"
 require 'globals'
 
 f1f2opf3 = {}
@@ -28,7 +27,7 @@ function eval(col)
         if size > 0  then 
             chunk_num = chunk_num + 1
             print(size, chunk, nn_chunk)
-            local iter = q_core.cast("int*", chunk) -- TODO make general
+            local iter = ffi.cast("int*", chunk) -- TODO make general
             for i=1,size do 
                 print(tonumber(iter[i-1]))
             end
