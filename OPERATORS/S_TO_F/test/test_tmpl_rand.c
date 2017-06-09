@@ -14,7 +14,7 @@ main()
   double lb = 1.3;
   double ub = 4.5;
 
-  RAND_F8_REC_TYPE args;
+  RANDOM_F8_REC_TYPE args;
   args.seed = 0;
   args.lb = lb;
   args.ub = ub;
@@ -26,7 +26,33 @@ main()
     }
   }
   printf("SUCCESS\n");
+  free(vec);
   //---------------------------------
+#ifdef LATER
+  n = 1024;
+  int len = 1024000;
+  int32_t *y = (int32_t*) malloc(len * sizeof(int32_t));
+  RAND_I4_REC_TYPE argsy;
+  argsy.seed = 0;
+  argsy.lb = 0;
+  argsy.ub = n - 1;
+  status = rand_I4(y, len, &argsy, true);
+  int ctr[n] = { 0 };
+  for ( uint64_t i = 0; i < n; i++ ) {
+    if ( y[i] < lb || y[i] > ub ) {
+      printf("FAILURE\n");
+      return status;
+    }
+    ctr[y[i]] += 1;
+  }
+
+  for ( uint64_t i = 0; i < n; i++ ) {
+    if ( ctr[i] < 900 || ctr[i] > 1100 ) {
+      printf("WARNING: uniformity is a bit off\n");
+    }
+  }
+#endif
+
   //---------------------------------
   return status;
 }
