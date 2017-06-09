@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../src/tmpl_rand.h"
+#include "_rand_I8.h"
 //#include <stdbool.h>
 //#include <stdint.h>
 
@@ -25,6 +26,8 @@ main()
     }
   }
   printf("SUCCESS\n");
+  //---------------------------------
+  //---------------------------------
   return status;
 }
 

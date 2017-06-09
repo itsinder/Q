@@ -34,6 +34,8 @@ return function (
   assert(type(lb) == "number")
   assert(type(ub) == "number")
   assert(ub > lb, "upper bound should be strictly greater than lower bound")
+
+  local subs = {};
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
@@ -44,25 +46,23 @@ return function (
   c_mem.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 
-    generator = "mrand48"
+    generator = "lrand48"
     subs.gen_type = "uint64_t"
-    scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
+    subs.scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
   elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
     generator = "drand48"
-    scaling_code = "range * x"
+    subs.scaling_code = "range * x"
     subs.gen_type = "double"
   else
     assert(nil, "Unknown type " .. qtype)
   end
   --=========================
   local tmpl = 'rand.tmpl'
-  local subs = {};
   subs.fn = "rand_" .. qtype
   subs.c_mem = c_mem
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
   subs.out_qtype = qtype
   subs.generator = generator
-  subs.scaling_code = scale_code
   return subs, tmpl
 end
