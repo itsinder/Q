@@ -1,6 +1,7 @@
-require 'Q/UTILS/lua/globals'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local function expander_f1opf2f3(a, x, optargs )
     -- Get name of specializer function. By convention
     local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
@@ -9,9 +10,9 @@ local function expander_f1opf2f3(a, x, optargs )
     assert(status, subs)
     local func_name = assert(subs.fn)
     local out1_qtype = assert(subs.out1_qtype)
-    local out1_width = g_qtypes[out1_qtype].width
+    local out1_width = qconsts.qtypes[out1_qtype].width
     local out2_qtype = assert(subs.out2_qtype)
-    local out2_width = g_qtypes[out2_qtype].width
+    local out2_width = qconsts.qtypes[out2_qtype].width
 
     local x_coro = assert(x:wrap(), "wrap failed for x")
     local coro = coroutine.create(function()

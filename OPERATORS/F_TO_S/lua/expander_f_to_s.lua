@@ -1,6 +1,7 @@
-require 'Q/UTILS/lua/globals'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-local ffi = require 'Q/UTILS/lua/q_ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local ffi    = require 'Q/UTILS/lua/q_ffi'
+local q_core = require 'Q/UTILS/lua/q_core'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
@@ -26,7 +27,7 @@ return function (a, x )
           assert(x_len > 0)
           print("XXXXXXXXXX")
           print(func_name)
-          q[func_name](x_chunk, x_len, buff, 0);
+          qc[func_name](x_chunk, x_len, buff, 0);
           coroutine.yield(buff)
         end
       end

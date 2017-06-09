@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   args
   )
@@ -17,17 +18,17 @@ return function (
   assert(type(ub) == "number")
   assert(ub > lb, "upper bound should be strictly greater than lower bound")
   local conv_fn = "txt_to_" .. qtype
-  local out_ctype = g_qtypes[qtype].ctype
-  local width = g_qtypes[qtype].width
+  local out_ctype = qconsts.qtypes[qtype].ctype
+  local width = qconsts.qtypes[qtype].width
   local c_mem = assert(qc.malloc(width), "malloc failed")
   qc.fill(c_mem, width, 0)
   local conv_fn = qc["txt_to_" .. qtype]
   local status 
-  if ( g_iorf[qtype] == "fixed" ) then 
+  if ( qconsts.iorf[qtype] == "fixed" ) then 
     status = conv_fn(tostring(val), 10, c_mem)
     generator = "mrand48"
     scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
-  elseif ( g_iorf[qtype] == "floating_point" ) then 
+  elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
     status  = conv_fn(tostring(val), c_mem)
     generator = "drand48"
     scaling_code = "range * x"

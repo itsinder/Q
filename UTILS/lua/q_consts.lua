@@ -1,9 +1,13 @@
-  --===========================
+local qconsts = {}
+--===========================
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
-    --===========================
+
+    qconsts.max_width = max_width
+   --===========================
     local chunk_size = 64
+    qconsts.chunk_size = chunk_size
     --===========================
     local width = {}
     width["I1"]  = 8;
@@ -12,6 +16,7 @@
     width["I8"] = 64;
     width["F4"]   = 32;
     width["F8"]  = 64;
+    qconsts.width = width
     --===========================
     local iwidth_to_fld = {}
     iwidth_to_fld[1] = "I1"
@@ -21,6 +26,7 @@
     local fwidth_to_fld = {}
     fwidth_to_fld[4] = "F4"
     fwidth_to_fld[8] = "F8"
+    qconsts.fwidth_to_fld = fwidth_to_fld
     --===========================
     local iorf = {}
     iorf["I1"]  = "fixed";
@@ -29,6 +35,7 @@
     iorf["I8"] = "fixed";
     iorf["F4"]   = "floatinpoint";
     iorf["F8"]  = "floatinpoint";
+    qconsts.iorf = iorf
     --===========================
 
     local qtypes = {}
@@ -129,12 +136,5 @@
       ctype_to_txt = "TBD" 
     }
 
-return { 
-max_width,
-chunk_size, 
-width,
-iwidth_to_fld,
-fwidth_to_fld,
-iorf,
-qtypes
-}
+   qconsts.qtypes = qtypes
+return qconsts 

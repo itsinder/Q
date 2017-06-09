@@ -2,6 +2,7 @@ return function (
   ftype,
   scalars
   )
+    local qconsts = require 'Q/UTILS/lua/q_consts'
     assert(( ftype == "I1" ) or ( ftype == "I2") or ( ftype == "I4" ) or 
        ( ftype == "I8" ) or ( ftype == "F4") or ( ftype == "F8" ),
        "type must be I1/I2/I4/I8/F4/F8")
@@ -16,7 +17,7 @@ return function (
     "lb not specified")
     -- TODO  convert lb/ub to appropriate ctypes
     subs.fn = "<<operator>>" .. ftype 
-    subs.fldtype = g_qtypes[ftype].ctype
+    subs.fldtype = qconsts.qtypes[ftype].ctype
     subs.out_qtype = "B1"
     subs.comp1 = ' <<comparator1>>  '
     subs.comp2 = ' <<comparator2>>  '

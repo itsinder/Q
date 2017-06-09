@@ -3,27 +3,27 @@ Vector Semantics
     1. Pull Semantics
         1.1 Read file
             Params
-                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
-                field_type - The field type used, which must be present in g_valid_types
-                field_size (optional) - The size of each element, defaults to getting it from g_valid_types
+                chunk_size (optional) - The number of fields in each chunk, defaults to qconsts.chunk_size
+                field_type - The field type used, which must be present in qconsts.qtypes
+                field_size - If specified for any other option then errors out
                 filename - The file to be read from
     2. Push Semantics
         2.1 Write file
             Params
-                chunk_size (optional) - The number of fields in each chunk, defaults to g_chunk_size
-                field_type - The field type used, which must be present in g_valid_types
-                field_size (optional) - The size of each element, defaults to getting it from g_valid_types
+                chunk_size (optional) - The number of fields in each chunk, defaults to qconsts.chunk_size
+                field_type - The field type used, which must be present in qconsts.qtypes
+                field_size (optional) - The size of each element, defaults to getting it from qconsts.qtypes
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
-require 'Q/UTILS/lua/globals'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local plpath = require("pl.path")
 local get_new_filename = require "Q/UTILS/lua/random_data_file"
+local ffi = require 'Q/UTILS/lua/q_ffi'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local Vector = {}
 Vector.__index = Vector
 
-local ffi = require 'Q/UTILS/lua/q_ffi'
-local qc = require 'Q/UTILS/lua/q_core'
 
 local DestructorLookup = {}
 setmetatable(Vector, {
@@ -92,12 +92,12 @@ function Vector.new(arg)
     vec.destructor_ptr= ffi.malloc(1, Vector.destructor) -- Destructor hack for luajit
     DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
-    vec.chunk_size = arg.chunk_size or g_chunk_size
-    assert(arg.field_type ~= nil and g_valid_types[arg.field_type] ~= nil, "Valid type not given")
+    vec.chunk_size = arg.chunk_size or qconsts.chunk_size
+    assert(arg.field_type ~= nil and qconsts.qtypes[arg.field_type] ~= nil, "Valid type not given")
     vec.field_type = arg.field_type
     if arg.field_size == nil then -- for constant length string this cannot be nil
-        local type_val =  assert(g_valid_types[vec.field_type], "Invalid type")
-        vec.field_size = g_qtypes[vec.field_type].width
+        local type_val =  assert(qconsts.qtypes[vec.field_type], "Invalid type")
+        vec.field_size = qconsts.qtypes[vec.field_type].width
     else
         assert(vec.field_type == "SC", "A variable field size can only be specified for SC")
         vec.field_size = arg.field_size

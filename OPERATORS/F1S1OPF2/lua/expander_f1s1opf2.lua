@@ -12,8 +12,8 @@
     assert(status, subs)
     local func_name = assert(subs.fn)
     local out_qtype = assert(subs.out_qtype)
-    local out_width = g_qtypes[out_qtype].width
-    local out_ctype = g_qtypes[out_qtype].ctype
+    local out_width = qconsts.qtypes[out_qtype].width
+    local out_ctype = qconsts.qtypes[out_qtype].ctype
     out_width = math.ceil(out_width/8) * 8
     -- TODO Where best to do malloc for buff?
     local f1_coro = assert(x:wrap(), "wrap failed for x")

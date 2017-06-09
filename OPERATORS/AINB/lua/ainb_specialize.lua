@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   atype,
   btype
@@ -8,7 +9,7 @@ return function (
     assert(is_base_qtype(atype), "type of A must be base type")
     assert(is_base_qtype(btype), "type of B must be base type")
     subs.fn = "ainb_" .. atype .. "_" .. btype
-    subs.atype = g_qtypes[atype].ctype
-    subs.btype = g_qtypes[btype].ctype
+    subs.atype = qconsts.qtypes[atype].ctype
+    subs.btype = qconsts.qtypes[btype].ctype
     return subs, tmpl
     end
