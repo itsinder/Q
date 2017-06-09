@@ -20,7 +20,7 @@ int fwrite(void *Buffer,int Size,int Count,FILE *ptr);
 int fflush(FILE *stream);
 ]])
 
-ffi.new = nil
+-- TODO: Put this back later ffi.new = nil 
 
 ffi.malloc = function(n, free_func)
    assert(n > 0, "Cannot malloc 0 or less bytes")

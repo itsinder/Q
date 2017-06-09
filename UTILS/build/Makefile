@@ -2,6 +2,9 @@ DEFAULT_GOAL := all
 OUTPUTS = libq.so libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
+all: q_core
+	echo "Q is built"
+
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
 	find ${Q_ROOT}/lib -type f | xargs rm -f
@@ -31,9 +34,6 @@ uninstall:
 	echo "Q uninstalled"
 
 libq.so: libq_core.so q.h
-
-all: q_core
-	echo "Q is built"
 
 q_core: q_basic q_operators
 	luajit mk_so.lua /tmp/
@@ -107,8 +107,8 @@ s_to_f: q_basic
 		bash gen_files.sh && luajit pkg_s_to_f.lua
 		
 		#cd ${BASE_PATH};\
-		cd OPERATORS/S_TO_F/lua;\
-		luajit pkg_s_to_f.lua
+		#cd OPERATORS/S_TO_F/lua;\
+		#luajit pkg_s_to_f.lua
 		
 		echo "s_to_f done"
 
@@ -116,10 +116,6 @@ f_to_s: q_basic
 		cd ${BASE_PATH}/OPERATORS/F_TO_S/lua;\
  		bash gen_files.sh && luajit pkg_f_to_s.lua
 		
-		#cd ${BASE_PATH};\
- 		cd OPERATORS/F_TO_S/lua;\
- 		luajit pkg_f_to_s.lua
- 		
 		echo "f_to_s done"
 
 ax_equals_b: q_basic

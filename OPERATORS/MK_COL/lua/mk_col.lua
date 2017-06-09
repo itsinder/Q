@@ -1,7 +1,8 @@
-local Q = require 'Q/q_export'
-local err   = require 'Q/UTILS/lua/error_code'
+local Q       = require 'Q/q_export'
+local err     = require 'Q/UTILS/lua/error_code'
 local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'   
-local qc  = require 'Q/UTILS/lua/q_core'
+local qc      = require 'Q/UTILS/lua/q_core'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
@@ -30,8 +31,8 @@ local mk_col = function (input, qtype)
     -- TODO: Should this be < or <=, > or >= 
     assert(v >= MINIMUM_LUA_NUMBER, err.INVALID_LOWER_BOUND) 
     assert(v <= MAXIMUM_LUA_NUMBER, err.INVALID_UPPER_BOUND) 
-    assert(v >= qconsts.qconsts.qtypes[qtype].min, err.INVALID_LOWER_BOUND) 
-    assert(v <= qocnsts.qconsts.qtypes[qtype].max, err.INVALID_UPPER_BOUND)
+    assert(v >= qconsts.qtypes[qtype].min, err.INVALID_LOWER_BOUND) 
+    assert(v <= qconsts.qtypes[qtype].max, err.INVALID_UPPER_BOUND)
   end
   --if field_type ~= "SC" then width=nil end
   local col = Column{
@@ -39,10 +40,10 @@ local mk_col = function (input, qtype)
     write_vector=true,
     nn=false }
           
-  local ctype =  assert(qconsts.qtypes[qtype].ctype, err.NULL_CTYPE_ERROR)
+  local ctype =  assert(qconsts.qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local length = table.getn(input)
   local length_in_bytes = col:sz() * length
-  local chunk = assert(ffi.new(ctype .. "[?]", length, input), err.FFI_NEW_ERROR)
+  local chunk = assert(ffi.new(ctype .. "[?]", length, input),g_err.FFI_NEW_ERROR)
   col:put_chunk(length, chunk)
   col:eov()
   return col
