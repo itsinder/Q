@@ -13,7 +13,7 @@ extern int
 rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
   bool is_first
   );
    ]],
@@ -34,7 +34,7 @@ int
 random_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
   bool is_first
   )
 //STOP_FUNC_DECL

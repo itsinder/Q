@@ -18,7 +18,7 @@ int
 random_F8(
   double *X,
   uint64_t nX,
-  RANDOM_F8_REC_TYPE *ptr_in,
+  RAND_F8_REC_TYPE *ptr_in,
   bool is_first
   )
 //STOP_FUNC_DECL

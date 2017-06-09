@@ -3,7 +3,8 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 return function (
   args
   )
-  local qc = require "Q/UTILS/lua/q_core"
+  local qc  = require "Q/UTILS/lua/q_core"
+  local ffi = require "Q/UTILS/lua/q_ffi"
 
   assert(type(args) == "table")
   local lb   = assert(args.lb)
@@ -18,23 +19,23 @@ return function (
   assert(type(ub) == "number")
   local conv_fn = "txt_to_" .. qtype
   local out_ctype = qconsts.qtypes[qtype].ctype
-  local width = qconsts.qtypes[qtype].width
-  local c_mem = assert(qc.malloc(width), "malloc failed")
+  local sz_c_mem = ffi.sizeof('RANDOM_' .. qtype .. '_REC_TYPE');
+
+  local c_mem = assert(qc.malloc(sz_c_mem), "malloc failed")
   ffi.fill(c_mem, width, 0)
   local conv_fn = qc["txt_to_" .. qtype]
   local status 
+  status = conv_fn(tostring(val), c_mem)
+  assert(status, "Unable to create random vector ")
   if ( qconsts.iorf[qtype] == "fixed" ) then 
-    status = conv_fn(tostring(val), 10, c_mem)
     generator = "mrand48"
     scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
   elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
-    status  = conv_fn(tostring(val), c_mem)
     generator = "drand48"
     scaling_code = "range * x"
   else
     assert(nil, "Unknown type " .. qtype)
   end
-  assert(status, "Unable to create random vector ")
   --=========================
   -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
   local tmpl = 'rand.tmpl'

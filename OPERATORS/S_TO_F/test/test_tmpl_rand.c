@@ -13,7 +13,7 @@ main()
   double lb = 1.3;
   double ub = 4.5;
 
-  RANDOM_F8_REC_TYPE args;
+  RAND_F8_REC_TYPE args;
   args.seed = 0;
   args.lb = lb;
   args.ub = ub;
