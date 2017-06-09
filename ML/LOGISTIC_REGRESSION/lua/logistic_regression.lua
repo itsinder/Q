@@ -2,7 +2,7 @@ local Q = require 'Q'
 
 local T = {}
 
-local function inner_loop(X, y, beta)
+local function beta_step(X, y, beta)
   local Xbeta = Q.mvmul(X, beta)
   local p = Q.logit(Xbeta)
   local w = Q.logit2(Xbeta)
@@ -29,15 +29,6 @@ local function inner_loop(X, y, beta)
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
   return beta_new
-end
-
-local function outer_loop(X, y, iters)
-  X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
-  local beta = Q.const({ val = 0, len = #X, qtype = 'F8' })
-  for i = 1, iters do
-    beta = inner_loop(X, y, beta)
-  end
-  return beta
 end
 
 local function package_betas(betas)
@@ -88,25 +79,29 @@ local function package_betas(betas)
 
   return get_class, get_prob
 end
+T.package_betas = package_betas
+require('Q/q_export').export('package_logistic_regression_betas', package_betas)
 
-local function train_multinomial(X, y, classes, iters)
-  local out_betas = {}
+local function make_multinomial_trainer(X, y, classes)
+  X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
+  local betas = {}
+  local ys = {}
   for i = 1, #classes - 1 do
+    betas[i] = Q.const({ val = 0, len = #X, qtype = 'F8' })
     -- TODO: vvec should be replaced by Q.vseq when it is available
     local vvec = Q.const({ val = classes[i], len = y:length(), qtype = 'F8' })
-    out_betas[i] = outer_loop(X, Q.vveq(y, vvec), iters)
+    ys[i] = Q.vveq(y, vvec)
   end
-  return out_betas, package_betas(out_betas)
-end
-T.train_multinomial = train_multinomial
-require('Q/q_export').export('train_multinomial_logistic_regression', train_multinomial)
 
-local function train_binary(X, y, iters)
-  out_betas, get_class, get_prob = train_multinomial(X, y, {0, 1}, iters)
+  local function step_betas()
+    for i = 1, #betas do
+      betas[i] = beta_step(X, ys[i], betas[i])
+    end
+  end
 
-  return out_betas[1], get_class, function(x) return get_prob(x, 2) end
+  return betas, step_betas
 end
-T.train_binary = train_binary
-require('Q/q_export').export('train_binary_logistic_regression', train_binary)
+T.make_trainer = make_multinomial_trainer
+require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
 
 return T
