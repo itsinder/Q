@@ -1,9 +1,9 @@
-local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   atype,
   btype
   )
-    local is_base_qtype = require('is_base_qtype')
+    local qconsts = require 'Q/UTILS/lua/q_consts'
+    local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
     local tmpl = 'ainb.tmpl'
     local subs = {}
     assert(is_base_qtype(atype), "type of A must be base type")

@@ -2,6 +2,9 @@ DEFAULT_GOAL := all
 OUTPUTS = libq.so libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
+all: q_core
+	echo "Q is built"
+
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
 	find ${Q_ROOT}/lib -type f | xargs rm -f
@@ -31,9 +34,6 @@ uninstall:
 	echo "Q uninstalled"
 
 libq.so: libq_core.so q.h
-
-all: q_core
-	echo "Q is built"
 
 q_core: q_basic q_operators
 	luajit mk_so.lua /tmp/
