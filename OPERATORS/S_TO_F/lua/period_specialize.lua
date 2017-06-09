@@ -25,11 +25,6 @@ return function (
   local sz_c_mem = ffi.sizeof('RANDOM_' .. qtype .. '_REC_TYPE');
 
   local c_mem = assert(qc.malloc(sz_c_mem), "malloc failed")
-  ffi.fill(c_mem, width, 0)
-  local conv_fn = qc["txt_to_" .. qtype]
-  local status 
-  status = conv_fn(tostring(val), c_mem)
-  assert(status, "Unable to create random vector ")
   if ( qconsts.iorf[qtype] == "fixed" ) then 
     generator = "mrand48"
     scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
@@ -39,7 +34,6 @@ return function (
   else
     assert(nil, "Unknown type " .. qtype)
   end
-  --=========================
   -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
   local tmpl = 'rand.tmpl'
   local subs = {};
