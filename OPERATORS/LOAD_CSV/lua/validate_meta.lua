@@ -1,4 +1,4 @@
-local qconsts = require 'Q/UTILS/lua/q_constsa'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
 local pl      = require 'pl'
 local plpath  = require 'pl.path'

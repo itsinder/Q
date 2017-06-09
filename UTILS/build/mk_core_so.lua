@@ -49,6 +49,7 @@ assert(status == 0, "Failure on " .. command)
 os.execute("rm -f *.o *.so")
 -- TODO Where to create this?
 plfile.write(q_root .. "/include/q_core.h", table.concat(fn_protos, "\n"))
+plfile.write(src_root .. "/q_core.h", table.concat(fn_protos, "\n"))
 print("Successfully generated minimal stuff with " .. n .. " files")
 
 --[[

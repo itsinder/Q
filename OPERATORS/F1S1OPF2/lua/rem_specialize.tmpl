@@ -1,15 +1,14 @@
 return function (
   in_qtype
   )
-  local qconsts = require 'Q/UTILS/lua/q_consts'
   local qconsts  = require 'Q/UTILS/lua/q_consts'
-  asssert(qconsts.iorf[in_qtype] == "fixed", "in_qtype must be integer")
+  assert(qconsts.iorf[in_qtype] == "fixed", "in_qtype must be integer")
   local tmpl = 'arith.tmpl'
   local subs = {}
   subs.fn = "<<operator>>_" .. in_qtype 
   subs.in_ctype = assert(qconsts.qtypes[in_qtype].ctype)
-  subs.out_qtype = subs.in_ctype
-  subs.out_ctype = assert(qconsts.qtypes[out_qtype].ctype)
+  subs.out_qtype = in_qtype
+  subs.out_ctype = assert(qconsts.qtypes[subs.out_qtype].ctype)
   subs.c_code_for_operator = " <<c_code>> "
   return subs, tmpl
 end
