@@ -9,11 +9,18 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
+
+typedef struct _rand_${out_qtype}_rec_type {
+  uint64_t seed;
+  ${out_ctype} lb;
+  ${out_ctype} ub;
+} RAND_${out_qtype}_REC_TYPE;
+
 extern int
 rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
   bool is_first
   );
    ]],
@@ -31,10 +38,10 @@ static inline uint64_t RDTSC()
 
 //START_FUNC_DECL
 int
-random_${out_qtype}(
+rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  RANDOM_${out_qtype}_REC_TYPE *ptr_in,
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
   bool is_first
   )
 //STOP_FUNC_DECL
@@ -51,6 +58,7 @@ random_${out_qtype}(
     srand48(seed);
   }
   ${out_ctype} range = ub - lb;
+#pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
     ${gen_type} x = ${generator}();
     X[i] = (${out_ctype}) (lb + (${scaling_code}) );
@@ -60,6 +68,7 @@ random_${out_qtype}(
     }
 #endif
   }
+  return status;
 BYE:
   return status;
 }
