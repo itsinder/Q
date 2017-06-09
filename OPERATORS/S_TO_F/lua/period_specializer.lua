@@ -7,16 +7,19 @@ return function (
   local ffi = require "Q/UTILS/lua/q_ffi"
 
   assert(type(args) == "table")
-  local lb   = assert(args.lb)
-  local ub   = assert(args.ub)
+  local start  = assert(args.start)
+  local p_len  = assert(args.p_len)
   local qtype = assert(args.qtype)
   local len   = assert(args.len)
-  local seed   = assert(args.seed)
+  local by = args.by
+  if ( not by ) then by = 1 end
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
-  assert(type(lb) == "number")
-  assert(type(ub) == "number")
+  assert(type(start) == "number")
+  assert(type(p_len) == "number")
+  assert(p_len > 0, "length of period must be positive") 
+  assert(type(by) == "number")
   local conv_fn = "txt_to_" .. qtype
   local out_ctype = qconsts.qtypes[qtype].ctype
   local sz_c_mem = ffi.sizeof('RANDOM_' .. qtype .. '_REC_TYPE');
@@ -44,8 +47,7 @@ return function (
   subs.c_mem = c_mem
   subs.out_ctype = out_ctype
   subs.len = len
+  subs.p_len = p_len
   subs.out_qtype = qtype
-  subs.generator = generator
-  subs.scale_code = scale_code
   return subs, tmpl
 end
