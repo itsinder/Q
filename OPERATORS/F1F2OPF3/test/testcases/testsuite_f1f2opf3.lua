@@ -13,7 +13,7 @@ local operators = { "vvadd", "vveq", "vvsub", "vvmul", "vvdiv",
 local assert_valid = function(expected, precision)
   return function (ret)
     for k,v in ipairs(ret) do
-      --print ( ret[k], expected[k])
+      -- print ( ret[k], expected[k])
       local final_result = tonumber(ret[k])
       local mult = 10^(precision or 0)
       local value = math.floor( final_result * mult + 0.5 ) / mult

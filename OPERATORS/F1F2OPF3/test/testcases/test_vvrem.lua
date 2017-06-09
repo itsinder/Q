@@ -1,4 +1,4 @@
--- data for div operation
+-- data for rem operation
 -- data field contains inputs in table 'a' and table 'b'
 -- and output in table 'z'
 local qtype = require 'Q/OPERATORS/F1F2OPF3/test/testcases/output_qtype'
