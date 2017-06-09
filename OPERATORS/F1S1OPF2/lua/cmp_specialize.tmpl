@@ -2,13 +2,14 @@ return function (
   in_qtype,
   scalar
   )
+    local qconsts = require 'Q/UTILS/lua/q_consts'
     assert(( in_qtype == "I1" ) or ( in_qtype == "I2") or ( in_qtype == "I4" ) or 
        ( in_qtype == "I8" ) or ( in_qtype == "F4") or ( in_qtype == "F8" ),
        "type must be I1/I2/I4/I8/F4/F8")
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 
     subs.fn = "<<operator>>" .. in_qtype 
-    subs.in_ctype = g_qtypes[in_qtype].ctype
+    subs.in_ctype = qconsts.qtypes[in_qtype].ctype
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
     subs.c_mem = 0 -- TODO 

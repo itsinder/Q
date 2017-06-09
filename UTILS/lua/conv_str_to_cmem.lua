@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (x, out_qtype)
   q_consts = require 'Q/UTILS/lua/q_const'
   local qc = require 'Q/UTILS/lua/q_core'
@@ -5,7 +6,7 @@ return function (x, out_qtype)
   if ( type(x) == "number" ) then x = tostring(x) end 
   assert(type(x) == "string")
   assert(type(out_qtype) == "string")
-  local out_ctype = assert(g_qtypes[out_qtype].ctype)
+  local out_ctype = assert(qconsts.qtypes[out_qtype].ctype)
   local conv_fn_name = "txt_to_" .. out_qtype
   local width = assert(qconsts.qtypes[out_qtype].width)
   local c_mem = assert(ffi.malloc(width), "malloc failed")

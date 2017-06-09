@@ -1,3 +1,4 @@
+  local qconsts = require 'Q/UTILS/lua/q_consts'
   local plpath = require 'pl.path'
   require 'Q/UTILS/lua/globals'
   local srcdir = "../gen_src/"; assert(plpath.isdir(srcdir))
@@ -11,7 +12,7 @@
   for i, qtype in ipairs(qtypes) do 
      local subs = {} 
      subs.fn    = "bin_search_" .. qtype
-     subs.ftype = assert(g_qtypes[qtype].ctype)
+     subs.ftype = assert(qconsts.qtypes[qtype].ctype)
      gen_code.doth(subs, tmpl, incdir)
      gen_code.dotc(subs, tmpl, srcdir)
      print("Generated ", subs.fn)

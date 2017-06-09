@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   qtype
   )
@@ -10,7 +11,7 @@ return function (
       assert(is_base_qtype(qtype), "qtype must be base type")
       subs.op = "max"
       subs.fn = subs.op .. "_" .. qtype 
-      subs.ctype = g_qtypes[qtype].ctype
+      subs.ctype = qconsts.qtypes[qtype].ctype
       subs.qtype = qtype
       subs.reduce_ctype = subs.ctype
       if ( qtype == "I1" ) then subs.initial_val = "INT8_MIN" end

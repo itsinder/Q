@@ -12,8 +12,8 @@ local mk_col = function (input, qtype)
   assert(input,  err.INPUT_NOT_TABLE)
   assert(type(input) == "table", "Input to mk_col must be a table")
   assert(#input > 0, "table has no entries")
-  assert( g_valid_types[qtype] ~= nil, err.INVALID_COLUMN_TYPE)
-  local width = assert(g_qtypes[qtype]["width"], err.NULL_WIDTH_ERROR)
+  assert( qconsts.qtypes[qtype] ~= nil, err.INVALID_COLUMN_TYPE)
+  local width = assert(qconsts.qtypes[qtype]["width"], err.NULL_WIDTH_ERROR)
   -- Does not support SC or SV
   assert((( qtype == "I1" )  or ( qtype == "I2" )  or ( qtype == "I4" )  or 
           ( qtype == "I8" )  or ( qtype == "F4" )  or ( qtype == "F8" ) ),
@@ -30,8 +30,8 @@ local mk_col = function (input, qtype)
     -- TODO: Should this be < or <=, > or >= 
     assert(v >= MINIMUM_LUA_NUMBER, err.INVALID_LOWER_BOUND) 
     assert(v <= MAXIMUM_LUA_NUMBER, err.INVALID_UPPER_BOUND) 
-    assert(v >= qconsts.g_qtypes[qtype].min, err.INVALID_LOWER_BOUND) 
-    assert(v <= qocnsts.g_qtypes[qtype].max, err.INVALID_UPPER_BOUND)
+    assert(v >= qconsts.qconsts.qtypes[qtype].min, err.INVALID_LOWER_BOUND) 
+    assert(v <= qocnsts.qconsts.qtypes[qtype].max, err.INVALID_UPPER_BOUND)
   end
   --if field_type ~= "SC" then width=nil end
   local col = Column{

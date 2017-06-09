@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 -- RS Delete this line - taken care of by LUA_INIT set up
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
 local err           = require 'Q/UTILS/lua/error_code'
@@ -42,8 +43,8 @@ local function mk_out_buf(
       ffi.copy(out_buf, in_buf, in_buf_len)
     end
     --=======================================
-    local converter = assert(g_qtypes[m.qtype]["txt_to_ctype"])
-    local ctype     = assert(g_qtypes[m.qtype]["ctype"])
+    local converter = assert(qconsts.qtypes[m.qtype]["txt_to_ctype"])
+    local ctype     = assert(qconsts.qtypes[m.qtype]["ctype"])
     local status = 0
     local casted = ffi.cast(ctype .. " *", out_buf)
     --=====================================
@@ -98,7 +99,7 @@ load_csv = function (
           -- times 2 to deal with escaping
           fld_max_txt_width = 2 * assert(M[i].width)
         else
-          fld_max_txt_width = assert(g_qtypes[M[i].qtype].max_txt_width)
+          fld_max_txt_width = assert(qconsts.qtypes[M[i].qtype].max_txt_width)
         end
         max_txt_width = ( fld_max_txt_width > max_txt_width ) 
         and fld_max_txt_width or max_txt_width 

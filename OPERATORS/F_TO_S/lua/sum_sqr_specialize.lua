@@ -1,3 +1,5 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
 return function (
   qtype
   )
@@ -10,7 +12,7 @@ return function (
       assert(is_base_qtype(qtype), "qtype must be base type")
       subs.op = "sum_sqr" 
       subs.fn = subs.op .. "_" .. qtype 
-      subs.ctype = g_qtypes[qtype].ctype
+      subs.ctype = qconsts.qtypes[qtype].ctype
       subs.qtype = qtype
       subs.initial_val = 0
       if ( ( qtype == "I1" ) or ( qtype == "I2" ) or 

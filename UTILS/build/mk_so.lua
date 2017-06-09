@@ -114,8 +114,8 @@ local root = rootdir
 local dirs_to_exclude = dofile("exclude_dir.lua")
 local files_to_exclude = dofile("exclude_fil.lua")
 --==========================
-local tgt_o = opdir .. "/libq.so"
-local tgt_h = opdir .. "/q.h"
+local tgt_o = opdir .. "/libq_core.so"
+local tgt_h = opdir .. "/q_core.h"
 
 local pattern = "*.c"
 local cdir = opdir .. "/LUAC"
@@ -128,56 +128,6 @@ local hdir = opdir .. "/LUAH"
 os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, dirs_to_exclude, files_to_exclude, hdir)
-local q_core_struct_files = {}
-local q_core_h_files = {}
-local q_core_h_set = {}
-local q_core_h = {}
-local q_core_c_files = {}
-local q_core_c_set = {}
-
-----------Create q_core.h
-local q_core = dofile('core_c_files.lua') -- TODO not all c files have an h file . Ramesh please review
-local c_files, h_files = q_core[2], q_core[1]
-q_core_c_files = c_files
-for i,v in ipairs(h_files) do
-    local f = hdir .. "/" .. v
-    if not plpath.isfile(f) then
-        f = hdir .. "/_" .. v
-    end
-    if is_struct_file(f) then
-        q_core_struct_files[#q_core_struct_files + 1 ] = f
-    else
-        q_core_h_files[#q_core_h_files + 1] = f
-    end
-    q_core_h_set[f] = true
-end
-
-for i, v in ipairs(c_files) do
-    local x = string.gsub(v, "%.c", ".h")
-    local f = hdir .. "/" .. x
-    local isfile = plpath.isfile(f)
-    if ( not isfile ) then
-        f = hdir .. "/_" .. x
-    end
-    assert(plpath.isfile(f), "File not found " .. f)
-    if is_struct_file(f) then
-        q_core_struct_files[#q_core_struct_files + 1 ] = f
-    else
-        q_core_h_files[#q_core_h_files + 1] = f
-    end
-    q_core_h_set[f] = true
-end
---. for k,v in pairs(q_core_h_set) do
---.    print ("q_core", k)
---. end
-q_core_h = add_files_to_list(q_core_h, q_core_struct_files)
-q_core_h = add_files_to_list(q_core_h, q_core_h_files)
-q_core_h = table.concat(q_core_h, "\n")
-local tgt_h = opdir .. "/q_core.h"
-plfile.write(tgt_h, q_core_h)
-pldir.copyfile(tgt_h, final_h)
-print("Copied " .. tgt_h .. " to " .. final_h)
-
 ----------Create q.h
 local q_struct_files = {}
 local q_h = {}
@@ -187,14 +137,12 @@ local q_h_set = {}
 local h_files = pldir.getfiles(hdir, "*.h")
 for num=1,#h_files do
     local file_path = h_files[num]
-    if not q_core_h_set[file_path]  then
         if is_struct_file(file_path) then
             q_struct_files[#q_struct_files + 1] = file_path
         else
             q_h_files[#q_h_files + 1] = file_path
         end
         q_h_set[file_path] = true
-    end
 end
 --. for k,v in pairs(q_h_set) do
 --.    print ("q", k)
@@ -208,40 +156,18 @@ plfile.write(tgt_h, q_h)
 pldir.copyfile(tgt_h, final_h)
 print("Copied " .. tgt_h .. " to " .. final_h)
 
-
 ----------Create q_core.so
 local FLAGS = "-std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
-local q_o, q_h, q_core_o, q_core_h = opdir .. "/libq.so", opdir .. "/q.h", opdir .. "/libq_core.so", opdir .. "/q_core.h"
+local q_so, q_h = opdir .. "/libq_core.so", opdir .. "/q_core.h"
 
-local q_core_c = table.concat(q_core_c_files, " ")
-local q_core_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_core_c, hdir, q_core_o)
-q_core_cmd = "cd " .. cdir .. "; " .. q_core_cmd
-local status = os.execute(q_core_cmd)
-assert(status, "gcc failed")
-assert(plpath.isfile(q_core_o), "Target " .. q_core_o .. " not created")
-print("Successfully created " .. q_core_o)
-pldir.copyfile(q_core_o, final_so)
-print("Copied " .. q_core_o .. " to " .. final_so)
-----------Create q.so
-local q_core_c_set = {}
-for _,v in ipairs(q_core_c_files) do
-    q_core_c_set[v] = true
-end
-
-local all_c_files = pldir.getfiles(cdir, "*.c")
-for index=1,#all_c_files do
-    local file = all_c_files[index]
-    if not q_core_c_set[file] then
-        q_c_files[#q_c_files +1] = file
-    end
-end
+local q_c_files = pldir.getfiles(cdir, "*.c")
 
 local q_c = table.concat(q_c_files, " ")
-local q_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_c, hdir, q_o)
+local q_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_c, hdir, q_so)
 q_cmd = "cd " .. cdir .. "; " .. q_cmd
 local status = os.execute(q_cmd)
 assert(status, "gcc failed")
-assert(plpath.isfile(q_o), "Target " .. q_o .. " not created")
-print("Successfully created " .. q_o)
-pldir.copyfile(q_o, final_so)
-print("Copied " .. q_o .. " to " .. final_so)
+assert(plpath.isfile(q_so), "Target " .. q_so .. " not created")
+print("Successfully created " .. q_so)
+pldir.copyfile(q_so, final_so)
+print("Copied " .. q_so .. " to " .. final_so)
