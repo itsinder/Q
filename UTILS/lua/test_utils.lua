@@ -1,9 +1,10 @@
 local ffi = require 'ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local utils
 utils = {
   arr_from_col = function (c)
     local sz, vec, nn_vec = c:chunk(-1)
-    local ctype = g_valid_types[c:fldtype()] .. " *"
+    local ctype = qconsts.qtypes[c:fldtype()] .. " *"
     return ffi.cast(ctype, vec)
   end,
   

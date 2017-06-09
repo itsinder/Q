@@ -13,7 +13,6 @@ declaration = [[
 extern int
 txt_to_${out_type_displ}(
       const char * const X,
-      int base,
       ${out_type} *ptr_out
       );
 
@@ -26,7 +25,6 @@ definition = [[
 int
 txt_to_${out_type_displ}(
       const char * const X,
-      int base,
       ${out_type} *ptr_out
       )
 //STOP_FUNC_DECL
@@ -38,7 +36,7 @@ txt_to_${out_type_displ}(
   if ( ( X == NULL ) || ( *X == '\0' ) ) { go_BYE(-1); }
   if ( !is_valid_chars_for_num(X) ) { 
   fprintf(stderr, "Invalid number [%s]\n", X); go_BYE(-1); }
-  out = ${converter}(X, &endptr, base);
+  out = ${converter}(X, &endptr, 10);
   if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { go_BYE(-1); }
   if ( ( out < ${min_val} ) || ( out > ${max_val} ) ) { go_BYE(-1); }
   if ( ((errno == ERANGE) && ((out == ${max_val}) || (out == ${min_val})))

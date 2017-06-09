@@ -5,9 +5,11 @@ return require 'Q/UTILS/lua/code_gen' {
 #include "q_incs.h"
 #include <unistd.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct _reduce_${op}_${qtype}_args {
   ${reduce_ctype} cum_val;
+  uint64_t num; // number of non-null elements inspected
   } REDUCE_${op}_${qtype}_ARGS;
   
 ${includes}
@@ -16,7 +18,7 @@ ${fn}(
       const ${ctype} * restrict in,  
       uint64_t nR,
       void *ptr_args,
-      uint32_t num_threads
+      bool is_first
       ) 
 ;
 
@@ -30,7 +32,7 @@ ${fn}(
       const ${ctype} * restrict in,
       uint64_t nR,  
       void *in_ptr_args,
-      uint32_t num_threads
+      bool is_first
       )
 
 {
@@ -39,8 +41,13 @@ ${fn}(
   REDUCE_${op}_${qtype}_ARGS *ptr_args;
   ptr_args = (REDUCE_${op}_${qtype}_ARGS *)in_ptr_args;
 
+  if ( is_first ) {
+    ptr_args->cum_val = ${initial_val};
+    ptr_args->num     = 0;
+  }
+  
   ${reduce_ctype} curr_val = ptr_args->cum_val;
-  if ( num_threads == 0 ) { num_threads = sysconf(_SC_NPROCESSORS_ONLN); }
+  uint32_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 
   uint64_t block_size = nR / num_threads;
 #pragma omp parallel for schedule(static)
@@ -48,7 +55,7 @@ ${fn}(
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
     if ( t == (num_threads-1) ) { ub = nR; }
-    ${reduce_ctype} lval = ${init_val};
+    ${reduce_ctype} lval = ${initial_val};
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       lval = ${reducer}(lval, inv);
@@ -59,6 +66,7 @@ ${fn}(
     }
   } 
   ptr_args->cum_val = curr_val;
+  ptr_args->num     += nR;
   return status;
 }
    ]]

@@ -1,6 +1,7 @@
-require 'Q/UTILS/lua/globals'
-local g_err = require 'Q/UTILS/lua/error_code'
-local q_core = require 'Q/UTILS/lua/q_core'
+local err     = require 'Q/UTILS/lua/error_code'
+local qc      = require 'Q/UTILS/lua/q_core'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
 
 local function strip_trailing_LL(temp)
@@ -13,6 +14,9 @@ local function strip_trailing_LL(temp)
 end
 
 local function chk_cols(column_list)
+
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+
   local max_length = 0
   local is_SC  = {}
   local is_SV  = {}
@@ -22,17 +26,17 @@ local function chk_cols(column_list)
   for i = 1, #column_list do
     assert( ((type(column_list[i]) == "Column") or 
              (type(column_list[i]) == "number")),
-      g_err.INPUT_NOT_COLUMN_NUMBER)
+      err.INPUT_NOT_COLUMN_NUMBER)
     
     is_col[i] = type(column_list[i]) == "Column" 
     if is_col[i] then
-      assert(g_valid_types[column_list[i]:fldtype()], 
-      g_err.INVALID_COLUMN_TYPE)
-      assert(g_qtypes[column_list[i]:fldtype()] ~= "B1", 
-        g_err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
+      assert(qconsts.qtypes[column_list[i]:fldtype()], 
+      err.INVALID_COLUMN_TYPE)
+      assert(qconsts.qtypes[column_list[i]:fldtype()] ~= "B1", 
+        err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
-        assert(column_list[i]:get_meta("dir"), g_err.NULL_DICTIONARY_ERROR)
+        assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
       if  column_list[i]:length() > max_length then 
@@ -54,27 +58,27 @@ end
 local function process_filter(filter, max_length)
   local lb = 0; local ub = 0; local where = nil
   if filter then
-    assert(type(filter) == "table", g_err.FILTER_NOT_TABLE_ERROR)
+    assert(type(filter) == "table", err.FILTER_NOT_TABLE_ERROR)
     lb = filter.lb
     ub = filter.ub
     where = filter.where
     if ( where ) then
-      assert(type(where) == "Vector",g_err.FILTER_TYPE_ERROR)
+      assert(type(where) == "Vector",err.FILTER_TYPE_ERROR)
       -- VIJAY: Should above be Column instead of Vector?  
-      assert(where:fldtype() == "B1",g_err.FILTER_INVALID_FIELD_TYPE)
+      assert(where:fldtype() == "B1",err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
-      assert(type(lb) == "number", g_err.INVALID_LOWER_BOUND_TYPE )
+      assert(type(lb) == "number", err.INVALID_LOWER_BOUND_TYPE )
       lb = assert(tonumber(lb))
-      assert(lb >= 0,g_err.INVALID_LOWER_BOUND)
+      assert(lb >= 0,err.INVALID_LOWER_BOUND)
     else
       lb = 0;
     end
     if ( ub ) then
-      assert(type(ub) == "number", g_err.INVALID_UPPER_BOUND_TYPE )
+      assert(type(ub) == "number", err.INVALID_UPPER_BOUND_TYPE )
       ub = assert(tonumber(ub))
-      assert(ub > lb ,g_err.UB_GREATER_THAN_LB)
-      assert(ub <= max_length, g_err.INVALID_UPPER_BOUND)
+      assert(ub > lb ,err.UB_GREATER_THAN_LB)
+      assert(ub <= max_length, err.INVALID_UPPER_BOUND)
     else
       ub = max_length
     end
@@ -93,7 +97,7 @@ local print_csv = function (column_list, filter, opfile)
   end
   
   assert( ((type(column_list) == "table") or 
-          (type(column_list) == "Column")), g_err.INPUT_NOT_TABLE)
+          (type(column_list) == "Column")), err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
   if type(column_list) == "Column" then
     column_list = {column_list}
@@ -104,7 +108,7 @@ local print_csv = function (column_list, filter, opfile)
   local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
-  local buf = q_core.malloc(1024) 
+  local buf = ffi.malloc(1024) 
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
@@ -125,7 +129,7 @@ local print_csv = function (column_list, filter, opfile)
   -- recall that upper bounds are inclusive in Lua
   for rowidx = lb, ub do
     if ( ( where == nil ) or 
-         ( where:get_element(rowidx -1 ) ~= q_core.NULL ) ) then
+         ( where:get_element(rowidx -1 ) ~= ffi.NULL ) ) then
       for col_idx = 1, num_cols do
         
         local temp = nil
@@ -135,17 +139,17 @@ local print_csv = function (column_list, filter, opfile)
           temp = col 
         else
           local cbuf = col:get_element(rowidx-1)          
-          if cbuf == q_core.NULL then
+          if cbuf == ffi.NULL then
             temp = ""
           else
-            local ctype =  assert(g_qtypes[col:fldtype()]["ctype"])
-            local str = q_core.cast(ctype.." *",cbuf)
+            local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
+            local str = ffi.cast(ctype.." *",cbuf)
             temp = tostring(str[0])
             if is_I8[col_idx] then
               temp = strip_trailing_LL(temp)
             end
             if is_SC[col_idx] then
-              temp = q_core.string(str)
+              temp = ffi.string(str)
             end
             if is_SV[col_idx] then 
                temp = str[0]

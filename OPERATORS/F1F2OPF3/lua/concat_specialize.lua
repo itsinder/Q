@@ -1,4 +1,4 @@
-
+local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   in1_qtype, 
   in2_qtype, 
@@ -12,8 +12,8 @@ return function (
     assert(ok_intypes[in1_qtype], "input type " .. in1_qtype .. " not acceptable")
     assert(ok_intypes[in2_qtype], "input type " .. in2_qtype .. " not acceptable")
 
-    local w1   = assert(g_qtypes[in1_qtype].width)
-    local w2   = assert(g_qtypes[in2_qtype].width)
+    local w1   = assert(qconsts.qtypes[in1_qtype].width)
+    local w2   = assert(qconsts.qtypes[in2_qtype].width)
 
     local shift = w2 * 8 -- convert bytes to bits 
     local l_out_qtype = nil
@@ -42,8 +42,8 @@ return function (
     if ( out_qtype ) then 
       assert(ok_out_qtypes[out_qtype], "output type " ..
       out_qtype .. " not acceptable")
-      local width_l_out_qtype = assert(g_qtypes[l_out_qtype].width, "ERROR")
-      local width_out_qtype   = assert(g_qtypes[out_qtype].width, "ERROR")
+      local width_l_out_qtype = assert(qconsts.qtypes[l_out_qtype].width, "ERROR")
+      local width_out_qtype   = assert(qconsts.qtypes[out_qtype].width, "ERROR")
       assert( width_out_qtype >= width_l_out_qtype,
       "specfiied outputtype not big enough")
       l_out_qtype = out_qtype
@@ -54,10 +54,10 @@ return function (
     subs.includes = "#include <math.h>\n"
     subs.fn = 
     "concat_" .. in1_qtype .. "_" .. in2_qtype .. "_" .. l_out_qtype 
-    subs.in1_ctype = "u" .. g_qtypes[in1_qtype].ctype
-    subs.in2_ctype = "u" .. g_qtypes[in2_qtype].ctype
+    subs.in1_ctype = "u" .. qconsts.qtypes[in1_qtype].ctype
+    subs.in2_ctype = "u" .. qconsts.qtypes[in2_qtype].ctype
     subs.out_qtype = l_out_qtype
-    subs.out_ctype = "u" .. g_qtypes[l_out_qtype].ctype
+    subs.out_ctype = "u" .. qconsts.qtypes[l_out_qtype].ctype
     -- Note that we are movint int8_t to uint8_t below
     subs.c_code_for_operator = " c = ((" .. subs.out_ctype .. ")a << " .. shift .. " ) | b; "
 

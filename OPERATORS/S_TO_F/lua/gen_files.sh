@@ -3,7 +3,7 @@ set -e
 test -d $Q_ROOT
 rm -r -f ../gen_src/; mkdir -p ../gen_src/
 rm -r -f ../gen_inc/; mkdir -p ../gen_inc/
-luajit generator.lua 
+luajit generator.lua operators.lua 
 cd ../gen_src/
 ls *c > _x
 while read line; do

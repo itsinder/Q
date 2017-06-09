@@ -2,7 +2,7 @@ local log = require 'Q/UTILS/lua/log'
 local plpath = require("pl.path")
 local Column = {}
 Column.__index = Column
-local q_core = require 'Q/UTILS/lua/q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
 -- dbg = require 'Q/UTILS/lua/debugger'
@@ -50,11 +50,11 @@ setmetatable(Column, {
 function Column.destructor(data)
     -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Column) then
-        q_core.free(data.destructor_ptr)
+        ffi.free(data.destructor_ptr)
     else
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
-        q_core.free(data)
+        ffi.free(data)
     end
 end
 
@@ -73,7 +73,7 @@ end
 function Column.new(arg)
     local column = setmetatable({}, Column)
     column.meta = {}
-    column.destructor_ptr = q_core.malloc(1, Column.destructor) -- Destructor hack for luajit
+    column.destructor_ptr = ffi.malloc(1, Column.destructor) -- Destructor hack for luajit
     DestructorLookup[column.destructor_ptr] = column
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     if arg.gen ~= nil then
@@ -152,8 +152,8 @@ function Column:materialized()
 end
 
 function Column:get_element(num)
-    if self.nn_vec ~= nil and self.nn_vec:get_element(num) == q_core.NULL then
-        return q_core.NULL
+    if self.nn_vec ~= nil and self.nn_vec:get_element(num) == ffi.NULL then
+        return ffi.NULL
     else
         return self.vec:get_element(num)
     end

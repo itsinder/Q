@@ -1,6 +1,6 @@
-require 'globals'
-require 'error_code'
-local Column = require 'Column'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local err     = require 'Q/UTILS/lua/error_code'
+local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
 local t_permute = function(elemtyp, idxtyp)
     return terra(src: &elemtyp, idx: &idxtyp, dest: &elemtyp, n: int, idx_in_src: bool)
@@ -29,8 +29,8 @@ function create_col_with_meta(c)
 end
 
 return function(val_col, idx_col, idx_in_src)
-  assert(type(idx_col) == "Column", g_err.INPUT_NOT_COLUMN) 
-  assert(type(val_col) == "Column", g_err.INPUT_NOT_COLUMN) 
+  assert(type(idx_col) == "Column", err.INPUT_NOT_COLUMN) 
+  assert(type(val_col) == "Column", err.INPUT_NOT_COLUMN) 
   assert(idx_col:has_nulls(), "Index column cannot have nulls")
   assert(val_col:has_nulls(), "As of now, Value column cannot have nulls")
 

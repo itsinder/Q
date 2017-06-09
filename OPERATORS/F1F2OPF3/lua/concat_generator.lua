@@ -1,7 +1,6 @@
   local gen_code = require 'Q/UTILS/lua/gen_code'
   local plpath = require 'pl.path'
   local plfile = require 'pl.file'
-  require 'Q/UTILS/lua/globals'
   local srcdir = '../gen_src/'
   local incdir = '../gen_inc/'
   local operator_file = assert(arg[1])
