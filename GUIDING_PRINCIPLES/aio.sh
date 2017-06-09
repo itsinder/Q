@@ -74,7 +74,8 @@ cleanup ../ #cleaning up all files
 
 #build files
 cd ../UTILS/build
-bash build.sh
+make clean && make all
+#bash build.sh
 #lua build.lua gen.lua
 #lua mk_so.lua /tmp/
 cd -
