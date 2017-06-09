@@ -50,16 +50,16 @@ column:
 
 utils:
 		cd ${BASE_PATH}/;\
-		cd UTILS/src; \
+		cd UTILS/src;\
 		bash gen_files.sh
 		
 		echo "utils done"
 
 load_csv:
-		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/lua\
+		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/lua;\
 		bash gen_files.sh
 		
-		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/src\
+		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/src;\
 		bash gen_files.sh
 		
 		echo "load_csv done"
