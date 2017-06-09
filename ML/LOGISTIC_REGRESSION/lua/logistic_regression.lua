@@ -6,7 +6,7 @@ local function beta_step(X, y, beta)
   local Xbeta = Q.mvmul(X, beta)
   local p = Q.logit(Xbeta)
   local w = Q.logit2(Xbeta)
-  local ysubp = Q.vvsub(y, p)
+  local ysubp = Q.vvsub(y,percent p)
   local A = {}
   local b = {}
   for i, X_i in ipairs(X) do
@@ -82,7 +82,7 @@ end
 T.package_betas = package_betas
 require('Q/q_export').export('package_logistic_regression_betas', package_betas)
 
-local function make_multinomial_trainer(X, y, classes)
+local function make_trainer(X, y, classes)
   X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
   local betas = {}
   local ys = {}
@@ -101,7 +101,7 @@ local function make_multinomial_trainer(X, y, classes)
 
   return betas, step_betas
 end
-T.make_trainer = make_multinomial_trainer
+T.make_trainer = make_trainer
 require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
 
 return T
