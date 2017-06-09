@@ -107,8 +107,8 @@ s_to_f: q_basic
 		bash gen_files.sh && luajit pkg_s_to_f.lua
 		
 		#cd ${BASE_PATH};\
-		cd OPERATORS/S_TO_F/lua;\
-		luajit pkg_s_to_f.lua
+		#cd OPERATORS/S_TO_F/lua;\
+		#luajit pkg_s_to_f.lua
 		
 		echo "s_to_f done"
 
