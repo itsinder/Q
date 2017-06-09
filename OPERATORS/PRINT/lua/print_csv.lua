@@ -13,7 +13,6 @@ local function strip_trailing_LL(temp)
 end
 
 local function chk_cols(column_list)
-  local qconsts = require 'Q/UTILS/lua/q_consts.lua'
   local max_length = 0
   local is_SC  = {}
   local is_SV  = {}
