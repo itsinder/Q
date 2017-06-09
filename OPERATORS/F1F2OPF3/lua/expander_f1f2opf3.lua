@@ -1,7 +1,7 @@
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local ffi     = require 'Q/UTILS/lua/q_ffi'
   local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-  local qc      = require 'Q/RUNTIME/lua/q_core'
+  local qc      = require 'Q/UTILS/lua/q_core'
   local function expander_f1f2opf3(a, f1 , f2, optargs )
     local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
     local spfn = assert(require(sp_fn_name))

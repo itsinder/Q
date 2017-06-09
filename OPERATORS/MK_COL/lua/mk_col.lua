@@ -40,13 +40,10 @@ local mk_col = function (input, qtype)
     write_vector=true,
     nn=false }
           
-  local ctype = assert(qconsts.qtypes[qtype].ctype, err.NULL_CTYPE_ERROR)
-  local chunk = assert(ffi.new(ctype .. "[?]", length, input), err.FFI_NEW_ERROR)
-  local sz = ffi.sizeof(ctype) * length
-  local chunk = assert(ffi.cast(ctype .. " *", ffi.malloc(sz)))
-
-  
-   local chunk = assert(ffi.new(ctype .. "[?]", length, input), err.FFI_NEW_ERROR)
+  local ctype =  assert(qconsts.qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
+  local length = table.getn(input)
+  local length_in_bytes = col:sz() * length
+  local chunk = assert(ffi.new(ctype .. "[?]", length, input),g_err.FFI_NEW_ERROR)
   col:put_chunk(length, chunk)
   col:eov()
   return col
