@@ -1,5 +1,6 @@
 local err     = require 'Q/UTILS/lua/error_code'
 local qc      = require 'Q/UTILS/lua/q_core'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
 
@@ -13,7 +14,7 @@ local function strip_trailing_LL(temp)
 end
 
 local function chk_cols(column_list)
-  local qconsts = require 'Q/UTILS/lua/q_consts.lua'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
   local max_length = 0
   local is_SC  = {}
   local is_SV  = {}
@@ -27,9 +28,9 @@ local function chk_cols(column_list)
     
     is_col[i] = type(column_list[i]) == "Column" 
     if is_col[i] then
-      assert(qconsts.qconsts.qtypes[column_list[i]:fldtype()], 
+      assert(qconsts.qtypes[column_list[i]:fldtype()], 
       err.INVALID_COLUMN_TYPE)
-      assert(qconsts.qconsts.qtypes[column_list[i]:fldtype()] ~= "B1", 
+      assert(qconsts.qtypes[column_list[i]:fldtype()] ~= "B1", 
         err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
@@ -140,7 +141,7 @@ local print_csv = function (column_list, filter, opfile)
             temp = ""
           else
             local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
-            local str = q_core.cast(ctype.." *",cbuf)
+            local str = ffi.cast(ctype.." *",cbuf)
             temp = tostring(str[0])
             if is_I8[col_idx] then
               temp = strip_trailing_LL(temp)

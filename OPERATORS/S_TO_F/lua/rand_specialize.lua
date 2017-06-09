@@ -21,7 +21,7 @@ return function (
 
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
   hdr = string.gsub(hdr,"<<ctype>>",  qconsts.qtypes[qtype].ctype)
-  ffi.cdef(hdr)
+  -- ffi.cdef(hdr)
 
   if ( seed ) then 
     assert(type(seed) == "number")
