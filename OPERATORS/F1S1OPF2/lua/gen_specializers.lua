@@ -37,7 +37,7 @@ y = string.gsub(y, "<<c_code>>", "c = a | b;")
 plfile.write("vsor_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsxor")
-y = string.gsub(y, "<<c_code>>", "c = a ^ b")
+y = string.gsub(y, "<<c_code>>", "c = a ^ b;")
 plfile.write("vsxor_specialize.lua", y)
 --=======================
 assert(plpath.isfile("cmp_specialize.tmpl"), "File not found")

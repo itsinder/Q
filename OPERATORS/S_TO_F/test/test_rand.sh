@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e 
-gcc $QC_FLAGS test_tmpl_rand.c ../src/tmpl_rand.c -I../../../UTILS/inc/ -DDEBUG
+INCS="-I../gen_inc/ -I../src/ -I../../../UTILS/inc/ "
+gcc $QC_FLAGS test_tmpl_rand.c ../src/tmpl_rand.c ${INCS}  -DDEBUG
 ./a.out
 echo "Successfully completed $0 in $PWD"

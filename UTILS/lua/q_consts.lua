@@ -33,8 +33,8 @@ local qconsts = {}
     iorf["I2"] = "fixed";
     iorf["I4"] = "fixed";
     iorf["I8"] = "fixed";
-    iorf["F4"]   = "floatinpoint";
-    iorf["F8"]  = "floatinpoint";
+    iorf["F4"] = "floating_point";
+    iorf["F8"] =  "floating_point";
     qconsts.iorf = iorf
     --===========================
 

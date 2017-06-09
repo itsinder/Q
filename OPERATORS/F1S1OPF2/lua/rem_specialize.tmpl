@@ -9,6 +9,7 @@ return function (
   subs.in_ctype = assert(qconsts.qtypes[in_qtype].ctype)
   subs.out_qtype = in_qtype
   subs.out_ctype = assert(qconsts.qtypes[subs.out_qtype].ctype)
+  subs.scalar_ctype = subs.out_ctype 
   subs.c_code_for_operator = " <<c_code>> "
   return subs, tmpl
 end

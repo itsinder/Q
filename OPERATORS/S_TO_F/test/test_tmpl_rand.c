@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../src/tmpl_rand.h"
+#include "_rand_I8.h"
 //#include <stdbool.h>
 //#include <stdint.h>
 
@@ -13,7 +14,7 @@ main()
   double lb = 1.3;
   double ub = 4.5;
 
-  RANDOM_F8_REC_TYPE args;
+  RAND_F8_REC_TYPE args;
   args.seed = 0;
   args.lb = lb;
   args.ub = ub;
@@ -25,6 +26,8 @@ main()
     }
   }
   printf("SUCCESS\n");
+  //---------------------------------
+  //---------------------------------
   return status;
 }
 

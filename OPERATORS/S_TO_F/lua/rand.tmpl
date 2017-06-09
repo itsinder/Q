@@ -9,6 +9,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct _rand_${out_qtype}_rec_type {
   uint64_t seed;
@@ -68,7 +69,6 @@ rand_${out_qtype}(
     }
 #endif
   }
-  return status;
 BYE:
   return status;
 }
