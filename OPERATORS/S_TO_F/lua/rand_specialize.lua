@@ -1,4 +1,5 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 return function (
   args
   )
@@ -19,7 +20,7 @@ return function (
   local out_ctype = qconsts.qtypes[qtype].ctype
   local width = qconsts.qtypes[qtype].width
   local c_mem = assert(qc.malloc(width), "malloc failed")
-  qc.fill(c_mem, width, 0)
+  ffi.fill(c_mem, width, 0)
   local conv_fn = qc["txt_to_" .. qtype]
   local status 
   if ( qconsts.iorf[qtype] == "fixed" ) then 

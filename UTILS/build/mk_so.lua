@@ -5,7 +5,7 @@ final_so = q_root .. "/lib/"
 
 local rootdir = os.getenv("Q_SRC_ROOT")
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
-local dbg = require 'Q/UTILS/lua.debugger'
+-- local dbg = require 'Q/UTILS/lua.debugger'
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
@@ -128,7 +128,7 @@ local hdir = opdir .. "/LUAH"
 os.execute("rm -r -f " .. hdir)
 plpath.mkdir(hdir)
 xcopy(pattern, root, dirs_to_exclude, files_to_exclude, hdir)
-----------Create q.h
+----------Create q_core.h
 local q_struct_files = {}
 local q_h = {}
 local q_h_files = {}
@@ -151,7 +151,7 @@ end
 q_h = add_files_to_list(q_h, q_struct_files)
 q_h = add_files_to_list(q_h, q_h_files)
 q_h = table.concat(q_h, "\n")
-tgt_h = opdir .. "/q.h"
+tgt_h = opdir .. "/q_core.h"
 plfile.write(tgt_h, q_h)
 pldir.copyfile(tgt_h, final_h)
 print("Copied " .. tgt_h .. " to " .. final_h)
