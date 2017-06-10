@@ -17,6 +17,7 @@ return function (a, x )
   local w =  assert(qconsts.qtypes[out_qtype].width)
   local buff =  assert(ffi.malloc(qconsts.chunk_size*w))
   local num_blocks = math.ceil(subs.len / qconsts.chunk_size)
+  local is_first = true
   local coro = coroutine.create(function()
     local x_len
     for i =1,num_blocks do
@@ -25,7 +26,9 @@ return function (a, x )
       else
         x_len = qconsts.chunk_size
       end
-      qc[func_name](buff, x_len, subs.c_mem)
+      print(func_name)
+      qc[func_name](buff, x_len, subs.c_mem, is_first)
+      is_first = false
       coroutine.yield(x_len, buff, nil)
     end
   end)
