@@ -4,15 +4,28 @@
 \section{Introduction}
 
 The aim of this document is to provide a step-by-step guide to being a
-library developeri, working on the internals of Q. We will also
+library developer, working on the internals of Q. We will also
 discuss how packaging and installation are done and how to operate as
 a Q developer. A Q developer need have {\bf no} idea about the
 internals of Q --- it is just another Lua package. Of course,
 understanding the internals, to some extent, allows for more efficient
 usage of the Q primitives.
 
+Remember, we have 2 distinct roles
+\be
+\item Library developer: The folks developing the Q library 
+\item Q programmer aka user: The developers who'll use the Q library
+\ee
+Note these are just roles, the same person can play both.
+
 \section{Getting Started}
 \label{getting_started}
+
+\subsection{Building your machine for the first time}
+
+Starting with a minimal Ubuntu install, you should execute Indrajeet \TBC
+
+
 
 \subsection{Environment Variables}
 \label{env_var}
@@ -54,9 +67,13 @@ where \verb+libq_core.so+ will be created
 
 There are some important consequences of the above. 
 \be
-\item 
-{\bf Do  not set} these environment variables in any of your scripts.
+\item {\bf Do  not set} these environment variables in any of your scripts.
 \item {\bf Do not use} \verb+Q_ROOT+ anywhere except in \verb+Q/UTILS/build+
+\item In your Lua scripts, you must specify the entire path of the file you want
+to require e.g.,
+\begin{center}
+{\tt local foo = require 'Q/UTILS/lua/foo' }
+\end{center}
 \ee
 
 
@@ -84,6 +101,22 @@ You are have the C functionality needed for code generation
 \item Within \verb+Q/UTILS/build/+, do {\tt make clean; make} 
 \ee
 
+\subsection{Registering an operator}
+
+When you create an operator, a functionality that will be used by the Q
+programmer e.g, add, sort, \ldots, you need to {\em register} that in the
+following manner.
+
+You need to know a few things to understand the underlying mechanism
+\be
+\item 
+\verb+Q_SRC_ROOT/init.lua+ is called when Q programmer does 
+\verb+require ('Q')+
+\item \verb+ q_export+ is the table that Q programmer will use
+\ee
+
+
+
 \subsection{Masquerading as a Q developer}
 \label{masquerade}
 
@@ -92,5 +125,72 @@ test your code. To enable this to happen without re-installing Q, you set
 \verb+LUA_PATH+ as below. Note the double semi-colon at the end. That is needed.
 Srinath to fill in the gaps \TBC
 \begin{verbatim}
-\verb+/home/subramon/WORK/?.lua;;+
+/home/subramon/WORK/?.lua;;+
 \end{verbatim}
+
+\subsection{Installation}
+
+At some point in the not too distant future, Q will be installed as 
+\begin{verbatim}
+sudo luarocks install Q
+\end{verbatim}
+Until then, it is installed as 
+\begin{verbatim}
+cd $Q_SRC_ROOT; sudo bash q_install.sh 
+\end{verbatim}
+%$
+\subsection{Usage}
+
+The Q developer does not need to set any of the environment variables of
+Section~\ref{env_var}, except for 
+\verb+Q_DATA_DIR, Q_METADATA_DIR+. In an earlier version, we had required them
+to set \verb+LUA_INIT+. That is no longer needed.
+A sample Q script looks as follows
+\begin{verbatim}
+Q = require 'Q'
+x = Q.mk_col({10, 20, 30, 40}, 'I4')
+Q.print_csv(x, nil, "")
+os.exit()
+\end{verbatim}
+
+\section{Lua Coding Conventions}
+This section deals with coding conventions to be followed by a library developer
+writing Lua code. 
+\be
+\item Do {\bf not} pollute the global name space. So, all variables are {\bf
+local}.
+\item Do not use {\tt dofile}. Use {\tt require instead}
+\item LuaJIT scripts that invoke pthreads (indirectly) should end with
+\verb+os.exit()+
+\ee
+
+\appendix
+
+\section{LuaJIT and OpenMP}
+
+Ciprian Tomoiaga wrote:
+{\it I have a C function containing OpenMP clause which I call with ffi. On my
+machine, the program terminates with a segmentation fault. However, it
+works without a problem on a Mac and on another machine. }
+
+Mike Pall responded: 
+The most likely cause is the dreaded pthread issue: the main
+executable must be compiled/linked with -pthread (note: this is
+not the same as -lpthread!). Otherwise a shared library which is
+loaded later on and uses threads may cause a crash.
+The easiest way to test this hypothesis is to rebuild LuaJIT with:
+\begin{verbatim}
+  make TARGET_FLAGS=-pthread
+\end{verbatim}
+and then try again.
+
+Ciprian Tomoiaga wrote:
+{\it I recompiled with the specified opition, but it still crashes. :(
+Do I have any other options? }
+
+Mike Pall responded: 
+Well I tried myself and it prints two lines, but then crashes when
+the shared library is unloaded (as a consequence of \verb+lua_close()+).
+Looks like OpenMP doesn't like to be unloaded --- this never
+happens with programs that are statically linked against it.
+
