@@ -25,6 +25,8 @@ Note these are just roles, the same person can play both.
 
 Starting with a minimal Ubuntu install, you should execute Indrajeet \TBC
 
+Check that we are building LuaJIT with pthread in Make. \TBC
+
 
 
 \subsection{Environment Variables}
@@ -74,11 +76,25 @@ to require e.g.,
 \begin{center}
 {\tt local foo = require 'Q/UTILS/lua/foo' }
 \end{center}
+\item Use the following conventions for your require's. We will explain each
+one below.
+\begin{verbatim}
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
+local qc      = require 'Q/UTILS/lua/q_core'
+\end{verbatim}
+\be
+\item qconsts contains constants
+\item qc contains all C functions that are accessible to Lua. See  Section~\ref{two_kinds_c_functions}.
+\item ffi is the same as on \url{http://luajit.org}. 
+\ee
 \ee
 
 
 \subsection{Building}
 
+\subsubsection{Two kinds of C functions}
+\label{two_kinds_c_functions}
 C programs are used to augment Lua in two important ways
 \be
 \item to help with code generation and to perform some functionality that 
@@ -87,6 +103,7 @@ of these are text converters like \verb+txt_to_I8+ or \verb+get_cell+
 \item the computational workhorse. This is where the heavy lifting happens.
 \ee
 
+\subsubsection{Breaking circular dependency}
 You will note a bit of a circular dependency. We need C code to create
 C code.  This is broken in one of two ways
 \be
@@ -105,7 +122,14 @@ You are have the C functionality needed for code generation
 
 When you create an operator, a functionality that will be used by the Q
 programmer e.g, add, sort, \ldots, you need to {\em register} that in the
-following manner.
+following manner. Consider \verb+mk_col+ as an example
+
+\begin{verbatim}
+local Q       = require 'Q/q_export'
+local mk_col = function(input, qtype)
+......
+return require('Q/q_export').export('mk_col', mk_col)
+\end{verbatim}
 
 You need to know a few things to understand the underlying mechanism
 \be
@@ -126,7 +150,9 @@ test your code. To enable this to happen without re-installing Q, you set
 Srinath to fill in the gaps \TBC
 \begin{verbatim}
 /home/subramon/WORK/?.lua;;+
+/home/subramon/WORK/?/init.lua;;
 \end{verbatim}
+First one above is current, second is Srinath's. Resolve difference \TBC
 
 \subsection{Installation}
 
@@ -143,7 +169,8 @@ cd $Q_SRC_ROOT; sudo bash q_install.sh
 
 The Q developer does not need to set any of the environment variables of
 Section~\ref{env_var}, except for 
-\verb+Q_DATA_DIR, Q_METADATA_DIR+. In an earlier version, we had required them
+\verb+Q_DATA_DIR, Q_METADATA_DIR+, which {\em must} be set. 
+In an earlier version, we had required them
 to set \verb+LUA_INIT+. That is no longer needed.
 A sample Q script looks as follows
 \begin{verbatim}
@@ -152,6 +179,16 @@ x = Q.mk_col({10, 20, 30, 40}, 'I4')
 Q.print_csv(x, nil, "")
 os.exit()
 \end{verbatim}
+
+If you want to change the environment variables, 
+\verb+Q_DATA_DIR, Q_METADATA_DIR+, this means that you want to work on a
+different project or tablespace. In that case, 
+\be
+\item \verb+Q.save()+
+\item exit the script 
+\item reset the environment variables
+\item restart the Q server or execute a new script
+\ee
 
 \section{Lua Coding Conventions}
 This section deals with coding conventions to be followed by a library developer
