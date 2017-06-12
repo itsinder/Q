@@ -30,8 +30,10 @@
   instance. \(X\) is stored as \(M\) columns, where \(X_j\) is
   observations for attribute \(j\)
 
-Note: We must add an additional attribute which is the constant 1.
-This is necessary because \framebox{{\bf ANDREW TO FILL IN}}
+Note: We must add an additional attribute which is the constant 1. Really, what
+we're solving for is a solution to $Y = \beta_0 + \sum_{j = 1}^N
+X_j \beta_j$, but to express this as one matrix expression we add a column of 1s to
+$X$ and solve $Y = X^T\beta$.
 
 \item \(y\) is an \(N \times 1\) classification vector. \(y_i\) is
   classification of instance \(i\) and can be 1 or 0.
@@ -55,9 +57,16 @@ approximations using Equation~\ref{eqn1} until convergence.
 \label{eqn1}
 (X^T W X) \times \beta ^{new} = X^T W ( X \beta + W^{-1}(y - p) )
 \end{equation}
-To see the solver at the heart of each iteration, re-write Equation~\ref{eqn1} as Equation~\ref{eqn2}
+However we can simplify this expression by subtracting $X^TWX\beta$ from both
+sides to get
 \begin{equation}
 \label{eqn2}
+(X^T W X) \times (\beta ^{new} - \beta) = X^T(y - p)
+\end{equation}
+and when we find $\beta^{new} - \beta$, we can add $\beta$ to get $\beta^{new}$.
+To see the solver at the heart of each iteration, re-write Equation~\ref{eqn1} as Equation~\ref{eqn2}
+\begin{equation}
+\label{eqn3}
 A x = b
 \end{equation}
 where 
@@ -82,15 +91,12 @@ Step by step computations in Table~\ref{step_by_step_calc}.
   {\bf Name} & {\bf Description} & {\bf Type} & {\bf Code} \\ \hline \hline
   \(t_1\) & \(X \beta\) & \((N \times M) \times (M \times 1)\)  &  \\
   & & \(= N \times 1\) & \\ \hline
-  \(p\) & & \(N \times 1\) & \( p = \mathrm{logit}(t1)\) \\ \hline
+  \(p\) & & \(N \times 1\) & \( p = \mathrm{logit}(t1) = e^{t1}/(1 + e^{t1})\) \\ \hline
   \(t_2\) &  \(y - p\) & \(N \times 1\) & \( t_2 = \mathrm{sub}(y, p)\) \\ \hline
-  \(w\) & & \(N \times 1\) & \( w = p \times (1-p)\) \\ \hline
-  \(t_3\) & \((y-p)/w\) & \(N \times 1\) & \(t_3 = \mathrm{div}(t_2, p)\) \\ \hline
-  \(t_4\) & \(X \beta + w^{-1}(y-p)\) & \(N \times 1\) & \(\mathrm{add}(t_1, t_3)\) \\ \hline
-  \(t_5\) & \(w(X \beta + w^{-1}(y-p))\) & \(N \times 1\) & \(\mathrm{mul}(w, t_4)\) \\ \hline
-  \(b\) & \(X^T w(X \beta + w^{-1}(y-p))\) & \((M\times N) \times (N \times 1)\)
+  \(w\) & & \(N \times 1\) & \( w = \mathrm{logit2}(t1) = e^{t1}/(1 + e^{t1})^2\) \\ \hline
+  \(b\) & \(X^T (y-p)\) & \((M\times N) \times (N \times 1)\)
   & \(\forall j_{j=1}^{j=M} b_j = \) \\ 
-        & & \( = M \times 1 \) & \(\mathrm{sumprod}(X_j, t_5)\) \\ \hline
+        & & \( = M \times 1 \) & \(\mathrm{sumprod}(X_j, t_2)\) \\ \hline
   \(A\) & \(X^T W X\) & \((M \times N) \times (N \times N) \times (N \times M)\)
   & \(\forall_{j=1}^{j=M} \forall_{k=j}^{k=M} A_{j, k} = \) \\ 
   & & \(= (M \times M)\) & \(\mathrm{sumprod2}(X_j, w, X_k)\) \\ \hline
@@ -107,7 +113,7 @@ Step by step computations in Table~\ref{step_by_step_calc}.
 \begin{tabular}{|l|l|l|l|l|} \hline \hline
   {\bf Name} & {\bf Input Type} & {\bf Output Type} & {\bf Return Value} \\ \hline \hline
   logit & Vector \(x\) & Vector \(y\) & \(y = \frac{e^x}{1 + 1^x}\) \\ \hline
-  constant & Scalar \(x\) & Vector \(y\) & \(\forall i:~y_i = x \) \\ \hline
+  logit2 & Vector \(x\) & Vector \(y\) & \(y = \frac{e^x}{(1 + 1^x)^2}\) \\ \hline
   vvadd & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x + y \)  \\ \hline
   vvsub & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x - y \)  \\ \hline
   vvmul & Vector \(x\), Vector \(y\) & Vector \(z\) & \(z = x \times y \)  \\ \hline
@@ -141,18 +147,12 @@ Step by step computations in Table~\ref{step_by_step_calc}.
 The Q code will look like the following.
 
 \begin{verbatim}
-t1 = constant(0, N, "int32_t") -- N by 1 vector 
-for j, beta_j in ipairs(beta) do
-  t1 = vvadd(t1, vsmul(Xj, beta_j)) 
-end
+t1 = mvmul(X, beta)  
 p = logit(t1)
+w = logit2(t1)
 t2 = vvsub(y, p)
-w = vvmul(p, vssub(1, p))
-t3 = vvdiv(t2, w)
-t4 = vvadd(t1, t3)
-t5 = vvmul(w, t4)
 for j in 1 to M do 
-  beta[j] = sumprod(Xj, t5) 
+  b[j] = sumprod(Xj, t5) 
 end
 for j in 1 to M do 
   for k in j to M do 
