@@ -95,22 +95,22 @@ bin2asc(
     memset(buf, '\0', BUFLEN);
     switch ( qtype ) { 
       case I1 : 
-        status = I1_to_txt(*((int8_t *)X), NULL, buf, BUFLEN-1); cBYE(status);
+        status = I1_to_txt(((int8_t *)X), NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case I2 : 
-        status = I2_to_txt(*((int8_t *)X),  NULL, buf, BUFLEN-1); cBYE(status);
+        status = I2_to_txt(((int16_t *)X),  NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case I4 : 
-        status = I4_to_txt(*((int8_t *)X), NULL, buf, BUFLEN-1); cBYE(status);
+        status = I4_to_txt(((int32_t *)X), NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case I8 : 
-        status = I8_to_txt(*((int8_t *)X),  NULL, buf, BUFLEN-1); cBYE(status);
+        status = I8_to_txt(((int64_t *)X),  NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case F4 : 
-        status = F4_to_txt(*((int8_t *)X),  NULL, buf, BUFLEN-1); cBYE(status);
+        status = F4_to_txt(((float *)X),  NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case F8 : 
-        status = F8_to_txt(*((int8_t *)X), NULL, buf, BUFLEN-1); cBYE(status);
+        status = F8_to_txt(((double *)X), NULL, buf, BUFLEN-1); cBYE(status);
         break;
       case SC : 
         status = SC_to_txt(X, width, buf, BUFLEN-1); cBYE(status);
@@ -141,7 +141,7 @@ main(
   char *infile    = argv[1];
   char *str_qtype = argv[2]; 
   char *str_len   = argv[3];
-  status = txt_to_I4(str_len, 10, &len); cBYE(status);
+  status = txt_to_I4(str_len, &len); cBYE(status);
   char *opfile    = argv[4];
   status = bin2asc(infile, str_qtype, len, opfile); cBYE(status);
 BYE:

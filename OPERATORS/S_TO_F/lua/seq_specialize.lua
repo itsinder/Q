@@ -2,6 +2,7 @@ return function (
   args
   )
   local qc = require "Q/UTILS/lua/q_core"
+  local ffi = require "Q/UTILS/lua/q_ffi"
 
   assert(type(args) == "table")
   local start  = assert(args.start)
