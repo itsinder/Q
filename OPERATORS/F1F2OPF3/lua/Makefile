@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
-all : _libf1f2opf3.so
+all : libf1f2opf3.so
 	
 vvsub_specialize.lua : vvadd_specialize.lua
 	cat vvadd_specialize.lua | \
@@ -119,9 +119,8 @@ vvgt_specialize.lua  : cmp_specialize.tmpl
 vvlt_specialize.lua  : cmp_specialize.tmpl
 	lua gen_specializers.lua
 
-_libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
+libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
-	cp libf1f2opf3.so ${Q_ROOT}/lib/
 
 _concat_files : 
 	luajit concat_generator.lua concat_operators.lua
