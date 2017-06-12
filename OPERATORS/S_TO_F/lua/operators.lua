@@ -1,6 +1,6 @@
 return {
   "const",
---  "sequence",
+--  "seq",
 --  "period",
---  "random",
+  "rand"
 }

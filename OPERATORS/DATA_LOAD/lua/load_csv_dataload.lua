@@ -1,5 +1,5 @@
-require 'Q/UTILS/lua/globals'
-local g_err = require 'Q/UTILS/lua/error_code'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local err = require 'Q/UTILS/lua/error_code'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
 local Dictionary = require 'Q/OPERATORS/DATA_LOAD/lua/dictionary_dataload'
 local plstring = require 'pl.stringx'
@@ -7,7 +7,7 @@ local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
-local q_core = require 'Q/UTILS/lua/q_core'
+local qc = require 'Q/UTILS/lua/q_core'
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format
@@ -26,12 +26,12 @@ return function (
   local col_num_nil = {}
   local size_of_data_list = {}
    
-  -- assert(type(_G["Q_DICTIONARIES"]) == "table",g_err.NULL_DICTIONARY_ERROR)
+  -- assert(type(_G["Q_DICTIONARIES"]) == "table",err.NULL_DICTIONARY_ERROR)
    
-  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),g_err.INPUT_FILE_NOT_FOUND)
-  assert( plpath.getsize(csv_file_path) ~= 0,g_err.INPUT_FILE_EMPTY)
-  -- assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), g_err.Q_DATA_DIR_NOT_FOUND)
-  -- assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), g_err.Q_META_DATA_DIR_NOT_FOUND)
+  assert( csv_file_path ~= nil and plpath.isfile(csv_file_path),err.INPUT_FILE_NOT_FOUND)
+  assert( plpath.getsize(csv_file_path) ~= 0,err.INPUT_FILE_EMPTY)
+  -- assert( _G["Q_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_DATA_DIR"]), err.Q_DATA_DIR_NOT_FOUND)
+  -- assert( _G["Q_META_DATA_DIR"] ~= nil and plpath.isdir(_G["Q_META_DATA_DIR"]), err.Q_META_DATA_DIR_NOT_FOUND)
   validate_meta(M)
    
 
@@ -48,7 +48,7 @@ return function (
         fld_width = M[i].width
         size_of_data_list[i] = M[i].width
       else
-        size_of_data_list[i] = g_qtypes[M[i].qtype]["width"]
+        size_of_data_list[i] = qconsts.qtypes[M[i].qtype]["width"]
       end
       
       -- If user does no specify null value, then treat null = true as default
@@ -66,7 +66,7 @@ return function (
       if M[i].qtype == "SV" then
         -- initialization to {} is required, if not done then in the second statement dict_table[i].dict, dict_table[i] will be nil
         dict_table[i] = {}
-        dict_table[i].dict = assert(Dictionary(M[i]), g_err.ERROR_CREATING_ACCESSING_DICT )
+        dict_table[i].dict = assert(Dictionary(M[i]), err.ERROR_CREATING_ACCESSING_DICT )
         dict_table[i].add_new_value = M.add
         column_list[i]:set_meta("dir",dict_table[i].dict)
       end 
@@ -74,9 +74,9 @@ return function (
   end
    
    -- mmap function here
-   local f_map = q_core.gc(q_core.f_mmap(csv_file_path, false), q_core.f_munmap)
+   local f_map = ffi.gc(qc.f_mmap(csv_file_path, false), qc.f_munmap)
    assert(f_map.status == 0 , "Mmap failed")
-   local X = q_core.cast("char *", f_map.ptr_mmapped_file)
+   local X = ffi.cast("char *", f_map.ptr_mmapped_file)
    local nX = tonumber(f_map.file_size)
    assert(nX > 0, "File cannot be empty")
    
@@ -95,9 +95,9 @@ return function (
    l:append(2*g_max_width_SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
-   local buf = q_core.malloc(buf_sz)
-   local cbuf = q_core.malloc(cbuf_sz)
-   local is_null = q_core.malloc(1)
+   local buf = ffi.malloc(buf_sz)
+   local cbuf = ffi.malloc(cbuf_sz)
+   local is_null = ffi.malloc(1)
    local ncols = #M
    local row_idx = 0
    local col_idx = 0
@@ -109,32 +109,32 @@ return function (
       else
          is_last_col = false;
       end
-      x_idx = tonumber( q_core.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
+      x_idx = tonumber( qc.get_cell(X, nX, x_idx, is_last_col, buf, buf_sz)  )
 
-      assert(x_idx > 0 , g_err.INVALID_INDEX_ERROR)
+      assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
       
       -- check if the column needs to be skipped while loading or not 
       if column_list[col_idx  + 1 ] then 
-        q_core.fill(is_null, 1, 255) -- initially will be false = 1
+        ffi.fill(is_null, 1, 255) -- initially will be false = 1
   
         if M[col_idx + 1].qtype == "SV" then 
-          if plstring.strip(q_core.string(buf)) ~= "" then 
-            local ret_number = dict_table[col_idx + 1].dict:add_with_condition(q_core.string(buf),
+          if plstring.strip(ffi.string(buf)) ~= "" then 
+            local ret_number = dict_table[col_idx + 1].dict:add_with_condition(ffi.string(buf),
               dict_table[col_idx + 1].add_new_value)  
-            q_core.copy(buf, tostring(ret_number))
+            ffi.copy(buf, tostring(ret_number))
           end   
         elseif M[col_idx + 1].qtype == "SC" then 
-          assert( string.len(q_core.string(buf)) <= M[col_idx + 1].width -1, g_err.STRING_GREATER_THAN_SIZE )  
+          assert( string.len(ffi.string(buf)) <= M[col_idx + 1].width -1, err.STRING_GREATER_THAN_SIZE )  
         end
              
-        q_core.memset(cbuf, 0, size_of_data_list[col_idx + 1])
-        local str = plstring.strip(q_core.string(buf))
+        ffi.fill(cbuf, size_of_data_list[col_idx + 1], 0)
+        local str = plstring.strip(ffi.string(buf))
         --if q_core.string(buf) == "" then 
         if str == "" then 
           -- nil values
-          assert( M[col_idx + 1].has_nulls == true, g_err.NULL_IN_NOT_NULL_FIELD )
+          assert( M[col_idx + 1].has_nulls == true, err.NULL_IN_NOT_NULL_FIELD )
           M[col_idx + 1].num_nulls = M[col_idx + 1].num_nulls + 1
-          q_core.fill(is_null, 1,0)
+          ffi.fill(is_null, 1, 0)
           if col_num_nil[col_idx + 1] == nil then 
             col_num_nil[col_idx + 1] =  1 
           else 
@@ -143,21 +143,21 @@ return function (
         else 
           local status = nil
           local qtype = M[col_idx + 1].qtype
-          local function_name = g_qtypes[qtype]["txt_to_ctype"]
+          local function_name = qconsts.qtypes[qtype]["txt_to_ctype"]
           -- for fixed size string pass the size of string data also
           if qtype == "SC" then
-            q_core.copy(cbuf, buf, string.len(q_core.string(buf))) 
+            ffi.copy(cbuf, buf, string.len(ffi.string(buf))) 
             status = 0 
           elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
-            status = q_core[function_name](buf, 10, cbuf)
+            status = qc[function_name](buf, 10, cbuf)
           elseif qtype == "F4" or qtype == "F8"  then 
-            status = q_core[function_name](buf, cbuf)
+            status = qc[function_name](buf, cbuf)
           else 
             error("Data type : " .. qtype .. " Not supported ")
           end
           
-          assert( status >= 0 , g_err.INVALID_DATA_ERROR )
+          assert( status >= 0 , err.INVALID_DATA_ERROR )
         end   
            
         column_list[col_idx+1]:put_chunk(1, cbuf, is_null)
@@ -181,7 +181,7 @@ return function (
       -- if no nulls are present, then delete the null file
       if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
         local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
-        assert(plfile.delete(null_file),g_err.INPUT_FILE_NOT_FOUND)
+        assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
       end
    end
    -- print("Completed successfully")

@@ -12,7 +12,7 @@ category5 - getting valid string stored at particular index from dictionary
 For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
-local g_err = require 'Q/UTILS/lua/error_code'
+local err = require 'Q/UTILS/lua/error_code'
 
 return { 
       -- checking the return of dict is dictionary
@@ -20,11 +20,11 @@ return {
       
       -- checking of invalid dict add to a dictionary by comparing the output_regex error message
       { name = "empty string ", category = "category2", input = "", meta = "test_add_nil.lua", 
-        output_regex = g_err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
+        output_regex = err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
       
       -- checking of invalid dict add to a dictionary by comparing the output_regex error message
       { name = "nil dict ", category = "category2", input = nil, meta = "test_add_nil.lua", 
-        output_regex = g_err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
+        output_regex = err.ADD_NIL_EMPTY_ERROR_IN_DICT  },
       
       -- checking of adding a valid dictionary entries to a dictionary and checking valid get size from a dictionary
       -- dict name = D2
