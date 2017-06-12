@@ -1,4 +1,4 @@
-OUTPUTS = libq.so libq_core.so q.h q_core.h
+OUTPUTS = libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
 clean:
@@ -6,7 +6,7 @@ clean:
 	find ${Q_ROOT}/lib -type f | xargs rm
 	find ${Q_ROOT}/bin -type f | xargs rm
 	rm -rf /tmp/LUA*
-	rm -f /tmp/libq.so /tmp/libq_core.so
+	rm -f /tmp/libq_core.so
 
 install:
 	cd ../../;\
@@ -18,10 +18,8 @@ install:
 	cp -r  q_export.lua /usr/local/share/lua/5.1/Q;\
 	cp -r  init.lua /usr/local/share/lua/5.1/Q;\
 	# FIX THIS, pick library from build target
-	cp ${Q_ROOT}/lib/libq.so /usr/lib;\
+	cp ${Q_ROOT}/lib/libq_core.so /usr/lib;\
 	cp ${Q_ROOT}/include/q_core.h /usr/local/share/lua/5.1/Q
-
-libq.so: libq_core.so q.h
 
 all: q_core
 	cd ${BASE_PATH}
@@ -29,9 +27,6 @@ all: q_core
 q_core: libq_core.so q_core.h
 	luajit mk_so.lua /tmp/
 	echo "all done for q_core"
-
-q: libq.so q.h
-	echo "all done for q"
 
 q_core.h: column utils load_csv
 	echo "all done for q_core.h"
