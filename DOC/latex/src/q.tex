@@ -1,0 +1,96 @@
+\startreport{Q: A Developer's Guide}
+\reportauthor{Ramesh Subramonian}
+
+\section{Introduction}
+
+The aim of this document is to provide a step-by-step guide to being a
+library developeri, working on the internals of Q. We will also
+discuss how packaging and installation are done and how to operate as
+a Q developer. A Q developer need have {\bf no} idea about the
+internals of Q --- it is just another Lua package. Of course,
+understanding the internals, to some extent, allows for more efficient
+usage of the Q primitives.
+
+\section{Getting Started}
+\label{getting_started}
+
+\subsection{Environment Variables}
+\label{env_var}
+So, you want to modify the guts of Q? Here's a step by step guide.
+
+\be
+\item Say, you are in \verb+/home/subramon/WORK/+ 
+\item \verb+git clone https://github.com/NerdWalletOSS/Q.git+
+\item Set the following environment variables
+using \verb+source setup.sh -f+. Note that this is just a convenience. If you
+want, you can set them yourself but then the onus is on you to get things right.
+These are
+\be
+\item \verb+QC_FLAGS+ --- these will be used as flags to gcc when creating
+\verb+.o+ files
+\item\verb+Q_LINK_FLAGS+ --- these will be used as flags to gcc when creating
+\verb+.so+ files
+\item \verb+Q_ROOT+ ---  This is where artifacts created by the build provess
+will be stored. As of now, they are
+\be
+\item \verb+Q_ROOT/lib/+ --- contains \verb+libq_core.so+
+\item \verb+Q_ROOT/include/+ --- contains \verb+q_core.h+
+\item \verb+Q_ROOT/tmpl/+ --- contains templates, used for dynamic code
+generation
+\ee
+\item \verb+Q_DATA_DIR+ --- This is where data files will be stored. Think of
+this as a tablespace and keep a separate one for each project you are working
+\item \verb+Q_METADATA_DIR+ --- This is where meta data files will be stored. Think of
+this as a tablespace and keep a separate one for each project you are working
+on. Default will be \verb+Q_ROOT/meta/+
+\item 
+\verb+LD_LIBRARY_PATH+ Make sure that this includes \verb+Q_ROOT/lib/+ This is
+where \verb+libq_core.so+ will be created
+\item \verb+ LUA_PATH+, Section~\ref{masquerade}
+\ee
+\ee
+
+\subsubsection{Consequences}
+
+There are some important consequences of the above. 
+\be
+\item 
+{\bf Do  not set} these environment variables in any of your scripts.
+\item {\bf Do not use} \verb+Q_ROOT+ anywhere except in \verb+Q/UTILS/build+
+\ee
+
+
+\subsection{Building}
+
+C programs are used to augment Lua in two important ways
+\be
+\item to help with code generation and to perform some functionality that 
+could not be done easily (or in a performant manner) in Lua. Examples
+of these are text converters like \verb+txt_to_I8+ or \verb+get_cell+
+\item the computational workhorse. This is where the heavy lifting happens.
+\ee
+
+You will note a bit of a circular dependency. We need C code to create
+C code.  This is broken in one of two ways
+\be
+\item Execute \verb+Q/UTILS/mk_core_so.lua+ This creates the following 
+files 
+\be
+\item \verb+Q_ROOT/include/q_core.h+ --- which is used for \verb+ffi.cdef()+
+\item \verb+Q_ROOT/lib/q_core.so+ --- which is used for \verb+ffi.load()+
+\ee
+You are have the C functionality needed for code generation
+
+\item Within \verb+Q/UTILS/build/+, do {\tt make clean; make} 
+\ee
+
+\subsection{Masquerading as a Q developer}
+\label{masquerade}
+
+From time to time, you will need to pretend to be a Q developer so that you can
+test your code. To enable this to happen without re-installing Q, you set
+\verb+LUA_PATH+ as below. Note the double semi-colon at the end. That is needed.
+Srinath to fill in the gaps \TBC
+\begin{verbatim}
+\verb+/home/subramon/WORK/?.lua;;+
+\end{verbatim}

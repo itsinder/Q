@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-test -d $Q_ROOT
 bash clean.sh
 rm -r -f ../gen_inc; mkdir -p ../gen_inc/
 rm -r -f ../gen_src; mkdir -p ../gen_src/
@@ -18,7 +17,6 @@ while read line; do
 done< _x
 gcc $Q_LINK_FLAGS *.o -o libf1s1opf2.so
 rm -f *.o 
-cp libf1s1opf2.so $Q_ROOT/lib
 rm -f _x
 cd -
 echo "ALL DONE; $0 in $PWD"

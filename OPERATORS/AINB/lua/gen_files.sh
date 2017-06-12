@@ -17,7 +17,6 @@ while read line; do
 done< _x
 echo "Done compiling"
 gcc $Q_LINK_FLAGS *.o -o libainb.so
-cp libainb.so $Q_ROOT/lib/
 rm -f *.o *
 rm -f _x
 cd -

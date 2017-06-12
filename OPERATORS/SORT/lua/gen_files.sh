@@ -10,7 +10,6 @@ while read line; do
   gcc -c $QC_FLAGS $line -I../gen_inc -I../../../UTILS/inc/
 done< _x
 gcc $Q_LINK_FLAGS *.o -o libsort.so
-cp libsort.so $Q_ROOT/lib/
 rm -f _x
 cd -
 echo "ALL DONE"
