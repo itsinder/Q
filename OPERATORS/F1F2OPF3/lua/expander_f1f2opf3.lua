@@ -21,7 +21,7 @@
       local f1_chunk_size = f1:chunk_size()
       local f2_chunk_size = f2:chunk_size()
       assert(f1_chunk_size == f2_chunk_size)
-      local buff = ffi.malloc(f1_chunk_size * z_width)
+      local buff = ffi.malloc(f1_chunk_size * f3_width)
       local nn_buff = nil -- Will be created if nulls in input
       if f1:has_nulls() or f2:has_nulls() then
         local width = qconsts.qtypes["B1"].width
@@ -34,14 +34,14 @@
         f2_status, f2_len, f2_chunk, nn_f2_chunk = coroutine.resume(f2_coro)
         assert(f1_status == f2_status)
         if f1_status then
-          ssert(f1_len == f2_len)
+          assert(f1_len == f2_len)
           assert(f1_len > 0)
           qc[func_name](f1_chunk, f2_chunk, f1_len, buff)
           coroutine.yield(f1_len, buff, nn_buff)
         end
       end
     end)
-    return Column{gen=f3_coro, nn=(nn_buf ~= nil), field_type=z_qtype}
+    return Column{gen=f3_coro, nn=(nn_buf ~= nil), field_type=f3_qtype}
   end
 
   return expander_f1f2opf3
