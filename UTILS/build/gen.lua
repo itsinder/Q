@@ -18,11 +18,10 @@ T[#T+1] = { dir = "/OPERATORS/S_TO_F/lua/", scripts = { "gen_files.sh"}}
 T[#T+1] = { dir = "/OPERATORS/S_TO_F/lua/", scripts = { "pkg_s_to_f.lua"}}
 T[#T+1] = { dir = "/OPERATORS/AX_EQUALS_B/", scripts = { "make clean && make" } }
 --========================
-local Tc = {} -- This is to build q_core.h and libq_core.so
-Tc[#Tc+1] = {dir = "/UTILS/src/", scripts = { "gen_files.sh" } }
-Tc[#Tc+1] = {dir = "/OPERATORS/LOAD_CSV/lua/", scripts = { "gen_files.sh" }}
-Tc[#Tc+1] = {dir = "/OPERATORS/LOAD_CSV/src/", scripts = { "gen_files.sh" }}
-Tc[#Tc+1] = {dir = "/OPERATORS/PRINT/src/", scripts = { "gen_files.sh" }}
-Tc[#Tc+1] = {dir = "/OPERATORS/PRINT/lua/", scripts = { "gen_files.sh" }}
+T[#T+1] = {dir = "/UTILS/src/", scripts = { "gen_files.sh" } }
+T[#T+1] = {dir = "/OPERATORS/LOAD_CSV/lua/", scripts = { "gen_files.sh" }}
+T[#T+1] = {dir = "/OPERATORS/LOAD_CSV/src/", scripts = { "gen_files.sh" }}
+T[#T+1] = {dir = "/OPERATORS/PRINT/src/", scripts = { "gen_files.sh" }}
+T[#T+1] = {dir = "/OPERATORS/PRINT/lua/", scripts = { "gen_files.sh" }}
 --========================
-return T, Tc
+return T

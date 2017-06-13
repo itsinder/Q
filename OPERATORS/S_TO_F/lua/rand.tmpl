@@ -1,38 +1,77 @@
-return require 'code_gen' {
+return require 'Q/UTILS/lua/code_gen' {
 
    declaration = [[
 
+#include <limits.h>
+#include <math.h>
+#include "q_macros.h"
+#include <stdio.h>
 #include <stdint.h>
+#include <time.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct _rand_${out_qtype}_rec_type {
+  uint64_t seed;
+  ${out_ctype} lb;
+  ${out_ctype} ub;
+} RAND_${out_qtype}_REC_TYPE;
+
 extern int
 rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  ${out_ctype} *ptr_val
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
+  bool is_first
   );
    ]],
+
    definition = [[
 
 #include "_rand_${out_qtype}.h"
 
+static inline uint64_t RDTSC()
+{
+  unsigned int hi, lo;
+    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+      return ((uint64_t)hi << 32) | lo;
+}
 
 //START_FUNC_DECL
 int
 rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
-  ${out_ctype} *ptr_val
+  RAND_${out_qtype}_REC_TYPE *ptr_in,
+  bool is_first
   )
 //STOP_FUNC_DECL
 {
   int status = 0;
-  ${out_ctype} val = *ptr_val;
+
+  uint64_t seed = ptr_in->seed;
+  ${out_ctype} lb = ptr_in->lb;
+  ${out_ctype} ub = ptr_in->ub;
+  if ( is_first ) { //seed has not yet been set
+    if ( seed == 0 ) {
+     seed = RDTSC();
+    }
+    srand48(seed);
+  }
+  ${out_ctype} range = ub - lb;
 #pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
-    X[i] = val;
+    ${gen_type} x = ${generator}();
+    X[i] = (${out_ctype}) (lb + (${scaling_code}) );
+#ifdef DEBUG
+    if ( ( X[i] < lb ) || ( X[i] > ub ) ) { 
+      go_BYE(-1);
+    }
+#endif
   }
+BYE:
   return status;
 }
-
 
    ]]
 }

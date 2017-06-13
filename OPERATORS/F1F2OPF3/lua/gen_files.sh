@@ -5,8 +5,7 @@ mkdir -p ../gen_inc
 rm -f ../gen_src/_*.c
 rm -f ../gen_src/_*.o
 rm -f ../gen_inc/_*.h
-rm -f  $Q_ROOT/lib/libf1f2opf3.so 
-bash cleanup.sh
+bash clean.sh
 lua gen_specializers.lua
 
 luajit concat_generator.lua concat_operators.lua
@@ -20,7 +19,6 @@ while read line; do
   gcc -c $line $QC_FLAGS -I../gen_inc -I../../../UTILS/inc/ 
 done< _x
 gcc $Q_LINK_FLAGS *.o -o libf1f2opf3.so
-cp libf1f2opf3.so $Q_ROOT/lib/
 rm -f *.o
 rm -f _x
 cd -

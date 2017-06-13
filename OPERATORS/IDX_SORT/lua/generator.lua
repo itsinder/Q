@@ -1,4 +1,4 @@
-  require 'Q/UTILS/lua/globals'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
 
   local tmpl = dofile 'idx_qsort.tmpl'
 
@@ -11,9 +11,9 @@
       for k, idx_type in ipairs(idx_types) do 
         tmpl.srt_ordr = ordr
         tmpl.val_type_displ = val_type
-        tmpl.val_type = g_qtypes[val_type].ctype
+        tmpl.val_type = qconsts.qtypes[val_type].ctype
         tmpl.idx_type_displ = idx_type
-        tmpl.idx_type = g_qtypes[idx_type].ctype
+        tmpl.idx_type = qconsts.qtypes[idx_type].ctype
         -- TODO Check below is correct order/comparator combo
         if ordr == "asc" then c = "<" end
         if ordr == "dsc" then c = ">" end

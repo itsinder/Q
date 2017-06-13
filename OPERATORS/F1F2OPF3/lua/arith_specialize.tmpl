@@ -4,14 +4,15 @@ return function (
   f2type
   )
   local promote = require 'Q/UTILS/lua/promote'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
   out_qtype = promote(f1type, f2type)
   local tmpl = 'base.tmpl'
   local subs = {}; 
   subs.fn = "<<operator>>_" .. f1type .. "_" .. f2type .. "_" .. out_qtype 
-  subs.in1_ctype = g_qtypes[f1type].ctype
-  subs.in2_ctype = g_qtypes[f2type].ctype
+  subs.in1_ctype = qconsts.qtypes[f1type].ctype
+  subs.in2_ctype = qconsts.qtypes[f2type].ctype
   subs.out_qtype = out_qtype
-  subs.out_ctype = g_qtypes[out_qtype].ctype
+  subs.out_ctype = qconsts.qtypes[out_qtype].ctype
   subs.c_code_for_operator = "c = a <<mathsymbol>> b; "
   return subs, tmpl
 end

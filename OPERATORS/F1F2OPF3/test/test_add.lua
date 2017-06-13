@@ -4,11 +4,12 @@ local c3 = c1
 c1 = 10
 print(c1)
 local c2 = Q.mk_col( {80,70,60,50,40,30,20,10}, "I4")
-local z = Q.vvadd(c3, c2, "junk")
+local z = Q.vvadd(c3, c2, { junk = "junk" } )
 -- local dbg = require 'Q/UTILS/lua/debugger'
 z:eval()
 -- print(z:length())
 Q.print_csv(z, { lb = 1, ub = 4} , "")
+print("Successfully completed")
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

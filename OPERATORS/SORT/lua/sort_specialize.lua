@@ -1,4 +1,5 @@
 return function(in_qtype, ordr)
+  local qconsts = require 'Q/UTILS/lua/q_consts'
   assert(type(ordr) == "string", "error")
   if ( ordr == "ascending" ) then ordr = "asc" end 
   if ( ordr == "descending" ) then ordr = "dsc" end 
@@ -8,7 +9,7 @@ return function(in_qtype, ordr)
   subs.SORT_ORDER = ordr
   subs.QTYPE = in_qtype
   subs.fn = "qsort_" .. ordr .. "_" .. in_qtype
-  subs.FLDTYPE = g_qtypes[in_qtype].ctype
+  subs.FLDTYPE = qconsts.qtypes[in_qtype].ctype
   -- TODO Check below is correct order/comparator combo
   local c = ""
   if ordr == "asc" then c = "<" end

@@ -1,11 +1,9 @@
   local gen_code = require 'Q/UTILS/lua/gen_code'
-  local plpath = require "pl.path"
-  require 'Q/UTILS/lua/globals'
+  local plpath   = require "pl.path"
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
   plpath.mkdir(srcdir)
   plpath.mkdir(incdir)
-
 
   local types = { 'F4', 'F8' }
 
