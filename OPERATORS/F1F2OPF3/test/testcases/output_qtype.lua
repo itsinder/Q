@@ -1,11 +1,12 @@
 -- get output qtype. in case of vvrem, logic is different from others
 local promote = require 'Q/UTILS/lua/promote'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local fns = {}
 
 fns.vvrem = function(qtype_input1, qtype_input2)  
   local qtype
-  local sz1 = assert(g_qtypes[qtype_input1].width)
-  local sz2 = assert(g_qtypes[qtype_input2].width)
+  local sz1 = assert(qconsts.qtypes[qtype_input1].width)
+  local sz2 = assert(qconsts.qtypes[qtype_input2].width)
   if ( sz1 < sz2 ) then 
     qtype = qtype_input1  
   else

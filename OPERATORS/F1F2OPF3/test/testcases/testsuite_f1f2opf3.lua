@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 -- list of qtypes to be operated on
 local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
 local concat_in_qtypes = { "I1", "I2", "I4" }
@@ -59,9 +60,9 @@ local create_tests = function()
           local input_type2 = q_type[2]
           local output_type = concat_out_qtypes[k]
             
-          local sz1 = assert(g_qtypes[input_type1].width)
-          local sz2 = assert(g_qtypes[input_type2].width)
-          local sz3 = assert(g_qtypes[output_type].width)
+          local sz1 = assert(qconsts.qtypes[input_type1].width)
+          local sz2 = assert(qconsts.qtypes[input_type2].width)
+          local sz3 = assert(qconsts.qtypes[output_type].width)
           if sz3 > sz1 and sz3 > sz2 then
             --print(concat_in_qtypes[i], concat_in_qtypes[j], concat_out_qtypes[k])
             local test_name = "concat_" .. input_type1 .. "_" .. input_type2 .. "_" .. output_type
