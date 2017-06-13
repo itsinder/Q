@@ -50,7 +50,7 @@ int main (
 
   //----------------------------------------------------------------------
 
-  long long num_quantile = 1000; 
+  long long num_quantile = 20;//1000; 
   /* ex: 5 => need 5 quantiles {20%,40%,60%,80%,100%}, choose between 1 & number of elements to be considered */
   if ( num_quantile == 0 ) { cBYE(-1);}
 
