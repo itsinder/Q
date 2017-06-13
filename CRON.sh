@@ -9,8 +9,8 @@ pre_build_cleanup(){
    rm -f /tmp/q_core.h
    rm -f /tmp/q.h
    rm -rf /tmp/LUA*
-   rm -rf $Q_ROOT/include/*
-   rm -rf $Q_ROOT/lib/*
+   rm -rf $HOME/local/Q/include/*
+   rm -rf $HOME/local/Q/lib/*
 }
 
 report_files_cleanup(){

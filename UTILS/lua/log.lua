@@ -99,6 +99,7 @@ end
 if oassert == nil then
     oassert = assert
 end
+--[[
 assert = function(cond, ...)
     if cond then
         return cond, ...
@@ -115,4 +116,5 @@ assert = function(cond, ...)
         error(cond)
     end
 end
+]]
 return log

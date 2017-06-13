@@ -1,5 +1,7 @@
 local ffi = require 'ffi'
 local plstring = require 'pl.stringx'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
 ffi.cdef
@@ -90,7 +92,7 @@ fns.category2 = function (index, v, status, ret)
   
   for i=1,ret:length() do  
     local result = ret:get_element(i-1)
-    local ctype =  g_qtypes[ret:fldtype()]["ctype"]
+    local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
     local str = ffi.cast(ctype.." *",result)
     local final_result = str[0]
     local is_float = ret:fldtype() == "F4" or ret:fldtype() == "F8"
