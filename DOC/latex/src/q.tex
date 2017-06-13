@@ -113,7 +113,7 @@ C code.  This is broken in one of two ways
 files 
 \be
 \item \verb+Q_ROOT/include/q_core.h+ --- which is used for \verb+ffi.cdef()+
-\item \verb+Q_ROOT/lib/q_core.so+ --- which is used for \verb+ffi.load()+
+\item \verb+Q_ROOT/lib/libq_core.so+ --- which is used for \verb+ffi.load()+
 \ee
 You are have the C functionality needed for code generation
 
@@ -274,3 +274,7 @@ the shared library is unloaded (as a consequence of \verb+lua_close()+).
 Looks like OpenMP doesn't like to be unloaded --- this never
 happens with programs that are statically linked against it.
 
+
+\section{Data Types}
+
+\subsection{Bit Vectors}
