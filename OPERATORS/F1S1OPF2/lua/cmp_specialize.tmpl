@@ -3,6 +3,7 @@ return function (
   scalar
   )
     local qconsts = require 'Q/UTILS/lua/q_consts'
+    local ffi     = require 'Q/UTILS/lua/q_ffi'
     assert(( in_qtype == "I1" ) or ( in_qtype == "I2") or ( in_qtype == "I4" ) or 
        ( in_qtype == "I8" ) or ( in_qtype == "F4") or ( in_qtype == "F8" ),
        "type must be I1/I2/I4/I8/F4/F8")
@@ -12,6 +13,6 @@ return function (
     subs.in_ctype = qconsts.qtypes[in_qtype].ctype
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
-    subs.c_mem = 0 -- TODO 
+    subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar.value} )
     return subs, tmpl
 end

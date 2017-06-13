@@ -22,3 +22,11 @@ rm -f vslt_specialize.lua
 rm -f vsleqorgeq_specialize.lua
 rm -f vsgeqandleq_specialize.lua
 rm -f vsgtandlt_specialize.lua
+rm -f vsltorgt_specialize.lua
+
+rm -f  log_specialize.lua
+rm -f  logit_specialize.lua
+rm -f  logit2_specialize.lua
+rm -f  incr_specialize.lua
+rm -f  exp_specialize.lua
+rm -f  decr_specialize.lua

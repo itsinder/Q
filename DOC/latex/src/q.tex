@@ -3,20 +3,21 @@
 
 \section{Introduction}
 
-The aim of this document is to provide a step-by-step guide to being a
-library developer, working on the internals of Q. We will also
-discuss how packaging and installation are done and how to operate as
-a Q developer. A Q developer need have {\bf no} idea about the
-internals of Q --- it is just another Lua package. Of course,
-understanding the internals, to some extent, allows for more efficient
-usage of the Q primitives.
-
-Remember, we have 2 distinct roles
+This document is written with two distinct audiences in mind.
 \be
 \item Library developer: The folks developing the Q library 
 \item Q programmer aka user: The developers who'll use the Q library
 \ee
 Note these are just roles, the same person can play both.
+
+The aim of this document is to provide a step-by-step guide to being a
+library developer, working on the internals of Q. We will also
+discuss how packaging and installation are done and how to operate as
+a Q programmer. A Q programmer need have {\bf no} idea about the
+internals of Q --- it is just another Lua package. Of course,
+understanding the internals, to some extent, allows for more efficient
+usage of the Q primitives.
+
 
 \section{Getting Started}
 \label{getting_started}
@@ -61,7 +62,7 @@ on. Default will be \verb+Q_ROOT/meta/+
 \item 
 \verb+LD_LIBRARY_PATH+ Make sure that this includes \verb+Q_ROOT/lib/+ This is
 where \verb+libq_core.so+ will be created
-\item \verb+ LUA_PATH+, Section~\ref{masquerade}
+\item \verb+LUA_PATH+, Section~\ref{masquerade}
 \ee
 \ee
 
@@ -69,24 +70,25 @@ where \verb+libq_core.so+ will be created
 
 There are some important consequences of the above. 
 \be
-\item {\bf Do  not set} these environment variables in any of your scripts.
+\item {\bf Do  not set} above environment variables in any of your scripts.
 \item {\bf Do not use} \verb+Q_ROOT+ anywhere except in \verb+Q/UTILS/build+
 \item In your Lua scripts, you must specify the entire path of the file you want
 to require e.g.,
 \begin{center}
 {\tt local foo = require 'Q/UTILS/lua/foo' }
 \end{center}
-\item Use the following conventions for your require's. We will explain each
-one below.
+\item There are a few ``requires'' that I would like to highlight.
 \begin{verbatim}
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 \end{verbatim}
 \be
-\item qconsts contains constants
-\item qc contains all C functions that are accessible to Lua. See  Section~\ref{two_kinds_c_functions}.
-\item ffi is the same as on \url{http://luajit.org}. 
+\item qconsts contains constants e.g., \verb+qconsts.qtypes+ describes the
+various qtypes.
+\item qc contains all C functions that are accessible to Lua. See  Section~\ref{two_kinds_c_functions}. Example, \verb+qc["txt_to_I8"]+
+\item ffi is the same as on \url{http://luajit.org}, except that malloc has been
+modified a bit.
 \ee
 \ee
 
@@ -141,10 +143,10 @@ You need to know a few things to understand the underlying mechanism
 
 
 
-\subsection{Masquerading as a Q developer}
+\subsection{Masquerading as a Q programmer}
 \label{masquerade}
 
-From time to time, you will need to pretend to be a Q developer so that you can
+From time to time, you will need to pretend to be a Q programmer so that you can
 test your code. To enable this to happen without re-installing Q, you set
 \verb+LUA_PATH+ as below. Note the double semi-colon at the end. That is needed.
 Srinath to fill in the gaps \TBC
@@ -167,7 +169,7 @@ cd $Q_SRC_ROOT; sudo bash q_install.sh
 %$
 \subsection{Usage}
 
-The Q developer does not need to set any of the environment variables of
+The Q programmer does not need to set any of the environment variables of
 Section~\ref{env_var}, except for 
 \verb+Q_DATA_DIR, Q_METADATA_DIR+, which {\em must} be set. 
 In an earlier version, we had required them
@@ -201,9 +203,50 @@ local}.
 \verb+os.exit()+
 \ee
 
-\appendix
+\section{LuaJIT}
+ I am going to make a difficult decision, favoring immediate 
+ expediency for long term portability.  Basically, decision is to tie 
+ ourselves to LuaJIT. This means we do {\bf not}  use features of Lua that 
+ come after 5.1.3. This is a moving target, depending on what Mike Pall is
+ willing to support. 
 
-\section{LuaJIT and OpenMP}
+ Andrew: I think the value terra brings alone is probably worth that. 
+
+\subsection{Performance tips}
+Following are all available on \url{luajit.org} and reproduced for convenience. 
+
+\be
+\item 
+ffi.copy() may be used as a faster (inlinable) replacement
+ for the C library functions memcpy(), strcpy() and strncpy().
+\ee
+
+\subsection{Converting numbers from Lua to C and vice versa}
+
+A simple way to convert Lua Number to C data struture using FFI API is
+\begin{verbatim}
+local chunk = ffi.new(ctype .. "[?]", length, input)
+\end{verbatim}
+where
+\be
+\item 
+\item chunk  ---  C data struture of type ctype
+\item ctype  ---  datatype e.g. -  int, char, float etc.
+\item input  ---  Lua table of Lua number
+\item length ---  number of elements
+\ee
+
+Reference link \url{http://luajit.org/ext_ffi.html}
+
+Extensions to the Lua Parser. 
+The parser for Lua source code treats numeric literals with the suffixes LL
+or ULL as signed or unsigned 64 bit integers. Case doesn't matter, but
+uppercase is recommended for readability. It handles both decimal (42LL)
+and hexadecimal (0x2aLL) literals.
+
+%----------------------------------
+
+\subsection{LuaJIT and OpenMP}
 
 Ciprian Tomoiaga wrote:
 {\it I have a C function containing OpenMP clause which I call with ffi. On my
