@@ -11,5 +11,6 @@ require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3"
 require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2"
 require "Q/OPERATORS/S_TO_F/lua/_s_to_f"
 require "Q/OPERATORS/F_TO_S/lua/_f_to_s"
+require "Q/OPERATORS/AX_EQUALS_B/lua/linear_solver"
 
 return require 'Q/q_export'

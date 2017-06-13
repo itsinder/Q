@@ -20,7 +20,6 @@ while read line; do
     -I../gen_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ 
 done< _x
 gcc ../gen_src/*.o ../src/*.o -shared -o libload_csv.so
-cp libload_csv.so $Q_ROOT/lib/
 # cleanup
 rm -f *.o
 rm -f _x

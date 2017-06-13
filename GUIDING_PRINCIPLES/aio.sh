@@ -64,6 +64,7 @@ if [[ $RES -ne 0 ]] ; then
    sudo luarocks install penlight
    sudo luarocks install luaposix
    sudo luarocks install luv
+   sudo luarocks install busted
 else
    my_print "luarocks is already installed"
 fi

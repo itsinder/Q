@@ -52,8 +52,9 @@ unset LD_LIBRARY_PATH
 # Wont work with simlinks
 BASE_PATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 echo "BASE_PATH: $BASE_PATH"
-export Q_ROOT="${Q_ROOT:=${HOME}/Q}"
+export Q_ROOT="${Q_ROOT:=${HOME}/local/Q}"
 echo "Q_ROOT: $Q_ROOT"
+mkdir -p $HOME/local/
 mkdir -p $Q_ROOT/include 
 mkdir -p $Q_ROOT/lib
 # export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin

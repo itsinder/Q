@@ -1,6 +1,5 @@
 local Q_core = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
-local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 
 return function(func_name, A, b)
   assert(type(A) == "table", "A should be a table of columns")
@@ -32,10 +31,8 @@ return function(func_name, A, b)
   assert(Q_core["full_positive_solver_check"](A_chunks, x_chunk, b_chunk, n, 0),
          "solution returned by solver "..func_name.." is invalid")
 
-  local x = {}
-  for i = 1, n do
-    x[i] = x_chunk[i-1]
-  end
-
-  return mk_col(x, "F8")
+  local x_col = Q.Column({field_type = "F8", write_vector = true})
+  x_col:put_chunk(n, x_chunk)
+  x_col:eov()
+  return x_col
 end
