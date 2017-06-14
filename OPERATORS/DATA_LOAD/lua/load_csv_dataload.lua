@@ -151,8 +151,8 @@ return function (
             status = 0 
           elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
-            print(function_name)
-            status = qc[function_name](buf, 10, cbuf)
+            -- print(function_name)
+            status = qc[function_name](buf, cbuf)
           elseif qtype == "F4" or qtype == "F8"  then 
             status = qc[function_name](buf, cbuf)
           else 
