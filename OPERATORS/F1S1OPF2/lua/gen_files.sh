@@ -7,7 +7,7 @@ lua gen_specializers.lua
 luajit generator0.lua  operators0.lua
 luajit generator1.lua  arith_operators.lua
 luajit generator1.lua  cmp_operators.lua
-# TODO luajit generator2.lua  cmp2_operators.lua
+# WONTFIX luajit generator2.lua  cmp2_operators.lua
 
 cd ../gen_src/
 ls *c > _x

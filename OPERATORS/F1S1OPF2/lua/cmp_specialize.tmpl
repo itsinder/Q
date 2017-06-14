@@ -9,7 +9,7 @@ return function (
        "type must be I1/I2/I4/I8/F4/F8")
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 
-    subs.fn = "<<operator>>" .. in_qtype 
+    subs.fn = "<<operator>>_" .. in_qtype 
     subs.in_ctype = qconsts.qtypes[in_qtype].ctype
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
