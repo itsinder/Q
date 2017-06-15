@@ -2,6 +2,8 @@
   local plpath = require 'pl.path'
   local srcdir = '../gen_src/'
   local incdir = '../gen_inc/'
+  if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
+  if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
   local operator_file = assert(arg[1])
   assert(plpath.isfile(operator_file))
   local operators = assert(dofile(operator_file))

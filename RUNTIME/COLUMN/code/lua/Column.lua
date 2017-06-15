@@ -110,9 +110,9 @@ end
 
 function Column:has_nulls()
     if self.nn_vec == nil  then
-        return true
-    else
         return false
+    else
+        return true
     end
 end
 
