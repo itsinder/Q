@@ -1,5 +1,5 @@
 DEFAULT_GOAL := all
-OUTPUTS = libq.so libq_core.so q.h q_core.h
+OUTPUTS = libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
 all: q_core
@@ -10,7 +10,7 @@ clean:
 	find ${Q_ROOT}/lib -type f | xargs rm -f
 	find ${Q_ROOT}/include -type f | xargs rm -f
 	rm -rf /tmp/LUA*
-	rm -f /tmp/libq.so /tmp/libq_core.so
+	rm -f /tmp/libq_core.so
 	cd ${BASE_PATH}/OPERATORS/F1F2OPF3/lua/;\
 		bash clean.sh
 	cd ${BASE_PATH}/OPERATORS/F1S1OPF2/lua/;\
@@ -28,17 +28,18 @@ install: uninstall
 	cp ${Q_ROOT}/lib/libq_core.so /usr/lib;\
 	cp ${Q_ROOT}/include/q_core.h /usr/local/share/lua/5.1/Q
 
+all: q_core
+	cd ${BASE_PATH}
+
 uninstall:
 	rm -rf /usr/local/share/lua/5.1/Q;\
 	rm -f /usr/lib/libq_core.so;\
 	echo "Q uninstalled"
 
-libq.so: libq_core.so q.h
 
 q_core: q_basic q_operators
 	luajit mk_so.lua /tmp/
 	echo "all done for q_core"
-
 
 q_basic: column utils load_csv print
 	luajit mk_so.lua /tmp/

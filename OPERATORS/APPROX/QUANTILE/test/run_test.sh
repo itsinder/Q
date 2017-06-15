@@ -15,7 +15,7 @@ FLAGS=' -std=gnu99 -Wall'
 
 OUTPUT='aq'
 
-gcc ${FILES} ${INCS} ${FLAGS} -o $OUTPUT -lm
+gcc -g ${FILES} ${INCS} ${FLAGS} -o $OUTPUT -lm
 
 # A. Run some R program with inputs 
 #   (1) number of elements 
