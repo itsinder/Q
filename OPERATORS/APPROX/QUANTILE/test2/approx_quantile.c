@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <math.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -9,7 +10,6 @@
 #include "macros.h"
 #include "qsort_asc_I4.h"
 #include "approx_quantile.h"
-#include "determine_b_k.h"
 #include "New.h"
 #include "Collapse.h"
 #include "Output.h"
@@ -27,12 +27,14 @@ int
 approx_quantile(
 		int * x,
 		char * cfld,
-		long long siz,
-		long long num_quantiles,
+		uint64_t siz,
+		uint64_t num_quantiles,
 		double eps,
 		int *y,
-		long long y_siz,
-		int *ptr_estimate_is_good
+		uint64_t y_siz,
+		int *ptr_estimate_is_good,
+                AQ_REC_TYPE *aqrt,
+                bool is_last
 		)
 // STOP FUNC DECL
 //----------------------------------------------------------------------------
@@ -95,11 +97,11 @@ status: takes values -1 or 0
   if ( siz <= 0 ) { go_BYE(-1); }
   if ( y_siz < num_quantiles ) { go_BYE(-1); } /* insufficient memory to write output */
 
-  long long eff_siz = 0; /* number of entries to be considered */
+  uint64_t eff_siz = 0; /* number of entries to be considered */
   if ( cfld == NULL ) { eff_siz = siz; }
   else {
 
-    for ( long long ii = 0; ii < siz; ii++ ) {
+    for ( uint64_t ii = 0; ii < siz; ii++ ) {
       if ( cfld[ii] == 0 ) { continue; }
       eff_siz++;
     }
@@ -113,72 +115,28 @@ status: takes values -1 or 0
   /* "buffer" is a 2d array containing b buffers, each of size k. Each of these b buffers have a weight assigned to them, which will be stored in "weight" array of size b. Consider the following way of viewing the 2d buffer array: each element in a buffer "effectively" occurs as many times as it's corresponding weight in the weight array. The algorithm  compresses the whole input data into these buffers by using "approximate" entries instead of actual entries so that the total number of distinct entries comes down significantly (uses a total memory of ~ b*k, which is typically << eff_siz, the price paid being approximation). This approximation is done intelligently so that very good and useful theoretical quantile guarantees can be provided */
 
  
-  int b;
-  long long k; 
-  status = determine_b_k(eps, eff_siz, &b, &k);  cBYE(status);
-  /* estimates b and k for the given eps and eff_siz */
+  int b = aqrt->b;
+  uint64_t k = aqrt->k; 
   
   int NUM_THREADS; 
   /* explained in the next section, mainly to allow parallelizable computations to be done in parallel */
 
-  if ( b <= 0 || k <= 0 ) {
-    *ptr_estimate_is_good = -1;
-    go_BYE(-1); /* Something wrong with the inputs eps or siz */ 
-  }
-  else if ( (b+1+10)*k > MAX_SZ ) {
-
-    /* (b+1+10)*k a good upper bound of the memory requirements */
-    *ptr_estimate_is_good = -2; 
-    go_BYE(0);
-    /* Quitting if too much memory needed. Retry by doing one or more of the following: 
-     (i) Increase MAX_SZ if you think you have more RAM 
-     (ii) Increase eps (the approximation percentage) so that computations can be done within RAM
-    */
-  } 
-  else {
-    *ptr_estimate_is_good = 1;
-
+   if (*ptr_estimate_is_good == 1) {
     NUM_THREADS = 128;
     while ( (b+NUM_THREADS+10)*k > MAX_SZ ) { NUM_THREADS = NUM_THREADS/2; }
     /* adapting NUM_THREADS to meet memory requirements */
     
   }
 
-  int **buffer = NULL;         
-  int *weight = NULL;  
+  int **buffer = aqrt->buffers;         
+  int *weight = aqrt->weight;  
 
   flag = 1; /* buffer and weight defined */
 
   int no_of_empty_buffers = b; /* no of free buffers in the 2d buffer array*/
 
-  buffer      = malloc( b * sizeof(int *) ); 
-  return_if_malloc_failed(buffer);
-
-  weight      = malloc( b * sizeof(int) ); 
-  return_if_malloc_failed(weight);
-#ifdef IPP
-  ippsZero_32s((int *)weight,b);
-#else
-  //assign_const_I4(weight,b,0);
-  memset(weight, 0, b*sizeof(int));
-#endif
-
-  for ( int ii = 0; ii < b; ii++ ) {
-    buffer[ii] = (int *) malloc( k * sizeof(int) );
-  }
-
   flag = 2; /* buffer[ii] defined for ii = 0 to b-1 */
   
-  for ( int ii = 0; ii < b; ii++ ) {
-    return_if_malloc_failed(buffer[ii]);
-#ifdef IPP
-    ippsZero_32s((int *)buffer[ii], k);
-#else
-    //assign_const_I4(buffer[ii], k, 0); 
-    memset(buffer[ii], 0, k*sizeof(int));
-#endif
-
-  } 
 
   //--------------------------------------------------------------------------
 
@@ -188,17 +146,17 @@ status: takes values -1 or 0
 
   int **inputPackets = NULL; 
   int *lastPacket = NULL;
-  long long * inputPacketsUsedSiz = NULL;
+  uint64_t * inputPacketsUsedSiz = NULL;
 
   flag = 3; /* inputPackets, inputPacketsUsedSiz and lastPacket defined */
 
   inputPackets = malloc( NUM_THREADS * sizeof(int *) );
   return_if_malloc_failed(inputPackets); 
   
-  inputPacketsUsedSiz = malloc( NUM_THREADS * sizeof(long long) );
+  inputPacketsUsedSiz = malloc( NUM_THREADS * sizeof(uint64_t) );
   return_if_malloc_failed(inputPacketsUsedSiz);
 
-  for ( long long ii = 0; ii < NUM_THREADS; ii++) {
+  for ( uint64_t ii = 0; ii < NUM_THREADS; ii++) {
     inputPacketsUsedSiz[ii] = 0;
   }
 
@@ -211,7 +169,7 @@ status: takes values -1 or 0
   memset(lastPacket, 0, k*sizeof(int));
 #endif
 
-  long long lastPacketUsedSiz = 0;
+  uint64_t lastPacketUsedSiz = 0;
   
   for ( int ii = 0; ii < NUM_THREADS; ii++ ) {
     inputPackets[ii] =  (int *) malloc( k * sizeof(int) );
@@ -231,7 +189,7 @@ status: takes values -1 or 0
 
   //---------------------------------------------------------------------------
   
-  long long current_loc_in_x = 0; /* start of input data */
+  uint64_t current_loc_in_x = 0; /* start of input data */
   int last_packet_incomplete = 0; 
 
   /* Do the following for each block of data */
@@ -247,14 +205,14 @@ status: takes values -1 or 0
       //---------------------------------------------------------------------
       /* considering all input data */
 
-      for ( long long ii = 0; ii < NUM_THREADS; ii++) {
+      for ( uint64_t ii = 0; ii < NUM_THREADS; ii++) {
 	inputPacketsUsedSiz[ii] = 0;
       }
       
       cilkfor ( int tid = 0; tid < NUM_THREADS; tid++ ) {
 
-	long long lb = current_loc_in_x + tid *k;
-	long long ub = lb + k;
+	uint64_t lb = current_loc_in_x + tid *k;
+	uint64_t ub = lb + k;
 	if ( lb >= siz ) { continue; }
 	if ( ub >= siz ) { 
 
@@ -291,7 +249,7 @@ status: takes values -1 or 0
       /* NOTE: if cfld input is non-null, it means we are not interested in all the elements. In every iteration, we keep filling inputPackets buffer with only those data we are interested in using the helper variable "current_loc_in_x". */
       
       int tid = 0;
-      for ( long long ii = 0; ii < NUM_THREADS; ii++ ) {
+      for ( uint64_t ii = 0; ii < NUM_THREADS; ii++ ) {
 	inputPacketsUsedSiz[ii] = 0;
       }
       
