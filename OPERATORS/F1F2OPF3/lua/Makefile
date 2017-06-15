@@ -10,129 +10,87 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
-all : libf1f2opf3.so
+all : libf1f2opf3.so _f1f2opf3.lua
 	
-vvsub_specialize.lua : vvadd_specialize.lua
-	cat vvadd_specialize.lua | \
-	sed s'/vvadd_/vvsub_/'g | \
-	sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a - b );/'g \
-	> vvsub_specialize.lua
+arith_specializers: vvadd_specialize.lua vvsub_specialize.lua \
+	vvmul_specialize.lua vvdiv_specialize.lua 
+	luajit gen_specializers.lua arith
 
-vvmul_specialize.lua : vvadd_specialize.lua
-	cat vvadd_specialize.lua | \
-	sed s'/vvadd_/vvmul_/'g | \
-	sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a * b );/'g \
-	> vvmul_specialize.lua
+cmp_specializers: vvgeq_specialize.lua vvleq_specialize.lua  \
+	vvgt_specialize.lua vvlt_specialize.lua \
+	vveq_specialize.lua vvneq_specialize.lua 
+	luajit gen_specializers.lua cmp
 
-vvdiv_specialize.lua : vvadd_specialize.lua
-	cat vvadd_specialize.lua | \
-	sed s'/vvadd_/vvdiv_/'g | \
-	sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a \/ b );/'g \
-	> vvdiv_specialize.lua
+bop_specializers : vvand_specialize.lua vvor_specialize.lua  \
+	vvxor_specialize.lua  vvandnot_specialize.lua  
+	luajit gen_specializers.lua bop
 
-vvor_specialize.lua : vvand_specialize.lua
-	cat vvand_specialize.lua | \
-	sed s'/vvand/vvor/'g | \
-	sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a || b );/'g \
-	> vvor_specialize.lua
-
-vvxor_specialize.lua : vvand_specialize.lua
-	cat vvand_specialize.lua | \
-	sed s'/vvand/vvxor/'g | \
-	sed s'/c_code_for_operator = .*;/c_code_for_operator = "c = ( a ^ b );/'g \
-	> vvxor_specialize.lua
-
-vvneq_specialize.lua : vveq_specialize.lua 
-	cat vveq_specialize.lua | \
-	sed s'/vveq_/vvneq_/'g | \
-	sed s'/comparison = .*;/comparison = "( a != b );/'g \
-	> vvneq_specialize.lua
-
-vvgt_specialize.lua : vveq_specialize.lua 
-	cat vveq_specialize.lua | \
-	sed s'/vveq_/vvgt_/'g | \
-	sed s'/comparison = .*;/comparison = "( a > b )/'g \
-	> vvgt_specialize.lua
-
-vvlt_specialize.lua : vveq_specialize.lua 
-	cat vveq_specialize.lua | \
-	sed s'/vveq_/vvlt_/'g | \
-	sed s'/comparison = .*;/comparison = "( a < b ;/'g \
-	> vvlt_specialize.lua
-
-vvgeq_specialize.lua : vveq_specialize.lua 
-	cat vveq_specialize.lua | \
-	sed s'/vveq_/vvgeq_/'g | \
-	sed s'/comparison = .*;/comparison = "( a >= b )/'g \
-	> vvgeq_specialize.lua
-
-vvleq_specialize.lua : vveq_specialize.lua 
-	cat vveq_specialize.lua | \
-	sed s'/vveq_/vvleq_/'g | \
-	sed s'/comparison = .*;/comparison = "( a <= b )/'g \
-	> vvleq_specialize.lua
-
+#----------------------------------
 clean :
+	rm -f vvadd_specialize.lua
+	rm -f vvsub_specialize.lua
+	rm -f vvmul_specialize.lua
+	rm -f vvdiv_specialize.lua 
+#-------------
+	rm -f vveq_specialize.lua
+	rm -f vvneq_specialize.lua
+	rm -f vvgeq_specialize.lua
+	rm -f vvleq_specialize.lua
+	rm -f vvgt_specialize.lua
+	rm -f vvlt_specialize.lua
+#-------------
+	rm -f vvand_specialize.lua
+	rm -f vvor_specialize.lua
+	rm -f vvxor_specialize.lua
+	rm -f vvandnot_specialize.lua
+#-------------
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
-	mkdir -p ../gen_src/
-	mkdir -p ../gen_inc/
-	rm -f vvsub_specialize.lua 
-	rm -f vvmul_specialize.lua 
-	rm -f vvdiv_specialize.lua 
-	rm -f vvor_specialize.lua 
-	rm -f vvxor_specialize.lua 
-	rm -f vvneq_specialize.lua 
-	rm -f vvgt_specialize.lua 
-	rm -f vvlt_specialize.lua 
-	rm -f vvgeq_specialize.lua 
-	rm -f vvleq_specialize.lua 
-	rm -f vvneq_specialize.lua 
 	rm -f _*
 		
 vvadd_specialize.lua : arith_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua arith
 vvsub_specialize.lua : arith_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua arith
 vvmul_specialize.lua : arith_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua arith
 vvdiv_specialize.lua : arith_specialize.tmpl
-	lua gen_specializers.lua
-vvrem_specialize.lua : arith_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua arith
+vvand_specialize.lua  : bop_specialize.tmpl
+	lua gen_specializers.lua bop
 vvor_specialize.lua  : bop_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua bop
 vvxor_specialize.lua  : bop_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua bop
 vvandnot_specialize.lua  : bop_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua bop
 vveq_specialize.lua  : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 vvneq_specialize.lua  : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 vvgeq_specialize.lua  : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 vvleq_specialize.lua   : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 vvgt_specialize.lua  : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 vvlt_specialize.lua  : cmp_specialize.tmpl
-	lua gen_specializers.lua
+	lua gen_specializers.lua cmp
 
 libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 
-_concat_files : 
+_concat_files : concat_specialize.lua
 	luajit concat_generator.lua concat_operators.lua
 
-_arith_files : vvadd_specialize.lua vvsub_specialize.lua vvmul_specialize.lua vvdiv_specialize.lua vvrem_specialize.lua
+_arith_files : arith_specializers
 	luajit arith_generator.lua arith_operators.lua
 
-_bop_files : vvor_specialize.lua vvxor_specialize.lua vvandnot_specialize.lua 
+_bop_files : bop_specializers
 	luajit bop_generator.lua bop_operators.lua
 
-_cmp_files : vvgeq_specialize.lua vvleq_specialize.lua  \
-	vvgt_specialize.lua vvlt_specialize.lua vvneq_specialize.lua 
-
+_cmp_files : cmp_specializers
 	luajit cmp_generator.lua cmp_operators.lua
 
+_f1f2opf3.lua : 
+	lua pkg_f1f2opf3.lua

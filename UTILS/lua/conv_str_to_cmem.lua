@@ -1,8 +1,10 @@
-local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (x, out_qtype)
-  q_consts = require 'Q/UTILS/lua/q_const'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
   local qc = require 'Q/UTILS/lua/q_core'
   local ffi = require 'Q/UTILS/lua/q_ffi'
+  local out_ctype = assert(qconsts.qtypes[out_qtype].ctype)
+  return ffi.new(out_ctype .. "[?]", 1, { x } )
+  --[[
   if ( type(x) == "number" ) then x = tostring(x) end 
   assert(type(x) == "string")
   assert(type(out_qtype) == "string")
@@ -16,4 +18,5 @@ return function (x, out_qtype)
   local status = conv_fn(x, c_mem)
   assert(status, "Unable to convert " .. scalar_val .. " to qtype" )
   return c_mem
+  --]]
 end

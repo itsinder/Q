@@ -5,10 +5,10 @@ local z = Q.vsadd(c1, 10 , { junk = "junk" } )
 z:eval()
 Q.print_csv(z, nil, "")
 --===========================
-local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "F8")
-local z = Q.exp(c1)
-z:eval()
-Q.print_csv(z, nil, "")
+-- local c1 = Q.mk_col( {1,2,1,2,1,2,1,2}, "I8")
+-- local z = Q.vseq(c1, { value = 2 }
+-- z:eval()
+-- Q.print_csv(z, nil, "")
 --===========================
 local c2 = Q.vseq(c1, 4)
 --===========================
