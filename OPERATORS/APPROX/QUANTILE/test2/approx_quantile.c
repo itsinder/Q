@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <math.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -9,7 +10,6 @@
 #include "macros.h"
 #include "qsort_asc_I4.h"
 #include "approx_quantile.h"
-#include "determine_b_k.h"
 #include "New.h"
 #include "Collapse.h"
 #include "Output.h"
@@ -32,7 +32,9 @@ approx_quantile(
 		double eps,
 		int *y,
 		uint64_t y_siz,
-		int *ptr_estimate_is_good
+		int *ptr_estimate_is_good,
+                AQ_REC_TYPE *aqrt,
+                bool is_last
 		)
 // STOP FUNC DECL
 //----------------------------------------------------------------------------
@@ -113,72 +115,28 @@ status: takes values -1 or 0
   /* "buffer" is a 2d array containing b buffers, each of size k. Each of these b buffers have a weight assigned to them, which will be stored in "weight" array of size b. Consider the following way of viewing the 2d buffer array: each element in a buffer "effectively" occurs as many times as it's corresponding weight in the weight array. The algorithm  compresses the whole input data into these buffers by using "approximate" entries instead of actual entries so that the total number of distinct entries comes down significantly (uses a total memory of ~ b*k, which is typically << eff_siz, the price paid being approximation). This approximation is done intelligently so that very good and useful theoretical quantile guarantees can be provided */
 
  
-  int b;
-  uint64_t k; 
-  status = determine_b_k(eps, eff_siz, &b, &k);  cBYE(status);
-  /* estimates b and k for the given eps and eff_siz */
+  int b = aqrt->b;
+  uint64_t k = aqrt->k; 
   
   int NUM_THREADS; 
   /* explained in the next section, mainly to allow parallelizable computations to be done in parallel */
 
-  if ( b <= 0 || k <= 0 ) {
-    *ptr_estimate_is_good = -1;
-    go_BYE(-1); /* Something wrong with the inputs eps or siz */ 
-  }
-  else if ( (b+1+10)*k > MAX_SZ ) {
-
-    /* (b+1+10)*k a good upper bound of the memory requirements */
-    *ptr_estimate_is_good = -2; 
-    go_BYE(0);
-    /* Quitting if too much memory needed. Retry by doing one or more of the following: 
-     (i) Increase MAX_SZ if you think you have more RAM 
-     (ii) Increase eps (the approximation percentage) so that computations can be done within RAM
-    */
-  } 
-  else {
-    *ptr_estimate_is_good = 1;
-
+   if (*ptr_estimate_is_good == 1) {
     NUM_THREADS = 128;
     while ( (b+NUM_THREADS+10)*k > MAX_SZ ) { NUM_THREADS = NUM_THREADS/2; }
     /* adapting NUM_THREADS to meet memory requirements */
     
   }
 
-  int **buffer = NULL;         
-  int *weight = NULL;  
+  int **buffer = aqrt->buffers;         
+  int *weight = aqrt->weight;  
 
   flag = 1; /* buffer and weight defined */
 
   int no_of_empty_buffers = b; /* no of free buffers in the 2d buffer array*/
 
-  buffer      = malloc( b * sizeof(int *) ); 
-  return_if_malloc_failed(buffer);
-
-  weight      = malloc( b * sizeof(int) ); 
-  return_if_malloc_failed(weight);
-#ifdef IPP
-  ippsZero_32s((int *)weight,b);
-#else
-  //assign_const_I4(weight,b,0);
-  memset(weight, 0, b*sizeof(int));
-#endif
-
-  for ( int ii = 0; ii < b; ii++ ) {
-    buffer[ii] = (int *) malloc( k * sizeof(int) );
-  }
-
   flag = 2; /* buffer[ii] defined for ii = 0 to b-1 */
   
-  for ( int ii = 0; ii < b; ii++ ) {
-    return_if_malloc_failed(buffer[ii]);
-#ifdef IPP
-    ippsZero_32s((int *)buffer[ii], k);
-#else
-    //assign_const_I4(buffer[ii], k, 0); 
-    memset(buffer[ii], 0, k*sizeof(int));
-#endif
-
-  } 
 
   //--------------------------------------------------------------------------
 
