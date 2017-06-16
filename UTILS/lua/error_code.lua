@@ -72,5 +72,6 @@ g_err.INVALID_LOWER_BOUND_TYPE = "type of lower is not a number"
 
 -- ffi error
 g_err.FFI_NEW_ERROR = "ffi new api failed"
+g_err.FFI_MALLOC_ERROR = "ffi malloc api failed"
 
 return g_err
