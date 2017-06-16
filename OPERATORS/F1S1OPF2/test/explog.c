@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "q_macros.h"
-#include "_expF8.h"
-#include "_logF8.h"
-#include "_logitF8.h"
-#include "_logit2F8.h"
+#include "_exp_F8.h"
+#include "_log_F8.h"
+#include "_logit_F8.h"
+#include "_logit2_F8.h"
 #include <math.h>
 int
 main(
@@ -28,8 +28,8 @@ main(
   Z = malloc(N * sizeof(double));
   return_if_malloc_failed(Y);
   //-----------TESTING-------------
-  status = expF8(X, N, NULL, Y);
-  status = logF8(Y, N, NULL, Z);
+  status = exp_F8(X, N, NULL, Y);
+  status = log_F8(Y, N, NULL, Z);
   double threshold = 0.01;
 
   for ( int i = 0; i < N; i++ ) {
@@ -43,7 +43,7 @@ main(
   for ( double x = 0.01; xidx < 100; xidx++, x = x + 0.01 ) { 
     X[xidx] = x;
   }
-  status = logitF8(X, N, NULL, Y);
+  status = logit_F8(X, N, NULL, Y);
   for ( xidx = 0; xidx < N; xidx++ ) { 
     double temp = exp(X[xidx]) / (1 + exp(X[xidx]));
     if ( fabs(temp - Y[xidx]) > threshold) {
@@ -52,7 +52,7 @@ main(
     }
   }
   printf("LOGIT SUCCESS\n");
-  status = logit2F8(X, N, NULL, Y);
+  status = logit2_F8(X, N, NULL, Y);
   for ( xidx = 0; xidx < N; xidx++ ) { 
     double temp = exp(X[xidx]) / ((1 + exp(X[xidx]))*(1 + exp(X[xidx])));
     if ( fabs(temp - Y[xidx]) > threshold) {

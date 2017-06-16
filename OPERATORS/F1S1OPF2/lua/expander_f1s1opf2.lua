@@ -25,7 +25,6 @@
     local f2_coro = coroutine.create(function()
       local x_chunk, x_status
       local buff = ffi.malloc(x:chunk_size() * out_width)
-      -- TODO Not needed I think buff = ffi.cast(out_ctype .. " * ", buff)
       assert(x:has_nulls() == true, "Not set up for nulls as yet")
       x_status = true
       while (x_status) do

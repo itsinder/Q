@@ -7,7 +7,7 @@
 #include <string.h>
 #include "constants.h"
 #include "macros.h"
-// TODO #include "qsort_asc_I4.h"
+#include "qsort_asc_I4.h"
 #include "approx_quantile.h"
 #include "determine_b_k.h"
 #include "New.h"
@@ -328,13 +328,11 @@ status: takes values -1 or 0
 
       if ( inputPacketsUsedSiz[tid] != k ) { continue; }
 
-/* TODO
 #ifdef IPP
       ippsSortAscend_32s_I(inputPackets[tid], inputPacketsUsedSiz[tid]);
 #else
       qsort_asc_I4(inputPackets[tid], inputPacketsUsedSiz[tid], sizeof(int), NULL);
 #endif 
-*/
 
     }
   
@@ -393,13 +391,11 @@ status: takes values -1 or 0
   /* Deal with the last packet separately here if it is not full */
 
   if ( last_packet_incomplete == 1 ) {
-/* TODO 
 #ifdef IPP
     ippsSortAscend_32s_I(lastPacket, lastPacketUsedSiz);
 #else
     qsort_asc_I4(lastPacket, lastPacketUsedSiz, sizeof(int), NULL);
 #endif
-*/
   }
 
   //--------------------------------------------------------------------------
