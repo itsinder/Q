@@ -1,5 +1,7 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local q_core = require 'Q/UTILS/lua/q_core'
 local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local ffi     = require "Q/UTILS/lua/q_ffi"
 local fns = { }
 local failed_testcases = { }
 local no_of_pass_testcases = 0
@@ -50,9 +52,9 @@ local create_c_data = function (vector, input_values)
   assert(field_type~=nil,"Field type should not be nil")
   local field_size = vector.field_size
   assert(field_size~=nil,"Field size should not be nil")
-  local ctype = g_qtypes[field_type].ctype
+  local ctype = qconsts.qtypes[field_type].ctype
   assert(ctype~=nil,"ctype should not be nil")
-  local max_length = g_qtypes[field_type].max_length
+  local max_length = qconsts.qtypes[field_type].max_length
   local is_integer = field_type == "I1" or field_type == "I2" or field_type == "I4" or field_type == "I8"
   local is_float = field_type == "F4" or field_type == "F8"
   
@@ -67,12 +69,12 @@ local create_c_data = function (vector, input_values)
   local length = table.getn(input_values)
   local length_in_bytes = field_size * length
   local chunk = q_core.malloc(length_in_bytes)
-  chunk = q_core.cast(ctype.. " * ", chunk)
+  chunk = ffi.cast(ctype.. " * ", chunk)
   q_core.memset(chunk, 0, length_in_bytes)
       
   for k,v in ipairs(input_values) do
     if field_type == "SC" then
-      local v = q_core.cast(ctype.. " * ", v)
+      local v = ffi.cast(ctype.. " * ", v)
       q_core.memcpy(chunk + (k-1)*field_size, v, field_size)
     else
       chunk[k-1] = v
@@ -111,7 +113,7 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
     end
     size = math.floor(size)
     local x = q_core.malloc(size)
-    x = q_core.cast("unsigned char* ", x)
+    x = ffi.cast("unsigned char* ", x)
     q_core.memset(x, 0, size)
 
     for k,v in ipairs(input_values) do
@@ -125,7 +127,7 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
     vector:eov()
     
     local field_type = vector.field_type
-    local field_size = g_qtypes[field_type].width
+    local field_size = qconsts.qtypes[field_type].width
     local file_size = file_size(value.filename)
     if size ~= file_size then
       fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")

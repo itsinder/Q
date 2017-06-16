@@ -1,4 +1,5 @@
-require 'Q/UTILS/lua/globals'
+--require 'Q/UTILS/lua/globals'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 -- table for random functions
 local random_func = {}
@@ -155,7 +156,7 @@ local function fill_table(column_list, chunk_print_size,unique_string_tables)
         table.insert(file_data[ind],unique_string_tables[dict_no][random_no])
       else
         local data_type_short_code = column_list[j]['qtype']
-        local func ='random_'..g_qtypes[data_type_short_code]['ctype']
+        local func ='random_'..qconsts.qtypes[data_type_short_code]['ctype']
         table.insert(file_data[ind],random_func[func]())
       end
     end

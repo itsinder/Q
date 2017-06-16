@@ -8,6 +8,7 @@ local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
 local qc = require 'Q/UTILS/lua/q_core'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 -- ----------------
 -- load( "CSV file to load", "meta data", "Global Metadata")
 -- Loads the CSV file and stores in the Q internal format
@@ -86,13 +87,13 @@ return function (
    -- pllist is a penlight list class, here used to find maximum values among the list of values 
    -- https://stevedonovan.github.io/Penlight/api/classes/pl.List.html
    local l = pllist()
-   for i, value in pairs(g_width) do
+   for i, value in pairs(qconsts.width) do
     l:append(value) 
    end
-   l:append(2*g_max_width_SC)
+   l:append(2*qconsts.max_width.SC)
    local min, cbuf_sz = l:minmax()  -- max value will be cbuff_sz, since c conversion will be to either one of the types contained in g_sz
    
-   l:append(2*g_max_width_SV)
+   l:append(2*qconsts.max_width.SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
    local buf = ffi.malloc(buf_sz)
@@ -150,7 +151,8 @@ return function (
             status = 0 
           elseif qtype == "I1" or qtype == "I2" or qtype == "I4" or qtype == "I8" or qtype == "SV" then
             -- For now second parameter , base is 10 only
-            status = qc[function_name](buf, 10, cbuf)
+            -- print(function_name)
+            status = qc[function_name](buf, cbuf)
           elseif qtype == "F4" or qtype == "F8"  then 
             status = qc[function_name](buf, cbuf)
           else 

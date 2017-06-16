@@ -1,4 +1,4 @@
-local qconsts = require 'Q/UTILS/lua/q_const'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require "Q/UTILS/lua/q_ffi"
 
 return function (col, rowidx)

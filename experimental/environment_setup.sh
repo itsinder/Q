@@ -105,12 +105,12 @@ git checkout dev
 
 # add enviornment variables to .bashrc 
 
-echo 'export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin' >> ~/.bashrc
-echo 'export Q_SRC_ROOT=$HOME/WORK/Q/' >> ~/.bashrc
-echo 'export Q_ROOT=$HOME/Q/' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_ROOT/lib' >> ~/.bashrc
-echo 'export LUA_INIT="@$HOME/WORK/Q/init.lua"' >> ~/.bashrc
-echo 'export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"' >> ~/.bashrc 
+#echo 'export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin' >> ~/.bashrc
+#echo 'export Q_SRC_ROOT=$HOME/WORK/Q/' >> ~/.bashrc
+#echo 'export Q_ROOT=$HOME/Q/' >> ~/.bashrc
+#echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_ROOT/lib' >> ~/.bashrc
+#echo 'export LUA_INIT="@$HOME/WORK/Q/init.lua"' >> ~/.bashrc
+#echo 'export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"' >> ~/.bashrc 
 
 #to install Zerobrane-IDE
 wget -P /tmp https://download.zerobrane.com/ZeroBraneStudioEduPack-1.50-linux.sh
