@@ -12,8 +12,8 @@ end
 -- local Generator = require "Generator"
 local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
 local Column = require "Q/RUNTIME/COLUMN/code/lua/Column"
-require 'Q/UTILS/lua/globals'
-g_chunk_size = 16
+-- require 'Q/UTILS/lua/globals'
+-- g_chunk_size = 16
 --local size = 1000
 --create bin file of only ones of type int
 local v1 = Vector{field_type='I4',

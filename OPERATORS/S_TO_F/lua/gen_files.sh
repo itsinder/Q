@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO Delete this file. Superseded by Makefile
 set -e 
 rm -r -f ../gen_src/; mkdir -p ../gen_src/
 rm -r -f ../gen_inc/; mkdir -p ../gen_inc/

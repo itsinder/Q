@@ -63,11 +63,6 @@ rand_${out_qtype}(
   for ( uint64_t i = 0; i < nX; i++ ) { 
     ${gen_type} x = ${generator}();
     X[i] = (${out_ctype}) (lb + (${scaling_code}) );
-#ifdef DEBUG
-    if ( ( X[i] < lb ) || ( X[i] > ub ) ) { 
-      go_BYE(-1);
-    }
-#endif
   }
 BYE:
   return status;
