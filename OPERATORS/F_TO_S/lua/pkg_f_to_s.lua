@@ -4,10 +4,11 @@ local s = [===[
 local function <<operator>>(x)
   if type(x) == "Column" then
     local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_f_to_s')
-    local status, numer, denom = pcall(expander, "<<operator>>", x)
-    if ( not status ) then print(col) end
+    -- y is a Scalar
+    local status, y = pcall(expander, "<<operator>>", x)
+    if ( not status ) then print(y) end
     assert(status, "Could not execute <<operator>>")
-    return numer, denom
+    return y
   end
   assert(nil, "input must be of type Column")
 end

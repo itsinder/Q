@@ -1,8 +1,10 @@
 #!/usr/bin/env lua
-incdir = "../gen_inc/"
-srcdir = "../gen_src/"
+local incdir = "../gen_inc/"
+local srcdir = "../gen_src/"
+local plpath = require 'pl.path'
+if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
+if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 local gen_code = require 'Q/UTILS/lua/gen_code'
-local tmpl = dofile 'qsort.tmpl'
 
 order = { 'asc', 'dsc' }
 qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }

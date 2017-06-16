@@ -1,0 +1,7 @@
+Fix luajit test_conv_str_to_cmem.lua
+
+g_valid_types has been removed. please use assert(g_qtypes[your_qtype]) to
+verify whether the type is good or not.
+
+Fix test_f_to_s.lua
+
