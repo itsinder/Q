@@ -4,6 +4,7 @@ local Scalar = {}
 Scalar.__index = Scalar
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local DestructorLookup = {}
+-- local dbg = require 'Q/UTILS/lua/debugger'
 
 setmetatable(Scalar, {
         __call = function (cls, ...)
@@ -38,7 +39,7 @@ end
 function Scalar.new(arg)
    assert(type(arg) == "table", "Called constructor with incorrect arguments")
    assert(type(arg.coro) == "thread", "Argument coro must have a coroutine")
-   assert(Type(arg.func) == "function", "Need a function to extract the scalar")
+   assert(type(arg.func) == "function", "Need a function to extract the scalar")
    local scalar = setmetatable({}, Scalar)
    scalar.destructor_ptr = ffi.malloc(1, Scalar.destructor)
    DestructorLookup[scalar.destructor_ptr] = scalar
@@ -49,13 +50,16 @@ end
 
 function Scalar:next()
    assert(coroutine.status(self._coro) ~= "dead" , "The coroutine is no longer alive")
-   local status, val = coroutine.resume(scalar._coro)
+   local status, val = coroutine.resume(self._coro)
    if status == true and val ~= nil then
       self._val = val
    end
+   return coroutine.status(self._coro) ~= "dead"
 end
 
 function Scalar:value()
    assert(self._val ~= nil, "The scalar has not been evaluated yet")
    return self._func(self._val)
 end
+
+return Scalar

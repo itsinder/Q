@@ -5,7 +5,7 @@ Column.__index = Column
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
-local clone = require 'Q/UTILS/lua/utils'
+local clone = require 'Q/UTILS/lua/utils'.clone
 -- dbg = require 'Q/UTILS/lua/debugger'
 
 
