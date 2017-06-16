@@ -5,15 +5,15 @@
 #include "macros.h"
 
 // START FUNC DECL
-int 
+int
 update_counter (
-		int * cntr_id,   
-		int * cntr_freq, 
-		long long cntr_siz, 
-		long long *ptr_active_cntr_siz,  
-		int * bf_id,      
-		int * bf_freq,      
-		long long bf_siz   
+		int * cntr_id,
+		int * cntr_freq,
+		long long cntr_siz,
+		long long *ptr_active_cntr_siz,
+		int * bf_id,
+		int * bf_freq,
+		long long bf_siz
 		)
 // STOP FUNC DECL
 //-------------------------------------------------------------------------
@@ -69,11 +69,11 @@ bf_siz: Size of the new input (bf_id, bf_freq) data
   temp_cntr_id = (int *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(int) );
   temp_cntr_freq = (int *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(int) );
 
-  
+
   while (1) {
 
     if ( ii < (*ptr_active_cntr_siz) && jj < bf_siz ) {
-      
+
       if ( cntr_id[ii] < bf_id[jj] ) {
 	temp_cntr_id[kk] = cntr_id[ii];
 	temp_cntr_freq[kk++] = cntr_freq[ii++];
@@ -100,16 +100,16 @@ bf_siz: Size of the new input (bf_id, bf_freq) data
       break;
     }
   }
-  
+
   *ptr_active_cntr_siz = kk;
 
   //------------------------------------------------------------------------
-  
+
   /* If the size of (temp_cntr_id,temp_cntr_freq) is less than cntr_siz (i.e., teh total number of counters available for use) then we just copy the data to (cntr_id, cntr_freq) (overwriting). Else, keep dropping elements with low frequencies (according to FREQUENT algorithm's rules so that theoretical guarantees hold)till the size of (temp_cntr_id,temp_cntr_freq) becomes less than cntr_siz and then copy the data to (cntr_id, cntr_freq). */
 
 
   while ( *ptr_active_cntr_siz > cntr_siz ) { 
-     
+
     for ( long long kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
       temp_cntr_freq[kk]--;
     }
@@ -120,7 +120,7 @@ bf_siz: Size of the new input (bf_id, bf_freq) data
 	temp_cntr_freq[jj] = temp_cntr_freq[kk];
 	temp_cntr_id[jj++] = temp_cntr_id[kk];
       }
-    } 
+    }
     *ptr_active_cntr_siz = jj;
 
   }

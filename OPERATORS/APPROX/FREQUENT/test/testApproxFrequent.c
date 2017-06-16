@@ -1,23 +1,9 @@
 #include <stdio.h>
-#include <time.h>
-#include <stdbool.h>
-#include "approx_frequent.h"
 #include <stdlib.h>
-#include <unistd.h>
-#include "string.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <assert.h>
-#include <fcntl.h>
-#include "constants.h"
-#include "macros.h"
-#include "mmap.h"
+#include <string.h>
 #include <malloc.h>
-
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#include "macros.h"
+#include "approx_frequent.h"
 
 int run_test(int *x, long long x_len, int *freq_ids, int *freq_counts, int freq_len, int min_freq, int err) {
   int status = 0;

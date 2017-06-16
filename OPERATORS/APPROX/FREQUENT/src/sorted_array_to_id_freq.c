@@ -55,22 +55,23 @@ ptr_bf_siz: Pointer to a location containing the number of ids in the input data
   int temp_freq = 1;
 
   while ( ii < num_buf-1 ) {
-    
+
     if ( buf[ii] == buf[ii+1] ) {
       temp_freq++;
     }
     else {
       bf_id[jj] = buf[ii];
-      bf_freq[jj++] = temp_freq;
+      bf_freq[jj] = temp_freq;
       temp_freq = 1;
-    }  
+      jj++;
+    }
     ii++;
   }
   bf_id[jj] = buf[ii];
   bf_freq[jj] = temp_freq;
   jj++;
 
-  *ptr_bf_siz = jj; 
+  *ptr_bf_siz = jj;
 
 
  BYE:
