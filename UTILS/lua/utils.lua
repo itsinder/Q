@@ -2,11 +2,29 @@ local plpath = require 'pl.path'
 local timer = require 'posix.time'
 local fns = {}
 
+fns.clone = function(t) -- deep-copy a table
+    if type(t) ~= "table" then return t end
+    local meta = getmetatable(t)
+    local target = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            target[k] = clone(v)
+        else
+            target[k] = v
+        end
+    end
+    setmetatable(target, meta)
+    return target
+end
+
 fns.timeit = function(f_name, ...)
    local t1 = timer.clock_gettime(0)
-   f_name(...)
+   local ret = table.pack(f_name(...))
    local t2 = timer.clock_gettime(0)
-   return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6
+   if ret.n == 0 then
+      return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6
+   end
+   return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6, unpack(ret)
 end
 
 fns.load_file_as_string = function (fname)
