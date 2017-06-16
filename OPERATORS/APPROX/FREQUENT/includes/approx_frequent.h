@@ -14,11 +14,11 @@ struct frequent_persistent_data {
 
 int
 allocate_persistent_data(
-    long long siz,
+    long long siz, // number of elements to be processed
     long long min_freq,
     long long err,
-    long long max_chunk_size,
-    struct frequent_persistent_data *data);
+    long long max_chunk_size, // larges number of elements to be processed at once
+    struct frequent_persistent_data *data); // caller should allocate
 
 extern int
 process_chunk(
@@ -34,6 +34,11 @@ process_output(
     int *out_len);
 
 extern void free_persistent_data(struct frequent_persistent_data *data);
+
+#define STATUS_HIGH_MEMORY 1
+#define STATUS_GOOD 0
+#define STATUS_ERROR -1
+#define STATUS_INVALID_INPUT -2
 
 extern int
 approx_frequent (

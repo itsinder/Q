@@ -6,70 +6,195 @@
 #include "macros.h"
 #include "_qsort_asc_I4.h"
 #include "approx_frequent.h"
-#include "sorted_array_to_id_freq.h"
-#include "update_counter.h"
 
-/* Will not use more than (4*200) MB of memory, can change if you want */
+/*
 
-/* README:
-
-status = approx_frequent(x,cfld,siz,min_freq,err,y,f,out_siz,ptr_len,ptr_estimate_is_good) : The algorithm takes as input an array of integers, and lists out the "frequent" elements in the set approximately, where "frequent" elements are defined as elements occuring greater than or equal to "min_freq" number of times in the input. The approximated output has the following properties:
+This algorithm takes in a number of elements, a min_freq and an err and produces two outputs, y and f satisfying:
 
 (1) all elements in x occuring greater than or equal to min_freq number of times  will definitely be listed in y (THESE ARE THE FREQUENT ELEMENTS (definition) )
 (2) their corresponding frequency in f will be greater than or equal to (min_freq-err), i.e., the maximum error in estimating their frequencies is err.
 (3) no elements in x occuring less than (min_freq-err) number of times will be listed in y
 
 The approximation is two fold:
+
 (i) the estimated frequencies of the "frequent" elements can be off by a maximum of err.
 (ii) elements occuring between (min_freq-err) and (min_freq) number of times can also be listed in y.
-
 
 For example: say min_freq = 500 and err = 100.  y will contain the id of all the elements occuring >= 500 definitely, and their corresponding estimated frequency in f would definitely be >= (500-100) = 400. No element in x which occurs less than 400 times will occur in y. Note that elements with frequency between 400 and 500 "can" be listed in y.
 
 Author: Kishore Jaganathan
 
-Algorithm: FREQUENT algorithm (refer to Cormode's paper "Finding Frequent Items in Data Streams")
+Algorithm: Based on the FREQUENT algorithm (refer to Cormode's paper "Finding Frequent Items in Data Streams")
+We actually run the FREQUENT algorithm with min_freq = err, which is what ends up guaranteeing our error bounds.
+We are also running a variant of that FREQUENT algorithm so that some steps can be done in parallel.
 
-NOTE: This implementation is a slight variant of the algorithm mentioned in the paper, so that some steps can be parallelized.
+USAGE: Can use approx_frequent(...) to process all data at once, or "allocate_persistent_data" and then the
+       various "process" functions to process data lazily.
 
-INPUTS:
-
-x: The input array
-
-cfld: two options - (1) NULL: All elements of x are processed.
-(2) non-NULL: Array of same size as x. Acts as a select vector (only those elements with non-zero values in cfld are processed). ex: If x has 10 elements and cfld is {0,0,1,0,0,0,1,0,1,0}, then only the 3rd, 7th and 9th element are chosen for processing.
-
-siz: Number of elements in the input array x
-
-min_freq: elements occuring greater than or equal to min_freq times in x (among the ones selected for processing) are considered frequent elements. All of their id's will definitely be stored in y.
-
-err: the measured frequencies of the "frequent" elements in x (i.e., occuring >= min_freq times in x, among the ones selected for processing) will definitely be greater than or equal to min_freq-err, and will be stored in f (corresponding to the id stored in y). Also, no element with frequency lesser than (min_freq-err) in x (among the ones selected for processing) will occur in y. Note: Lesser the error, more memory is needed for computation
-
-out_siz: number of integers that can be written in y and f (prealloced memory). See y and f for how much to allocate.
-
-
-OUTPUTS:
-
-y: array containing the id's of the "frequent" elements. Need to malloc beforehand by atleast (number of elements to be processed)/(min_freq-err) * sizeof(int). If cfld is NULL, number of elements to be processed is siz, else it is equal to the number of non-zero entries in cfld.
-
-f: array containing the corresponding frequencies of the "frequent" elements. Need to malloc beforehand by atleast (number of elements to be processed)/(min_freq-err) * sizeof(int). If cfld is NULL, number of elements to be processed is siz, else it is equal to the number of non-zero entries in cfld.
-
-out_siz: number of integers that can be written in y and f (prealloced memory). See y and f for how much to allocate.
-
-ptr_len: the size of y and f used by the algorithm to write the ids and frequencies of estimated approximate "frequent" elements
-
-ptr_estimate_is_good: pointer to a location which stores 1, -1, -2 or -3
-1: approximate calculations were successful, results stored in y,f and ptr_len
--1: something wrong with the input data. Check if sufficient malloc was done beforehand to y and f, in case you forgot.
--2: need too much memory, hence didn't do the calculations. Can retry with one of the following two things : (i) increase MAX_SZ if you are sure you have more RAM available (ii) increase err (the approximation parameter). Increasing err will result in more approximation (hence answer being less accurate) but memory requirements will be lesser.
-
-status: will return 0 or -1
-0: two cases - (i) calculations are successful, ptr_estimate_is_good will be set to 1 (ii) need too much memory and hence didn't do the calculations, ptr_estimate_is_good will be set to -2.
--1: Something wrong with inputs, ptr_estimate_is_good will also be set to -1
+STATUS: will return 1, 0 or -1
+1: warning that function will use an unusually high amount of memory, consider decreasing err.
+0: all good.
+-1: Unrecoverable error
+-2: Something wrong with inputs
 
  */
 
-#define MAX_SZ 200*1048576
+// HELPERS
+
+int
+sorted_array_to_id_freq (
+                         int * buf,
+                         long long num_buf,
+                         int * bf_id,
+                         int * bf_freq,
+                         long long * ptr_bf_siz
+                         )
+{
+
+  int status = 0;
+
+  /* check inputs */
+
+  if ( buf == NULL ) { go_BYE(-1); }
+  if ( bf_id == NULL ) { go_BYE(-1); }
+  if ( bf_freq == NULL ) { go_BYE(-1); }
+  if ( ptr_bf_siz == NULL ) { go_BYE(-1); }
+
+  /* (id, freq) conversion of sorted data */
+
+  long long ii = 0, jj = 0;
+  int temp_freq = 1;
+
+  while ( ii < num_buf-1 ) {
+
+    if ( buf[ii] == buf[ii+1] ) {
+      temp_freq++;
+    }
+    else {
+      bf_id[jj] = buf[ii];
+      bf_freq[jj] = temp_freq;
+      temp_freq = 1;
+      jj++;
+    }
+    ii++;
+  }
+  bf_id[jj] = buf[ii];
+  bf_freq[jj] = temp_freq;
+  jj++;
+
+  *ptr_bf_siz = jj;
+
+
+ BYE:
+  return(status);
+
+}
+
+int
+update_counter (
+		int * cntr_id,
+		int * cntr_freq,
+		long long cntr_siz,
+		long long *ptr_active_cntr_siz,
+		int * bf_id,
+		int * bf_freq,
+		long long bf_siz
+		)
+{
+
+  int status = 0;
+
+  int * temp_cntr_id = NULL;
+  int * temp_cntr_freq = NULL;
+
+  /* check inputs */
+
+  if ( cntr_id == NULL ) { go_BYE(-1); }
+  if ( cntr_freq == NULL ) { go_BYE(-1); }
+  if ( ptr_active_cntr_siz == NULL ) { go_BYE(-1); }
+  if ( bf_id == NULL ) { go_BYE(-1); }
+  if ( bf_freq == NULL ) { go_BYE(-1); }
+
+  //------------------------------------------------------------------------
+
+  /* (temp_cntr_id,temp_cntr_freq) stores the merged and sorted (sorted in id) data of the counters (cntr_id,cntr_freq) and (bf_id, bf_freq) */
+
+  long long ii = 0, jj = 0, kk = 0;
+
+  temp_cntr_id = (int *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(int) );
+  temp_cntr_freq = (int *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(int) );
+
+
+  while (1) {
+
+    if ( ii < (*ptr_active_cntr_siz) && jj < bf_siz ) {
+
+      if ( cntr_id[ii] < bf_id[jj] ) {
+        temp_cntr_id[kk] = cntr_id[ii];
+        temp_cntr_freq[kk++] = cntr_freq[ii++];
+      }
+      else if ( bf_id[jj] < cntr_id[ii] ) {
+        temp_cntr_id[kk] = bf_id[jj];
+        temp_cntr_freq[kk++] = bf_freq[jj++];
+      }
+      else {
+        temp_cntr_id[kk] = bf_id[jj];
+        temp_cntr_freq[kk++] = bf_freq[jj++] + cntr_freq[ii++];
+      }
+
+    }
+    else if ( ii < (*ptr_active_cntr_siz) && jj == bf_siz ) {
+      temp_cntr_id[kk] = cntr_id[ii];
+      temp_cntr_freq[kk++] = cntr_freq[ii++];
+    }
+    else if ( ii == (*ptr_active_cntr_siz) && jj < bf_siz ) {
+      temp_cntr_id[kk] = bf_id[jj];
+      temp_cntr_freq[kk++] = bf_freq[jj++];
+    }
+    else {
+      break;
+    }
+  }
+
+  *ptr_active_cntr_siz = kk;
+
+  //------------------------------------------------------------------------
+
+  /* If the size of (temp_cntr_id,temp_cntr_freq) is less than cntr_siz (i.e., the total number of counters available for use) then we just copy the data to (cntr_id, cntr_freq) (overwriting). Else, keep dropping elements with low frequencies (according to FREQUENT algorithm's rules so that theoretical guarantees hold)till the size of (temp_cntr_id,temp_cntr_freq) becomes less than cntr_siz and then copy the data to (cntr_id, cntr_freq). */
+
+
+  while ( *ptr_active_cntr_siz > cntr_siz ) {
+
+    for ( long long kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
+      temp_cntr_freq[kk]--;
+    }
+
+    jj = 0;
+    for ( long long kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
+      if ( temp_cntr_freq[kk] > 0 ) {
+        temp_cntr_freq[jj] = temp_cntr_freq[kk];
+        temp_cntr_id[jj++] = temp_cntr_id[kk];
+      }
+    }
+    *ptr_active_cntr_siz = jj;
+
+  }
+
+  memcpy(cntr_id, temp_cntr_id, *ptr_active_cntr_siz*sizeof(int));
+  memcpy(cntr_freq, temp_cntr_freq, *ptr_active_cntr_siz*sizeof(int));
+
+ BYE:
+  free_if_non_null(temp_cntr_id);
+  free_if_non_null(temp_cntr_freq);
+
+  return(status);
+
+}
+
+// END HELPERS
+
+// memory bound
+#define HIGH_MEM 200*1048576
 
 int
 allocate_persistent_data(
@@ -92,12 +217,8 @@ allocate_persistent_data(
   cntr_siz = siz / err + 1;
   if (cntr_siz < 10000) { cntr_siz = 10000; } /* can be removed */
 
-  if (cntr_siz * (1 + 2 + 6) > MAX_SZ) { // TODO: handle this gracefully
-    go_BYE(1);
-    /* Quitting if too much memory needed. Retry by doing one of the following:
-       (i) Increase MAX_SZ if you think you have more RAM
-       (ii) Increase eps (the approximation percentage) so that computations can be done within RAM
-     */
+  if (cntr_siz * 4 + max_chunk_siz * 5 > HIGH_MEM) {
+    status = 1;
   }
   if (max_chunk_siz < 1) {
     max_chunk_siz = cntr_siz;

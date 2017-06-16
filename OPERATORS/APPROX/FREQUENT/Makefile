@@ -13,8 +13,6 @@ TEST_DIR = test
 
 SRCOBJS = bin/approx_frequent.o \
 	../../SORT/gen_src/_qsort_asc_I4.o \
-	bin/sorted_array_to_id_freq.o \
-	bin/update_counter.o \
 
 
 all: testApproxFrequent
