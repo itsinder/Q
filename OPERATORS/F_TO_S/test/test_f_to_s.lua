@@ -20,11 +20,11 @@ end
 local z= Q.sum(c1)
 z = get_val(z)
 assert(z == 36 )
+print("Completed " .. arg[0]) os.exit()
 
 local z = Q.min(c1)
 z = get_val(z)
 assert(z == 1 )
-print("Completed " .. arg[0]) os.exit()
 
 local z = Q.max(c1)
 z = get_val(z)
