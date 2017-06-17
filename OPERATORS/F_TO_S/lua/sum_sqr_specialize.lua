@@ -40,7 +40,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
       local sz_c_mem = ffi.sizeof("REDUCE_sum_sqr_" .. qtype .. "_ARGS")
       local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
       c_mem = ffi.cast("REDUCE_sum_sqr_" .. qtype .. "_ARGS *", c_mem)
-      c_mem.min_val  = 0
+      c_mem.sum_sqr_val  = 0
       c_mem.num = 0
       subs.c_mem = c_mem
       --==============================
