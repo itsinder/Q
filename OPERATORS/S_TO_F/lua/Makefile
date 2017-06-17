@@ -25,3 +25,11 @@ libs_to_f.so :
 
 _s_to_f.lua : 
 	lua pkg_s_to_f.lua
+
+test_q : libs_to_f.so
+	luajit ../test/test_s_to_f.lua
+
+test_c :  libs_to_f.so
+	bash ../test/test_rand.sh
+
+test : test_q test_c

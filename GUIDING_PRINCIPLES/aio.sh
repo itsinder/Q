@@ -70,7 +70,7 @@ else
 fi
 #  ######## Build Q #########
 my_print "Building Q"
-source ../setup.sh -f
+source ../setup.sh
 cleanup ../ #cleaning up all files
 
 #build files
