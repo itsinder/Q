@@ -6,7 +6,7 @@ local function beta_step(X, y, beta)
   local Xbeta = Q.mvmul(X, beta)
   local p = Q.logit(Xbeta)
   local w = Q.logit2(Xbeta)
-  local ysubp = Q.vvsub(y,percent p)
+  local ysubp = Q.vvsub(y, p)
   local A = {}
   local b = {}
   for i, X_i in ipairs(X) do

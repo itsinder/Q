@@ -1,8 +1,10 @@
 #!/usr/bin/env lua
   local gen_code = require 'Q/UTILS/lua/gen_code'
-  local pl = require 'pl'
+  local plpath = require 'pl.path'
   local srcdir = '../gen_src/'
   local incdir = '../gen_inc/'
+  if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
+  if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
   local operators = assert(dofile 'cmp_operators.lua')
   local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 

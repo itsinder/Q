@@ -4,7 +4,7 @@ return function (
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local tmpl = 'f1opf2.tmpl'
   local subs = {}; 
-  subs.fn = "<<operator>>" .. in_qtype 
+  subs.fn = "<<operator>>_" .. in_qtype 
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype
   subs.c_code_for_operator = "<<c_code_for_operator>>"
   subs.out_qtype = <<out_qtype>>

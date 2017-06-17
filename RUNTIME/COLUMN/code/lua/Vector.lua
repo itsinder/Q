@@ -36,7 +36,8 @@ function Vector.destructor(data)
     -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Vector) then
         ffi.free(data.destructor_ptr)
-    else
+        DestructorLookup[data.destructor_ptr] = nil
+   else
         -- local tmp_slf = DestructorLookup[data]
         DestructorLookup[data] = nil
         ffi.free(data)
@@ -58,6 +59,7 @@ end
 local function read_file_vector(self, arg) -- TODO indrajeet rename as now its a read write vector`but fixed length`
     self.input_from_file = true
     self.filename = assert(arg.filename, "Filename not specified to read from")
+    assert(plpath.exists(self.filename), "File should exist")
     self.f_map = ffi.gc(qc.f_mmap(self.filename, true), 
       ffi.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")

@@ -6,7 +6,7 @@ local qconsts = {}
 
     qconsts.max_width = max_width
    --===========================
-    local chunk_size = 64
+    local chunk_size = 64 * 1024
     qconsts.chunk_size = chunk_size
     --===========================
     local width = {}
@@ -51,8 +51,8 @@ local qconsts = {}
       max_length="6"
     }
     qtypes.I2 = { 
-      min = -32767,
-      max =  32768,
+      min = -32768,
+      max =  32767,
       short_code = "I2",
       max_txt_width  = 32,
       width = 2,

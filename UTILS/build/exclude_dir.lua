@@ -9,6 +9,7 @@ return {
   "qsort2",
   "test",
   ".git",
-  "OPERATORS/F_TO_S/test/",
-  "OPERATORS/AX_EQUALS_B/test/",
+  "OPERATORS/F_TO_S/test",
+  "OPERATORS/AX_EQUALS_B/test",
+  "OPERATORS/APPROX",
 }

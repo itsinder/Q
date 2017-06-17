@@ -19,7 +19,7 @@ local function mk_out_buf(
   out_buf_len,
   err_loc
 )
-    local in_buf_len = assert( tonumber(ffi.strlen(in_buf)))
+    local in_buf_len = assert( tonumber(ffi.C.strlen(in_buf)))
 
     if m.qtype == "SV" then 
       assert(in_buf_len <= m.max_width, err_loc .. err.STRING_TOO_LONG)

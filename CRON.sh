@@ -1,8 +1,34 @@
 #!/bin/bash
+
+TEMP_LOCATION="/tmp"
 set +e
 export Q_SRC_ROOT="`pwd`"
 cd $Q_SRC_ROOT
 git pull
+
+pre_build_cleanup(){
+   rm -f $TEMP_LOCATION/libq*
+   rm -f $TEMP_LOCATION/q_core.h
+   rm -rf $TEMP_LOCATION/LUA*
+   rm -rf $Q_ROOT/include/*
+   rm -rf $Q_ROOT/lib/*
+}
+
+report_files_cleanup(){
+   rm -f $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/data_load.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/load_csv.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/mk_col.stats.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.report.txt
+   rm -f $Q_SRC_ROOT/OPERATORS/PRINT/test/print_csv.stats.txt
+   rm -f $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.report.txt
+   rm -f $Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.stats.txt
+   rm -f $Q_SRC_ROOT/UTILS/test/dictionary.report.txt
+   rm -f $Q_SRC_ROOT/UTILS/test/dictionary.stats.txt
+}
+
 
 export LUA_PATH="$Q_SRC_ROOT/../?.lua;;"
 
@@ -10,12 +36,14 @@ cd $Q_SRC_ROOT/UTILS/build
 
 source $Q_SRC_ROOT/setup.sh -f
 
-var80="------------OUTPUT of build scripts--------------------------------------"
-var81=$(lua build.lua gen.lua 2>&1)
-var82="------------OUTPUT of library scripts----------------------------------------"
-var83=$(lua mk_so.lua /tmp/ 2>&1)
-var84="------------OUTPUT of test scripts------------------------------------"
-var85=$(lua build.lua tests.lua 2>&1)
+pre_build_cleanup
+
+build_output_heading="------------OUTPUT of build scripts--------------------------------------"
+build_output=$(lua build.lua gen.lua 2>&1)
+library_output_heading="------------OUTPUT of library scripts----------------------------------------"
+library_output=$(lua mk_so.lua /tmp/ 2>&1)
+test_output_heading="------------OUTPUT of test scripts------------------------------------"
+test_output=$(lua build.lua tests.lua 2>&1)
 
 unset LUA_PATH
 
@@ -41,10 +69,9 @@ bash test_vector.sh
 nightly_file=$Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/nightly_build_metadata.txt
 if [ -f $nightly_file ] 
 then
- var1=$(cat $nightly_file)
- #echo "$var1"
+ load_csv_metadata_out=$(cat $nightly_file)
 else
- var1="Error in Creating METADATA TEST CASES"
+ load_csv_metadata_out="Error in Creating METADATA TEST CASES"
 fi
 rm $nightly_file
 
@@ -52,10 +79,9 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/nightly_build_load.txt
 if [ -f $nightly_file ] 
 then
- var2=$(cat $nightly_file)
- #echo "$var1"
+ load_csv_out=$(cat $nightly_file)
 else
- var2="Error in Creating LOAD_CSV TEST CASES"
+ load_csv_out="Error in Creating LOAD_CSV TEST CASES"
 fi
 rm $nightly_file
 
@@ -63,10 +89,9 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/OPERATORS/DATA_LOAD/test/testcases/nightly_build_load.txt
 if [ -f $nightly_file ] 
 then
- var3=$(cat $nightly_file)
- #echo "$var1"
+ data_load_out=$(cat $nightly_file)
 else
- var3="Error in Creating DATA_LOAD TEST CASES"
+ data_load_out="Error in Creating DATA_LOAD TEST CASES"
 fi
 rm $nightly_file
 
@@ -76,10 +101,9 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/OPERATORS/PRINT/test/nightly_build_print.txt
 if [ -f $nightly_file ] 
 then
- var4=$(cat $nightly_file)
- #echo "$var1"
+ print_out=$(cat $nightly_file)
 else
- var4="Error in Creating PRINT TEST CASES"
+ print_out="Error in Creating PRINT TEST CASES"
 fi
 rm $nightly_file
 
@@ -87,10 +111,9 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/UTILS/test/nightly_build_dictionary.txt
 if [ -f $nightly_file ] 
 then
- var5=$(cat $nightly_file)
- #echo "$var5"
+ utils_out=$(cat $nightly_file)
 else
- var5="Error in Creating DICTIONARY TEST CASES"
+ utils_out="Error in Creating DICTIONARY TEST CASES"
 fi
 rm $nightly_file
 
@@ -98,10 +121,9 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/OPERATORS/MK_COL/test/testcases/nightly_build_mkcol.txt
 if [ -f $nightly_file ] 
 then
- var6=$(cat $nightly_file)
- #echo "$var1"
+ mk_col_out=$(cat $nightly_file)
 else
- var6="Error in Creating MK_COL TEST CASES"
+ mk_col_out="Error in Creating MK_COL TEST CASES"
 fi
 rm $nightly_file
 
@@ -109,18 +131,17 @@ rm $nightly_file
 nightly_file=$Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/nightly_build_vector.txt
 if [ -f $nightly_file ] 
 then
- var7=$(cat $nightly_file)
- #echo "$var1"
+ vector_out=$(cat $nightly_file)
 else
- var7="Error in Creating Vector TEST CASES"
+ vector_out="Error in Creating Vector TEST CASES"
 fi
 rm $nightly_file
 
 
-var100="${var1}"$'\n\n'"${var2}"$'\n\n'"${var3}"$'\n\n'"${var4}"$'\n\n'"${var5}"$'\n\n'"${var6}"$'\n\n'"${var7}"
+final_out="${load_csv_metadata_out}"$'\n\n'"${load_csv_out}"$'\n\n'"${data_load_out}"$'\n\n'"${print_out}"$'\n\n'"${utils_out}"$'\n\n'"${mk_col_out}"$'\n\n'"${vector_out}"
 
-var100="${var100}"$'\n\n'"${var80}"$'\n\n'"${var81}"$'\n\n'"${var82}"$'\n\n'"${var83}"$'\n\n'"${var84}"$'\n\n'"${var85}"
-#echo "$var100" 
+final_out="${final_out}"$'\n\n'"${build_output_heading}"$'\n\n'"${build_output}"$'\n\n'"${library_output_heading}"$'\n\n'"${library_output}"$'\n\n'"${test_output_heading}"$'\n\n'"${test_output}"
+#echo "$final_out" 
 
 attach_file=$Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.report.txt
 if [ -f $attach_file ] 
@@ -163,5 +184,7 @@ then
 fi
 
 # echo $varattach
-# echo "$var100"
-echo "$var100" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
+# echo "$final_out"
+echo "$final_out" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
+
+report_files_cleanup

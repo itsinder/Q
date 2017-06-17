@@ -152,7 +152,7 @@ p = logit(t1)
 w = logit2(t1)
 t2 = vvsub(y, p)
 for j in 1 to M do 
-  b[j] = sumprod(Xj, t5) 
+  b[j] = sumprod(Xj, t2)
 end
 for j in 1 to M do 
   for k in j to M do 

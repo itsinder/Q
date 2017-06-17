@@ -1,4 +1,3 @@
-require 'Q/UTILS/lua/globals'
 local dir = require 'pl.dir'
 local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
 local fns = require 'Q/RUNTIME/COLUMN/code/test_cases/handle_category'
