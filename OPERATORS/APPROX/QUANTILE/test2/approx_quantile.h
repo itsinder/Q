@@ -3,6 +3,8 @@ typedef struct aq_rec_type {
   uint64_t k;
   int **buffers;
   int *weight;
+  int *last_packet;
+  int num_in_lp;
 } AQ_REC_TYPE;
 
 int 

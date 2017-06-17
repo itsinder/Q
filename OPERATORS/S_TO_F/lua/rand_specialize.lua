@@ -48,7 +48,7 @@ return function (
   c_mem.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 
-    generator = "lrand48"
+    generator = "mrand48"
     subs.gen_type = "uint64_t"
     subs.scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
   elseif ( qconsts.iorf[qtype] == "floating_point" ) then 

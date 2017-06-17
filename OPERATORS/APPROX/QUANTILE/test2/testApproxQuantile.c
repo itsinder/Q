@@ -117,6 +117,11 @@ int main (
 #endif
   }
 
+  aqrt.last_packet = (int *)malloc ( k * sizeof(int));
+  return_if_malloc_failed(aqrt.last_packet);
+  aqrt. num_in_lp = 0;
+
+
 
 
    /* CALLING APPROX QUANTILE */
