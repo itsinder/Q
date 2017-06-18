@@ -2,9 +2,11 @@
   local plpath = require "pl.path"
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
+  if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
+  if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 
   local operator_file = assert(arg[1])
-  assert(plpath.isfile(operator_file))
+  assert(plpath.isfile(operator_file), "File not found " .. operator_file)
   local operators = dofile(operator_file)
   local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
