@@ -13,6 +13,6 @@ require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2"
 require "Q/OPERATORS/S_TO_F/lua/_s_to_f"
 require "Q/OPERATORS/F_TO_S/lua/_f_to_s"
 require "Q/OPERATORS/AX_EQUALS_B/lua/linear_solver"
--- require "Q/OPERATORS/APPROX/QUANTILE/lua/approx_quantile"
+require "Q/OPERATORS/APPROX/QUANTILE/lua/approx_quantile"
 
 return require 'Q/q_export'

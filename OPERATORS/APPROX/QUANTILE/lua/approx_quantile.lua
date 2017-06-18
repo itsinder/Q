@@ -19,7 +19,7 @@ local func_name = "approx_quantile_" .. qtype
   assert(type(args) == "table")
   local num_quantiles = assert(args.num_quantiles, "num quantiles is a required argument")
   num_quantiles = assert(tonumber(num_quantiles), "num quantiles must be a number")
-  assert(num_quantiles > 2, "num quantiles must be positive and greater than 2")
+  assert(num_quantiles > 1, "num quantiles must be positive and greater than 1")
   assert( num_quantiles < siz, "cannot have more quantiles than numbers")
   
   local err = args.err
@@ -38,7 +38,7 @@ local func_name = "approx_quantile_" .. qtype
   end
   -- STOP: verify inputs
   
-  local ptr_est_is_good = assert(ffi.malloc(ffi.sizeof(int)), "malloc failed")
+  local ptr_est_is_good = assert(ffi.malloc(ffi.sizeof("int")), "malloc failed")
   ptr_est_is_good = ffi.cast("int *", ptr_est_is_good)
 
   local ctype = qconsts.qtypes[qtype].ctype
