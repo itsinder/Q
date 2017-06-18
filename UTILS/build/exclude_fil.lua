@@ -7,6 +7,7 @@ return {
   "eq.c",
   "hr.c",
   "initialize_vector.c",
+  "approx_quantile.c",
   "tmpl_rand.c",
   "print.c",
   "qsort.c",

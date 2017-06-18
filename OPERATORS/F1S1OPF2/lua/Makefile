@@ -8,7 +8,7 @@ DBGFLAGS= -g -DDEBUG
 OPTFLAGS= -O4
 OPTFLAGS= 
 
-CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
+CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
 all : libf1s1opf2.so _f1s1opf2.lua
 	
@@ -96,17 +96,21 @@ logit_specialize.lua  : f1opf2_specialize.tmpl
 logit2_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 
-libf1s1opf2.so : _arith_files _bop_files _f1opf2_files
+libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
 
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua
 
-_bop_files : bop_specializers
-	luajit generator1.lua bop_operators.lua
-
 _cmp_files : cmp_specializers
 	luajit generator1.lua cmp_operators.lua
 
+_f1opf2_files : f1opf2_specializers
+	luajit generator0.lua operators0.lua
+
 _f1s1opf2.lua : 
 	lua pkg_f1s1opf2.lua
+
+_ctests : libf1s1opf2.so 
+	cd ../test/ && bash run_tests.sh && cd -
+	

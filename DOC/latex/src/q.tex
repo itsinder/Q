@@ -220,8 +220,33 @@ ffi.copy() may be used as a faster (inlinable) replacement
  for the C library functions memcpy(), strcpy() and strncpy().
 \ee
 
-\subsection{Converting numbers from Lua to C and vice versa}
+\subsection{Converting numbers: C to Lua}
+\label{cnum_to_lnum}
 
+Consider the following scenario. 
+You need a C function, {\tt foo}, to create an F8 number.
+Lua would allocate space for it, pass the pointer to C to set it and the Lua
+would need to convert that back to a Lua number.
+\begin{verbatim}
+local conv_cnum_to_lnum = require "Q/UTILS/lua/conv_lnum_to_cnum"
+local ctype = q_consts.qtypes[qtype].width
+local c_mem = ffi.malloc(width)
+qc.foo(...., c_mem)
+local rslt = 
+\end{verbatim}
+
+\subsection{Converting numbers: Lua to C}
+\label{lnum_to_cnum}
+
+\subsubsection{What to do}
+
+\begin{verbatim}
+local conv_lnum_to_cnum = require "Q/UTILS/lua/conv_lnum_to_cnum"
+local c_mem = conv_lnum_to_cnum(123, "I4")
+local c_mem = conv_lnum_to_cnum("123", "I4") -- for large I8 numbers
+\end{verbatim}
+
+\subsubsection{Rationale}
 A simple way to convert Lua Number to C data struture using FFI API is
 \begin{verbatim}
 local chunk = ffi.new(ctype .. "[?]", length, input)
@@ -242,6 +267,7 @@ The parser for Lua source code treats numeric literals with the suffixes LL
 or ULL as signed or unsigned 64 bit integers. Case doesn't matter, but
 uppercase is recommended for readability. It handles both decimal (42LL)
 and hexadecimal (0x2aLL) literals.
+
 
 %----------------------------------
 
