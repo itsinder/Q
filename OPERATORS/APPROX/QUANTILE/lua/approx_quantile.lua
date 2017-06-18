@@ -1,14 +1,14 @@
-
 local ffi = require "Q/UTILS/lua/q_ffi"
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require "Q/UTILS/lua/q_core"
 
+
+local approx_quantile = function(x, args)
 assert(type(x) == "Column")
 local qtype = x:fldtype()
 local func_name = "approx_quantile_" .. qtype 
 
-local approx_quantile = function(x, args)
   -- START: verify inputs
   local siz = x:length()
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
@@ -42,13 +42,33 @@ local approx_quantile = function(x, args)
   ptr_est_is_good = ffi.cast("int *", ptr_est_is_good)
 
   local ctype = qconsts.qtypes[qtype].ctype
-  local yptr = assert(ffi.malloc(num_quantiles*ffi.sizeof(ctype)), "malloc failed")
+  local qptr = assert(ffi.malloc(num_quantiles*ffi.sizeof(ctype)), "malloc failed")
   
   local x_len, xptr, nn_xptr = x:chunk(-1)
+  assert(nn_xptr == nil, "Not set up for null values")
 
-  qc[func_name](xptr, cfld, siz, num_quantiles, err, yptr, ptr_est_is_good)
+  local status
+  status = qc[func_name](xptr, cfld, siz, num_quantiles, err, qptr, ptr_est_is_good)
+--[[approx_quantile(
+		ctype * x,
+		char * cfld,
+		uint64_t siz, 
+		uint64_t num_quantiles, TODO uint32_t ???
+		double eps,
+		ctype *y,
+		int *ptr_estimate_is_good)
+                --]]
+  assert(status == 0, "Failure in C code of " .. func_name)
+  local is_estimate_good = ptr_est_is_good[0]
+  assert( ( is_estimate_good == 1 ) or 
+          ( is_estimate_good == -1 ) or 
+          ( is_estimate_good == -2 ) )
+  
+  local qcol = Column({field_type = qtype, write_vector = true})
+  qcol:put_chunk(num_quantiles, qptr)
+  qcol:eov()
+  return qcol, is_estimate_good
 
 end
-
 
 return require('Q/q_export').export('approx_quantile', approx_quantile)
