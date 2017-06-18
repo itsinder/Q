@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <time.h>
 #include <stdbool.h>
-#include "approx_quantile.h"
+#include "../gen_inc/_approx_quantile_I4.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include "string.h"
@@ -38,7 +39,7 @@ int main (
 
   char * infile = argv[1];
   status = rs_mmap(infile, &X, &nX, 0); cBYE(status);
-  long long siz = nX / sizeof(int);	   
+  uint64_t siz = nX / sizeof(int);	   
   x = (int *)X;
   if ( x == NULL ) { go_BYE(-1); }
   
@@ -50,18 +51,17 @@ int main (
 
   //----------------------------------------------------------------------
 
-  long long num_quantile = 20;//1000; 
+  uint64_t num_quantile = 3;//20;//1000; 
   /* ex: 5 => need 5 quantiles {20%,40%,60%,80%,100%}, choose between 1 & number of elements to be considered */
   if ( num_quantile == 0 ) { cBYE(-1);}
 
-  long long y_siz = num_quantile;
-  y = (int *)malloc( y_siz * sizeof(int) );
+  y = (int *)malloc( num_quantile * sizeof(int) );
   return_if_malloc_failed(y);
  
   double eps = 0.001;   /* 0.0001: Ok with +/- 0.01% error in quantile estimations. For ex: 50% -> ok with 50 +/- 0.01 % */ 
   int estimate_is_good; 
 
-  status = approx_quantile(x, cfld, siz, num_quantile, eps, y, y_siz, &estimate_is_good); cBYE(status);
+  status = approx_quantile(x, cfld, siz, num_quantile, eps, y, &estimate_is_good); cBYE(status);
 
   quantile_percent = (double *)malloc ( num_quantile * sizeof(double) );
   return_if_malloc_failed(quantile_percent);
