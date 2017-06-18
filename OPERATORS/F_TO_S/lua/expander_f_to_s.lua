@@ -15,7 +15,6 @@ return function (a, x )
     local func_name = assert(subs.fn)
     assert(qc[func_name], "Function does not exist " .. func_name)
     local x_coro = assert(x:wrap(), "wrap failed for x")
-    print(subs.c_mem)
     local reduce_struct = assert(subs.c_mem)
     --[[
     local reduce_struct_name = string.format("REDUCE_%s_ARGS", func_name)

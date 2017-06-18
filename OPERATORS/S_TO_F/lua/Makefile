@@ -17,6 +17,7 @@ clean :
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
 	rm -f _*
+	rm -f *.so
 		
 
 libs_to_f.so : 
