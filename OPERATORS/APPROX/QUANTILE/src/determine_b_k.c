@@ -1,21 +1,19 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <sys/types.h>
 #include <inttypes.h>
-#include "constants.h"
-#include "macros.h"
-#include "determine_b_k.h"
+#include <limits.h>
 #include <math.h>
+#include "q_macros.h"
+#include "determine_b_k.h"
 
-// START FUNC DECL
+//START_FUNC_DECL
 int
 determine_b_k(
 	      double eps,  
 	      uint64_t siz, 
-	      int *ptr_b,  
-	      uint64_t *ptr_k  
+	      uint32_t *ptr_b,  
+	      uint32_t *ptr_k  
 	      )
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 //---------------------------------------------------------------------------
 /* README:
 
@@ -37,17 +35,16 @@ ptr_k: Pointer to the location which tells you the size of each buffer in the 2d
 
 //---------------------------------------------------------------------------
 {
-
   int status = 0;
-
   int b = -1;
-  uint64_t k = -1;
+  uint64_t k;
 
   b = 2; 
   while ( ((b-2)*pow(2,b-2)+1) < (double)(eps*siz) ) {
     b++;
   }
   b--;
+  if ( b <= 0 ) { go_BYE(-1); }
 
   if ( (siz % (uint64_t)pow(2,b-1)) == 0 ) {
     k = siz/pow(2,b-1);
@@ -55,11 +52,16 @@ ptr_k: Pointer to the location which tells you the size of each buffer in the 2d
   else {
     k = siz/pow(2,b-1)+1;
   }
+  if ( k >  INT_MAX ) { go_BYE(-1); } // we return a signed integer
+  if ( k <= 0 ) { go_BYE(-1); } 
 
-  if ( k < 10000 ) { k = 10000; } /* to give some freedom for cilkfor */
+  /* TODO: Improve documentation here. We set k to a minimum size since 
+   * we will give each thread k items to sort in parallel */
+  if ( k < 16384 ) { k = 16384; } 
 
-  *ptr_b = b;
-  *ptr_k = k;
+  *ptr_b = (uint32_t)b;
+  *ptr_k = (uint32_t)k;
 
-  return(status);
+BYE:
+  return status;
 }

@@ -20,8 +20,8 @@ Output_${qtype}(
        uint64_t eff_siz, 
        uint64_t num_quantiles,
        ${ctype} *ptr_y,
-       int b,         
-       uint64_t k
+       uint32_t b,         
+       uint32_t k
        );
 
   ]=],
@@ -42,8 +42,8 @@ Output_${qtype}(
        uint64_t siz, 
        uint64_t num_quantiles,
        ${ctype} *ptr_y,
-       int b,         
-       uint64_t k
+       uint32_t b,         
+       uint32_t k
        )
 // STOP FUNC DECL
 //---------------------------------------------------------------------------
@@ -87,9 +87,8 @@ NOTE: This function is slightly different from the paper, in order to take into 
 */
 //---------------------------------------------------------------------------
 {
-
   int status = 0;
-  int * current_loc_buf = NULL;
+  ${ctype} *current_loc_buf = NULL;
 
   /* check inputs */ 
   if ( src_bufs == NULL ) { go_BYE(-1); }
@@ -104,7 +103,7 @@ NOTE: This function is slightly different from the paper, in order to take into 
      NOTE: all arrays considered here are presorted */
 
   current_loc_buf = (${ctype} *)malloc( b * sizeof(${ctype})); 
-  for ( int ii = 0; ii < b; ii++ ) {
+  for ( unsigned int ii = 0; ii < b; ii++ ) {
     current_loc_buf[ii] = 0;
   }
   /* keeps track of the current processing location in each buffer */
@@ -128,24 +127,22 @@ NOTE: This function is slightly different from the paper, in order to take into 
     int min_unproc_val_loc = -1; 
     /* stores the buffer id (between 0 and b-1) if the minimum unprocessed value is in one of those buffers, stores b if it is in the last packet */
 
-    for ( int ii = 0; ii < b; ii++ ) {
-      
-      if ( ptr_weight[ii] > 0 && current_loc_buf[ii] < k ) {
+    for ( unsigned int ii = 0; ii < b; ii++ ) {
+      if ( ( ptr_weight[ii] > 0 ) && ( current_loc_buf[ii] < k ) ) {
 	/* Only consider those buffers with corresponding weight > 0 */
 	if ( src_bufs[ii][current_loc_buf[ii]] < min_unproc_val ) {
 	  min_unproc_val = src_bufs[ii][current_loc_buf[ii]];
 	  min_unproc_val_loc = ii;
 	}
       }
-
     }
-    if ( last_packet_incomplete == 1 && current_loc_lp < last_packet_siz ) {
-    
+    //------------------------------
+    if ( ( last_packet_incomplete == 1 ) && 
+         ( current_loc_lp < last_packet_siz ) ) {
       if ( last_packet[current_loc_lp] < min_unproc_val ) {
 	min_unproc_val = last_packet[current_loc_lp];
 	min_unproc_val_loc = b;
       }
-
     }
     
     if ( min_unproc_val_loc < 0 ) { break; } /* done with our work */
@@ -164,9 +161,7 @@ NOTE: This function is slightly different from the paper, in order to take into 
       ptr_y[jj++] = min_unproc_val;  
       next_quantile_rank = (uint64_t) ceil((jj+1)*(double)siz/num_quantiles);
     }
-
   }
-
  BYE:
   free_if_non_null(current_loc_buf);
   return(status);
