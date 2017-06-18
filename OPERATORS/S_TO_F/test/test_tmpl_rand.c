@@ -30,8 +30,8 @@ main()
   free(vec);*/
   //---------------------------------
 //#ifdef LATER
-  int n = 10;
-  int len = 10;
+  uint32_t n = 10;
+  uint32_t len = 10;
   int32_t *y = (int32_t*) malloc(len * sizeof(int32_t));
   RAND_I4_REC_TYPE argsy;
   argsy.seed = 0;
@@ -40,7 +40,7 @@ main()
   argsy.lb = lb;
   argsy.ub = ub;
   status = rand_I4(y, len, &argsy, true);
-  int ctr[n]; for ( int i = 0; i < n; i++ ) { ctr[i]= 0; }
+  int ctr[n]; for ( unsigned int i = 0; i < n; i++ ) { ctr[i]= 0; }
   for ( uint64_t i = 0; i < n; i++ ) {
     if ( y[i] < lb || y[i] > ub ) {
       printf("FAILURE\n");
@@ -56,7 +56,7 @@ main()
   printf("\n");
 
   int num_bad = 0;
-  for ( int i = 0; i < n; i++ ) {
+  for ( unsigned int i = 0; i < n; i++ ) {
     if ( ctr[i] < 1 || ctr[i] > 4 ) {
       //printf("WARNING: uniformity is a bit off\n");
       num_bad += 1;

@@ -1,7 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-local ffi    = require 'Q/UTILS/lua/q_ffi'
-local qc     = require 'Q/UTILS/lua/q_core'
+local Scalar  = require 'Q/RUNTIME/SCALAR/lua/Scalar'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
+local qc      = require 'Q/UTILS/lua/q_core'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
@@ -15,13 +15,17 @@ return function (a, x )
     local func_name = assert(subs.fn)
     assert(qc[func_name], "Function does not exist " .. func_name)
     local x_coro = assert(x:wrap(), "wrap failed for x")
-    --[[
+    print(subs.c_mem)
     local reduce_struct = assert(subs.c_mem)
-    --]]
+    --[[
     local reduce_struct_name = string.format("REDUCE_%s_ARGS", func_name)
     local reduce_struct = assert(ffi.malloc(ffi.sizeof(reduce_struct_name)))
-    local reduce_struct = ffi.cast(reduce_struct_name .. "*", reduce_struct)
-    return coroutine.create(function()
+    --]]
+    local getter = assert(subs.getter)
+    assert(type(getter) == "function")
+    --==================
+
+    local lcoro = coroutine.create(function()
       local x_chunk, x_status
       x_status = true
       while (x_status) do
@@ -33,4 +37,6 @@ return function (a, x )
         end -- if
       end -- while 
     end)
+    local s =  Scalar ( { coro = lcoro, func = getter } )
+    return s
 end

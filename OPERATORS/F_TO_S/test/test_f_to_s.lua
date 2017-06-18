@@ -2,6 +2,7 @@ local Q = require 'Q'
 local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 
+--[[
 function get_val(coro)
 local res = 0
 local status, x
@@ -15,23 +16,59 @@ repeat
 until coroutine.status(coro) == "dead" 
 return tonumber(x[0].cum_val)
 end
+--]]
 
 
 local z= Q.sum(c1)
-z = get_val(z)
-assert(z == 36 )
-print("Completed " .. arg[0]) os.exit()
+assert(type(z) == "Scalar")
+local status = true repeat status = z:next() until not status
+local val = z:value()
+assert(val == 36 )
+
+assert(Q.sum(c1):eval() == 36)
 
 local z = Q.min(c1)
-z = get_val(z)
-assert(z == 1 )
+local status = true repeat status = z:next() until not status
+local val = z:value()
+assert(val == 1 )
+assert(Q.min(c1):eval() == 1)
 
 local z = Q.max(c1)
-z = get_val(z)
-assert(z == 8 )
+local status = true repeat status = z:next() until not status
+local val = z:value()
+assert(val == 8 )
+assert(Q.max(c1):eval() == 8)
 
 local z = Q.sum_sqr(c1)
-z = get_val(z)
-assert(z == XXXXX )
+local status = true repeat status = z:next() until not status
+local val = z:value()
+local n = c1:length()
+assert(val ==(n * (n+1) * (2*n+1) )/6) 
+
+function fold( fns, vec)
+  gens = {}
+  for i, v in ipairs(fns) do
+    gens[i] = Q[v](vec)
+    -- print(type(gens[i]))
+  end
+  local status = true
+  repeat
+    for i, v in ipairs(fns) do
+      status = gens[i]:next() 
+    end
+  until not status
+  rvals = {}
+  for i, v in ipairs(gens) do
+    rvals[i] = gens[i]:value() 
+  end
+  for i, v in ipairs(rvals) do 
+    print(rvals[i])
+  end
+  return unpack(rvals)
+end
+
+x, y, z = fold({ "sum", "min", "max" }, c1)
+print (x, y, z)
+print("Completed " .. arg[0]); os.exit()
+
 --=========================================
-os.exit()
