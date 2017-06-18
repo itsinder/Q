@@ -12,5 +12,6 @@ return function (
 
   subs.ctype = qconsts.qtypes[qtype].ctype
   subs.qtype = qtype
+  --subs.fn = "approx_quantile_" .. qtype
   return subs, tmpls
 end

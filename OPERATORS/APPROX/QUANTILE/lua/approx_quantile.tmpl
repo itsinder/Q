@@ -35,7 +35,6 @@ approx_quantile (
 		 uint64_t num_quantiles, 
 		 double err, 
 		 ${ctype} *y,
-		 uint64_t y_siz,
 		 int *ptr_estimate_is_good
 		 );
 
@@ -55,14 +54,13 @@ approx_quantile(
 		uint64_t num_quantiles,
 		double eps,
 		${ctype} *y,
-		uint64_t y_siz,
 		int *ptr_estimate_is_good
 		)
 // STOP FUNC DECL
 //----------------------------------------------------------------------------
 /* README:
 
-status = approx_quantile(x,cfld, siz,num_quantiles,eps,y,y_siz,ptr_estimate_is_good): Calculates the approximate quantiles of an integer set using very little memory. 
+status = approx_quantile(x,cfld, siz,num_quantiles,eps,y,ptr_estimate_is_good): Calculates the approximate quantiles of an integer set using very little memory. 
 
 For example: If you request for 10 quantiles with eps of 0.001: {10%, 20%,...90%, 100% } quantiles will be answered with an error of +/0.1% i.e., 10% quantile will be definitely between 9.9% and 10.1%, 90% quantile will definitely be between 89.9% and 90.1%.
 
@@ -83,11 +81,12 @@ num_quantiles: Number of quantiles that have to be calculated (1 <= num_quantile
 
 eps: Acceptable error in the calculated quantiles (0 <= eps <= 1). For example, eps = 0.001 would imply +/- 0.1%, eps = 0.0001 would imply +/- 0.01% (try 0.001 if you don't know what to use).
 
-y_siz: Number of integers that can be written in y (preallocated memory). Has to be atleast num_quantiles*sizeof(int).
+num_quantiles: Number of integers that can be written in y (preallocated memory). Has to be atleast num_quantiles*sizeof(int).
 
 OUTPUTS: 
 
-y: Array where the quantile summary is going to be stored, need to malloc with y_siz integer memory (>= num_quantiles*sizeof(int)) beforehand.
+y: Array where the quantile summary is going to be stored, need to malloc with
+num_quantiles integer memory (>= num_quantiles*sizeof(int)) beforehand.
 
 ptr_estimate_is_good: Pointer to the location with values 1, -1 or -2, which stand for the following
 1: For the given inputs siz and eps, approximate quantile calculations are possible. The computations are done and results are stored in y.
@@ -117,7 +116,6 @@ status: takes values -1 or 0
   if ( ( eps < 0 )  || ( eps > 1 ) ) { go_BYE(-1); }
   if ( num_quantiles < 1 ) { go_BYE(-1); }
   if ( siz <= 0 ) { go_BYE(-1); }
-  if ( y_siz < num_quantiles ) { go_BYE(-1); } /* insufficient memory to write output */
 
   uint64_t eff_siz = 0; /* number of entries to be considered */
   if ( cfld == NULL ) { eff_siz = siz; }
