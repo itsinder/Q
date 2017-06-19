@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS=-I../src/  -I../../../../UTILS/inc/ -I../gen_inc/ -I../../../SORT/gen_inc/
+INCS=-I../src/  -I../inc/ -I../../../../UTILS/inc/ -I../gen_inc/ -I../../../SORT/gen_inc/
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG
@@ -44,6 +44,11 @@ SRT_FILES = \
 libaq.so : ${SRT_FILES} ${GEN_FILES}
 	luajit generator.lua 
 	gcc ${SRT_FILES} ../src/*.c ${GEN_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS}  -o libaq.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
+	cp ../inc/*.h ${Q_BUILD_DIR}/include/
 
 GEN_FILES = \
 	../gen_src/_approx_quantile_I1.c \

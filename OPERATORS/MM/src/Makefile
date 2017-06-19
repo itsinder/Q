@@ -20,6 +20,7 @@ libmm.so : matrix_multiply.c
 mm: driver_mm.c matrix_multiply.c
 	$(CC) $(INCS) $(FLAGS) -lgomp -lpthread -lm \
 	  	driver_mm.c matrix_multiply.c mm_helpers.c -o mm
+	cp matrix_multiply.c ${Q_BUILD_DIR}/src/
 
 clean:
 	rm -f *.o mm *.so

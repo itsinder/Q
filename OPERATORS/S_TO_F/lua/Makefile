@@ -23,6 +23,9 @@ clean :
 libs_to_f.so : ${GEN_FILES}
 	luajit generator.lua operators.lua
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libs_to_f.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _s_to_f.lua : 
 	lua pkg_s_to_f.lua

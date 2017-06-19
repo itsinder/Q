@@ -34,6 +34,7 @@ bop_specializers : rem_specialize.tmpl \
 
 #----------------------------------
 clean :
+	rm -f libf1s1opf2.so _f1s1opf2.lua
 	rm -f vsadd_specialize.lua
 	rm -f vssub_specialize.lua
 	rm -f vsmul_specialize.lua
@@ -98,6 +99,9 @@ logit2_specialize.lua  : f1opf2_specialize.tmpl
 
 libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua
