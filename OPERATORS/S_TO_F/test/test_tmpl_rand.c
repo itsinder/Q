@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include "../src/tmpl_rand.h"
-#include "_rand_I4.h"
+#include "../gen_inc/_rand_I4.h"
 //#include <stdbool.h>
 //#include <stdint.h>
 
@@ -30,8 +30,8 @@ main()
   free(vec);*/
   //---------------------------------
 //#ifdef LATER
-  uint32_t n = 10;
-  uint32_t len = 10;
+  uint32_t n = 1024;
+  uint32_t len = 10240000;
   int32_t *y = (int32_t*) malloc(len * sizeof(int32_t));
   RAND_I4_REC_TYPE argsy;
   argsy.seed = 0;
@@ -41,31 +41,37 @@ main()
   argsy.ub = ub;
   status = rand_I4(y, len, &argsy, true);
   int ctr[n]; for ( unsigned int i = 0; i < n; i++ ) { ctr[i]= 0; }
-  for ( uint64_t i = 0; i < n; i++ ) {
+  for ( uint64_t i = 0; i < len; i++ ) {
     if ( y[i] < lb || y[i] > ub ) {
       printf("FAILURE\n");
       return status;
     }
     ctr[y[i]] += 1;
   }
-
+/*
   for ( uint64_t i = 0; i < n; i++ ) {
     printf("%d ", y[i]);
     printf("count %d\n", ctr[i]);
+  }*/
+  printf("\n");
+
+  bool print_warning = false;
+  int num_bad = 0;
+  for ( unsigned int i = 0; i < n; i++ ) {
+    if ( ctr[i] < (0.9*len)/n || ctr[i] > (1.1*len)/n ) {
+      print_warning = true;
+      num_bad += 1;
+    }
+  }
+  if(print_warning) {
+    printf("WARNING: uniformity is a bit off\n");
+    printf("Num bad is %d\n", num_bad);
+  }
+  else {
+    printf("Uniformity is good");
   }
   printf("\n");
 
-  int num_bad = 0;
-  for ( unsigned int i = 0; i < n; i++ ) {
-    if ( ctr[i] < 1 || ctr[i] > 4 ) {
-      //printf("WARNING: uniformity is a bit off\n");
-      num_bad += 1;
-    }
-    else {
-      printf("yay %d is good\n", i);
-    }
-  }
-  printf("Num bad is %d\n", num_bad);
 //#endif
 
   //---------------------------------
