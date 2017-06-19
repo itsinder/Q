@@ -48,7 +48,7 @@ uninstall:
 q_core: q_basic q_operators
 	cd ${BASE_PATH}/UTILS/lua/
 	lua copy_generated_files.lua 
-	# luajit mk_so.lua
+	luajit mk_so.lua
 	echo "all done for q_core"
 
 q_basic: column utils load_csv print
