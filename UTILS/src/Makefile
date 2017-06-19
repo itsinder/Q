@@ -55,10 +55,7 @@ libutils.so : ${bin_search_files} ${hdr_files}
 	mkdir -p ${Q_BUILD_DIR}/include/
 	mkdir -p ${Q_BUILD_DIR}/src/
 	cp ${INCDIR}/*.h         ${Q_BUILD_DIR}/include/
-	cp mmap.c      ${Q_BUILD_DIR}/src/
-	cp f_mmap.c    ${Q_BUILD_DIR}/src/
-	cp f_munmap.c  ${Q_BUILD_DIR}/src/
-	cp is_valid_chars_for_num.c  ${Q_BUILD_DIR}/src/
+	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
 
 clean :
 	rm -f ../gen_src/*
@@ -66,4 +63,10 @@ clean :
 	rm -f _*
 	rm -f *.so
 	rm -f *.o
+
+asc2bin :
+	echo TODO
+
+bin2asc :
+	echo TODO
 
