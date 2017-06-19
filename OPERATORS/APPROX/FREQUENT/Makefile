@@ -1,34 +1,19 @@
-CC=gcc -O4 -std=gnu99 -fopenmp
-LINKOPTIONS= -lm -g
+INCLUDES = -I../../SORT/gen_inc/ -I./gen_inc/ -I./inc/
+SRC_INCLUDES = ../../SORT/gen_src/*.c gen_src/*.c
 
-#CC=icc -O3 -std=c99
-#LINKOPTIONS=-ipp -DIPP -DCILK -lm -g
+all: libapprox_frequent.so
 
-CFLAGS = -c -Wall
+gen_inc/% gen_src/% : lua/*
+	cd lua; luajit generator.lua
 
-INCLUDES = -I ../../SORT/gen_inc/ -I ./includes
-TARGET_DIR = bin
-SRC_DIR = src
-TEST_DIR = test
+libapprox_frequent.so: gen_inc/* gen_src/*
+	gcc ${SRC_INCLUDES} ${QC_FLAGS} ${INCLUDES} -shared -o libapprox_frequent.so
 
-SRCOBJS = bin/approx_frequent.o \
-	../../SORT/gen_src/_qsort_asc_I4.o \
-
-
-all: testApproxFrequent
-
-$(TARGET_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) $(INCLUDES) $< $(LINKOPTIONS) -o $@
-
-$(TARGET_DIR)/%.o: $(TEST_DIR)/%.c
-	$(CC)  $(CFLAGS) $(INCLUDES) $< $(LINKOPTIONS) -o $@
-
-testApproxFrequent: $(SRCOBJS) bin/testApproxFrequent.o
-	$(CC) $(INCLUDES) $(SRCOBJS) $(TARGET_DIR)/testApproxFrequent.o $(LINKOPTIONS) -o $(TEST_DIR)/testApproxFrequent
-	$(TEST_DIR)/testApproxFrequent
+test: gen_inc/* gen_src/* test/testApproxFrequent.c
+	gcc ${SRC_INCLUDES} ${QC_FLAGS} ${INCLUDES} test/testApproxFrequent.c -o testApproxFrequent
+	./testApproxFrequent
 
 clean:
-	rm -f $(TARGET_DIR)/*.o test/testApproxFrequent
-
-
-
+	rm -rf gen_src gen_inc
+	rm -f lua/libapprox_frequent.so
+	rm -f testApproxFrequent

@@ -11,37 +11,37 @@ return require 'Q/UTILS/lua/code_gen' {
 struct frequent_persistent_data_${elem_qtype} {
   ${elem_ctype} *packet_space;
   ${elem_ctype} *cntr_id;
-  int *cntr_freq;
-  long long cntr_siz;
-  long long active_cntr_siz;
+  uint64_t *cntr_freq;
+  uint64_t cntr_siz;
+  uint64_t active_cntr_siz;
   ${elem_ctype} *bf_id;
-  int *bf_freq;
-  long long siz;
-  long long min_freq;
-  long long err;
-  long long max_chunk_size;
+  uint64_t *bf_freq;
+  uint64_t siz;
+  uint64_t min_freq;
+  uint64_t err;
+  uint64_t max_chunk_size;
 };
 
 int
 allocate_frequent_persistent_data_${elem_qtype}(
-    long long siz, // number of elements to be processed
-    long long min_freq,
-    long long err,
-    long long max_chunk_size, // larges number of elements to be processed at once
+    uint64_t siz, // number of elements to be processed
+    uint64_t min_freq,
+    uint64_t err,
+    uint64_t max_chunk_size, // larges number of elements to be processed at once
     struct frequent_persistent_data_${elem_qtype} *data); // caller should allocate
 
 extern int
 frequent_process_chunk_${elem_qtype}(
-    int *chunk,
-    int chunk_siz,
+    ${elem_ctype} *chunk,
+    uint64_t chunk_siz,
     struct frequent_persistent_data_${elem_qtype} *data);
 
 extern int
 frequent_process_output_${elem_qtype}(
     struct frequent_persistent_data_${elem_qtype} *data,
     ${elem_ctype} **y,
-    int **f,
-    int *out_len);
+    uint64_t **f,
+    uint64_t *out_len);
 
 extern void free_frequent_persistent_data_${elem_qtype}(struct frequent_persistent_data_${elem_qtype} *data);
 
@@ -53,12 +53,12 @@ extern void free_frequent_persistent_data_${elem_qtype}(struct frequent_persiste
 extern int
 approx_frequent_${elem_qtype}(
     ${elem_ctype} *x,
-    long long siz,
-    long long min_freq,
-    long long err,
+    uint64_t siz,
+    uint64_t min_freq,
+    uint64_t err,
     ${elem_ctype} **y,
-    int **f,
-    int *out_len
+    uint64_t **f,
+    uint64_t *out_len
     );
 ]],
 
@@ -99,13 +99,13 @@ STATUS: will return 1, 0 or -1
 
 // HELPERS
 
-int
+static int
 sorted_array_to_id_freq (
                          ${elem_ctype} * buf,
-                         long long num_buf,
+                         uint64_t num_buf,
                          ${elem_ctype} * bf_id,
-                         int * bf_freq,
-                         long long * ptr_bf_siz
+                         uint64_t * bf_freq,
+                         uint64_t * ptr_bf_siz
                          )
 {
 
@@ -120,8 +120,8 @@ sorted_array_to_id_freq (
 
   /* (id, freq) conversion of sorted data */
 
-  long long ii = 0, jj = 0;
-  int temp_freq = 1;
+  uint64_t ii = 0, jj = 0;
+  uint64_t temp_freq = 1;
 
   while ( ii < num_buf-1 ) {
 
@@ -148,22 +148,21 @@ sorted_array_to_id_freq (
 
 }
 
-int
+static int
 update_counter (
 		${elem_ctype} * cntr_id,
-		int * cntr_freq,
-		long long cntr_siz,
-		long long *ptr_active_cntr_siz,
+		uint64_t * cntr_freq,
+		uint64_t cntr_siz,
+		uint64_t *ptr_active_cntr_siz,
 		${elem_ctype} * bf_id,
-		int * bf_freq,
-		long long bf_siz
+		uint64_t * bf_freq,
+		uint64_t bf_siz
 		)
 {
-
   int status = 0;
 
   ${elem_ctype} * temp_cntr_id = NULL;
-  int * temp_cntr_freq = NULL;
+  uint64_t * temp_cntr_freq = NULL;
 
   /* check inputs */
 
@@ -177,12 +176,12 @@ update_counter (
 
   /* (temp_cntr_id,temp_cntr_freq) stores the merged and sorted (sorted in id) data of the counters (cntr_id,cntr_freq) and (bf_id, bf_freq) */
 
-  long long ii = 0, jj = 0, kk = 0;
 
   temp_cntr_id = (${elem_ctype} *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(${elem_ctype}) );
-  temp_cntr_freq = (int *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(int) );
+  temp_cntr_freq = (uint64_t *)malloc( ((*ptr_active_cntr_siz)+bf_siz)*sizeof(uint64_t) );
 
-
+  {
+  uint64_t ii = 0, jj = 0, kk = 0;
   while (1) {
 
     if ( ii < (*ptr_active_cntr_siz) && jj < bf_siz ) {
@@ -215,6 +214,7 @@ update_counter (
   }
 
   *ptr_active_cntr_siz = kk;
+  }
 
   //------------------------------------------------------------------------
 
@@ -223,12 +223,12 @@ update_counter (
 
   while ( *ptr_active_cntr_siz > cntr_siz ) {
 
-    for ( long long kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
+    for ( uint64_t kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
       temp_cntr_freq[kk]--;
     }
 
-    jj = 0;
-    for ( long long kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
+    uint64_t jj = 0;
+    for ( uint64_t kk = 0; kk < *ptr_active_cntr_siz; kk++ ) {
       if ( temp_cntr_freq[kk] > 0 ) {
         temp_cntr_freq[jj] = temp_cntr_freq[kk];
         temp_cntr_id[jj++] = temp_cntr_id[kk];
@@ -239,7 +239,7 @@ update_counter (
   }
 
   memcpy(cntr_id, temp_cntr_id, *ptr_active_cntr_siz*sizeof(${elem_ctype}));
-  memcpy(cntr_freq, temp_cntr_freq, *ptr_active_cntr_siz*sizeof(int));
+  memcpy(cntr_freq, temp_cntr_freq, *ptr_active_cntr_siz*sizeof(uint64_t));
 
  BYE:
   free_if_non_null(temp_cntr_id);
@@ -256,21 +256,21 @@ update_counter (
 
 int
 allocate_frequent_persistent_data_${elem_qtype}(
-    long long siz,
-    long long min_freq,
-    long long err,
-    long long max_chunk_siz,
+    uint64_t siz,
+    uint64_t min_freq,
+    uint64_t err,
+    uint64_t max_chunk_siz,
     struct frequent_persistent_data_${elem_qtype} *data)
 {
   int status = 0;
 
   ${elem_ctype} *packet_space = NULL;
   ${elem_ctype} *cntr_id = NULL;
-  int *cntr_freq = NULL;
-  long long cntr_siz;
-  long long active_cntr_siz = 0;
+  uint64_t *cntr_freq = NULL;
+  uint64_t cntr_siz;
+  uint64_t active_cntr_siz = 0;
   ${elem_ctype} *bf_id = NULL;
-  int *bf_freq = NULL;
+  uint64_t *bf_freq = NULL;
 
   cntr_siz = siz / err + 1;
   if (cntr_siz < 10000) { cntr_siz = 10000; } /* can be removed */
@@ -283,9 +283,9 @@ allocate_frequent_persistent_data_${elem_qtype}(
   }
 
   cntr_id = malloc(cntr_siz * sizeof(${elem_ctype})); return_if_malloc_failed(cntr_id);
-  cntr_freq = malloc(cntr_siz * sizeof(int)); return_if_malloc_failed(cntr_freq);
+  cntr_freq = malloc(cntr_siz * sizeof(uint64_t)); return_if_malloc_failed(cntr_freq);
   bf_id = malloc(max_chunk_siz * sizeof(${elem_ctype})); return_if_malloc_failed(bf_id);
-  bf_freq = malloc(max_chunk_siz * sizeof(int)); return_if_malloc_failed(bf_freq);
+  bf_freq = malloc(max_chunk_siz * sizeof(uint64_t)); return_if_malloc_failed(bf_freq);
   packet_space = malloc(max_chunk_siz * sizeof(${elem_ctype})); return_if_malloc_failed(packet_space);
 
   data->packet_space = packet_space;
@@ -306,16 +306,16 @@ allocate_frequent_persistent_data_${elem_qtype}(
 int
 frequent_process_chunk_${elem_qtype}(
     ${elem_ctype} *chunk,
-    long long chunk_siz,
+    uint64_t chunk_siz,
     struct frequent_persistent_data_${elem_qtype} *data)
 {
   int NUM_THREADS = 1;
   int status = 0;
 
   ${elem_ctype} **packet_starts = NULL;
-  long long *packet_sizs = NULL;
+  uint64_t *packet_sizs = NULL;
   packet_starts = malloc(NUM_THREADS * sizeof(${elem_ctype}*)); return_if_malloc_failed(packet_starts);
-  packet_sizs = malloc(NUM_THREADS * sizeof(long long)); return_if_malloc_failed(packet_sizs);
+  packet_sizs = malloc(NUM_THREADS * sizeof(uint64_t)); return_if_malloc_failed(packet_sizs);
 
   // copy chunk into NUM_THREADS packets to be sorted in parallel
   for (int tid = 0; tid < NUM_THREADS; tid++) {
@@ -341,7 +341,7 @@ frequent_process_chunk_${elem_qtype}(
   for ( int tid = 0; tid < NUM_THREADS; tid++ ) {
     if ( packet_sizs[tid] == 0 ) { continue; }
 
-    long long bf_siz = 0;
+    uint64_t bf_siz = 0;
     status = sorted_array_to_id_freq(packet_starts[tid], packet_sizs[tid], data->bf_id, data->bf_freq, &bf_siz); cBYE(status);
     status = update_counter(data->cntr_id, data->cntr_freq, data->cntr_siz, &data->active_cntr_siz, data->bf_id, data->bf_freq, bf_siz); cBYE(status);
   }
@@ -356,13 +356,13 @@ int
 frequent_process_output_${elem_qtype}(
     struct frequent_persistent_data_${elem_qtype} *data,
     ${elem_ctype} **y,
-    int **f,
-    int *out_len)
+    uint64_t **f,
+    uint64_t *out_len)
 {
   int status = 0;
 
-  long long j = 0;
-  for (long long i = 0; i < data->active_cntr_siz; i++) {
+  uint64_t j = 0;
+  for (uint64_t i = 0; i < data->active_cntr_siz; i++) {
     if (data->cntr_freq[i] >= (data->min_freq - data->err)) {
       data->cntr_id[j] = data->cntr_id[i];
       data->cntr_freq[j] = data->cntr_freq[i];
@@ -373,10 +373,10 @@ frequent_process_output_${elem_qtype}(
   *y = NULL;
   *f = NULL;
   *y = malloc(j * sizeof(${elem_ctype})); return_if_malloc_failed(*y);
-  *f = malloc(j * sizeof(int)); return_if_malloc_failed(*f);
+  *f = malloc(j * sizeof(uint64_t)); return_if_malloc_failed(*f);
 
   memcpy(*y, data->cntr_id, j * sizeof(${elem_ctype}));
-  memcpy(*f, data->cntr_freq, j * sizeof(int));
+  memcpy(*f, data->cntr_freq, j * sizeof(uint64_t));
   *out_len = j;
 
  BYE:
@@ -394,14 +394,14 @@ void free_frequent_persistent_data_${elem_qtype}(struct frequent_persistent_data
 }
 
 int
-approx_frequent (
+approx_frequent_${elem_qtype} (
     ${elem_ctype} *x,
-    long long siz,
-    long long min_freq,
-    long long err,
+    uint64_t siz,
+    uint64_t min_freq,
+    uint64_t err,
     ${elem_ctype} **y,
-    int **f,
-    int *out_len
+    uint64_t **f,
+    uint64_t *out_len
     )
 {
   int status = 0;
@@ -409,11 +409,11 @@ approx_frequent (
   struct frequent_persistent_data_${elem_qtype} *data = NULL;
   data = malloc(sizeof(struct frequent_persistent_data_${elem_qtype})); return_if_malloc_failed(data);
 
-  status = allocate_frequent_persistent_data_${elem_qtype}(siz, min_freq, err, -1, data); cBYE(status);
+  status = allocate_frequent_persistent_data_${elem_qtype}(siz, min_freq, err, 0, data); cBYE(status);
 
-  for (long long i = 0; i < siz; i += data->cntr_siz) {
-    ${elem_qtype} *chunk_start = x + i;
-    long long chunk_siz = min(data->cntr_siz, siz - i);
+  for (uint64_t i = 0; i < siz; i += data->cntr_siz) {
+    ${elem_ctype} *chunk_start = x + i;
+    uint64_t chunk_siz = min(data->cntr_siz, siz - i);
     status = frequent_process_chunk_${elem_qtype}(chunk_start, chunk_siz, data); cBYE(status);
   }
 
