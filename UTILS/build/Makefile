@@ -85,9 +85,7 @@ sort: q_basic
 		echo "sort done"
 
 idx_sort: q_basic
-		cd ${BASE_PATH}/OPERATORS/IDX_SORT/lua;\
-		bash gen_files.sh
-
+		make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
 		echo "idx_sort done"
 
 s_to_f: q_basic
