@@ -8,7 +8,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include "macros.h"
 #include "_qsort_asc_${elem_qtype}.h"
 
-struct frequent_persistent_data_${elem_qtype} {
+${data_ty} {
   ${elem_ctype} *packet_space;
   ${elem_ctype} *cntr_id;
   uint64_t *cntr_freq;
@@ -23,27 +23,27 @@ struct frequent_persistent_data_${elem_qtype} {
 };
 
 int
-allocate_frequent_persistent_data_${elem_qtype}(
+${alloc_fn}(
     uint64_t siz, // number of elements to be processed
     uint64_t min_freq,
     uint64_t err,
     uint64_t max_chunk_size, // larges number of elements to be processed at once
-    struct frequent_persistent_data_${elem_qtype} *data); // caller should allocate
+    ${data_ty} *data); // caller should allocate
 
 extern int
-frequent_process_chunk_${elem_qtype}(
+${chunk_fn}(
     ${elem_ctype} *chunk,
     uint64_t chunk_siz,
-    struct frequent_persistent_data_${elem_qtype} *data);
+    ${data_ty} *data);
 
 extern int
-frequent_process_output_${elem_qtype}(
-    struct frequent_persistent_data_${elem_qtype} *data,
+${out_fn}(
+    ${data_ty} *data,
     ${elem_ctype} **y,
     uint64_t **f,
     uint64_t *out_len);
 
-extern void free_frequent_persistent_data_${elem_qtype}(struct frequent_persistent_data_${elem_qtype} *data);
+extern void ${free_fn}(${data_ty} *data);
 
 #define STATUS_HIGH_MEMORY 1
 #define STATUS_GOOD 0
@@ -51,7 +51,7 @@ extern void free_frequent_persistent_data_${elem_qtype}(struct frequent_persiste
 #define STATUS_INVALID_INPUT -2
 
 extern int
-approx_frequent_${elem_qtype}(
+${fn}(
     ${elem_ctype} *x,
     uint64_t siz,
     uint64_t min_freq,
@@ -255,12 +255,12 @@ update_counter (
 #define HIGH_MEM 200*1048576
 
 int
-allocate_frequent_persistent_data_${elem_qtype}(
+${alloc_fn}(
     uint64_t siz,
     uint64_t min_freq,
     uint64_t err,
     uint64_t max_chunk_siz,
-    struct frequent_persistent_data_${elem_qtype} *data)
+    ${data_ty} *data)
 {
   int status = 0;
 
@@ -304,10 +304,10 @@ allocate_frequent_persistent_data_${elem_qtype}(
 }
 
 int
-frequent_process_chunk_${elem_qtype}(
+${chunk_fn}(
     ${elem_ctype} *chunk,
     uint64_t chunk_siz,
-    struct frequent_persistent_data_${elem_qtype} *data)
+    ${data_ty} *data)
 {
   int NUM_THREADS = 1;
   int status = 0;
@@ -353,8 +353,8 @@ frequent_process_chunk_${elem_qtype}(
 }
 
 int
-frequent_process_output_${elem_qtype}(
-    struct frequent_persistent_data_${elem_qtype} *data,
+${out_fn}(
+    ${data_ty} *data,
     ${elem_ctype} **y,
     uint64_t **f,
     uint64_t *out_len)
@@ -383,7 +383,7 @@ frequent_process_output_${elem_qtype}(
   return status;
 }
 
-void free_frequent_persistent_data_${elem_qtype}(struct frequent_persistent_data_${elem_qtype} *data) {
+void ${free_fn}(${data_ty} *data) {
   if (data == NULL) return;
   free_if_non_null(data->packet_space);
   free_if_non_null(data->cntr_id);
@@ -394,7 +394,7 @@ void free_frequent_persistent_data_${elem_qtype}(struct frequent_persistent_data
 }
 
 int
-approx_frequent_${elem_qtype} (
+${fn} (
     ${elem_ctype} *x,
     uint64_t siz,
     uint64_t min_freq,
@@ -406,21 +406,21 @@ approx_frequent_${elem_qtype} (
 {
   int status = 0;
 
-  struct frequent_persistent_data_${elem_qtype} *data = NULL;
-  data = malloc(sizeof(struct frequent_persistent_data_${elem_qtype})); return_if_malloc_failed(data);
+  ${data_ty} *data = NULL;
+  data = malloc(sizeof(${data_ty})); return_if_malloc_failed(data);
 
-  status = allocate_frequent_persistent_data_${elem_qtype}(siz, min_freq, err, 0, data); cBYE(status);
+  status = ${alloc_fn}(siz, min_freq, err, 0, data); cBYE(status);
 
   for (uint64_t i = 0; i < siz; i += data->cntr_siz) {
     ${elem_ctype} *chunk_start = x + i;
     uint64_t chunk_siz = min(data->cntr_siz, siz - i);
-    status = frequent_process_chunk_${elem_qtype}(chunk_start, chunk_siz, data); cBYE(status);
+    status = ${chunk_fn}(chunk_start, chunk_siz, data); cBYE(status);
   }
 
-  status = frequent_process_output_${elem_qtype}(data, y, f, out_len); cBYE(status);
+  status = ${out_fn}(data, y, f, out_len); cBYE(status);
 
  BYE:
-  free_frequent_persistent_data_${elem_qtype}(data);
+  ${free_fn}(data);
   return status;
 }
 ]]

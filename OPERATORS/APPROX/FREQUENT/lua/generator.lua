@@ -6,11 +6,11 @@ if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
 if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 local gen_code = require 'Q/UTILS/lua/gen_code'
 
-qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
+local qtypes = require 'qtypes'
 
-local spfn = require 'sort_specialize'
-for k, f in ipairs(qtypes) do
-  status, subs, tmpl = pcall(spfn, f, o)
+local spfn = require 'specializer_approx_frequent'
+for _, f in ipairs(qtypes) do
+  status, subs, tmpl = pcall(spfn, f)
   if ( not status ) then print(subs) end
   assert(status)
   assert(type(subs) == "table")
