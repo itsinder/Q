@@ -48,7 +48,7 @@ uninstall:
 q_core: q_basic q_operators
 	cd ${BASE_PATH}/UTILS/lua/
 	lua copy_generated_files.lua 
-	luajit mk_so.lua
+	# luajit mk_so.lua
 	echo "all done for q_core"
 
 q_basic: column utils load_csv print
@@ -91,7 +91,7 @@ f1f2opf3: q_basic
 	echo "f1f2opf3 done"
 
 f1s1opf2: q_basic
-	make ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
 	echo "f1s1opf2 done"
 
 sort: q_basic

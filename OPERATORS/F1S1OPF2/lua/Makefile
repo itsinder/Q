@@ -34,6 +34,7 @@ bop_specializers : rem_specialize.tmpl \
 
 #----------------------------------
 clean :
+	rm -f libf1s1opf2.so _f1s1opf2.lua
 	rm -f vsadd_specialize.lua
 	rm -f vssub_specialize.lua
 	rm -f vsmul_specialize.lua
