@@ -15,7 +15,7 @@ return function (a, x )
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
   local w =  assert(qconsts.qtypes[out_qtype].width)
-  local buff =  assert(ffi.malloc(qconsts.chunk_size*w))
+  local buff =  assert(ffi.malloc(qconsts.chunk_size * w))
   local num_blocks = math.ceil(subs.len / qconsts.chunk_size)
   local is_first = true
   local coro = coroutine.create(function()
@@ -29,6 +29,9 @@ return function (a, x )
       print(func_name)
       qc[func_name](buff, x_len, subs.c_mem, is_first)
       is_first = false
+      if ( a == "seq" ) then
+        subs.c_mem[0].start = subs.c_mem[0].start + x_len * subs.c_mem[0].by
+      end
       coroutine.yield(x_len, buff, nil)
     end
   end)
