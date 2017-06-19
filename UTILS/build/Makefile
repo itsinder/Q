@@ -7,14 +7,21 @@ all: q_core
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
-	find ${Q_ROOT}/lib -type f | xargs rm -f
-	find ${Q_ROOT}/include -type f | xargs rm -f
-	rm -rf /tmp/LUA*
-	rm -f /tmp/libq_core.so
-	cd ${BASE_PATH}/OPERATORS/F1F2OPF3/lua/;\
-		bash clean.sh
-	cd ${BASE_PATH}/OPERATORS/F1S1OPF2/lua/;\
-		bash clean.sh
+	rm -f ${Q_ROOT}/lib/libq_core.so
+	rm -f ${Q_ROOT}/include/q_core.h
+	rm -f ${Q_BUILD_DIR}/src/*
+	rm -f ${Q_BUILD_DIR}/include/*
+	make -C ${BASE_PATH}/UTILS/src/  clean
+	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
+	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/ clean
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 
 install: uninstall 
 	cd ../../;\

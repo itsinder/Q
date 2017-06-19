@@ -65,10 +65,17 @@ GEN_FILES = \
 	../gen_src/_txt_to_F4.c  \
 	../gen_src/_txt_to_F8.c  
 
+XXXX := $(GEN_FILES:.c=.h) # TODO: clean up XXX , do it in one step
+GEN_INC_FILES := $(subst gen_src,gen_inc, ${XXXX})
+
 libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES} 
 	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${SRC_FILES} ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} -shared -o libload_csv.so
 	test -d  ${Q_BUILD_DIR}/src/
 	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
+	cp ${GEN_FILES}      ${Q_BUILD_DIR}/src/
+	cp ${GEN_INC_FILES}        ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_get_cell.h  ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_txt_to_SC.h ${Q_BUILD_DIR}/include/
 
 test_q : libload_csv.so
 	echo "TODO"

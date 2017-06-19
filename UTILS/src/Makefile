@@ -61,6 +61,7 @@ libutils.so : ${bin_search_files} ${hdr_files}
 	mkdir -p ${Q_BUILD_DIR}/src/
 	cp ${INCDIR}/*.h         ${Q_BUILD_DIR}/include/
 	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
+	cp ../inc/*          ${Q_BUILD_DIR}/include/
 
 clean :
 	rm -f ../gen_src/*
