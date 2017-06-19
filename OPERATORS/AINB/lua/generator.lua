@@ -1,13 +1,26 @@
-  local plfile = require 'pl.file'
+  local plpath = require 'pl.path'
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
+  if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end 
+  if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end 
   local gen_code =  require("Q/UTILS/lua/gen_code")
 
-  local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  local q_qtypes = nil; local bqtypes = nil
+  if ( arg[1] ) then 
+    a_qtypes = { arg[1] }
+  else
+    a_qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  end
+  if ( arg[2] ) then 
+    b_qtypes = { arg[2] }
+  else
+    b_qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  end
+
   local sp_fn = require 'ainb_specialize'
   local num_produced = 0
-  for i, atype in ipairs(qtypes) do 
-    for j, btype in ipairs(qtypes) do 
+  for i, atype in ipairs(a_qtypes) do 
+    for j, btype in ipairs(b_qtypes) do 
       local status, subs, tmpl = pcall(sp_fn, atype, btype)
       if ( status ) then 
         gen_code.doth(subs, tmpl, incdir)

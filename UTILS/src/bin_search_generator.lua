@@ -4,9 +4,16 @@
   local incdir = "../gen_inc/"; assert(plpath.isdir(incdir))
   local gen_code = require("Q/UTILS/lua/gen_code")
 
+  local qtypes 
+  if arg[1] then 
+    qtypes = { arg[1] }
+  else
+    qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  end
+
   local tmpl = "bin_search.tmpl"
   assert(plpath.isfile(tmpl))
-  local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
+  local num_produced = 0
   -- ==================
   for i, qtype in ipairs(qtypes) do 
      local subs = {} 
@@ -15,4 +22,6 @@
      gen_code.doth(subs, tmpl, incdir)
      gen_code.dotc(subs, tmpl, srcdir)
      print("Generated ", subs.fn)
+     num_produced = num_produced + 1
   end
+  assert(num_produced > 0)

@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libsort.so 
+all : libidx_sort.so 
 	
 #----------------------------------
 clean :
@@ -19,20 +19,6 @@ clean :
 	rm -f _* *.so
 		
 
-libsort.so : ${SRC_FILES}
+libidx_sort.so : 
 	luajit generator.lua 
-	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libsort.so
-
-SRC_FILES = \
-	_qsort_asc_F4.c \
-	_qsort_asc_F8.c \
-	_qsort_asc_I1.c \
-	_qsort_asc_I2.c \
-	_qsort_asc_I4.c \
-	_qsort_asc_I8.c \
-	_qsort_dsc_F4.c \
-	_qsort_dsc_F8.c \
-	_qsort_dsc_I1.c \
-	_qsort_dsc_I2.c \
-	_qsort_dsc_I4.c \
-	_qsort_dsc_I8.c \
+	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libidx_sort.so
