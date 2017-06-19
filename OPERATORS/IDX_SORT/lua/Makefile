@@ -21,6 +21,9 @@ clean :
 libidx_sort.so : ${GEN_FILES}
 	luajit generator.lua 
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libidx_sort.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 ../gen_src/_qsort_asc_val_F4_idx_I1.c : idx_qsort.tmpl
 	luajit generator.lua 

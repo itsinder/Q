@@ -79,6 +79,9 @@ vvlt_specialize.lua  : cmp_specialize.tmpl
 
 libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _concat_files : concat_specialize.lua
 	luajit concat_generator.lua concat_operators.lua

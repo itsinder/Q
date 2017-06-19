@@ -13,6 +13,7 @@ clean:
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
@@ -45,7 +46,9 @@ uninstall:
 
 
 q_core: q_basic q_operators
-	luajit mk_so.lua /tmp/
+	cd ${BASE_PATH}/UTILS/lua/
+	lua copy_generated_files.lua 
+	luajit mk_so.lua
 	echo "all done for q_core"
 
 q_basic: column utils load_csv print
@@ -59,6 +62,10 @@ column:
 utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 	echo "utils done"
+
+ainb:
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
+	echo "ainb done"
 
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
