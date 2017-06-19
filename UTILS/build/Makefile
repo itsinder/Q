@@ -58,7 +58,7 @@ load_csv:
 	echo "load_csv done"
 
 print:
-	make -C ${BASE_PATH}/OPERATORS/PRINT_CSV/lua/
+	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 	echo "print_csv done"
 
 q_operators: f1f2opf3 \
