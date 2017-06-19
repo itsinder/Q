@@ -4,6 +4,8 @@ LIBS = -llapack -llapacke
 all: src/*.c src/*.h
 	gcc ${QC_FLAGS} src/*.c -shared -o _libsolver.so
 	rm _libsolver.so
+	cp src/*.c ${Q_BUILD_DIR}/src/
+	cp src/*.h ${Q_BUILD_DIR}/inc/
 
 test_driver: src/*.c src/*.h test/*
 	gcc ${C_FLAGS} src/*.c test/test_driver.c ${LIBS} -o test_driver
