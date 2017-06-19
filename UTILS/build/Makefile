@@ -7,14 +7,22 @@ all: q_core
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
-	find ${Q_ROOT}/lib -type f | xargs rm -f
-	find ${Q_ROOT}/include -type f | xargs rm -f
-	rm -rf /tmp/LUA*
-	rm -f /tmp/libq_core.so
-	cd ${BASE_PATH}/OPERATORS/F1F2OPF3/lua/;\
-		bash clean.sh
-	cd ${BASE_PATH}/OPERATORS/F1S1OPF2/lua/;\
-		bash clean.sh
+	rm -f ${Q_ROOT}/lib/libq_core.so
+	rm -f ${Q_ROOT}/include/q_core.h
+	rm -f ${Q_BUILD_DIR}/src/*
+	rm -f ${Q_BUILD_DIR}/include/*
+	make -C ${BASE_PATH}/UTILS/src/  clean
+	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
+	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/ clean
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 
 install: uninstall 
 	cd ../../;\
@@ -38,7 +46,9 @@ uninstall:
 
 
 q_core: q_basic q_operators
-	luajit mk_so.lua /tmp/
+	cd ${BASE_PATH}/UTILS/lua/
+	lua copy_generated_files.lua 
+	# luajit mk_so.lua
 	echo "all done for q_core"
 
 q_basic: column utils load_csv print
@@ -50,29 +60,20 @@ column:
 	echo "column done"
 
 utils:
-		cd ${BASE_PATH}/;\
-		cd UTILS/src;\
-		bash gen_files.sh
-		
-		echo "utils done"
+	make -C ${BASE_PATH}/UTILS/src/ 
+	echo "utils done"
+
+ainb:
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
+	echo "ainb done"
 
 load_csv:
-		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/lua;\
-		bash gen_files.sh
-		
-		cd ${BASE_PATH}/OPERATORS/LOAD_CSV/src;\
-		bash gen_files.sh
-		
-		echo "load_csv done"
+	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
+	echo "load_csv done"
 
 print:
-		cd ${BASE_PATH}/OPERATORS/PRINT/lua;\
-		bash gen_files.sh
-		
-		cd ${BASE_PATH}/OPERATORS/PRINT/src;\
-		bash gen_files.sh
-		
-		echo "print done"
+	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
+	echo "print_csv done"
 
 q_operators: f1f2opf3 \
 	f1s1opf2 \
@@ -86,55 +87,34 @@ q_operators: f1f2opf3 \
 
 
 f1f2opf3: q_basic
-		cd ${BASE_PATH}/OPERATORS/F1F2OPF3/lua;\
-		make clean && make && luajit pkg_f1f2opf3.lua
-		
-		#luajit pkg_f1f2opf3.lua
-		echo "f1f2opf3 done"
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
+	echo "f1f2opf3 done"
 
 f1s1opf2: q_basic
-		cd ${BASE_PATH}/OPERATORS/F1S1OPF2/lua;\
-		bash gen_files.sh && luajit pkg_f1s1opf2.lua
-		
-		echo "f1s1opf2 done"
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
+	echo "f1s1opf2 done"
 
 sort: q_basic
-		cd ${BASE_PATH}/OPERATORS/SORT/lua;\
-		bash gen_files.sh
-
-		echo "sort done"
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+	echo "sort done"
 
 idx_sort: q_basic
-		cd ${BASE_PATH}/OPERATORS/IDX_SORT/lua;\
-		bash gen_files.sh
-
-		echo "idx_sort done"
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
+	echo "idx_sort done"
 
 s_to_f: q_basic
-		cd ${BASE_PATH}/OPERATORS/S_TO_F/lua;\
-		bash gen_files.sh && luajit pkg_s_to_f.lua
-		
-		#cd ${BASE_PATH};\
-		#cd OPERATORS/S_TO_F/lua;\
-		#luajit pkg_s_to_f.lua
-		
-		echo "s_to_f done"
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
+	echo "s_to_f done"
 
 f_to_s: q_basic
-		cd ${BASE_PATH}/OPERATORS/F_TO_S/lua;\
- 		bash gen_files.sh && luajit pkg_f_to_s.lua
-		
-		echo "f_to_s done"
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
+	echo "f_to_s done"
 
 ax_equals_b: q_basic
-		cd ${BASE_PATH}/OPERATORS/AX_EQUALS_B;\
-		make clean && make
-
-		echo "ax_equals_b done"
-
+	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
+	echo "ax_equals_b done"
 	
 approx_quantile: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua clean && \
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua all 
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua 
 	echo "approx_quantile done"
 

@@ -55,7 +55,7 @@ unset LD_LIBRARY_PATH
 unset QC_FLAGS
 unset Q_DATA_DIR
 unset Q_METADATA_DIR
-
+unset Q_BUILD_DIR
 # TODO fix bug with ld library path
 unset LD_LIBRARY_PATH
 
@@ -80,6 +80,7 @@ echo "Q_DATA_DIR: $Q_DATA_DIR"
 mkdir -p $Q_ROOT/meta
 export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
 echo "Q_METADATA_DIR: $Q_METADATA_DIR"
+export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # Setting ld library path based on lua init
 #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 # set +m
@@ -95,8 +96,9 @@ echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
 CURR_PATH=`pwd`
 cd $BASE_PATH
 cd ../
-export LUA_PATH="`pwd`/?.lua;;"
+export LUA_PATH="`pwd`/?.lua;`pwd`/?/init.lua;;"
 cd $CURR_PATH
 echo "LUA_PATH: $LUA_PATH"
+echo "Q_BUILD_DIR: $Q_BUILD_DIR"
 cd $PREV_DIR
 cd $CUR_DIR 
