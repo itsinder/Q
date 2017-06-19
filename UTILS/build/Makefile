@@ -73,35 +73,32 @@ q_operators: f1f2opf3 \
 
 
 f1f2opf3: q_basic
-		make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
-		echo "f1f2opf3 done"
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
+	echo "f1f2opf3 done"
 
 f1s1opf2: q_basic
-		make ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
-		echo "f1s1opf2 done"
+	make ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
+	echo "f1s1opf2 done"
 
 sort: q_basic
-		make -C ${BASE_PATH}/OPERATORS/SORT/lua
-		echo "sort done"
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+	echo "sort done"
 
 idx_sort: q_basic
-		make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
-		echo "idx_sort done"
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
+	echo "idx_sort done"
 
 s_to_f: q_basic
-		make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
-		echo "s_to_f done"
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
+	echo "s_to_f done"
 
 f_to_s: q_basic
-		make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
-		echo "f_to_s done"
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
+	echo "f_to_s done"
 
 ax_equals_b: q_basic
-		cd ${BASE_PATH}/OPERATORS/AX_EQUALS_B;\
-		make clean && make
-
-		echo "ax_equals_b done"
-
+	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
+	echo "ax_equals_b done"
 	
 approx_quantile: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua 
