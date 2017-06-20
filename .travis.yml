@@ -1,16 +1,15 @@
+language: erlang
 sudo: required
 dist: trusty
 
 group: edge  # Add this
-
-language: erlang
 
 env:
   - LUA="luajit"
 
 branches:
   only:
-	- dev
+    - dev
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh
@@ -18,8 +17,8 @@ install:
 script: "source setup.sh && busted --lua=${LUA} RUNTIME/COLUMN/code/test/exp/test_vector.lua"
 
 notifications:
-  recipients:
-    - isingh@nerdwallet.com
   email:
+    recipients:
+      - isingh@nerdwallet.com
     on_success: change
     on_failure: always
