@@ -12,7 +12,7 @@ int main() {
 
   int status = 0;
   
-  status = seq_I4(X, n, &args, true)
+  status = seq_I4(X, n, &args, true);
 
   for(int i = 0; i < n; i += 1 ) {
     printf("%d ", X[i]);
