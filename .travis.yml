@@ -12,7 +12,7 @@ branches:
     - dev
 
 install:
-  - cd GUIDING_PRINCIPLES/ && bash aio.sh
+  - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
 
 before_script:
   - source setup.sh
