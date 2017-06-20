@@ -1,0 +1,34 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include <stdio.h>
+#include <stdint.h>
+
+extern int
+convert_${in_qtype}_${out_qtype}(
+  ${in_ctype} in,
+  ${out_ctype} *out
+  );
+   ]],
+   
+   definition = [[
+   
+#include <stdio.h>
+#include <stdint.h>
+
+int
+convert_${in_qtype}_${out_qtype}(
+  ${in_ctype} in,
+  ${out_ctype} *out
+  )
+
+{
+  int status = 0;
+  ${out_ctype} outv = (${out_ctype}) in;
+  *out = outv;
+  return status;
+}
+
+   ]],
+}
