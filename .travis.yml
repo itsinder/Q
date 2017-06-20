@@ -14,7 +14,7 @@ branches:
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh
 
-script: "source setup.sh && busted --lua=${LUA} RUNTIME/COLUMN/code/test/exp/test_vector.lua"
+script: "source setup.sh && /usr/local/bin/busted --lua=luajit RUNTIME/COLUMN/code/test/exp/test_vector.lua"
 
 notifications:
   email:
