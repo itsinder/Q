@@ -1,7 +1,11 @@
 #!/usr/bin/env lua
 local tmpl = dofile 'txt_to_I.tmpl'
+local plpath = require 'pl.path'
 local incdir = "../gen_inc/"
 local srcdir = "../gen_src/"
+if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end 
+if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end 
+
 local subs = {}      -- a set to collect authors
 function Entry (b) 
   subs[b.qtype] = b 

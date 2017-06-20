@@ -2,28 +2,12 @@ local Q = require 'Q'
 local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 
---[[
-function get_val(coro)
-local res = 0
-local status, x
-repeat
-   local y
-   status, y = coroutine.resume(coro)
-   if y ~= nil then 
-      print(y, y[0].cum_val)
-      x = y
-   end
-until coroutine.status(coro) == "dead" 
-return tonumber(x[0].cum_val)
-end
---]]
-
-
 local z= Q.sum(c1)
 assert(type(z) == "Scalar")
 local status = true repeat status = z:next() until not status
-local val = z:value()
+local val, num = z:value()
 assert(val == 36 )
+-- assert(num == 8 ) TODO  Verify what getter returns 
 
 assert(Q.sum(c1):eval() == 36)
 

@@ -15,10 +15,13 @@ function sum_prod(X, w, A)
   end
 
   local nC = 4-- TODO how to get num chunks
-  local nC = math.ceil( w:length() / w:chunk_size() )
+  local nC = math.ceil( w:length() / qconsts.chunk_size )
   
   for c = 1, nC do
     for i = 1, M do
+      if ( C == nC ) then
+        M = -- TODO FILL IN 
+      end
       temp[i]:chunk(c) -- get this chunk evaluated
       for j = i, M do
         SA[i][j]:next() -- get this chunk evaluated

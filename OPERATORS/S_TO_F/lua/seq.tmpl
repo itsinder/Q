@@ -6,6 +6,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct _seq_${out_qtype}_rec_type {
    ${out_ctype} start;
@@ -38,6 +39,7 @@ seq_${out_qtype}(
   int status = 0;
 
   ${out_ctype} start = ptr_in->start;
+  printf("code start is %d\n", start);
   ${out_ctype} by = ptr_in->by;
 
   if ( by == 0 ) {
@@ -45,8 +47,9 @@ seq_${out_qtype}(
   }
 
   ${out_ctype} j = start;
-  for ( int64_t i = start; i < nX; i += 1, j += by ) { 
+  for ( int64_t i = start; i < (signed int)nX; i += 1 ) { 
     X[i] = (${out_ctype}) j;
+    j += by;
   }
   return status;
 BYE:

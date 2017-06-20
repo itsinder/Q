@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libs_to_f.so _s_to_f.lua
+all : libf_to_s.so _f_to_s.lua
 	
 #----------------------------------
 clean :
@@ -20,41 +20,22 @@ clean :
 	rm -f *.so
 		
 
-libs_to_f.so : ${GEN_FILES}
+libf_to_s.so : 
 	luajit generator.lua operators.lua
-	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libs_to_f.so
+	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf_to_s.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
-_s_to_f.lua : 
-	lua pkg_s_to_f.lua
+_f_to_s.lua : 
+	lua pkg_f_to_s.lua
 
-test_q : libs_to_f.so
-	luajit ../test/test_s_to_f.lua
+test_q : libf_to_s.so
+	luajit ../test/test_f_to_s.lua
+	echo "TODO"
 
-test_c :  libs_to_f.so
+test_c :  libf_to_s.so
 	bash ../test/test_rand.sh
+	echo "TODO"
 
 test : test_q test_c
-
-GEN_FILES = \
-	_const_F4.c \
-	_const_F8.c \
-	_const_I1.c \
-	_const_I2.c \
-	_const_I4.c \
-	_const_I8.c \
-	_rand_F4.c \
-	_rand_F8.c \
-	_rand_I1.c \
-	_rand_I2.c \
-	_rand_I4.c \
-	_rand_I8.c \
-	_seq_F4.c \
-	_seq_F8.c \
-	_seq_I1.c \
-	_seq_I2.c \
-	_seq_I4.c \
-	_seq_I8.c \
-

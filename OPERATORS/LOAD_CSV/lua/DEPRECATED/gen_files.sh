@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 
-INCS="-I..n_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ "
+INCS="-I. -I../gen_inc -I../../../UTILS/gen_inc/  -I../../../UTILS/inc/ "
 rm -rf ../gen_inc ../gen_src 
 mkdir ../gen_inc ../gen_src 
 
