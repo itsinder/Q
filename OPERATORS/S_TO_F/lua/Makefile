@@ -51,3 +51,10 @@ GEN_FILES = \
 	_rand_I2.c \
 	_rand_I4.c \
 	_rand_I8.c \
+	_seq_F4.c \
+	_seq_F8.c \
+	_seq_I1.c \
+	_seq_I2.c \
+	_seq_I4.c \
+	_seq_I8.c \
+

@@ -10,7 +10,6 @@ return function (
     <<ctype>> by;
   } SEQ_<<qtype>>_REC_TYPE;
 ]]
-
   assert(type(args) == "table")
   local start  = assert(args.start)
   local qtype = assert(args.qtype)
@@ -41,11 +40,11 @@ return function (
   c_mem.start = start
   c_mem.by = by
   --========================
-  local tmpl = 'rand.tmpl'
+  local tmpl = 'seq.tmpl'
   local subs = {};
   subs.fn = "seq_" .. qtype
   subs.c_mem = c_mem
-  subs.out_ctype = g_qtypes[qtype].ctype
+  subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
   subs.out_qtype = qtype
   return subs, tmpl
