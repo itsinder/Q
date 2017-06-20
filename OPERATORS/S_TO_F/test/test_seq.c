@@ -7,7 +7,7 @@ int main() {
   int n = 10;
   int32_t *X = (int32_t *) malloc(n*sizeof(int32_t));
   SEQ_I4_REC_TYPE args;
-  args.start = 1;
+  args.start = -10;
   args.by = 3;
 
   int status = 0;
