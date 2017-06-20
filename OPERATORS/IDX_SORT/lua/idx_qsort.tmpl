@@ -32,14 +32,14 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdio.h>
 #include <stdint.h>
 extern int
-qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
-		${idx_type} *srt_ordr,
+qsort_${srt_ordr}_val_${val_qtype}_idx_${idx_qtype} (
+		${idx_ctype} *srt_ordr,
 		void *const pbase, 
 		size_t total_elems
     );
     ]],
 definition = [[
-#include "_qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ}.h"
+#include "_qsort_${srt_ordr}_val_${val_qtype}_idx_${idx_qtype}.h"
 
 #define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__); }
 
@@ -69,9 +69,9 @@ definition = [[
   /* TODO Delete following checks later on */
 #define SWAP(a, b, size) \
 { \
-  ${val_type} *ia = (${val_type} *)a; \
-  ${val_type} *ib = (${val_type} *)b; \
-  ${val_type} itmp = *ia; \
+  ${val_ctype} *ia = (${val_ctype} *)a; \
+  ${val_ctype} *ib = (${val_ctype} *)b; \
+  ${val_ctype} itmp = *ia; \
   aidx = ((char *)a - (char *)pbase) / size;				\
   bidx = ((char *)b - (char *)pbase) / size;				\
   if ( aidx >= total_elems ) { WHEREAMI; return -1;  } \
@@ -132,8 +132,8 @@ typedef struct
 
 // START FUNC DECL
 int
-qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
-		${idx_type} *srt_ordr,
+qsort_${srt_ordr}_val_${val_qtype}_idx_${idx_qtype} (
+		${idx_ctype} *srt_ordr,
 		void *const pbase, 
 		size_t total_elems
 		)
@@ -141,12 +141,12 @@ qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
 {
   register char *base_ptr = (char *) pbase;
   size_t aidx, bidx;
-  ${idx_type} aval, bval;
+  ${idx_ctype} aval, bval;
 #ifdef VERBOSE
-  ${val_type} *X = (${val_type} *)pbase; // for debugging 
+  ${val_ctype} *X = (${val_ctype} *)pbase; // for debugging 
 #endif
 
-  const size_t size = sizeof(${val_type}); 
+  const size_t size = sizeof(${val_ctype}); 
   const size_t max_thresh = MAX_THRESH * size;
 
 #ifdef VERBOSE
@@ -181,18 +181,18 @@ qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
       char *mid = lo + size * ((hi - lo) / size >> 1);
 
       // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${val_type} *)mid) ${comparator} *((${val_type} *)lo) ) {
+      if ( *((${val_ctype} *)mid) ${comparator} *((${val_ctype} *)lo) ) {
 	SWAP (mid, lo, size);
       }
       // if ( (*cmp) ((void *) hi, (void *) mid) < 0) {
-      if ( *((${val_type} *)hi) ${comparator} *((${val_type} *)mid) ) {
+      if ( *((${val_ctype} *)hi) ${comparator} *((${val_ctype} *)mid) ) {
 	SWAP (mid, hi, size);
       }
       else {
 	goto jump_over;
       }
       // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${val_type} *)mid) ${comparator} *((${val_type} *)lo) ) {
+      if ( *((${val_ctype} *)mid) ${comparator} *((${val_ctype} *)lo) ) {
 	SWAP (mid, lo, size);
       }
     jump_over:;
@@ -205,12 +205,12 @@ qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
 	 that this algorithm runs much faster than others. */
       do {
 	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) {
-	while ( *((${val_type} *)left_ptr) ${comparator} *((${val_type} *)mid) ) {
+	while ( *((${val_ctype} *)left_ptr) ${comparator} *((${val_ctype} *)mid) ) {
 	  left_ptr += size;
 	}
 
 	// while ((*cmp) ((void *) mid, (void *) right_ptr) < 0) {
-	while ( *((${val_type} *)mid) ${comparator} *((${val_type} *)right_ptr) ) {
+	while ( *((${val_ctype} *)mid) ${comparator} *((${val_ctype} *)right_ptr) ) {
 	  right_ptr -= size;
 	}
 
@@ -284,7 +284,7 @@ qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
 
     for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
       // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      if (  *((${val_type} *)run_ptr) ${comparator} *((${val_type} *) tmp_ptr) ) {
+      if (  *((${val_ctype} *)run_ptr) ${comparator} *((${val_ctype} *) tmp_ptr) ) {
         tmp_ptr = run_ptr;
       }
     }
@@ -305,13 +305,13 @@ qsort_${srt_ordr}_val_${val_type_displ}_idx_${idx_type_displ} (
     run_ptr = base_ptr + size; /* this is element, X, to compare */
     while ((run_ptr += size) <= end_ptr) {
       /* above while loop iterates over values of X is compared */
-      ${idx_type} pos, pos_hi, pos_lo, sve_idx;
+      ${idx_ctype} pos, pos_hi, pos_lo, sve_idx;
       tmp_ptr = run_ptr - size;
       pos = ( ( (char *)tmp_ptr - (char *)base_ptr) / size ) + 1;
       sve_idx = srt_ordr[pos];
 
       // while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      while ( *((${val_type} *)run_ptr) ${comparator} *((${val_type} *)tmp_ptr) ) {
+      while ( *((${val_ctype} *)run_ptr) ${comparator} *((${val_ctype} *)tmp_ptr) ) {
 	tmp_ptr -= size;
       }
 

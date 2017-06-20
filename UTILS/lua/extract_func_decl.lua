@@ -23,7 +23,6 @@ z = plstr.strip(z)
 --=========================================
 fn = string.gsub(infile, "^.*/", "")
 fn = string.gsub(fn, ".c$", "")
-print(fn)
 if ( opdir ~= "" ) then 
   local basefile = string.gsub(infile, "^.*/", "") 
   opfile = opdir .. "/_" .. fn .. ".h"
