@@ -7,6 +7,7 @@
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
     local spfn = assert(require(sp_fn_name))
     assert( type(x) == "Column") 
+    assert(x:has_nulls() == false, "Not set up for nulls as yet")
     if ( optargs ) then 
       assert(type(optargs) == "table")
     end
@@ -21,15 +22,15 @@
     local out_ctype = qconsts.qtypes[out_qtype].ctype
     out_width = math.ceil(out_width/8) * 8
     -- TODO Where best to do malloc for buff?
+    local buff = ffi.malloc(x:chunk_size() * out_width)
     local f1_coro = assert(x:wrap(), "wrap failed for x")
     local f2_coro = coroutine.create(function()
       local x_chunk, x_status
-      local buff = ffi.malloc(x:chunk_size() * out_width)
-      assert(x:has_nulls() == false, "Not set up for nulls as yet")
       x_status = true
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(f1_coro)
-        if x_status then
+        print(x_status, x_len, x_chunk, nn_x_chunk)
+        if x_status and x_len > 0 then 
           assert(x_len > 0)
           qc[func_name](x_chunk, x_len, subs.c_mem, buff)
           coroutine.yield(x_len, buff, nil)

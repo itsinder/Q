@@ -12,6 +12,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
    status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
    assert(status, subs)
    local func_name = assert(subs.fn)
+   assert(qc[func_name], "Symbol not available" .. func_name)
    local f3_qtype = assert(subs.out_qtype)
    local f3_width = qconsts.qtypes[f3_qtype].width
    f3_width = math.ceil(f3_width/8) * 8
