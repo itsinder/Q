@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include "macros.h"
 #include "matrix_multiply.h"
-#include "mm_helpers.h"
 
 int 
 mm_simple(
