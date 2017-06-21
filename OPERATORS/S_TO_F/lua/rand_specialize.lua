@@ -41,7 +41,7 @@ return function (
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
-  local c_mem = assert(qc.malloc(sz_c_mem), "malloc failed")
+  local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
   c_mem = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", c_mem)
   c_mem.lb = lb
   c_mem.ub = ub
@@ -50,7 +50,7 @@ return function (
   if ( qconsts.iorf[qtype] == "fixed" ) then 
     generator = "mrand48"
     subs.gen_type = "uint64_t"
-    subs.scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
+    subs.scaling_code = "floor( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * (range + 1) )"
   elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
     generator = "drand48"
     subs.scaling_code = "range * x"

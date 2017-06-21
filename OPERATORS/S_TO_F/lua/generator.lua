@@ -16,8 +16,10 @@ local num_produced = 0
 local args = {}
 args.len = 100
 for i, operator in ipairs(operators) do
+  print("working on " .. operator)
   local sp_fn = assert(require(operator .. "_specialize"))
-  for i, qtype in ipairs(qtypes) do 
+  for i, qtype in ipairs(qtypes) do
+    print("qtype " .. qtype)
     -- args.qtype = qtype
     args.qtype = qtype
     if ( operator == "const" ) then 
@@ -26,6 +28,9 @@ for i, operator in ipairs(operators) do
       args.lb = 10
       args.ub = 20
       args.seed = 30
+    elseif (operator == "seq" ) then
+      args.start = 1
+      args.by = 3
     else
       assert(nil, "Control should not come here")
     end

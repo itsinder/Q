@@ -11,6 +11,9 @@ DEPS = matrix_multiply.h
 INCS= -I../inc
 
 all : mm libmm.so
+	test -d ${QQ_BUILD_DIR}
+	cp matrix_multiply.c ${Q_BUILD_DIR}/src/
+	cp matrix_multiply.h ${Q_BUILD_DIR}/include/
 
 %.o: %.c $(DEPS)
 	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
