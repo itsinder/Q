@@ -88,9 +88,7 @@ local function make_trainer(X, y, classes)
   local ys = {}
   for i = 1, #classes - 1 do
     betas[i] = Q.const({ val = 0, len = #X, qtype = 'F8' })
-    -- TODO: vvec should be replaced by Q.vseq when it is available
-    local vvec = Q.const({ val = classes[i], len = y:length(), qtype = 'F8' })
-    ys[i] = Q.vveq(y, vvec)
+    ys[i] = Q.vseq(y, classes[i])
   end
 
   local function step_betas()

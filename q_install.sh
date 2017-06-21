@@ -6,6 +6,7 @@ sudo mkdir /usr/local/share/lua/5.1/Q
 sudo cp -r ./OPERATORS /usr/local/share/lua/5.1/Q
 sudo cp -r ./UTILS /usr/local/share/lua/5.1/Q
 sudo cp -r ./RUNTIME /usr/local/share/lua/5.1/Q
+sudo cp -r ./ML /usr/local/share/lua/5.1/Q
 sudo cp -r  q_export.lua /usr/local/share/lua/5.1/Q
 sudo cp -r  init.lua /usr/local/share/lua/5.1/Q
 

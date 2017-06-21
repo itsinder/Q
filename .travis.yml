@@ -1,0 +1,21 @@
+language: erlang
+sudo: required
+dist: trusty
+
+group: edge  # Add this
+
+env:
+  - LUA="luajit"
+
+branches:
+  only:
+    - dev
+
+install:
+  - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
+
+before_script:
+  - source setup.sh
+
+script:
+  - busted --lua=luajit RUNTIME/COLUMN/code/test/exp/test_vector.lua
