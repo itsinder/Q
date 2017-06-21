@@ -47,6 +47,8 @@ if [[ $RES -ne 0 ]] ; then
    sudo make install
    cd ../
    rm -rf LuaJIT-2.0.4
+   echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
+   echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 else
    my_print "luajit is already installed"
 fi
