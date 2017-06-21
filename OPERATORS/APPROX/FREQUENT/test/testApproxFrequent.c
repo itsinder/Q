@@ -130,9 +130,9 @@ static int test_barely_freq() {
 static int test_many_freq() {
   int status = 0;
 
-  uint64_t total_nums = 20;
-  uint64_t min_freq = 1;
-  uint64_t err = 1;
+  uint64_t total_nums = 200000;
+  uint64_t min_freq = 10000;
+  uint64_t err = 10;
   uint64_t num_freq = 10;
   uint64_t freq_len = num_freq + (total_nums - min_freq * num_freq);
 
