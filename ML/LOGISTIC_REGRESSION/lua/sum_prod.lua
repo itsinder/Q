@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 function sum_prod(X, w, A)
   local temp = {}
@@ -8,9 +9,9 @@ function sum_prod(X, w, A)
   for i = 1, M do
     SA[i] = {}
     A[i] = {}
-    temp[i] = Q.vvmul(X[i], w):memo(0)
+    temp[i] = Q.vvmul(X[i], w):memo(false)
     for j = i, M do
-      SA[i][j] = Q.sum(Q.vvmul(X[j], temp[i]):memo(0))
+      SA[i][j] = Q.sum(Q.vvmul(X[j], temp[i]):memo(false))
     end
   end
 
@@ -38,3 +39,4 @@ function sum_prod(X, w, A)
   end
 
 end
+return sum_prod
