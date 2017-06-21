@@ -15,25 +15,21 @@ return function (a, x)
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
   local w =  assert(qconsts.qtypes[out_qtype].width)
-  local chunk_size = 4 --qconsts.chunk_size
+  local chunk_size = qconsts.chunk_size
   local buff =  assert(ffi.malloc(chunk_size * w))
   local num_blocks = math.ceil(subs.len / chunk_size)
-  local is_first = true
+  local lb = 0
   local coro = coroutine.create(function()
-    local x_len
     for i =1,num_blocks do
-      if ( i == num_blocks ) then 
-        x_len = subs.len % chunk_size
-      else
-        x_len = chunk_size
+      local ub = lb + chunk_size
+      if ( ub > subs.len ) then 
+        chunk_size = subs.len -lb
+        ub = subs.len
       end
-      print(func_name)
-      qc[func_name](buff, x_len, subs.c_mem, is_first)
-      is_first = false
-      if ( a == "seq" ) then
-        subs.c_mem[0].start = subs.c_mem[0].start + x_len * subs.c_mem[0].by
-      end
-      coroutine.yield(x_len, buff, nil)
+      qc[func_name](buff, chunk_size, subs.c_mem, lb)
+      -- print(a, lb, ub, chunk_size)
+      coroutine.yield(chunk_size, buff, nil)
+      lb = lb + chunk_size
     end
   end)
   return Column{gen=coro, false, field_type=out_qtype}

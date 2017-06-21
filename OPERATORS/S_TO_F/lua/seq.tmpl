@@ -18,7 +18,7 @@ seq_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   SEQ_${out_qtype}_REC_TYPE *ptr_in,
-  bool is_first
+  uint64_t idx
   );
    ]],
 
@@ -32,7 +32,7 @@ seq_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   SEQ_${out_qtype}_REC_TYPE *ptr_in,
-  bool is_first
+  uint64_t idx
   )
 //STOP_FUNC_DECL
 {
@@ -40,6 +40,8 @@ seq_${out_qtype}(
 
   ${out_ctype} start = ptr_in->start;
   ${out_ctype} by = ptr_in->by;
+
+  start += (idx *by); // offset based on index
 
   if ( by == 0 ) {
     by = (${out_ctype}) 1;
