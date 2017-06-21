@@ -100,5 +100,8 @@ export LUA_PATH="`pwd`/?.lua;`pwd`/?/init.lua;;"
 cd $CURR_PATH
 echo "LUA_PATH: $LUA_PATH"
 echo "Q_BUILD_DIR: $Q_BUILD_DIR"
+mkdir -p $Q_BUILD_DIR
+mkdir -p $Q_BUILD_DIR/src/
+mkdir -p $Q_BUILD_DIR/include/
 cd $PREV_DIR
 cd $CUR_DIR 

@@ -22,6 +22,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/ clean
+	make -C ${BASE_PATH}/OPERATORS/MM/src/ clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 
 install: uninstall 
@@ -82,6 +83,7 @@ q_operators: f1f2opf3 \
 	s_to_f \
 	f_to_s \
 	ax_equals_b \
+	mvmul \
 	approx_quantile
 	echo "all done for operators"
 
@@ -118,3 +120,7 @@ approx_quantile: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua 
 	echo "approx_quantile done"
 
+mvmul: q_basic
+	make -C ${BASE_PATH}/OPERATORS/MM/src/
+	echo "mvmul done"
+	
