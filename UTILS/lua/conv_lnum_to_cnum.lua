@@ -10,7 +10,7 @@ return function (x, out_qtype)
     return ffi.new(out_ctype .. "[?]", 1, { x } )
   end
 
-  assert(type(x) == "string")
+  assert(type(x) == "string", "type = " .. type(x) )
   local conv_fn_name = "txt_to_" .. out_qtype
   local width = assert(qconsts.qtypes[out_qtype].width)
   local c_mem = assert(ffi.malloc(width), "malloc failed")
