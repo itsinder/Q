@@ -4,9 +4,11 @@ return function (
   in_qtype,
   scalar
   )
-  local qconsts = require "Q/UTILS/lua/q_consts"
-  local qc = require "Q/UTILS/lua/q_core"
-  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
+  local qconsts       = require "Q/UTILS/lua/q_consts"
+  local qc            = require "Q/UTILS/lua/q_core"
+  local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+  local promote       = require 'Q/UTILS/lua/promote'
+
   assert(is_base_qtype(in_qtype))
   local scalar_val = nil
   local scalar_qtype = nil
@@ -23,10 +25,7 @@ return function (
     assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
     scalar_qtype = in_qtype
   end
-  --===========================================
-  local promote = require 'Q/UTILS/lua/promote'
   local out_qtype = assert(promote(in_qtype, scalar_qtype))
-  --=========================
   local conv_fn = "txt_to_" .. out_qtype
   local scalar_width = qconsts.qtypes[out_qtype].width
   local c_mem = assert(ffi.malloc(scalar_width), "malloc failed")
