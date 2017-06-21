@@ -19,10 +19,3 @@ before_script:
 
 script:
   - busted --lua=luajit RUNTIME/COLUMN/code/test/exp/test_vector.lua
-
-notifications:
-  email:
-    recipients:
-      - isingh@nerdwallet.com
-    on_success: change
-    on_failure: always
