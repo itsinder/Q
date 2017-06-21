@@ -22,7 +22,7 @@ rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   RAND_${out_qtype}_REC_TYPE *ptr_in,
-  bool is_first
+  uint64_t idx
   );
    ]],
 
@@ -43,7 +43,7 @@ rand_${out_qtype}(
   ${out_ctype} *X,
   uint64_t nX,
   RAND_${out_qtype}_REC_TYPE *ptr_in,
-  bool is_first
+  uint64_t idx
   )
 //STOP_FUNC_DECL
 {
@@ -52,7 +52,7 @@ rand_${out_qtype}(
   uint64_t seed = ptr_in->seed;
   ${out_ctype} lb = ptr_in->lb;
   ${out_ctype} ub = ptr_in->ub;
-  if ( is_first ) { //seed has not yet been set
+  if ( idx == 0 ) { //seed has not yet been set
     if ( seed == 0 ) {
      seed = RDTSC();
     }

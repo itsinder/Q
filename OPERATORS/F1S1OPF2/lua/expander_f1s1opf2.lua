@@ -25,7 +25,7 @@
     local f2_coro = coroutine.create(function()
       local x_chunk, x_status
       local buff = ffi.malloc(x:chunk_size() * out_width)
-      assert(x:has_nulls() == true, "Not set up for nulls as yet")
+      assert(x:has_nulls() == false, "Not set up for nulls as yet")
       x_status = true
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(f1_coro)

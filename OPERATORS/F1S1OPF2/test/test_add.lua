@@ -1,7 +1,8 @@
 local Q = require 'Q'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
-local z = Q.vsadd(c1, 10 , { junk = "junk" } )
+local z = Q.vsadd(c1, 10 )
+local z2= Q.vsadd(c1, { value = 10, qtype = "I8"} )
 z:eval()
 Q.print_csv(z, nil, "")
 --===========================
