@@ -1,4 +1,4 @@
-local qtypes = require 'qtypes'
+local qtypes = require 'Q/OPERATORS/APPROX/FREQUENT/lua/qtypes'
 
 return function(elem_qtype)
   assert(qtypes[elem_qtype], "approx_frequent specializer called with invalid qtype")
@@ -9,7 +9,7 @@ return function(elem_qtype)
   subs.elem_ctype = qconsts.qtypes[elem_qtype].ctype
   subs.freq_qtype = 'I8'
   subs.freq_ctype = 'uint64_t'
-  subs.len_ctype = 'uint64_t'
+  subs.out_len_ctype = 'uint32_t'
   subs.fn = "approx_frequent_"..elem_qtype
   subs.data_ty = "struct frequent_persistent_data_"..elem_qtype
   subs.alloc_fn = "allocate_frequent_persistent_data_"..elem_qtype

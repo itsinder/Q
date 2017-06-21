@@ -41,7 +41,7 @@ ${out_fn}(
     ${data_ty} *data,
     ${elem_ctype} **y,
     uint64_t **f,
-    uint64_t *out_len);
+    uint32_t *out_len);
 
 extern void ${free_fn}(${data_ty} *data);
 
@@ -58,7 +58,7 @@ ${fn}(
     uint64_t err,
     ${elem_ctype} **y,
     uint64_t **f,
-    uint64_t *out_len
+    uint32_t *out_len
     );
 ]],
 
@@ -357,11 +357,11 @@ ${out_fn}(
     ${data_ty} *data,
     ${elem_ctype} **y,
     uint64_t **f,
-    uint64_t *out_len)
+    uint32_t *out_len)
 {
   int status = 0;
 
-  uint64_t j = 0;
+  uint32_t j = 0;
   for (uint64_t i = 0; i < data->active_cntr_siz; i++) {
     if (data->cntr_freq[i] >= (data->min_freq - data->err)) {
       data->cntr_id[j] = data->cntr_id[i];
@@ -390,7 +390,6 @@ void ${free_fn}(${data_ty} *data) {
   free_if_non_null(data->cntr_freq);
   free_if_non_null(data->bf_id);
   free_if_non_null(data->bf_freq);
-  free(data);
 }
 
 int
@@ -401,7 +400,7 @@ ${fn} (
     uint64_t err,
     ${elem_ctype} **y,
     uint64_t **f,
-    uint64_t *out_len
+    uint32_t *out_len
     )
 {
   int status = 0;
@@ -421,6 +420,7 @@ ${fn} (
 
  BYE:
   ${free_fn}(data);
+  free_if_non_null(data);
   return status;
 }
 ]]
