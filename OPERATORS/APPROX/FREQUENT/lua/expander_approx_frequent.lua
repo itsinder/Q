@@ -1,4 +1,3 @@
-local Q       = require 'Q'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
@@ -8,8 +7,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local qtypes  = require 'Q/OPERATORS/APPROX/FREQUENT/lua/qtypes'
 local spfn    = require 'Q/OPERATORS/APPROX/FREQUENT/lua/specializer_approx_frequent'
 
-local function approx_frequent(x, min_freq, err)
-  assert(type(x) == "Column", "x must be a column")
+local function expander_approx_frequent(x, min_freq, err)
   local subs = spfn(x:fldtype())
   local x_coro = assert(x:wrap(), "approx_frequent wrap failed for x")
 
@@ -41,11 +39,11 @@ local function approx_frequent(x, min_freq, err)
 
     qc[subs.out_fn](data, y, f, len)
 
-    local y_col = Q.Column({field_type = subs.elem_qtype, write_vector = true})
+    local y_col = Column({field_type = subs.elem_qtype, write_vector = true})
     y_col:put_chunk(len[0], y[0])
     y_col:eov()
 
-    local f_col = Q.Column({field_type = subs.freq_qtype, write_vector = true})
+    local f_col = Column({field_type = subs.freq_qtype, write_vector = true})
     f_col:put_chunk(len[0], f[0])
     f_col:eov()
 
@@ -56,4 +54,4 @@ local function approx_frequent(x, min_freq, err)
   return Scalar({ coro = out_coro, func = getter })
 end
 
-return approx_frequent
+return expander_approx_frequent

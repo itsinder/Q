@@ -1,7 +1,6 @@
 local Q      = require 'Q'
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 
-local exp    = require 'Q/OPERATORS/APPROX/FREQUENT/lua/expander_approx_frequent'
 local qtypes = require 'Q/OPERATORS/APPROX/FREQUENT/lua/qtypes'
 
 local x_bare = {}
@@ -37,7 +36,7 @@ for i = 0, siz - 1 do
 end
 
 local x = Q.mk_col(x_bare, "I4")
-local y, f, out_len = exp(x, min_freq, err):eval()
+local y, f, out_len = Q.approx_frequent(x, min_freq, err):eval()
 local _, y_c, _ = y:chunk(-1)
 local _, f_c, _ = f:chunk(-1)
 y = ffi.cast("int*", y_c)
