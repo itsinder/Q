@@ -38,6 +38,5 @@ return function (
   subs.out_qtype = out_qtype
   subs.out_ctype = qconsts.qtypes[out_qtype].ctype
   subs.scalar_ctype = qconsts.qtypes[scalar_qtype].ctype
-  print(">>> VSADD ", subs.c_mem)
   return subs, tmpl
 end
