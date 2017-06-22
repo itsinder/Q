@@ -99,22 +99,4 @@ end
 if oassert == nil then
     oassert = assert
 end
-
-assert = function(cond, ...)
-    if cond then
-        return cond, ...
-    else
-        log.fatal(...)
-        -- now remove self from top of stack (second line)
-        local idx = 1
-        for line in string.gmatch(debug.traceback(), "[^\n]+" ) do
-            if idx ~= 2 then
-                log.fatal(line)
-            end
-            idx = idx + 1
-        end
-        error(cond)
-    end
-end
-
 return log
