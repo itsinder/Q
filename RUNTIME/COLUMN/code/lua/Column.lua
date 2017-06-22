@@ -161,6 +161,16 @@ function Column:get_element(num)
 end
 
 function Column:chunk(num)
+    if num < 0 then 
+        local chunk , size = self.vec:chunk(num)
+        local nn_chunk, nn_size
+        if self.nn_vec ~= nil then 
+            nn_chunk, nn_size = self.nn_vec:chunk(-1)
+            assert(nn_size == size, "Size of null vector and vector should be the same")
+        end
+        return size, chunk, nn_chunk
+    end
+
     local chunk_num = self.vec:last_chunk()
     assert(type(num) == "number", "Require a number for chunk number")
     if self:materialized() == false and self.gen ~= nil and (chunk_num == nil or num == chunk_num + 1 ) then
