@@ -127,8 +127,8 @@ programmer e.g, add, sort, \ldots, you need to {\em register} that in the
 following manner. Consider \verb+mk_col+ as an example
 
 \begin{verbatim}
-local Q       = require 'Q/q_export'
 local mk_col = function(input, qtype)
+local Q       = require 'Q/q_export'
 ......
 return require('Q/q_export').export('mk_col', mk_col)
 \end{verbatim}
@@ -268,6 +268,19 @@ or ULL as signed or unsigned 64 bit integers. Case doesn't matter, but
 uppercase is recommended for readability. It handles both decimal (42LL)
 and hexadecimal (0x2aLL) literals.
 
+
+\subsection{Where to place your require statements in a function}
+In many functions, we have something like
+
+\begin{verbatim}
+local ffi = require ‘Q/UTILS/lua/q_ffi.lua
+local function foo (...)
+end
+\end{verbatim}
+
+I propose we adopt the convention that the above kind of require’s occur {\bf before} the start of the function definition.
+While it can be done anywhere, standardization is better to read and maintain
+the code.
 
 %----------------------------------
 
