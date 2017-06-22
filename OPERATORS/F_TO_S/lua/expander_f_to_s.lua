@@ -26,13 +26,15 @@ return function (a, x )
 
     local lcoro = coroutine.create(function()
       local x_chunk, x_status
+      local idx = 0
       x_status = true
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(x_coro)
         if x_status then
           assert(x_len > 0)
-          qc[func_name](x_chunk, x_len, reduce_struct, 0);
+          qc[func_name](x_chunk, x_len, reduce_struct, idxx);
           coroutine.yield(reduce_struct)
+          idx = idx + x_len
         end -- if
       end -- while 
     end)
