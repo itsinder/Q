@@ -15,5 +15,5 @@ test: gen_inc/* gen_src/* test/testApproxFrequent.c
 
 clean:
 	rm -rf gen_src gen_inc
-	rm -f lua/libapprox_frequent.so
+	rm -f libapprox_frequent.so
 	rm -f testApproxFrequent

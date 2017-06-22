@@ -4,6 +4,11 @@ dist: trusty
 
 group: edge  # Add this
 
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
 env:
   - LUA="luajit"
 
@@ -18,4 +23,4 @@ before_script:
   - source setup.sh
 
 script:
-  - busted --lua=luajit RUNTIME/COLUMN/code/test/exp/test_vector.lua
+  - busted . --lua=luajit -p="_spec.lua"
