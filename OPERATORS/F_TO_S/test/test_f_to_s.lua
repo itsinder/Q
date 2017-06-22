@@ -4,9 +4,14 @@ local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 
 local z= Q.sum(c1)
 assert(type(z) == "Scalar")
-local status = true repeat status = z:next() until not status
+dbg()
+local status = true 
+repeat 
+  status = z:next() 
+until not status
 local val, num = z:value()
 assert(val == 36 )
+
 -- assert(num == 8 ) TODO  Verify what getter returns 
 
 assert(Q.sum(c1):eval() == 36)
