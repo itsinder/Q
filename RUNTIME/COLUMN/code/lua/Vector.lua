@@ -115,7 +115,7 @@ function Vector.new(arg)
            error('No data input to vector.')
         end
     end
-    local buff_size = vec.field_size * vec.chunk_size
+    -- local buff_size = vec.field_size * vec.chunk_size
     -- vec.buffer = ffi.malloc(buff_size)
     return vec
 end
