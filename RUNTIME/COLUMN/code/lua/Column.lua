@@ -208,11 +208,13 @@ end
 function Column:wrap()
     return coroutine.create(function()
             local i = 0
-            local status = true
-            while status do
-                status, length, chunk, nn_chunk = self:chunk(i)
-                if status then
-                    coroutine.yield(status, length, chunk, nn_chunk)
+            local length, chunk, nn_chunk, status
+            length = 1
+            while length ~= nil and length > 0  do
+               dbg()
+                length, chunk, nn_chunk = self:chunk(i)
+                if length ~= nil and length > 0 then
+                    coroutine.yield(length, chunk, nn_chunk)
                     i = i + 1
                 end
             end
