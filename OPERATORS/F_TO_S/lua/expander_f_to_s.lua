@@ -30,8 +30,7 @@ return function (a, x )
       x_status = true
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(x_coro)
-        if x_status then
-          assert(x_len > 0)
+        if x_status and x_len and x_len > 0 then 
           qc[func_name](x_chunk, x_len, reduce_struct, idx);
           coroutine.yield(reduce_struct)
           idx = idx + x_len
