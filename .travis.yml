@@ -4,6 +4,11 @@ dist: trusty
 
 group: edge  # Add this
 
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
 env:
   - LUA="luajit"
 
