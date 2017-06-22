@@ -127,8 +127,8 @@ programmer e.g, add, sort, \ldots, you need to {\em register} that in the
 following manner. Consider \verb+mk_col+ as an example
 
 \begin{verbatim}
-local Q       = require 'Q/q_export'
 local mk_col = function(input, qtype)
+local Q       = require 'Q/q_export'
 ......
 return require('Q/q_export').export('mk_col', mk_col)
 \end{verbatim}
@@ -269,6 +269,19 @@ uppercase is recommended for readability. It handles both decimal (42LL)
 and hexadecimal (0x2aLL) literals.
 
 
+\subsection{Where to place your require statements in a function}
+In many functions, we have something like
+
+\begin{verbatim}
+local ffi = require ‘Q/UTILS/lua/q_ffi.lua
+local function foo (...)
+end
+\end{verbatim}
+
+I propose we adopt the convention that the above kind of require’s occur {\bf before} the start of the function definition.
+While it can be done anywhere, standardization is better to read and maintain
+the code.
+
 %----------------------------------
 
 \subsection{LuaJIT and OpenMP}
@@ -303,3 +316,19 @@ happens with programs that are statically linked against it.
 \section{Data Types}
 
 \subsection{Bit Vectors}
+\section{General coding guidelines}
+\subsection{No seg faults}
+Number of things we need to achieve this. 
+\be 
+\item  Trust nobody. Assert everything.
+\item \TBC
+\ee
+
+
+\subsection{Makefiles for operators}
+
+\be
+\item You must have a target called {\tt clean} which deletes all files created
+by {\tt make}
+\ee
+

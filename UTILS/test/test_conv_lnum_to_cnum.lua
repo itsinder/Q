@@ -8,11 +8,20 @@ local c_mem = conv_lnum_to_cnum(val, "I1")
 local val2 = conv_cnum_to_lnum(c_mem, "I1")
 assert(val2 == 123)
 --====================
+ffi.cdef("int cnum_to_str( int64_t x, char *buf, int bufsz)")
+z = ffi.load("foo.so")
+print("+++++++++++++++++++");
 local val = 9223372036854775807LL
-print(type(val))
-local nX = 32
-X = ffi.malloc(nX)
-local val2 = qc["I8_to_txt"](val, nil, X, nX)
-print(val2)
+-- print(type(val)) == cdata
+buf  = ffi.malloc(32)
+alt_val = ffi.malloc(8)
+alt_val = ffi.cast("int64_t *", alt_val)
+alt_val[0] = val
+print(alt_val[0])
+alt_val[0] = 123456
+
+local orig_ffi = require 'ffi'
+z.cnum_to_str(val, buf, 32)
+print("output = ", orig_ffi.C.printf(stderr, "%s", buf))
 --====================
 print( "Successfully completed " .. arg[0])

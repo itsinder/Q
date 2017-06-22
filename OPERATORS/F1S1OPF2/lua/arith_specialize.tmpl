@@ -8,6 +8,7 @@ return function (
   local qc            = require "Q/UTILS/lua/q_core"
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   local promote       = require 'Q/UTILS/lua/promote'
+  local conv_lnum_to_cnum       = require 'Q/UTILS/lua/conv_lnum_to_cnum'
 
   assert(is_base_qtype(in_qtype))
   local scalar_val = nil
@@ -26,14 +27,7 @@ return function (
     scalar_qtype = in_qtype
   end
   local out_qtype = assert(promote(in_qtype, scalar_qtype))
-  local conv_fn = "txt_to_" .. out_qtype
-  local scalar_width = qconsts.qtypes[out_qtype].width
-  local c_mem = assert(ffi.malloc(scalar_width), "malloc failed")
-  ffi.fill(c_mem, scalar_width, 0)
-  local conv_fn = assert(qc["txt_to_" .. out_qtype], "No converter function")
-  local status 
-  status = conv_fn(tostring(scalar_val), c_mem)
-  assert(status, "Unable to convert " .. scalar_val .. " to qtype" )
+  local c_mem  = assert(conv_lnum_to_cnum(scalar_val, out_qtype))
   --=========================
   local tmpl = 'arith.tmpl'
   local subs = {}; 
@@ -44,5 +38,6 @@ return function (
   subs.out_qtype = out_qtype
   subs.out_ctype = qconsts.qtypes[out_qtype].ctype
   subs.scalar_ctype = qconsts.qtypes[scalar_qtype].ctype
+  print(">>> VSADD ", subs.c_mem)
   return subs, tmpl
 end

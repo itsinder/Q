@@ -22,10 +22,15 @@ ${fn}(
       uint64_t nR,  
       uint64_t * restrict out 
       )
-{ 
+{
+  int status = 0;
+  if ( in == NULL ) { go_BYE(-1); }
+  if ( out == NULL ) { go_BYE(-1); }
+  if ( ptr_sval == NULL ) { go_BYE(-1); }
+  if ( nR == 0 ) { go_BYE(-1); }
+
   ${in_ctype} sval = *ptr_sval;
 #define VECTOR_LENGTH 4096
-  int status = 0;
   /* calculate number of VECTOR_LENGTH element sized chunks to process */
   uint64_t num_blocks = nR / VECTOR_LENGTH; 
   int num_last_block = VECTOR_LENGTH;
@@ -58,6 +63,7 @@ ${fn}(
       out[out_idx] = oval;
     }
   }
+  BYE:
   return status;
 }
    ]]

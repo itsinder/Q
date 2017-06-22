@@ -20,6 +20,7 @@ local z = Q.logit2(c1)
 z:eval()
 Q.print_csv(z, nil, "")
 --===========================
+print("Successfully completed " .. arg[0])
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

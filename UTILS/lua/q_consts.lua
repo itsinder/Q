@@ -6,7 +6,7 @@ local qconsts = {}
 
     qconsts.max_width = max_width
    --===========================
-    local chunk_size = 64 * 1024
+    local chunk_size = 3 -- 64 * 1024
     qconsts.chunk_size = chunk_size
     --===========================
     local width = {}
