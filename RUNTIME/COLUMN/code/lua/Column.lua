@@ -206,7 +206,7 @@ function Column:chunk(num)
         end
         return vec_size, vec, nn_vec
     else
-      return nil, "Bad index: " .. tostring(num)
+      return 0, nil, nil
         -- assert(nil, "Bad index: " .. tostring(num))
     end
 end
