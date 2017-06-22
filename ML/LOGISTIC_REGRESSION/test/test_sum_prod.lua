@@ -8,14 +8,14 @@ local c3 = Q.mk_col ( {4, 1, 1, 1} , "I4")
 local X = {c1, c2, c3}
 local w = Q.mk_col ( { 2, 0, 1, 4} , "I4")
 
-A = {}
-
-sum_prod(X, w, A)
+local A = sum_prod(X, w)
+print "XXXXXXXXXXXXXXX"
 
 for i = 1, #A do
-  for j = 1, #A do
-    print(A[j][i] .. " ")
+  for j = i, #A do
+    print(i, j, A[i][j])
   end
   print("\n")
 end
 
+os.exit()
