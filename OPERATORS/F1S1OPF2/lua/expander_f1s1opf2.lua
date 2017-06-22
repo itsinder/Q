@@ -2,6 +2,7 @@
   local ffi     = require 'Q/UTILS/lua/q_ffi'
   local qc      = require 'Q/UTILS/lua/q_core'
   local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+  local dbg     = require 'Q/UTILS/lua/debugger'
 
   local function expander_f1s1opf2(a, x, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
@@ -14,25 +15,26 @@
 
     ytype = type(Column)
     assert( ( ytype == "table" ) or ( ytype == "string" ) or ( ytype == "number" ), "scalar must be table/string/number")
-    status, subs, tmpl = pcall(spfn, x:fldtype(), y)
+    local status, subs, tmpl = pcall(spfn, x:fldtype(), y)
     assert(status, subs)
     local func_name = assert(subs.fn)
     local out_qtype = assert(subs.out_qtype)
     local out_width = qconsts.qtypes[out_qtype].width
-    local out_ctype = qconsts.qtypes[out_qtype].ctype
     out_width = math.ceil(out_width/8) * 8
     -- TODO Where best to do malloc for buff?
-    local buff = ffi.malloc(x:chunk_size() * out_width)
     local f1_coro = assert(x:wrap(), "wrap failed for x")
     local f2_coro = coroutine.create(function()
-      local x_chunk, x_status
-      x_status = true
+      local buff = ffi.malloc(x:chunk_size() * out_width)
+      local l_subs = subs
+      local l_sp_fn_name = sp_fn_name
+      local status, x_status, x_len, x_chunk, nn_x_chunk 
+      x_status = true; status = 0
       while (x_status) do
         x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(f1_coro)
-        print(x_status, x_len, x_chunk, nn_x_chunk)
-        if x_status and x_len > 0 then 
-          assert(x_len > 0)
-          qc[func_name](x_chunk, x_len, subs.c_mem, buff)
+        if x_status and x_len and x_len > 0 then 
+          -- dbg()
+          status = qc[func_name](x_chunk, x_len, l_subs.c_mem, buff)
+          assert(status == 0, ">>>C error" .. func_name .. "<<<<")
           coroutine.yield(x_len, buff, nil)
         end
       end

@@ -9,7 +9,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
    assert(type(f1) == "Column", "f1 must be a column")
    assert(type(f2) == "Column", "f2 must be a column")
    if ( optargs ) then assert(type(optargs) == "table") end
-   status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
+   local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
    assert(status, subs)
    local func_name = assert(subs.fn)
    assert(qc[func_name], "Symbol not available" .. func_name)

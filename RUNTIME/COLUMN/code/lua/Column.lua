@@ -211,7 +211,6 @@ function Column:wrap()
             local length, chunk, nn_chunk, status
             length = 1
             while length ~= nil and length > 0  do
-               dbg()
                 length, chunk, nn_chunk = self:chunk(i)
                 if length ~= nil and length > 0 then
                     coroutine.yield(length, chunk, nn_chunk)

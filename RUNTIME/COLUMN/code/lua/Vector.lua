@@ -20,6 +20,7 @@ local plpath = require("pl.path")
 local get_new_filename = require "Q/UTILS/lua/random_data_file"
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qc = require 'Q/UTILS/lua/q_core'
+local dbg = require 'Q/UTILS/lua/debugger'
 
 local Vector = {}
 Vector.__index = Vector
