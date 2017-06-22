@@ -21,23 +21,25 @@ sum_B1(
   // Convert number of elements (nR) to number of 64 bit integers (nRprime)
   uint64_t nRprime = nR / 64; if ( ( nRprime * 64 ) != nR ) { nRprime++; }
   uint64_t block_size = nRprime / num_threads;
+  if ( block_size == 0 ) { block_size = 1; }
 
   uint64_t g_sum = 0;
-#pragma omp parallel for schedule(static)
+// #pragma omp parallel for schedule(static)
   for ( uint32_t t = 0; t < num_threads; t++ ) { 
     uint64_t l_sum = 0;
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
-    if ( t == (num_threads-1) ) { ub = nR; }
+    if ( t == (num_threads-1) ) { ub = nRprime; }
+    if ( lb >= nRprime ) { continue; }
     for ( uint64_t i  = lb; i < ub; i++ ) {  
-      l_sum += popcount64(in[i]);
+      l_sum += __builtin_popcountll(in[i]);
     }
-#pragma omp critical (_sum_B1)
+// #pragma omp critical (_sum_B1)
     {
     g_sum += l_sum;
     }
   } 
-  ptr_args->sum_val = g_sum;
+  ptr_args->sum_val += g_sum;
   ptr_args->num     += nR;
   return status;
 }
