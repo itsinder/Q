@@ -116,7 +116,7 @@ function Vector.new(arg)
         end
     end
     local buff_size = vec.field_size * vec.chunk_size
-    vec.buffer = ffi.malloc(buff_size)
+    -- vec.buffer = ffi.malloc(buff_size)
     return vec
 end
 
