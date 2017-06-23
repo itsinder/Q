@@ -139,7 +139,7 @@ if [[ $RES -eq 0 ]] ; then
 else
    my_print "FAIL" "error"
 fi
-
+exit 1
 
 
 
