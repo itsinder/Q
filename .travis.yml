@@ -23,8 +23,9 @@ before_script:
   - source setup.sh
 
 script:
-  - busted . -c --lua=luajit -p="_spec.lua"
+  - busted . -c --lua=luajit -p='_spec.lua'
+  - cp luacov.stats.out luacov.report.out
 
 after_success:
-  - cp luacov.stats.out luacov.report.out
+  - find . -name "*.out"
   - bash <(curl -s https://codecov.io/bash)
