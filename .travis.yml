@@ -23,7 +23,7 @@ before_script:
   - source setup.sh
 
 script:
-  - busted . --lua=luajit -p="_spec.lua"
+  - busted . -c --lua=luajit -p="_spec.lua"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
