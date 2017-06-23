@@ -27,7 +27,7 @@ return function (a, x)
         ub = subs.len
       end
       qc[func_name](buff, chunk_size, subs.c_mem, lb)
-      -- print(a, lb, ub, chunk_size)
+      print(a, lb, ub, chunk_size)
       coroutine.yield(chunk_size, buff, nil)
       lb = lb + chunk_size
     end
