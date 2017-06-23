@@ -26,4 +26,5 @@ script:
   - busted . -c --lua=luajit -p="_spec.lua"
 
 after_success:
+  - cp luacov.stats.out luacov.report.out
   - bash <(curl -s https://codecov.io/bash)
