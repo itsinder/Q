@@ -101,5 +101,16 @@ write_bits_to_file(
     //cBYE(status);
     val = 0;
   }
+  // Now lets pad to the remaining 64 bits boundary
+  long int f_pos = ftell(fp);
+  if ( f_pos % 8 != 0 ){
+      long int pad_len = 8 - (f_pos % 8);
+      print("I will write %d pad entries \n", pad_len);
+      for (int i=0; i< pad_len; i++ ){
+          status = fputc('\0', fp);
+          assertc( status == '\0', "Value returned by fputc must match\n" );
+     }
+
+  }
   return 0;
 }
