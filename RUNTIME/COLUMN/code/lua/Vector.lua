@@ -269,7 +269,7 @@ function Vector:chunk(num)
             local ptr = ffi.cast("unsigned char*", self.cdata)
             local length = self:length() - num * self.chunk_size
             if length > self.chunk_size then length = self.chunk_size end
-            dbg()
+            --dbg()
             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), length
              -- assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
              -- if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
