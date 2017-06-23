@@ -24,7 +24,6 @@ before_script:
 
 script:
   - busted . -c --lua=luajit -p='_spec.lua'
-  - cp luacov.stats.out luacov.report.out
 
 after_success:
   - find . -name "*.out"
