@@ -90,6 +90,7 @@ BYE:
   return status;
 }
 
+#define STAND_ALONE_TEST
 #ifdef STAND_ALONE_TEST
 int
 main(
@@ -118,5 +119,7 @@ main(
 BYE:
   return status;
 }
+
+ gcc $QC_FLAGS sum_prod.c -I../inc/  -o a.out -I../../../UTILS/inc/
 
 #endif
