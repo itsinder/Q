@@ -19,7 +19,7 @@ branches:
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
-  - bash q_install.sh
+  - sudo ./q_install.sh
 
 before_script:
   - source setup.sh
