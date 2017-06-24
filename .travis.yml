@@ -27,5 +27,4 @@ script:
   - busted . -v -c --lua=luajit -p='_spec.lua'
 
 after_success:
-  - find . -name "*.out"
   - bash <(curl -s https://codecov.io/bash)
