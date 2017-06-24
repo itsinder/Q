@@ -24,7 +24,7 @@ before_script:
   - source setup.sh
 
 script:
-  - busted . -c --lua=luajit -p='_spec.lua'
+  - busted . -v -c --lua=luajit -p='_spec.lua'
 
 after_success:
   - find . -name "*.out"
