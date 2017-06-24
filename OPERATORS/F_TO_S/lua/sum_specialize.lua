@@ -13,7 +13,8 @@ typedef struct _reduce_sum_<<qtype>>_args {
     local tmpl = 'reduce.tmpl'
     local subs = {}
     if ( qtype == "B1" ) then
-      assert(nil, "TODO")
+      subs.fn = "sum_B1"
+      tmpl = nil
     else
       assert(is_base_qtype(qtype), "qtype must be base type")
       subs.op = "sum"

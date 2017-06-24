@@ -5,6 +5,7 @@ Column.__index = Column
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 local DestructorLookup = {}
+local qc = require 'Q/UTILS/lua/q_core'
 local clone = require 'Q/UTILS/lua/utils'.clone
 -- dbg = require 'Q/UTILS/lua/debugger'
 
@@ -110,7 +111,7 @@ function Column:last_chunk()
     if self.nn_vec ~= nil then
         nn_num = self.nn_vec:last_chunk()
         assert(vec_num == nn_num, "Position of both vectors has to be the same")
-        assert(vec ~= nn_vec, "The vectors are different")
+        assert(self.vec ~= self.nn_vec, "The vectors are different")
     end
     return vec_num
 end
@@ -119,14 +120,57 @@ function Column:materialized()
     return self.vec:materialized()
 end
 
+-- Do not use this interface. Higly discouraged and to be used for testing only
 function Column:get_element(num)
-    if self.nn_vec ~= nil and self.nn_vec:get_element(num) == ffi.NULL then
-        return ffi.NULL
-    else
-        return self.vec:get_element(num)
+    assert(num == math.floor(num), "element number needs to be a integer")
+    assert(num >= 0, "Requires a whole number " .. tostring(num))
+    local column_chunk_size = self.vec.chunk_size
+    local size, chunk , nn_chunk = self:chunk(math.floor(num / column_chunk_size))
+    local vec_val , nn_vec_val = nil, nil
+    local offset = num % column_chunk_size
+    assert(offset >= 0 and offset < column_chunk_size, "Element needs to be in current chunk")
+    if size == nil or size == 0 then return 0 end
+    chunk = ffi.cast("unsigned char*", chunk)
+    if self.vec:fldtype() == "B1" then
+        local char_offset = offset / 8
+        local bit_offset = offset % 8
+        local char_value = chunk + char_offset
+        local bit_value = tonumber( qc.get_bit(char_value, bit_offset) )
+        if bit_value == 0 then
+           vec_val = ffi.NULL
+        else
+           vec_val =  1
+        end
+   else
+      vec_val =  ffi.cast("void *", chunk +  offset * self.vec.field_size)
+   end
+
+   if self.nn_vec ~= nil then
+        local char_offset = offset / 8
+        local bit_offset = offset % 8
+        local char_value = chunk + char_offset
+        local bit_value = tonumber( qc.get_bit(char_value, bit_offset) )
+        if bit_value == 0 then
+           nn_vec_val = ffi.NULL
+        else
+           nn_vec_val =  1
+        end
     end
+
+    return vec_val, nn_vec_val
 end
+
 function Column:chunk(num)
+    if num < 0 then 
+        local chunk , size = self.vec:chunk(num)
+        local nn_chunk, nn_size
+        if self.nn_vec ~= nil then 
+            nn_chunk, nn_size = self.nn_vec:chunk(-1)
+            assert(nn_size == size, "Size of null vector and vector should be the same")
+        end
+        return size, chunk, nn_chunk
+    end
+
     local chunk_num = self.vec:last_chunk()
     assert(type(num) == "number", "Require a number for chunk number")
     if self:materialized() == false and self.gen ~= nil and (chunk_num == nil or num == chunk_num + 1 ) then
@@ -162,7 +206,8 @@ function Column:chunk(num)
         end
         return vec_size, vec, nn_vec
     else
-        assert(nil, "Bad index: " .. tostring(num))
+      return 0, nil, nil
+        -- assert(nil, "Bad index: " .. tostring(num))
     end
 end
 

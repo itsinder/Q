@@ -20,7 +20,7 @@ local plpath = require("pl.path")
 local get_new_filename = require "Q/UTILS/lua/random_data_file"
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qc = require 'Q/UTILS/lua/q_core'
-local dbg = require 'Q/UTILS/lua/debugger'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 
 local Vector = {}
 Vector.__index = Vector
@@ -115,8 +115,8 @@ function Vector.new(arg)
            error('No data input to vector.')
         end
     end
-    local buff_size = vec.field_size * vec.chunk_size
-    vec.buffer = ffi.malloc(buff_size)
+    -- local buff_size = vec.field_size * vec.chunk_size
+    -- vec.buffer = ffi.malloc(buff_size)
     return vec
 end
 
@@ -269,12 +269,12 @@ function Vector:chunk(num)
             local ptr = ffi.cast("unsigned char*", self.cdata)
             local length = self:length() - num * self.chunk_size
             if length > self.chunk_size then length = self.chunk_size end
-            --dbg()
+            -- dbg()
             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), length
-             -- assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
-             -- if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
-             -- local ptr = ffi.cast("unsigned char*", self.cdata)
-             -- return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
+            -- assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
+            -- if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
+            -- local ptr = ffi.cast("unsigned char*", self.cdata)
+            -- return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
         elseif num == self:last_chunk() + 1 then
             if self.output_to_file == true then
                 error("Vector does not support pull semantics in this mode")
