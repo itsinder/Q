@@ -113,7 +113,7 @@ assert = function(cond, ...)
             end
             idx = idx + 1
         end
-        error(cond)
+        oassert(cond, ...)
     end
 end
 

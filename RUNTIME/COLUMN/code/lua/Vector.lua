@@ -160,16 +160,16 @@ local function append_to_file(self, ptr, size)
     --print ("VECTOR FILE NAME" .. self.filename)
     if self.file == nil  or self.file == ffi.NULL then
         if self.field_type == "B1" then -- except for bits append only applies. TODO change this by buffering
-            self.file = ffi.C.fopen(self.filename, "wb+")
+            self.file = ffi.gc(ffi.C.fopen(self.filename, "wb+"), ffi.C.fclose)
         else
-            self.file = ffi.C.fopen(self.filename, "ab+")
+            self.file = ffi.gc(ffi.C.fopen(self.filename, "ab+"), ffi.C.fclose)
         end
         assert(self.file ~= ffi.NULL, "Unable to open file")
     end
     -- write out buffer to file
     -- TODO make more general based on field size
     if self.field_type == "B1" then
-        assert(tonumber(qc.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
+       assert(tonumber(qc.write_bits_to_file(self.file, ptr, size, self.my_length)) == 0 , "Unable to write to file")
     else
         assert(ffi.C.fwrite(ptr, self.field_size, size, self.file) == size, "Unable to write to file")
     end
@@ -269,7 +269,6 @@ function Vector:chunk(num)
             local ptr = ffi.cast("unsigned char*", self.cdata)
             local length = self:length() - num * self.chunk_size
             if length > self.chunk_size then length = self.chunk_size end
-            -- dbg()
             return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), length
              -- assert(self.my_length % self.chunk_size == 0, "Incomplete chunk cannot be returned")
              -- if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
@@ -298,6 +297,7 @@ end
 
 function Vector:eov()
     ffi.C.fflush(self.file)
+    ffi.C.fclose(self.file)
     self.input_from_file = true
     self.f_map = ffi.gc(qc.f_mmap(self.filename, true), qc.f_munmap)
     assert(self.f_map ~= ffi.NULL, "Should get back a valid map")
