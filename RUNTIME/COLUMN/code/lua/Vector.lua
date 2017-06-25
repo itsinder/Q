@@ -297,7 +297,8 @@ end
 
 function Vector:eov()
     ffi.C.fflush(self.file)
-    ffi.C.fclose(self.file)
+    self.file = ffi.NULL
+    -- ffi.C.fclose(self.file)
     self.input_from_file = true
     self.f_map = ffi.gc(qc.f_mmap(self.filename, true), qc.f_munmap)
     assert(self.f_map ~= ffi.NULL, "Should get back a valid map")
