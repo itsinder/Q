@@ -14,7 +14,6 @@ return function (a, x)
   local out_qtype = assert(x.qtype)
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
-  for k, v in pairs(subs) do print(k, v) end
   assert(subs.len > 0)
   local coro = coroutine.create(function()
     local lb = 0

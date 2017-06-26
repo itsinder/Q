@@ -4,7 +4,8 @@ return function (
   local qc      = require "Q/UTILS/lua/q_core"
   local ffi     = require 'Q/UTILS/lua/q_ffi'
   local qconsts = require 'Q/UTILS/lua/q_consts'
-  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
+  local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'
+  local is_base_qtype     = require 'Q/UTILS/lua/is_base_qtype'
 
   assert(type(args) == "table")
   local val   = assert(args.val)
