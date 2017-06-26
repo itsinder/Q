@@ -23,12 +23,16 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
       local f1_chunk_size = f1:chunk_size()
       local f2_chunk_size = f2:chunk_size()
       assert(f1_chunk_size == f2_chunk_size)
-      local buff = ffi.malloc(f1_chunk_size * f3_width)
+      local bytes_to_alloc = (f1_chunk_size * f3_width)
+      -- must allocate multiples of 8 bytes 
+      bytes_to_alloc = math.ceil(bytes_to_alloc/8) * 8
+      local buff = ffi.malloc(bytes_to_alloc)
       local nn_buff = nil -- Will be created if nulls in input
       if f1:has_nulls() or f2:has_nulls() then
          local width = qconsts.qtypes["B1"].width
          local size = math.ceil(width/8) * 8
          nn_buff = ffi.malloc(size)
+         assert(nil, "TODO")
       end
       f1_status = true
       while (f1_status) do

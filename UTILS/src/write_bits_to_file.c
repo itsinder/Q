@@ -101,5 +101,15 @@ write_bits_to_file(
     //cBYE(status);
     val = 0;
   }
-  return 0;
+  // Now lets pad to the remaining 64 bits boundary
+  int seek_pos = file_size + length;
+
+  if (seek_pos % 64 != 0) {
+      seek_pos = seek_pos + ( 64 - (seek_pos % 64) );
+     // now convert the seek pos from bits to bytes
+     seek_pos = seek_pos / 8;
+     status = fseek( fp, seek_pos - 1, SEEK_SET);
+     fputc('\0', fp);
+  }  
+    return 0;
 }

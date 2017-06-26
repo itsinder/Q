@@ -9,6 +9,10 @@ local z = Q.vvadd(c3, c2, { junk = "junk" } )
 z:eval()
 -- print(z:length())
 Q.print_csv(z, { lb = 1, ub = 4} , "")
+--==============
+local w = Q.vveq(c3, c2)
+w:eval()
+print(w)
 print("Successfully completed")
 os.exit()
 --[[

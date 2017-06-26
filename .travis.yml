@@ -15,15 +15,17 @@ env:
 branches:
   only:
     - dev
+    - dev_ramesh
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
+  - sudo ./q_install.sh
 
 before_script:
   - source setup.sh
 
 script:
-  - busted . -c --lua=luajit -p="_spec.lua"
+  - busted . -v -c --lua=luajit -p="_spec.lua"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

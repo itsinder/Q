@@ -67,6 +67,8 @@ if [[ $RES -ne 0 ]] ; then
    sudo luarocks install luaposix
    sudo luarocks install luv
    sudo luarocks install busted
+   sudo luarocks install luacov
+   sudo luarocks install cluacov
 else
    my_print "luarocks is already installed"
 fi
@@ -139,7 +141,6 @@ if [[ $RES -eq 0 ]] ; then
 else
    my_print "FAIL" "error"
 fi
-
 
 
 

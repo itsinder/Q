@@ -273,14 +273,16 @@ and hexadecimal (0x2aLL) literals.
 In many functions, we have something like
 
 \begin{verbatim}
-local ffi = require ‘Q/UTILS/lua/q_ffi.lua
 local function foo (...)
+local ffi     = require ‘Q/UTILS/lua/q_ffi.lua
+local qconsts = require ‘Q/UTILS/lua/q_consts.lua
+.....
 end
 \end{verbatim}
 
-I propose we adopt the convention that the above kind of require’s occur {\bf before} the start of the function definition.
-While it can be done anywhere, standardization is better to read and maintain
-the code.
+I propose we adopt the convention that the above kind of require’s occur 
+at the {\bf start} of the function, before any of the ``real'' code.  While it can be 
+done anywhere, standardization is better to read and maintain the code.
 
 %----------------------------------
 

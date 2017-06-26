@@ -1,7 +1,8 @@
+Speed up load_csv
+
 Fix luajit test_conv_str_to_cmem.lua
 
-g_valid_types has been removed. please use assert(g_qtypes[your_qtype]) to
-verify whether the type is good or not.
+F_TO_S for B1
 
-Fix test_f_to_s.lua
+Verify that extra bits are zeroed out for vveq and vseq and so on
 
