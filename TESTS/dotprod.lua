@@ -31,7 +31,7 @@ ysubp:eval()
 
 local b = Q.sum(Q.vvmul(X, ysubp))
 b = b:eval()
-for i = 1,50 do
+for i = 1,1000 do
   local btmp = Q.sum(Q.vvmul(X, ysubp)):eval()
   assert(btmp == b, "original result: "..b..", different result: "..btmp)
 end
