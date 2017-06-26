@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -36,7 +37,7 @@ sum_prod(
   num_ops = 0;
   uint32_t nT = sysconf(_SC_NPROCESSORS_ONLN);
   printf("nT = %d \n", nT);
-// #pragma omp parallel for 
+#pragma omp parallel for 
   for ( uint64_t i = 0; i < M; i++ ) { 
     memset(A[i], '\0', M*sizeof(double));
     // num_ops += M;
@@ -47,7 +48,7 @@ sum_prod(
       if ( ( i + (c*nT) ) >= M ) { break; }
       float *Xi = X[i];
       double *Ai = A[i];
-// #pragma omp simd
+#pragma omp simd
       for ( uint32_t l = 0; l < N; l++ ) { 
         temp[l] = Xi[l] * w[l];  // num_ops++;
       }
@@ -57,41 +58,37 @@ sum_prod(
       if ( j_ub > M ) { j_ub = M; }
       // printf("c = %d, i = %d, j = [%d, %d]\n", c, i, j_lb, j_ub);
 // #pragma omp parallel for schedule (static, 1)
+#pragma omp parallel for 
       for ( uint64_t j = j_lb; j < j_ub; j++ ) {
         // printf("%d, %d, %d, %d \n", j, j_lb, j_ub, omp_get_thread_num());
-        double temp2[block_size];
+        double temp2[2*block_size];
         double sum = 0;
         float *Xj = X[j];
         int num_blocks = N / block_size;
         if ( ( num_blocks * block_size ) != (int)N ) { num_blocks++; }
-        for ( int b = 0; b < num_blocks; b++ ) { 
+        for ( int b = 0; b < num_blocks; b++ ) {
           uint64_t lb = b * block_size;
           uint64_t ub = lb + block_size;
           if ( b == (num_blocks-1) ) { ub = N; }
-          double rslt;
-// #pragma omp simd
           uint32_t tidx = 0;
+#pragma omp simd
           for ( uint32_t l = lb; l < ub; l++ ) { 
-            temp2[tidx] = Xj[l] * temp[l];  // num_ops++;
+            temp2[tidx++] = Xj[l] * temp[l];  // num_ops++;
           }
-// #pragma omp simd reduction(+:rslt)
           tidx = 0;
+#pragma omp simd reduction(+:sum)
           for ( tidx = 0; tidx < ub-lb; tidx++ ) { 
-            rslt += temp2[tidx];
+            sum += temp2[tidx]; // num_ops++; 
           }
-          sum += rslt;
-          // num_ops++;
         }
-// #pragma omp critical (_sum_prod)
+#pragma omp critical (_sum_prod)
         {
           Ai[j] = sum;
-          Ai[j] = 1; // TODO DELETE
         }
       }
     }
   }
 
-  fprintf(stderr, "Num Ops = %llu \n", (unsigned long long)num_ops);
 BYE:
   free_if_non_null(temp);
   return status;
@@ -107,12 +104,22 @@ main(
   double **A = NULL;
   float **X = NULL;
   double *w = NULL;
+  clock_t start_t, stop_t, total_t;
+
 
   w = malloc(N * sizeof(double));
+  for ( int i = 0; i < N; i++ ) { 
+    w[i] = 1.0 /(i+1);
+  }
 
   X = malloc(M * sizeof(float *));
   for ( uint64_t i = 0; i < M; i++ ) { 
-    X[i] = malloc(M * sizeof(float));
+    X[i] = malloc(N * sizeof(float));
+  }
+  for ( uint64_t i = 0; i < M; i++ ) { 
+    for ( uint64_t j = 0; j < N; j++ ) { 
+      X[i][j] = (i+j+1);
+    }
   }
 
   A = malloc(M * sizeof(double *));
@@ -120,14 +127,44 @@ main(
     A[i] = malloc(M * sizeof(double));
   }
 
+  system("date");
+  start_t = clock();
   status = sum_prod(X, M, N, w, A);
-  for ( unsigned int i = 0; i < M; i++ ) { 
-    for ( unsigned int j = i; j < M; j++ ) { 
-      if ( A[i][j] != 1 ) { go_BYE(-1); }
+  stop_t = clock();
+  system("date");
+  fprintf(stderr, "Num clocks = %llu \n", stop_t - start_t);
+  fprintf(stderr, "Num Ops = %llu \n", (unsigned long long)num_ops);
+  double chk = 0;
+
+  int ii = 2, jj = 2;
+  for ( unsigned int l = 0; l < N; l++ ) { 
+    chk += (X[ii][l] * X[jj][l] * w[l]);
+  }
+  if ( ( ( A[ii][jj] -  chk) / chk )  > 0.001 ) {
+    fprintf(stderr, "chk = %lf, A = %lf \n", chk, A[ii][jj]);
+    go_BYE(-1);
+  }
+  for ( uint64_t i = 0; i < M; i++ ) { 
+    for ( uint64_t j = i; j < M; j++ ) { 
+      if ( A[i][j] == 0 ) { go_BYE(-1); 
+      }
+    }
+    for ( uint64_t j = 0; j < i; j++ ) { 
+      if ( A[i][j] != 0 ) { go_BYE(-1); 
+      }
     }
   }
-  /* num_ops = 146256437248 */
+  /* num_ops = 146231168000 */
+  /* gcc -std=gnu99 -O4 expt_sum_prod.c -I../../../UTILS/inc/ -o a.out -fopenmp -lgomp*/
 BYE:
+  free_if_non_null(w);
+
+  for ( uint64_t i = 0; i < M; i++ ) { free_if_non_null(A[i]); }
+  free_if_non_null(A);
+
+  for ( uint64_t i = 0; i < M; i++ ) { free_if_non_null(X[i]); }
+  free_if_non_null(X);
+
   return status;
 }
 
