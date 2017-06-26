@@ -1,4 +1,3 @@
-require("busted")
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
@@ -11,7 +10,7 @@ describe("Vector" , function(vector_type)
    vector_type = vector_type or v_type
       
    describe("should read from files", function()
-     pending("need a valid filename"    
+     pending("need a valid filename")    
      pending("needs a valid type")
      pending("needs a valid length")
      pending("verify number of chunks")
