@@ -23,7 +23,7 @@ return function (
   local tmpl = 'f1opf2.tmpl'
   local subs = {};
   subs.fn = "convert_" .. in_qtype .. "_" .. out_qtype
-  subs.c_code_for_operator = "c = (" .. out_ctype .. ") a"
+  subs.c_code_for_operator = "c = (" .. out_ctype .. ") a; "
   subs.in_ctype = in_ctype
   subs.out_ctype = out_ctype
   subs.c_mem = nil
