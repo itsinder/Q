@@ -21,6 +21,11 @@ return function (
   subs.c_mem = assert(conv_lnum_to_cnum(val, qtype))
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
+  if ( ( qtype == "F4" ) or ( qtype == "F8" ) )  then
+    subs.format = '%lf'
+  else
+    subs.format = '%ld'
+  end
   subs.out_qtype = qtype
   return subs, tmpl
 end
