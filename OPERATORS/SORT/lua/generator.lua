@@ -6,9 +6,10 @@ if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
 if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 local gen_code = require 'Q/UTILS/lua/gen_code'
 
-order = { 'asc', 'dsc' }
-qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
+local order = { 'asc', 'dsc' }
+local qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
+local num_produced = 0
 local spfn = require 'sort_specialize'
 for i, o in ipairs(order) do 
   for k, f in ipairs(qtypes) do 
@@ -19,5 +20,7 @@ for i, o in ipairs(order) do
     gen_code.doth(subs, tmpl, incdir)
     gen_code.dotc(subs, tmpl, srcdir)
     print("Produced ", subs.fn)
+    num_produced = num_produced + 1
   end
 end
+assert(num_produced > 0)
