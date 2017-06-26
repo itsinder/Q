@@ -11,7 +11,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
   uint64_t num; // number of non-null elements inspected
 } REDUCE_sum_sqr_<<qtype>>_ARGS;
   ]]
-    local tmpl = 'reduce.tmpl'
+    local tmpl = 'sum.tmpl'
     local subs = {}
     assert(is_base_qtype(qtype), "qtype must be base type")
     subs.op = "sum_sqr" 
@@ -30,7 +30,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     hdr = string.gsub(hdr,"<<qtype>>", qtype)
     hdr = string.gsub(hdr,"<<reduce_ctype>>",  subs.reduce_ctype)
     pcall(ffi.cdef, hdr)
-    subs.reducer = "mcr_sum_sqr"
+    subs.reducer = "mcr_sqr"
     subs.t_reducer = "mcr_sum"
     --==============================
     -- Set c_mem using info from args

@@ -10,7 +10,7 @@ typedef struct _reduce_sum_<<qtype>>_args {
   uint64_t num; // number of non-null elements inspected
 } REDUCE_sum_<<qtype>>_ARGS;
   ]]
-    local tmpl = 'reduce.tmpl'
+    local tmpl = 'sum.tmpl'
     local subs = {}
     if ( qtype == "B1" ) then
       subs.fn = "sum_B1"
@@ -31,8 +31,8 @@ typedef struct _reduce_sum_<<qtype>>_args {
       hdr = string.gsub(hdr,"<<qtype>>", qtype)
       hdr = string.gsub(hdr,"<<reduce_ctype>>",  subs.reduce_ctype)
       pcall(ffi.cdef, hdr)
-      subs.reducer = "mcr_sum"
-      subs.t_reducer = subs.reducer
+      subs.reducer = "mcr_nop"
+      subs.t_reducer = "mcr_sum"
       --==============================
       -- Set c_mem using info from args
       local sz_c_mem = ffi.sizeof("REDUCE_sum_" .. qtype .. "_ARGS")
