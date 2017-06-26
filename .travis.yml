@@ -26,7 +26,7 @@ before_script:
   - source setup.sh
 
 script:
-  - busted . -v -c --lua=luajit -p="_spec.lua" || true
+  - busted . -v -c --lua=luajit -p="_spec.lua"
   - luacov
 
 after_success:
