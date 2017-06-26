@@ -14,12 +14,14 @@ return function (a, x)
   local out_qtype = assert(x.qtype)
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
-  local w =  assert(qconsts.qtypes[out_qtype].width)
-  local chunk_size = qconsts.chunk_size
-  local buff =  assert(ffi.malloc(chunk_size * w))
-  local num_blocks = math.ceil(subs.len / chunk_size)
-  local lb = 0
+  assert(subs.len > 0)
   local coro = coroutine.create(function()
+    local lb = 0
+    local ub = 0
+    local chunk_size = qconsts.chunk_size
+    local num_blocks = math.ceil(subs.len / chunk_size)
+    local width =  assert(qconsts.qtypes[out_qtype].width)
+    local buff =  assert(ffi.malloc(chunk_size * width))
     for i =1,num_blocks do
       local ub = lb + chunk_size
       if ( ub > subs.len ) then 
