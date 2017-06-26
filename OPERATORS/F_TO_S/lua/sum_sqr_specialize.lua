@@ -13,7 +13,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
   ]]
     local tmpl = 'sum.tmpl'
     local subs = {}
-    assert(is_base_qtype(qtype), "qtype must be base type")
+    assert(is_base_qtype(qtype), "qtype must be base type, not" .. qtype) 
     subs.op = "sum_sqr" 
     subs.fn = subs.op .. "_" .. qtype 
     subs.ctype = qconsts.qtypes[qtype].ctype
