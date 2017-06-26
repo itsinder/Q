@@ -29,26 +29,14 @@ report_files_cleanup(){
    rm -f $Q_SRC_ROOT/UTILS/test/dictionary.stats.txt
 }
 
-
-export LUA_PATH="$Q_SRC_ROOT/../?.lua;;"
-
 cd $Q_SRC_ROOT/UTILS/build
 
 source $Q_SRC_ROOT/setup.sh -f
 
-pre_build_cleanup
-
+build_cleanup_heading="------------OUTPUT of build cleanup--------------------------------------"
+build_cleanup_output=$(make clean 2>&1)
 build_output_heading="------------OUTPUT of build scripts--------------------------------------"
-build_output=$(lua build.lua gen.lua 2>&1)
-library_output_heading="------------OUTPUT of library scripts----------------------------------------"
-library_output=$(lua mk_so.lua /tmp/ 2>&1)
-test_output_heading="------------OUTPUT of test scripts------------------------------------"
-test_output=$(lua build.lua tests.lua 2>&1)
-
-unset LUA_PATH
-
-cd $Q_SRC_ROOT
-sudo bash q_install.sh
+build_output=$(make 2>&1)
 
 cd $Q_SRC_ROOT/OPERATORS/LOAD_CSV/test/testcases/
 bash test_meta_data.sh
@@ -140,7 +128,7 @@ rm $nightly_file
 
 final_out="${load_csv_metadata_out}"$'\n\n'"${load_csv_out}"$'\n\n'"${data_load_out}"$'\n\n'"${print_out}"$'\n\n'"${utils_out}"$'\n\n'"${mk_col_out}"$'\n\n'"${vector_out}"
 
-final_out="${final_out}"$'\n\n'"${build_output_heading}"$'\n\n'"${build_output}"$'\n\n'"${library_output_heading}"$'\n\n'"${library_output}"$'\n\n'"${test_output_heading}"$'\n\n'"${test_output}"
+final_out="${final_out}"$'\n\n'"${build_output_heading}"$'\n\n'"${build_output}"$'\n\n'"${build_cleanup_heading}"$'\n\n'"${build_cleanup_output}"
 #echo "$final_out" 
 
 attach_file=$Q_SRC_ROOT/RUNTIME/COLUMN/code/test_cases/vector.report.txt
@@ -184,7 +172,7 @@ then
 fi
 
 # echo $varattach
-# echo "$final_out"
+# echo "$final_out" > /tmp/output.txt
 echo "$final_out" | /usr/bin/mail -s "Q Unit Tests" projectq@gslab.com,isingh@nerdwallet.com,rsubramonian@nerdwallet.com $varattach
 
 report_files_cleanup
