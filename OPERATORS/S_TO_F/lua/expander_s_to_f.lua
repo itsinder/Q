@@ -8,7 +8,7 @@ return function (a, x)
     -- Get name of specializer function. By convention
   local filename = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
   local spfn = assert(require(filename))
-  status, subs, tmpl = pcall(spfn, x)
+  local status, subs, tmpl = pcall(spfn, x)
   assert(status, subs)
   local func_name = assert(subs.fn)
   local out_qtype = assert(x.qtype)
