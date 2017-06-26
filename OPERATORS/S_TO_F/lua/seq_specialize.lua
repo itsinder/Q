@@ -4,6 +4,8 @@ return function (
   local qconsts = require "Q/UTILS/lua/q_consts"
   local qc = require "Q/UTILS/lua/q_core"
   local ffi = require "Q/UTILS/lua/q_ffi"
+  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
+  --====================================
   local hdr = [[
   typedef struct _seq_<<qtype>>_rec_type {
     <<ctype>> start;
@@ -11,14 +13,13 @@ return function (
   } SEQ_<<qtype>>_REC_TYPE;
 ]]
   assert(type(args) == "table")
-  local start  = assert(args.start)
+  local start = assert(args.start)
   local qtype = assert(args.qtype)
   local len   = assert(args.len)
-  local by = args.by
+  local by    = args.by
 
   hdr = string.gsub(hdr, "<<qtype>>", qtype)
   hdr = string.gsub(hdr, "<<ctype>>", qconsts.qtypes[qtype].ctype)
-
   pcall(ffi.cdef, hdr)
 
   if ( by ) then
@@ -26,11 +27,10 @@ return function (
   else
     by = 1
   end
-  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(qtype))
+  assert(type(len) == "number")
   assert(len > 0, "vector length must be positive")
   assert(type(start) == "number")
-
   local subs = {};
   --========================
   -- Set c_mem using info from args
@@ -42,10 +42,10 @@ return function (
   --========================
   local tmpl = 'seq.tmpl'
   local subs = {};
-  subs.fn = "seq_" .. qtype
-  subs.c_mem = c_mem
+  subs.fn        = "seq_" .. qtype
+  subs.c_mem     = c_mem
   subs.out_ctype = qconsts.qtypes[qtype].ctype
-  subs.len = len
+  subs.len       = len
   subs.out_qtype = qtype
   return subs, tmpl
 end
