@@ -66,6 +66,5 @@ return function (
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
   subs.out_qtype = qtype
-  subs.generator = generator
   return subs, tmpl
 end

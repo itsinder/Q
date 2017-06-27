@@ -1,4 +1,3 @@
-require("busted")
 local plpath = require "pl.path"
 local ffi = require("Q/UTILS/lua/q_ffi")
 local Q = require 'Q'

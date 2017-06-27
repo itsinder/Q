@@ -19,7 +19,6 @@ return function (a, x )
     local getter = assert(subs.getter)
     assert(type(getter) == "function")
     --==================
-
     local lcoro = coroutine.create(function()
       local x_chunk, x_status
       local idx = 0
@@ -32,7 +31,7 @@ return function (a, x )
           idx = idx + x_len
         end -- if
       end -- while 
-    end)
+   end)
     local s =  Scalar ( { coro = lcoro, func = getter } )
     return s
 end
