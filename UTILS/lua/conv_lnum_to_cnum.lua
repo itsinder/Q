@@ -10,6 +10,8 @@ return function (x, out_qtype)
     local y = ffi.malloc(ffi.sizeof(out_ctype))
     local y = ffi.cast(out_ctype .. " *", y)
     y[0] = x
+    print(" x = ", x)
+    print(y[0])
     return y
     -- return ffi.new(out_ctype .. "[?]", 1, { x } )
   elseif ( type(x) == "cdata" ) then
