@@ -8,25 +8,46 @@ return function (a, x)
     -- Get name of specializer function. By convention
   local filename = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
   local spfn = assert(require(filename))
-  status, subs, tmpl = pcall(spfn, x)
+  local status, subs, tmpl = pcall(spfn, x)
   assert(status, subs)
   local func_name = assert(subs.fn)
   local out_qtype = assert(x.qtype)
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
-  local w =  assert(qconsts.qtypes[out_qtype].width)
-  local chunk_size = qconsts.chunk_size
-  local buff =  assert(ffi.malloc(chunk_size * w))
-  local num_blocks = math.ceil(subs.len / chunk_size)
-  local lb = 0
+  assert(subs.len > 0)
+
+  --[[
+  local x = subs.c_mem
+  local x = ffi.cast("int *", subs.c_mem)
+  print("X: x = ", x[0])
+  print(subs.c_mem)
+  --]]
+
   local coro = coroutine.create(function()
+    --[[
+    local dbg = require 'Q/UTILS/lua/debugger'
+    dbg()
+    local y = ffi.cast("int *", subs.c_mem)
+    print("X: y = ", y[0])
+    print("X: x = ", x[0])
+    print(subs.c_mem)
+    subs.c_mem[0] = 123
+    --]]
+
+    local lb = 0
+    local ub = 0
+    local c_mem = subs.c_mem
+    local chunk_size = qconsts.chunk_size
+    local num_blocks = math.ceil(subs.len / chunk_size)
+    local width =  assert(qconsts.qtypes[out_qtype].width)
+    local buff =  assert(ffi.malloc(chunk_size * width))
     for i =1,num_blocks do
-      local ub = lb + chunk_size
+      ub = lb + chunk_size
       if ( ub > subs.len ) then 
         chunk_size = subs.len -lb
         ub = subs.len
       end
-      qc[func_name](buff, chunk_size, subs.c_mem, lb)
+      qc[func_name](buff, chunk_size, c_mem, lb)
       -- print(a, lb, ub, chunk_size)
       coroutine.yield(chunk_size, buff, nil)
       lb = lb + chunk_size

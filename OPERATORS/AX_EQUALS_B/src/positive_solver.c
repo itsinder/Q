@@ -26,7 +26,7 @@ static int _positive_solver_rec(
   if (n < 1) { go_BYE(-1); }
   if (n == 1) {
     if (A[0][0] == 0.0) {
-        if (b[0] != 0.0) { go_BYE(-1); }
+      if (abs(b[0]) > DEFAULT_EPS) { go_BYE(-1); }
         x[0] = 0.0;
         return 0;
     }
