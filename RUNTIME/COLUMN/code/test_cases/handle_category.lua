@@ -129,10 +129,10 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
     local field_type = vector.field_type
     local field_size = qconsts.qtypes[field_type].width
     local file_size = file_size(value.filename)
-    if size ~= file_size then
-      fns["increment_fail_testcases"](index, value, "Length of input is not equal to the binary file size")
-      return false
-    end
+    --if size ~= file_size then
+    --  fns["increment_fail_testcases"](index, value, "Length of input is not equal to the binary file size")
+    --  return false
+    --end
   end
 
   for k,v in ipairs(input_values) do
