@@ -18,5 +18,5 @@ set -e
 #-------------------
 echo "Completed $0 in $PWD"
 rm _x
-exit
 rm -f a.out
+exit
