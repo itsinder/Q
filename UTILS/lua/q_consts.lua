@@ -6,8 +6,7 @@ local qconsts = {}
 
     qconsts.max_width = max_width
    --===========================
-    local chunk_size = 4 -- 64 * 1024
-    qconsts.chunk_size = 3 --chunk_size
+    qconsts.chunk_size = 64 * 1024
     --===========================
     local width = {}
     width["I1"]  = 8;

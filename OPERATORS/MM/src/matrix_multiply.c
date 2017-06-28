@@ -82,6 +82,7 @@ mvmul_a(
 
 //#pragma omp parallel for schedule(static, 1)
   int block_size = m / nT;
+
   for ( int t = 0; t < nT; t++ ) {
     int lb = t * block_size;
     int ub = lb + block_size;
@@ -91,11 +92,11 @@ mvmul_a(
       z[j] = 0;
     }
   }
+
   //n = 1 in this special case
   for ( int i = 0; i < k; i++ ) {
     double scale = y[i];
     double *x_i = x[i];
-    int block_size = m / nT;
 //#pragma omp parallel for schedule(static, 1)
     for ( int t = 0; t < nT; t++ ) { 
       int lb = t * block_size;
