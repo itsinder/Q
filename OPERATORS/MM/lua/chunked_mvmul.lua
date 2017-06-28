@@ -4,7 +4,7 @@ local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
-local mvmul = function(X, Y)
+local cmvmul = function(X, Y)
   -- START: verify inputs
   assert(type(X) == "table", "X must be a table ")
   local m = nil
@@ -26,34 +26,47 @@ local mvmul = function(X, Y)
   -- STOP: verify inputs
 
 
-  local chunk_size = qconsts.chunk_size
-  local num_blocks = math.ceil( m / chunk_size )
-  for i = 1,num_blocks do
-    local len = chunk_size
-    if( i == num_blocks ) then
-      len = m % chunk_size
-    end
-
-    qc["mvmul_a"](Xptr, yptr, zptr, len, k)
-  end
-
-  local zptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m), "malloc failed")
+  --all of y needs to be evaluated
   local y_len, yptr, nn_yptr = Y:chunk(-1)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
-  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
-  Xptr = ffi.cast("double **", Xptr)
-  for xidx = 1, #X do
-    local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
-    assert(nn_xptr == nil, "Don't support null values")
-    Xptr[xidx-1] = ffi.cast("double *", xptr)
-  end
+
+  local chunk_size = qconsts.chunk_size
+  local num_blocks = math.ceil( m / chunk_size )
+
+  local coro = coroutine.create(function()
+   
+    local status, zptr, Xptr, len
+
+    for i = 1,num_blocks do
+
+      len = chunk_size
+      if( i == num_blocks ) then
+        len = m % chunk_size
+      end
+    
+      zptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * len), "malloc failed")
+      Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
+      Xptr = ffi.cast("double **", Xptr)
+      
+      --TODO FIX THIS FOR LOOP
+      for xidx = 1, #X do
+        local x_len, xptr, nn_xptr = X[xidx]:chunk(i) -- TODO check this line
+        assert(x_len == len)
+        assert(nn_xptr == nil, "Don't support null values")
+        Xptr[xidx-1] = ffi.cast("double *", xptr)
+      end
+
+      local status = qc["mvmul_a"](Xptr, yptr, zptr, len, k)
+      assert(status == 0, "C error in mvmul")
+      coroutine.yield(len, zptr, nil)
+    end
+  end)
+
   -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
-  qc["mvmul_a"](Xptr, yptr, zptr, m, k);
-  local zcol = Column({field_type = "F8", write_vector = true})
-  zcol:put_chunk(m, zptr)
-  zcol:eov()
-  return zcol
+  return Column( {gen=coro, nn=(nn_zptr ~= nil), field_type="F8"} )
 end
-return require('Q/q_export').export('mvmul', mvmul)
+return require('Q/q_export').export('cmvmul', cmvmul)
+
+
