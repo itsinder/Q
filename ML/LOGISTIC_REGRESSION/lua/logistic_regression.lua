@@ -8,32 +8,42 @@ local function beta_step(X, y, beta)
   local p = Q.logit(Xbeta)
   local w = Q.logit2(Xbeta)
   local ysubp = Q.vvsub(y, p)
+
   local A = {}
   local b = {}
-  print('setting up matrices')
   for i, X_i in ipairs(X) do
-    print('making column '..i)
     A[i] = {}
     b[i] = Q.sum(Q.vvmul(X_i, ysubp))
     for j, X_j in ipairs(X) do
       A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
     end
   end
-  print('set up matrices')
-  local b_col = Q.Column({field_type = "F8", write_vector = true})
-  b_col:put_chunk(#b, b)
-  b_col:eov()
-  b = b_col
-  for i = 1, #A do
-    local Ai_col = Q.Column({field_type = "F8", write_vector = true})
-    Ai_col:put_chunk(#A[i], A[i])
-    Ai_col:eov()
-    A[i] = Ai_col
+
+  local status = true
+  while status do
+    for i = 1, #A do
+      status = status and b[i]:next()
+      if not status then
+        b[i] = b[i]:value()
+      end
+      for j = 1, #A[i] do
+        if status then
+          A[i][j]:next()
+        else
+          A[i][j] = A[i][j]:value()
+        end
+      end
+    end
   end
-  print('doing solver')
+
+  b = Q.mk_col(b, "F8")
+  for i = 1, #A do
+    A[i] = Q.mk_col(A[i], "F8")
+  end
+
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
-  print('did solver')
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
+
   return beta_new
 end
 
@@ -100,12 +110,13 @@ local function package_betas(betas)
   end
 
   local function get_classes(X)
-    X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
+    X[#X + 1] = Q.const({ val = 1, len = X[1]:length(), qtype = 'F8' })
+    X[#X]:eval()
     local vals = {}
     local len = 0
     for i = 1, #betas - 1 do
       val = Q.mvmul(X, betas[i])
-      _, val, len = val:chunk(-1)
+      len, val, _ = val:chunk(-1)
       val = ffi.cast('double*', val)
       vals[i] = val
     end
@@ -125,7 +136,10 @@ local function package_betas(betas)
       classes[i] = max_i
     end
 
-    return Q.mk_col(classes, 'F8')
+    X[#X] = nil
+    classes = Q.mk_col(classes, 'F8')
+    classes:eval()
+    return classes
   end
 
   return get_class, get_prob, get_classes, get_probs
@@ -151,12 +165,13 @@ local function make_trainer(X, y, classes)
       end
     end
     ys[i] = Q.mk_col(ytab, 'F8')
+    ys[i]:eval()
   end
 
   local function step_betas()
     for i = 1, #betas do
-      betas[i]:eval()
       betas[i] = beta_step(X, ys[i], betas[i])
+      betas[i]:eval()
     end
   end
 
