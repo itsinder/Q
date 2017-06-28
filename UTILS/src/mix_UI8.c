@@ -1,7 +1,13 @@
 //START_INCLUDES
-#include "mix_UI4.h"
-#include "mix_UI8.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <time.h>
+#include "q_macros.h"
+#include "_mix_UI4.h"
 //STOP_INCLUDES
+#include "_mix_UI8.h"
 //START_FUNC_DECL
 uint64_t 
 mix_UI8(
@@ -19,4 +25,3 @@ mix_UI8(
   uint64_t i3 = ( i1 << 32 ) | i2;
   return i3;
 } 
-

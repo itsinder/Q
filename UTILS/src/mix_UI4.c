@@ -1,6 +1,12 @@
 //START_INCLUDES
-#include "mix_UI4.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <time.h>
+#include "q_macros.h"
 //STOP_INCLUDES
+#include "_mix_UI4.h"
 //START_FUNC_DECL
 uint32_t
 mix_UI4( 
