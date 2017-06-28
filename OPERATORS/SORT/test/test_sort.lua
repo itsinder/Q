@@ -7,5 +7,5 @@ Q.sort(x, "dsc")
 Q.print_csv(x, nil, "")
 save = require 'Q/UTILS/lua/save'
 save('tmp.save')
-print("Completed")
+print("SUCCESS for " .. arg[0])
 os.exit()

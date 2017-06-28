@@ -1,8 +1,6 @@
 #!/bibn/bash
 set -e 
-cd ../lua/
-bash gen_files.sh 
-cd - 
+make -C ../lua/
 gcc -g -std=gnu99  \
   -I../gen_inc \
   -I../../../UTILS/inc \

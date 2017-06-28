@@ -5,8 +5,9 @@ local qc      = require 'Q/UTILS/lua/q_core'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
-    local filename = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
-    local spfn = assert(require(filename))
+    local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
+    local spfn = assert(require(sp_fn_name), 
+    "Specializer missing " .. sp_fn_name)
     assert(type(x) == "Column", "input should be a column")
     assert(x:has_nulls() == false, "Not set up for null values as yet")
     local x_qtype = assert(x:fldtype())

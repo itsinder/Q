@@ -16,4 +16,5 @@ z = Q.seq( {start = -1, by = 5, qtype = "I4", len = 10} )
 z:eval()
 Q.print_csv(z, nil, "")
 --=======================================
+print("SUCCESS for " .. arg[0])
 os.exit()
