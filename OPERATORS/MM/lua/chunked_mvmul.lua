@@ -10,61 +10,62 @@ local cmvmul = function(X, Y)
   local m = nil
   for k, v in ipairs(X) do 
     assert(type(v) == "Column", "each element of X must be a column")
-    local l_m = v:length()
-    -- assert(l_m > 0, "column must have positive length")
-    if not m then 
-      m = l_m  
-    else 
-      -- assert(m == l_m, "All columns must have same length")
-    end
     assert(v:fldtype() == "F8", "Currently we only support F8")
   end
   assert(type(Y) == "Column", "Y must be a column ")
   local k = #X
   -- assert(k == Y:length(), "Y must have same length as num cols of X")
   assert(Y:fldtype() == "F8", "Currently we only support F8")
-  -- STOP: verify inputs
-
-
   --all of y needs to be evaluated
   local y_len, yptr, nn_yptr = Y:chunk(-1)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
-
-  local chunk_size = qconsts.chunk_size
-  local num_blocks = math.ceil( m / chunk_size )
+  -- STOP: verify inputs
 
   local coro = coroutine.create(function()
+    -- malloc space for one chunk worth of output z
+    local z_sz = qconsts.qtypes["F8"].width * qconsts.chunk_size
+    local z_buf = assert(ffi.malloc(z_sz), "malloc failed")
    
-    local status, zptr, Xptr, len
+    local status, Xptr, len
+    -- malloc space for pointers to chunks of X
+    local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
+    Xptr = ffi.cast("double **", Xptr)
 
-    for i = 1,num_blocks do
-
-      len = chunk_size
-      if( i == num_blocks ) then
-        len = m % chunk_size
-      end
-    
-      zptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * len), "malloc failed")
-      Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
-      Xptr = ffi.cast("double **", Xptr)
-      
-      --TODO FIX THIS FOR LOOP
+    local cidx = 0 -- chunk index
+    local last_chunk = false
+    repeat 
+      local len = 0
+      -- assemble Xptr
       for xidx = 1, #X do
-        local x_len, xptr, nn_xptr = X[xidx]:chunk(i) -- TODO check this line
-        assert(x_len == len)
+        local x_len, xptr, nn_xptr = X[xidx]:chunk(cidx) 
+        if ( xidx == 1 ) then
+          len = x_len
+          if ( len < qconsts.chunk_size ) then
+            last_chunk = true
+          end
+          assert(len <= qconsts.chunk_size) 
+          if ( len == 0 ) then
+            last_chunk = true
+            break
+          end
+        else 
+          assert(x_len == len)
+        end
         assert(nn_xptr == nil, "Don't support null values")
         Xptr[xidx-1] = ffi.cast("double *", xptr)
       end
-
-      local status = qc["mvmul_a"](Xptr, yptr, zptr, len, k)
-      assert(status == 0, "C error in mvmul")
-      coroutine.yield(len, zptr, nil)
-    end
+      --=================================
+      if ( len > 0 ) then 
+        -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
+        local status = qc["mvmul_a"](Xptr, yptr, z_buf, len, k)
+        assert(status == 0, "C error in mvmul")
+        coroutine.yield(len, z_buf, nil)
+      end
+    until (last_chunk == true )
   end)
 
-  -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
   return Column( {gen=coro, nn=(nn_zptr ~= nil), field_type="F8"} )
 end
 return require('Q/q_export').export('cmvmul', cmvmul)
