@@ -4,7 +4,8 @@ local Column = {}
 Column.__index = Column
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
-local DestructorLookup = {}
+-- local DestructorLookup = {}
+-- setmetatable(DestructorLookup, { __mode = 'v' })
 local qc = require 'Q/UTILS/lua/q_core'
 local clone = require 'Q/UTILS/lua/utils'.clone
 -- dbg = require 'Q/UTILS/lua/debugger'
@@ -16,18 +17,26 @@ setmetatable(Column, {
         end,
     })
 
-function Column.destructor(data)
-    -- Works with Lua but not luajit so adding a little hack
-    if type(data) == type(Column) then
-        ffi.free(data.destructor_ptr)
-    else
+--[[ function Column.destructor(data)
+    Works with Lua but not luajit so adding a little hack
+    print("Destroying column")
+    local col , ptr
+    if type(data) == type(Vector) then
+        vec = data
+        ptr = vec.destructor_ptr
+   else
         -- local tmp_slf = DestructorLookup[data]
-        DestructorLookup[data] = nil
-        ffi.free(data)
+        ptr = data
+        col = DestructorLookup[data]
     end
+    DestructorLookup[ptr] = nil
+    ffi.C.free(ptr)
+    col.vec = nil
+    col.nn_vec = nil
 end
 
 Column.__gc = Column.destructor
+]]
 
 local original_type = type  -- saves `type` function
 -- monkey patch type function
@@ -42,8 +51,8 @@ end
 function Column.new(arg)
     local column = setmetatable({}, Column)
     column.meta = {}
-    column.destructor_ptr = ffi.malloc(1, Column.destructor) -- Destructor hack for luajit
-    DestructorLookup[column.destructor_ptr] = column
+    -- column.destructor_ptr = ffi.malloc(1, column.destructor) -- Destructor hack for luajit
+    -- DestructorLookup[column.destructor_ptr] = column
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     if arg.gen ~= nil then
         column.gen = arg.gen

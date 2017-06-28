@@ -26,26 +26,29 @@ local Vector = {}
 Vector.__index = Vector
 
 
-local DestructorLookup = {}
+-- local DestructorLookup = {}
 setmetatable(Vector, {
         __call = function (cls, ...)
             return cls.new(...)
         end,
     })
 
-function Vector.destructor(data)
-    -- Works with Lua but not luajit so adding a little hack
-    if type(data) == type(Vector) then
-        ffi.free(data.destructor_ptr)
-        DestructorLookup[data.destructor_ptr] = nil
-   else
-        -- local tmp_slf = DestructorLookup[data]
-        DestructorLookup[data] = nil
-        ffi.free(data)
-    end
-end
-
-Vector.__gc = Vector.destructor
+-- function Vector.destructor(data)
+--     -- Works with Lua but not luajit so adding a little hack
+--     local vec , ptr
+--     if type(data) == type(Vector) then
+--         vec = data
+--         ptr = vec.destructor_ptr
+--    else
+--         -- local tmp_slf = DestructorLookup[data]
+--         ptr = data
+--         vec = DestructorLookup[data]
+--     end
+--     DestructorLookup[ptr] = nil
+--     ffi.C.free(ptr)
+-- end
+-- 
+-- Vector.__gc = Vector.destructor
 
 local original_type = type  -- saves `type` function
 -- monkey patch type function
@@ -61,8 +64,7 @@ local function read_file_vector(self, arg) -- TODO indrajeet rename as now its a
     self.input_from_file = true
     self.filename = assert(arg.filename, "Filename not specified to read from")
     assert(plpath.exists(self.filename), "File should exist")
-    self.f_map = ffi.gc(qc.f_mmap(self.filename, true), 
-      ffi.f_munmap)
+    self.f_map = ffi.gc(qc.f_mmap(self.filename, true), qc.f_munmap)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
@@ -92,8 +94,8 @@ end
 function Vector.new(arg)
     local vec = setmetatable({}, Vector)
     vec.meta = {}
-    vec.destructor_ptr= ffi.malloc(1, Vector.destructor) -- Destructor hack for luajit
-    DestructorLookup[vec.destructor_ptr] = vec
+    -- vec.destructor_ptr= ffi.malloc(1, Vector.destructor) -- Destructor hack for luajit
+    -- DestructorLookup[vec.destructor_ptr] = vec
     assert(type(arg) == "table", "Called constructor with incorrect arguements")
     vec.chunk_size = arg.chunk_size or qconsts.chunk_size
     assert(arg.field_type ~= nil and qconsts.qtypes[arg.field_type] ~= nil, "Valid type not given")
