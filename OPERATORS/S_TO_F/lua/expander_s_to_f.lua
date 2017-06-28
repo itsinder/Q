@@ -16,23 +16,30 @@ return function (a, x)
   assert(subs.c_mem)
   assert(subs.len > 0)
 
-  --[[
+
   local x = subs.c_mem
   local x = ffi.cast("int *", subs.c_mem)
   print("X: x = ", x[0])
-  print(subs.c_mem)
-  --]]
+
+  local function foo ( )
+    local x = subs.c_mem
+    local x = ffi.cast("int *", subs.c_mem)
+    print("FOO: x = ", x[0])
+  end
+  print("===============")
+  local xcoro = coroutine.create(foo)
+  coroutine.resume(xcoro)
+
 
   local coro = coroutine.create(function()
     --[[
     local dbg = require 'Q/UTILS/lua/debugger'
     dbg()
-    local y = ffi.cast("int *", subs.c_mem)
-    print("X: y = ", y[0])
-    print("X: x = ", x[0])
-    print(subs.c_mem)
-    subs.c_mem[0] = 123
     --]]
+  local x = subs.c_mem
+  local x = ffi.cast("int *", subs.c_mem)
+  print("X: x = ", x[0])
+  print("In coroutine ADDRESS = ", subs.c_mem)
 
     local lb = 0
     local ub = 0
