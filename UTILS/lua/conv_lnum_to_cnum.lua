@@ -7,14 +7,14 @@ return function (x, out_qtype)
   local out_ctype = assert(qconsts.qtypes[out_qtype].ctype)
 
   if ( type(x) == "number" ) then 
-    --[[
     local width = assert(qconsts.qtypes[out_qtype].width)
     local y = ffi.malloc(width)
     local y = ffi.cast(out_ctype .. " *", y)
     y[0] = x
     return y
-    --]]
+    --[[
     return ffi.new(out_ctype .. "[?]", 1, { x } )
+    --]]
   elseif ( type(x) == "cdata" ) then
     return x
   elseif type(x) == "string" then 

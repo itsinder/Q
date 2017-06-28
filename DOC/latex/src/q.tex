@@ -269,6 +269,14 @@ uppercase is recommended for readability. It handles both decimal (42LL)
 and hexadecimal (0x2aLL) literals.
 
 
+\subsection{Writing tests}
+
+\subsubsection{strict}
+
+In all your Lua tests, remember to start with 
+\begin{verbatim}
+require 'Q/UTILS/lua/strict'
+\end{verbatim}
 \subsection{Where to place your require statements in a function}
 In many functions, we have something like
 
