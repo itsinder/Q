@@ -24,10 +24,8 @@ main(
   //-----------TESTING-------------
   status = convert_I4_I2(X, N, NULL, Y);
 
-  double threshold = 0.01;
-
   for ( int i = 0; i < N; i++ ) {
-    if ( fabs((int16_t)X[i] - Y[i] ) > threshold ) {
+    if ( (int16_t)X[i] != Y[i] ) {
       printf("FAILURE\n");
       return 1;
     }
