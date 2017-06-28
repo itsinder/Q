@@ -80,6 +80,17 @@ mvmul_a(
   int status = 0;
   int nT = sysconf(_SC_NPROCESSORS_ONLN);
 
+//#pragma omp parallel for schedule(static, 1)
+  int block_size = m / nT;
+  for ( int t = 0; t < nT; t++ ) {
+    int lb = t * block_size;
+    int ub = lb + block_size;
+    if ( t == (nT-1) ) { ub = m; }
+#pragma omp simd
+    for ( int j = lb; j < ub; j++ ) {
+      z[j] = 0;
+    }
+  }
   //n = 1 in this special case
   for ( int i = 0; i < k; i++ ) {
     double scale = y[i];

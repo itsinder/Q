@@ -35,20 +35,19 @@ local cmvmul = function(X, Y)
 
     local cidx = 0 -- chunk index
     local last_chunk = false
-    iter = 0
+    iter = 1
     repeat 
-      print(iter)
+      print("Iteration = ", iter)
       iter = iter + 1
       local len = 0
       -- assemble Xptr
-      print("last chunk", last_chunk)
       for xidx = 1, #X do
         local x_len, xptr, nn_xptr = X[xidx]:chunk(cidx) 
         local new_chunk = ffi.cast("double*", xptr)
         --[[print(new_chunk[0])
         print(new_chunk[1])
         print(new_chunk[2])
-        print("len", x_len)--]]
+        --]]
         if ( xidx == 1 ) then
           len = x_len
           if ( len < qconsts.chunk_size ) then
@@ -65,6 +64,7 @@ local cmvmul = function(X, Y)
         assert(nn_xptr == nil, "Don't support null values")
         Xptr[xidx-1] = ffi.cast("double *", xptr)
       end
+      print("len", x_len)
       for o=1,2 do
         for p=1,3 do
           print(o, p, Xptr[o-1][p-1])
@@ -74,10 +74,18 @@ local cmvmul = function(X, Y)
       if ( len > 0 ) then 
         -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
         local status = qc["mvmul_a"](Xptr, yptr, z_buf, len, k)
-        assert(status == 0, "C error in mvmul")
-        coroutine.yield(len, z_buf, nil)
+        assert(status == 0, "C error in mvmul") coroutine.yield(len, z_buf, nil)
+        local zptr = ffi.cast("double *", z_buf)
+        for i = 1, 3 do 
+          print("Z ", i, zptr[i-1])
+        end
+        local yyptr = ffi.cast("double *", yptr)
+        for i = 1, 2 do 
+          print("Y ", i, yyptr[i-1])
+        end
       end
       cidx = cidx + 1
+      print("last chunk", last_chunk)
     until (last_chunk == true )
   end)
 
