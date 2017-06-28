@@ -1,5 +1,5 @@
 local Q = require 'Q'
-local Q_core = require 'Q/UTILS/lua/q_core'
+local qc = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 
 return function(func_name, A, b)
@@ -27,9 +27,10 @@ return function(func_name, A, b)
     A_chunks[i-1] = Ai_chunk
   end
 
-  local status = Q_core[func_name](A_chunks, x_chunk, b_chunk, n)
+  assert(qc[func_name], "Symbol not found " .. func_name)
+  local status = qc[func_name](A_chunks, x_chunk, b_chunk, n)
   assert(status == 0, "solver failed with status "..status)
-  assert(Q_core["full_positive_solver_check"](A_chunks, x_chunk, b_chunk, n, 0),
+  assert(qc["full_positive_solver_check"](A_chunks, x_chunk, b_chunk, n, 0),
          "solution returned by solver "..func_name.." is invalid")
 
   local x_col = Q.Column({field_type = "F8", write_vector = true})

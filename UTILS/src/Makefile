@@ -4,6 +4,15 @@ INCDIR=../gen_inc/
 
 all : libutils.so ${hdr_files}
 
+../gen_inc/_rand_file_name.h : 
+	lua ../lua/cli_extract_func_decl.lua rand_file_name.c ${INCDIR}
+
+../gen_inc/_mix_UI4.h : 
+	lua ../lua/cli_extract_func_decl.lua mix_UI4.c ${INCDIR}
+
+../gen_inc/_mix_UI8.h : 
+	lua ../lua/cli_extract_func_decl.lua mix_UI8.c ${INCDIR}
+
 ../gen_inc/_f_mmap.h : 
 	lua ../lua/cli_extract_func_decl.lua f_mmap.c ${INCDIR}
 
@@ -47,7 +56,10 @@ bin_search_files = \
 	../gen_src/_bin_search_F8.c 
 
 hdr_files = \
-	../gen_inc/_f_mmap.h  \
+	../gen_inc/_mix_UI4.h  \
+	../gen_inc/_mix_UI8.h  \
+	../gen_inc/_rand_file_name.h  \
+	../gen_inc/_f_mmap.h \
 	../gen_inc/_f_munmap.h \
 	../gen_inc/_mmap.h \
 	../gen_inc/_write_bits_to_file.h \
@@ -57,6 +69,9 @@ hdr_files = \
 
 #--------
 SRC_FILES=  \
+	mix_UI4.c \
+	mix_UI8.c \
+	rand_file_name.c \
 	f_mmap.c  \
 	f_munmap.c \
 	mmap.c \
