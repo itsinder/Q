@@ -44,7 +44,8 @@ while read -r line
 do
   luajit $line &>/dev/null
   CODE=$?
-  echo $CODE
+  # for code cove a second run
+  luajit -lluacov $line &>/dev/null
   if [ $CODE -eq 0 ] ; then
     (( SUCCESS++ ))
   elif [ $CODE -eq 2 ]; then
@@ -60,13 +61,17 @@ done < <( find_matches 'test_*.lua' )
 echo "busted"
 while read -r line
 do
-  busted -v -c $line &>/dev/null
-  CODE=`echo $?`
+  busted -v $line &>/dev/null
+  CODE=$?
+  # second run for adding to code cov
+  busted -c -v $line &>/dev/null
   if [ $CODE -neq 0  ] ; then
     echo "$line failed"
   fi
   (( EXIT += $? ))
 done < <( find_matches "spec_*.lua" )
+
+luacov
 
 echo "SUCCESS/ NA/ FAIL/ TOTAL $SUCCESS/$NA/$FAIL/$TOTAL"
 
