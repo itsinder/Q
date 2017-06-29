@@ -1,5 +1,5 @@
-require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 local dbg = require 'Q/UTILS/lua/debugger'
 
 

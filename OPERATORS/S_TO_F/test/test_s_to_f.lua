@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 z = Q.const( { val = 5, qtype = "I4", len = 10 })
 z:eval()
