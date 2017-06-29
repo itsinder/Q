@@ -14,7 +14,7 @@ Q.print_csv(z, nil, "")
 --===========================
 local c2 = Q.vseq(c1, 4)
 --===========================
-print("Successfully completed" .. arg[0])
+print("SUCCESS for " .. arg[0])
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

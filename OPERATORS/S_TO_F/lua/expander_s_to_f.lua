@@ -6,10 +6,10 @@ local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 
 return function (a, x)
     -- Get name of specializer function. By convention
-  local filename = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
-  local spfn = assert(require(filename))
+  local sp_fn_name = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
+  local spfn = assert(require(sp_fn_name), "Specializer not found")
   local status, subs, tmpl = pcall(spfn, x)
-  assert(status, subs)
+  assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   local out_qtype = assert(x.qtype)
   assert(qc[func_name], "Function not found " .. func_name)
@@ -22,8 +22,9 @@ return function (a, x)
     local chunk_size = qconsts.chunk_size
     local num_blocks = math.ceil(subs.len / chunk_size)
     local width =  assert(qconsts.qtypes[out_qtype].width)
-    local buff =  assert(ffi.malloc(chunk_size * width))
-    for i =1,num_blocks do
+    if ( width < 1 ) then width = 1 end 
+    local buff =  assert(ffi.malloc(chunk_size * width), "mallocc failed")
+    for i = 1, num_blocks do
       ub = lb + chunk_size
       if ( ub > subs.len ) then 
         chunk_size = subs.len -lb
