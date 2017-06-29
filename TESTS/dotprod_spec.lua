@@ -37,4 +37,5 @@ for i = 1,1000 do
   assert(btmp == b, "original result: "..b..", different result: "..btmp)
 end
 
+print("SUCCESS for ", arg[0])
 os.exit()

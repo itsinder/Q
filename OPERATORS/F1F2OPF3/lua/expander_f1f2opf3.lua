@@ -6,7 +6,9 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local function expander_f1f2opf3(a, f1 , f2, optargs )
    local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
    local spfn = assert(require(sp_fn_name))
+   assert(f1)
    assert(type(f1) == "Column", "f1 must be a column")
+   assert(f2)
    assert(type(f2) == "Column", "f2 must be a column")
    if ( optargs ) then assert(type(optargs) == "table") end
    local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
