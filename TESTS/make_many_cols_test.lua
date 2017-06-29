@@ -1,8 +1,8 @@
 local Q = require 'Q'
 
 for i = 1,10000 do
-  local c1 = Q.mk_col({1, 9, 2, 8, 3, 7}, "I4")
-  local c2 = Q.mk_col({7, 1, 3, 2, 1, 0}, "I4")
+  local c1 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F4", len = 65537 } )
   c1:eval()
-  c2:eval()
+  print("Iteration ", i)
 end
+print("SUCCESS for ", arg[0])
