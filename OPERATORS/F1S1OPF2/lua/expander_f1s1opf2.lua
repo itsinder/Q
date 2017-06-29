@@ -2,44 +2,45 @@
   local ffi     = require 'Q/UTILS/lua/q_ffi'
   local qc      = require 'Q/UTILS/lua/q_core'
   local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-  local dbg     = require 'Q/UTILS/lua/debugger'
+  local is_in   = require 'Q/UTILS/lua/is_in'
 
-  local function expander_f1s1opf2(a, x, y, optargs )
+  local function expander_f1s1opf2(a, f1, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
     local spfn = assert(require(sp_fn_name))
-    assert( type(x) == "Column") 
-    assert(x:has_nulls() == false, "Not set up for nulls as yet")
+    assert(f1, "Need to provide vector for"  .. a)
+    assert(type(f1) == "Column", 
+    "first argument for " .. a .. "should be vector")
+    assert(f1:has_nulls() == false, "Not set up for nulls as yet")
     if ( optargs ) then 
       assert(type(optargs) == "table")
     end
-
-    ytype = type(Column)
-    assert( ( ytype == "table" ) or ( ytype == "string" ) or ( ytype == "number" ), "scalar must be table/string/number")
-    local status, subs, tmpl = pcall(spfn, x:fldtype(), y)
-    assert(status, subs)
+    if ( y ) then 
+      --y not defined if no scalar like in incr, decr, exp, log
+      local ytype = type(y)
+      assert(is_in(ytype, {"table", "number", "string"}), 
+        "scalar must be table/string/number")
+    end
+    local status, subs, tmpl = pcall(spfn, f1:fldtype(), y)
+    assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
-    local out_qtype = assert(subs.out_qtype)
-    local out_width = qconsts.qtypes[out_qtype].width
-    out_width = math.ceil(out_width/8) * 8
-    -- TODO Where best to do malloc for buff?
-    local f1_coro = assert(x:wrap(), "wrap failed for x")
+    local f2_qtype = assert(subs.out_qtype)
+    local f2_width = qconsts.qtypes[f2_qtype].width
+    local buf_sz = qconsts.chunk_size * f2_width
+    local f1_coro = assert(f1:wrap(), "wrap failed for x")
     local f2_coro = coroutine.create(function()
-      local buff = ffi.malloc(x:chunk_size() * out_width)
-      local l_subs = subs
-      local l_sp_fn_name = sp_fn_name
-      local status, x_status, x_len, x_chunk, nn_x_chunk 
-      x_status = true; status = 0
-      while (x_status) do
-        x_status, x_len, x_chunk, nn_x_chunk = coroutine.resume(f1_coro)
-        if x_status and x_len and x_len > 0 then 
-          -- dbg()
-          status = qc[func_name](x_chunk, x_len, l_subs.c_mem, buff)
+      local f2_buf = ffi.malloc(buf_sz)
+      local status, f1_status, f1_len, f1_chunk, nn_f1_chunk 
+      f1_status = true; status = 0
+      while (f1_status) do
+        f1_status, f1_len, f1_chunk, nn_f1_chunk = coroutine.resume(f1_coro)
+        if f1_status and f1_len and f1_len > 0 then 
+          status = qc[func_name](f1_chunk, f1_len, subs.c_mem, f2_buf)
           assert(status == 0, ">>>C error" .. func_name .. "<<<<")
-          coroutine.yield(x_len, buff, nil)
+          coroutine.yield(f1_len, f2_buf, nil)
         end
       end
     end)
-    return Column{gen=f2_coro, nn=(nn_buf ~= nil), field_type=out_qtype}
+    return Column{gen=f2_coro, nn=false, field_type=f2_qtype}
   end
 
   return expander_f1s1opf2

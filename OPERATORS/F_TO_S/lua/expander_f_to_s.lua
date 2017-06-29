@@ -5,12 +5,13 @@ local qc      = require 'Q/UTILS/lua/q_core'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
-    local filename = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
-    local spfn = assert(require(filename))
+    local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
+    local spfn = assert(require(sp_fn_name), 
+    "Specializer missing " .. sp_fn_name)
     assert(type(x) == "Column", "input should be a column")
     assert(x:has_nulls() == false, "Not set up for null values as yet")
     local x_qtype = assert(x:fldtype())
-    status, subs, tmpl = pcall(spfn, x_qtype)
+    local status, subs, tmpl = pcall(spfn, x_qtype)
     assert(status, subs)
     local func_name = assert(subs.fn)
     assert(qc[func_name], "Function does not exist " .. func_name)
@@ -20,7 +21,7 @@ return function (a, x )
     assert(type(getter) == "function")
     --==================
     local lcoro = coroutine.create(function()
-      local x_chunk, x_status
+      local x_status, x_len, x_chunk, nn_x_chunk 
       local idx = 0
       x_status = true
       while (x_status) do

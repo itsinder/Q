@@ -29,4 +29,5 @@ for i, bi in ipairs(b_bare) do
   assert(math.abs(bi - b_new_chunk[i - 1]) < 0.001, "Ax ~= b")
 end
 
+print("SUCCESS for " .. arg[0])
 os.exit()

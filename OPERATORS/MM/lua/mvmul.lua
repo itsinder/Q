@@ -11,17 +11,17 @@ local mvmul = function(X, Y)
   for k, v in ipairs(X) do 
     assert(type(v) == "Column", "each element of X must be a column")
     local l_m = v:length()
-    -- assert(l_m > 0, "column must have positive length")
+    assert(l_m > 0, "column must have positive length")
     if not m then 
       m = l_m  
     else 
-      -- assert(m == l_m, "All columns must have same length")
+      assert(m == l_m, "All columns must have same length")
     end
     assert(v:fldtype() == "F8", "Currently we only support F8")
   end
   assert(type(Y) == "Column", "Y must be a column ")
   local k = #X
-  -- assert(k == Y:length(), "Y must have same length as num cols of X")
+  assert(k == Y:length(), "Y must have same length as num cols of X")
   assert(Y:fldtype() == "F8", "Currently we only support F8")
   -- STOP: verify inputs
   local zptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m), "malloc failed")
@@ -29,7 +29,7 @@ local mvmul = function(X, Y)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
-  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
+  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
   Xptr = ffi.cast("double **", Xptr)
   for xidx = 1, #X do
     local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
