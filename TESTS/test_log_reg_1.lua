@@ -16,6 +16,25 @@ for i = 1, 1000 do
   local w = Q.logit2(Xbeta)
   local ysubp = Q.vvsub(y, p)
   local temp = ysubp:eval()
+  --========================= 
+  --[[ TODO STILL TO TEST FOLLOWING
+  local A = {}
+  local b = {}
+  print('setting up matrices')
+  for i, X_i in ipairs(X) do
+    print("len Xi = ", X_i:length())
+    A[i] = {}
+    print("len ysubp = ", ysubp:length())
+    b[i] = Q.sum(Q.vvmul(X_i, ysubp))
+    for j, X_j in ipairs(X) do
+      print("len Xj = ", X_j:length())
+      print("type(w) = ", type(w))
+      A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
+      A[i][j]:eval()
+    end
+    b[i]:eval()
+  end
+  --]]
   print("Iteration ", i)
 end
 
