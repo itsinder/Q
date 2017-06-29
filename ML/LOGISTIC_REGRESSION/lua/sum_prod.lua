@@ -20,19 +20,11 @@ function sum_prod(X, w)
   local chunk_size = qconsts.chunk_size
 
   local nC = math.ceil( len / chunk_size )
-  print("len = ", w:length())
-  print("nC = ", nC)
-  print("chunk_size = ", chunk_size)
   
   for c = 1, nC do
     for i = 1, M do
-      if ( C == nC ) then
-        M = len % chunk_size 
-      end
-      print("Evaluating chunk ", c, i)
       temp[i]:chunk(c-1) -- get this chunk evaluated
       for j = i, M do
-        print("Evaluating next ", c, i, j)
         SA[i][j]:next() -- get this chunk evaluated
       end
     end
