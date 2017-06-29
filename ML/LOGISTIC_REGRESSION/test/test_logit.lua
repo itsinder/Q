@@ -1,15 +1,10 @@
+require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
-local logit = require 'Q/ML/LOGISTIC_REGRESSION/lua/logit'
 
--- z = Q.rand( { lb = 0, ub = 1, qtype = "F8", len = 4 } )
-local z = Q.mk_col({0.5, 0.7, 0.2 , 0.1, 0.05}, "F8")
-z:eval()
-local x, y = logit(z)
--- y = Q.vsadd(z, 1)
+local z = Q.rand( { lb = 0, ub = 1, qtype = "F8", len = 4 } )
+local x = Q.logit(z)
 x:eval()
-y:eval()
+-- TODO Check values of x 
 Q.print_csv(x, nil, "")
-print("--------")
-Q.print_csv(y, nil, "")
-print("Successfully completed " .. arg[0] )
+print("SUCCESS for " .. arg[0] )
 os.exit()
