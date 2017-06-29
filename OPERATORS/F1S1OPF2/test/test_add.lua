@@ -1,5 +1,5 @@
--- require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 local z = Q.vsadd(c1, 10 )

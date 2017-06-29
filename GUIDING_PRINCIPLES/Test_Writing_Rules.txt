@@ -1,0 +1,12 @@
+Following is for writing tests at the Q level
+1) 
+First 2 lines should be as follows
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+2)
+Name of file should be test_*.lua
+
+3) Last lines of script should be
+
+require('Q/UTILS/lua/cleanup')()
+os.exit()
