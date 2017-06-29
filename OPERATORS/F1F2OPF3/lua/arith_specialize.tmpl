@@ -5,7 +5,7 @@ return function (
   )
   local promote = require 'Q/UTILS/lua/promote'
   local qconsts = require 'Q/UTILS/lua/q_consts'
-  out_qtype = promote(f1type, f2type)
+  local out_qtype = promote(f1type, f2type)
   local tmpl = 'base.tmpl'
   local subs = {}; 
   subs.fn = "<<operator>>_" .. f1type .. "_" .. f2type .. "_" .. out_qtype 

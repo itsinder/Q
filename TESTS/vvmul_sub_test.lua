@@ -19,6 +19,8 @@ for i = 1,1000 do
   local s = Q.sum(z)
   assert(type(s) == "Scalar", "S NOT SCALAR WRONG")
   local val = s:eval() 
+  local w = Q.vvmul(c1, c1)
+  w:eval()
 end
 
 print("SUCCESS for ", arg[0])

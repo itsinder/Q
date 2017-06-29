@@ -1,3 +1,4 @@
+require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local dbg = require 'Q/UTILS/lua/debugger'
 
@@ -17,7 +18,6 @@ for i = 1, 1000 do
   local ysubp = Q.vvsub(y, p)
   local temp = ysubp:eval()
   --========================= 
-  --[[ TODO STILL TO TEST FOLLOWING
   local A = {}
   local b = {}
   print('setting up matrices')
@@ -29,12 +29,16 @@ for i = 1, 1000 do
     for j, X_j in ipairs(X) do
       print("len Xj = ", X_j:length())
       print("type(w) = ", type(w))
-      A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
+      -- A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
+      print(X_i)
+      print(X_j)
+      --  A[i][j] = Q.sum(Q.vvmul(X_i, X_j))
+       A[i][j] = Q.vvmul(X_i, X_j)
       A[i][j]:eval()
     end
     b[i]:eval()
   end
-  --]]
+  os.exit()
   print("Iteration ", i)
 end
 

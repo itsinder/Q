@@ -66,7 +66,7 @@ local cmvmul = function(X, Y)
     until (last_chunk == true )
   end)
 
-  return Column( {gen=coro, nn=(nn_zptr ~= nil), field_type="F8"} )
+  return Column( {gen=coro, nn=false, field_type="F8"} )
 end
 return require('Q/q_export').export('cmvmul', cmvmul)
 

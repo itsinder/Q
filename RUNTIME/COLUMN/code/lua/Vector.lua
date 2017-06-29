@@ -303,7 +303,7 @@ function Vector:eov()
     -- ffi.C.fclose(self.file)
     self.input_from_file = true
     self.f_map = ffi.gc(qc.f_mmap(self.filename, true), qc.f_munmap)
-    assert(self.f_map ~= ffi.NULL, "Should get back a valid map")
+    assert(self.f_map ~= ffi.NULL, "mmap failed for " .. self.filename)
     assert(self.f_map.status == 0, "Mmap failed")
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
