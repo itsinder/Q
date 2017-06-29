@@ -29,7 +29,7 @@ local mvmul = function(X, Y)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
-  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
+  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
   Xptr = ffi.cast("double **", Xptr)
   for xidx = 1, #X do
     local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)

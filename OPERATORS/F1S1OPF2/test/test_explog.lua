@@ -19,8 +19,15 @@ local c1 = Q.mk_col( {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8}, "F8")
 local z = Q.logit2(c1)
 z:eval()
 Q.print_csv(z, nil, "")
+
+for i = 1, 1000 do
+  local z = Q.sum(Q.logit2(Q.logit(Q.log(Q.exp(Q.rand({ lb = 10, ub = 20, seed = 1234, qtype = "F4", len = 65537 } ))))))
+  z:eval()
+  print("Iteration ", i)
+end
+
 --===========================
-print("Successfully completed " .. arg[0])
+print("SUCCESS for " .. arg[0])
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'
