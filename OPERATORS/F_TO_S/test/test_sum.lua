@@ -6,6 +6,8 @@ for iter = 1, 1000 do
   local c2 = Q.sum(c1)
   c2:eval()
 end
-print("Completed " .. arg[0])
+local status = pcall(Q.sum, 123)
+assert(status == false)
+print("SUCCESS for " .. arg[0])
 os.exit()
 --=========================================
