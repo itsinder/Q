@@ -259,8 +259,8 @@ function Vector:chunk(num)
     else -- if not materialized
         if num < 0 then return self.cdata, self.my_length end
         if num < self:last_chunk() then
-            if self.memoized == true then
-                if num > self.file_last_chunk_number then flush_remap_file(self) end
+            if self:ismemo() == true then
+                if self.file_last_chunk_number == nil or num > self.file_last_chunk_number then flush_remap_file(self) end
                 local ptr = ffi.cast("unsigned char*", self.cdata)
                 return ffi.cast("void *", ptr + self.chunk_size * num * self.field_size), self.chunk_size
             else
@@ -308,7 +308,7 @@ function Vector:eov()
     self.cdata = self.f_map.ptr_mmapped_file
     --mmap the file
     --take length of file to be length of vector
-    self.memoized = true
+    -- self.memoized = true
     self.is_materialized = true
     -- self.my_length = tonumber(self.f_map.file_size) / self.field_size
     self.max_chunks = math.ceil(self.my_length/self.chunk_size)
@@ -317,14 +317,14 @@ end
 function Vector:delete()
     assert(tonumber(ffi.fclose(self.file)))
     self.f_map = nil -- Causing the file to be unmmapped 
-    if self.memoized then
+    if self:ismemo() then
         os.remove(self.file_name)
     end
 end
 
 function Vector:persist()
     -- TODO Add routine to materialize if not already materialized
-    if self.memoized then
+    if self:ismemo() then
         return string.format("Vector{field_type='%s', filename='%s',}", 
             self.field_type, plpath.abspath(self.filename))
     else 
