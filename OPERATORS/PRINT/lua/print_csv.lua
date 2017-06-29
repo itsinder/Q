@@ -33,8 +33,6 @@ local function chk_cols(column_list)
     if is_col[i] then
       assert(qconsts.qtypes[column_list[i]:fldtype()], 
       err.INVALID_COLUMN_TYPE)
-      --assert(column_list[i]:fldtype() ~= "B1", 
-      --  err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
         assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
@@ -148,6 +146,7 @@ local print_csv = function (column_list, filter, opfile)
             end
           else
             if is_B1[col_idx] then
+              assert(cbuf == 1, "Value is not 1")
               temp = tostring(cbuf)
             else
               local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
