@@ -21,7 +21,7 @@ return function (a, x )
     assert(type(getter) == "function")
     --==================
     local lcoro = coroutine.create(function()
-      local x_chunk, x_status
+      local x_status, x_len, x_chunk, nn_x_chunk 
       local idx = 0
       x_status = true
       while (x_status) do

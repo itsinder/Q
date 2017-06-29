@@ -65,7 +65,7 @@ end
 function Scalar:eval()
     local status = coroutine.status(self._coro) ~= "dead"
     while status == true do
-        status = self:next()
+      status = self:next()
     end
     return self:value()
 end
