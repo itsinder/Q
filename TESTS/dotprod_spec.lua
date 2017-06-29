@@ -1,3 +1,4 @@
+require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 
 local X = {}
