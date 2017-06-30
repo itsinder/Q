@@ -60,11 +60,11 @@ y = string.gsub(y, "<<comparison>>", " >= " )
 plfile.write("vsgeq_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsgt")
-y = string.gsub(y, "<<comparison>>", " == " )
+y = string.gsub(y, "<<comparison>>", " > " )
 plfile.write("vsgt_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vslt")
-y = string.gsub(y, "<<comparison>>", " == " )
+y = string.gsub(y, "<<comparison>>", " < " )
 plfile.write("vslt_specialize.lua", y)
 --=======================
 -- assert(plpath.isfile("cmp2_specialize.tmpl"), "File not found")
