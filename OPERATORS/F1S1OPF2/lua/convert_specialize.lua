@@ -14,6 +14,7 @@ return function (
   end
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   local qconsts = require 'Q/UTILS/lua/q_consts'
+  local crange = require 'Q/OPERATORS/F1S1OPF2/lua/c_range'
 
   assert(type(out_qtype) == "string")
   assert(is_base_qtype(out_qtype), "Cannot convert to type " .. out_qtype)
@@ -23,6 +24,13 @@ return function (
   local tmpl = 'f1opf2.tmpl'
   local subs = {};
   subs.fn = "convert_" .. in_qtype .. "_" .. out_qtype
+  if is_safe then
+    tmpl = 'safe_f1opf2.tmpl'
+    --TODO: Write logic to get min_val and max_val according to out_qtype
+    subs.min_val = crange[out_qtype].min_val
+    subs.max_val = crange[out_qtype].max_val
+    subs.fn = "safe_convert_" .. in_qtype .. "_" .. out_qtype
+  end
   subs.c_code_for_operator = "c = (" .. out_ctype .. ") a; "
   subs.out_qtype = out_qtype
   subs.in_ctype = in_ctype
