@@ -7,3 +7,4 @@ assert(rslt == true)
 x = "foobar"
 local rslt = is_in(x, X)
 assert(rslt == false)
+print("SUCCESS for ", arg[0] )

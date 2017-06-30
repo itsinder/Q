@@ -1,4 +1,6 @@
 local Q = require 'Q'
+local ffi = require 'Q/UTILS/lua/q_ffi'
+local plpath = require 'pl.path'
 
 local X = {}
 for i = 1,9 do
@@ -31,11 +33,21 @@ ysubp:eval()
 
 local b = Q.sum(Q.vvmul(X, ysubp))
 b = b:eval()
-for i = 1,1000 do
+for i = 1,100000 do
   local btmp = Q.sum(Q.vvmul(X, ysubp)):eval()
   print("Iteration ", i)
   assert(btmp == b, "original result: "..b..", different result: "..btmp)
 end
+-- Now that there are enough files lets try the test
+local Q = require 'Q'
+local c1 = Q.const( {val = 65535, qtype = "I4", len = 8 })
+c1:eval()
+local val, nn_val = c1:get_element(0)
+-- print(val, nn_val)
+assert(ffi.cast("int *", val)[0] == 65535)
+-- now lets remove all the files in the data folder
+local data_dir = require("Q/q_export").Q_DATA_DIR 
 
-print("SUCCESS for ", arg[0])
-os.exit()
+os.execute(string.format("find %s -type f -delete", data_dir))
+os.exit()--
+
