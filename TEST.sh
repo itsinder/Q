@@ -26,6 +26,7 @@ find_matches() {
       -and -not -path '*/*DEPRECAT*' \
       -and -not -path '*/*experiment*' \
       -and -not -path '*/DOC/*' \
+      -and -not -path '*/DATA_LOAD*' \
       -and -name "$1"
 
 }
