@@ -15,11 +15,12 @@ Vector Semantics
                 field_size (optional) - The size of each element, defaults to getting it from qconsts.qtypes
                 filename (optional) - The file to be written out to, defaults to a random unused file
 ]]
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local plpath = require("pl.path")
+local qconsts  = require 'Q/UTILS/lua/q_consts'
+local plpath   = require("pl.path")
+-- TODO Use rand_file_name() from C code instead 
 local get_new_filename = require "Q/UTILS/lua/random_data_file"
-local ffi = require 'Q/UTILS/lua/q_ffi'
-local qc = require 'Q/UTILS/lua/q_core'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
+local qc      = require 'Q/UTILS/lua/q_core'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 local Vector = {}

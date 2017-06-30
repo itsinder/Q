@@ -1,10 +1,22 @@
 Following is for writing tests at the Q level
-1) 
-First 2 lines should be as follows
+1) First line should be *ONE OR MORE* of the following
+-- FUNCTIONAL 
+-- NO_OP
+-- PERFORMANCE
+-- STRESS
+-- BUSTED
+
+Note that you can provide multiple labels e.g.,
+-- FUNCTIONAL PERFORMANCE
+
+2) Next few lines should be as follows
+
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-2)
-Name of file should be test_*.lua
+
+3) Name of file should be test_*.lua. Note that if you have a file
+that matches "test_*.lua" but you do not want the test runner to pick
+it up, then the firsty line should be -- NO_OP
 
 3) Last lines of script should be
 
