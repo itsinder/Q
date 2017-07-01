@@ -26,4 +26,4 @@ incr_specialize.lua
 log_specialize.lua
 logit_specialize.lua
 logit2_specialize.lua
-
+abs_specialize.lua
