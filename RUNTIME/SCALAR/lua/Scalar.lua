@@ -3,7 +3,7 @@ local plpath = require("pl.path")
 local Scalar = {}
 Scalar.__index = Scalar
 local ffi = require 'Q/UTILS/lua/q_ffi'
-local DestructorLookup = {}
+-- local DestructorLookup = {}
 -- local dbg = require 'Q/UTILS/lua/debugger'
 
 setmetatable(Scalar, {
@@ -12,6 +12,7 @@ setmetatable(Scalar, {
         end,
     })
 
+    --[[ TODO Delete later. Not needed for scalar
 function Scalar.destructor(data)
     -- Works with Lua but not luajit so adding a little hack
     if type(data) == type(Scalar) then
@@ -25,6 +26,7 @@ function Scalar.destructor(data)
 end
 
 Scalar.__gc = Scalar.destructor
+--]]
 
 local original_type = type  -- saves `type` function
 -- monkey patch type function
@@ -41,8 +43,8 @@ function Scalar.new(arg)
    assert(type(arg.coro) == "thread", "Argument coro must have a coroutine")
    assert(type(arg.func) == "function", "Need a function to extract the scalar")
    local scalar = setmetatable({}, Scalar)
-   scalar.destructor_ptr = ffi.malloc(1, Scalar.destructor)
-   DestructorLookup[scalar.destructor_ptr] = scalar
+   -- TODO Delete scalar.destructor_ptr = ffi.malloc(1, Scalar.destructor)
+   -- TODO Delete DestructorLookup[scalar.destructor_ptr] = scalar
    scalar._coro = arg.coro
    scalar._func = arg.func
    return scalar

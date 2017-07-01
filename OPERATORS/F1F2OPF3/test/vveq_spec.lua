@@ -1,6 +1,8 @@
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 local plpath = require "pl.path"
 local ffi = require("Q/UTILS/lua/q_ffi")
-local Q = require 'Q'
+
 -- Helper function to calculate file size.
 local function filesize (fd)
    local current = fd:seek()

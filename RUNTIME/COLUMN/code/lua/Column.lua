@@ -1,13 +1,13 @@
-local log = require 'Q/UTILS/lua/log'
+local log    = require 'Q/UTILS/lua/log'
 local plpath = require("pl.path")
+local qc     = require 'Q/UTILS/lua/q_core'
+local clone  = require 'Q/UTILS/lua/utils'.clone
 local Column = {}
 Column.__index = Column
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require "Q/RUNTIME/COLUMN/code/lua/Vector"
 -- local DestructorLookup = {}
 -- setmetatable(DestructorLookup, { __mode = 'v' })
-local qc = require 'Q/UTILS/lua/q_core'
-local clone = require 'Q/UTILS/lua/utils'.clone
 -- dbg = require 'Q/UTILS/lua/debugger'
 
 

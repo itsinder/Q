@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 
@@ -35,7 +36,7 @@ local n = c1:length()
 assert(val ==(n * (n+1) * (2*n+1) )/6) 
 
 function fold( fns, vec)
-  gens = {}
+local  gens = {}
   for i, v in ipairs(fns) do
     gens[i] = Q[v](vec)
     -- print(type(gens[i]))
@@ -46,7 +47,7 @@ function fold( fns, vec)
       status = gens[i]:next() 
     end
   until not status
-  rvals = {}
+  local rvals = {}
   for i, v in ipairs(gens) do
     rvals[i] = gens[i]:value() 
   end
@@ -58,6 +59,7 @@ end
 
 x, y, z = fold({ "sum", "min", "max" }, c1)
 print (x, y, z)
-print("Completed " .. arg[0]); os.exit()
+print("Completed " .. arg[0])
+os.exit()
 
 --=========================================
