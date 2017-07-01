@@ -25,6 +25,9 @@ all : libutils.so ${hdr_files}
 ../gen_inc/_bytes_to_bits.h : 
 	lua ../lua/cli_extract_func_decl.lua bytes_to_bits.c ${INCDIR}
 
+../gen_inc/_bits_to_bytes.h : 
+	lua ../lua/cli_extract_func_decl.lua bits_to_bytes.c ${INCDIR}
+
 ../gen_inc/_write_bits_to_file.h : 
 	lua ../lua/cli_extract_func_decl.lua write_bits_to_file.c ${INCDIR}
 
@@ -65,7 +68,8 @@ hdr_files = \
 	../gen_inc/_write_bits_to_file.h \
         ../gen_inc/_get_bit.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
-	../gen_inc/_bytes_to_bits.h 
+	../gen_inc/_bytes_to_bits.h   \
+	../gen_inc/_bits_to_bytes.h 
 
 #--------
 SRC_FILES=  \
@@ -76,6 +80,7 @@ SRC_FILES=  \
 	f_munmap.c \
 	mmap.c \
 	bytes_to_bits.c \
+	bits_to_bytes.c \
 	write_bits_to_file.c  \
         get_bit.c  \
 	is_valid_chars_for_num.c 

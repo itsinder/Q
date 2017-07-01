@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libainb.so 
+all : libainb.so  _ainb.lua
 	
 AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 
@@ -21,6 +21,8 @@ AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 ../gen_src/_ainb_I4_I4.c :
 	luajit generator.lua I4 I4 
 #----------------------------------
+_ainb.lua : pkg_ainb.lua
+	lua pkg_ainb.lua
 clean :
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 

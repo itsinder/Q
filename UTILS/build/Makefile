@@ -83,6 +83,7 @@ q_operators: f1f2opf3 \
 	idx_sort \
 	s_to_f \
 	f_to_s \
+	ainb \
 	ax_equals_b \
 	mvmul \
 	approx_quantile \
