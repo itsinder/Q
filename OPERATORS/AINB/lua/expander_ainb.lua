@@ -11,7 +11,8 @@ local expander_ainb = function(op, a, b)
   assert(type(b) == "Column", "b must be a column ")
   local sp_fn_name = "Q/OPERATORS/AINB/lua/ainb_specialize"
   local spfn = assert(require(sp_fn_name))
-  local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype())
+  local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype(), 
+  b:get_meta("sort_order"))
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)

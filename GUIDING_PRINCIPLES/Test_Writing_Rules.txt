@@ -18,7 +18,16 @@ require 'Q/UTILS/lua/strict'
 that matches "test_*.lua" but you do not want the test runner to pick
 it up, then the firsty line should be -- NO_OP
 
-3) Last lines of script should be
+4) If your script uses other Lua files, then remember to require them in the
+usual way e.g.
+local helper = require 'Q/UTILS/lua/helper.lua'
+
+5) If your script uses data files, then provide the full path, not the reltive
+path e.g.,
+local q_src_root = os.getenv("Q_SRC_ROOT")
+local data_file = q_src_root .. "/OPERATORS/DATA_LOAD/datafile/file1.csv"
+
+6) Last lines of script should be
 
 require('Q/UTILS/lua/cleanup')()
 os.exit()
