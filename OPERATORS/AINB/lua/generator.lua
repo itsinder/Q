@@ -17,7 +17,8 @@
     b_qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   end
 
-  local sort_order = { 'unsorted', 'asc' }
+  -- TODO local sort_order = { 'unsorted', 'asc' }
+  local sort_order = { 'unsorted' }
 
   local sp_fn = require 'ainb_specialize'
   local num_produced = 0
