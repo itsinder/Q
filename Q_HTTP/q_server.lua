@@ -1,10 +1,7 @@
-#!/usr/bin/env lua
 --[[
-A simple HTTP server
+A simple HTTP server that loadstring's the input string
 
-If a request is not a HEAD method, then reply with "Hello world!"
-
-Usage: lua examples/server_hello.lua [<port>]
+Usage: luajit Q/Q_HTTP/q_server.lua [<port>]
 ]]
 
 local port = arg[1] or 0 -- 0 means pick one at random

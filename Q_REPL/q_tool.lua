@@ -1,10 +1,15 @@
+--[[
+A CLI for Q that can either run standalone or act as remote http-client to a Q-server
+
+Usage: luajit Q/Q_REPL/q_tool.lua [<host> <port>]
+]]
+
 print '----- Welcome to Q! ------'
 
 local repl = require 'Q/Q_REPL/start_repl'
 local eval = require 'Q/Q_REPL/q_eval_line'
 local res_str = require 'Q/Q_REPL/q_res_str'
 
-print (#arg)
 if (#arg == 0) then
     repl (function (line)
         local success, results = eval(line)
@@ -19,7 +24,8 @@ elseif (#arg == 2) then
     local host = arg[1]
     local port = arg[2]
     local uri = "http://" .. host .. ":" .. port
-    print ("----- Remotely connected to Q-server at " .. uri)
+    print ("Commands will be delegated to Q-server at " .. uri)
+    print ("--------------------------")
     local request = require "http.request"
     local req_timeout = 10
     repl (function (line)
@@ -39,5 +45,5 @@ elseif (#arg == 2) then
         return body   
     end)
 else
-    print "USAGE .... ?!!"
+    print "Usage: luajit Q/Q_REPL/q_tool.lua [<host> <port>]"
 end
