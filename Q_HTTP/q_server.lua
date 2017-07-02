@@ -46,6 +46,7 @@ local function reply(myserver, stream) -- luacheck: ignore 212
 	local res_headers = http_headers.new()
 	res_headers:append(":status", "200")
 	res_headers:append("content-type", "text/plain")
+    res_headers:append("Access-Control-Allow-Origin", "*")
 	-- Send headers to client; end the stream immediately if this was a HEAD request
 	assert(stream:write_headers(res_headers, req_method == "HEAD"))
 	if req_method ~= "HEAD" then
