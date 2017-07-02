@@ -11,6 +11,7 @@ local eval = require 'Q/Q_REPL/q_eval_line'
 local res_str = require 'Q/Q_REPL/q_res_str'
 
 if (#arg == 0) then
+    Q = require 'Q'
     repl (function (line)
         local success, results = eval(line)
         if success then

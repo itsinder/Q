@@ -4,6 +4,7 @@ A simple HTTP server that loadstring's the input string
 Usage: luajit Q/Q_HTTP/q_server.lua [<port>]
 ]]
 
+Q = require 'Q'
 local port = arg[1] or 0 -- 0 means pick one at random
 
 local http_server = require "http.server"
