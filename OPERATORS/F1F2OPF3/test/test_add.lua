@@ -1,4 +1,6 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 local c3 = c1
 c1 = 10
@@ -13,7 +15,12 @@ Q.print_csv(z, { lb = 1, ub = 4} , "")
 local w = Q.vveq(c3, c2)
 w:eval()
 print(w)
+
+local status = pcall(Q.vveq, c3, 123)
+assert(status == false)
+
 print("Successfully completed")
+
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

@@ -46,7 +46,7 @@ rand_file_name(
 BYE:
   return status;
 }
-
+#ifdef STAND_ALONE
 int
 main()
 {
@@ -54,3 +54,4 @@ main()
   rand_file_name(X, 32);
   fprintf(stderr, "X = %s \n", X);
 }
+#endif

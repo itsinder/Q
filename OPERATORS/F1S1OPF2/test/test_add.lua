@@ -1,6 +1,6 @@
--- require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
--- local dbg = require 'Q/UTILS/lua/debugger'
+require 'Q/UTILS/lua/strict'
+local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 local z = Q.vsadd(c1, 10 )
 local z2= Q.vsadd(c1, { value = 10, qtype = "I8"} )
@@ -12,7 +12,15 @@ Q.print_csv(z, nil, "")
 -- z:eval()
 -- Q.print_csv(z, nil, "")
 --===========================
-local c2 = Q.vseq(c1, 4)
+print("=================================")
+local c2 = Q.sum(Q.vseq(c1, 4))
+c2:eval()
+print(c2:eval())
+local status = Q.vseq( 4, c1)
+assert(status == false)
+--===========================
+local status = Q.vsmul(2, Q.mk_col({1, 2, 3}, "F8"))
+assert(status == false)
 --===========================
 print("SUCCESS for " .. arg[0])
 os.exit()

@@ -34,7 +34,7 @@ for i, operator in ipairs(operators) do
     else
       assert(nil, "Control should not come here")
     end
-    status, subs, tmpl = pcall(sp_fn, args)
+    local status, subs, tmpl = pcall(sp_fn, args)
     assert(status, subs)
     gen_code.doth(subs, tmpl, incdir)
     gen_code.dotc(subs, tmpl, srcdir)

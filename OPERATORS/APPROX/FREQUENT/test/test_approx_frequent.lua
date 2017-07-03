@@ -1,7 +1,6 @@
-local Q      = require 'Q'
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 local ffi    = require 'Q/UTILS/lua/q_ffi'
-
-local qtypes = require 'Q/OPERATORS/APPROX/FREQUENT/lua/qtypes'
 
 local x_bare = {}
 local freq_ids = {}
@@ -63,4 +62,5 @@ while i < freq_len do
   i = i + 1
 end
 
+print("SUCCESS for ", arg[0])
 os.exit()

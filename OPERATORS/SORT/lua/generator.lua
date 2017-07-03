@@ -13,7 +13,7 @@ local num_produced = 0
 local spfn = require 'sort_specialize'
 for i, o in ipairs(order) do 
   for k, f in ipairs(qtypes) do 
-    status, subs, tmpl = pcall(spfn, f, o)
+    local status, subs, tmpl = pcall(spfn, f, o)
     if ( not status ) then print(subs) end
     assert(status)
     assert(type(subs) == "table")

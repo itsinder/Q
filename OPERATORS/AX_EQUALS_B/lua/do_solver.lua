@@ -14,11 +14,18 @@ return function(func_name, A, b)
 
   local b_len, b_chunk, nn_b_chunk = b:chunk(-1)
   local n = b_len
+  assert(n > 0)
   assert(nn_b_chunk == nil, "b should have no nil elements")
 
   assert(#A == n, "A should have same width as b")
+  --[[ Modified to following to add assert 
   local A_chunks = ffi.cast('double**', ffi.malloc(n * ffi.sizeof('double*')))
   local x_chunk = ffi.cast('double*', ffi.malloc(n * ffi.sizeof('double')))
+  --]]
+  local A_chunks = assert(ffi.malloc(n * ffi.sizeof('double *')))
+  local x_chunk  = assert(ffi.malloc(n * ffi.sizeof('double')))
+  A_chunks = ffi.cast('double **', A_chunks)
+  x_chunk  = ffi.cast('double *', x_chunk)
   for i = 1, n do
     local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:chunk(-1)
     assert(Ai_len == n, "A["..i.."] should have same height as b")

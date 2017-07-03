@@ -50,6 +50,9 @@
 
 #define set_bit(x, i) (x = (x) | ((uint64_t) 1 << (i)))
 
+/* Following assumes word starts at 0's */
+#define set_bit_val(word,  bit_idx, val) { word = word | (val << bit_idx ) }
+
 #define unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
 #define mcr_get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))

@@ -17,18 +17,25 @@
     b_qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   end
 
+  -- TODO local sort_order = { 'unsorted', 'asc' }
+  local sort_order = { 'unsorted' }
+
   local sp_fn = require 'ainb_specialize'
   local num_produced = 0
-  for i, atype in ipairs(a_qtypes) do 
-    for j, btype in ipairs(b_qtypes) do 
-      local status, subs, tmpl = pcall(sp_fn, atype, btype)
-      if ( status ) then 
-        gen_code.doth(subs, tmpl, incdir)
-        gen_code.dotc(subs, tmpl, srcdir)
-        print("Generated ", subs.fn)
-        num_produced = num_produced + 1
-      else
-        print(subs)
+
+  for _, b_sort_order  in ipairs(sort_order) do 
+    for i, atype in ipairs(a_qtypes) do 
+      for j, btype in ipairs(b_qtypes) do 
+        print(atype, btype, b_sort_order)
+        local status, subs, tmpl = pcall(sp_fn, atype, btype, b_sort_order)
+        if ( status ) then 
+          gen_code.doth(subs, tmpl, incdir)
+          gen_code.dotc(subs, tmpl, srcdir)
+          print("Generated ", subs.fn)
+          num_produced = num_produced + 1
+        else
+          print(subs)
+        end
       end
     end
   end

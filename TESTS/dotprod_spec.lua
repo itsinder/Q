@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 
 local X = {}
 for i = 1,9 do
