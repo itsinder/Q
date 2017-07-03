@@ -6,7 +6,6 @@ Following is for writing tests at the Q level
 -- NO_OP
 -- PERFORMANCE
 -- STRESS
--- BUSTED
 
 Note that you can provide multiple labels e.g.,
 -- FUNCTIONAL PERFORMANCE
@@ -35,4 +34,16 @@ require('Q/UTILS/lua/cleanup')()
 os.exit()
 
 --===============================================
-The rationale for the above rules
+The rationale for the above rules is as follows. We have a test runner script
+which resursively lists all files starting from the Q_SRC_ROOT. If the file
+name matches "test_*.lua", it is picked up for review. The first line is
+inspected to determine what kind of test it is. The file is ignored if
+1) the first line is NOT a comment or 
+2) the first line is a comment with NO_OP in it
+2) the first line is a comment with none of the other labels in it
+
+The test runner has a few different modes in which it is executed. Before a
+commit, we will execute only functional tests. However, the nightly build must
+execute stress and performance tests.
+
+

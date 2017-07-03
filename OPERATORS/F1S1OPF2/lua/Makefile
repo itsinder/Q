@@ -52,6 +52,14 @@ clean :
 	rm -f vsor_specialize.lua
 	rm -f vsxor_specialize.lua
 #-------------
+	rm -f decr_specialize.lua
+	rm -f exp_specialize.lua
+	rm -f incr_specialize.lua
+	rm -f log_specialize.lua
+	rm -f logit_specialize.lua
+	rm -f logit2_specialize.lua
+	rm -f abs_specialize.lua
+#-------------
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
 	rm -f _*
