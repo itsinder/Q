@@ -6,8 +6,8 @@ local function expander_f1opf2f3(a, x, optargs )
     -- Get name of specializer function. By convention
     local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
     local spfn = require(sp_fn_name)
-    status, subs, tmpl = pcall(spfn, x:fldtype())
-    assert(status, subs)
+    local status, subs, tmpl = pcall(spfn, x:fldtype())
+    assert(status, "Failure in specializer " .. sp_fn_name)
     local func_name = assert(subs.fn)
     local out1_qtype = assert(subs.out1_qtype)
     local out1_width = qconsts.qtypes[out1_qtype].width
@@ -16,7 +16,7 @@ local function expander_f1opf2f3(a, x, optargs )
 
     local x_coro = assert(x:wrap(), "wrap failed for x")
     local coro = coroutine.create(function()
-      local x_chunk, x_status
+      local x_status, x_len, x_chunk, nn_x_chunk 
       local x_chunk_size = x:chunk_size()
       local out1_buff = q_core.malloc(x_chunk_size * out1_width)
       local out2_buff = q_core.malloc(x_chunk_size * out2_width)

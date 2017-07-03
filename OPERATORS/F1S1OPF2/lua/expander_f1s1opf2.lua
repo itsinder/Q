@@ -23,12 +23,14 @@
     local status, subs, tmpl = pcall(spfn, f1:fldtype(), y)
     assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
+    assert(qc[func_name], "Missing symbol " .. func_name)
     local f2_qtype = assert(subs.out_qtype)
     local f2_width = qconsts.qtypes[f2_qtype].width
     local buf_sz = qconsts.chunk_size * f2_width
     local f1_coro = assert(f1:wrap(), "wrap failed for x")
+    --============================================
     local f2_coro = coroutine.create(function()
-      local f2_buf = ffi.malloc(buf_sz)
+      local f2_buf = assert(ffi.malloc(buf_sz))
       local status, f1_status, f1_len, f1_chunk, nn_f1_chunk 
       f1_status = true; status = 0
       while (f1_status) do

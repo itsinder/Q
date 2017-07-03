@@ -108,7 +108,7 @@ local print_csv = function (column_list, filter, opfile)
   local is_SC, is_SV, is_I8, is_col, is_B1, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
-  local buf = ffi.malloc(1024) 
+  local buf = assert(ffi.malloc(1024))
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 

@@ -7,6 +7,7 @@ local function <<operator>>(x, y, optargs)
     assert(status, "Could not execute <<operator>>")
     return col
   end
+  assert(nil, "Bad arguments to ainb")
 end
 T.<<operator>> = <<operator>>
 require('Q/q_export').export('<<operator>>', <<operator>>)

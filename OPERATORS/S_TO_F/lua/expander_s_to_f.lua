@@ -23,7 +23,7 @@ return function (a, x)
     local num_blocks = math.ceil(subs.len / chunk_size)
     local width =  assert(qconsts.qtypes[out_qtype].width)
     if ( width < 1 ) then width = 1 end 
-    local buff =  assert(ffi.malloc(chunk_size * width), "mallocc failed")
+    local buff =  assert(ffi.malloc(chunk_size * width), "malloc failed")
     for i = 1, num_blocks do
       ub = lb + chunk_size
       if ( ub > subs.len ) then 

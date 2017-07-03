@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local linear_solver = require 'Q/OPERATORS/AX_EQUALS_B/lua/linear_solver'
 
