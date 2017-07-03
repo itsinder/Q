@@ -34,6 +34,7 @@ This test_runner program runs all tests, and logs all failed test-cases with the
 -- require 'terra_globals'
 -- require 'Q/UTILS/lua/error_code'
 local pretty = require 'pl.pretty'
+require 'Q/UTILS/lua/terra' -- TODO assumes we 'may' need terra,  check if okay
 
 print ("Function under test: " .. arg[1])
 print ("Test suite: " .. arg[2])
