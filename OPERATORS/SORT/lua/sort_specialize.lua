@@ -1,8 +1,6 @@
 return function(in_qtype, ordr)
   local qconsts = require 'Q/UTILS/lua/q_consts'
   assert(type(ordr) == "string", "Sort order should be a string")
-  if ( ordr == "ascending" ) then ordr = "asc" end 
-  if ( ordr == "descending" ) then ordr = "dsc" end 
   assert( ( ( ordr == "asc") or ( ordr == "dsc") ), 
   "Sort order should be asc or dsc")
   local subs = {}

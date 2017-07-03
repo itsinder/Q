@@ -96,9 +96,9 @@ return function (
    l:append(2*qconsts.max_width.SV)
    local min, buf_sz = l:minmax() -- buf_sz is the max size of the input indicated by globals
    
-   local buf = ffi.malloc(buf_sz)
-   local cbuf = ffi.malloc(cbuf_sz)
-   local is_null = ffi.malloc(1)
+   local buf  = assert(ffi.malloc(buf_sz))
+   local cbuf = assert(ffi.malloc(cbuf_sz))
+   local is_null = assert(ffi.malloc(1))
    local ncols = #M
    local row_idx = 0
    local col_idx = 0

@@ -60,13 +60,14 @@ local cmvmul = function(X, Y)
       if ( len > 0 ) then 
         -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
         local status = qc["mvmul_a"](Xptr, yptr, z_buf, len, k)
-        assert(status == 0, "C error in mvmul") coroutine.yield(len, z_buf, nil)
+        assert(status == 0, "C error in mvmul") 
+        coroutine.yield(len, z_buf, nil)
       end
       cidx = cidx + 1
     until (last_chunk == true )
   end)
 
-  return Column( {gen=coro, nn=(nn_zptr ~= nil), field_type="F8"} )
+  return Column( {gen=coro, nn=false, field_type="F8"} )
 end
 return require('Q/q_export').export('cmvmul', cmvmul)
 
