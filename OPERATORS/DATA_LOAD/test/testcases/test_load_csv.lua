@@ -1,28 +1,29 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 local load_csv = require 'Q/OPERATORS/DATA_LOAD/lua/load_csv_dataload'
 local fns = require 'Q/OPERATORS/DATA_LOAD/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 local dir = require 'pl.dir'
+local plpath = require 'pl.path'
 
-local test_input_dir = "./test_data/"
-local test_metadata_dir ="./test_metadata/"
--- common setting (SET UPS) which needs to be done for all test-cases
---set environment variables for test-case
--- _G["Q_DATA_DIR"] = "./test_data/out/"
--- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
--- dir.makepath(_G["Q_DATA_DIR"])
--- dir.makepath(_G["Q_META_DATA_DIR"])
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local test_input_dir = script_dir .."/test_data/"
+local test_metadata_dir = script_dir .."/test_metadata/"
 
 -- loop through testcases
 -- these testcases output error messages
-local T = dofile("map_metadata_data.lua")
+local T = dofile(script_dir .."/map_metadata_data.lua")
 for i, v in ipairs(T) do
   if arg[1] and i ~= tonumber(arg[1]) then 
     goto skip 
   end
   
   _G["Q_DICTIONARIES"] = {}
-  _G["Q_DATA_DIR"] = "./test_data/out/"
-  _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+  --_G["Q_DATA_DIR"] = "./test_data/out/"
+  --_G["Q_META_DATA_DIR"] = "./test_data/metadata/"
   print("--------------------------------")
   local M = dofile(test_metadata_dir..v.meta)
   local D = v.data
@@ -53,6 +54,8 @@ for i, v in ipairs(T) do
 end
 
 fns["print_result"]()
+require('Q/UTILS/lua/cleanup')()
+os.exit()
 
 -- _G["Q_DATA_DIR"] = "./test_data/out/"
 -- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"

@@ -1,3 +1,8 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local q_core = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
@@ -12,4 +17,7 @@ for i=1,ret:length() do
   local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
   local str = ffi.cast(ctype.." *",result)
   print(str[0])
-end    
+end   
+
+require('Q/UTILS/lua/cleanup')()
+os.exit() 
