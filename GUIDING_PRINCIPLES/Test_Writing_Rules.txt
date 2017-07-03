@@ -1,3 +1,5 @@
+We will first document the rules and then present the rationale for them.
+--===============================================
 Following is for writing tests at the Q level
 1) First line should be *ONE OR MORE* of the following
 -- FUNCTIONAL 
@@ -31,3 +33,6 @@ local data_file = q_src_root .. "/OPERATORS/DATA_LOAD/datafile/file1.csv"
 
 require('Q/UTILS/lua/cleanup')()
 os.exit()
+
+--===============================================
+The rationale for the above rules

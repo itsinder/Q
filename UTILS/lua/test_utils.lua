@@ -4,7 +4,7 @@ local utils
 utils = {
   arr_from_col = function (c)
     local sz, vec, nn_vec = c:chunk(-1)
-    local ctype = qconsts.qtypes[c:fldtype()] .. " *"
+    local ctype = qconsts.qtypes[c:fldtype()].ctype .. " *"
     return ffi.cast(ctype, vec)
   end,
   
