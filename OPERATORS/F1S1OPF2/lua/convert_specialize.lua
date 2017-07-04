@@ -25,10 +25,10 @@ return function (
   subs.fn = "convert_" .. in_qtype .. "_" .. out_qtype
   if is_safe then
     tmpl = 'safe_f1opf2.tmpl'
-    --TODO: Write logic to get min_val and max_val according to out_qtype
     subs.min_val = qconsts.qtypes[out_qtype].min
     subs.max_val = qconsts.qtypes[out_qtype].max
     subs.fn = "safe_convert_" .. in_qtype .. "_" .. out_qtype
+    subs.is_safe = is_safe
   end
   subs.c_code_for_operator = "c = (" .. out_ctype .. ") a; "
   subs.out_qtype = out_qtype
