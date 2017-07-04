@@ -1,4 +1,5 @@
 local pldir = require 'pl.dir'
+local plpath = require 'pl.path'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local ignore_files = {
 
@@ -60,20 +61,38 @@ end
 
 local function find_test_files(directory, pattern)
    local iter_list, next_iter_list = {}, {}
-   pattern = pattern or "test_*.lua"
+   pattern = pattern or "*.lua"
    iter_list[1] = directory
    local list = {}
    repeat
       for i=1,#iter_list do
          local dir = iter_list[i]
-         local files = pldir.getfiles(dir, pattern)
-         local dirs = pldir.getdirectories(dir)
-         next_iter_list = append_dirs(next_iter_list, dirs)
-         for j=1,#files do
-            local file = files[j]
-            if not is_file_exception(file) then
-               list[#list + 1] = tostring(file)
-            end
+         local exclude = false
+         if ( string.find(dir, ".git") ) then 
+           exclude = true
+         end
+         if ( not exclude ) then 
+           local files = pldir.getfiles(dir, pattern)
+           local xfiles = {}
+           if ( files and #files > 0 ) then 
+             for _, v in ipairs(files) do
+               if string.match(v, "/test_") then
+                 xfiles[#xfiles+1] = v
+               end
+             end
+           else
+             print("NO matches in ", dir)
+           end
+           files = xfiles
+             local dirs = pldir.getdirectories(dir)
+             next_iter_list = append_dirs(next_iter_list, dirs)
+             for j=1,#files do
+               local file = files[j]
+               if not is_file_exception(file) then
+                 print("SCHEDULED ",file)
+                 list[#list + 1] = tostring(file)
+               end
+             end
          end
       end
 
@@ -101,21 +120,22 @@ local function run_files(list, command, coverage_command, total, success, fail, 
          if ret_val == 0 then  -- success
             success = success + 1
             total = total + 1
+            print(string.format("Succeeded: %s",file ))
          elseif ret_val == 2 then -- NOP
             nop = nop + 1
          else
             fail = fail + 1
             total = total + 1
-            print(string.format("Failed %s",file ))
+            print(string.format("Failed: %s",file ))
          end
       else
-         print(string.format("Unsupported %s",file ))
+         print(string.format("Unsupported: %s",file ))
       end
    end
    return total, success, fail, nop
 end
 
-local TOTAL, SUCCESS, FAIL, NOP = run_files(find_test_files("./", "test_*.lua"),
+local TOTAL, SUCCESS, FAIL, NOP = run_files(find_test_files("./", "*.lua"),
    "luajit %s",
    "luajit -lluacov %s",
    0, 0, 0, 0)
