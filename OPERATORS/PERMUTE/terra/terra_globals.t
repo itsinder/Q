@@ -20,6 +20,3 @@ function t_Array(qtype, N)
     ffi.gc(r, ffi.C.free)
     return r
 end
-
--- TODO added temporarily for use with Terra due to Vector code; discard later
-qconsts.chunk_size = nil

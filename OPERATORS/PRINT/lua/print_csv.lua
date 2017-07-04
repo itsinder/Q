@@ -145,12 +145,13 @@ local print_csv = function (column_list, filter, opfile)
               temp = "0"
             end
           else
+            local str
             if is_B1[col_idx] then
               assert(cbuf == 1, "Value is not 1")
               temp = tostring(cbuf)
             else
               local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
-              local str = ffi.cast(ctype.." *",cbuf)
+              str = ffi.cast(ctype.." *",cbuf)
               temp = tostring(str[0])
             end
             if is_I8[col_idx] then

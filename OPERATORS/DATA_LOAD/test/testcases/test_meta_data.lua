@@ -1,16 +1,24 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
+local plpath = require 'pl.path'
 local plstring = require 'pl.stringx'
 local validate_meta = require 'Q/OPERATORS/LOAD_CSV/lua/validate_meta'
-_G["Q_META_DATA_DIR"] = "./metadata"
+
+--_G["Q_META_DATA_DIR"] = "./metadata"
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local no_of_success = 0
 local no_of_failure = 0
-local T = dofile("meta_data.lua")
+local T = dofile(script_dir .."/meta_data.lua")
 local failed_testcases = {}
 
 for i, m in ipairs(T) do
   
   if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
   print(i,"Testing " .. m.meta)
-  local M = dofile("test_metadata/"..m.meta)
+  local M = dofile(script_dir .."/test_metadata/"..m.meta)
   local status, ret = pcall(validate_meta, M)
   --local status, ret = validate_meta(M)
   if ( not status ) then 
@@ -70,4 +78,6 @@ assert(io.output(file), "Nightly build file write error")
 assert(io.write(str), "Nightly build file write error")
 assert(io.close(file), "Nighty build file close error")
 
+require('Q/UTILS/lua/cleanup')()
+os.exit()
 
