@@ -1,20 +1,20 @@
+-- PERFORMANCE
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
+local plpath = require 'pl.path'
 local dir = require 'pl.dir'
 local fns = require 'Q/OPERATORS/LOAD_CSV/test/performance_testing/gen_csv_metadata_file'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local utils = require 'Q/UTILS/lua/utils'
 
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 -- file in which performance testing results for each csv file is written
-local performance_file ="./performance_results/performance_measures.txt"
-local meta_info_dir_path = "./meta_info/"
+local performance_file = script_dir .."/performance_results/performance_measures.txt"
+local meta_info_dir_path = script_dir .."/meta_info/"
 
-dir.makepath("./performance_results/")
---set environment variables for test-case
--- _G["Q_DATA_DIR"] = "./test_data/out/"
--- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
--- _G["Q_DICTIONARIES"] = {}
-  
--- dir.makepath(_G["Q_DATA_DIR"])
--- dir.makepath(_G["Q_META_DATA_DIR"])
+dir.makepath(script_dir .."/performance_results/")
 
 -- opening the performance result file
 local filep = assert(io.open(performance_file, 'a')) -- append mode so that all testcases writes their result in this file
@@ -24,7 +24,7 @@ filep:write("Rows \t Columns \t Testcase \t\t\t Execution time(in secs) \t Time 
 filep:close()
 
 
-local T = dofile("map_meta_info_data.lua")
+local T = dofile(script_dir .."/map_meta_info_data.lua")
 for i, v in ipairs(T) do
   
   -- _G["Q_DICTIONARIES"] = {}
@@ -39,6 +39,9 @@ for i, v in ipairs(T) do
   local metadata_table = fns["generate_metadata"](M)
   
   local csv_file_path = v.data -- taking csv file name from map_meta_info_data file
+  if not plpath.isabs(v.data) then
+    csv_file_path = script_dir .."/".. csv_file_path
+  end
   local row_count = v.row_count  -- no of rows you wish to enter
   local chunk_print_size = v.chunk_print_size  -- writing data into files as chunks(i.e. chunk size)
   
@@ -60,7 +63,7 @@ for i, v in ipairs(T) do
   utils["testcase_results"](v, "test_performance.lua", "Load_csv Performance Testing", "Performance Testing", result, "")
   
   -- delete respective csv file
-  file.delete(csv_file_path) 
+  os.remove(csv_file_path) 
   
   print("Results written in performance_results file\n")
   print("--------------------------------------------")
@@ -68,6 +71,8 @@ for i, v in ipairs(T) do
   
 end  
 
+require('Q/UTILS/lua/cleanup')()
+os.exit()
 -- clear the output directory 
 -- dir.rmtree(_G["Q_DATA_DIR"])
 -- dir.rmtree(_G["Q_META_DATA_DIR"])
