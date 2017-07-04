@@ -1,6 +1,6 @@
 local Q = require 'Q'
 
-local input_col = Q.mk_col({22100000, 125, 200}, "I4")
+local input_col = Q.mk_col({22100, 125, 200}, "I4")
 local expected_col = Q.mk_col({22100, 125, 200}, "I2")
 local converted_col = Q.convert(input_col, {qtype = "I2", is_safe=true})
 converted_col:eval()
