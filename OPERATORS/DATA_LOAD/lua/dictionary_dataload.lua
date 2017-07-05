@@ -1,6 +1,8 @@
 local fns = require 'Q/UTILS/lua/utils'
 local parser = require 'Q/UTILS/lua/parser'
-_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
+
+--_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
+_G["Q_DICTIONARIES"] = {}
 local Dictionary = {}
 Dictionary.__index = Dictionary
 

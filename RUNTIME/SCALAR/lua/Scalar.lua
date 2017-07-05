@@ -1,3 +1,4 @@
+-- Coding convention. Local variables start with underscore
 local log = require 'Q/UTILS/lua/log'
 local plpath = require("pl.path")
 local Scalar = {}
@@ -39,19 +40,24 @@ type = function( obj )
 end
 
 function Scalar.new(arg)
-   assert(type(arg) == "table", "Called constructor with incorrect arguments")
-   assert(type(arg.coro) == "thread", "Argument coro must have a coroutine")
-   assert(type(arg.func) == "function", "Need a function to extract the scalar")
+   assert(type(arg) == "table", 
+   "Scalar: Constructor needs a table as input argument. Instead got " .. type(arg))
+   assert(type(arg.coro) == "thread", 
+   "Scalar: Table must have argument coro which must be a coroutine")
+   assert(type(arg.func) == "function", 
+   "Scalar: Table must have arg [func] which must be a function used to extract scalar")
    local scalar = setmetatable({}, Scalar)
    -- TODO Delete scalar.destructor_ptr = ffi.malloc(1, Scalar.destructor)
    -- TODO Delete DestructorLookup[scalar.destructor_ptr] = scalar
    scalar._coro = arg.coro
    scalar._func = arg.func
+   -- scalar._val contains partial results. 
    return scalar
 end
 
 function Scalar:next()
-   assert(coroutine.status(self._coro) ~= "dead" , "The coroutine is no longer alive")
+   assert(coroutine.status(self._coro) ~= "dead" , 
+   "Scalar: The coroutine is no longer alive")
    local status, val = coroutine.resume(self._coro)
    if status == true and val ~= nil then
       self._val = val
@@ -60,6 +66,7 @@ function Scalar:next()
 end
 
 function Scalar:value()
+   -- We are allowing user to obtain partial values
    assert(self._val ~= nil, "The scalar has not been evaluated yet")
    return self._func(self._val)
 end
