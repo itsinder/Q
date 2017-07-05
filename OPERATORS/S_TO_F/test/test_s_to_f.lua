@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
@@ -18,4 +19,5 @@ z:eval()
 Q.print_csv(z, nil, "")
 --=======================================
 print("SUCCESS for " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()

@@ -1,5 +1,6 @@
 local pldir = require 'pl.dir'
 local plpath = require 'pl.path'
+local q_root = assert(os.getenv("Q_ROOT"))
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local ignore_files = {
 
@@ -102,7 +103,8 @@ local function find_test_files(directory, pattern)
       for i=1,#iter_list do
          local dir = iter_list[i]
          local exclude = false
-         if ( string.find(dir, ".git") ) then 
+         if ( ( string.find(dir, ".git") ) or 
+              ( string.find(dir, "DEPRECATED") ) ) then 
            exclude = true
          end
          if ( not exclude ) then 
@@ -134,6 +136,7 @@ local function run_files(list, command, coverage_command, total, success, fail, 
    fail = fail or 0
    nop = nop or 0
    for i=1,#list do
+      os.execute("rm -r -f " .. q_root .. "/data/*")
       local file = list[i]
       local tags = get_tags(file)
       if tags.NO_OP == true then
@@ -160,10 +163,9 @@ local function run_files(list, command, coverage_command, total, success, fail, 
    return total, success, fail, nop
 end
 
-local q_root = assert(os.getenv("Q_ROOT"))
 assert(plpath.isdir(q_root))
 assert(plpath.isdir(q_root .. "/data/"))
-os.execute("rm -r -f $Q_ROOT/data/*")
+os.execute("rm -r -f " .. q_root .. "/data/*")
 require('Q/UTILS/lua/cleanup')()
 local TOTAL, SUCCESS, FAIL, NOP = run_files(find_test_files("./", "*.lua"),
    "luajit %s",

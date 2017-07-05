@@ -1,3 +1,4 @@
+-- NO_OP
 package.path = package.path .. ";../lua/?.lua;"
 
 require 'utils'

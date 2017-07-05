@@ -1,10 +1,10 @@
--- STRESS
+-- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local dbg = require 'Q/UTILS/lua/debugger'
 
 
-for i = 1, 1000 do 
+for i = 1, 100 do 
   local x_len = 65537
   local y = Q.rand({ lb = 0, ub = 1, seed = 1234, qtype = "I1", len = x_len } )
   local c1 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F8", len = x_len } )
@@ -34,4 +34,5 @@ for i = 1, 1000 do
   print("Iteration ", i)
 end
 print("SUCCESS for ", arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()

@@ -1,3 +1,4 @@
+-- NO_OP
 --[[
 Expected to be run as a command line program; takes below arguments
     "funcUnderTest": Mandatory; is a module that returns the function to be tested. This is in accordance with the convention we're following for Q modules.

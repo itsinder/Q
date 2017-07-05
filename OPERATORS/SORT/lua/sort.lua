@@ -12,11 +12,12 @@ local function sort(x, ordr)
   assert(type(subs) == "table", "error in call to sort_specialize")
   local func_name = assert(subs.fn)
 
+  -- TODO Check is already sorted correct way and don't repeat
   local x_len, x_chunk, nn_x_chunk = x:chunk(-1)
   assert(nn_x_chunk == nil, "Cannot sort with null values")
   assert(qc[func_name], "Unknown function " .. func_name)
   qc[func_name](x_chunk, x_len)
-  x.set_meta("sort_order", ordr)
+  x:set_meta("sort_order", ordr)
 
 end
 return require('Q/q_export').export('sort', sort)

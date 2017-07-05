@@ -1,3 +1,4 @@
+-- STRESS
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local ffi = require 'Q/UTILS/lua/q_ffi'
@@ -50,5 +51,6 @@ assert(ffi.cast("int *", val)[0] == 65535)
 local data_dir = require("Q/q_export").Q_DATA_DIR 
 
 os.execute(string.format("find %s -type f -delete", data_dir))
+require 'Q/UTILS/lua/strict'
 os.exit()--
 

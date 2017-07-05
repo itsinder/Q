@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 require 'Q/UTILS/lua/strict'
 local plpath = require "pl.path"
 local ffi = require("Q/UTILS/lua/q_ffi")
@@ -49,4 +50,6 @@ assert(size == 8)
 for i=1,size -1 do
    assert(bytes[i] == 0)
 end
+require 'Q/UTILS/lua/strict'
+print("SUCCESS for ", arg[0])
 os.exit()

@@ -1,3 +1,4 @@
+-- FUNCTIONAL
 require "Q/UTILS/lua/strict"
 local is_in = require "Q/UTILS/lua/is_in"
 local x = "number"
@@ -8,3 +9,6 @@ x = "foobar"
 local rslt = is_in(x, X)
 assert(rslt == false)
 print("SUCCESS for ", arg[0] )
+
+require('Q/UTILS/lua/cleanup')()
+os.exit()

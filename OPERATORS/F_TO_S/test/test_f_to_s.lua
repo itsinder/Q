@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
@@ -59,7 +60,6 @@ end
 
 x, y, z = fold({ "sum", "min", "max" }, c1)
 print (x, y, z)
-print("Completed " .. arg[0])
+print("SUCCESS for " .. arg[0])
+require 'Q/UTILS/lua/strict'
 os.exit()
-
---=========================================

@@ -1,4 +1,6 @@
+--  FUNCTIONAL 
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 
 local input_col = Q.mk_col({22100.45, 125.44, 200.8}, "F4")
 local expected_col = Q.mk_col({84, 125, -56}, "I1")
@@ -15,4 +17,5 @@ assert(n:eval() == len)
 Q.print_csv(converted_col, nil, "")
 --===========================
 print("Successfully completed " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()

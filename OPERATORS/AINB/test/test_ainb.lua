@@ -1,4 +1,4 @@
--- FUNCTION
+-- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
