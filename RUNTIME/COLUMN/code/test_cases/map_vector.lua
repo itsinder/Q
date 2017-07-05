@@ -117,7 +117,7 @@ return {
   },
   --to make sure B1.bin is present, run the testcase with write_vector = true first
   -- Vector read the values from B1.bin, and compare the values in binary file to values got by reading vector
-  { name = "valid B1 read", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = false, category = "category2", field_size = 1/8,
+  { name = "valid B1 read", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = false, category = "category2", 
     input_values = B1_data 
   },
   -- valid b1 testcases with number of elements is not multiple of 8
@@ -126,7 +126,7 @@ return {
   },
   --to make sure B1.bin is present, run the testcase with write_vector = true first
   -- valid b1 testcases with number of elements is not multiple of 8
-  { name = "second valid B1 read", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = false, category = "category2", field_size = 1/8,
+  { name = "second valid B1 read", field_type = 'B1', filename="B1.bin", chunk_size = 8, write_vector = false, category = "category2", 
     input_values = B1_odd_data 
   },
   -- error testcases

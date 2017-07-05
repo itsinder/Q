@@ -22,6 +22,7 @@ local function chk_cols(column_list)
   local is_SV  = {}
   local is_I8  = {}
   local is_col = {}
+  local is_B1 = {}
   local max_length = column_list[1]:length()
   for i = 1, #column_list do
     assert( ((type(column_list[i]) == "Column") or 
@@ -32,8 +33,6 @@ local function chk_cols(column_list)
     if is_col[i] then
       assert(qconsts.qtypes[column_list[i]:fldtype()], 
       err.INVALID_COLUMN_TYPE)
-      assert(qconsts.qtypes[column_list[i]:fldtype()] ~= "B1", 
-        err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
       -- dictionary cannot be null in get_meta for SV data type
       if column_list[i]:fldtype() == "SV" then 
         assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
@@ -42,6 +41,7 @@ local function chk_cols(column_list)
       if  column_list[i]:length() > max_length then 
         max_length = column_list[i]:length() 
       end
+      is_B1[i] = column_list[i]:fldtype() == "B1"
       is_SC[i] = column_list[i]:fldtype() == "SC"    
             -- if field type is SC , then pass field size, else nil
       is_SV[i] = column_list[i]:fldtype() == "SV"    
@@ -51,7 +51,7 @@ local function chk_cols(column_list)
     end
     assert(max_length > 0, "Nothing to print")
   end
-  return is_SC, is_SV, is_I8, is_col, max_length
+  return is_SC, is_SV, is_I8, is_col, is_B1, max_length
 end
 
 --Sri 27/05/17 TODO WHY ISN'T this local?? making it for now, to see if something breaks
@@ -105,7 +105,7 @@ local print_csv = function (column_list, filter, opfile)
   
   -- Initially, all columns had to be same length. That has been relaxed.
 
-  local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
+  local is_SC, is_SV, is_I8, is_col, is_B1, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
   local buf = assert(ffi.malloc(1024))
@@ -138,13 +138,22 @@ local print_csv = function (column_list, filter, opfile)
         if not is_col[col_idx] then 
           temp = col 
         else
-          local cbuf = col:get_element(rowidx-1)          
+          local cbuf = col:get_element(rowidx-1)
           if cbuf == ffi.NULL then
             temp = ""
+            if is_B1[col_idx] then
+              temp = "0"
+            end
           else
-            local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
-            local str = ffi.cast(ctype.." *",cbuf)
-            temp = tostring(str[0])
+            local str
+            if is_B1[col_idx] then
+              assert(cbuf == 1, "Value is not 1")
+              temp = tostring(cbuf)
+            else
+              local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
+              str = ffi.cast(ctype.." *",cbuf)
+              temp = tostring(str[0])
+            end
             if is_I8[col_idx] then
               temp = strip_trailing_LL(temp)
             end

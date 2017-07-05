@@ -14,7 +14,7 @@ all : libf1s1opf2.so _f1s1opf2.lua
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
 	log_specialize.lua exp_specialize.lua \
-	logit_specialize.lua logit2_specialize.lua  
+	logit_specialize.lua logit2_specialize.lua 
 	luajit gen_specializers.lua f1opf2
 
 arith_specializers: arith_specialize.tmpl \
@@ -105,12 +105,15 @@ logit_specialize.lua  : f1opf2_specialize.tmpl
 logit2_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 
-libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files
+libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
+_convert_files : convert_specialize.lua
+	luajit generator0_0.lua
+		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua
 
