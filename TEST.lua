@@ -5,6 +5,40 @@ local ignore_files = {
 
 }
 
+function exclude_non_test_files(files)
+  local xfiles = {}
+  if ( files and #files > 0 ) then 
+    for _, full_name in ipairs(files) do
+      local is_excl = false
+      local reason 
+      local base_name = string.gsub(full_name, "%..*/test_", "test_")
+      start, stop = string.find(base_name, "test_") 
+      -- print(base_name, start, stop)
+      if ( ( start == nil ) or ( start ~= 1 ) ) then
+        is_excl = true
+        reason = 1
+      end
+      start, stop = string.find(base_name, ".lua") 
+      -- print(base_name, start, stop)
+      if ( stop == nil ) or ( stop ~= string.len(base_name) ) then 
+        is_excl = true
+        reason = 2
+      end
+      if ( is_excl == false ) then 
+        xfiles[#xfiles+1] = full_name
+      end
+      --[[
+      if ( is_excl ) then 
+        print(reason, "Excluding ", full_name, base_name)
+      else
+        print(reason, "NOT Excluding ", full_name, base_name)
+      end
+      --]]
+    end
+  end
+  return xfiles
+end
+--===============================
 local ignore_dirs = {
    DEPRECATED = true,
    experiment = true,
@@ -73,26 +107,16 @@ local function find_test_files(directory, pattern)
          end
          if ( not exclude ) then 
            local files = pldir.getfiles(dir, pattern)
-           local xfiles = {}
-           if ( files and #files > 0 ) then 
-             for _, v in ipairs(files) do
-               if string.match(v, "/test_") then
-                 xfiles[#xfiles+1] = v
-               end
+           local xfiles = exclude_non_test_files(files)
+           local dirs = pldir.getdirectories(dir)
+           next_iter_list = append_dirs(next_iter_list, dirs)
+           for j=1,#xfiles do
+             local xfile = xfiles[j]
+             if not is_file_exception(xfile) then
+               -- print("SCHEDULED ",file)
+               list[#list + 1] = tostring(xfile)
              end
-           else
-             print("NO matches in ", dir)
            end
-           files = xfiles
-             local dirs = pldir.getdirectories(dir)
-             next_iter_list = append_dirs(next_iter_list, dirs)
-             for j=1,#files do
-               local file = files[j]
-               if not is_file_exception(file) then
-                 print("SCHEDULED ",file)
-                 list[#list + 1] = tostring(file)
-               end
-             end
          end
       end
 
@@ -115,6 +139,7 @@ local function run_files(list, command, coverage_command, total, success, fail, 
       if tags.NO_OP == true then
          nop = nop + 1
       elseif tags.FUNCTIONAL == true then
+        print("Starting evaluation ", file)
          local ret_val = os.execute(string.format(command  .. " 2>&1 >/dev/null", file) )
          os.execute(string.format(coverage_command  .. " 2>&1 >/dev/null", file))
          if ret_val == 0 then  -- success

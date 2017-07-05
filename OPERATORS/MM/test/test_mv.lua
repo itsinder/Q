@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local x1 = Q.mk_col({10, 20, 30, 40, 50, 60, 70, 80}, 'F8')
@@ -19,4 +20,5 @@ local numer, denom = n:eval()
 assert(numer == x1:length())
 assert(numer == denom)
 print("SUCCESS for ", arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
