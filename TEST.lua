@@ -160,6 +160,11 @@ local function run_files(list, command, coverage_command, total, success, fail, 
    return total, success, fail, nop
 end
 
+local q_root = assert(os.getenv("Q_ROOT"))
+assert(plpath.isdir(q_root))
+assert(plpath.isdir(q_root .. "/data/"))
+os.execute("rm -r -f $Q_ROOT/data/*")
+require('Q/UTILS/lua/cleanup')()
 local TOTAL, SUCCESS, FAIL, NOP = run_files(find_test_files("./", "*.lua"),
    "luajit %s",
    "luajit -lluacov %s",
