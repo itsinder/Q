@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 describe("Column should not evaluate on chunk(-1)", function()
   local x = Q.const({ val = 1, len = 1025, qtype = 'F8' })
   local y = Q.const({ val = 1, len = 1025, qtype = 'F8' })

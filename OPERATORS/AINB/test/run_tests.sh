@@ -1,8 +1,7 @@
 #!/bibn/bash
 set -e 
-cd ../lua/
-bash gen_files.sh
-cd - 
+make -C ../../../UTILS/src/
+make -C ../lua/
 gcc -g -std=gnu99 \
   test_ainb.c \
   ../../../UTILS/src/bytes_to_bits.c  \

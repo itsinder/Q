@@ -1,7 +1,7 @@
 --local val_qtypes = {"I1", "I2", "I4", "I8", "F4", "F8"}
 --local idx_qtypes = {"I1", "I2", "I4", "I8"}
-local mk_col = require 'mk_col'
-local utils = require 'test_utils'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local utils = require 'Q/UTILS/lua/test_utils'
 
 -- mk_col faltering for I2/I8 ??!!
 local val_qtypes = {"I4"}
@@ -31,6 +31,7 @@ local create_tests = function()
           expectedOut = expected 
         end      
         table.insert(tests, {
+          name = "succ_" .. vqt .. iqt,
           input = {mk_col(val_tab, vqt), mk_col(idx_tab, iqt), idx_in_src},
           check = assert_valid(expectedOut)
         })
@@ -47,6 +48,7 @@ local create_tests = function()
       -- Test level setup/teardown can be specified
       -- setup = function() print ("failure setup") end,
       -- teardown = function() print ("failure teardown") end,
+      name="fail_f4_ip",
       input = {
               mk_col ({10, 20, 30, 40, 50, 60}, "I4"),
               mk_col({0, 5, 1, 4, 2, 3}, "F4"),

@@ -1,10 +1,18 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
+local plpath = require 'pl.path'
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local fns = require 'Q/OPERATORS/MK_COL/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 
+
 -- loop through testcases
 -- these testcases output error messages
-local T = dofile("map_mkcol.lua")
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local T = dofile(script_dir .."/map_mkcol.lua")
 for i, v in ipairs(T) do
   if arg[1] and i ~= tonumber(arg[1]) then 
     goto skip 
@@ -27,3 +35,5 @@ for i, v in ipairs(T) do
 end
 
 fns["print_result"]()
+require('Q/UTILS/lua/cleanup')()
+os.exit()

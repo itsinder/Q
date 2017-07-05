@@ -1,12 +1,13 @@
 local s = [===[
-local function <<operator>>(x, optargs)
+local function <<operator>>(x, y, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
   if type(x) == "Column" then 
-    local status, col = pcall(expander, "<<operator>>", x, optargs)
+    local status, col = pcall(expander, "<<operator>>", x, y, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute <<operator>>")
     return col
   end
+  assert(nil, "Bad arguments to f1s1ofp2")
 end
 T.<<operator>> = <<operator>>
 require('Q/q_export').export('<<operator>>', <<operator>>)

@@ -1,7 +1,7 @@
 -- START: Following is standard stuff for creating a class 
 local Dictionary = {}
 local err = require("Q/UTILS/lua/error_code")
-_G["Q_DICTIONARIES"] = _G["Q_DICTIONARIES"] or {}
+local q_dictionaries = {}
 Dictionary.__index = Dictionary
 
 setmetatable(Dictionary, {
@@ -24,10 +24,10 @@ end
 function Dictionary.get_instance(
   dict_name
   )
-    local dict = _G["Q_DICTIONARIES"][dict_name]
+    local dict = q_dictionaries[dict_name]
     if not dict then
         dict = setmetatable({}, Dictionary)
-        _G["Q_DICTIONARIES"][dict_name] = dict
+        q_dictionaries[dict_name] = dict
         -- Create a forward map and a reverse map
         dict.string_to_index = {}
         dict.index_to_string = {}

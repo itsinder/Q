@@ -1,13 +1,13 @@
-local ffi = require "Q/UTILS/lua/q_ffi"
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local ffi     = require "Q/UTILS/lua/q_ffi"
+local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local qc = require "Q/UTILS/lua/q_core"
+local qc      = require "Q/UTILS/lua/q_core"
 
 
 local approx_quantile = function(x, args)
-assert(type(x) == "Column")
-local qtype = x:fldtype()
-local func_name = "approx_quantile_" .. qtype 
+  assert(type(x) == "Column")
+  local qtype = x:fldtype()
+  local func_name = "approx_quantile_" .. qtype 
 
   -- START: verify inputs
   local siz = x:length()
