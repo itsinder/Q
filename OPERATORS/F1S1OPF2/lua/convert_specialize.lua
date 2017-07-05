@@ -9,8 +9,10 @@ return function (
   if ( type(args) == "table" ) then
     out_qtype = assert(args.qtype)
     is_safe = args.is_safe
-    if ( not is_safe ) then is_safe = false end 
-  else if ( type(args) == "string" ) then 
+    if ( not is_safe ) then 
+      is_safe = false 
+    end 
+  elseif ( type(args) == "string" ) then 
     out_qtype = args
     is_safe = false
   else
