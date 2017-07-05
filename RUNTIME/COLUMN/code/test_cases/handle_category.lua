@@ -106,6 +106,7 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
   if write_vector then
     local size
     local x_size = #input_values
+    local expected_file_size = math.ceil(x_size/64)*8
     if x_size%8 ==0 then 
       size  = x_size/8
     else
@@ -129,12 +130,11 @@ fns.handle_category2 = function (index, value, status, vector, input_values, wri
     local field_type = vector.field_type
     local field_size = qconsts.qtypes[field_type].width
     local file_size = file_size(value.filename)
-    if size ~= file_size then
-      fns["increment_fail_testcases"](index, v, "Length of input is not equal to the binary file size")
+    if expected_file_size ~= file_size then
+      fns["increment_fail_testcases"](index, value, "Length of input is not equal to the binary file size")
       return false
     end
   end
-
   for k,v in ipairs(input_values) do
     if v == 0 then v = nil end
     if v ~= vector:get_element(k-1) then
