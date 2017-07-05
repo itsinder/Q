@@ -1,4 +1,6 @@
+-- FUNCTIONAL
 local Q = require 'Q'
+require('Q/UTILS/lua/cleanup')()
 require 'Q/UTILS/lua/strict'
 local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
@@ -16,13 +18,14 @@ print("=================================")
 local c2 = Q.sum(Q.vseq(c1, 4))
 c2:eval()
 print(c2:eval())
-local status = Q.vseq( 4, c1)
+local status = pcall(Q.vseq, 4, c1)
 assert(status == false)
 --===========================
-local status = Q.vsmul(2, Q.mk_col({1, 2, 3}, "F8"))
+local status = pcall(Q.vsmul, 2, Q.mk_col({1, 2, 3}, "F8"))
 assert(status == false)
 --===========================
 print("SUCCESS for " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'
