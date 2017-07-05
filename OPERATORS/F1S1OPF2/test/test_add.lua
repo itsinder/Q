@@ -1,3 +1,5 @@
+-- FUNCTIONAL
+
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local dbg = require 'Q/UTILS/lua/debugger'
@@ -23,6 +25,7 @@ local status = Q.vsmul(2, Q.mk_col({1, 2, 3}, "F8"))
 assert(status == false)
 --===========================
 print("SUCCESS for " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'
