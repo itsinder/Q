@@ -8,12 +8,16 @@ return function(file_name, data_file, num_cols, num_classes)
 
   local status = pcall(dofile, os.getenv("Q_METADATA_DIR")..'/'..meta_file)
   if not status or not train_X or not train_y or not test_X or not test_y then
-    os.execute('tar -xzf '..data_file)
+    local data_folder = 'data'
 
-    local train_X_file = file_name .. '/train_data.csv'
-    local train_y_file = file_name .. '/train_labels.csv'
-    local test_X_file = file_name .. '/test_data.csv'
-    local test_y_file = file_name .. '/test_labels.csv'
+    os.execute('mkdir -p ' .. data_folder)
+    os.execute('tar -xzf '.. data_file .. ' -C ' .. data_folder)
+
+    local prefix = data_folder .. '/' .. file_name .. '/'
+    local train_X_file = prefix .. 'train_data.csv'
+    local train_y_file = prefix .. 'train_labels.csv'
+    local test_X_file = prefix .. 'test_data.csv'
+    local test_y_file = prefix .. 'test_labels.csv'
 
     function cols(suff)
       local x_cols = {}
