@@ -1,8 +1,10 @@
+-- FUNCTIONAL STRESS
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
+require('Q/UTILS/lua/cleanup')()
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
-local z = Q.vsadd(c1, 10 , "junk")
+local z = Q.vsadd(c1, 10 )
 z:eval()
 Q.print_csv(z, nil, "")
 --===========================
@@ -29,6 +31,7 @@ end
 
 --===========================
 print("SUCCESS for " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

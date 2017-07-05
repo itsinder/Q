@@ -28,15 +28,16 @@
     local f2_width = qconsts.qtypes[f2_qtype].width
     local buf_sz = qconsts.chunk_size * f2_width
     local f1_coro = assert(f1:wrap(), "wrap failed for x")
+    local f2_buf = assert(ffi.malloc(buf_sz))
+    local nn_f2_buf = nil
     --============================================
     local f2_coro = coroutine.create(function()
-      local f2_buf = assert(ffi.malloc(buf_sz))
       local status, f1_status, f1_len, f1_chunk, nn_f1_chunk 
       f1_status = true; status = 0
       while (f1_status) do
         f1_status, f1_len, f1_chunk, nn_f1_chunk = coroutine.resume(f1_coro)
         if f1_status and f1_len and f1_len > 0 then 
-          status = qc[func_name](f1_chunk, f1_len, subs.c_mem, f2_buf)
+          status = qc[func_name](f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
           assert(status == 0, ">>>C error" .. func_name .. "<<<<")
           coroutine.yield(f1_len, f2_buf, nil)
         end
