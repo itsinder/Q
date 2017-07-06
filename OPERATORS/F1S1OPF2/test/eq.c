@@ -20,7 +20,7 @@ main(
   return_if_malloc_failed(Z);
   for ( int i = 0; i < M; i++ ) { Z[i] = 0; }
   //--------------------------------
-  status = vseq_F4(X, &Y, N, Z); cBYE(status);
+  status = vseq_F4(X, N,&Y, Z, NULL); cBYE(status);
   //--------------------------------
   // fprintf(stderr, "len = %d \n", sizeof(unsigned long long));
   int sum = 0;

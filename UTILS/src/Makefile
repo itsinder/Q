@@ -37,6 +37,11 @@ all : libutils.so ${hdr_files}
 ../gen_inc/_is_valid_chars_for_num.h : 
 	lua ../lua/cli_extract_func_decl.lua is_valid_chars_for_num.c ${INCDIR}
 
+../gen_inc/_file_cleanup.h:
+	lua ../lua/cli_extract_func_decl.lua file_cleanup.c ${INCDIR}
+
+
+
 ../gen_src/_bin_search_I1.c : bin_search.tmpl bin_search_generator.lua
 	lua bin_search_generator.lua I1
 ../gen_src/_bin_search_I2.c : bin_search.tmpl bin_search_generator.lua
@@ -69,7 +74,8 @@ hdr_files = \
         ../gen_inc/_get_bit.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
-	../gen_inc/_bits_to_bytes.h 
+	../gen_inc/_bits_to_bytes.h   \
+	../gen_inc/_file_cleanup.h
 
 #--------
 SRC_FILES=  \
@@ -83,7 +89,8 @@ SRC_FILES=  \
 	bits_to_bytes.c \
 	write_bits_to_file.c  \
         get_bit.c  \
-	is_valid_chars_for_num.c 
+	is_valid_chars_for_num.c \
+	file_cleanup.c
 
 libutils.so : ${bin_search_files} ${hdr_files}
 	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${INCS} ${SRC_FILES} ../gen_src/*.c -o libutils.so
