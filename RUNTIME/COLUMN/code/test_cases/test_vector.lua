@@ -1,14 +1,21 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 local dir = require 'pl.dir'
 local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
 local fns = require 'Q/RUNTIME/COLUMN/code/test_cases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
+local plpath = require 'pl.path'
 
-local bin_file_path = "./bin/"
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local bin_file_path = script_dir .."/bin/"
 
 -- common setting (SET UPS) which needs to be done for all test-cases
 dir.makepath(bin_file_path)
 
-local T = dofile("map_vector.lua")
+local T = dofile(script_dir .."/map_vector.lua")
 for i, v in ipairs(T) do
   if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
   
@@ -46,5 +53,7 @@ end
 
 fns["print_result"]()
 
+require('Q/UTILS/lua/cleanup')()
+os.exit()
 -- common cleanup (TEAR DOWN) for all testcases
 --dir.rmtree(bin_file_path)
