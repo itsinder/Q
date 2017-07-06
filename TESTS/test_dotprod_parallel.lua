@@ -1,4 +1,4 @@
--- WIP
+-- STRESS
 local Q = require 'Q'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 require 'Q/UTILS/lua/strict'
