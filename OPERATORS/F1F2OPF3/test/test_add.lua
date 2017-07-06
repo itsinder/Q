@@ -1,3 +1,5 @@
+-- FUNCTIONAL
+
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
@@ -21,6 +23,7 @@ assert(status == false)
 
 print("Successfully completed")
 
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 --[[
 q s_to_f T1 f1 'val=[10]:fldtype=[I4]'

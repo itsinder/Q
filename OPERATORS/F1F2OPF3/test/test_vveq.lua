@@ -49,4 +49,5 @@ assert(size == 8)
 for i=1,size -1 do
    assert(bytes[i] == 0)
 end
+require('Q/UTILS/lua/cleanup')()
 os.exit()
