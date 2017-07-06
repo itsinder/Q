@@ -11,6 +11,8 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <malloc.h>
 #include "mmap_types.h"
 //STOP_INCLUDES
 #include "_f_mmap.h"
@@ -22,8 +24,10 @@ f_mmap(
 )
 //STOP_FUNC_DECL
 {
-  mmap_struct *map = malloc(sizeof(mmap_struct));
-  if ( map == NULL ) { return NULL; }
+  errno = 0;
+  mmap_struct *map = NULL;
+  map = malloc(sizeof(mmap_struct));
+  if ( map == NULL ) { fprintf(stderr, "%s\n", strerror(errno)); return NULL; }
   map->status = -1;
   map->ptr_mmapped_file = NULL;
   map->file_size = 0;
