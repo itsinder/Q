@@ -42,7 +42,7 @@
         if f1_status and f1_len and f1_len > 0 then 
           status = qc[func_name](f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
           assert(status == 0, ">>>C error" .. func_name .. "<<<<")
-          coroutine.yield(f1_len, f2_buf, nil)
+          coroutine.yield(f1_len, f2_buf, nn_f2_buf)
         end
       end
     end)
