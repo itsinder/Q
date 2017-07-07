@@ -1,3 +1,4 @@
+-- NO_OP
 -- data for mul operation
 -- data field contains inputs in table 'a' and table 'b'
 -- and output in table 'z'
