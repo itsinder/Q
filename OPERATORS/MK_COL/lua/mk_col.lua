@@ -58,6 +58,7 @@ local mk_col = function (input, qtype)
     ffi.memset(chunk, 0, length_in_bytes)
 
     -- Copy values to allocated chunk
+    -- TODO: Look for bit operation in Lua or can we use C code (shift operator) instead of below arithmetic
     for k, v in ipairs(input) do
       if v == 1 then
         local index = math.floor((k-1)/64)
