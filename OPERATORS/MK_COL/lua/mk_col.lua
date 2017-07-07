@@ -52,10 +52,10 @@ local mk_col = function (input, qtype)
   local chunk = nil
   if qtype == "B1" then
     -- Allocate memory (multiple of 8bytes)
-    length_in_bytes = math.ceil(table_length/64)*8
-    chunk = assert(qc.malloc(length_in_bytes))
+    local length_in_bytes = math.ceil(table_length/64)*8
+    chunk = assert(ffi.malloc(length_in_bytes))
     chunk = assert(ffi.cast(ctype .. "*", chunk))
-    qc.memset(chunk, 0, length_in_bytes)
+    ffi.memset(chunk, 0, length_in_bytes)
 
     -- Copy values to allocated chunk
     for k, v in ipairs(input) do
