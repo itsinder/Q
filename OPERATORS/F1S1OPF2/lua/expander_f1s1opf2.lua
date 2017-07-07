@@ -32,6 +32,7 @@
     local nn_f2_buf = nil
     if subs.is_safe then
         nn_f2_buf = assert(ffi.malloc(qconsts.chunk_size))
+        ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
     end
     --============================================
     local f2_coro = coroutine.create(function()
@@ -46,7 +47,7 @@
         end
       end
     end)
-    return Column{gen=f2_coro, nn=false, field_type=f2_qtype}
+    return Column{gen=f2_coro, nn=subs.is_safe, field_type=f2_qtype}
   end
 
   return expander_f1s1opf2

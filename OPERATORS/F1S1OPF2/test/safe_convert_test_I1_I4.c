@@ -31,13 +31,17 @@ main(
   status = safe_convert_I1_I4(X, N, NULL, Y, Z);
 
   for ( int i = 0; i < N; i++ ) {
-    if ( Z[i] == 0 ) {
+    uint64_t widx = i >> 8; // word index
+    uint64_t bidx = i & 0xFF; // bit index
+    if ( !(mcr_is_ith_bit_set(Z[widx], bidx)) ) {
       printf("FAILURE\n");
       go_BYE(-1);
       return 1;
     }
+    printf("Ok\n");
   }
   printf("CONVERT SUCCESS\n");
+
 
 BYE:
   for ( int i = 0; i < N; i++ ) {
