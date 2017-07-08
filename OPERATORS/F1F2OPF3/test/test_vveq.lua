@@ -50,6 +50,5 @@ assert(size == 8)
 for i=1,size -1 do
    assert(bytes[i] == 0)
 end
-require 'Q/UTILS/lua/strict'
 print("SUCCESS for ", arg[0])
 os.exit()

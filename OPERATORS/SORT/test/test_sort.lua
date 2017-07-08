@@ -1,4 +1,4 @@
--- FUNCTIONAL 
+-- FUNCTIONAL
 Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 x = Q.mk_col({10, 20, 30, 40}, 'I4')
