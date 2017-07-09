@@ -12,19 +12,23 @@
 #include <assert.h>
 #include <fcntl.h>
 #include "mmap_types.h"
+#include "q_incs.h"
 //STOP_INCLUDES
 #include "_f_munmap.h"
 
 //START_FUNC_DECL
 int 
 f_munmap(
-    mmap_struct* map        
+    MMAP_REC_TYPE *ptr_mmap        
 )
 //STOP_FUNC_DECL
 {
-  if ( map == NULL ) { return -1; }
-  int rc = munmap(map->ptr_mmapped_file, map->file_size);
-  if ( rc != 0 ) { return -1; }
-  free(map);
-  return 0;
+  int status = 0;
+  if ( ptr_mmap == NULL ) { go_BYE(-1); }
+  int rc = munmap(ptr_mmap->map_addr, ptr_mmap->map_len);
+  if ( rc != 0 ) { go_BYE(-1); }
+  unlink(ptr_mmap->file_name);
+  free(ptr_mmap);
+BYE:
+  return status;
 }

@@ -1,8 +1,11 @@
 #ifndef __mmap_types_h
 #define __mmap_types_h
-typedef struct _mmap_struct {
-    void* ptr_mmapped_file;
-    size_t file_size;
+#include "q_constants.h"
+typedef struct _mmap_rec_type {
+  char file_name[Q_MAX_LEN_FILE_NAME+1];
+    void *map_addr;
+    size_t map_len;
+    int is_persist;
     int status;
-} mmap_struct;
+} MMAP_REC_TYPE;
 #endif

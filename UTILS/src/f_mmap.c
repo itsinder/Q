@@ -13,26 +13,32 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <malloc.h>
+#include "q_incs.h"
 #include "mmap_types.h"
 //STOP_INCLUDES
 #include "_f_mmap.h"
 //START_FUNC_DECL
-mmap_struct*
+
+MMAP_REC_TYPE *
 f_mmap(
    const char * const file_name,
    bool is_write
 )
 //STOP_FUNC_DECL
 {
-  errno = 0;
-  mmap_struct *map = NULL;
-  map = malloc(sizeof(mmap_struct));
-  if ( map == NULL ) { fprintf(stderr, "%s\n", strerror(errno)); return NULL; }
-  map->status = -1;
-  map->ptr_mmapped_file = NULL;
-  map->file_size = 0;
-
   int status = 0;
+  MMAP_REC_TYPE *ptr_mmap = NULL;
+  ptr_mmap = (MMAP_REC_TYPE *)malloc(sizeof(MMAP_REC_TYPE));
+  memset(ptr_mmap, '\0', sizeof(MMAP_REC_TYPE));
+
+  errno = 0;
+  if ( ( file_name == NULL) || ( *file_name == '\0' ) ) { go_BYE(-1); }
+  if ( ptr_mmap == NULL ) { go_BYE(-1); }
+  ptr_mmap->status = -1;
+  ptr_mmap->map_addr = NULL;
+  ptr_mmap->map_len = 0;
+  if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
+
   int fd, flags;
   struct stat filestat;
   size_t len;
@@ -44,21 +50,23 @@ f_mmap(
   else {
     fd = open(file_name, O_RDONLY);
   }
-  if ( fd < 0 ) { free(map); return NULL; }
-  status = fstat(fd, &filestat);
-  if (status < 0) { free(map); return NULL; }
+  if ( fd < 0 ) { go_BYE(-1); }
+  status = fstat(fd, &filestat); cBYE(status);
   len = filestat.st_size;
-  if ( len == 0 ) {  free(map); return NULL; }
-  if (is_write == true) {
+  if ( len == 0 ) {  go_BYE(-1); }
+  if ( is_write ) {
     flags = PROT_READ | PROT_WRITE;
   }
   else {
     flags = PROT_READ;
   }
-  map->ptr_mmapped_file = 
-    (void*)mmap(NULL, (size_t) len,  flags, MAP_SHARED, fd, 0);
+  ptr_mmap->map_addr = (void*)mmap(NULL, (size_t)len, flags, 
+      MAP_SHARED, fd, 0);
   close(fd);
-  map->file_size = filestat.st_size;
-  map->status = 0;
-  return map;
+  ptr_mmap->map_len = filestat.st_size;
+  ptr_mmap->status  = 0;
+  ptr_mmap->is_persist = false;
+  strcpy(ptr_mmap->file_name, file_name);
+BYE:
+  if ( status < 0 ) { return NULL; } else { return ptr_mmap; }
 }
