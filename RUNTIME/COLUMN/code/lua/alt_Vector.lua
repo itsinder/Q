@@ -44,9 +44,10 @@ local function open_vec_for_append(self)
   self.chunk_num    = 0
   self.num_in_chunk = 0
   self.num_elements = 0
-  self.filename = ffi.malloc(32)
+  self.filename = ffi.malloc(qconsts.max_len_file_name+1)
+  ffi.fill(self.filename, qconsts.max_len_file_name+1)
   self.is_memo = true
-  qc['rand_file_name'](self.filename, 32-1)
+  qc['rand_file_name'](self.filename, qconsts.max_len_file_name)
   return self
 end
 
@@ -147,7 +148,6 @@ function Vector:fldtype()
 end
 
 function Vector:sz()
-  --size of each entry
   return self.field_size
 end
 
@@ -187,24 +187,20 @@ function Vector:set(addr, idx, len)
   assert(type(len) == "number")
   assert(len >= 1)
   if ( chunk ) then
-    if ( idx ) then 
-      assert(type(idx) == "number")
-      assert(idx >= 0)
-      -- must start writing from where you left off
-      local chk_chunk_num = idx / qconsts.chunk_size
-      assert(chk_chunk_num >= self.chunk_num)
-      local chk_num_in_chunk = idx % qconsts.chunk_size
-      assert(num_in_chunk == self.num_in_chunk)
-    else
-      idx = (chunk_num * qconsts.chunk_size) + num_in_chunk
-    end
+    -- have to start writing from where you left off
+    assert( idx == nil)
+    idx = self.num_in_chunk
     -- TODO < or <= ?
     -- if ( (len + num_in_chunk) < qconsts.chunk_size ) then
-    local num_left_to_copy = 0
+    local num_left_to_copy = len
     repeat 
+      local space_in_chunk = qconsts.chunk_size - self.num_in_chunk)
+      local num_to_copy = min(len, space_in_chunk)
       local dst = chunk + (idx * self.field_size)
-      local n = len * self.field_size
-      ffi.copy(dst, addr, n)
+      ffi.copy(dst, addr, num_to_copy)
+      num_left_to_copy = num_left_to_copy - num_to_copy
+      addr = addr + (num_to_copy * self.field_size)
+      self.num_in_chunk = self.num_in_chunk + num_to_copy
     until num_left_to_copy == 0
   else
     assert(idx)

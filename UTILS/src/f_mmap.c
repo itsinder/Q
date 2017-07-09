@@ -37,7 +37,8 @@ f_mmap(
   ptr_mmap->status = -1;
   ptr_mmap->map_addr = NULL;
   ptr_mmap->map_len = 0;
-  if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
+  // TODO: Change 255 to q #define CONSTANT
+  if ( strlen(file_name) > 255 ) { go_BYE(-1); }
 
   int fd, flags;
   struct stat filestat;

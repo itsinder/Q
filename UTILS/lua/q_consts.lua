@@ -4,6 +4,7 @@ local qconsts = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
 
+    qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
     qconsts.chunk_size = 64 * 1024
