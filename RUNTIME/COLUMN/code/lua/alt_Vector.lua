@@ -29,7 +29,13 @@ local function open_file_for_rw_access(self, arg)
   self.filename = assert(arg.filename, "Filename not specified for read")
 
   --mmap the file
-  self.mmap = assert(ffi.gc(qc.f_mmap(self.filename, true), qc.f_munmap))
+  local is_write = true
+  if ( arg.is_write and arg.is_write = false ) then 
+    is_write = false
+  end
+  self.mmap = assert(ffi.gc(qc.f_mmap(self.filename, is_write), 
+  qc.f_munmap))
+  self.is_write = is_write
 
   self.num_elements = tonumber(self.map_len) / self.field_size
   assert(self.num_elements > 0 )
