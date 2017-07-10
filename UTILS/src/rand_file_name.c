@@ -24,7 +24,7 @@ rand_file_name(
   int status = 0;
   char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                'A', 'B', 'C', 'D', 'E', 'F' };
-  if (  bufsz < 32 ) { go_BYE(-1); }
+  if (  bufsz < 31 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
   uint64_t t = RDTSC();
   t = mix_UI8(t);

@@ -39,3 +39,7 @@ mt.__index = function (t, n)
   return rawget(t, n)
 end
 
+
+-- This enforces debug = true while testing
+require 'Q/UTILS/lua/q_consts'
+package.loaded['Q/UTILS/lua/q_consts'].debug = true

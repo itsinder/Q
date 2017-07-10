@@ -2,7 +2,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local plpath  = require 'pl.path'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
--- local dbg = require 'Q/UTILS/lua/debugger'
+local dbg = require 'Q/UTILS/lua/debugger'
 
 local Vector = {}
 Vector.__index = Vector
@@ -23,18 +23,19 @@ type = function( obj )
   return otype
 end
 
-local function open_file_for_rw_access(self, arg) 
+local function materialized_vec(self, arg) 
 
-  assert(self.filename == nil)
-  self.filename = assert(arg.filename, "Filename not specified for read")
+  assert(self.file_name == nil)
+  self.file_name = assert(arg.file_name, "file_name not specified for read")
 
   --mmap the file
   local is_write = true
-  if ( arg.is_write and arg.is_write = false ) then 
+  if ( ( arg.is_write ) and ( arg.is_write == false ) ) then 
     is_write = false
   end
-  self.mmap = assert(ffi.gc(qc.f_mmap(self.filename, is_write), 
-  qc.f_munmap))
+  self.mmap = assert(ffi.gc(qc.f_mmap(self.file_name, is_write), 
+    qc.f_munmap))
+  self.mmap = ffi.cast("MMAP_REC_TYPE *", self.mmap)
   self.is_write = is_write
 
   self.num_elements = tonumber(self.map_len) / self.field_size
@@ -42,39 +43,29 @@ local function open_file_for_rw_access(self, arg)
   assert(math.ceil(self.num_elements)  == self.num_elements)
   assert(math.floor(self.num_elements) == self.num_elements)
 
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
-local function open_vec_for_append(self)
-  self.chunk = assert(ffi.malloc(qconsts.chunk_size * vec.field_size))
+local function nascent_vec(self)
+  self.chunk = assert(ffi.malloc(qconsts.chunk_size * self.field_size))
   self.chunk_num    = 0
   self.num_in_chunk = 0
   self.num_elements = 0
-  self.filename = ffi.malloc(qconsts.max_len_file_name+1)
-  ffi.fill(self.filename, qconsts.max_len_file_name+1)
+  self.file_name = ffi.malloc(qconsts.max_len_file_name+1)
+  ffi.fill(self.file_name, qconsts.max_len_file_name+1)
   self.is_memo = true
-  qc['rand_file_name'](self.filename, qconsts.max_len_file_name)
+  qc['rand_file_name'](self.file_name, qconsts.max_len_file_name)
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
 function Vector:check()
   --================================================
-  if self.mmap then 
-    assert(self.mmap.file_name)
-    assert(self.mmap.map_addr)
-    assert(self.mmap.persist)
-    assert(self.mmap.map_len > 0)
-    assert(plpath.isfile(self.mmap.file_name))
-    local file_size = plpath.getsize(vec.filename)
-    assert(file_size > 0)
-    local chk_len = tonumber(self.f_map.file_size) / self.field_size
-    assert(math.ceil(chk_len) == self.num_elements)
-    assert(math.floor(chk_len) == self.num_elements)
-    assert(self.num_elements > 0)
-  end
-  --================================================
+  assert(self.field_type)
+  assert(type(self.field_type) == "string")
   if ( self.field_type ~= "SC" ) then 
-    assert(self.field_size == q_consts.qtype[qtype].width)
+    assert(self.field_size == qconsts.qtypes[self.field_type].width)
   else
     assert(self.field_size >= 2)
   end
@@ -91,24 +82,45 @@ function Vector:check()
     assert(self.num_in_chunk >= 0 )
 
     if ( self.is_memo ) then
-      assert(self.filename)
+      assert(self.file_name)
     else
-      assert(self.filename == nil)
+      assert(self.file_name == nil)
     end
-    local filesize = plpath.getsize(self.filename)
-    assert(filesize == (chunk_num * self.field_size))
-    assert(((self.chunk_num * qconsts.chunk_size) + self.num_in_chunk)
-      == self.num_elements)
+    assert(self.is_write == nil)
     if ( ( self.chunk_num >= 1 ) and ( self.is_memo ) ) then 
-      assert(self.mmap.file_name)
-      assert(plpath.isfile(self.mmapfile_name))
-      local file_size = ( chunk_num * self.field_size )
-      assert(file_size == plpath.getsize(self.filename))
+      assert(self.file_name)
+      assert(plpath.isfile(ffi.string(self.file_name)))
+      local file_size = (self.chunk_num*self.field_size*qconsts.chunk_size)
+      assert(file_size == plpath.getsize(ffi.string(self.file_name)))
+      assert(((self.chunk_num * qconsts.chunk_size) + self.num_in_chunk)
+      == self.num_elements)
     end
   else
+    if ( self.is_write ) then 
+      assert(type(self.is_write) == "boolean")
+    end
     assert(self.chunk == nil)
     assert(self.num_in_chunk == nil)
     assert(self.chunk_num == nil)
+  --================================================
+    local mmap = assert(ffi.cast("MMAP_REC_TYPE *", self.mmap))
+    local file_name  = assert(mmap[0].file_name)
+    local map_addr   = assert(mmap[0].map_addr)
+    local is_persist = assert(mmap[0].is_persist)
+    local map_len    = assert(mmap[0].map_len)
+
+    file_name = ffi.string(file_name)
+
+    assert((is_persist == 0 ) or ( is_persist == 1))
+    assert(map_len > 0)
+    assert(plpath.isfile(file_name))
+    local file_size = plpath.getsize(file_name)
+    assert(file_size > 0)
+    local chk_len = tonumber(file_size) / self.field_size
+    assert(math.ceil(chk_len) == self.num_elements)
+    assert(math.floor(chk_len) == self.num_elements)
+    assert(self.num_elements > 0)
+  --================================================
   end
   return true
 end
@@ -131,7 +143,7 @@ function Vector.new(arg)
     vec.field_size = fldsz
   else
     assert(arg.field_size == nil, "Can specify field size only for SC")
-    vec.field_size = q_consts.qtype[qtype].width
+    vec.field_size = qconsts.qtypes[qtype].width
   end
   --====== is vector materialized or nascent
   assert(arg.is_nascent)
@@ -146,21 +158,24 @@ function Vector.new(arg)
 end
 
 function Vector:length()
+  if ( qconsts.debug ) then self:check() end
   return self.num_elements
 end
 
 function Vector:fldtype()
+  if ( qconsts.debug ) then self:check() end
   return self.field_type
 end
 
 function Vector:sz()
+  if ( qconsts.debug ) then self:check() end
   return self.field_size
 end
 
 function Vector:memo(is_memo)
   assert(is_memo, "is_memo not specified")
   assert(type(is_memo) == "boolean", "Incorrect type supplied")
-  if ( self.chunk ) then 
+  if ( self.is_nascent ) then 
     if ( self.chunk_num > 0 ) then 
       assert(nil, "Too late to set memo")
     end
@@ -169,21 +184,23 @@ function Vector:memo(is_memo)
     end
     if ( is_memo ) then 
       self.is_memo = true
-      if ( not self.filename ) then 
-        self.filename = ffi.malloc(32)
-        qc['rand_file_name'](self.filename, 32-1)
+      if ( not self.file_name ) then 
+        self.file_name = ffi.malloc(32)
+        qc['rand_file_name'](self.file_name, 32-1)
       end
     else
       self.is_memo = false
-      self.filename = nil
+      self.file_name = nil
     end
   else
     -- change to log 
     print("No need to memo when materialized")
   end
+  if ( qconsts.debug ) then self:check() end
 end
 
 function Vector:is_memo()
+  if ( qconsts.debug ) then self:check() end
   return self.is_memo
 end
 
@@ -192,23 +209,55 @@ function Vector:set(addr, idx, len)
   assert(len)
   assert(type(len) == "number")
   assert(len >= 1)
-  if ( chunk ) then
+  if ( self.is_nascent ) then
     -- have to start writing from where you left off
     assert( idx == nil)
-    idx = self.num_in_chunk
+    local initial_num_elements = self.num_elements
     -- TODO < or <= ?
     -- if ( (len + num_in_chunk) < qconsts.chunk_size ) then
     local num_left_to_copy = len
     repeat 
-      local space_in_chunk = qconsts.chunk_size - self.num_in_chunk)
-      local num_to_copy = min(len, space_in_chunk)
-      local dst = chunk + (idx * self.field_size)
-      ffi.copy(dst, addr, num_to_copy)
+      local space_in_chunk = qconsts.chunk_size - self.num_in_chunk
+      print(" space = ", space_in_chunk)
+      if ( space_in_chunk == 0 )  then
+        if ( self.is_memo ) then
+          print("C: Writing to file")
+          local status = qc["buf_to_file"](self.chunk,
+            self.field_size, self.num_in_chunk, self.file_name)
+          print("C: Done with file")
+            --[[
+          local fp = ffi.C.fopen(ffi.string(self.file_name), "a")
+          print("Opened file")
+          local nw = ffi.C.fwrite(self.chunk, qconsts.chunk_size,
+            self.field_size, fp);
+          print("Wrote to file")
+          -- assert(nw > 0 )
+          ffi.C.fclose(fp)
+          print("Done with file")
+          --]]
+        end
+        self.num_in_chunk = 0
+        self.chunk_num = self.chunk_num + 1
+        space_in_chunk = qconsts.chunk_size
+        ffi.fill(self.chunk, qconsts.chunk_size * self.field_size, 0)
+      end
+
+      local num_to_copy  = len
+      if ( space_in_chunk < len ) then 
+        num_to_copy = space_in_chunk
+      end
+      -- local num_to_copy = min(len, space_in_chunk)
+      local dst = ffi.cast("char *", self.chunk) + 
+        (self.num_in_chunk * self.field_size)
+      ffi.copy(dst, addr, num_to_copy * self.field_size)
       num_left_to_copy = num_left_to_copy - num_to_copy
-      addr = addr + (num_to_copy * self.field_size)
+      addr = ffi.cast("char *", addr) + (num_to_copy * self.field_size)
       self.num_in_chunk = self.num_in_chunk + num_to_copy
+      self.num_elements = self.num_elements + num_to_copy
     until num_left_to_copy == 0
+    assert(self.num_elements == initial_num_elements + len)
   else
+    assert(self.is_write == true)
     assert(idx)
     assert(type(idx) == "number")
     assert(idx >= 0)
@@ -219,37 +268,79 @@ function Vector:set(addr, idx, len)
     local n = len * self.field_size
     ffi.copy(dst, addr, n)
   end
+  if ( qconsts.debug ) then self:check() end
 end
 
-local function get(idx, len)
+function Vector:get(idx, len)
   local addr
+
+  assert(idx)
+  assert(type(idx) == "number")
+  assert(idx >= 0)
+
+  assert(len)
+  assert(type(len) == "number")
+  assert(len >= 1)
+  if ( self.is_nascent ) then 
+    local chunk_num = math.floor(idx / qconsts.chunk_size)
+    local chunk_idx = idx % qconsts.chunk_size
+    assert(chunk_num == self.chunk_num)
+    assert(num_in_chunk + len <= qconsts.chunk_size)
+    addr = self.chunk + (chunk_idx * self.field_size)
+  else
+    assert(idx < self.num_elements)
+    assert(idx+len <= self.num_elements)
+    addr = ffi.cast("char *", self.mmap.map_addr) + (idx * self.field_size)
+  end
+  if ( qconsts.debug ) then self:check() end
   return addr
 end
 
 function Vector:eov()
-  return self -- TODO 
+  -- flush last chunk to file 
+  assert(self.is_nascent)
+  if ( self.num_in_chunk == 0 ) then return end
+  local fp = ffi.C.fopen(ffi.string(self.file_name), "a")
+  local nw = ffi.C.fwrite(self.chunk, self.num_in_chunk, self.field_size, fp);
+  -- TODO Why does this not work? assert(nw == self.num_in_chunk)
+  assert(nw > 0 )
+  ffi.C.fclose(fp)
+  -- open file for r/w access
+  self.is_write = true
+  self.mmap = assert(ffi.gc(qc.f_mmap(self.file_name, self.is_write), 
+  qc.f_munmap))
+  self.is_nascent = false
+  -- destroy stuff not needed any more
+  self.chunk = nil
+  self.num_in_chunk = nil
+  self.chunk_num = nil
+  self.file_name = nil
+  if ( qconsts.debug ) then self:check() end
 end
 
 function Vector:internals()
-  return self -- TODO Check with IS
-end
-
-function Vector:delete()
-  -- TODO 
+  if ( qconsts.debug ) then self:check() end
+  return self -- TODO Check with IS for tostring() compatibility
 end
 
 function Vector:persist()
-    -- TODO Add routine to materialize if not already materialized
-    if self:ismemo() then
-        return string.format("Vector{field_type='%s', filename='%s',}", 
-            self.field_type, plpath.abspath(self.filename))
-    else 
-        return nil
-    end
+   -- TODO Add routine to materialize if not already materialized
+  self.mmap.is_persist = true
+  assert(self.is_nascent == false)
 end
 
-function Vector:__tostring()
-    return self:persist()
+
+function Vector:meta()
+  local T = {}
+  if ( self.file_name ) then 
+    T.file_name = self.file_name
+  end
+  if ( self.mmap ) then
+    T.map_len = self.mmap.map_len
+    T.file_name = self.mmap.file_name
+    T.is_persist = self.mmap.is_persist
+  end
+  return T
 end
 
 return require('Q/q_export').export('Vector', Vector)
