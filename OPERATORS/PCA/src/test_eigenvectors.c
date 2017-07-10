@@ -5,17 +5,16 @@
 #include "eigenvectors.h"
 
 int 
-main( ) 
+main(void) 
 {
   int status = 0;
-#ifdef XXX
 
   uint64_t n = 3;
   double **X = NULL;
   X = malloc(n * sizeof(double *));
   return_if_malloc_failed(X);
   for ( uint64_t i = 0; i < n; i+=1 ) {
-    X[i] = (double *) malloc(n * sizeof(double));
+    X[i] = malloc(n * sizeof(double));
     return_if_malloc_failed(X[i]);
   }
 
@@ -31,15 +30,13 @@ main( )
 
   //X = {{3, 2, 4}, {2, 0, 2}, {4, 2, 3}};
 
-  uint64_t A_len = (n * (n + 1)) / 2;
-  double *A = (double *) malloc(A_len * sizeof(double));
+  double *A = malloc(n*n* sizeof(double));
   return_if_malloc_failed(A);
-  for (uint64_t i = 0; i < n; i+=1 ) {
-    for (uint64_t j = 0; j < n; j+=1 ) {
+  for (uint64_t i = 0; i < n; i++ ) { 
+    for (uint64_t j = 0; j < n; j++ ) { 
       A[i * n + j] = X[i][j];
     }
   }
-
 
   double *W = (double *) malloc(n * sizeof(double));
   return_if_malloc_failed(W);
@@ -60,16 +57,20 @@ main( )
     printf("end eigenvector %" PRIu64 "\n", i);
   }
 
-  printf("begin eigenvectors\n");
+  printf("begin eigenvalues\n");
   for ( uint64_t i = 0; i < n; i+=1 ) {
     printf("%lf ", W[i]);
   }
-  printf("end eigenvectors\n");
+  printf("\nend eigenvalues\n");
 
-  return status;
-#endif
 BYE:
+  free(A);
+  free(W);
+  if ( X != NULL ) { 
+    for ( int i = 0; i < n; i++ ) {
+      free_if_non_null(X[i]);
+    }
+  }
+  free_if_non_null(X);
   return status;
-
 }
-
