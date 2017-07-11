@@ -19,4 +19,4 @@ for i = 1, 128 do
   status = qc['buf_to_file'](addr, size, nmemb, file_name)
   assert(status == 0)
 end
--- os.execute("rm -f _*")
+os.execute("rm -f _*")

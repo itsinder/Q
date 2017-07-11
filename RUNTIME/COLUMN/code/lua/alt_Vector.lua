@@ -185,8 +185,8 @@ function Vector:memo(is_memo)
     if ( is_memo ) then 
       self.is_memo = true
       if ( not self.file_name ) then 
-        self.file_name = ffi.malloc(32)
-        qc['rand_file_name'](self.file_name, 32-1)
+        self.file_name = ffi.malloc(qconsts.max_len_file_name+1)
+        qc['rand_file_name'](self.file_name, qconsts.max_len_file_name)
       end
     else
       self.is_memo = false
@@ -221,20 +221,22 @@ function Vector:set(addr, idx, len)
       print(" space = ", space_in_chunk)
       if ( space_in_chunk == 0 )  then
         if ( self.is_memo ) then
-          print("C: Writing to file")
-          local status = qc["buf_to_file"](self.chunk,
+          local use_c_code = true
+          if ( use_c_code ) then 
+            print("C: Writing to file")
+            local status = qc["buf_to_file"](self.chunk,
             self.field_size, self.num_in_chunk, self.file_name)
-          print("C: Done with file")
-            --[[
-          local fp = ffi.C.fopen(ffi.string(self.file_name), "a")
-          print("Opened file")
-          local nw = ffi.C.fwrite(self.chunk, qconsts.chunk_size,
-            self.field_size, fp);
-          print("Wrote to file")
-          -- assert(nw > 0 )
-          ffi.C.fclose(fp)
-          print("Done with file")
-          --]]
+            print("C: Done with file")
+          else 
+            local fp = ffi.C.fopen(ffi.string(self.file_name), "a")
+            print("Opened file")
+            local nw = ffi.C.fwrite(self.chunk, qconsts.chunk_size,
+              self.field_size, fp);
+            print("Wrote to file")
+            -- assert(nw > 0 )
+            ffi.C.fclose(fp)
+            print("Done with file")
+          end
         end
         self.num_in_chunk = 0
         self.chunk_num = self.chunk_num + 1
