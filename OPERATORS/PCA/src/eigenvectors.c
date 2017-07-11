@@ -21,6 +21,8 @@ eigenvectors(
   
   status = LAPACKE_dsyev(LAPACK_COL_MAJOR, jobz, uplo, N, A, LDA, W);
 
+  
+
 BYE:
   return status;
 }

@@ -1,7 +1,7 @@
 local q = require 'Q'
 local qconsts = require 'Q/UTILS/q_consts.lua'
 
-return local function pca(X)
+return function pca(X)
   -- TODO add input error checking
   local n = X[1]:length()
   local p = #X
@@ -20,7 +20,11 @@ return local function pca(X)
   for i=1,p do
     VCM[i] = {}
     for j=i,p do
-      VCM[i][j] = Q.sum(Q.vvmul(X[i], X[j])) / (n-1)
+      if(j == i) then
+        VCM[i][j] = 1
+      else
+        VCM[i][j] = Q.sum(Q.vvmul(X[i], X[j])) / (n-1)
+      end
     end
     if( i ~= 1 ) then
       for j = 1,i-1 do

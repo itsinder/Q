@@ -18,15 +18,15 @@ main(void)
     return_if_malloc_failed(X[i]);
   }
 
-  X[0][0] = 3;
-  X[0][1] = 2;
-  X[0][2] = 4;
-  X[1][0] = 2;
-  X[1][1] = 0;
-  X[1][2] = 2;
-  X[2][0] = 4;
-  X[2][1] = 2;
-  X[2][2] = 3;
+  X[0][0] = 1;
+  X[0][1] = 0.67;
+  X[0][2] = -0.1;
+  X[1][0] = 0.67;
+  X[1][1] = 1.0;
+  X[1][2] = -0.29;
+  X[2][0] = -0.10;
+  X[2][1] = -0.29;
+  X[2][2] = 1.0;
 
   //X = {{3, 2, 4}, {2, 0, 2}, {4, 2, 3}};
 
@@ -46,6 +46,16 @@ main(void)
   if(status != 0) {
     printf("ERROR something went wrong\n");
     return status;
+  }
+
+  //eigenvalues in PCA cannot be negative
+  if ( status == 0 ) {
+    for ( int i = 0; i < n; i++ ) {
+      if ( W[i] < 0 ) {
+        printf("Negative eigenvectors - model specification error\n");
+        go_BYE(-1);
+      }
+    }
   }
 
   for ( uint64_t i = 0; i < n; i+=1 ) {
