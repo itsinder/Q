@@ -1,13 +1,20 @@
+-- FUNCTIONAL
+
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 local Dictionary = require "Q/UTILS/lua/dictionary"
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 local utils = require 'Q/UTILS/lua/utils'
+local plpath = require 'pl.path'
 
+local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local no_of_success = 0
 local no_of_failure = 0
 local failed_testcases = {}
 
-local T = dofile("map_dictionary.lua")
+local T = dofile(script_dir .."/map_dictionary.lua")
 --_G["Q_DICTIONARIES"] = {}
 
 
@@ -18,11 +25,11 @@ function increment_failed_load(index, v, str)
   print("reason for failure ::"..str)
   no_of_failure = no_of_failure + 1
   table.insert(failed_testcases,index)
-  
+--[[  
   print("\n-----------------Meta Data File------------\n")
   os.execute("cat /home/pragati/Desktop/Q/UTILS/test/test_metadata/"..v.meta) 
   print("\n--------------------------------------------\n")
-  
+]]  
 end
 
 -- this function checks whether after passing valid metadata
@@ -158,7 +165,7 @@ handle_function["category5"] = handle_category5
 
 local function calling_dictionary(i ,m)
   -- print(i,"Testing : " .. m.name)
-  local M = dofile("test_metadata/"..m.meta)
+  local M = dofile(script_dir .."/test_metadata/"..m.meta)
   local result
   local ret = assert(Dictionary(M.dict))
   if handle_function[m.category] then
@@ -194,3 +201,6 @@ for i, m in ipairs(T) do
 end
 
 print_results()
+
+require('Q/UTILS/lua/cleanup')()
+os.exit()
