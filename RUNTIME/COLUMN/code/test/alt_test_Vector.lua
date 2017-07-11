@@ -8,10 +8,10 @@ local x
 local idx 
 local addr
 local len  = 1
+vec_len = 20000*qconsts.chunk_size+3
 x = Vector({ field_type = "I4", is_nascent = true})
 addr = ffi.malloc(len * qconsts.qtypes["I4"].width)
 addr = ffi.cast("int32_t *", addr)
-vec_len = 20000*qconsts.chunk_size+3
 for i = 1, vec_len do 
   addr[0] = i*10
   x:set(addr, nil, len)
