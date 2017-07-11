@@ -1,21 +1,21 @@
 require 'Q/UTILS/lua/strict'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi      = require 'Q/UTILS/lua/q_ffi'
-local Vector   = require 'Q/RUNTIME/COLUMN/code/lua/alt_Vector'
+local Vector   = require 'Q/RUNTIME/COLUMN/code/lua/bug_Vector'
 os.execute("rm -f _*")
 
 local x 
 local idx 
 local addr
 local len  = 1
-vec_len = 20000*qconsts.chunk_size+3
+vec_len = 32*qconsts.chunk_size+3
 x = Vector({ field_type = "I4", is_nascent = true})
 addr = ffi.malloc(len * qconsts.qtypes["I4"].width)
 addr = ffi.cast("int32_t *", addr)
 for i = 1, vec_len do 
   addr[0] = i*10
   x:set(addr, nil, len)
-  print(i)
+  if ( ( i % (16*1024) ) == 0 ) then print(i) end
 end
 print("=== Created vector ===")
 os.exit()

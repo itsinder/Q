@@ -48,12 +48,17 @@ local function materialized_vec(self, arg)
 end
 
 local function nascent_vec(self)
-  self.chunk = assert(ffi.malloc(qconsts.chunk_size * self.field_size))
+  local sz = qconsts.chunk_size * self.field_size
+  self.chunk = ffi.new("char[?]", sz)
+  assert(self.chunk)
+  ffi.fill(self.chunk, sz)
   self.chunk_num    = 0
   self.num_in_chunk = 0
   self.num_elements = 0
-  self.file_name = ffi.malloc(qconsts.max_len_file_name+1)
-  ffi.fill(self.file_name, qconsts.max_len_file_name+1)
+  sz = qconsts.max_len_file_name+1
+  self.file_name = ffi.new("char[?]", sz)
+  assert(self.file_name)
+  ffi.fill(self.file_name, sz)
   self.is_memo = true
   qc['rand_file_name'](self.file_name, qconsts.max_len_file_name)
   if ( qconsts.debug ) then self:check() end
@@ -61,6 +66,7 @@ local function nascent_vec(self)
 end
 
 function Vector:check()
+
   --================================================
   assert(self.field_type)
   assert(type(self.field_type) == "string")
@@ -122,6 +128,7 @@ function Vector:check()
     assert(self.num_elements > 0)
   --================================================
   end
+
   return true
 end
 
@@ -173,7 +180,7 @@ function Vector:sz()
 end
 
 function Vector:memo(is_memo)
-  assert(is_memo, "is_memo not specified")
+  print(is_memo)
   assert(type(is_memo) == "boolean", "Incorrect type supplied")
   if ( self.is_nascent ) then 
     if ( self.chunk_num > 0 ) then 
@@ -185,7 +192,10 @@ function Vector:memo(is_memo)
     if ( is_memo ) then 
       self.is_memo = true
       if ( not self.file_name ) then 
-        self.file_name = ffi.malloc(qconsts.max_len_file_name+1)
+        sz = qconsts.max_len_file_name+1
+        self.file_name = ffi.new("char [?]", sz)
+        assert(self.file_name)
+        ffi.fill(self.file_name, sz)
         qc['rand_file_name'](self.file_name, qconsts.max_len_file_name)
       end
     else
@@ -218,9 +228,9 @@ function Vector:set(addr, idx, len)
     local num_left_to_copy = len
     repeat 
       local space_in_chunk = qconsts.chunk_size - self.num_in_chunk
-      print(" space = ", space_in_chunk)
       if ( space_in_chunk == 0 )  then
         if ( self.is_memo ) then
+          print(self.chunk)
           local use_c_code = true
           if ( use_c_code ) then 
             print("C: Writing to file")
