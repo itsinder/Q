@@ -2,36 +2,22 @@ local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
-local eigen   = load('Q/OPERATORS/PCA/src/libeigen.so')
-
---[=[local hdr = [[
-
-extern int
-eigenvectors(
-             uint64_t n,
-             double *W,
-             double *A,
-             double **X
-            );
-]]
-
-pcall(ffi.cdef, hdr)
---]=]
 
 local function eigen(X)
-  local eigen   = load('Q/OPERATORS/PCA/src/libeigen.so')
-
-  local hdr = [[
-
-  extern int
-  eigenvectors(
-               uint64_t n,
-               double *W,
-               double *A,
-               double **X
-              );
-  ]]
-  pcall(ffi.cdef, hdr)
+  local stand_alone_test = true
+  local soqc
+  if  stand_alone_test then
+    local hdr = [[
+    extern int eigenvectors(
+                 uint64_t n,
+                 double *W,
+                 double *A,
+                 double **X
+                );
+    ]]
+    ffi.cdef(hdr)
+    soqc = ffi.load("../src/libeigen.so")
+  end
   -- START: verify inputs
   assert(type(X) == "table", "X must be a table ")
   local m = nil
@@ -53,7 +39,9 @@ local function eigen(X)
 
   -- malloc space for eigenvalues (w) and eigenvectors (A)
   local wptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m), "malloc failed")
+  wptr = ffi.cast("double *", wptr)
   local Aptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m * m), "malloc failed")
+  Aptr = ffi.cast("double *", Aptr)
 
   local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
   Xptr = ffi.cast("double **", Xptr)
@@ -62,7 +50,12 @@ local function eigen(X)
     assert(nn_xptr == nil, "Values cannot be nil")
     Xptr[xidx-1] = ffi.cast("double *", xptr)
   end
-  local status = qc["eigenvectors"](m, wptr, Aptr, Xptr)
+  local status 
+  if ( stand_alone_test ) then
+    status = soqc["eigenvectors"](m, wptr, Aptr, Xptr)
+  else
+    status = qc["eigenvectors"](m, wptr, Aptr, Xptr)
+  end
   assert(status == 0, "eigenvectors could not be calculated")
 
   local E = {}
@@ -70,11 +63,11 @@ local function eigen(X)
   for i = 1, m do
     E[i] = Column.new({field_type = "F8", write_vector = true})
     E[i]:put_chunk(m, Aptr, nil)
-    Aptr = Aptr + (ffi.sizeof("double") * m)
+    Aptr = Aptr + m
   end
 
   local W = Column.new({field_type = "F8", write_vector =true})
-  W.put_chunk(m, wptr, nil)
+  W:put_chunk(m, wptr, nil)
 
   return({eigenvalues = W, eigenvectors = E})
 

@@ -5,9 +5,9 @@ DBG_FLAGS = -g
 OPT_FLAGS = -O4
 OPT_FLAGS = 
 
-FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) -std=gnu99 -fPIC -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic 
+FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) ${QC_FLAGS}
 # LINK_FLAGS =  -lm -lgomp -llapacke  -llapack -lblas
-LINK_FLAGS = -llapacke -llapack -lblas -lm -Wall
+LINK_FLAGS = -llapacke -llapack -lblas -lm -Wall -fPIC -shared
 DEPS = matrix_multiply.h
 
 INCS= -I../../../UTILS/inc
@@ -18,7 +18,7 @@ all: eigen libeigen.so
 	cp eigenvectors.h ${Q_BUILD_DIR}/include/
 
 libeigen.so : eigenvectors.c
-	$(CC) -c $(INCS) $(FLAGS) eigenvectors.c -o libeigen.so
+	$(CC) $(INCS) $(FLAGS) ${LINK_FLAGS}  eigenvectors.c -o libeigen.so
 
 eigen: eigenvectors.o test_eigenvectors.o
 	$(CC) $(INCS) $(FLAGS)  \
