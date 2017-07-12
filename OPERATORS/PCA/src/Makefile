@@ -7,7 +7,7 @@ OPT_FLAGS =
 
 FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) ${QC_FLAGS}
 # LINK_FLAGS =  -lm -lgomp -llapacke  -llapack -lblas
-LINK_FLAGS = -llapacke -llapack -lblas -lm -Wall -fPIC -shared
+LINK_FLAGS = -llapacke -llapack -lblas -lm -Wall -shared
 
 INCS= -I../../../UTILS/inc
 
@@ -20,7 +20,7 @@ libeigen.so : eigenvectors.c
 	$(CC) $(INCS) $(FLAGS) ${LINK_FLAGS}  eigenvectors.c -o libeigen.so
 
 eigen: eigenvectors.o test_eigenvectors.o
-	$(CC) $(INCS) $(FLAGS)  \
+	$(CC) $(INCS) $(FLAGS)  -shared \
 	eigenvectors.o test_eigenvectors.o  -o eigen $(LINK_FLAGS)
 
 .c.o : $(DEPS)
