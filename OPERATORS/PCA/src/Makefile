@@ -8,7 +8,6 @@ OPT_FLAGS =
 FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) ${QC_FLAGS}
 # LINK_FLAGS =  -lm -lgomp -llapacke  -llapack -lblas
 LINK_FLAGS = -llapacke -llapack -lblas -lm -Wall -fPIC -shared
-DEPS = matrix_multiply.h
 
 INCS= -I../../../UTILS/inc
 
