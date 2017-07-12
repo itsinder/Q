@@ -15,6 +15,7 @@
 #include "q_incs.h"
 //STOP_INCLUDES
 #include "_f_munmap.h"
+#include "_get_file_size.h"
 
 //START_FUNC_DECL
 int 
@@ -29,7 +30,15 @@ f_munmap(
   if ( ptr_mmap->map_len == 0 ) { go_BYE(-1); }
   if ( ptr_mmap->file_name == NULL ) { go_BYE(-1); }
   int rc = munmap(ptr_mmap->map_addr, ptr_mmap->map_len);
-  unlink(ptr_mmap->file_name);
+  if ( ptr_mmap->is_persist != 1 ) { 
+    fprintf(stderr, "Deleting %s \n", ptr_mmap->file_name);
+    status = remove(ptr_mmap->file_name); cBYE(status);
+    int64_t sz = get_file_size(ptr_mmap->file_name);
+    if ( sz >= 0 ) { fprintf(stderr, "Delete failed, sz = %llu\n", sz); go_BYE(-1); }
+  }
+  else {
+    fprintf(stderr, "NOT Deleting %s \n", ptr_mmap->file_name);
+  }
   if ( rc != 0 ) { go_BYE(-1); }
   free(ptr_mmap);
 BYE:
