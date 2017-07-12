@@ -24,10 +24,10 @@ buf_to_file(
   fp = fopen(file_name, "a");
   return_if_fopen_failed(fp, file_name, "wb");
   size_t nw = fwrite(addr, size, nmemb, fp);
-  fprintf(stderr, "Wrote %d times %d \n", size, nmemb);
+  // fprintf(stderr, "Wrote %d times %d to %s \n", size, nmemb, file_name);
   fclose(fp);
   if ( nw != nmemb ) { go_BYE(-1); }
 BYE:
-  fprintf(stderr, "Finished buf_to_file\n");
+  // fprintf(stderr, "Finished buf_to_file\n");
   return status;
 }

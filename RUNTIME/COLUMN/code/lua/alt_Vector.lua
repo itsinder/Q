@@ -1,8 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local plpath  = require 'pl.path'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
-local dbg = require 'Q/UTILS/lua/debugger'
 
 local Vector = {}
 Vector.__index = Vector
@@ -52,20 +50,22 @@ local function nascent_vec(self)
   self.chunk = ffi.new("char[?]", sz)
   assert(self.chunk)
   ffi.fill(self.chunk, sz)
+
   self.chunk_num    = 0
   self.num_in_chunk = 0
   self.num_elements = 0
+  self.is_memo = true
   sz = qconsts.max_len_file_name+1
   self.file_name = ffi.new("char[?]", sz)
   assert(self.file_name)
   ffi.fill(self.file_name, sz)
-  self.is_memo = true
   qc['rand_file_name'](self.file_name, qconsts.max_len_file_name)
   if ( qconsts.debug ) then self:check() end
   return self
 end
 
 function Vector:check()
+  --[==[
 
   --================================================
   assert(self.field_type)
@@ -93,14 +93,16 @@ function Vector:check()
       assert(self.file_name == nil)
     end
     assert(self.is_write == nil)
+    assert(((self.chunk_num * qconsts.chunk_size) + self.num_in_chunk)
+      == self.num_elements)
+      --[[
     if ( ( self.chunk_num >= 1 ) and ( self.is_memo ) ) then 
       assert(self.file_name)
       assert(plpath.isfile(ffi.string(self.file_name)))
       local file_size = (self.chunk_num*self.field_size*qconsts.chunk_size)
       assert(file_size == plpath.getsize(ffi.string(self.file_name)))
-      assert(((self.chunk_num * qconsts.chunk_size) + self.num_in_chunk)
-      == self.num_elements)
     end
+    --]]
   else
     if ( self.is_write ) then 
       assert(type(self.is_write) == "boolean")
@@ -119,15 +121,16 @@ function Vector:check()
 
     assert((is_persist == 0 ) or ( is_persist == 1))
     assert(map_len > 0)
-    assert(plpath.isfile(file_name))
-    local file_size = plpath.getsize(file_name)
+    local file_size = qc['get_file_size'](self.file_name)
     assert(file_size > 0)
+
     local chk_len = tonumber(file_size) / self.field_size
     assert(math.ceil(chk_len) == self.num_elements)
     assert(math.floor(chk_len) == self.num_elements)
     assert(self.num_elements > 0)
   --================================================
   end
+  --]==]
 
   return true
 end
@@ -231,7 +234,7 @@ function Vector:set(addr, idx, len)
       if ( space_in_chunk == 0 )  then
         if ( self.is_memo ) then
           print(self.chunk)
-          local use_c_code = true
+          local use_c_code = false
           if ( use_c_code ) then 
             print("C: Writing to file")
             local status = qc["buf_to_file"](self.chunk,
@@ -239,13 +242,13 @@ function Vector:set(addr, idx, len)
             print("C: Done with file")
           else 
             local fp = ffi.C.fopen(ffi.string(self.file_name), "a")
-            print("Opened file")
+            print("L: Opened file")
             local nw = ffi.C.fwrite(self.chunk, qconsts.chunk_size,
               self.field_size, fp);
-            print("Wrote to file")
+            print("L: Wrote to file")
             -- assert(nw > 0 )
             ffi.C.fclose(fp)
-            print("Done with file")
+            print("L: Done with file")
           end
         end
         self.num_in_chunk = 0
@@ -280,7 +283,7 @@ function Vector:set(addr, idx, len)
     local n = len * self.field_size
     ffi.copy(dst, addr, n)
   end
-  if ( qconsts.debug ) then self:check() end
+  -- if ( qconsts.debug ) then self:check() end
 end
 
 function Vector:get(idx, len)

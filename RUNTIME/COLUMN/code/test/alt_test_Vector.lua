@@ -8,29 +8,26 @@ local x
 local idx 
 local addr
 local len  = 1
-vec_len = 32*qconsts.chunk_size+3
+vec_len = 64*qconsts.chunk_size+3
 x = Vector({ field_type = "I4", is_nascent = true})
 addr = ffi.malloc(len * qconsts.qtypes["I4"].width)
 addr = ffi.cast("int32_t *", addr)
 for i = 1, vec_len do 
   addr[0] = i*10
   x:set(addr, nil, len)
-  if ( ( i % (16*1024) ) == 0 ) then print(i) end
+  if ( ( i % (16*1024) ) == 0 ) then print("W: ", i) end
 end
 print("=== Created vector ===")
-os.exit()
 x:eov()
+os.exit()
 local T = x:meta()
 assert(T.file_name)
 assert(T.map_len == vec_len * ffi.sizeof("int32_t"))
 for i = 1, vec_len do
   local addr = ffi.cast("int32_t *", x:get(i-1, 1))
-  print(i, addr[0])
-  if (addr[0] ~= i) then
-    print("XX ", i, addr[0])
-    os.execute("sleep 1000")
-  end
-  assert(addr[0] == i)
+  print(tonumber(addr[i]))
+  assert(addr[0] == i*10)
+  if ( ( i % (16*1024) ) == 0 ) then print("R: ", i) end
 end
 
 
