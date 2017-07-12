@@ -32,16 +32,11 @@ main(void)
 
   double *A = malloc(n*n* sizeof(double));
   return_if_malloc_failed(A);
-  for (uint64_t i = 0; i < n; i++ ) { 
-    for (uint64_t j = 0; j < n; j++ ) { 
-      A[i * n + j] = X[i][j];
-    }
-  }
 
   double *W = (double *) malloc(n * sizeof(double));
   return_if_malloc_failed(W);
 
-  status = eigenvectors(n, W, A);
+  status = eigenvectors(n, W, A, X);
 
   if(status != 0) {
     printf("ERROR something went wrong\n");
@@ -50,7 +45,7 @@ main(void)
 
   //eigenvalues in PCA cannot be negative
   if ( status == 0 ) {
-    for ( int i = 0; i < n; i++ ) {
+    for ( uint64_t i = 0; i < n; i++ ) {
       if ( W[i] < 0 ) {
         printf("Negative eigenvectors - model specification error\n");
         go_BYE(-1);
@@ -77,7 +72,7 @@ BYE:
   free(A);
   free(W);
   if ( X != NULL ) { 
-    for ( int i = 0; i < n; i++ ) {
+    for ( uint64_t i = 0; i < n; i++ ) {
       free_if_non_null(X[i]);
     }
   }

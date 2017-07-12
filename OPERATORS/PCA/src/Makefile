@@ -12,16 +12,25 @@ DEPS = matrix_multiply.h
 
 INCS= -I../../../UTILS/inc
 
-t: eigenvectors.o test_eigenvectors.o
+all: eigen libeigen.so
+	test -d ${QQ_BUILD_DIR}
+	cp eigenvectors.c ${Q_BUILD_DIR}/src/
+	cp eigenvectors.h ${Q_BUILD_DIR}/include/
+
+libeigen.so : eigenvectors.c
+	$(CC) -c $(INCS) $(FLAGS) eigenvectors.c -o libeigen.so
+
+eigen: eigenvectors.o test_eigenvectors.o
 	$(CC) $(INCS) $(FLAGS)  \
-	eigenvectors.o test_eigenvectors.o  -o t $(LINK_FLAGS)
+	eigenvectors.o test_eigenvectors.o  -o eigen $(LINK_FLAGS)
 
 .c.o : $(DEPS)
 	$(CC) $(INCS) $(FLAGS)  -c -o $@ $< 
 
 clean:
 	rm -f *.o 
-	rm -f t 
+	rm -f eigen
+	rm -f *.so
 
 
 

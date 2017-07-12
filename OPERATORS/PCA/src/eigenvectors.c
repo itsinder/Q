@@ -9,7 +9,8 @@ int
 eigenvectors(
              uint64_t n,
              double *W,
-             double *A
+             double *A,
+             double **X
             )
 {
   int status = 0;
@@ -19,10 +20,12 @@ eigenvectors(
   int N = n;
   int LDA = N; /* dimensions of X = LDA by N*/
   
+  for (uint64_t i = 0; i < n; i++ ) { 
+    for (uint64_t j = 0; j < n; j++ ) { 
+      A[i * n + j] = X[i][j];
+    }
+  }
+
   status = LAPACKE_dsyev(LAPACK_COL_MAJOR, jobz, uplo, N, A, LDA, W);
-
-  
-
-BYE:
   return status;
 }
