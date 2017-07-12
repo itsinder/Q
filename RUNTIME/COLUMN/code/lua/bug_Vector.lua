@@ -225,10 +225,11 @@ function Vector:set(addr, idx, len)
           end
           local use_c_code = true
           if ( use_c_code ) then 
-            -- print("C: Writing to file")
+            print("C: Writing to file")
             local status = qc["buf_to_file"](self.chunk,
             self.field_size, self.num_in_chunk, self.file_name)
-            -- print("C: Done with file")
+            print("C: Done with file")
+      -- print(self.num_elements, self.chunk)
           else 
             local fp = ffi.C.fopen(self.file_name, "a")
             print("L: Opened file")
@@ -250,8 +251,8 @@ function Vector:set(addr, idx, len)
       if ( space_in_chunk < len ) then 
         num_to_copy = space_in_chunk
       end
+      -- print(self.num_elements, self.chunk)
       --[[
-      print(self.chunk)
       local dst = ffi.cast("char *", self.chunk) 
         + (self.num_in_chunk * self.field_size)
       ffi.copy(dst, addr, num_to_copy * self.field_size)
