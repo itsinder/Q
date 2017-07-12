@@ -19,13 +19,11 @@ for i = 1, vec_len do
 end
 print("=== Created vector ===")
 x:eov()
-os.exit()
 local T = x:meta()
 assert(T.file_name)
 assert(T.map_len == vec_len * ffi.sizeof("int32_t"))
 for i = 1, vec_len do
   local addr = ffi.cast("int32_t *", x:get(i-1, 1))
-  print(tonumber(addr[i]))
   assert(addr[0] == i*10)
   if ( ( i % (16*1024) ) == 0 ) then print("R: ", i) end
 end

@@ -251,6 +251,8 @@ function Vector:set(addr, idx, len)
       if ( space_in_chunk < len ) then 
         num_to_copy = space_in_chunk
       end
+      qc["c_copy"](self.chunk, addr, self.num_in_chunk, num_to_copy, 
+        self.field_size)
       -- print(self.num_elements, self.chunk)
       --[[
       local dst = ffi.cast("char *", self.chunk) 
