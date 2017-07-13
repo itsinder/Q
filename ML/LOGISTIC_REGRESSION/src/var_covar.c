@@ -1,7 +1,6 @@
 #include <time.h>
 #include "var_covar.h"
 
-uint64_t num_ops;
 
 static inline void
 _vvmul(
@@ -14,7 +13,6 @@ _vvmul(
 #pragma omp simd
   for ( uint32_t i = 0; i < n; i++ ) { 
     Z[i] = X[i] * Y[i];
-    num_ops++;
   }
 }
  
@@ -29,7 +27,6 @@ _sum(
 #pragma omp simd
   for ( uint32_t i = 0; i < n; i++ ) { 
     y += X[i];
-    num_ops++;
   }
   *ptr_Y = y;
 }
@@ -58,7 +55,6 @@ var_covar(
   // initialize A to 0
   for ( uint64_t i = 0; i < M; i++ ) { 
     memset(A[i], '\0', M*sizeof(double));
-    num_ops += M;
   }
   // set diagonal to 1
   for ( uint64_t i = 0; i < M; i++ ) { 
@@ -82,76 +78,23 @@ var_covar(
         _vvmul(X[j] +lb, Xi+lb, (ub-lb), temp2);
         _sum(temp2, (ub-lb), &rslt);
         sum += rslt;
-        num_ops++;
       }
       // #pragma omp critical (_var_covar)
       {
-        Ai[j] = sum;
+        Ai[j] = sum / (N - 1);
       }
     }
   }
+  
+  for ( uint64_t i = 0; i < M; i++ ) {
+    for ( uint64_t j = 0; j < i; j++ ) {
+      A[i][j] = A[j][i];
+    }
+  }
+
+
 BYE:
   return status;
 }
 
-#define STAND_ALONE_TEST
-#ifdef STAND_ALONE_TEST
-/*
-gcc -g $QC_FLAGS var_covar.c  -I../inc/ -I$HOME/WORK/Q/UTILS/inc/
-*/
-int
-main(
-    )
-{
-  int status = 0;
-  uint64_t N = 1024;
-  uint64_t M = 32;
-  double **A = NULL;
-  float **X = NULL;
-  clock_t start_t, stop_t;
-  num_ops = 0;
 
-  X = malloc(M * sizeof(float *));
-  for ( uint64_t i = 0; i < M; i++ ) { 
-    X[i] = malloc(N * sizeof(float));
-  }
-
-  A = malloc(M * sizeof(double *));
-  for ( uint64_t i = 0; i < M; i++ ) { 
-    A[i] = malloc(M * sizeof(double));
-  }
-  for ( uint64_t i = 0; i < M; i++ ) { 
-    for ( uint64_t j = 0; j < N; j++ ) { 
-      X[i][j] = (i+j+1);
-    }
-  }
-
-  system("date");
-  start_t = clock();
-  status = var_covar(X, M, N, A);
-  stop_t = clock();
-  system("date");
-  fprintf(stderr, "Num clocks = %llu \n", (unsigned long long)stop_t - start_t);
-  fprintf(stderr, "Num Ops = %llu \n", (unsigned long long)num_ops);
-#define CHECK_RESULTS
-#ifdef CHECK_RESULTS
-  for ( unsigned int ii = 0; ii < M; ii++ ) { 
-    for ( unsigned int jj = 0; jj < M; jj++ ) { 
-      double chk = 0;
-      for ( unsigned int l = 0; l < N; l++ ) { 
-        chk += (X[ii][l] * X[jj][l]);
-      }
-      if ( ( ( A[ii][jj] -  chk) / chk )  > 0.001 ) {
-        fprintf(stderr, "chk = %lf, A = %lf \n", chk, A[ii][jj]);
-        go_BYE(-1);
-      }
-    }
-  }
-#endif
-BYE:
-  return status;
-}
-
- // gcc $QC_FLAGS sum_prod.c -I../inc/  -o a.out -I../../../UTILS/inc/
-
-#endif

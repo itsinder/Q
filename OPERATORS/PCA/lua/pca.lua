@@ -16,22 +16,7 @@ local function pca(X)
   end
 
   -- Step 2: compute the variance covariance matrix
-  local VCM = {}
-  for i=1,p do
-    VCM[i] = {}
-    for j=i,p do
-      if(j == i) then
-        VCM[i][j] = 1
-      else
-        VCM[i][j] = Q.sum(Q.vvmul(X[i], X[j])) / (n-1)
-      end
-    end
-    if( i ~= 1 ) then
-      for j = 1,i-1 do
-        VCM[i][j] = VCM[j][i]
-      end
-    end
-  end
+  local VCM = Q.var_covar(X)
 
   -- Step 3: find the eigenvectors of the variance covariance matrix
   local eigen_info = Q.eigen(VCM)
