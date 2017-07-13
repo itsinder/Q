@@ -34,7 +34,10 @@ f_munmap(
     fprintf(stderr, "Deleting %s \n", ptr_mmap->file_name);
     status = remove(ptr_mmap->file_name); cBYE(status);
     int64_t sz = get_file_size(ptr_mmap->file_name);
-    if ( sz >= 0 ) { fprintf(stderr, "Delete failed, sz = %llu\n", sz); go_BYE(-1); }
+    if ( sz >= 0 ) { 
+      fprintf(stderr, "Delete failed, sz = %d\n", (int32_t)sz); 
+      go_BYE(-1); 
+    }
   }
   else {
     fprintf(stderr, "NOT Deleting %s \n", ptr_mmap->file_name);

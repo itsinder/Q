@@ -48,7 +48,8 @@ end
 
 local function nascent_vec(self)
   local sz = qconsts.chunk_size * self._field_size
-  self._chunk = ffi.new("char[?]", sz)
+  -- self._chunk = ffi.new("char[?]", sz)
+  self._chunk = ffi.malloc(sz)
   assert(self._chunk)
   ffi.fill(self._chunk, sz)
 
@@ -190,7 +191,8 @@ function Vector:memo(is_memo)
       self._is_memo = true
       if ( not self._file_name ) then 
         sz = qconsts.max_len_file_name+1
-        self._file_name = ffi.new("char [?]", sz)
+        -- self._file_name = ffi.new("char [?]", sz)
+        self._file_name = ffi.malloc(sz)
         assert(self._file_name)
         ffi.fill(self._file_name, sz)
         qc['rand_file_name'](self._file_name, qconsts.max_len_file_name)
@@ -223,7 +225,8 @@ function Vector:set(addr, idx, len)
         if ( self._is_memo ) then
           if ( not self._file_name ) then 
             local sz = qconsts.max_len_file_name + 1
-            self._file_name = ffi.new("char[?]", sz)
+            -- self._file_name = ffi.new("char[?]", sz)
+            self._file_name = ffi.malloc(sz)
             assert(self._file_name)
             ffi.fill(self._file_name, sz)
             qc['rand_file_name'](self._file_name, qconsts.max_len_file_name)
@@ -332,19 +335,21 @@ function Vector:persist()
    -- TODO Add routine to materialize if not already materialized
   assert(self._is_nascent == false)
   self._mmap.is_persist = 1
-  local dbg = require 'Q/UTILS/lua/debugger'
-  dbg()
+  -- local dbg = require 'Q/UTILS/lua/debugger'; dbg() 
 end
 
 function Vector:destroy()
   if ( self._chunk ) then 
-    ffi.C.free(self._chunk)
+    -- ffi.C.free(self._chunk)
+    qc.c_free(self._chunk)
     self._chunk = nil
     self._chunk_num = nil
     self._num_in_chunk = nil
   end
   if ( self._mmap) then
     qc.f_munmap(self._mmap)
+    self._mmap.map_addr = nil
+    self._mmap.map_len = 0
     self._mmap = nil
   end
   self._num_elements = nil
