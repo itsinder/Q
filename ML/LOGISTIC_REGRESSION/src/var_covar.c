@@ -96,6 +96,9 @@ BYE:
 
 #define STAND_ALONE_TEST
 #ifdef STAND_ALONE_TEST
+/*
+gcc -g $QC_FLAGS var_covar.c  -I../inc/ -I$HOME/WORK/Q/UTILS/inc/
+*/
 int
 main(
     )
