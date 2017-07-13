@@ -21,7 +21,7 @@ typedef struct _vec_rec_type {
 
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
-  void *map_addr;
+  char *map_addr;
   size_t map_len;
   uint32_t is_persist;
   bool is_nascent;

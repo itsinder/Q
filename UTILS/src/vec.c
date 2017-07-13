@@ -244,7 +244,8 @@ vec_set(
   else {
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-    memcpy(ptr_vec->map_addr, addr, len * ptr_vec->field_size);
+    char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+    memcpy(dst, addr, len * ptr_vec->field_size);
   }
 
   /*

@@ -22,6 +22,11 @@ main()
     }
     status = vec_eov(X, false); cBYE(status);
     status = vec_check(X); cBYE(status);
+    for ( int j = 0; j < NUM_ELEMENTS; j++ ) { 
+      addr[0] = (j+1)*100;
+      status = vec_set(X, (char *)addr, j, 1); cBYE(status);
+      status = vec_check(X); cBYE(status);
+    }
     status = vec_free(X); cBYE(status);
   }
 BYE:
