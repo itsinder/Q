@@ -4,6 +4,7 @@
 #include "_mmap.h"
 #include "_rand_file_name.h"
 #include "_get_file_size.h"
+#include "_buf_to_file.h"
 
 int
 chk_field_type(
@@ -118,6 +119,7 @@ vec_new(
 
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
+  ptr_vec->is_memo    = true; // default
   strcpy(ptr_vec->field_type, field_type);
 
 BYE:
@@ -201,68 +203,49 @@ vec_set(
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
   if ( ptr_vec->is_nascent ) {
+    // idx is implicit for nascent case
     if ( idx != 0 ) { go_BYE(-1); }
     uint64_t initial_num_elements = ptr_vec->num_elements;
-    uint32_t num_left_to_copy = len;
-    for ( ; ; ) {
-      /*
-         local space_in_chunk = qconsts.chunk_size - self._num_in_chunk
-         if ( space_in_chunk == 0 )  then
-         if ( self._is_memo ) then
-         if ( not self._file_name ) then 
-         local sz = qconsts.max_len_file_name + 1
-         -- self._file_name = ffi.new("char[?]", sz)
-         self._file_name = ffi.malloc(sz, qc.c_free)
-         assert(self._file_name)
-         ffi.fill(self._file_name, sz)
-         qc['rand_file_name'](self._file_name, qconsts.max_len_file_name)
-         end
-         local use_c_code = true
-         if ( use_c_code ) then 
-         local status = qc["buf_to_file"](self._chunk,
-         self._field_size, self._num_in_chunk, self._file_name)
-         else 
-         local fp = ffi.C.fopen(self._file_name, "a")
-         print("L: Opened file")
-         local nw = ffi.C.fwrite(self._chunk, self._field_size, 
-         qconsts.chunk_size, fp);
-         print("L: Wrote to file")
-         -- assert(nw > 0 )
-         ffi.C.fclose(fp)
-         print("L: Done with file")
-         end
-         end
-         self._num_in_chunk = 0
-         self._chunk_num = self._chunk_num + 1
-         space_in_chunk = qconsts.chunk_size
-         ffi.fill(self._chunk, qconsts.chunk_size * self._field_size, 0)
-         end
-
-         local num_to_copy  = len
-         if ( space_in_chunk < len ) then 
-         num_to_copy = space_in_chunk
-         end
-         qc["c_copy"](self._chunk, addr, self._num_in_chunk, num_to_copy, 
-         self._field_size)
-         --[[ Not sure why following does not work.
-         local dst = ffi.cast("char *", self._chunk) 
-         + (self._num_in_chunk * self._field_size)
-         ffi.copy(dst, addr, num_to_copy * self._field_size)
-         --]]
-
-         num_left_to_copy = num_left_to_copy - num_to_copy
-         self._num_in_chunk = self._num_in_chunk + num_to_copy
-         self._num_elements = self._num_elements + num_to_copy
-         until num_left_to_copy == 0
-         */
+    uint32_t num_copied = 0;
+    for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
+       uint32_t space_in_chunk = ptr_vec->chunk_size-ptr_vec->num_in_chunk;
+       if ( space_in_chunk == 0 )  {
+         if ( ptr_vec->is_memo ) { 
+           if ( ptr_vec->file_name[0] == '\0' ) {
+             status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+             cBYE(status);
+           }
+           status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+               ptr_vec->num_in_chunk, ptr_vec->file_name);
+           cBYE(status);
+         }
+         ptr_vec->num_in_chunk = 0;
+         ptr_vec->chunk_num++;
+         memset(ptr_vec->chunk, '\0', 
+             (ptr_vec->field_size * ptr_vec->chunk_size));
+       }
+       else {
+         uint32_t num_to_copy = mcr_min(space_in_chunk, len);
+         char *dst = ptr_vec->chunk + 
+           (ptr_vec->num_in_chunk * ptr_vec->field_size);
+         char *src = addr + (num_copied * ptr_vec->field_size);
+         memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
+         ptr_vec->num_in_chunk += num_to_copy;
+         ptr_vec->num_elements += num_to_copy;
+         num_left_to_copy      -= num_to_copy;
+         num_copied            += num_to_copy;
+       }
     }
+    if ( num_copied != len ) { go_BYE(-1); }
     if ( ptr_vec->num_elements != initial_num_elements + len) {
       go_BYE(-1);
     }
   }
   else {
+    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+    if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+    memcpy(ptr_vec->map_addr, addr, len * ptr_vec->field_size);
   }
-}
 
   /*
      else
@@ -282,6 +265,47 @@ vec_set(
      if ( qconsts.debug ) then self:check() end
      end
      */
+BYE:
+  return status;
+}
+
+int
+vec_eov(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_read_only
+    )
+{
+  int status = 0;
+  char *X = NULL; size_t nX = 0;
+
+  if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
+  if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
+  if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
+  // If memo NOT set, return now; do not persist to disk
+  if ( ptr_vec->is_memo == false ) { goto BYE; }
+  // this is the case when all data fits into one chunk
+  if ( ptr_vec->file_name[0] == '\0' ) {
+    status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+    cBYE(status);
+  }
+  status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+      ptr_vec->num_in_chunk, ptr_vec->file_name);
+  cBYE(status);
+  ptr_vec->is_nascent = false;
+  free_if_non_null(ptr_vec->chunk);
+  ptr_vec->chunk_num = 0;
+  ptr_vec->num_in_chunk = 0;
+
+  // open as materialized vector
+  bool is_write;
+  if ( is_read_only ) { is_write = false; } else { is_write = true; }
+  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
+  cBYE(status);
+  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+  ptr_vec->map_addr = X;
+  ptr_vec->map_len  = nX;
+  ptr_vec->is_read_only = is_read_only;
+
 BYE:
   return status;
 }

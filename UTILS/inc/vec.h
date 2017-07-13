@@ -33,4 +33,16 @@ extern bool
 file_exists (
     const char * constfilename
     );
+extern int
+vec_set(
+    VEC_REC_TYPE *ptr_vec,
+    char *addr, 
+    uint64_t idx, 
+    uint32_t len
+    );
+extern int
+vec_eov(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_read_only
+    );
 #endif
