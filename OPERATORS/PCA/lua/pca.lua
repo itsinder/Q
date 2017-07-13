@@ -1,7 +1,7 @@
 local q = require 'Q'
 local qconsts = require 'Q/UTILS/q_consts.lua'
 
-return function pca(X)
+local function pca(X)
   -- TODO add input error checking
   local n = X[1]:length()
   local p = #X
@@ -34,8 +34,11 @@ return function pca(X)
   end
 
   -- Step 3: find the eigenvectors of the variance covariance matrix
+  local eigen_info = Q.eigen(VCM)
+  return eigen_info.eigenvectors
   
 end
+return pca
 
 
     

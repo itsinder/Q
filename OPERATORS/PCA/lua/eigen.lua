@@ -4,7 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
 local function eigen(X)
-  local stand_alone_test = false
+  local stand_alone_test = true
   local soqc
   if  stand_alone_test then
     local hdr = [[
@@ -50,12 +50,14 @@ local function eigen(X)
     assert(nn_xptr == nil, "Values cannot be nil")
     Xptr[xidx-1] = ffi.cast("double *", xptr)
   end
-  local status 
+  local cfn = nil
   if ( stand_alone_test ) then
-    status = soqc["eigenvectors"](m, wptr, Aptr, Xptr)
+    cfn = soqc["eigenvectors"]
   else
-    status = qc["eigenvectors"](m, wptr, Aptr, Xptr)
+    cfn = qc["eigenvectors"]
   end
+  assert(cfn, "C function for eigenvecrors not found")
+  local status = cfn(m, wptr, Aptr, Xptr)
   assert(status == 0, "eigenvectors could not be calculated")
 
   local E = {}
@@ -72,4 +74,5 @@ local function eigen(X)
   return({eigenvalues = W, eigenvectors = E})
 
 end
+--return eigen
 return require('Q/q_export').export('eigen', eigen)
