@@ -35,55 +35,57 @@ _sum(
 }
  
 int
-sum_prod(
+var_covar(
     float **X, /* M vectors of length N */
     uint64_t M,
     uint64_t N,
-    double **A /* M vectors of length M */,
-    bool std
+    double **A /* M vectors of length M */
     )
 {
   int status = 0;
-  double *temp = NULL;
-  return_if_malloc_failed(temp);
-  int block_size = 16384; 
 
+  if ( X == NULL ) { go_BYE(-1); }
+  if ( A == NULL ) { go_BYE(-1); }
+  if ( M == 0 ) { go_BYE(-1); } 
+  if ( N <= 1 ) { go_BYE(-1); } // else division by 0
+  int block_size = 16384; 
   uint32_t nT = sysconf(_SC_NPROCESSORS_ONLN);
+  int num_blocks = N / block_size;
+  if ( ( num_blocks * block_size ) != (int)N ) { num_blocks++; }
+
 #pragma omp parallel for 
+  // initialize A to 0
   for ( uint64_t i = 0; i < M; i++ ) { 
     memset(A[i], '\0', M*sizeof(double));
     num_ops += M;
+  }
+  // set diagonal to 1
+  for ( uint64_t i = 0; i < M; i++ ) { 
+    A[i][j] = 1;
   }
 
   for ( uint64_t i = 0; i < M; i++ ) { 
     float *Xi = X[i];
     double *Ai = A[i];
     if ( nT > M-i ) { nT = M-i; }
-// #pragma omp parallel for schedule(static, 1) num_threads(nT)
-// #pragma omp parallel for 
-    for ( uint64_t j = i; j < M; j++ ) {
-      if ( std && (j == i) ) {
-        Ai[j] = 1;
+    // #pragma omp parallel for schedule(static, 1) num_threads(nT)
+    // #pragma omp parallel for 
+    for ( uint64_t j = i+1; j < M; j++ ) {
+      double temp2[block_size];
+      double sum = 0;
+      for ( int b = 0; b < num_blocks; b++ ) { 
+        uint64_t lb = b * block_size;
+        uint64_t ub = lb + block_size;
+        if ( b == (num_blocks-1) ) { ub = N; }
+        double rslt;
+        _vvmul(X[j] +lb, Xi+lb, (ub-lb), temp2);
+        _sum(temp2, (ub-lb), &rslt);
+        sum += rslt;
+        num_ops++;
       }
-      else {
-        double temp2[block_size];
-        double sum = 0;
-        int num_blocks = N / block_size;
-        if ( ( num_blocks * block_size ) != (int)N ) { num_blocks++; }
-        for ( int b = 0; b < num_blocks; b++ ) { 
-          uint64_t lb = b * block_size;
-          uint64_t ub = lb + block_size;
-          if ( b == (num_blocks-1) ) { ub = N; }
-          double rslt;
-          _vvmul(X[j] +lb, Xi+lb, (ub-lb), temp2);
-          _sum(temp2, (ub-lb), &rslt);
-          sum += rslt;
-          num_ops++;
-        }
-        // #pragma omp critical (_sum_prod)
-        {
-          Ai[j] = sum;
-        }
+      // #pragma omp critical (_sum_prod)
+      {
+        Ai[j] = sum;
       }
     }
   }
@@ -102,7 +104,6 @@ main(
   uint64_t M = 1024;
   double **A = NULL;
   float **X = NULL;
-  double *w = NULL;
   clock_t start_t, stop_t;
   num_ops = 0;
 
@@ -116,9 +117,6 @@ main(
   A = malloc(M * sizeof(double *));
   for ( uint64_t i = 0; i < M; i++ ) { 
     A[i] = malloc(M * sizeof(double));
-  }
-  for ( int i = 0; i < N; i++ ) { 
-    w[i] = 1.0 /(i+1);
   }
   for ( uint64_t i = 0; i < M; i++ ) { 
     for ( uint64_t j = 0; j < N; j++ ) { 
