@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <errno.h>
 #include <malloc.h>
 #include "q_incs.h"
@@ -33,6 +34,10 @@ f_mmap(
 
   errno = 0;
   if ( ( file_name == NULL) || ( *file_name == '\0' ) ) { go_BYE(-1); }
+  if ( strlen(file_name) >= Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
+  for (  char *cptr = file_name; *cptr != '\0'; cptr++ ) { 
+    if ( !isascii(*cptr) ) { go_BYE(-1); }
+  }
   if ( ptr_mmap == NULL ) { go_BYE(-1); }
   ptr_mmap->status = -1;
   ptr_mmap->map_addr = NULL;

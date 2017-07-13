@@ -5,7 +5,7 @@
 
 //START_FUNC_DECL
 void
-q_free(
+c_free(
     void *X
 )
 //STOP_FUNC_DECL

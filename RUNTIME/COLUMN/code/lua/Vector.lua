@@ -49,7 +49,7 @@ end
 local function nascent_vec(self)
   local sz = qconsts.chunk_size * self._field_size
   -- self._chunk = ffi.new("char[?]", sz)
-  self._chunk = ffi.malloc(sz)
+  self._chunk = ffi.malloc(sz, qc.c_free)
   assert(self._chunk)
   ffi.fill(self._chunk, sz)
 
@@ -192,7 +192,7 @@ function Vector:memo(is_memo)
       if ( not self._file_name ) then 
         sz = qconsts.max_len_file_name+1
         -- self._file_name = ffi.new("char [?]", sz)
-        self._file_name = ffi.malloc(sz)
+        self._file_name = ffi.malloc(sz, qc.c_free)
         assert(self._file_name)
         ffi.fill(self._file_name, sz)
         qc['rand_file_name'](self._file_name, qconsts.max_len_file_name)
@@ -226,7 +226,7 @@ function Vector:set(addr, idx, len)
           if ( not self._file_name ) then 
             local sz = qconsts.max_len_file_name + 1
             -- self._file_name = ffi.new("char[?]", sz)
-            self._file_name = ffi.malloc(sz)
+            self._file_name = ffi.malloc(sz, qc.c_free)
             assert(self._file_name)
             ffi.fill(self._file_name, sz)
             qc['rand_file_name'](self._file_name, qconsts.max_len_file_name)
@@ -328,6 +328,7 @@ function Vector:eov()
   self._chunk = nil
   self._num_in_chunk = nil
   self._chunk_num = nil
+  qc.c_free(self._filename) -- filename is now in _mmap
   if ( qconsts.debug ) then self:check() end
 end
 

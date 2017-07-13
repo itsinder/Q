@@ -27,10 +27,8 @@ ffi.malloc = function(n, free_func)
    local c_mem = nil
    if free_func == nil then
       c_mem = assert(ffi.gc(ffi.C.malloc(n), ffi.C.free))
-   elseif type(free_func) == "function" then
+   else -- TODO Review with Indrajeet
       c_mem = assert(ffi.gc(ffi.C.malloc(n), free_func))
-   else
-      error("Invalid free function specified")
    end
    return c_mem
 end
