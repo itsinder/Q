@@ -4,7 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
 local function eigen(X)
-  local stand_alone_test = true
+  local stand_alone_test = false
   local soqc
   if  stand_alone_test then
     local hdr = [[
@@ -72,5 +72,4 @@ local function eigen(X)
   return({eigenvalues = W, eigenvectors = E})
 
 end
-return eigen
---return require('Q/q_export').export('eigen', eigenvectors)
+return require('Q/q_export').export('eigen', eigen)
