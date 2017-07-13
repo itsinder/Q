@@ -1,5 +1,5 @@
 #include <time.h>
-#include "sum_prod.h"
+#include "var_covar.h"
 
 uint64_t num_ops;
 
