@@ -133,9 +133,10 @@ main(
   system("date");
   fprintf(stderr, "Num clocks = %llu \n", (unsigned long long)stop_t - start_t);
   fprintf(stderr, "Num Ops = %llu \n", (unsigned long long)num_ops);
+#define CHECK_RESULTS
 #ifdef CHECK_RESULTS
-  for ( int ii = 0; ii < M; ii++ ) { 
-    for ( int jj = 0; jj < M; jj++ ) { 
+  for ( unsigned int ii = 0; ii < M; ii++ ) { 
+    for ( unsigned int jj = 0; jj < M; jj++ ) { 
       double chk = 0;
       for ( unsigned int l = 0; l < N; l++ ) { 
         chk += (X[ii][l] * X[jj][l]);
