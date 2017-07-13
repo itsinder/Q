@@ -15,7 +15,8 @@ all: eigen libeigen.so
 	test -d ${QQ_BUILD_DIR}
 	cp eigenvectors.c ${Q_BUILD_DIR}/src/
 	cp eigenvectors.h ${Q_BUILD_DIR}/include/
-
+# The LINK_FLAGS need to go at the end, otherwise the make will not work as
+# expected
 libeigen.so : eigenvectors.c
 	$(CC) -shared $(INCS) $(FLAGS) eigenvectors.c -o libeigen.so $(LINK_FLAGS)
 
