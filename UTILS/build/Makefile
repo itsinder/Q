@@ -87,7 +87,8 @@ q_operators: f1f2opf3 \
 	ax_equals_b \
 	mvmul \
 	approx_quantile \
-	approx_frequent
+	approx_frequent \
+	eigen
 	echo "all done for operators"
 
 
