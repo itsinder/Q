@@ -6,7 +6,7 @@ uint64_t num_ops;
 static inline void
 _vvmul(
     float * restrict X,
-    double * restrict Y,
+    float * restrict Y,
     uint32_t n,
     double * restrict Z
     )
@@ -48,6 +48,7 @@ var_covar(
   if ( A == NULL ) { go_BYE(-1); }
   if ( M == 0 ) { go_BYE(-1); } 
   if ( N <= 1 ) { go_BYE(-1); } // else division by 0
+  // set up parameters for blocking/multi-threading
   int block_size = 16384; 
   uint32_t nT = sysconf(_SC_NPROCESSORS_ONLN);
   int num_blocks = N / block_size;
@@ -61,7 +62,7 @@ var_covar(
   }
   // set diagonal to 1
   for ( uint64_t i = 0; i < M; i++ ) { 
-    A[i][j] = 1;
+    A[i][i] = 1;
   }
 
   for ( uint64_t i = 0; i < M; i++ ) { 
@@ -83,7 +84,7 @@ var_covar(
         sum += rslt;
         num_ops++;
       }
-      // #pragma omp critical (_sum_prod)
+      // #pragma omp critical (_var_covar)
       {
         Ai[j] = sum;
       }
@@ -100,14 +101,12 @@ main(
     )
 {
   int status = 0;
-  uint64_t N = 128 * 1024;
-  uint64_t M = 1024;
+  uint64_t N = 1024;
+  uint64_t M = 32;
   double **A = NULL;
   float **X = NULL;
   clock_t start_t, stop_t;
   num_ops = 0;
-
-  w = malloc(N * sizeof(double));
 
   X = malloc(M * sizeof(float *));
   for ( uint64_t i = 0; i < M; i++ ) { 
@@ -126,32 +125,21 @@ main(
 
   system("date");
   start_t = clock();
-  status = sum_prod(X, M, N, w, A);
+  status = var_covar(X, M, N, A);
   stop_t = clock();
   system("date");
-  fprintf(stderr, "Num clocks = %llu \n", stop_t - start_t);
-  fprintf(stderr, "Num Ops = %llu \n", num_ops);
+  fprintf(stderr, "Num clocks = %llu \n", (unsigned long long)stop_t - start_t);
+  fprintf(stderr, "Num Ops = %llu \n", (unsigned long long)num_ops);
 #ifdef CHECK_RESULTS
   for ( int ii = 0; ii < M; ii++ ) { 
     for ( int jj = 0; jj < M; jj++ ) { 
       double chk = 0;
       for ( unsigned int l = 0; l < N; l++ ) { 
-        chk += (X[ii][l] * X[jj][l] * w[l]);
+        chk += (X[ii][l] * X[jj][l]);
       }
       if ( ( ( A[ii][jj] -  chk) / chk )  > 0.001 ) {
         fprintf(stderr, "chk = %lf, A = %lf \n", chk, A[ii][jj]);
         go_BYE(-1);
-      }
-    }
-  }
-  for ( uint64_t i = 0; i < M; i++ ) { 
-    for ( uint64_t j = i; j < M; j++ ) { 
-      if ( A[i][j] == 0 ) { 
-        go_BYE(-1); 
-      }
-    }
-    for ( uint64_t j = 0; j < i; j++ ) { 
-      if ( A[i][j] != 0 ) { go_BYE(-1); 
       }
     }
   }
