@@ -18,6 +18,10 @@ main()
     for ( int j = 0; j < NUM_ELEMENTS; j++ ) { 
       addr[0] = (j+1)*10;
       status = vec_set(X, (char *)addr, 0, 1); cBYE(status);
+      char *chk_addr = vec_get(X, j, 1); cBYE(status);
+      if ( chk_addr == NULL ) { go_BYE(-1); }
+      int *iptr = (int *)chk_addr;
+      if ( *iptr != (j+1)*10 ) { go_BYE(-1); }
       status = vec_check(X); cBYE(status);
     }
     status = vec_eov(X, false); cBYE(status);

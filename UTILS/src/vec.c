@@ -211,12 +211,13 @@ vec_get(
     if ( idx >= 4048 ) {
       int *iptr = (int *)ptr_vec->chunk;
       iptr += idx;
+      /*
       fprintf(stderr, "C: %d ", idx);
       for ( int i = 0; i <= 3 ; i++ ) { 
         fprintf(stderr, "%d ", *iptr++);
       }
       fprintf(stderr, "\n");
-
+      */
     }
     uint32_t chunk_num = idx / ptr_vec->chunk_size;
     if ( chunk_num != ptr_vec->chunk_num ) { go_BYE(-1); }

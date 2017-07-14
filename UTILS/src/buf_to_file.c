@@ -21,6 +21,8 @@ buf_to_file(
   if ( nmemb == 0 ) { go_BYE(-1); }
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(1); }
   if ( addr == NULL ) { go_BYE(-1); }
+
+  // fprintf(stderr, "addr = %llu, size = %d, nmemb = %d, %s \n", addr, size, nmemb, file_name);
   fp = fopen(file_name, "a");
   return_if_fopen_failed(fp, file_name, "wb");
   size_t nw = fwrite(addr, size, nmemb, fp);
