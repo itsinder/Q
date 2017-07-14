@@ -23,6 +23,10 @@ typedef struct _vec_rec_type {
   char file_name[255+1];
   char *map_addr;
   size_t map_len;
+
+  char *ret_addr; // returned to get
+  size_t ret_len; // returned to get
+
   uint32_t is_persist;
   bool is_nascent;
   int status;

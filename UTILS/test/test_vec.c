@@ -12,7 +12,8 @@ main()
 #define NUM_ELEMENTS 65537
 #define CHUNK_SIZE   8192
   for ( int i = 0; i < NUM_TRIALS; i++ ) { 
-    VEC_REC_TYPE *X = vec_new("I4", sizeof(int32_t), CHUNK_SIZE);
+    VEC_REC_TYPE *X = malloc(sizeof(VEC_REC_TYPE));
+    status =  vec_new(X, "I4", sizeof(int32_t), CHUNK_SIZE); cBYE(status);
     status = vec_nascent(X); cBYE(status);
     status = vec_check(X); cBYE(status);
     for ( int j = 0; j < NUM_ELEMENTS; j++ ) { 
@@ -32,6 +33,7 @@ main()
       status = vec_check(X); cBYE(status);
     }
     status = vec_free(X); cBYE(status);
+    fprintf(stderr, "Iter = %d \n", i);
   }
 BYE:
   if ( status == 0 ) { 

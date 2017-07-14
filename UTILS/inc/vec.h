@@ -9,8 +9,9 @@ extern int
 vec_nascent(
     VEC_REC_TYPE *ptr_vec
     );
-extern VEC_REC_TYPE *
+extern int
 vec_new(
+    VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
     uint32_t field_size,
     uint32_t chunk_size
@@ -45,10 +46,15 @@ vec_eov(
     VEC_REC_TYPE *ptr_vec,
     bool is_read_only
     );
-extern char *
+extern int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
     uint64_t idx, 
     uint32_t len
+    );
+extern int
+is_eq_I4(
+    void *X,
+    int val
     );
 #endif

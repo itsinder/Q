@@ -25,6 +25,7 @@ chk_field_type(
     /* all is well */
   }
   else {
+    fprintf(stderr, "Bad field type = [%s] \n", field_type);
     go_BYE(-1);
   }
 BYE:
@@ -99,38 +100,37 @@ vec_nascent(
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   uint32_t sz = ptr_vec->field_size * ptr_vec->chunk_size;
   ptr_vec->chunk = malloc(sz);
+  fprintf(stderr, "chunk = %16x \n", ptr_vec->chunk);
+  fprintf(stderr, "chunk = %p \n", ptr_vec->chunk);
   ptr_vec->is_nascent = true;
 
 BYE:
   return status;
 }
 
-VEC_REC_TYPE *
+int 
 vec_new(
+    VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
     uint32_t field_size,
     uint32_t chunk_size
     )
 {
   int status = 0;
-  VEC_REC_TYPE *ptr_vec = NULL;
 
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   if ( field_size == 0 ) { go_BYE(-1); }
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
   status = chk_field_type(field_type); cBYE(status);
-
-  ptr_vec = malloc(sizeof(VEC_REC_TYPE));
-  return_if_malloc_failed(ptr_vec);
-  memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
-
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = true; // default
   strcpy(ptr_vec->field_type, field_type);
 
 BYE:
-  if ( status == 0 ) { return ptr_vec; } else { return NULL; }
+  return status;
 }
 
 bool 
@@ -198,7 +198,7 @@ BYE:
   return status;
 }
 
-char *
+int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
     uint64_t idx, 
@@ -207,6 +207,8 @@ vec_get(
 {
   int status = 0;
   char *addr = NULL;
+  ptr_vec->ret_addr = NULL;
+  ptr_vec->ret_len  = 0;
   if ( ptr_vec->is_nascent ) {
     if ( idx >= 4048 ) {
       int *iptr = (int *)ptr_vec->chunk;
@@ -230,9 +232,11 @@ vec_get(
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
     addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
   }
+  ptr_vec->ret_addr = addr; // TODO P0 FIX. 
+  ptr_vec->ret_len  = len; // TODO P0 FIX. 
 
 BYE:
-  if ( status < 0 ) { return NULL; } else { return addr; }
+  return status;
 }
 
 int
@@ -355,3 +359,14 @@ vec_eov(
 BYE:
   return status;
 }
+
+int
+is_eq_I4(
+    void *X,
+    int val
+    )
+{
+  int *iptr = (int *)X;
+  if ( *iptr == val ) { return 0; } else { return 1; }
+}
+

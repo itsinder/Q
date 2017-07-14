@@ -3,6 +3,7 @@ local plpath = require 'pl.path'
 require 'Q/UTILS/lua/strict'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi      = require 'Q/UTILS/lua/q_ffi'
+local qc       = require 'Q/UTILS/lua/q_core'
 local dbg      = require 'Q/UTILS/lua/debugger'
 local Vector   = require 'Q/RUNTIME/COLUMN/code/lua/c_Vector'
 os.execute("rm -f _*")
@@ -15,21 +16,25 @@ local vec_len = 64*qconsts.chunk_size+3
 local addr = ffi.malloc(len * qconsts.qtypes["I4"].width)
 addr = ffi.cast("int32_t *", addr)
 
+local sz_after = 32
+
+
 local x
-for iter = 1, 10 do
+for iter = 1, 100 do
   x = Vector({ field_type = "I4", is_nascent = true})
   for i = 1, vec_len do 
+    local after = ffi.new("char[?]", sz_after)
     addr[0] = i*10
-    local before = tonumber(addr[0])
+    local before = tostring(tonumber(addr[0]))
     x:set(addr, nil, len)
-
+    --[[
     local chk_addr, chk_len = x:get(i-1, 1)
+    assert(chk_len == 1)
     assert(chk_addr ~= nil )
-    local after = tonumber(addr[0])
-    chk_addr = ffi.cast("int32_t *", chk_addr)
-    local get_val = tonumber(chk_addr[0])
-    print("L: ",  i, before, after, get_val)
-    assert(before == get_val)
+    local status = qc.is_eq_I4(chk_addr, i*10)
+    assert(status)
+    --]]
+    print("L: ",  i)
 
     -- if ( ( i % (16*1024) ) == 0 ) then print("W: ", i) end
   end

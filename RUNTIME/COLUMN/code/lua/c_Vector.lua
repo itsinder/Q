@@ -27,25 +27,30 @@ function Vector.new(arg)
 
   -- set qtype
   assert(type(arg) == "table", "argument to constructor should be table")
-  local qtype = assert(arg.field_type, "must specifyt fldtype for vector")
+  local qtype = assert(arg.field_type, "must specify fldtype for vector")
   assert(type(qtype) == "string")
   assert(qconsts.qtypes[qtype], "Valid qtype not given")
   vec._field_type = qtype
 
   local status
   -- set field_size
+  local fldsz
   if ( qtype == "SC" ) then 
     local fldsz = assert(arg.field_size, "Must specify field size for SC")
     assert(type(fldsz) == "number")
     assert(fldsz >= 2, "Field size must be >= 2 (one for nullc)")
-    vec._field_size = fldsz
+    vec._field_size = fldszfield_size
   else
     assert(arg.field_size == nil, "Can specify field size only for SC")
-    vec._field_size = qconsts.qtypes[qtype].width
+    fldsz = qconsts.qtypes[qtype].width
   end
+  vec._field_size = fldsz
   --==============================
-  vec._vec = ffi.gc(qc.vec_new(vec._field_type, vec._field_size, 
-    qconsts.chunk_size), qc.vec_free)
+  -- local dbg = require 'Q/UTILS/lua/debugger'
+  -- dbg()
+  vec._vec = ffi.gc(ffi.malloc(ffi.sizeof("VEC_REC_TYPE")), qc.vec_free)
+  vec._vec = ffi.cast("VEC_REC_TYPE *", vec._vec)
+  qc.vec_new(vec._vec, qtype, fldsz, qconsts.chunk_size)
   --[[
   vec._vec = qc.vec_new(vec._field_type, vec._field_size, 
     qconsts.chunk_size)
@@ -64,7 +69,6 @@ function Vector.new(arg)
   assert(type(arg.is_nascent) == "boolean")
   if arg.is_nascent == true then 
     vec._is_nascent = true
-    status = qc.vec_nascent(vec._vec);
   else
     vec._is_nascent = false
   end
@@ -79,7 +83,9 @@ function Vector.new(arg)
   end
   assert(status == 0)
   --===================================
+  print("Created vec")
   if ( qconsts.debug ) then qc.vec_check(vec._vec) end
+  print("tested vec")
   return vec
 end
 
@@ -156,9 +162,12 @@ function Vector:get(idx, len)
   assert(len)
   assert(type(len) == "number")
   assert(len >= 1)
-  local addr = assert(qc.vec_get(self._vec, idx, len))
+  local status = qc.vec_get(self._vec, idx, len)
+  assert(status == 0)
+  local addr = assert(self._vec.ret_addr)
+  local len  = assert(self._vec.ret_len)
   if ( qconsts.debug ) then qc.vec_check(self._vec) end
-  return addr
+  return addr, len
 
 end
 
