@@ -27,14 +27,14 @@ for iter = 1, 100 do
     addr[0] = i*10
     local before = tostring(tonumber(addr[0]))
     x:set(addr, nil, len)
-    --[[
     local chk_addr, chk_len = x:get(i-1, 1)
     assert(chk_len == 1)
     assert(chk_addr ~= nil )
-    local status = qc.is_eq_I4(chk_addr, i*10)
-    assert(status)
-    --]]
-    print("L: ",  i)
+    local after = tonumber(addr[0])
+    chk_addr = ffi.cast("int32_t *", chk_addr)
+    local get_val = tonumber(chk_addr[0])
+    -- print("L: ",  i, before, after, get_val)
+    assert(before == get_val)
 
     -- if ( ( i % (16*1024) ) == 0 ) then print("W: ", i) end
   end
