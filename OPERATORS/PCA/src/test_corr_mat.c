@@ -1,8 +1,8 @@
 #include <time.h>
-#include "var_covar.h"
+#include "corr_mat.h"
 
 /*
-gcc -g $QC_FLAGS var_covar.c  -I../inc/ -I$HOME/WORK/Q/UTILS/inc/
+gcc -g $QC_FLAGS corr_mat.c  -I../inc/ -I$HOME/WORK/Q/UTILS/inc/
 */
 int
 main(
@@ -36,7 +36,7 @@ main(
 
   system("date");
   start_t = clock();
-  status = var_covar(X, M, N, A);
+  status = corr_mat(X, M, N, A);
   stop_t = clock();
   system("date");
   fprintf(stderr, "Num clocks = %llu \n", (unsigned long long)stop_t - start_t);
@@ -64,6 +64,19 @@ main(
 
 #endif
 BYE:
+  if ( X != NULL ) { 
+    for ( uint64_t i = 0; i < M; i++ ) {
+      free_if_non_null(X[i]);
+    }
+  }
+  free_if_non_null(X);
+
+  if ( A != NULL ) { 
+    for ( uint64_t i = 0; i < M; i++ ) {
+      free_if_non_null(A[i]);
+    }
+  }
+  free_if_non_null(A);
   return status;
 }
 

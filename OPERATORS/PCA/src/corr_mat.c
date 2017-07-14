@@ -1,5 +1,5 @@
 #include <time.h>
-#include "var_covar.h"
+#include "corr_mat.h"
 
 
 static inline void
@@ -32,7 +32,7 @@ _sum(
 }
  
 int
-var_covar(
+corr_mat(
     float **X, /* M vectors of length N */
     uint64_t M,
     uint64_t N,
@@ -79,7 +79,7 @@ var_covar(
         _sum(temp2, (ub-lb), &rslt);
         sum += rslt;
       }
-      // #pragma omp critical (_var_covar)
+      // #pragma omp critical (_corr_mat)
       {
         Ai[j] = sum / (N - 1);
       }

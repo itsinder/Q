@@ -25,7 +25,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/MM/src/ clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT  clean
-	make -C ${BASE_PATH}/OPERATORS/PCA/src/ clean
+	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
 
 install: uninstall 
 	cd ../../;\
@@ -88,7 +88,7 @@ q_operators: f1f2opf3 \
 	mvmul \
 	approx_quantile \
 	approx_frequent \
-	eigen
+	corrm
 	echo "all done for operators"
 
 
@@ -132,7 +132,7 @@ mvmul: q_basic
 	make -C ${BASE_PATH}/OPERATORS/MM/src/
 	echo "mvmul done"
 
-eigen: q_basic
+corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/
-	echo "eigen done"
+	echo "corrm done"
 

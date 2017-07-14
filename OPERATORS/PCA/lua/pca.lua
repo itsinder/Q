@@ -1,5 +1,6 @@
-local q = require 'Q'
-local qconsts = require 'Q/UTILS/q_consts.lua'
+local q       = require 'Q'
+local qconsts = require 'Q/UTILS//lua/q_consts'
+local eigen   = require 'Q/OPERATORS/PCA/lua/eigen'
 
 local function pca(X)
   -- TODO add input error checking
@@ -16,15 +17,12 @@ local function pca(X)
   end
 
   -- Step 2: compute the variance covariance matrix
-  local VCM = Q.var_covar(X)
+  local VCM = Q.corr_mat(X)
 
   -- Step 3: find the eigenvectors of the variance covariance matrix
-  local eigen_info = Q.eigen(VCM)
+  local eigen_info = eigen(VCM)
   return eigen_info.eigenvectors
   
 end
 return pca
-
-
-    
 
