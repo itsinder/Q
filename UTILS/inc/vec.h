@@ -45,4 +45,10 @@ vec_eov(
     VEC_REC_TYPE *ptr_vec,
     bool is_read_only
     );
+extern char *
+vec_get(
+    VEC_REC_TYPE *ptr_vec,
+    uint64_t idx, 
+    uint32_t len
+    );
 #endif

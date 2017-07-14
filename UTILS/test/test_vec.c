@@ -8,7 +8,7 @@ main()
   int status = 0;
   int32_t *addr = NULL;
   addr = malloc(sizeof(int32_t));
-#define NUM_TRIALS   1
+#define NUM_TRIALS   1024
 #define NUM_ELEMENTS 65537
 #define CHUNK_SIZE   8192
   for ( int i = 0; i < NUM_TRIALS; i++ ) { 

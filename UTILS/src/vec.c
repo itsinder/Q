@@ -66,17 +66,24 @@ vec_free(
     )
 {
   int status = 0;
+  if ( ptr_vec == NULL ) {  go_BYE(-1); }
+  // fprintf(stderr, "file = %s \n", ptr_vec->file_name);
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);
+    ptr_vec->map_addr = NULL;
+    ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) { 
+    // printf("%8x\n", ptr_vec->chunk);
     free(ptr_vec->chunk);
+    ptr_vec->chunk = NULL;
   }
   if ( ptr_vec->is_persist != 1 ) {
     if ( ptr_vec->file_name[0] != '\0' ) {
       status = remove(ptr_vec->file_name); cBYE(status);
     }
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
+    memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
   free(ptr_vec);
 BYE:
@@ -191,6 +198,32 @@ BYE:
   return status;
 }
 
+char *
+vec_get(
+    VEC_REC_TYPE *ptr_vec,
+    uint64_t idx, 
+    uint32_t len
+    )
+{
+  int status = 0;
+  char *addr = NULL;
+  if ( ptr_vec->is_nascent ) {
+    uint32_t chunk_num = idx / ptr_vec->chunk_size;
+    if ( chunk_num != ptr_vec->chunk_num ) { go_BYE(-1); }
+    uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
+    if ( idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
+    addr = ptr_vec->chunk + (chunk_idx * ptr_vec->field_size);
+  }
+  else {
+    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+    if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+    addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+  }
+
+BYE:
+  if ( status < 0 ) { return NULL; } else { return addr; }
+}
+
 int
 vec_set(
     VEC_REC_TYPE *ptr_vec,
@@ -208,9 +241,10 @@ vec_set(
     uint64_t initial_num_elements = ptr_vec->num_elements;
     uint32_t num_copied = 0;
     for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
-       uint32_t space_in_chunk = ptr_vec->chunk_size-ptr_vec->num_in_chunk;
+       uint32_t space_in_chunk = 
+         ptr_vec->chunk_size - ptr_vec->num_in_chunk;
        if ( space_in_chunk == 0 )  {
-         if ( ptr_vec->is_memo ) { 
+         if ( ptr_vec->is_memo ) {
            if ( ptr_vec->file_name[0] == '\0' ) {
              status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
              cBYE(status);
@@ -297,7 +331,7 @@ vec_eov(
   ptr_vec->chunk_num = 0;
   ptr_vec->num_in_chunk = 0;
 
-  // open as materialized vector
+  // open as materiali_zed vector
   bool is_write;
   if ( is_read_only ) { is_write = false; } else { is_write = true; }
   status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
