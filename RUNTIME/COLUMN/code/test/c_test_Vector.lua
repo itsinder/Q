@@ -16,7 +16,7 @@ local addr = ffi.malloc(len * qconsts.qtypes["I4"].width)
 addr = ffi.cast("int32_t *", addr)
 
 local x
-for iter = 1, 10 do
+for iter = 1, 100 do
   x = Vector({ field_type = "I4", is_nascent = true})
   for i = 1, vec_len do 
     addr[0] = i*10
@@ -28,7 +28,7 @@ for iter = 1, 10 do
     local after = tonumber(addr[0])
     chk_addr = ffi.cast("int32_t *", chk_addr)
     local get_val = tonumber(chk_addr[0])
-    print("L: ",  i, before, after, get_val)
+    -- print("L: ",  i, before, after, get_val)
     assert(before == get_val)
 
     -- if ( ( i % (16*1024) ) == 0 ) then print("W: ", i) end
