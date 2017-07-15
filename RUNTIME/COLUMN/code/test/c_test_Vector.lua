@@ -19,6 +19,7 @@ addr = ffi.cast("int32_t *", addr)
 local sz_after = 32
 
 
+local status
 local x
 for iter = 1, 100 do
   x = Vector({ field_type = "I4", is_nascent = true})
@@ -27,7 +28,9 @@ for iter = 1, 100 do
     addr[0] = i*10
     local before = tonumber(addr[0])
     x:set(addr, nil, len)
+    status = x:check(); assert(status == 0)
     local chk_addr, chk_len = x:get(i-1, 1)
+    status = x:check(); assert(status == 0)
     assert(chk_len == 1)
     assert(chk_addr ~= nil )
     local after = tonumber(addr[0])

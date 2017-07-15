@@ -94,6 +94,11 @@ function Vector:length()
   return self._num_elements
 end
 
+function Vector:check()
+  local status = qc.vec_check(self._vec)
+  return status
+end
+
 function Vector:fldtype()
   if ( qconsts.debug ) then self:check() end
   return self._field_type
