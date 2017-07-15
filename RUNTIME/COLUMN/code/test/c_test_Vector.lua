@@ -25,7 +25,7 @@ for iter = 1, 100 do
   for i = 1, vec_len do 
     local after = ffi.new("char[?]", sz_after)
     addr[0] = i*10
-    local before = tostring(tonumber(addr[0]))
+    local before = tonumber(addr[0])
     x:set(addr, nil, len)
     local chk_addr, chk_len = x:get(i-1, 1)
     assert(chk_len == 1)

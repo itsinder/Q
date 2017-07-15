@@ -48,7 +48,7 @@ function Vector.new(arg)
   --==============================
   -- local dbg = require 'Q/UTILS/lua/debugger'
   -- dbg()
-  vec._vec = ffi.gc(ffi.malloc(ffi.sizeof("VEC_REC_TYPE")), qc.vec_free)
+  vec._vec = ffi.malloc(ffi.sizeof("VEC_REC_TYPE"), qc.vec_free)
   vec._vec = ffi.cast("VEC_REC_TYPE *", vec._vec)
   qc.vec_new(vec._vec, qtype, fldsz, qconsts.chunk_size)
   --[[
