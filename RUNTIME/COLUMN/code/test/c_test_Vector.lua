@@ -33,7 +33,7 @@ for iter = 1, 100 do
     local after = tonumber(addr[0])
     chk_addr = ffi.cast("int32_t *", chk_addr)
     local get_val = tonumber(chk_addr[0])
-    -- print("L: ",  i, before, after, get_val)
+    print("L: ",  i, before, after, get_val)
     assert(before == get_val)
 
     -- if ( ( i % (16*1024) ) == 0 ) then print("W: ", i) end
