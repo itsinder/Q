@@ -30,6 +30,10 @@
     local f1_coro = assert(f1:wrap(), "wrap failed for x")
     local f2_buf = assert(ffi.malloc(buf_sz))
     local nn_f2_buf = nil
+    if subs.is_safe then
+        nn_f2_buf = assert(ffi.malloc(qconsts.chunk_size))
+        ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
+    end
     --============================================
     local f2_coro = coroutine.create(function()
       local status, f1_status, f1_len, f1_chunk, nn_f1_chunk 
@@ -39,11 +43,11 @@
         if f1_status and f1_len and f1_len > 0 then 
           status = qc[func_name](f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
           assert(status == 0, ">>>C error" .. func_name .. "<<<<")
-          coroutine.yield(f1_len, f2_buf, nil)
+          coroutine.yield(f1_len, f2_buf, nn_f2_buf)
         end
       end
     end)
-    return Column{gen=f2_coro, nn=false, field_type=f2_qtype}
+    return Column{gen=f2_coro, nn=subs.is_safe, field_type=f2_qtype}
   end
 
   return expander_f1s1opf2
