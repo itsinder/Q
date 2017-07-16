@@ -19,9 +19,12 @@ main()
     for ( int j = 0; j < NUM_ELEMENTS; j++ ) { 
       addr[0] = (j+1)*10;
       status = vec_set(X, (char *)addr, 0, 1); cBYE(status);
-      char *chk_addr = vec_get(X, j, 1); cBYE(status);
-      if ( chk_addr == NULL ) { go_BYE(-1); }
-      int *iptr = (int *)chk_addr;
+      status = vec_get(X, j, 1); cBYE(status);
+      char *ret_addr = X->ret_addr;
+      int32_t ret_len = X->ret_len;
+      if ( ret_addr == NULL ) { go_BYE(-1); }
+      if ( ret_len  != 1 ) { go_BYE(-1); }
+      int *iptr = (int *)ret_addr;
       if ( *iptr != (j+1)*10 ) { go_BYE(-1); }
       status = vec_check(X); cBYE(status);
     }
