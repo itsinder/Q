@@ -6,7 +6,7 @@ DBG_FLAGS = -g
 OPT_FLAGS = -O4
 OPT_FLAGS = 
 
-FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) -std=gnu99 -fopenmp -fPIC -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic
+FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) -std=gnu99 -fPIC -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp -pthread
 LINK_FLAGS =  -lm -lgomp 
 
 INCS= -I../../../UTILS/inc -I../inc

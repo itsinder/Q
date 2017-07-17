@@ -10,7 +10,7 @@ _vvmul(
     double * restrict Z
     )
 {
-#pragma omp simd
+// #pragma omp simd
   for ( uint32_t i = 0; i < n; i++ ) { 
     Z[i] = X[i] * Y[i];
   }
@@ -24,7 +24,7 @@ _sum(
     )
 {
   double y = 0;
-#pragma omp simd
+// #pragma omp simd
   for ( uint32_t i = 0; i < n; i++ ) { 
     y += X[i];
   }
@@ -47,11 +47,12 @@ corr_mat(
   if ( N <= 1 ) { go_BYE(-1); } // else division by 0
   // set up parameters for blocking/multi-threading
   int block_size = 16384; 
-  uint32_t nT = sysconf(_SC_NPROCESSORS_ONLN);
+  // uint32_t nT = sysconf(_SC_NPROCESSORS_ONLN);
+  uint32_t nT = 3;
   int num_blocks = N / block_size;
   if ( ( num_blocks * block_size ) != (int)N ) { num_blocks++; }
 
-#pragma omp parallel for 
+  // #pragma omp parallel for 
   // initialize A to 0
   for ( uint64_t i = 0; i < M; i++ ) { 
     memset(A[i], '\0', M*sizeof(double));

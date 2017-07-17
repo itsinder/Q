@@ -49,6 +49,10 @@ local function eigen(X)
     local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
     assert(nn_xptr == nil, "Values cannot be nil")
     Xptr[xidx-1] = ffi.cast("double *", xptr)
+    print("Printing X[] ", xidx-1)
+    for i = 1, m do 
+      print(Xptr[i-1])
+    end
   end
   local cfn = nil
   if ( stand_alone_test ) then
@@ -56,10 +60,11 @@ local function eigen(X)
   else
     cfn = qc["eigenvectors"]
   end
+  print("starting eigenvectors C function")
   assert(cfn, "C function for eigenvecrors not found")
   local status = cfn(m, wptr, Aptr, Xptr)
   assert(status == 0, "eigenvectors could not be calculated")
-
+  print("done with C, creating outputs")
   local E = {}
   -- for this to work, m needs to be less than q_consts.chunk_size
   for i = 1, m do
@@ -67,7 +72,7 @@ local function eigen(X)
     E[i]:put_chunk(m, Aptr, nil)
     Aptr = Aptr + m
   end
-
+  print("done with E")
   local W = Column.new({field_type = "F8", write_vector =true})
   W:put_chunk(m, wptr, nil)
 
