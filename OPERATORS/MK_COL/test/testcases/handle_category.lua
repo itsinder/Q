@@ -92,9 +92,15 @@ fns.category2 = function (index, v, status, ret)
   
   for i=1,ret:length() do  
     local result = ret:get_element(i-1)
-    local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
-    local str = ffi.cast(ctype.." *",result)
-    local final_result = str[0]
+    local final_result = nil
+    if ret:fldtype() == "B1" then
+      if result == nil then result = 0 end
+      final_result = result
+    else
+      local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
+      local str = ffi.cast(ctype.." *",result)
+      final_result = str[0]
+    end
     local is_float = ret:fldtype() == "F4" or ret:fldtype() == "F8"
     -- to handle the extra decimal values put in case of Float
     if is_float then
