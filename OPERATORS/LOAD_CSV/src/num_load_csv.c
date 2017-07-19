@@ -97,6 +97,7 @@ num_load_csv(
   }
   //---------------------------------
 
+  //mmap the file
   status = rs_mmap(infile, &mmap_file, &file_size, false); //false b/c not writing to file
   cBYE(status);
   if ( ( mmap_file == NULL ) || ( file_size == 0 ) )  { go_BYE(-1); }
@@ -107,6 +108,7 @@ num_load_csv(
   uint64_t row_ctr = 0;
   uint64_t col_ctr = 0;
   bool is_last_col;
+  //read from the input file and write to the output file
   while ( true ) {
     size_t bufsz = 31;
     char buf[bufsz+1];
@@ -119,12 +121,18 @@ num_load_csv(
     }
     xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, bufsz);
     fprintf(stderr, "%llu, %llu, %llu, %s \n", row_ctr, col_ctr, xidx, buf);
-    if ( xidx == 0 ) { go_BYE(-1); }
+    if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty
+    //row_ctr == 0 means we are reading the first line which is the header
+    if ( ( is_hdr ) && ( row_ctr == 0 ) ) { 
+      if ( col_ctr == nC - 1 ) {
+        row_ctr = row_ctr + 1;
+      }
+      col_ctr = (col_ctr + 1) % nC;
+      continue; 
+    }
+    //after a line has been read, increment the row count
     if ( col_ctr == nC-1 ) {
       row_ctr = row_ctr + 1;
-    }
-    if ( ( is_hdr ) && ( row_ctr == 1 ) ) { 
-      continue; 
     }
     switch ( qtypes[col_ctr] ) {
       case I1:
@@ -135,7 +143,7 @@ num_load_csv(
       case I2:
         status = txt_to_I2(buf, &tempI2); cBYE(status);
         fwrite(&tempI1, 1, sizeof(int16_t), ofps[col_ctr]);
-        printf("I2\n");
+        printf("I2");
         break;
       case I4:
         status = txt_to_I4(buf, &tempI4); cBYE(status);
@@ -158,13 +166,20 @@ num_load_csv(
         printf("F8\n");
         break;
       default:
+        //should not come here
         go_BYE(-1);
         break;
     }
+    /*this check needs to be done after the file has been written to because it
+     * is possible that on the last get_cell, xidx is incremented to file_size
+     * or greater, but the value from that last get_cell still needs to be
+     * written to file*/
     if ( xidx >= file_size ) { break; } // check == or >= 
     col_ctr = (col_ctr + 1) % nC;
   }
+  //want to exclude the header from the row count
   if ( is_hdr ) { row_ctr--; }
+  //header row
   *ptr_nR = row_ctr;
 
 BYE:
