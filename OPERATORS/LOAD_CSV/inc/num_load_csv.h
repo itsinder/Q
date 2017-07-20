@@ -14,7 +14,8 @@ num_load_csv(
     char *infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char **outfiles,
-    char **fldtypes,
-    bool is_hdr
+    const char **outfiles,
+    const char **fldtypes,
+    bool is_hdr,
+    bool *is_load
     );

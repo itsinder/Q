@@ -31,9 +31,10 @@ num_load_csv(
     char *infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char **outfiles,
-    char **fldtypes,
-    bool is_hdr
+    const char **outfiles,
+    const char **fldtypes,
+    bool is_hdr,
+    bool *is_load
     )
 //STOP_FUNC_DECL
 {
@@ -60,6 +61,10 @@ num_load_csv(
   qtypes = malloc(nC * sizeof(qtype_type));
   return_if_malloc_failed(qtypes);
   for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) {
+      qtypes[i] = undef;
+      continue;
+    }
     if ( strcasecmp(fldtypes[i], "I1") == 0 ) {
       qtypes[i] = I1;
     }
@@ -87,6 +92,9 @@ num_load_csv(
     ofps[i] = NULL;
   }
   for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) {
+      continue;
+    }
     if ( outfiles[i] != '\0' ) {
       ofps[i] = fopen(outfiles[i], "wb");
       return_if_fopen_failed(ofps[i], outfiles[i], "wb");
@@ -123,7 +131,7 @@ num_load_csv(
     fprintf(stderr, "%llu, %llu, %llu, %s \n", row_ctr, col_ctr, xidx, buf);
     if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty
     //row_ctr == 0 means we are reading the first line which is the header
-    if ( ( is_hdr ) && ( row_ctr == 0 ) ) { 
+    if ( (( is_hdr ) && ( row_ctr == 0 )) || !is_load[col_ctr] ) { 
       if ( col_ctr == nC - 1 ) {
         row_ctr = row_ctr + 1;
       }
@@ -138,12 +146,12 @@ num_load_csv(
       case I1:
         status = txt_to_I1(buf, &tempI1); cBYE(status);
         fwrite(&tempI1, 1, sizeof(int8_t), ofps[col_ctr]);
-        printf("I1\n");
+        //printf("I1\n");
         break;
       case I2:
         status = txt_to_I2(buf, &tempI2); cBYE(status);
         fwrite(&tempI1, 1, sizeof(int16_t), ofps[col_ctr]);
-        printf("I2");
+        //printf("I2");
         break;
       case I4:
         status = txt_to_I4(buf, &tempI4); cBYE(status);
@@ -153,7 +161,7 @@ num_load_csv(
       case I8:
         status = txt_to_I8(buf, &tempI8); cBYE(status);
         fwrite(&tempI8, 1, sizeof(int64_t), ofps[col_ctr]);
-        printf("I8\n");
+        //printf("I8\n");
         break;
       case F4:
         status = txt_to_F4(buf, &tempF4); cBYE(status);
@@ -163,7 +171,7 @@ num_load_csv(
       case F8:
         status = txt_to_F8(buf, &tempF8); cBYE(status);
         fwrite(&tempF8, 1, sizeof(double), ofps[col_ctr]);
-        printf("F8\n");
+        //printf("F8\n");
         break;
       default:
         //should not come here
