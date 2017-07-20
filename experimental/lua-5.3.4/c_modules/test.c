@@ -43,7 +43,9 @@ static int l_vec_get( lua_State *L) {
   if ( status == 0) { 
     lua_pushlightuserdata(L, ptr_vec->ret_addr);
     lua_pushinteger(L, ptr_vec->ret_len);
-    return 2;
+    int *iptr = (int *)ptr_vec->ret_addr;
+    lua_pushinteger(L, *iptr);
+    return 3;
   }
   else {
     lua_pushnil(L);

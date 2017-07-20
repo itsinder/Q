@@ -12,9 +12,10 @@ for j = 1, num_trials do
   for i = 1, num_elements do
     status = vec.set(y, buf, i-1, 1)
     assert(status == 0)
-    ret_addr, ret_len = vec.get(y, i-1, 1)
+    ret_addr, ret_len, ret_val  = vec.get(y, i-1, 1)
     -- print("addr ", ret_addr); print("len ", ret_len)
     assert(ret_addr)
+    -- print(ret_addr, ret_len, ret_val)
     assert(ret_len == 1)
   end
   print("Iter ", j)
