@@ -2,6 +2,6 @@ local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local ffi = require 'lua/q_ffi'
 
-local incfile = "inc/q_core.h"
+local incfile = "include/q_core.h"
 ffi.cdef(plfile.read(incfile))
 return ffi.load('lib/libq_core.so')
