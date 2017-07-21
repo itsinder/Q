@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <inttypes.h>
 
 #include "luaconf.h"
 #include "lua.h"
@@ -20,22 +21,7 @@
 
 // TODO Move following decl
 
-static int l_sclr_eq( lua_State *L);
-typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8} QTYPE;
-
-typedef union _cdata_type {
-  int8_t  valI1;
-  int16_t valI2;
-  int32_t valI4;
-  int64_t valI8;
-  float   valF4;
-  double  valF8;
-} CDATA_TYPE;
-
-typedef struct _sclr_rec_type {
-  char field_type[8];
-  CDATA_TYPE cdata;
-} SCLR_REC_TYPE;
+#include "scalar.h"
 
 LUAMOD_API int luaopen_libsclr (lua_State *L);
 
@@ -58,7 +44,7 @@ int status = 0;
     snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI4);
   }
   else if ( strcmp(field_type, "I8" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%lld", ptr_sclr->cdata.valI8);
+    snprintf(buf, BUFLEN, "%" PRId64, ptr_sclr->cdata.valI8);
   }
   else if ( strcmp(field_type, "F4" ) == 0 ) { 
     snprintf(buf, BUFLEN, "%f", ptr_sclr->cdata.valF4);
@@ -132,6 +118,10 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_new. ");
   return 2;
 }
+
+#include "_eval_cmp.c"
+
+#include "_eval.c"
 //-----------------------
 static const struct luaL_Reg sclr_methods[] = {
     { NULL,          NULL               },
@@ -141,6 +131,11 @@ static const struct luaL_Reg sclr_functions[] = {
     { "new", l_sclr_new },
     { "to_str", l_sclr_to_str },
     { "eq", l_sclr_eq },
+    { "neq", l_sclr_neq },
+    { "gt", l_sclr_gt },
+    { "lt", l_sclr_lt },
+    { "geq", l_sclr_geq },
+    { "leq", l_sclr_leq },
     { NULL,  NULL         }
 };
  
@@ -172,156 +167,4 @@ LUAMOD_API int luaopen_libsclr (lua_State *L) {
   luaL_newlib(L, sclr_functions);
 
   return 1;
-}
-
-static int l_sclr_eq( lua_State *L) {
-  int status = 0;
-  int ret_val = 0;
-
-  SCLR_REC_TYPE *ptr_sclr1 = (SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
-  SCLR_REC_TYPE *ptr_sclr2 = (SCLR_REC_TYPE *)luaL_checkudata(L, 2, "Scalar");
-  if ( strcmp(ptr_sclr1->field_type, "I1") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI1 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  else if ( strcmp(ptr_sclr1->field_type, "I2") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI2 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  else if ( strcmp(ptr_sclr1->field_type, "I4") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI4 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  else if ( strcmp(ptr_sclr1->field_type, "I8") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valI8 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  else if ( strcmp(ptr_sclr1->field_type, "F4") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF4 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  else if ( strcmp(ptr_sclr1->field_type, "F8") == 0 ) { 
-    if ( strcmp(ptr_sclr2->field_type, "I1") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valI1;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I2") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valI2;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valI4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "I8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valI8;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F4") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valF4;
-    }
-    else if ( strcmp(ptr_sclr2->field_type, "F8") == 0 ) { 
-      ret_val = ptr_sclr1->cdata.valF8 == ptr_sclr2->cdata.valF8;
-    }
-    else {
-      go_BYE(-1);
-    }
-  }
-  lua_pushinteger(L, ret_val);
-  return 1;
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: sclr_eq. ");
-  return 2;
 }

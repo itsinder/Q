@@ -1,3 +1,5 @@
+#!/bin/bash
+set -e 
 gcc -g $QC_FLAGS \
   test.c \
   vec.c \
@@ -18,6 +20,11 @@ gcc -g $QC_FLAGS \
   -I./inc/ \
   -I./gen_inc/ \
   -shared -o libcmem.so
+
+
+rm -f _eval_cmp.c _eval.c
+lua gen.lua
+# gcc -c $QC_FLAGS _eval_cmp.c -I../../../UTILS/inc/
 
 gcc -g $QC_FLAGS \
   scalar.c \

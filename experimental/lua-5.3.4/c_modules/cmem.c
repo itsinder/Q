@@ -28,7 +28,7 @@ static int l_cmem_malloc( lua_State *L)
 
   void *X = malloc(sz);
   if ( X == NULL ) { goto ERR; }
-  fprintf(stderr, "CMEM: Malloc %d bytes at %llu \n", sz, (uint64_t)X);
+  // fprintf(stderr, "CMEM: Malloc %d bytes at %llu \n", sz, (uint64_t)X);
   ptr_cmem->addr = X;
   ptr_cmem->sz = sz;
   /* Add the metatable to the stack. */
@@ -44,7 +44,7 @@ ERR:
 //----------------------------------------
 static int l_cmem_free( lua_State *L) {
   CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
-  printf("CMEM: Freeing %d bytes  at %llu\n", ptr_cmem->sz, (uint64_t)ptr_cmem->addr);
+  // fprintf(stderr, "CMEM: Freeing %d bytes  at %llu\n", ptr_cmem->sz, (uint64_t)ptr_cmem->addr);
   if ( ptr_cmem->sz <= 0  ) { goto ERR; }
   free(ptr_cmem->addr);
   lua_pushinteger(L, 0);
