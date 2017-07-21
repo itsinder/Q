@@ -1,3 +1,4 @@
+mkdir -p lib
 rm -f lib/libq_core.so
 
 gcc -g -std=gnu99 -Wall -fPIC -W -Waggregate-return \
