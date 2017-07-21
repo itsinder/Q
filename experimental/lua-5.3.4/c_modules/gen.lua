@@ -77,7 +77,7 @@ static int l_sclr___KEY__(lua_State *L)
   status = eval_cmp( ptr_sclr1->field_type, ptr_sclr2->field_type, 
       "__VAL__", ptr_sclr1->cdata, ptr_sclr2->cdata, &ret_val);
   cBYE(status);
-  lua_pushinteger(L, ret_val);
+  lua_pushboolean(L, ret_val);
   return 1;
 BYE:
   lua_pushnil(L);

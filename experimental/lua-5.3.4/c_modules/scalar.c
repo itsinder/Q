@@ -25,6 +25,39 @@
 
 LUAMOD_API int luaopen_libsclr (lua_State *L);
 
+static int l_sclr_to_num( lua_State *L) {
+  int status = 0;
+
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  const char *field_type = ptr_sclr->field_type;
+  if ( strcmp(field_type, "I1" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valI1);
+  }
+  else if ( strcmp(field_type, "I2" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valI2);
+  }
+  else if ( strcmp(field_type, "I4" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valI4);
+  }
+  else if ( strcmp(field_type, "I8" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valI8);
+  }
+  else if ( strcmp(field_type, "F4" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valF4);
+  }
+  else if ( strcmp(field_type, "F8" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valF8);
+  }
+  else {
+    go_BYE(-1);
+  }
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_to_num. ");
+  return 2;
+}
+
 static int l_sclr_to_str( lua_State *L) {
 int status = 0;
 #define BUFLEN 31
@@ -62,7 +95,6 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_to_str. ");
   return 2;
 }
-//----------------------------------------
 static int l_sclr_new( lua_State *L) {
   int status = 0;
   int8_t  tempI1;
@@ -118,6 +150,12 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_new. ");
   return 2;
 }
+//----------------------------------------
+static int l_sclr_xxx( lua_State *L) {
+  lua_remove(L, -3);
+  return l_sclr_new(L);
+}
+//----------------------------------------
 
 #include "_eval_cmp.c"
 
@@ -130,6 +168,7 @@ static const struct luaL_Reg sclr_methods[] = {
 static const struct luaL_Reg sclr_functions[] = {
     { "new", l_sclr_new },
     { "to_str", l_sclr_to_str },
+    { "to_num", l_sclr_to_num },
     { "eq", l_sclr_eq },
     { "neq", l_sclr_neq },
     { "gt", l_sclr_gt },
@@ -154,6 +193,14 @@ LUAMOD_API int luaopen_libsclr (lua_State *L) {
    * metatable.__index = metatable
    */
   lua_setfield(L, -2, "__index");
+  lua_pushcfunction(L, l_sclr_to_str); lua_setfield(L, -2, "__tostring");
+  lua_pushcfunction(L, l_sclr_eq); lua_setfield(L, -2, "__eq");
+  lua_pushcfunction(L, l_sclr_lt); lua_setfield(L, -2, "__lt");
+  lua_pushcfunction(L, l_sclr_leq); lua_setfield(L, -2, "__le");
+  // Following do not work currently
+  lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
+  lua_pushcfunction(L, l_sclr_xxx); lua_setfield(L, -2, "__call");
+  // Above do not work currently
 
   /* Register the object.func functions into the table that is at the 
    * top of the stack. */
