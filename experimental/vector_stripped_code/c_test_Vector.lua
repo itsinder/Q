@@ -5,29 +5,32 @@ local Vector   = require 'lua/c_Vector_stripped'
 os.execute("rm -f _*")
 
 local len  = 1
-local vec_len = 64*64*1024+3
-local addr = ffi.malloc(len * 4)
+
+-- Number of elements in vector (4194304)
+local vec_len = 64*64*1024
+
+-- Creating chunk for a single element of type int32_t
+element_fld_size = 4
+local addr = ffi.malloc(element_fld_size)
 addr = ffi.cast("int32_t *", addr)
-
-local sz_after = 32
-
 
 local status
 local x
 for iter = 1, 100 do
-  x = Vector({ field_type = "I4", is_nascent = true})
+  -- Create vector instance
+  x = Vector({ field_size = element_fld_size})
   for i = 1, vec_len do 
-    local after = ffi.new("char[?]", sz_after)
     addr[0] = i*10
-    local before = tonumber(addr[0])
-    x:set(addr, nil, len)
+    -- Set value to vector
+    x:set(addr, len)
   end
   print("=== Created vector ===", iter)
 
-  if ( ( iter %  8 ) == 0 ) then
-    print("GARBAGE COLLECTION")
-    collectgarbage()
-  end
+  -- Calling garbage collection explicitly for testing purpose
+  --if ( ( iter %  8 ) == 0 ) then
+  --  print("GARBAGE COLLECTION")
+  --  collectgarbage()
+  --end
 end
 --====================================
 os.exit()

@@ -11,19 +11,17 @@ vec_free(
     VEC_REC_TYPE *ptr_vec
     )
 {
+  printf("#################################################################################################################################\n");
+  printf("vec_free called\n");
   int status = 0;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
-  // fprintf(stderr, "file = %s \n", ptr_vec->file_name);
-  if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
-    munmap(ptr_vec->map_addr, ptr_vec->map_len);
-    ptr_vec->map_addr = NULL;
-    ptr_vec->map_len  = 0;
-  }
   if ( ptr_vec->chunk != NULL ) { 
     // printf("%8x\n", ptr_vec->chunk);
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
+// Commenting below code, not sure whether to delete file or not
+/*
   if ( ptr_vec->is_persist != 1 ) {
     if ( ptr_vec->file_name[0] != '\0' ) {
       status = remove(ptr_vec->file_name); cBYE(status);
@@ -31,6 +29,7 @@ vec_free(
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
+*/
   free(ptr_vec);
 BYE:
   return status;
@@ -39,7 +38,6 @@ BYE:
 int 
 vec_new(
     VEC_REC_TYPE *ptr_vec,
-    const char * const field_type,
     uint32_t field_size,
     uint32_t chunk_size
     )
@@ -51,10 +49,8 @@ vec_new(
   if ( field_size == 0 ) { go_BYE(-1); }
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
-  //status = chk_field_type(field_type); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
-  ptr_vec->is_memo    = true; // default
   uint32_t sz = ptr_vec->field_size * ptr_vec->chunk_size;
   ptr_vec->chunk = malloc(sz);
 BYE:
@@ -81,7 +77,6 @@ int
 vec_set(
     VEC_REC_TYPE *ptr_vec,
     char *addr, 
-    uint64_t idx, 
     uint32_t len
     )
 {
@@ -92,17 +87,16 @@ vec_set(
      uint32_t space_in_chunk = 
        ptr_vec->chunk_size - ptr_vec->num_in_chunk;
      if ( space_in_chunk == 0 )  {
-       if ( ptr_vec->is_memo ) {
-         if ( ptr_vec->file_name[0] == '\0' ) {
-           status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-           cBYE(status);
-         }
-         printf("Writing buffer to file\n");
-         status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-             ptr_vec->num_in_chunk, ptr_vec->file_name);
-         printf("Writing Done\n");
+       printf("Space in chunk is zero");
+       if ( ptr_vec->file_name[0] == '\0' ) {
+         status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
          cBYE(status);
        }
+       printf("Writing buffer to file\n");
+       status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+           ptr_vec->num_in_chunk, ptr_vec->file_name);
+       printf("Writing Done\n");
+       cBYE(status);
        ptr_vec->num_in_chunk = 0;
        ptr_vec->chunk_num++;
        memset(ptr_vec->chunk, '\0', 

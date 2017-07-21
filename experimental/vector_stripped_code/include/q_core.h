@@ -7,6 +7,11 @@ buf_to_file(
    const char * const file_name
 );
 
+typedef struct _file_cleanup_struct {
+    char file_name[200];
+    int clean;
+} file_cleanup_struct;
+
 typedef struct _mmap_rec_type {
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
@@ -15,11 +20,6 @@ typedef struct _mmap_rec_type {
     int is_persist;
     int status;
 } MMAP_REC_TYPE;
-
-typedef struct _file_cleanup_struct {
-    char file_name[200];
-    int clean;
-} file_cleanup_struct;
 
 extern MMAP_REC_TYPE *
 f_mmap(
@@ -51,7 +51,6 @@ rs_mmap(
 	);
 
 typedef struct _vec_rec_type {
-  char field_type[3+1];
   uint32_t field_size;
   uint32_t chunk_size;
 
@@ -61,17 +60,8 @@ typedef struct _vec_rec_type {
 
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
-  char *map_addr;
-  size_t map_len;
 
-  char *ret_addr; // returned to get
-  size_t ret_len; // returned to get
-
-  uint32_t is_persist;
-  bool is_nascent;
   int status;
-  int is_memo;
-  bool is_read_only;
   char *chunk;
 } VEC_REC_TYPE;
 
@@ -87,23 +77,10 @@ chk_field_type(
     );
 
 extern int
-vec_nascent(
-    VEC_REC_TYPE *ptr_vec
-    );
-
-extern int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
-    const char * const field_type,
     uint32_t field_size,
     uint32_t chunk_size
-    );
-
-extern int
-vec_materialized(
-    VEC_REC_TYPE *ptr_vec,
-    const char *const file_name,
-    bool is_read_only
     );
 
 extern int
@@ -125,25 +102,5 @@ extern int
 vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
-    uint64_t idx, 
     uint32_t len
-    );
-
-extern int
-vec_eov(
-    VEC_REC_TYPE *ptr_vec,
-    bool is_read_only
-    );
-
-extern int
-vec_get(
-    VEC_REC_TYPE *ptr_vec,
-    uint64_t idx, 
-    uint32_t len
-    );
-
-extern int
-is_eq_I4(
-    void *X,
-    int val
     );
