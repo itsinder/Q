@@ -27,7 +27,7 @@ main(void) {
   status = num_load_csv(infile, nC, &nR, outfiles, fldtypes, false);
 #endif
 
-  const char *infile = "small_with_header.csv";
+  const char *infile = "small_with_header_and_nils.csv";
   uint32_t nC = 3;
   const char *fldtypes[nC];
   fldtypes[0] = "I4";
@@ -35,9 +35,14 @@ main(void) {
   fldtypes[2] = "I4";
 
   const char *outfiles[nC];
-  outfiles[0] = "a";
-  outfiles[1] = "b";
-  outfiles[2] = "c";
+  outfiles[0] = "_a";
+  outfiles[1] = "_b";
+  outfiles[2] = "_c";
+
+  const char *nil_files[nC];
+  nil_files[0] = "_nil_a";
+  nil_files[1] = "_nil_b";
+  nil_files[2] = "_nil_c";
 
   bool is_load[nC];
   is_load[0] = false;
@@ -47,8 +52,13 @@ main(void) {
 
   uint64_t nR = NULL;
 
-  status = num_load_csv(infile, nC, &nR, outfiles, fldtypes, true, is_load);
+  status = num_load_csv(infile, nC, &nR, outfiles, fldtypes, true, is_load, nil_files);
 
 BYE:
+  /*for ( uint32_t i = 0; i < nC; i++ ) {
+    free_if_non_null(outfiles[i]);
+  }
+  free_if_non_null(outfiles);
+  */
   return status;
 }

@@ -17,5 +17,6 @@ num_load_csv(
     const char **outfiles,
     const char **fldtypes,
     bool is_hdr,
-    bool *is_load
+    bool *is_load,
+    const char **nil_files
     );

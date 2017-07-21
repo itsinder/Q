@@ -34,7 +34,8 @@ num_load_csv(
     const char **outfiles,
     const char **fldtypes,
     bool is_hdr,
-    bool *is_load
+    bool *is_load,
+    const char **nil_files
     )
 //STOP_FUNC_DECL
 {
@@ -42,7 +43,9 @@ num_load_csv(
   char *mmap_file = NULL; //X
   size_t file_size = 0; //nX
   FILE **ofps = NULL;
+  FILE **nofps = NULL;
   qtype_type *qtypes = NULL;
+  uint64_t *nil_ctrs = NULL;
 
   //---------------------------------
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
@@ -51,12 +54,14 @@ num_load_csv(
   if ( ptr_nR == NULL ) { go_BYE(-1); }
   //---------------------------------
   // allocate space and other resources
-  *ptr_nR = 0;
-  ofps = malloc(nC * sizeof(FILE *));
-  return_if_malloc_failed(ofps);
-  for ( uint32_t i = 0; i < nC; i++ ) {
-    ofps[i] = NULL;
+
+  nil_ctrs = malloc(nC * sizeof(uint64_t));
+  return_if_malloc_failed(nil_ctrs);
+  for(uint32_t i = 0; i < nC; i++ ) {
+    nil_ctrs[i] = 0;
   }
+
+  *ptr_nR = 0;
   // set up qtypes 
   qtypes = malloc(nC * sizeof(qtype_type));
   return_if_malloc_failed(qtypes);
@@ -85,11 +90,14 @@ num_load_csv(
     }
     else { go_BYE(-1); }
   }
-  // malloc and open output file pointers
+  // malloc and open output file pointers and nil output file pointers
   ofps = malloc(nC * sizeof(FILE *));
   return_if_malloc_failed(ofps);
+  nofps = malloc(nC * sizeof(FILE *));
+  return_if_malloc_failed(nofps);
   for ( uint32_t i = 0; i < nC; i++ ) {
     ofps[i] = NULL;
+    nofps[i] = NULL;
   }
   for ( uint32_t i = 0; i < nC; i++ ) {
     if ( !is_load[i] ) {
@@ -100,7 +108,14 @@ num_load_csv(
       return_if_fopen_failed(ofps[i], outfiles[i], "wb");
     } 
     else {
-      ofps[i] = stdout;
+      cBYE(-1)
+    }
+    if ( nil_files[i] != '\0' ) {
+      nofps[i] = fopen(nil_files[i], "wb");
+      return_if_fopen_failed(nofps[i], nil_files[i], "wb");
+    } 
+    else {
+      cBYE(-1)
     }
   }
   //---------------------------------
@@ -112,6 +127,8 @@ num_load_csv(
 
   int8_t tempI1; int16_t tempI2; int32_t tempI4; int64_t tempI8; float tempF4; double tempF8;
 
+  size_t prev_xidx = 0;
+  int8_t nil = 0;
   size_t xidx = 0;
   uint64_t row_ctr = 0;
   uint64_t col_ctr = 0;
@@ -127,20 +144,35 @@ num_load_csv(
     else {
       is_last_col = false;
     }
+    prev_xidx = xidx;
     xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, bufsz);
+    if ( (xidx - prev_xidx) == 1 ) { //only one character consumed (the comma or new line character)
+      nil_ctrs[col_ctr] += 1;
+      nil = 1;
+    }
+    else {
+      nil = 0;
+    }
     fprintf(stderr, "%llu, %llu, %llu, %s \n", row_ctr, col_ctr, xidx, buf);
     if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty
     //row_ctr == 0 means we are reading the first line which is the header
-    if ( (( is_hdr ) && ( row_ctr == 0 )) || !is_load[col_ctr] ) { 
+    if ( (( is_hdr ) && ( row_ctr == 0 )) || (!is_load[col_ctr]) ) { 
       if ( col_ctr == nC - 1 ) {
         row_ctr = row_ctr + 1;
       }
       col_ctr = (col_ctr + 1) % nC;
+      if ( xidx >= file_size ) { break; } // check == or >= 
       continue; 
     }
     //after a line has been read, increment the row count
     if ( col_ctr == nC-1 ) {
       row_ctr = row_ctr + 1;
+    }
+    fwrite(&nil, 1, sizeof(int8_t), nofps[col_ctr]);
+    if ( nil == 1 ) {
+      col_ctr = (col_ctr + 1) % nC;
+      if ( xidx >= file_size ) { break; } // check == or >= 
+      continue;
     }
     switch ( qtypes[col_ctr] ) {
       case I1:
@@ -190,18 +222,40 @@ num_load_csv(
   //header row
   *ptr_nR = row_ctr;
 
+
 BYE:
   for ( uint32_t i = 0; i < nC; i++ ) {
     if ( *outfiles[i] != '\0' ) {
       fclose_if_non_null(ofps[i]);
     }
+    if ( *nil_files[i] != '\0' ) {
+      fclose_if_non_null(nofps[i]);
+    }
   }
+
   if ( ofps != NULL ) { 
     for  ( uint32_t i = 0; i < nC; i++ ) { 
       fclose_if_non_null(ofps[i]);
     }
   }
+
+  if ( nofps != NULL ) { 
+    for  ( uint32_t i = 0; i < nC; i++ ) { 
+      fclose_if_non_null(nofps[i]);
+    }
+  }
+  //delete nil_files with no nil elements
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( nil_ctrs[i] == 0 ) {
+      status = remove(nil_files[i]);
+      nil_files[i] = NULL;
+      cBYE(status);
+    }
+  }
+
   rs_munmap(mmap_file, file_size);
   free_if_non_null(ofps);
+  free_if_non_null(nofps);
+  free_if_non_null(nil_ctrs);
   return status;
 }
