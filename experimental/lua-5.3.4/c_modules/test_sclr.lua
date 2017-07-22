@@ -1,4 +1,4 @@
-vec = require 'libtest' ; 
+vec = require 'libvec' ; 
 cmem = require 'libcmem' ; 
 Scalar = require 'libsclr' ; 
 num_trials = 1024

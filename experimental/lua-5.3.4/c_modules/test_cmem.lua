@@ -1,4 +1,4 @@
-vec = require 'libtest' ; 
+vec = require 'libvec' ; 
 cmem = require 'libcmem' ; 
 
 local num_trials = 1024*1048576

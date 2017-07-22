@@ -87,7 +87,6 @@ function get_output_type(
   else
     assert(nil)
   end
-  print("f1, f2 => f3", f1, f2, f3)
   return f3
 end
 ----------------------

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e 
 gcc -g $QC_FLAGS \
-  test.c \
-  vec.c \
+  vector.c \
+  core_vec.c \
   mmap.c \
   txt_to_I4.c \
   is_valid_chars_for_num.c \
@@ -13,7 +13,7 @@ gcc -g $QC_FLAGS \
   buf_to_file.c \
   -I./inc/ \
   -I./gen_inc/ \
-  -shared -o libtest.so
+  -shared -o libvec.so
 
 gcc -g $QC_FLAGS \
   cmem.c \

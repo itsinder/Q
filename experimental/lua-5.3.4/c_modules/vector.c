@@ -18,7 +18,7 @@ typedef struct _cmem_rec_type {
   int32_t sz;
 } CMEM_REC_TYPE;
 
-LUAMOD_API int luaopen_libtest (lua_State *L);
+LUAMOD_API int luaopen_libvec (lua_State *L);
 
 static int l_vec_eov( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -163,9 +163,9 @@ static const struct luaL_Reg vector_functions[] = {
 };
  
 /*
-** Open test library
+** Open vector library
 */
-LUAMOD_API int luaopen_libtest (lua_State *L) {
+LUAMOD_API int luaopen_libvec (lua_State *L) {
   /* Create the metatable and put it on the stack. */
   luaL_newmetatable(L, "Vector");
   /* Duplicate the metatable on the stack (We know have 2). */
