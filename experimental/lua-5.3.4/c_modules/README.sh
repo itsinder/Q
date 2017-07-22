@@ -22,8 +22,9 @@ gcc -g $QC_FLAGS \
   -shared -o libcmem.so
 
 
-rm -f _eval_cmp.c _eval.c
+rm -f _*.c
 lua gen_cmp.lua
+lua gen_arith.lua
 # gcc -c $QC_FLAGS _eval_cmp.c -I../../../UTILS/inc/
 
 gcc -g $QC_FLAGS \

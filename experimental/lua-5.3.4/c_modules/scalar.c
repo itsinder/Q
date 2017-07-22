@@ -289,8 +289,9 @@ static int l_sclr_xxx( lua_State *L) {
 //----------------------------------------
 
 #include "_eval_cmp.c"
-
-#include "_eval.c"
+#include "_outer_eval_cmp.c"
+#include "_eval_arith.c"
+#include "_outer_eval_arith.c"
 //-----------------------
 static const struct luaL_Reg sclr_methods[] = {
     { NULL,          NULL               },
@@ -306,6 +307,10 @@ static const struct luaL_Reg sclr_functions[] = {
     { "lt", l_sclr_lt },
     { "geq", l_sclr_geq },
     { "leq", l_sclr_leq },
+    { "add", l_sclr_add },
+    { "sub", l_sclr_sub },
+    { "mul", l_sclr_mul },
+    { "div", l_sclr_div },
     { NULL,  NULL         }
 };
  
@@ -328,6 +333,12 @@ LUAMOD_API int luaopen_libsclr (lua_State *L) {
   lua_pushcfunction(L, l_sclr_eq); lua_setfield(L, -2, "__eq");
   lua_pushcfunction(L, l_sclr_lt); lua_setfield(L, -2, "__lt");
   lua_pushcfunction(L, l_sclr_leq); lua_setfield(L, -2, "__le");
+  /* negations of above happen automatically. No need to do them here */
+
+  lua_pushcfunction(L, l_sclr_add); lua_setfield(L, -2, "__add");
+  lua_pushcfunction(L, l_sclr_sub); lua_setfield(L, -2, "__sub");
+  lua_pushcfunction(L, l_sclr_mul); lua_setfield(L, -2, "__mul");
+  lua_pushcfunction(L, l_sclr_div); lua_setfield(L, -2, "__div");
   // Following do not work currently
   lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
   lua_pushcfunction(L, l_sclr_xxx); lua_setfield(L, -2, "__call");
