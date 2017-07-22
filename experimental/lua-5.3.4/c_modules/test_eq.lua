@@ -2,7 +2,7 @@ vec = require 'libtest' ;
 cmem = require 'libcmem' ; 
 Scalar = require 'libsclr' ; 
 
-y  = Scalar(123, "F4")
+-- y  = Scalar(123, "F4")
 x  = Scalar.new(123, "F4")
 
 a = Scalar.to_num(x)

@@ -150,6 +150,137 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_new. ");
   return 2;
 }
+static int set_output_field_type(
+    const char *const fldtype1,
+    const char *const fldtype2,
+    SCLR_REC_TYPE *ptr_sclr
+    )
+{
+  int status = 0;
+  if ( strcmp(fldtype1, "I1") == 0 ) {
+    if ( strcmp(fldtype2, "I1") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I1");
+    }
+    else if ( strcmp(fldtype2, "I2") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I2");
+    }
+    else if ( strcmp(fldtype2, "I4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I4");
+    }
+    else if ( strcmp(fldtype2, "I8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "F4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F8");
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(fldtype1, "I2") == 0 ) {
+    if ( strcmp(fldtype2, "I1") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I2");
+    }
+    else if ( strcmp(fldtype2, "I2") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I2");
+    }
+    else if ( strcmp(fldtype2, "I4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I4");
+    }
+    else if ( strcmp(fldtype2, "I8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "F4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F8");
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(fldtype1, "I4") == 0 ) {
+    if ( strcmp(fldtype2, "I1") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I4");
+    }
+    else if ( strcmp(fldtype2, "I2") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I4");
+    }
+    else if ( strcmp(fldtype2, "I4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I4");
+    }
+    else if ( strcmp(fldtype2, "I8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "F4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F8");
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(fldtype1, "I8") == 0 ) {
+    if ( strcmp(fldtype2, "I1") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "I2") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "I4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "I8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "I8");
+    }
+    else if ( strcmp(fldtype2, "F4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F8");
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(fldtype1, "F4") == 0 ) {
+    if ( strcmp(fldtype2, "I1") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "I2") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "I4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "I8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F4") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F4");
+    }
+    else if ( strcmp(fldtype2, "F8") == 0 ) {
+      strcpy(ptr_sclr->field_type, "F8");
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(fldtype1, "F8") == 0 ) {
+    strcpy(ptr_sclr->field_type, "F8");
+  }
+  else {
+    go_BYE(-1);
+  }
+BYE:
+  return status;
+}
 //----------------------------------------
 static int l_sclr_xxx( lua_State *L) {
   lua_remove(L, -3);

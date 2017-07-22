@@ -23,7 +23,7 @@ gcc -g $QC_FLAGS \
 
 
 rm -f _eval_cmp.c _eval.c
-lua gen.lua
+lua gen_cmp.lua
 # gcc -c $QC_FLAGS _eval_cmp.c -I../../../UTILS/inc/
 
 gcc -g $QC_FLAGS \

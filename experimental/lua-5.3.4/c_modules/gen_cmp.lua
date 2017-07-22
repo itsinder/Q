@@ -104,6 +104,6 @@ io.close()
 
 T = { eq = "==", neq = "!=", gt = ">", lt = "<", geq = ">=", leq = "<=" }
 
-io.output("_eval.c")
+io.output("_outer_eval_cmp.c")
 gen_outer(T)
 io.close()
