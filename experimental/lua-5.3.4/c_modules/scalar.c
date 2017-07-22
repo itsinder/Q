@@ -335,7 +335,7 @@ LUAMOD_API int luaopen_libsclr (lua_State *L) {
    * metatable.__index = metatable
    */
   lua_setfield(L, -2, "__index");
-  lua_pushcfunction(L, l_sclr_to_str); lua_setfield(L, -2, "__tostring");
+  // TODO PUT THIS BACK lua_pushcfunction(L, l_sclr_to_str); lua_setfield(L, -2, "__tostring");
   lua_pushcfunction(L, l_sclr_eq); lua_setfield(L, -2, "__eq");
   lua_pushcfunction(L, l_sclr_lt); lua_setfield(L, -2, "__lt");
   lua_pushcfunction(L, l_sclr_leq); lua_setfield(L, -2, "__le");

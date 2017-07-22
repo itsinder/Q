@@ -122,12 +122,15 @@ vec_free(
   if ( !ptr_vec->is_persist ) { 
     if ( ptr_vec->file_name[0] != '\0' ) {
       printf("Deleting %s \n", ptr_vec->file_name); 
-      status = remove(ptr_vec->file_name); cBYE(status);
+      status = remove(ptr_vec->file_name); 
+      if ( status != 0 ) { 
+        printf("Unable to delete %s \n", ptr_vec->file_name); WHEREAMI;
+      }
     }
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
-  // Don't do this in C. Lua will do it free(ptr_vec);
+  // Don't do this in C. Lua will do it: free(ptr_vec);
 BYE:
   return status;
 }
@@ -327,25 +330,6 @@ vec_set(
     char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
     memcpy(dst, addr, len * ptr_vec->field_size);
   }
-
-  /*
-     else
-     print(self._is_nascent)
-     os.exit()
-     assert(self._is_write == true)
-     assert(idx)
-     assert(type(idx) == "number")
-     assert(idx >= 0)
-     assert(self._mmap)
-     assert(idx < self._num_elements)
-     assert(idx+len < self._num_elements)
-     local dst = self._mmap.map_addr + (idx * self._field_size)
-     local n = len * self._field_size
-     ffi.copy(dst, addr, n)
-     end
-     if ( qconsts.debug ) then self:check() end
-     end
-     */
 BYE:
   return status;
 }

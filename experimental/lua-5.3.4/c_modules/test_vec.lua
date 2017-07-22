@@ -1,22 +1,22 @@
+os.execute("rm -f _*.bin")
 local plpath = require 'pl.path'
-Vector = require 'libvec' ; 
-Scalar = require 'libsclr' ; 
-cmem = require 'libcmem' ; 
+local Vector = require 'libvec' ; 
+local Scalar = require 'libsclr' ; 
+local cmem = require 'libcmem' ; 
 local buf = cmem.new(4096)
 -- for k, v in pairs(vec) do print(k, v) end 
 
-s1 = Scalar.new(123, "I4")
-y = Vector.new('I4', 'in1.bin', nil, false)
+local y = Vector.new('I4', 'in1.bin', nil, false)
 y:persist(true)
 print(Vector.length(y))
 print(y:length())
 print(y:check())
 print("xxxxxxxxxxxxx")
-a, b = y:eov()
+local a, b = y:eov()
 assert(a == nil)
-i, j = string.find(b, "ERROR")
+local i, j = string.find(b, "ERROR")
 assert(i >= 0)
-M = load(y:meta())()
+local M = load(y:meta())()
 print(M)
 for k, v in pairs(M) do print(k, v) end
 print('------------------')
@@ -24,6 +24,43 @@ y = nil
 collectgarbage()
 assert(plpath.isfile("in1.bin"))
 
+-- create a nascent vector
+y = Vector.new('I4')
+local num_elements = 1024
+for j = 1, num_elements do 
+  local s1 = Scalar.new(j, "I4")
+  y:append(s1)
+end
+y:eov()
+print(y:check())
+local M = load(y:meta())()
+for k, v in pairs(M) do print(k, v) end
+--================================
+y = Vector.new('I4', M.file_name)
+print(y)
+assert(y:check())
+print("here is where strangeness happens >>>>>> ")
+
+local S = {}
+for j = 1, num_elements do
+  -- S[j] = Scalar.new(j*10, "I4")
+  s = Scalar.new(j*10, "I4")
+  print(j, s)
+  -- status = y:set(s1, j-1)
+  -- assert(status)
+  -- status = y:set(j*10, j-1)
+  -- assert(status)
+end
+
+y:persist()
+assert(y:check())
+local M = load(y:meta())()
+print("Persisting ", M.file_name)
+-- TODO Why does this not work? assert(plpath.isfile(M.file_name))
+print("Completed ", arg[0])
+os.exit()
+
+--======================
 local num_trials = 65536
 for j = 1, num_trials do 
   y = Vector.new('I4', 'in1.bin')
@@ -42,6 +79,7 @@ for j = 1, num_trials do
   --]]
   print("Iter ", j)
 end
+y:meta()
 
 --=========================
 print("Completed ", arg[0])

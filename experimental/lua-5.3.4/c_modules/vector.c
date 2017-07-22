@@ -102,6 +102,10 @@ static int l_vec_append( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
+  if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
+  if ( strcmp(ptr_vec->field_type, ptr_sclr->field_type) != 0 ) { 
+    go_BYE(-1);
+  }
   void * addr = (void *)(&ptr_sclr->cdata);
   status = vec_set(ptr_vec, addr, 0, 1); cBYE(status);
   lua_pushinteger(L, status);
@@ -113,23 +117,60 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_set( lua_State *L) {
+  int status = 0;
+  char *addr;
+  int64_t idx;
+  int32_t len;
+  double buf; // need this to be word aligned
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  CMEM_REC_TYPE *ptr_X = luaL_checkudata(L, 2, "CMEM");
-  char * addr = ptr_X->addr;
-  if ( ptr_X->sz != 4096 ) { 
-    printf("STRANGE\n"); goto ERR; 
+  if (  luaL_testudata(L, 2, "CMEM") ) { 
+    CMEM_REC_TYPE *ptr_X = luaL_checkudata(L, 2, "CMEM");
+    addr = ptr_X->addr;
+    idx = luaL_checknumber(L, 3);
+    len = luaL_checknumber(L, 4);
   }
-  int64_t idx = luaL_checknumber(L, 3);
-  int32_t len = luaL_checknumber(L, 4);
-  int status = vec_set(ptr_vec, addr, idx, len);
+  else if (  luaL_testudata(L, 2, "Scalar") ) { 
+    SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
+    idx = luaL_checknumber(L, 3);
+    addr = (char *)&(ptr_sclr->cdata);
+    len = 1;
+  }
+  else if (  lua_isnumber(L, 2) ) {
+    double dtemp = luaL_checknumber(L, 2);
+    if ( strcmp(ptr_vec->field_type, "I1") == 0 ) { 
+      int8_t val = dtemp; memcpy(&buf, &val, 1);
+    }
+    else if ( strcmp(ptr_vec->field_type, "I2") == 0 ) { 
+      int16_t val = dtemp; memcpy(&buf, &val, 2);
+    }
+    else if ( strcmp(ptr_vec->field_type, "I4") == 0 ) { 
+      int32_t val = dtemp; memcpy(&buf, &val, 4);
+    }
+    else if ( strcmp(ptr_vec->field_type, "I8") == 0 ) { 
+      int64_t val = dtemp; memcpy(&buf, &val, 8);
+    }
+    else if ( strcmp(ptr_vec->field_type, "F4") == 0 ) { 
+      float val = dtemp; memcpy(&buf, &val, 4);
+    }
+    else if ( strcmp(ptr_vec->field_type, "F8") == 0 ) { 
+      double val = dtemp; memcpy(&buf, &val, 8);
+    }
+    addr = (char *)&buf;
+    idx = luaL_checknumber(L, 3);
+    len = 1;
+  }
+  else {
+    go_BYE(-1);
+  }
+  status = vec_set(ptr_vec, addr, idx, len);
   if ( status == 0) { 
-    lua_pushinteger(L, status);
+    lua_pushboolean(L, true);
     return 1;
   }
-ERR:
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: vec_set. ");
-    return 2;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_set. ");
+  return 2;
 }
 //----------------------------------------
 static int l_vec_meta( lua_State *L) {
@@ -222,9 +263,8 @@ static int l_vec_new( lua_State *L) {
       nn_file_name = luaL_checkstring(L, 3);
     }
   }
-  else { // function provided for nascent vec
+  else { 
     is_materialized = false;
-    go_BYE(-1);
   }
   if ( is_materialized ) { 
     if ( lua_isboolean(L, 4) ) { // is_read_only specified
