@@ -6,6 +6,11 @@ chk_field_type(
     const char * const field_type
     );
 extern int
+vec_meta(
+    VEC_REC_TYPE *ptr_vec,
+    char *opbuf
+    );
+extern int
 vec_nascent(
     VEC_REC_TYPE *ptr_vec
     );
@@ -20,6 +25,7 @@ extern int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
     const char *const file_name,
+    const char *const nn_file_name,
     bool is_read_only
     );
 extern int
@@ -45,6 +51,11 @@ extern int
 vec_eov(
     VEC_REC_TYPE *ptr_vec,
     bool is_read_only
+    );
+extern int
+vec_persist(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_persist
     );
 extern int
 vec_get(

@@ -12,7 +12,8 @@ typedef union _cdata_type {
 } CDATA_TYPE;
 
 typedef struct _sclr_rec_type {
-  char field_type[8];
+  char field_type[4];
+  int field_size;
   CDATA_TYPE cdata;
 } SCLR_REC_TYPE;
 #endif

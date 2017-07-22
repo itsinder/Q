@@ -2,6 +2,7 @@
 set -e 
 gcc -g $QC_FLAGS \
   vector.c \
+  ../../../UTILS/src/err.c \
   core_vec.c \
   mmap.c \
   txt_to_I4.c \
@@ -17,6 +18,7 @@ gcc -g $QC_FLAGS \
 
 gcc -g $QC_FLAGS \
   cmem.c \
+  ../../../UTILS/src/err.c \
   -I./inc/ \
   -I./gen_inc/ \
   -shared -o libcmem.so
@@ -29,6 +31,7 @@ lua gen_arith.lua
 
 gcc -g $QC_FLAGS \
   scalar.c \
+  ../../../UTILS/src/err.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I1.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I2.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \

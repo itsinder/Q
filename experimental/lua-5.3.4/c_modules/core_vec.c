@@ -1,10 +1,14 @@
 #include "q_incs.h"
 #include "mmap_types.h"
-#include "vec.h"
+#include "core_vec.h"
 #include "_mmap.h"
 #include "_rand_file_name.h"
 #include "_get_file_size.h"
 #include "_buf_to_file.h"
+
+#include "lauxlib.h"
+
+extern luaL_Buffer g_errbuf;
 
 int
 chk_field_type(
@@ -36,14 +40,19 @@ int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
     const char *const file_name,
+    const char *const nn_file_name,
     bool is_read_only
     )
 {
   int status = 0;
   char *X = NULL; size_t nX = 0;
   bool is_write;
+
+  // Sample error luaL_addstring(&g_errbuf, "hello world"); 
+
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
+  if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
   if ( is_read_only ) { is_write = false; } else { is_write = true; }
   status = rs_mmap(file_name, &X, &nX, is_write);
@@ -56,7 +65,37 @@ vec_materialized(
   ptr_vec->map_len  = nX;
   ptr_vec->is_nascent = false;
   ptr_vec->is_read_only = is_read_only;
+  strcpy(ptr_vec->file_name, file_name);
 
+  if ( ( nn_file_name != NULL ) && ( *file_name != '\0' ) ) { 
+    if ( strlen(nn_file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
+    fprintf(stderr, "TO BE IMPLEMENTED\n");  go_BYE(-1); // TODO P0
+  }
+
+BYE:
+  return status;
+}
+
+int
+vec_meta(
+    VEC_REC_TYPE *ptr_vec,
+    char *opbuf
+    )
+{
+  int status = 0;
+  // TODO P3 This is slow. Can be speeded up
+  char  buf[1024];
+  if ( ptr_vec == NULL ) {  go_BYE(-1); }
+  strcpy(opbuf, "return { ");
+  if ( ptr_vec->file_name[0] != '\0' ) {
+    sprintf(buf, "file_name = \"%s\", ", ptr_vec->file_name);
+    strcat(opbuf, buf);
+  }
+  sprintf(buf, "field_type = \"%s\", ", ptr_vec->field_type);
+  strcat(opbuf, buf);
+  sprintf(buf, "num_elements = \"%" PRIu64 "\", ", ptr_vec->num_elements);
+  strcat(opbuf, buf);
+  strcat(opbuf, "} ");
 BYE:
   return status;
 }
@@ -80,7 +119,7 @@ vec_free(
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
-  if ( ptr_vec->is_persist != 1 ) {
+  if ( !ptr_vec->is_persist ) { 
     if ( ptr_vec->file_name[0] != '\0' ) {
       printf("Deleting %s \n", ptr_vec->file_name); 
       status = remove(ptr_vec->file_name); cBYE(status);
@@ -157,6 +196,7 @@ vec_check(
 {
   int status = 0;
   status = chk_field_type(ptr_vec->field_type);
+  cBYE(status);
   if ( ptr_vec->field_size == 0 ) { go_BYE(-1); }
   if ( strcmp(ptr_vec->field_type, "SC") == 0 )  {
     if ( ptr_vec->field_size < 2 ) { go_BYE(-1); }
@@ -181,14 +221,15 @@ vec_check(
     }
     if ( ptr_vec->map_addr   != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len    != 0    ) { go_BYE(-1); }
-    if ( ptr_vec->is_persist != 0    ) { go_BYE(-1); }
+    if ( ptr_vec->is_persist         ) { go_BYE(-1); }
   }
   else {
     if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
-    status = file_exists(ptr_vec->file_name); cBYE(status);
+    int is_file = file_exists(ptr_vec->file_name); 
+    if ( is_file != 1 ) { go_BYE(-1); }
     int64_t fsz = get_file_size(ptr_vec->file_name); 
-    if ( fsz / ptr_vec->field_size != ptr_vec->num_elements ) {
+    if ( (uint64_t)(fsz / ptr_vec->field_size) != ptr_vec->num_elements ) {
       go_BYE(-1);
     }
     if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
@@ -310,6 +351,19 @@ BYE:
 }
 
 int
+vec_persist(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_persist
+    )
+{
+  int status = 0;
+  if ( ptr_vec->is_nascent ) { go_BYE(-1); }
+  ptr_vec->is_persist = is_persist;
+BYE:
+  return status;
+}
+
+int
 vec_eov(
     VEC_REC_TYPE *ptr_vec,
     bool is_read_only
@@ -336,7 +390,7 @@ vec_eov(
   ptr_vec->chunk_num = 0;
   ptr_vec->num_in_chunk = 0;
 
-  // open as materiali_zed vector
+  // open as materialized vector
   bool is_write;
   if ( is_read_only ) { is_write = false; } else { is_write = true; }
   status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);

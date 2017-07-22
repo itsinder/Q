@@ -11,7 +11,6 @@
 #include "lualib.h"
 
 #include "q_incs.h"
-#include "vec.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"
 #include "_txt_to_I4.h"
@@ -104,6 +103,7 @@ static int l_sclr_new( lua_State *L) {
   float   tempF4;
   double  tempF8;
 
+
   const char *str_val = luaL_checkstring(L, 1);
   const char *qtype   = luaL_checkstring(L, 2);
   SCLR_REC_TYPE *ptr_sclr = NULL;
@@ -116,26 +116,32 @@ static int l_sclr_new( lua_State *L) {
   if ( strcmp(qtype, "I1" ) == 0 ) { 
     status = txt_to_I1(str_val, &tempI1); cBYE(status);
     memcpy(dst, &tempI1, 1); strcpy(ptr_sclr->field_type, "I1"); 
+    ptr_sclr->field_size = 1;
   }
   else if ( strcmp(qtype, "I2" ) == 0 ) { 
     status = txt_to_I2(str_val, &tempI2); cBYE(status);
     memcpy(dst, &tempI2, 2); strcpy(ptr_sclr->field_type, "I2"); 
+    ptr_sclr->field_size = 2;
   }
   else if ( strcmp(qtype, "I4" ) == 0 ) { 
     status = txt_to_I4(str_val, &tempI4); cBYE(status);
     memcpy(dst, &tempI4, 4); strcpy(ptr_sclr->field_type, "I4"); 
+    ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "I8" ) == 0 ) { 
     status = txt_to_I8(str_val, &tempI8); cBYE(status);
     memcpy(dst, &tempI8, 8); strcpy(ptr_sclr->field_type, "I8"); 
+    ptr_sclr->field_size = 8;
   }
   else if ( strcmp(qtype, "F4" ) == 0 ) { 
     status = txt_to_F4(str_val, &tempF4); cBYE(status);
     memcpy(dst, &tempF4, 4); strcpy(ptr_sclr->field_type, "F4"); 
+    ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "F8" ) == 0 ) { 
     status = txt_to_F8(str_val, &tempF8); cBYE(status);
     memcpy(dst, &tempF8, 8); strcpy(ptr_sclr->field_type, "F8"); 
+    ptr_sclr->field_size = 8;
   }
   else {
     go_BYE(-1);

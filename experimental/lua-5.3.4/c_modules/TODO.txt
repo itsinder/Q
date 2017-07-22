@@ -1,0 +1,1 @@
+Consider how to pass errors from C to Lua both for these APIs and in general
