@@ -103,6 +103,7 @@ static int l_sclr_new( lua_State *L) {
   float   tempF4;
   double  tempF8;
 
+  lua_gc(L, LUA_GCCOLLECT, 0);  // TODO REMOVE LATER
 
   const char *str_val = luaL_checkstring(L, 1);
   const char *qtype   = luaL_checkstring(L, 2);

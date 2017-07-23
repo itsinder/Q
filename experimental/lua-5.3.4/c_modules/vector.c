@@ -123,15 +123,14 @@ static int l_vec_set( lua_State *L) {
   int32_t len;
   double buf; // need this to be word aligned
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
     CMEM_REC_TYPE *ptr_X = luaL_checkudata(L, 2, "CMEM");
     addr = ptr_X->addr;
-    idx = luaL_checknumber(L, 3);
     len = luaL_checknumber(L, 4);
   }
   else if (  luaL_testudata(L, 2, "Scalar") ) { 
     SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
-    idx = luaL_checknumber(L, 3);
     addr = (char *)&(ptr_sclr->cdata);
     len = 1;
   }
@@ -156,7 +155,6 @@ static int l_vec_set( lua_State *L) {
       double val = dtemp; memcpy(&buf, &val, 8);
     }
     addr = (char *)&buf;
-    idx = luaL_checknumber(L, 3);
     len = 1;
   }
   else {

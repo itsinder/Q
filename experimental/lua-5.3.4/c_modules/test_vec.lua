@@ -26,18 +26,23 @@ assert(plpath.isfile("in1.bin"))
 
 -- create a nascent vector
 y = Vector.new('I4')
-local num_elements = 1024
+local num_elements = 16*1048576
 for j = 1, num_elements do 
   local s1 = Scalar.new(j, "I4")
   y:append(s1)
 end
+local M
+print("writing meta data of nascent vector")
+M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
 y:eov()
-print(y:check())
-local M = load(y:meta())()
-for k, v in pairs(M) do print(k, v) end
+print("writing meta data of persisted vector")
+M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
+y:persist()
+assert(y:check())
 --================================
 y = Vector.new('I4', M.file_name)
-print(y)
+print("writing meta data of new vector from old file name ")
+M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
 assert(y:check())
 print("here is where strangeness happens >>>>>> ")
 
@@ -45,11 +50,11 @@ local S = {}
 for j = 1, num_elements do
   -- S[j] = Scalar.new(j*10, "I4")
   s = Scalar.new(j*10, "I4")
-  print(j, s)
-  -- status = y:set(s1, j-1)
-  -- assert(status)
-  -- status = y:set(j*10, j-1)
-  -- assert(status)
+  status = y:set(s, j-1)
+  assert(status)
+  status = y:set(j*10, j-1)
+  assert(status)
+  assert(y:check())
 end
 
 y:persist()

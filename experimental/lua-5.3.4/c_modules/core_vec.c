@@ -93,6 +93,12 @@ vec_meta(
   }
   sprintf(buf, "field_type = \"%s\", ", ptr_vec->field_type);
   strcat(opbuf, buf);
+  sprintf(buf, "is_nascent = \"%d\", ", ptr_vec->is_nascent);
+  strcat(opbuf, buf);
+  sprintf(buf, "is_persist = \"%d\", ", ptr_vec->is_persist);
+  strcat(opbuf, buf);
+  sprintf(buf, "is_memo = \"%d\", ", ptr_vec->is_memo);
+  strcat(opbuf, buf);
   sprintf(buf, "num_elements = \"%" PRIu64 "\", ", ptr_vec->num_elements);
   strcat(opbuf, buf);
   strcat(opbuf, "} ");
@@ -129,6 +135,11 @@ vec_free(
     }
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
+  }
+  else {
+    if ( ptr_vec->file_name[0] != '\0' ) {
+      printf("NOT Deleting %s \n", ptr_vec->file_name); 
+    }
   }
   // Don't do this in C. Lua will do it: free(ptr_vec);
 BYE:
