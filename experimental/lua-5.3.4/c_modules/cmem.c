@@ -11,6 +11,13 @@
 
 #include "q_incs.h"
 
+#include "_I1_to_txt.h"
+#include "_I2_to_txt.h"
+#include "_I4_to_txt.h"
+#include "_I8_to_txt.h"
+#include "_F4_to_txt.h"
+#include "_F8_to_txt.h"
+
 typedef struct _cmem_rec_type {
   void *addr;
   int32_t sz;
@@ -41,6 +48,42 @@ ERR:
   lua_pushstring(L, "ERROR: malloc. ");
   return 2;
 }
+static int l_cmem_to_str( lua_State *L) {
+  int status = 0;
+#define BUFLEN 1024
+  char buf[BUFLEN]; // TODO reconcile with q_consts
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
+  const char *qtype = luaL_checkstring(L, 2);
+  if ( ptr_cmem->sz <= 0  ) { go_BYE(-1); }
+  memset(buf, '\0', BUFLEN);
+  if ( strcmp(qtype, "I1") == 0 ) { 
+    status = I1_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I2") == 0 ) { 
+    status = I2_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I4") == 0 ) { 
+    status = I4_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I8") == 0 ) { 
+    status = I8_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else if ( strcmp(qtype, "F4") == 0 ) { 
+    status = F4_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else if ( strcmp(qtype, "F8") == 0 ) { 
+    status = F8_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+  }
+  else {
+    go_BYE(-1);
+  }
+  lua_pushstring(L, buf);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: tostring. ");
+  return 2;
+}
 //----------------------------------------
 static int l_cmem_free( lua_State *L) {
   CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
@@ -57,12 +100,13 @@ ERR:
 //----------------------------------------
 //----------------------------------------
 static const struct luaL_Reg cmem_methods[] = {
-//    { "__gc",    l_cmem_free   },
+//    { "__gc",    l_cmem_free   }, WHY IS THIS COMMENTED OUT?
     { NULL,          NULL               },
 };
  
 static const struct luaL_Reg cmem_functions[] = {
     { "new", l_cmem_malloc },
+    { "__tostring", l_cmem_to_str },
     { NULL,  NULL         }
 };
  

@@ -2,7 +2,7 @@ vec = require 'libvec' ;
 cmem = require 'libcmem' ; 
 Scalar = require 'libsclr' ; 
 
-for i = 1,10000000 do
+for i = 1,1000 do
   x = Scalar.new(123, "F4")
   y = Scalar.new(456, "F4")
   z = Scalar.add(x, y)

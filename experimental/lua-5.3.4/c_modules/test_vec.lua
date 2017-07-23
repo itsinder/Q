@@ -26,7 +26,7 @@ assert(plpath.isfile("in1.bin"))
 
 -- create a nascent vector
 y = Vector.new('I4')
-local num_elements = 16*1048576
+local num_elements = 100000000
 for j = 1, num_elements do 
   local s1 = Scalar.new(j, "I4")
   y:append(s1)
@@ -55,6 +55,10 @@ for j = 1, num_elements do
   status = y:set(j*10, j-1)
   assert(status)
   assert(y:check())
+  ret_addr, ret_len, ret_val  = y:get(j-1, 1)
+  assert(ret_addr)
+  assert(ret_len == 1)
+  assert(Scalar.to_str(ret_val) == tostring(j*10))
 end
 
 y:persist()

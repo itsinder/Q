@@ -102,10 +102,16 @@ static int l_sclr_new( lua_State *L) {
   int64_t tempI8;
   float   tempF4;
   double  tempF8;
+  const char *str_val = NULL;
 
-  lua_gc(L, LUA_GCCOLLECT, 0);  // TODO REMOVE LATER
+  // TESTING GC problems lua_gc(L, LUA_GCCOLLECT, 0);  
 
-  const char *str_val = luaL_checkstring(L, 1);
+  if ( lua_isstring(L, 1) ) { 
+    str_val = luaL_checkstring(L, 1);
+  }
+  else {
+    go_BYE(-1);
+  }
   const char *qtype   = luaL_checkstring(L, 2);
   SCLR_REC_TYPE *ptr_sclr = NULL;
   ptr_sclr = (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));

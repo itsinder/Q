@@ -85,11 +85,20 @@ static int l_vec_get( lua_State *L) {
   int32_t len = luaL_checknumber(L, 3);
   int status = vec_get(ptr_vec, idx, len);
   if ( status == 0) { 
+    int num_to_return = 2;
     lua_pushlightuserdata(L, ptr_vec->ret_addr);
     lua_pushinteger(L, ptr_vec->ret_len);
-    int *iptr = (int *)ptr_vec->ret_addr;
-    lua_pushinteger(L, *iptr);
-    return 3;
+    if ( len == 1 ) {  // this is for debugging help
+      num_to_return++;
+      SCLR_REC_TYPE *ptr_sclr = 
+        (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
+      strcpy(ptr_sclr->field_type, ptr_vec->field_type);
+      ptr_sclr->field_size = ptr_vec->field_size;
+      memcpy(&(ptr_sclr->cdata), ptr_vec->ret_addr, ptr_vec->field_size);
+      luaL_getmetatable(L, "Scalar");
+      lua_setmetatable(L, -2);
+    }
+    return num_to_return;
   }
   else {
     lua_pushnil(L);
