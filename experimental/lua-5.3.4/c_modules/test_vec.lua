@@ -11,7 +11,6 @@ y:persist(true)
 print(Vector.length(y))
 print(y:length())
 print(y:check())
-print("xxxxxxxxxxxxx")
 local a, b = y:eov()
 assert(a == nil)
 local i, j = string.find(b, "ERROR")
@@ -57,7 +56,6 @@ local M
 --==============================================
 -- num_in_chunk should increase steadily and then reset after chunk_sizr
 local y = Vector.new('I4')
-local is_memo
 local chunk_size = 65536  
 for i = 1, chunk_size do 
   status = y:append(s)
@@ -70,15 +68,34 @@ status = y:append(s)
 M = load(y:meta())(); 
 assert(M.num_in_chunk == 1)
 assert(M.chunk_num == 1)
-status = y:memo(is_memo)
-assert(status == nil)
 --==============================================
-print("DONE")
-os.exit()
+-- Can get current chunk num but cannot get previous 
+-- ret_len should be number of elements in chunk
+orig_ret_addr = nil
+local y = Vector.new('I4')
+for i = 1, chunk_size do 
+  status = y:append(s)
+  assert(status)
+  ret_addr, ret_len = y:get_chunk(0);
+  assert(ret_addr);
+  assert(ret_len == i)
+  if ( i == 1 ) then 
+    orig_ret_addr = ret_addr
+  else
+    assert(ret_addr == orig_ret_addr)
+  end
+end
+status = y:append(s)
+ret_addr, ret_len = y:get_chunk(0);
+assert(ret_addr == nil);
+ret_addr, ret_len = y:get_chunk(1);
+assert(ret_len == 1)
+-- Test get_chunk
+--==============================================
 
 -- create a nascent vector
 y = Vector.new('I4')
-local num_elements = 100000000
+local num_elements = 10000
 for j = 1, num_elements do 
   local s1 = Scalar.new(j, "I4")
   y:append(s1)
@@ -95,7 +112,6 @@ y = Vector.new('I4', M.file_name)
 print("writing meta data of new vector from old file name ")
 M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
 assert(y:check())
-print("here is where strangeness happens >>>>>> ")
 
 local S = {}
 for j = 1, num_elements do

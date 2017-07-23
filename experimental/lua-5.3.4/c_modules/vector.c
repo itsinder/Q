@@ -9,6 +9,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#define Q_CHUNK_SIZE 65536 //  TODO P1 
+// Above should not be needed. Should come from q_constants.h
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
@@ -121,6 +123,19 @@ static int l_vec_get( lua_State *L) {
   }
 }
 //------------------------------------------
+static int l_vec_get_chunk( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  int64_t chunk_num = luaL_checknumber(L, 2);
+  uint64_t idx = chunk_num * Q_CHUNK_SIZE;
+  status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE); cBYE(status);
+  lua_pushlightuserdata(L, ptr_vec->ret_addr);
+  lua_pushinteger(L, ptr_vec->ret_len);
+  return 2;
+BYE:
+  lua_pushnil(L); lua_pushstring(L, "ERROR: vec_get. "); return 2;
+}
+//----------------------------------------------------
 static int l_vec_append( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -183,11 +198,9 @@ static int l_vec_set( lua_State *L) {
   else {
     go_BYE(-1);
   }
-  status = vec_set(ptr_vec, addr, idx, len);
-  if ( status == 0) { 
-    lua_pushboolean(L, true);
-    return 1;
-  }
+  status = vec_set(ptr_vec, addr, idx, len); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: vec_set. ");
@@ -293,7 +306,7 @@ static int l_vec_new( lua_State *L) {
     }
   }
     
-  int32_t chunk_size  = 65536; // TODO P0 THIS SHOULD NOT BE HERE 
+  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO P0 THIS SHOULD NOT BE HERE 
 
   VEC_REC_TYPE *ptr_vec = NULL;
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
@@ -328,6 +341,8 @@ static const struct luaL_Reg vector_methods[] = {
     { "append", l_vec_append },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
+    { "get_chunk", l_vec_get_chunk },
+    { "put_chunk", l_vec_put_chunk },
 // TODO    { "has_nulls", l_vec_has_nulls },
     { "set", l_vec_set },
     { "get", l_vec_get },

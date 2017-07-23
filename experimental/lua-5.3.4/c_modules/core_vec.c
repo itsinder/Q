@@ -299,15 +299,15 @@ vec_get(
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
     if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
     addr = ptr_vec->chunk + (chunk_idx * ptr_vec->field_size);
+    ptr_vec->ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
   }
   else {
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
     addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+    ptr_vec->ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
   }
-  ptr_vec->ret_addr = addr; // TODO P0 FIX. 
-  ptr_vec->ret_len  = len; // TODO P0 FIX. 
-
+  ptr_vec->ret_addr = addr; 
 BYE:
   return status;
 }
