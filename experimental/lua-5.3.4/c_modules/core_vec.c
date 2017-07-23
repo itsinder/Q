@@ -93,13 +93,23 @@ vec_meta(
   }
   sprintf(buf, "field_type = \"%s\", ", ptr_vec->field_type);
   strcat(opbuf, buf);
-  sprintf(buf, "is_nascent = \"%d\", ", ptr_vec->is_nascent);
+  sprintf(buf, "field_size = %d, ", ptr_vec->field_size);
   strcat(opbuf, buf);
-  sprintf(buf, "is_persist = \"%d\", ", ptr_vec->is_persist);
+  sprintf(buf, "is_nascent = %s, ", ptr_vec->is_nascent ? "true" : "false");
   strcat(opbuf, buf);
-  sprintf(buf, "is_memo = \"%d\", ", ptr_vec->is_memo);
+  sprintf(buf, "is_persist = %s, ", ptr_vec->is_persist ? "true" : "false");
   strcat(opbuf, buf);
-  sprintf(buf, "num_elements = \"%" PRIu64 "\", ", ptr_vec->num_elements);
+  sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
+  strcat(opbuf, buf);
+  sprintf(buf, "is_read_only = %s, ", ptr_vec->is_read_only ? "true" : "false");
+  strcat(opbuf, buf);
+  sprintf(buf, "num_elements = %" PRIu64 ", ", ptr_vec->num_elements);
+  strcat(opbuf, buf);
+  sprintf(buf, "chunk_num = %" PRIu32 ", ", ptr_vec->chunk_num);
+  strcat(opbuf, buf);
+  sprintf(buf, "chunk_size = %" PRIu32 ", ", ptr_vec->chunk_size);
+  strcat(opbuf, buf);
+  sprintf(buf, "num_in_chunk = %" PRIu32 ", ", ptr_vec->num_in_chunk);
   strcat(opbuf, buf);
   strcat(opbuf, "} ");
 BYE:
@@ -255,6 +265,24 @@ BYE:
 }
 
 int
+vec_memo(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_memo
+    )
+{
+  int status = 0;
+  if ( ptr_vec->is_nascent ) {
+    if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
+    ptr_vec->is_memo = is_memo;
+  }
+  else {
+    go_BYE(-1);
+  }
+
+BYE:
+  return status;
+}
+int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
     uint64_t idx, 
@@ -336,6 +364,7 @@ vec_set(
     }
   }
   else {
+    if ( ptr_vec->is_read_only ) { go_BYE(-1); }
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
     char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);

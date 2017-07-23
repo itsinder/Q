@@ -68,4 +68,9 @@ is_eq_I4(
     void *X,
     int val
     );
+extern int
+vec_memo(
+    VEC_REC_TYPE *ptr_vec,
+    bool is_memo
+    );
 #endif

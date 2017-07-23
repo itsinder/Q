@@ -24,6 +24,58 @@ y = nil
 collectgarbage()
 assert(plpath.isfile("in1.bin"))
 
+-- try to modify a vector created as read only. Should fail
+local is_read_only = true
+local y = Vector.new('I4', 'in1.bin', nil, is_read_only)
+y:persist(true)
+s = Scalar.new(123, "I4")
+status = y:set(s, 0)
+assert(status == nil)
+--==============================================
+-- try to modify a vector created as read only by eov. Should fail
+local is_read_only = true
+local y = Vector.new('I4')
+status = y:append(s)
+y:eov(true)
+status = y:set(s, 0)
+assert(status == nil)
+--==============================================
+-- can memo a vector until it hits chunk size. then must fail
+local y = Vector.new('I4')
+local is_memo
+local chunk_size = 65536  
+for i = 1, chunk_size do 
+  status = y:append(s)
+  if ( ( i % 2 ) == 0 ) then is_memo = true else is_memo = false end
+  status = y:memo(is_memo)
+  assert(status)
+end
+status = y:append(s)
+status = y:memo(is_memo)
+assert(status == nil)
+local M
+--==============================================
+-- num_in_chunk should increase steadily and then reset after chunk_sizr
+local y = Vector.new('I4')
+local is_memo
+local chunk_size = 65536  
+for i = 1, chunk_size do 
+  status = y:append(s)
+  assert(status)
+  M = load(y:meta())(); 
+  assert(M.num_in_chunk == i)
+  assert(M.chunk_num == 0)
+end
+status = y:append(s)
+M = load(y:meta())(); 
+assert(M.num_in_chunk == 1)
+assert(M.chunk_num == 1)
+status = y:memo(is_memo)
+assert(status == nil)
+--==============================================
+print("DONE")
+os.exit()
+
 -- create a nascent vector
 y = Vector.new('I4')
 local num_elements = 100000000
@@ -31,7 +83,6 @@ for j = 1, num_elements do
   local s1 = Scalar.new(j, "I4")
   y:append(s1)
 end
-local M
 print("writing meta data of nascent vector")
 M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
 y:eov()
@@ -65,30 +116,7 @@ y:persist()
 assert(y:check())
 local M = load(y:meta())()
 print("Persisting ", M.file_name)
--- TODO Why does this not work? assert(plpath.isfile(M.file_name))
-print("Completed ", arg[0])
-os.exit()
-
---======================
-local num_trials = 65536
-for j = 1, num_trials do 
-  y = Vector.new('I4', 'in1.bin')
-  assert(type(y) == "userdata")
-  y:persist()
-  --[[
-  for i = 1, num_elements do
-    status = y:set(buf, i-1, 1)
-    assert(status == 0)
-    ret_addr, ret_len, ret_val  = Vector.get(y, i-1, 1)
-    -- print("addr ", ret_addr); print("len ", ret_len)
-    assert(ret_addr)
-    -- print(ret_addr, ret_len, ret_val)
-    assert(ret_len == 1)
-  end
-  --]]
-  print("Iter ", j)
-end
-y:meta()
-
+assert(plpath.isfile(M.file_name))
 --=========================
 print("Completed ", arg[0])
+os.exit()

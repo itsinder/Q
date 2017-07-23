@@ -1,1 +1,25 @@
 Consider how to pass errors from C to Lua both for these APIs and in general
+
+In meta Column.lua:function Column:length()
+In meta Column.lua:function Column:fldtype()
+In meta Column.lua:function Column:sz()
+In meta .lua:function Column:memo(bool)
+In meta .lua:function Column:ismemo()
+In meta :materialized() == not is_nascent
+In meta chunk_size()
+In meta __tostring()
+
+DONE :get() :get_element(num)
+ALMOST DONE: get() :chunk(num)
+ALMOST DONE: set() :put_chunk(length, chunk, nn_chunk)
+DONE :eov()
+DONE persist(name)
+
+TBD .lua:function Column:has_nulls()
+TBD get_meta(index)
+TBD set_meta(index, val)
+TBD delete_nn()
+TBD eval()
+
+??? last_chunk()
+??? wrap()

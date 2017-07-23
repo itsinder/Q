@@ -86,13 +86,15 @@ BYE:
 }
 //----------------------------------------
 static int l_cmem_free( lua_State *L) {
+  int status = 0;
   CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
-  // fprintf(stderr, "CMEM: Freeing %d bytes  at %llu\n", ptr_cmem->sz, (uint64_t)ptr_cmem->addr);
-  if ( ptr_cmem->sz <= 0  ) { goto ERR; }
+  if ( ptr_cmem->sz <= 0  ) { go_BYE(-1); }
+  if ( ptr_cmem->addr == NULL ) { go_BYE(-1); }
   free(ptr_cmem->addr);
-  lua_pushinteger(L, 0);
-  return 1;
-ERR:
+  ptr_cmem->sz = 0;
+  ptr_cmem->addr = NULL;
+  return 0;
+BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: malloc. ");
   return 2;

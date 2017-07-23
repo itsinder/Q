@@ -25,7 +25,26 @@ typedef struct _cmem_rec_type {
 
 LUAMOD_API int luaopen_libvec (lua_State *L);
 
+static int l_vec_memo( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  //------------------------------
+  bool is_memo = true;
+  if ( lua_isboolean(L, 2) ) { 
+    is_memo = lua_toboolean(L, 2);
+  }
+  //------------------------------
+  status = vec_memo(ptr_vec, is_memo); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_memo. ");
+  return 2;
+}
+//----------------------------------------
 static int l_vec_persist( lua_State *L) {
+  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   //------------------------------
   bool is_persist = true;
@@ -33,36 +52,31 @@ static int l_vec_persist( lua_State *L) {
     is_persist = lua_toboolean(L, 2);
   }
   //------------------------------
-  int status = vec_persist(ptr_vec, is_persist);
-  if ( status == 0) { 
-    lua_pushinteger(L, status);
-    return 1;
-  }
-  else {
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: vec_eov. ");
-    return 2;
-  }
+  status = vec_persist(ptr_vec, is_persist); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_memo. ");
+  return 2;
 }
 //----------------------------------------
 static int l_vec_eov( lua_State *L) {
+  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   //------------------------------
-  bool is_read_only = 0;
+  bool is_read_only = false;
   if ( lua_isboolean(L, 2) ) { 
     is_read_only = lua_toboolean(L, 2);
   }
   //------------------------------
-  int status = vec_eov(ptr_vec, is_read_only);
-  if ( status == 0) { 
-    lua_pushinteger(L, status);
-    return 1;
-  }
-  else {
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: vec_eov. ");
-    return 2;
-  }
+  status = vec_eov(ptr_vec, is_read_only); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_eov. ");
+  return 2;
 }
 //----------------------------------------
 static int l_vec_length( lua_State *L) {
@@ -313,6 +327,8 @@ static const struct luaL_Reg vector_methods[] = {
     { "length", l_vec_length },
     { "append", l_vec_append },
     { "persist", l_vec_persist },
+    { "memo", l_vec_memo },
+// TODO    { "has_nulls", l_vec_has_nulls },
     { "set", l_vec_set },
     { "get", l_vec_get },
     { NULL,          NULL               },
