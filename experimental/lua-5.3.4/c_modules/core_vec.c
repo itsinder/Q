@@ -251,7 +251,9 @@ vec_check(
     if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
     int is_file = file_exists(ptr_vec->file_name); 
-    if ( is_file != 1 ) { go_BYE(-1); }
+    if ( is_file != 1 ) { 
+      fprintf(stderr, "File does not exist [%s]\n", ptr_vec->file_name);
+      go_BYE(-1); }
     int64_t fsz = get_file_size(ptr_vec->file_name); 
     if ( (uint64_t)(fsz / ptr_vec->field_size) != ptr_vec->num_elements ) {
       go_BYE(-1);

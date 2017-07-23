@@ -19,12 +19,6 @@
 // TODO Delete luaL_Buffer g_errbuf;
 extern luaL_Buffer g_errbuf;
 
-// TODO Move following decl
-typedef struct _cmem_rec_type {
-  void *addr;
-  int32_t sz;
-} CMEM_REC_TYPE;
-
 LUAMOD_API int luaopen_libvec (lua_State *L);
 
 static int l_vec_memo( lua_State *L) {
@@ -154,6 +148,7 @@ BYE:
   return 2;
 }
 //----------------------------------------
+
 static int l_vec_set( lua_State *L) {
   int status = 0;
   char *addr;
@@ -163,8 +158,8 @@ static int l_vec_set( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
-    CMEM_REC_TYPE *ptr_X = luaL_checkudata(L, 2, "CMEM");
-    addr = ptr_X->addr;
+    void *X = luaL_checkudata(L, 2, "CMEM");
+    addr = X;
     len = luaL_checknumber(L, 4);
   }
   else if (  luaL_testudata(L, 2, "Scalar") ) { 
@@ -205,6 +200,15 @@ BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: vec_set. ");
   return 2;
+}
+//----------------------------------------
+static int l_vec_put_chunk( lua_State *L) {
+  // Modify idx and sent to l_vec_set
+ int64_t chunk_num = luaL_checknumber(L, 3);
+ int64_t idx = chunk_num * Q_CHUNK_SIZE;
+ lua_pushnumber(L, chunk_num);
+ lua_replace(L, 3);
+ return l_vec_set(L);
 }
 //----------------------------------------
 static int l_vec_meta( lua_State *L) {

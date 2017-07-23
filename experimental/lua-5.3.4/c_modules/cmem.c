@@ -18,26 +18,13 @@
 #include "_F4_to_txt.h"
 #include "_F8_to_txt.h"
 
-typedef struct _cmem_rec_type {
-  void *addr;
-  int32_t sz;
-} CMEM_REC_TYPE;
-
 LUAMOD_API int luaopen_libcmem (lua_State *L);
 
 static int l_cmem_malloc( lua_State *L) 
 {
   int32_t sz = luaL_checknumber(L, 1);
   if ( sz <= 0 ) { goto ERR; }
-  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sz);
-  ptr_cmem->addr = NULL; 
-  ptr_cmem->sz   = 0; 
-
-  void *X = malloc(sz);
-  if ( X == NULL ) { goto ERR; }
-  // fprintf(stderr, "CMEM: Malloc %d bytes at %llu \n", sz, (uint64_t)X);
-  ptr_cmem->addr = X;
-  ptr_cmem->sz = sz;
+  lua_newuserdata(L, sz);
   /* Add the metatable to the stack. */
   luaL_getmetatable(L, "CMEM");
   /* Set the metatable on the userdata. */
@@ -48,31 +35,111 @@ ERR:
   lua_pushstring(L, "ERROR: malloc. ");
   return 2;
 }
-static int l_cmem_to_str( lua_State *L) {
+// Following only for debugging 
+static int l_cmem_seq( lua_State *L) {
   int status = 0;
-#define BUFLEN 1024
-  char buf[BUFLEN]; // TODO reconcile with q_consts
-  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
-  const char *qtype = luaL_checkstring(L, 2);
-  if ( ptr_cmem->sz <= 0  ) { go_BYE(-1); }
+#define BUFLEN 31
+  char buf[BUFLEN+1]; 
+  void  *X          = luaL_checkudata( L, 1, "CMEM");
+  lua_Number start  = luaL_checknumber(L, 2);
+  lua_Number incr   = luaL_checknumber(L, 3);
+  lua_Number num    = luaL_checknumber(L, 4);
+  const char *qtype = luaL_checkstring(L, 5);
   memset(buf, '\0', BUFLEN);
   if ( strcmp(qtype, "I1") == 0 ) { 
-    status = I1_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    int8_t *ptr = (int8_t *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else if ( strcmp(qtype, "I2") == 0 ) { 
-    status = I2_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    int16_t *ptr = (int16_t *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else if ( strcmp(qtype, "I4") == 0 ) { 
-    status = I4_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    int32_t *ptr = (int32_t *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else if ( strcmp(qtype, "I8") == 0 ) { 
-    status = I8_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    int64_t *ptr = (int64_t *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else if ( strcmp(qtype, "F4") == 0 ) { 
-    status = F4_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    float *ptr = (float *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else if ( strcmp(qtype, "F8") == 0 ) { 
-    status = F8_to_txt(ptr_cmem->addr, "", buf, BUFLEN-1); cBYE(status);
+    double *ptr = (double *)X; ptr[0] = start;
+    for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
+  }
+  else {
+    go_BYE(-1);
+  }
+  return 0;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: tostring. ");
+  return 2;
+}
+// Following only for debugging 
+static int l_cmem_set( lua_State *L) {
+  int status = 0;
+#define BUFLEN 31
+  char buf[BUFLEN+1]; 
+  void  *X          = luaL_checkudata( L, 1, "CMEM");
+  lua_Number val    = luaL_checknumber(L, 2);
+  const char *qtype = luaL_checkstring(L, 3);
+  memset(buf, '\0', BUFLEN);
+  if ( strcmp(qtype, "I1") == 0 ) { 
+    int8_t *ptr = (int8_t *)X; ptr[0] = val;
+  }
+  else if ( strcmp(qtype, "I2") == 0 ) { 
+    int16_t *ptr = (int16_t *)X; ptr[0] = val;
+  }
+  else if ( strcmp(qtype, "I4") == 0 ) { 
+    int32_t *ptr = (int32_t *)X; ptr[0] = val;
+  }
+  else if ( strcmp(qtype, "I8") == 0 ) { 
+    int64_t *ptr = (int64_t *)X; ptr[0] = val;
+  }
+  else if ( strcmp(qtype, "F4") == 0 ) { 
+    float *ptr = (float *)X; ptr[0] = val;
+  }
+  else if ( strcmp(qtype, "F8") == 0 ) { 
+    double *ptr = (double *)X; ptr[0] = val;
+  }
+  else {
+    go_BYE(-1);
+  }
+  return 0;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: tostring. ");
+  return 2;
+}
+// Following only for debugging 
+static int l_cmem_to_str( lua_State *L) {
+  int status = 0;
+#define BUFLEN 31
+  char buf[BUFLEN+1]; 
+  void  *X          = luaL_checkudata( L, 1, "CMEM");
+  const char *qtype = luaL_checkstring(L, 2);
+  memset(buf, '\0', BUFLEN);
+  if ( strcmp(qtype, "I1") == 0 ) { 
+    status = I1_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I2") == 0 ) { 
+    status = I2_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I4") == 0 ) { 
+    status = I4_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I8") == 0 ) { 
+    status = I8_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "F4") == 0 ) { 
+    status = F4_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "F8") == 0 ) { 
+    status = F8_to_txt(X, "", buf, BUFLEN); cBYE(status);
   }
   else {
     go_BYE(-1);
@@ -85,30 +152,18 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_cmem_free( lua_State *L) {
-  int status = 0;
-  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
-  if ( ptr_cmem->sz <= 0  ) { go_BYE(-1); }
-  if ( ptr_cmem->addr == NULL ) { go_BYE(-1); }
-  free(ptr_cmem->addr);
-  ptr_cmem->sz = 0;
-  ptr_cmem->addr = NULL;
-  return 0;
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: malloc. ");
-  return 2;
-}
-//----------------------------------------
-//----------------------------------------
 static const struct luaL_Reg cmem_methods[] = {
-//    { "__gc",    l_cmem_free   }, WHY IS THIS COMMENTED OUT?
+    { "set",          l_cmem_set               },
+    { "seq",          l_cmem_seq               },
+    { "print",        l_cmem_to_str },
     { NULL,          NULL               },
 };
  
 static const struct luaL_Reg cmem_functions[] = {
     { "new", l_cmem_malloc },
-    { "__tostring", l_cmem_to_str },
+    { "print",        l_cmem_to_str },
+    { "set",          l_cmem_set               },
+    { "seq",          l_cmem_seq               },
     { NULL,  NULL         }
 };
  
@@ -127,11 +182,7 @@ LUAMOD_API int luaopen_libcmem (lua_State *L) {
    * metatable.__index = metatable
    */
   lua_setfield(L, -2, "__index");
-
-   /* set its __gc field  */
-  lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, l_cmem_free);
-  lua_settable(L, -3);
+  lua_pushcfunction(L, l_cmem_to_str); lua_setfield(L, -2, "__tostring");
 
   /* Register the object.func functions into the table that is at the 
    * top of the stack. */

@@ -108,6 +108,23 @@ M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
 y:persist()
 assert(y:check())
 --================================
+---- test put_chunk
+y = Vector.new('I4')
+y:persist()
+local buf = cmem.new(chunk_size * 4)
+local start = 1
+local incr  = 1
+buf:seq(start, incr, chunk_size, "I4")
+y:put_chunk(buf, 0, chunk_size)
+start = 10; incr = 10
+buf:seq(start, incr, chunk_size, "I4")
+y:put_chunk(buf, 1, chunk_size/2)
+y:eov()
+y:persist()
+M = load(y:meta())(); print(M.file_name)
+-- if you do od of file name, you can verify that all is good
+
+--================================
 y = Vector.new('I4', M.file_name)
 print("writing meta data of new vector from old file name ")
 M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
