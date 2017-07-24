@@ -12,10 +12,12 @@ INCS= -I../inc \
 	-I../../../UTILS/inc \
 	-I../../../UTILS/gen_inc
 
-all : test_num_load_csv
+all : test_load_csv_fast 
+%.o: %.c $(DEPS)
+	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
 
-SRCS = ../src/num_load_csv.c \
-       test_num_load_csv.c  \
+SRCS = ../src/load_csv_fast.c \
+       test_load_csv_fast.c  \
        ../../../UTILS/src/mmap.c \
        ../../../UTILS/src/is_valid_chars_for_num.c \
        ../src/get_cell.c \
@@ -26,14 +28,12 @@ SRCS = ../src/num_load_csv.c \
        ../gen_src/_txt_to_F4.c \
        ../gen_src/_txt_to_F8.c \
 
-%.o: %.c $(DEPS)
-	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
-
-test_num_load_csv : $(SRCS)
-	$(CC) $(SRCS) $(INCS) $(FLAGS) -o test_num_load_csv
+test_load_csv_fast : 
+	$(CC) $(SRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
+	  	
 	  	
 
 clean:
 	rm -f *.o 
-	rm -f test_num_load_csv
+	rm -f test_load_csv_fast
 	rm -f ../*.o
