@@ -15,7 +15,7 @@ local a, b = y:eov()
 assert(a == nil)
 local i, j = string.find(b, "ERROR")
 assert(i >= 0)
-local M = load(y:meta())()
+local M = loadstring(y:meta())()
 print(M)
 for k, v in pairs(M) do print(k, v) end
 print('------------------')
@@ -60,12 +60,12 @@ local chunk_size = 65536
 for i = 1, chunk_size do 
   status = y:append(s)
   assert(status)
-  M = load(y:meta())(); 
+  M = loadstring(y:meta())(); 
   assert(M.num_in_chunk == i)
   assert(M.chunk_num == 0)
 end
 status = y:append(s)
-M = load(y:meta())(); 
+M = loadstring(y:meta())(); 
 assert(M.num_in_chunk == 1)
 assert(M.chunk_num == 1)
 --==============================================
@@ -101,10 +101,10 @@ for j = 1, num_elements do
   y:append(s1)
 end
 print("writing meta data of nascent vector")
-M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
+M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
 y:eov()
 print("writing meta data of persisted vector")
-M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
+M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
 y:persist()
 assert(y:check())
 --================================
@@ -122,13 +122,13 @@ buf:seq(start, incr, chunk_size, "I4")
 y:put_chunk(buf, 1, chunk_size/2)
 y:eov()
 y:persist()
-M = load(y:meta())(); print(M.file_name)
+M = loadstring(y:meta())(); print(M.file_name)
 -- if you do od of file name, you can verify that all is good
 
 --================================
 y = Vector.new('I4', M.file_name)
 print("writing meta data of new vector from old file name ")
-M = load(y:meta())(); for k, v in pairs(M) do print(k, v) end
+M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
 assert(y:check())
 
 local S = {}
@@ -148,7 +148,7 @@ end
 
 y:persist()
 assert(y:check())
-local M = load(y:meta())()
+local M = loadstring(y:meta())()
 print("Persisting ", M.file_name)
 assert(plpath.isfile(M.file_name))
 --=========================

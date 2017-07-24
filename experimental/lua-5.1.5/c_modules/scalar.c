@@ -22,7 +22,7 @@
 
 #include "scalar.h"
 
-LUAMOD_API int luaopen_libsclr (lua_State *L);
+int luaopen_libsclr (lua_State *L);
 
 static int l_sclr_to_cdata( lua_State *L) {
   int status = 0;
@@ -346,7 +346,7 @@ static const struct luaL_Reg sclr_functions[] = {
 /*
 ** Open test library
 */
-LUAMOD_API int luaopen_libsclr (lua_State *L) {
+int luaopen_libsclr (lua_State *L) {
   /* Create the metatable and put it on the stack. */
   luaL_newmetatable(L, "Scalar");
   /* Duplicate the metatable on the stack (We know have 2). */
@@ -379,11 +379,12 @@ LUAMOD_API int luaopen_libsclr (lua_State *L) {
 
   /* Set the methods to the metatable that should be accessed via
    * object:func */
-  luaL_setfuncs(L, sclr_methods, 0);
+  luaL_register(L, NULL, sclr_methods);
 
   /* Register the object.func functions into the table that is at the
    * top of the stack. */
-  luaL_newlib(L, sclr_functions);
+  lua_createtable(L, 0, 0);
+  luaL_register(L, NULL, sclr_functions);
 
   return 1;
 }

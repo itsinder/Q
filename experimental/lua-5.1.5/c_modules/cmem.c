@@ -18,7 +18,7 @@
 #include "_F4_to_txt.h"
 #include "_F8_to_txt.h"
 
-LUAMOD_API int luaopen_libcmem (lua_State *L);
+int luaopen_libcmem (lua_State *L);
 
 static int l_cmem_malloc( lua_State *L) 
 {
@@ -170,7 +170,7 @@ static const struct luaL_Reg cmem_functions[] = {
 /*
 ** Open test library
 */
-LUAMOD_API int luaopen_libcmem (lua_State *L) {
+int luaopen_libcmem (lua_State *L) {
   /* Create the metatable and put it on the stack. */
   luaL_newmetatable(L, "CMEM");
   /* Duplicate the metatable on the stack (We know have 2). */
@@ -189,11 +189,12 @@ LUAMOD_API int luaopen_libcmem (lua_State *L) {
 
   /* Set the methods to the metatable that should be accessed via
    * object:func */
-  luaL_setfuncs(L, cmem_methods, 0);
+  luaL_register(L, NULL, cmem_methods);
 
   /* Register the object.func functions into the table that is at the
    * top of the stack. */
-  luaL_newlib(L, cmem_functions);
+  lua_createtable(L, 0, 0);
+  luaL_register(L, NULL, cmem_functions);
 
   return 1;
 }
