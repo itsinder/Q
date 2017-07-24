@@ -115,7 +115,8 @@ local buf = cmem.new(chunk_size * 4)
 local start = 1
 local incr  = 1
 buf:seq(start, incr, chunk_size, "I4")
-y:put_chunk(buf, 0, chunk_size)
+-- y:put_chunk(buf, 0, chunk_size)
+y:put_chunk(buf, 0) -- chunk size not specified => Q_CHUNK_SIZE
 start = 10; incr = 10
 buf:seq(start, incr, chunk_size, "I4")
 y:put_chunk(buf, 1, chunk_size/2)

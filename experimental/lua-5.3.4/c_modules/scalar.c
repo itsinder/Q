@@ -24,6 +24,20 @@
 
 LUAMOD_API int luaopen_libsclr (lua_State *L);
 
+static int l_sclr_to_cdata( lua_State *L) {
+  int status = 0;
+
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  lua_pushlightuserdata(L, &(ptr_sclr->cdata));
+  luaL_getmetatable(L, "CMEM");
+  lua_setmetatable(L, -2);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_to_cdata. ");
+  return 2;
+}
+
 static int l_sclr_to_num( lua_State *L) {
   int status = 0;
 
@@ -307,11 +321,13 @@ static int l_sclr_xxx( lua_State *L) {
 #include "_outer_eval_arith.c"
 //-----------------------
 static const struct luaL_Reg sclr_methods[] = {
+    { "cdata", l_sclr_to_cdata },
     { NULL,          NULL               },
 };
  
 static const struct luaL_Reg sclr_functions[] = {
     { "new", l_sclr_new },
+    { "cdata", l_sclr_to_cdata },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
     { "eq", l_sclr_eq },

@@ -6,8 +6,13 @@ tbl_size = 4096 -- 1048576
 s1 = Scalar.new(123, "I4")
 s2 = Scalar.new(123, "F4")
 s3 = Scalar.new(123.1, "F4")
-print(Scalar.eq(s1, s2))
-print(Scalar.eq(s1, s3))
+-- Verify that cdata works TODO
+local x = s1:cdata()
+y = x:print("I4")
+assert(tonumber(y) == 123)
+--================
+assert((Scalar.eq(s1, s2)) == true)
+assert((Scalar.eq(s1, s3)) == false)
 for i = 1, num_trials do
   x = {}
   for j = 1, tbl_size do
@@ -18,6 +23,5 @@ for i = 1, num_trials do
     -- print(in_val, out_val)
     assert( math.abs((out_val - in_val))/out_val < 0.001)
   end
-  print("i = ", i)
 end
 print("Completed ", arg[0])

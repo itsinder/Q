@@ -8,6 +8,7 @@ for j = 1, num_trials do
   -- print(buf, "I4")
   x = buf:print("I4")
   assert(j == tonumber(x))
+  print(j, x)
   buf = nil
 end
 local num_elements = 1024

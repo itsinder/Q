@@ -203,12 +203,32 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_put_chunk( lua_State *L) {
+  int status = 0;
   // Modify idx and sent to l_vec_set
- int64_t chunk_num = luaL_checknumber(L, 3);
- int64_t idx = chunk_num * Q_CHUNK_SIZE;
- lua_pushnumber(L, chunk_num);
- lua_replace(L, 3);
- return l_vec_set(L);
+  int64_t chunk_num = luaL_checknumber(L, 3);
+  if ( chunk_num < 0 ) { go_BYE(-1); }
+  int64_t idx = chunk_num * Q_CHUNK_SIZE;
+  lua_pushnumber(L, idx);
+  lua_replace(L, 3);
+  // If L, 4 is undefined or is defined and is 0, change to chunk_size
+  int32_t len;
+  if ( lua_isnumber(L, 4) ) { 
+    len = luaL_checknumber(L, 4);
+    if ( len > Q_CHUNK_SIZE ) { go_BYE(-1); }
+    if ( len == 0 ) { 
+      lua_pushnumber(L, Q_CHUNK_SIZE);
+      lua_replace(L, 4);
+    }
+  }
+  else {
+    lua_pushnumber(L, Q_CHUNK_SIZE);
+  }
+  //---------------------------------------
+  return l_vec_set(L);
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_push_chunk. ");
+  return 2;
 }
 //----------------------------------------
 static int l_vec_meta( lua_State *L) {

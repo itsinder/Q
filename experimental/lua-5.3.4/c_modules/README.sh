@@ -5,14 +5,14 @@ gcc -g $QC_FLAGS $INCS \
   vector.c \
   ../../../UTILS/src/err.c \
   core_vec.c \
-  mmap.c \
+  ../../../UTILS/src/mmap.c \
   txt_to_I4.c \
-  is_valid_chars_for_num.c \
-  rand_file_name.c \
-  get_file_size.c \
-  mix_UI8.c \
-  mix_UI4.c \
-  buf_to_file.c \
+  ../../../UTILS/src/is_valid_chars_for_num.c \
+  ../../../UTILS/src/rand_file_name.c \
+  ../../../UTILS/src/get_file_size.c \
+  ../../../UTILS/src/mix_UI8.c \
+  ../../../UTILS/src/mix_UI4.c \
+  ../../../UTILS/src/buf_to_file.c \
   -shared -o libvec.so
 
 gcc -g $QC_FLAGS $INCS \
