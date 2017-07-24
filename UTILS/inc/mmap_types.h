@@ -15,7 +15,7 @@ typedef struct _vec_rec_type {
   uint32_t field_size;
   uint32_t chunk_size;
 
-  uint32_t num_elements;
+  uint64_t num_elements;
   uint32_t num_in_chunk;
   uint32_t chunk_num;   
 
@@ -27,10 +27,10 @@ typedef struct _vec_rec_type {
   char *ret_addr; // returned to get
   size_t ret_len; // returned to get
 
-  uint32_t is_persist;
+  bool is_persist;
   bool is_nascent;
   int status;
-  int is_memo;
+  bool is_memo;
   bool is_read_only;
   char *chunk;
 } VEC_REC_TYPE;

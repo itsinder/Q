@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e 
-INCS=" -I./inc/ -I./gen_inc/ -I../../../UTILS/gen_inc/ -I../../../UTILS/inc/ -I../../../OPERATORS/LOAD_CSV/gen_inc/ -I../../../OPERATORS/PRINT/gen_inc/ "
+INCS=" -I. -I./inc/ -I./gen_inc/ -I../../../UTILS/gen_inc/ -I../../../UTILS/inc/ -I../../../OPERATORS/LOAD_CSV/gen_inc/ -I../../../OPERATORS/PRINT/gen_inc/ "
 gcc -g $QC_FLAGS $INCS \
   vector.c \
   ../../../UTILS/src/err.c \
   core_vec.c \
   ../../../UTILS/src/mmap.c \
-  txt_to_I4.c \
+  ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \
   ../../../UTILS/src/is_valid_chars_for_num.c \
   ../../../UTILS/src/rand_file_name.c \
   ../../../UTILS/src/get_file_size.c \
