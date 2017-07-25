@@ -17,6 +17,26 @@ assert(n:eval() == len)
 -- Check the compare result
 Q.print_csv(converted_col, nil, "")
 --===========================
+
+print("------------------------------------------")
+
+local input_col = Q.mk_col({22, 125, 20}, "I2")
+local expected_col = Q.mk_col({22, 125, 20}, "I1")
+local converted_col = Q.convert(input_col, {qtype = "I1"})
+converted_col:eval()
+
+-- Compare converted column with expected column
+local n = Q.sum(Q.vveq(expected_col, converted_col))
+assert(type(n) == "Scalar")
+len = input_col:length()
+assert(n:eval() == len)
+
+-- Check the compare result
+Q.print_csv(converted_col, nil, "")
+--===========================
+
+
+
 print("Successfully completed " .. arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()
