@@ -2,7 +2,7 @@
 INCS=-I../inc/ -I../gen_inc/
 INCDIR=../gen_inc/
 
-all : libutils.so ${hdr_files}
+all : libutils.so ${hdr_files} asc2bin
 
 ../gen_inc/_rand_file_name.h : 
 	lua ../lua/cli_extract_func_decl.lua rand_file_name.c ${INCDIR}
@@ -129,8 +129,9 @@ clean :
 	rm -f *.so
 	rm -f *.o
 
-asc2bin :
+asc2bin : 
 	echo TODO
+	
 
 bin2asc :
 	echo TODO
