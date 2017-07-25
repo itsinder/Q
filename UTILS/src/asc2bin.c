@@ -63,10 +63,10 @@ asc2bin(
   if ( strcasecmp(fldtype, "I1") == 0 ) {
     qtype = I1;
   }
-  if ( strcasecmp(fldtype, "I2") == 0 ) {
+  else if ( strcasecmp(fldtype, "I2") == 0 ) {
     qtype = I2;
   }
-  if ( strcasecmp(fldtype, "I4") == 0 ) {
+  else if ( strcasecmp(fldtype, "I4") == 0 ) {
     qtype = I4;
   }
   else if ( strcasecmp(fldtype, "I8") == 0 ) {
