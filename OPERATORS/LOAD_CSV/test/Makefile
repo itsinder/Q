@@ -28,7 +28,7 @@ SRCS = ../src/load_csv_fast.c \
        ../gen_src/_txt_to_F4.c \
        ../gen_src/_txt_to_F8.c \
 
-test_load_csv_fast : 
+test_load_csv_fast : test_load_csv_fast.c ../src/load_csv_fast.c
 	$(CC) $(SRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
 	  	
 	  	
@@ -36,4 +36,4 @@ test_load_csv_fast :
 clean:
 	rm -f *.o 
 	rm -f test_load_csv_fast
-	rm -f ../*.o
+	rm -f ../src/*.o

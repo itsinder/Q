@@ -1,21 +1,9 @@
 #!/bin/bash
 set -e
-bash gen_files.sh
+make 
 
-cd ../../OPERATORS/LOAD_CSV/lua/
-bash gen_files.sh
-cd -
-cd ../../OPERATORS/LOAD_CSV/src/
-bash gen_files.sh
-cd -
-
-cd ../../OPERATORS/PRINT/lua/
-bash gen_files.sh
-cd -
-
-cd ../../OPERATORS/PRINT/src/
-bash gen_files.sh
-cd -
+make -C  ../../OPERATORS/LOAD_CSV/lua/
+make -C  ../../OPERATORS/PRINT/lua/
 
 gcc -g -std=gnu99 \
   asc2bin.c \

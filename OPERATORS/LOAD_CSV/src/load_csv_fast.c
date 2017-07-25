@@ -1,5 +1,6 @@
 //START_INCLUDES
 #include "q_incs.h"
+#include "q_macros.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"
 #include "_txt_to_I4.h"
@@ -27,15 +28,15 @@ typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8 } qtype_type;
 //START_FUNC_DECL
 int
 load_csv_fast(
-    char *infile,
+    const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    const char **outfiles,
-    const char **fldtypes,
+    char **outfiles,
+    char **fldtypes,
     bool is_hdr,
     bool *is_load,
     bool *has_nulls,
-    const char **nil_files//, TODO TODO TODO
+    char **nil_files//, TODO TODO TODO
     //uint64_t *ptr_nil_ctrs
     )
 //STOP_FUNC_DECL
@@ -137,7 +138,7 @@ load_csv_fast(
 
   size_t xidx = 0;
   uint64_t row_ctr = 0;
-  uint64_t col_ctr = 0;
+  uint32_t col_ctr = 0;
   bool is_last_col;
   char null_val[8];
   memset(null_val, '\0', 8); // we write 0 when value is null
@@ -161,7 +162,9 @@ load_csv_fast(
     if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
 
-    fprintf(stderr, "%llu, %llu, %llu, %s \n", row_ctr, col_ctr, xidx, buf);
+    //fprintf(stderr, "%llu, %u, %llu, %s \n", 
+     //   (unsigned long long)row_ctr, col_ctr, 
+     //   (unsigned long long)xidx, buf);
 
     // Deal with header line 
     //row_ctr == 0 means we are reading the first line which is the header
@@ -205,16 +208,11 @@ load_csv_fast(
       // bit already 0 during initialization so no need to set it to 0
       nil_ctrs[col_ctr] += 1;
     }
-    fprintf(stderr, "%d: %d: %8x\n", row_ctr, col_ctr, nn_buf[col_ctr]);
 
     //nil buffer is full
     if ( ( row_ctr % 64 ) == 63 && has_nulls[col_ctr]) { // ( row_ctr & 0xFF ) == 0xFF 
       fwrite(&(nn_buf[col_ctr]), 1, sizeof(uint64_t), nofps[col_ctr]);
       nn_buf[col_ctr] = 0; //reset
-    }
-
-    if ( row_ctr == 62 ) {
-      printf("break here\n");
     }
 
     //write element to file
@@ -227,7 +225,7 @@ load_csv_fast(
           status = txt_to_I1(buf, &tempI1); cBYE(status);
           fwrite(&tempI1, 1, sizeof(int8_t), ofps[col_ctr]);
         }
-        printf("I1\n");
+//        printf("I1\n");
         break;
       case I2:
         if ( is_val_null ) { 
@@ -235,9 +233,9 @@ load_csv_fast(
         }
         else {
           status = txt_to_I2(buf, &tempI2); cBYE(status);
-          fwrite(&tempI1, 1, sizeof(int16_t), ofps[col_ctr]);
+          fwrite(&tempI2, 1, sizeof(int16_t), ofps[col_ctr]);
         }
-        printf("I2");
+  //      printf("I2");
         break;
       case I4:
         if ( is_val_null ) { 
@@ -247,7 +245,7 @@ load_csv_fast(
           status = txt_to_I4(buf, &tempI4); cBYE(status);
           fwrite(&tempI4, 1, sizeof(int32_t), ofps[col_ctr]);
         }
-        printf("I4\n");
+    //    printf("I4\n");
         break;
       case I8:
         if ( is_val_null ) { 
@@ -267,7 +265,7 @@ load_csv_fast(
           status = txt_to_F4(buf, &tempF4); cBYE(status);
           fwrite(&tempF4, 1, sizeof(float), ofps[col_ctr]);
         }
-        printf("F4\n");
+      //  printf("F4\n");
         break;
       case F8:
         if ( is_val_null ) { 
@@ -321,11 +319,11 @@ BYE:
   if ( nofps != NULL ) { 
     for ( uint32_t i = 0; i < nC; i++ ) {
       if ( nil_ctrs[i] == 0 ) {
-        printf("no nils\n");
+        //printf("no nils\n");
         if ( nofps[i] != NULL ) { 
           fclose_if_non_null(nofps[i]);
           status = remove(nil_files[i]);
-          printf("removing file\n");
+          //printf("removing file\n");
         }
         cBYE(status);
       }
