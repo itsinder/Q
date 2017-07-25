@@ -3,6 +3,7 @@
 typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8} QTYPE;
 
 typedef union _cdata_type {
+   bool   valB1;
   int8_t  valI1;
   int16_t valI2;
   int32_t valI4;

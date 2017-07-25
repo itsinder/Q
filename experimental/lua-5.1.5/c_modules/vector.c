@@ -133,6 +133,7 @@ BYE:
 //----------------------------------------------------
 static int l_vec_append( lua_State *L) {
   int status = 0;
+  bool bit_val; // TODO THINK ABOUT THIS
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
@@ -140,7 +141,7 @@ static int l_vec_append( lua_State *L) {
     go_BYE(-1);
   }
   void * addr = (void *)(&ptr_sclr->cdata);
-  status = vec_set(ptr_vec, addr, 0, 1); cBYE(status);
+  status = vec_set(ptr_vec, addr, 0, 1, bit_val); cBYE(status);
   lua_pushinteger(L, status);
   return 1;
 BYE:
@@ -156,6 +157,7 @@ static int l_vec_set( lua_State *L) {
   int64_t idx;
   int32_t len;
   double buf; // need this to be word aligned
+  bool bit_val = false;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
@@ -170,7 +172,12 @@ static int l_vec_set( lua_State *L) {
   }
   else if (  lua_isnumber(L, 2) ) {
     double dtemp = luaL_checknumber(L, 2);
-    if ( strcmp(ptr_vec->field_type, "I1") == 0 ) { 
+    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+      int8_t val = dtemp; 
+      if ( ( val != 0 ) && ( val != 1 ) ) { go_BYE(-1); }
+      memset(&buf, 255, 8);
+    }
+    else if ( strcmp(ptr_vec->field_type, "I1") == 0 ) { 
       int8_t val = dtemp; memcpy(&buf, &val, 1);
     }
     else if ( strcmp(ptr_vec->field_type, "I2") == 0 ) { 
@@ -194,7 +201,7 @@ static int l_vec_set( lua_State *L) {
   else {
     go_BYE(-1);
   }
-  status = vec_set(ptr_vec, addr, idx, len); cBYE(status);
+  status = vec_set(ptr_vec, addr, idx, len, bit_val); cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -279,8 +286,7 @@ static int l_vec_new( lua_State *L) {
   const char * const qtype_sz  = luaL_checkstring(L, 1);
   const char *qtype; int field_size;
   if ( strcmp(qtype_sz, "B1") == 0 ) { 
-    qtype = qtype_sz; field_size = 1/8;
-    fprintf(stderr, "TO BE IMPLEMENTED\n"); go_BYE(-1); 
+    qtype = qtype_sz; field_size = 8; // SPECIAL CASE
   }
   else if ( strcmp(qtype_sz, "I1") == 0 ) { 
     qtype = qtype_sz; field_size = 1;
@@ -338,8 +344,7 @@ static int l_vec_new( lua_State *L) {
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   status = vec_new(ptr_vec, qtype, field_size, chunk_size); cBYE(status);
   if ( is_materialized ) { 
-    status = vec_materialized(ptr_vec, file_name, nn_file_name, 
-        is_read_only); 
+    status = vec_materialized(ptr_vec, file_name, is_read_only); 
     cBYE(status);
   }
   else {

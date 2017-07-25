@@ -40,7 +40,6 @@ int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
     const char *const file_name,
-    const char *const nn_file_name,
     bool is_read_only
     )
 {
@@ -60,17 +59,22 @@ vec_materialized(
   if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
   // check nX
   ptr_vec->num_elements = nX / ptr_vec->field_size;
-  if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { go_BYE(-1);}
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    int64_t n = ptr_vec->num_elements/64;
+    if ( ( n * 64 ) != ptr_vec->num_elements ) { n += 64; }
+    int64_t num_bytes = n / 8;
+    if ( num_bytes < nX ) { go_BYE(-1); }
+  }
+  else {
+    if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
+      go_BYE(-1);
+    }
+  }
   ptr_vec->map_addr = X;
   ptr_vec->map_len  = nX;
   ptr_vec->is_nascent = false;
   ptr_vec->is_read_only = is_read_only;
   strcpy(ptr_vec->file_name, file_name);
-
-  if ( ( nn_file_name != NULL ) && ( *file_name != '\0' ) ) { 
-    if ( strlen(nn_file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
-    fprintf(stderr, "TO BE IMPLEMENTED\n");  go_BYE(-1); // TODO P0
-  }
 
 BYE:
   return status;
@@ -221,7 +225,12 @@ vec_check(
   int status = 0;
   status = chk_field_type(ptr_vec->field_type);
   cBYE(status);
-  if ( ptr_vec->field_size == 0 ) { go_BYE(-1); }
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 )  {
+    if ( ptr_vec->field_size != 8 ) { go_BYE(-1); }
+  }
+  else {
+    if ( ptr_vec->field_size == 0 ) { go_BYE(-1); }
+  }
   if ( strcmp(ptr_vec->field_type, "SC") == 0 )  {
     if ( ptr_vec->field_size < 2 ) { go_BYE(-1); }
   }
@@ -301,7 +310,22 @@ vec_get(
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
     if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
     addr = ptr_vec->chunk + (chunk_idx * ptr_vec->field_size);
-    ptr_vec->ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+    ptr_vec->ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+    /*
+     * Consider a following use-case
+     * - Create a nascent vector of any type say I4
+     *   - Append 10 elements to it (num_in_chunk = 10)
+     *   - Get first two elements i.e index=0 and length=2
+     *
+     *   Is this a valid use-case? 
+     *   If yes, then what will the value of ret_len?
+     *
+     *   I tried this test (test_read_write.lua) and 
+     *   my expectation was value of ret_len will be 2
+     *   but I got different value i.e 10.
+     *
+     *   ret_len should be min(ptr_vec->num_in_chunk - chunk_idx, len)
+     */
   }
   else {
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
@@ -319,7 +343,8 @@ vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
     uint64_t idx, 
-    uint32_t len
+    uint32_t len,
+    bool bit_val // for B1 special case
     )
 {
   int status = 0;
@@ -331,34 +356,34 @@ vec_set(
     uint64_t initial_num_elements = ptr_vec->num_elements;
     uint32_t num_copied = 0;
     for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
-       uint32_t space_in_chunk = 
-         ptr_vec->chunk_size - ptr_vec->num_in_chunk;
-       if ( space_in_chunk == 0 )  {
-         if ( ptr_vec->is_memo ) {
-           if ( ptr_vec->file_name[0] == '\0' ) {
-             status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-             cBYE(status);
-           }
-           status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-               ptr_vec->num_in_chunk, ptr_vec->file_name);
-           cBYE(status);
-         }
-         ptr_vec->num_in_chunk = 0;
-         ptr_vec->chunk_num++;
-         memset(ptr_vec->chunk, '\0', 
-             (ptr_vec->field_size * ptr_vec->chunk_size));
-       }
-       else {
-         uint32_t num_to_copy = mcr_min(space_in_chunk, len);
-         char *dst = ptr_vec->chunk + 
-           (ptr_vec->num_in_chunk * ptr_vec->field_size);
-         char *src = addr + (num_copied * ptr_vec->field_size);
-         memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
-         ptr_vec->num_in_chunk += num_to_copy;
-         ptr_vec->num_elements += num_to_copy;
-         num_left_to_copy      -= num_to_copy;
-         num_copied            += num_to_copy;
-       }
+      uint32_t space_in_chunk = 
+        ptr_vec->chunk_size - ptr_vec->num_in_chunk;
+      if ( space_in_chunk == 0 )  {
+        if ( ptr_vec->is_memo ) {
+          if ( ptr_vec->file_name[0] == '\0' ) {
+            status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+            cBYE(status);
+          }
+          status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+              ptr_vec->num_in_chunk, ptr_vec->file_name);
+          cBYE(status);
+        }
+        ptr_vec->num_in_chunk = 0;
+        ptr_vec->chunk_num++;
+        memset(ptr_vec->chunk, '\0', 
+            (ptr_vec->field_size * ptr_vec->chunk_size));
+      }
+      else {
+        uint32_t num_to_copy = mcr_min(space_in_chunk, len);
+        char *dst = ptr_vec->chunk + 
+          (ptr_vec->num_in_chunk * ptr_vec->field_size);
+        char *src = addr + (num_copied * ptr_vec->field_size);
+        memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
+        ptr_vec->num_in_chunk += num_to_copy;
+        ptr_vec->num_elements += num_to_copy;
+        num_left_to_copy      -= num_to_copy;
+        num_copied            += num_to_copy;
+      }
     }
     if ( num_copied != len ) { go_BYE(-1); }
     if ( ptr_vec->num_elements != initial_num_elements + len) {
@@ -369,8 +394,32 @@ vec_set(
     if ( ptr_vec->is_read_only ) { go_BYE(-1); }
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-    char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-    memcpy(dst, addr, len * ptr_vec->field_size);
+    if ( strcpy(ptr_vec->field_type, "B1") == 0 ) { 
+      if ( ( len == 1 ) || ( ( len % 64 ) == 0 ) ) {
+        if ( len == 1 ) {
+          if ( addr != NULL ) { go_BYE(-1); }
+          int64_t word_idx = idx / 64;
+          int64_t bit_idx = idx % 64;
+          int64_t *X  =(int64_t *)ptr_vec->map_addr;
+          if ( bit_val ) { 
+            X[word_idx] = X[word_idx] | (1 << bit_idx);
+          }
+          else {
+          }
+        }
+        else {
+          if ( ( idx % 64 ) != 0 ) { go_BYE(-1); }
+        }
+        // all is well
+      }
+      else {
+        go_BYE(-1);
+      }
+    }
+    else {
+      char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      memcpy(dst, addr, len * ptr_vec->field_size);
+    }
   }
 BYE:
   return status;

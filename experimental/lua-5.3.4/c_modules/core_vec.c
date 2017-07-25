@@ -301,7 +301,22 @@ vec_get(
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
     if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
     addr = ptr_vec->chunk + (chunk_idx * ptr_vec->field_size);
-    ptr_vec->ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+    ptr_vec->ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+    /*
+     * Consider a following use-case
+     * - Create a nascent vector of any type say I4
+     *   - Append 10 elements to it (num_in_chunk = 10)
+     *   - Get first two elements i.e index=0 and length=2
+     *
+     *   Is this a valid use-case? 
+     *   If yes, then what will the value of ret_len?
+     *
+     *   I tried this test (test_read_write.lua) and 
+     *   my expectation was value of ret_len will be 2
+     *   but I got different value i.e 10.
+     *
+     *   ret_len should be min(ptr_vec->num_in_chunk - chunk_idx, len)
+     */
   }
   else {
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }

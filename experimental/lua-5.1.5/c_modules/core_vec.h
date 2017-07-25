@@ -25,7 +25,6 @@ extern int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
     const char *const file_name,
-    const char *const nn_file_name,
     bool is_read_only
     );
 extern int
@@ -45,7 +44,8 @@ vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
     uint64_t idx, 
-    uint32_t len
+    uint32_t len,
+    bool bit_val
     );
 extern int
 vec_eov(
