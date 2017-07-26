@@ -56,7 +56,7 @@ end
 
 function Column:set_generator(gen)
    if self._last_chunk_number == nil then
-      assert(type(gen) == function
+      assert(type(gen) == "`function")
       self._gen = gen
    else
       error("Cannot change the generator once a chunk has already been set")

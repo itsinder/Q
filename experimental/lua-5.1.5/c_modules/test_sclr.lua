@@ -3,6 +3,15 @@ cmem = require 'libcmem' ;
 Scalar = require 'libsclr' ; 
 num_trials = 32 -- 1024
 tbl_size = 4096 -- 1048576
+sb = Scalar.new("true", "B1")
+print(sb)
+x = Scalar.to_str(sb)
+assert(x == "true")
+sb = Scalar.new("false", "B1")
+print(sb)
+x = Scalar.to_str(sb)
+assert(x == "false")
+
 s1 = Scalar.new(123, "I4")
 s2 = Scalar.new(123, "F4")
 s3 = Scalar.new(123.1, "F4")

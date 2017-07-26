@@ -44,8 +44,7 @@ vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
     uint64_t idx, 
-    uint32_t len,
-    bool bit_val
+    uint32_t len
     );
 extern int
 vec_eov(

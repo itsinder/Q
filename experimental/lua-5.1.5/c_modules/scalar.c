@@ -11,6 +11,7 @@
 #include "lualib.h"
 
 #include "q_incs.h"
+#include "_txt_to_B1.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"
 #include "_txt_to_I4.h"
@@ -43,7 +44,10 @@ static int l_sclr_to_num( lua_State *L) {
 
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
-  if ( strcmp(field_type, "I1" ) == 0 ) { 
+  if ( strcmp(field_type, "B1" ) == 0 ) { 
+    lua_pushnumber(L, ptr_sclr->cdata.valB1);
+  }
+  else if ( strcmp(field_type, "I1" ) == 0 ) { 
     lua_pushnumber(L, ptr_sclr->cdata.valI1);
   }
   else if ( strcmp(field_type, "I2" ) == 0 ) { 
@@ -80,7 +84,15 @@ int status = 0;
   // TODO Allow user to provide format
   memset(buf, '\0', BUFLEN+1);
   const char *field_type = ptr_sclr->field_type;
-  if ( strcmp(field_type, "I1" ) == 0 ) { 
+  if ( strcmp(field_type, "B1" ) == 0 ) { 
+    if (  ptr_sclr->cdata.valB1 ) { 
+      strncpy(buf, "true", BUFLEN);
+    }
+    else {
+      strncpy(buf, "false", BUFLEN);
+    }
+  }
+  else if ( strcmp(field_type, "I1" ) == 0 ) { 
     snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI1);
   }
   else if ( strcmp(field_type, "I2" ) == 0 ) { 
@@ -110,6 +122,7 @@ BYE:
 }
 static int l_sclr_new( lua_State *L) {
   int status = 0;
+  bool    tempB1;
   int8_t  tempI1;
   int16_t tempI2;
   int32_t tempI4;
@@ -134,7 +147,12 @@ static int l_sclr_new( lua_State *L) {
     // TODO Infer qtype 
     go_BYE(-1);
   }
-  if ( strcmp(qtype, "I1" ) == 0 ) { 
+  if ( strcmp(qtype, "B1" ) == 0 ) { 
+    status = txt_to_B1(str_val, &tempB1); cBYE(status);
+    memcpy(dst, &tempB1, sizeof(bool)); strcpy(ptr_sclr->field_type, "B1"); 
+    ptr_sclr->field_size = sizeof(bool);
+  }
+  else if ( strcmp(qtype, "I1" ) == 0 ) { 
     status = txt_to_I1(str_val, &tempI1); cBYE(status);
     memcpy(dst, &tempI1, 1); strcpy(ptr_sclr->field_type, "I1"); 
     ptr_sclr->field_size = 1;
@@ -309,11 +327,6 @@ BYE:
   return status;
 }
 //----------------------------------------
-static int l_sclr_xxx( lua_State *L) {
-  lua_remove(L, -3);
-  return l_sclr_new(L);
-}
-//----------------------------------------
 
 #include "_eval_cmp.c"
 #include "_outer_eval_cmp.c"
@@ -322,6 +335,7 @@ static int l_sclr_xxx( lua_State *L) {
 //-----------------------
 static const struct luaL_Reg sclr_methods[] = {
     { "cdata", l_sclr_to_cdata },
+    { "to_str", l_sclr_to_str },
     { NULL,          NULL               },
 };
  
@@ -371,7 +385,6 @@ int luaopen_libsclr (lua_State *L) {
   lua_pushcfunction(L, l_sclr_div); lua_setfield(L, -2, "__div");
   // Following do not work currently
   lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
-  lua_pushcfunction(L, l_sclr_xxx); lua_setfield(L, -2, "__call");
   // Above do not work currently
 
   /* Register the object.func functions into the table that is at the 

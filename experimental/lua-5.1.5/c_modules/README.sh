@@ -17,6 +17,7 @@ gcc -g $QC_FLAGS $INCS \
 
 gcc -g $QC_FLAGS $INCS \
   cmem.c \
+  ../../../OPERATORS/PRINT/src/B1_to_txt.c \
   ../../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
   ../../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \
   ../../../OPERATORS/PRINT/gen_src/_I4_to_txt.c \
@@ -37,6 +38,7 @@ lua gen_arith.lua
 gcc -g $QC_FLAGS $INCS \
   scalar.c \
   ../../../UTILS/src/err.c \
+  ../../../OPERATORS/LOAD_CSV/src/txt_to_B1.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I1.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I2.c \
   ../../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \

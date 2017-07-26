@@ -60,9 +60,9 @@ vec_materialized(
   // check nX
   ptr_vec->num_elements = nX / ptr_vec->field_size;
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
-    int64_t n = ptr_vec->num_elements/64;
+    uint64_t n = ptr_vec->num_elements/64;
     if ( ( n * 64 ) != ptr_vec->num_elements ) { n += 64; }
-    int64_t num_bytes = n / 8;
+    uint64_t num_bytes = n / 8;
     if ( num_bytes < nX ) { go_BYE(-1); }
   }
   else {
@@ -237,7 +237,8 @@ vec_check(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
     if ( ( ptr_vec->is_memo == 1 ) && ( ptr_vec->chunk_num >= 1 ) ) {
-      status = file_exists(ptr_vec->file_name); cBYE(status);
+      bool exists = file_exists(ptr_vec->file_name); 
+      if ( !exists ) { go_BYE(-1); }
       int64_t fsz = get_file_size(ptr_vec->file_name); 
       if ( fsz / ptr_vec->field_size != 
           ( ptr_vec->chunk_num * ptr_vec->chunk_size ) ) {
@@ -343,8 +344,7 @@ vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
     uint64_t idx, 
-    uint32_t len,
-    bool bit_val // for B1 special case
+    uint32_t len
     )
 {
   int status = 0;
@@ -395,6 +395,7 @@ vec_set(
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
     if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
     if ( strcpy(ptr_vec->field_type, "B1") == 0 ) { 
+      /*
       if ( ( len == 1 ) || ( ( len % 64 ) == 0 ) ) {
         if ( len == 1 ) {
           if ( addr != NULL ) { go_BYE(-1); }
@@ -415,6 +416,7 @@ vec_set(
       else {
         go_BYE(-1);
       }
+      */
     }
     else {
       char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);

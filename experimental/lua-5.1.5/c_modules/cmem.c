@@ -11,6 +11,7 @@
 
 #include "q_incs.h"
 
+#include "_B1_to_txt.h"
 #include "_I1_to_txt.h"
 #include "_I2_to_txt.h"
 #include "_I4_to_txt.h"
@@ -123,7 +124,10 @@ static int l_cmem_to_str( lua_State *L) {
   void  *X          = luaL_checkudata( L, 1, "CMEM");
   const char *qtype = luaL_checkstring(L, 2);
   memset(buf, '\0', BUFLEN);
-  if ( strcmp(qtype, "I1") == 0 ) { 
+  if ( strcmp(qtype, "B1") == 0 ) { 
+    status = B1_to_txt(X, buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "I1") == 0 ) { 
     status = I1_to_txt(X, "", buf, BUFLEN); cBYE(status);
   }
   else if ( strcmp(qtype, "I2") == 0 ) { 

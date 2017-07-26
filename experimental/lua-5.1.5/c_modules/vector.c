@@ -133,7 +133,6 @@ BYE:
 //----------------------------------------------------
 static int l_vec_append( lua_State *L) {
   int status = 0;
-  bool bit_val; // TODO THINK ABOUT THIS
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
@@ -141,7 +140,7 @@ static int l_vec_append( lua_State *L) {
     go_BYE(-1);
   }
   void * addr = (void *)(&ptr_sclr->cdata);
-  status = vec_set(ptr_vec, addr, 0, 1, bit_val); cBYE(status);
+  status = vec_set(ptr_vec, addr, 0, 1); cBYE(status);
   lua_pushinteger(L, status);
   return 1;
 BYE:
@@ -157,7 +156,6 @@ static int l_vec_set( lua_State *L) {
   int64_t idx;
   int32_t len;
   double buf; // need this to be word aligned
-  bool bit_val = false;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
@@ -201,7 +199,7 @@ static int l_vec_set( lua_State *L) {
   else {
     go_BYE(-1);
   }
-  status = vec_set(ptr_vec, addr, idx, len, bit_val); cBYE(status);
+  status = vec_set(ptr_vec, addr, idx, len); cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -320,13 +318,9 @@ static int l_vec_new( lua_State *L) {
   //-- STOP: Get qtype and field size
   bool  is_materialized;
   const char *file_name = NULL; 
-  const char *nn_file_name = NULL; 
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);
     is_materialized = true;
-    if ( lua_isstring(L, 3) ) { // nn filename provided 
-      nn_file_name = luaL_checkstring(L, 3);
-    }
   }
   else { 
     is_materialized = false;
