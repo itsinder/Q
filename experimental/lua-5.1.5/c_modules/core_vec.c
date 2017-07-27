@@ -1,3 +1,4 @@
+#include <math.h>
 #include "q_incs.h"
 #include "mmap_types.h"
 #include "core_vec.h"
@@ -12,25 +13,36 @@ extern luaL_Buffer g_errbuf;
 
 int
 chk_field_type(
-    const char * const field_type
+    const char * const field_type,
+    uint32_t field_size
     )
 {
   int status = 0;
   if ( field_type == NULL ) { go_BYE(-1); }
-  // TODO Needs to be kept in wync with qtypes in q_consts.lua
-  if ( ( strcmp(field_type, "I1") == 0 ) || 
+  // TODO SYNC with qtypes in q_consts.lua
+  if ( ( strcmp(field_type, "B1") == 0 ) || 
+       ( strcmp(field_type, "I1") == 0 ) || 
        ( strcmp(field_type, "I2") == 0 ) || 
        ( strcmp(field_type, "I4") == 0 ) || 
        ( strcmp(field_type, "I8") == 0 ) || 
        ( strcmp(field_type, "F4") == 0 ) || 
        ( strcmp(field_type, "F8") == 0 ) || 
        ( strcmp(field_type, "SC") == 0 ) || 
-       ( strcmp(field_type, "SC") == 0 ) ) {
+       ( strcmp(field_type, "SV") == 0 ) ) {
     /* all is well */
   }
   else {
     fprintf(stderr, "Bad field type = [%s] \n", field_type);
     go_BYE(-1);
+  }
+  if ( strcmp(field_type, "B1") == 0 )  {
+    if ( field_size != 0 ) { go_BYE(-1); }
+  }
+  else {
+    if ( field_size == 0 ) { go_BYE(-1); }
+  }
+  if ( strcmp(field_type, "SC") == 0 )  {
+    if ( field_size < 2 ) { go_BYE(-1); }
   }
 BYE:
   return status;
@@ -59,10 +71,11 @@ vec_materialized(
   if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
   // check nX
   ptr_vec->num_elements = nX / ptr_vec->field_size;
+  // For B1, file can be larger than necessary, not smaller
+  // For all others, size must match number of elements
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
-    uint64_t n = ptr_vec->num_elements/64;
-    if ( ( n * 64 ) != ptr_vec->num_elements ) { n += 64; }
-    uint64_t num_bytes = n / 8;
+    uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
+    uint64_t num_bytes = num_words * 8;
     if ( num_bytes < nX ) { go_BYE(-1); }
   }
   else {
@@ -133,13 +146,13 @@ vec_free(
     ptr_vec->map_addr = NULL;
     ptr_vec->map_len  = 0;
   }
-  if ( ptr_vec->chunk != NULL ) { 
+  if ( ptr_vec->chunk != NULL ) {
   // fprintf(stderr, "FREE: chunk = %llu \n", (unsigned long long)ptr_vec->chunk);
     // printf("%8x\n", ptr_vec->chunk);
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
-  if ( !ptr_vec->is_persist ) { 
+  if ( !ptr_vec->is_persist ) {
     if ( ptr_vec->file_name[0] != '\0' ) {
       printf("Deleting %s \n", ptr_vec->file_name); 
       status = remove(ptr_vec->file_name); 
@@ -166,10 +179,17 @@ vec_nascent(
     )
 {
   int status = 0;
+  uint32_t sz = 0;
   if ( ptr_vec == NULL ) { go_BYE(-1); }
-  uint32_t sz = ptr_vec->field_size * ptr_vec->chunk_size;
+  // chunk size must be multiple of 64
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    sz = ptr_vec->chunk_size / 8;
+  }
+  else {
+    sz = ptr_vec->field_size * ptr_vec->chunk_size;
+  }
   ptr_vec->chunk = malloc(sz);
-  // fprintf(stderr, "MALLOC: chunk = %llu \n", (unsigned long long)ptr_vec->chunk);
+  return_if_malloc_failed(ptr_vec->chunk);
   ptr_vec->is_nascent = true;
 
 BYE:
@@ -188,10 +208,9 @@ vec_new(
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
-  if ( field_size == 0 ) { go_BYE(-1); }
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
-  status = chk_field_type(field_type); cBYE(status);
+  status = chk_field_type(field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = true; // default
@@ -206,9 +225,9 @@ file_exists (
     const char * const filename
     )
 {
-  int status = 0; struct stat buf;
+  struct stat buf;
   if ( ( filename == NULL ) || ( *filename == '\0' ) ) { return false; }
-  status = stat(filename, &buf );
+  int status = stat(filename, &buf );
   if ( status == 0 ) { /* File found */
     return true;
   }
@@ -223,17 +242,8 @@ vec_check(
     )
 {
   int status = 0;
-  status = chk_field_type(ptr_vec->field_type);
+  status = chk_field_type(ptr_vec->field_type, ptr_vec->field_size);
   cBYE(status);
-  if ( strcmp(ptr_vec->field_type, "B1") == 0 )  {
-    if ( ptr_vec->field_size != 8 ) { go_BYE(-1); }
-  }
-  else {
-    if ( ptr_vec->field_size == 0 ) { go_BYE(-1); }
-  }
-  if ( strcmp(ptr_vec->field_type, "SC") == 0 )  {
-    if ( ptr_vec->field_size < 2 ) { go_BYE(-1); }
-  }
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
     if ( ( ptr_vec->is_memo == 1 ) && ( ptr_vec->chunk_num >= 1 ) ) {
@@ -271,6 +281,10 @@ vec_check(
     if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
     if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
   }
+  // chunk size must be multiple of 64
+  if ( ( ( ptr_vec->chunk_size / 64 ) * 64 ) != ptr_vec->chunk_size ) { 
+    go_BYE(-1);
+  }
 
 BYE:
   return status;
@@ -305,12 +319,29 @@ vec_get(
   char *addr = NULL;
   ptr_vec->ret_addr = NULL;
   ptr_vec->ret_len  = 0;
+  // If B1 and you ask for 5 elements starting from 67th, then 
+  // this is translated to asking for (5+3) elements starting from 64th
+  // In other words, if you wanted
+  // 67, 68, 69, 60, 71, you will get 
+  // 64, 65, 66, 67, 68, 69, 60, 71 and
+  // you have to index into it yourself to get the bits you want
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+    uint32_t bit_idx = idx % 64;
+    len += bit_idx;
+  }
   if ( ptr_vec->is_nascent ) {
     uint32_t chunk_num = idx / ptr_vec->chunk_size;
     if ( chunk_num != ptr_vec->chunk_num ) { go_BYE(-1); }
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
     if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-    addr = ptr_vec->chunk + (chunk_idx * ptr_vec->field_size);
+    uint32_t offset;
+    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+      offset = chunk_idx * ptr_vec->field_size;
+    }
+    else {
+      offset = chunk_idx * ptr_vec->field_size;
+    }
+    addr = ptr_vec->chunk + offset;
     ptr_vec->ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     /*
      * Consider a following use-case
@@ -340,6 +371,61 @@ BYE:
 }
 
 int
+vec_add(
+    VEC_REC_TYPE *ptr_vec,
+    char * const addr, 
+    uint32_t len
+    )
+{
+  int status = 0;
+  if ( addr == NULL ) { go_BYE(-1); }
+  if ( len == 0 ) { go_BYE(-1); }
+  if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
+  uint64_t initial_num_elements = ptr_vec->num_elements;
+  uint32_t num_copied = 0;
+  if ( len == 362 ) { 
+    printf("hello world\n");
+  }
+  for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
+    uint32_t space_in_chunk = 
+      ptr_vec->chunk_size - ptr_vec->num_in_chunk;
+    if ( space_in_chunk == 0 )  {
+      if ( ptr_vec->is_memo ) {
+        if ( ptr_vec->file_name[0] == '\0' ) {
+          status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+          cBYE(status);
+        }
+        status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+            ptr_vec->num_in_chunk, ptr_vec->file_name);
+        cBYE(status);
+      }
+      ptr_vec->num_in_chunk = 0;
+      ptr_vec->chunk_num++;
+      memset(ptr_vec->chunk, '\0', 
+          (ptr_vec->field_size * ptr_vec->chunk_size));
+    }
+    else {
+      uint32_t num_to_copy = mcr_min(space_in_chunk, num_left_to_copy);
+      char *dst = ptr_vec->chunk + 
+        (ptr_vec->num_in_chunk * ptr_vec->field_size);
+      char *src = addr + (num_copied * ptr_vec->field_size);
+      memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
+      ptr_vec->num_in_chunk += num_to_copy;
+      ptr_vec->num_elements += num_to_copy;
+      num_left_to_copy      -= num_to_copy;
+      num_copied            += num_to_copy;
+    }
+  }
+  if ( num_copied != len ) { go_BYE(-1); }
+  if ( ptr_vec->num_elements != initial_num_elements + len) {
+    go_BYE(-1);
+  }
+BYE:
+  return status;
+}
+
+
+int
 vec_set(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
@@ -350,78 +436,31 @@ vec_set(
   int status = 0;
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
-  if ( ptr_vec->is_nascent ) {
-    // idx is implicit for nascent case
-    // TODO: PUT THIS BACK if ( idx != 0 ) { go_BYE(-1); }
-    uint64_t initial_num_elements = ptr_vec->num_elements;
-    uint32_t num_copied = 0;
-    for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
-      uint32_t space_in_chunk = 
-        ptr_vec->chunk_size - ptr_vec->num_in_chunk;
-      if ( space_in_chunk == 0 )  {
-        if ( ptr_vec->is_memo ) {
-          if ( ptr_vec->file_name[0] == '\0' ) {
-            status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-            cBYE(status);
-          }
-          status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-              ptr_vec->num_in_chunk, ptr_vec->file_name);
-          cBYE(status);
-        }
-        ptr_vec->num_in_chunk = 0;
-        ptr_vec->chunk_num++;
-        memset(ptr_vec->chunk, '\0', 
-            (ptr_vec->field_size * ptr_vec->chunk_size));
+  if ( ptr_vec->is_read_only ) { go_BYE(-1); }
+  if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+  if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+  uint64_t offset = ( idx * ptr_vec->field_size);
+  if ( offset > ptr_vec->map_len ) { go_BYE(-1); }
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+    /* you can either set one bit or set on word boundary */
+    if ( ( len != 1 ) && ( ( idx % 64 ) != 0 ) ) { go_BYE(-1); }
+    if ( len == 1 ) {
+      int64_t word_idx = idx / 64;
+      int64_t bit_idx = idx % 64;
+      int64_t *X  =(int64_t *)ptr_vec->map_addr;
+      bool bit_val;
+      if ( bit_val ) { 
+        X[word_idx] = X[word_idx] | (1 << bit_idx);
       }
       else {
-        uint32_t num_to_copy = mcr_min(space_in_chunk, len);
-        char *dst = ptr_vec->chunk + 
-          (ptr_vec->num_in_chunk * ptr_vec->field_size);
-        char *src = addr + (num_copied * ptr_vec->field_size);
-        memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
-        ptr_vec->num_in_chunk += num_to_copy;
-        ptr_vec->num_elements += num_to_copy;
-        num_left_to_copy      -= num_to_copy;
-        num_copied            += num_to_copy;
       }
     }
-    if ( num_copied != len ) { go_BYE(-1); }
-    if ( ptr_vec->num_elements != initial_num_elements + len) {
-      go_BYE(-1);
+    else {
     }
   }
   else {
-    if ( ptr_vec->is_read_only ) { go_BYE(-1); }
-    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-    if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-    if ( strcpy(ptr_vec->field_type, "B1") == 0 ) { 
-      /*
-      if ( ( len == 1 ) || ( ( len % 64 ) == 0 ) ) {
-        if ( len == 1 ) {
-          if ( addr != NULL ) { go_BYE(-1); }
-          int64_t word_idx = idx / 64;
-          int64_t bit_idx = idx % 64;
-          int64_t *X  =(int64_t *)ptr_vec->map_addr;
-          if ( bit_val ) { 
-            X[word_idx] = X[word_idx] | (1 << bit_idx);
-          }
-          else {
-          }
-        }
-        else {
-          if ( ( idx % 64 ) != 0 ) { go_BYE(-1); }
-        }
-        // all is well
-      }
-      else {
-        go_BYE(-1);
-      }
-      */
-    }
-    else {
-      char *dst = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-      memcpy(dst, addr, len * ptr_vec->field_size);
-    }
+    char *dst = ptr_vec->map_addr + offset;
+    memcpy(dst, addr,len * ptr_vec->field_size); 
   }
 BYE:
   return status;

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include "q_macros.h"
-#include "_mix_UI8.h"
 #include "_rand_file_name.h"
 
 static inline uint64_t RDTSC()
@@ -26,9 +26,13 @@ rand_file_name(
                'A', 'B', 'C', 'D', 'E', 'F' };
   if (  bufsz < 31 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
-  uint64_t t = RDTSC();
-  t = mix_UI8(t);
-  char ct[8];
+  // TODO: P3 Improve randomization
+  srand48(RDTSC() & 0xFFFFFFFF);
+  uint64_t t1 = lrand48();
+  uint64_t t2 = lrand48();
+  uint64_t t  = (t1 << 32) | t2;
+  char ct[16];
+  memset(ct, '\0', 16);
   memcpy(ct, &t, 8);
   int bufidx = 0;
   buf[bufidx++] = '_';
@@ -46,12 +50,16 @@ rand_file_name(
 BYE:
   return status;
 }
+#undef STAND_ALONE
 #ifdef STAND_ALONE
 int
 main()
 {
   char X[32];
-  rand_file_name(X, 32);
-  fprintf(stderr, "X = %s \n", X);
+  for ( int i = 0; i < 100; i++ ) { 
+    memset(X, '\0', 32);
+    rand_file_name(X, 32);
+    fprintf(stderr, "X = %s \n", X);
+  }
 }
 #endif

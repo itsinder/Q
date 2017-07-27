@@ -91,31 +91,36 @@ static int l_vec_length( lua_State *L) {
 }
 //----------------------------------------
 static int l_vec_get( lua_State *L) {
+  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t idx = luaL_checknumber(L, 2);
   int32_t len = luaL_checknumber(L, 3);
-  int status = vec_get(ptr_vec, idx, len);
-  if ( status == 0) { 
-    int num_to_return = 2;
-    lua_pushlightuserdata(L, ptr_vec->ret_addr);
-    lua_pushinteger(L, ptr_vec->ret_len);
-    if ( len == 1 ) {  // this is for debugging help
-      num_to_return++;
-      SCLR_REC_TYPE *ptr_sclr = 
-        (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
-      strcpy(ptr_sclr->field_type, ptr_vec->field_type);
-      ptr_sclr->field_size = ptr_vec->field_size;
-      memcpy(&(ptr_sclr->cdata), ptr_vec->ret_addr, ptr_vec->field_size);
-      luaL_getmetatable(L, "Scalar");
-      lua_setmetatable(L, -2);
+  status = vec_get(ptr_vec, idx, len); cBYE(status);
+  int num_to_return = 2;
+  lua_pushlightuserdata(L, ptr_vec->ret_addr);
+  lua_pushinteger(L, ptr_vec->ret_len);
+  if ( len == 1 ) {  // this is for debugging help
+    num_to_return++;
+    SCLR_REC_TYPE *ptr_sclr = 
+      (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
+    strcpy(ptr_sclr->field_type, ptr_vec->field_type);
+    ptr_sclr->field_size = ptr_vec->field_size;
+    if ( strcmp(ptr_sclr->field_type, "B1") == 0 ) { 
+      uint64_t word = ((uint64_t *)(ptr_vec->ret_addr))[0];
+      uint32_t bit_idx = idx % 64;
+      ptr_sclr->cdata.valB1 = word >> bit_idx & 0x1;
     }
-    return num_to_return;
+    else {
+      memcpy(&(ptr_sclr->cdata), ptr_vec->ret_addr, ptr_vec->field_size);
+    }
+    luaL_getmetatable(L, "Scalar");
+    lua_setmetatable(L, -2);
   }
-  else {
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: vec_get. ");
-    return 2;
-  }
+  return num_to_return;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_get. ");
+  return 2;
 }
 //------------------------------------------
 static int l_vec_get_chunk( lua_State *L) {
@@ -131,7 +136,7 @@ BYE:
   lua_pushnil(L); lua_pushstring(L, "ERROR: vec_get. "); return 2;
 }
 //----------------------------------------------------
-static int l_vec_append( lua_State *L) {
+static int l_vec_put1( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
@@ -140,12 +145,12 @@ static int l_vec_append( lua_State *L) {
     go_BYE(-1);
   }
   void * addr = (void *)(&ptr_sclr->cdata);
-  status = vec_set(ptr_vec, addr, 0, 1); cBYE(status);
+  status = vec_add(ptr_vec, addr, 1); cBYE(status);
   lua_pushinteger(L, status);
   return 1;
 BYE:
   lua_pushnil(L);
-  lua_pushstring(L, "ERROR: vec_append. ");
+  lua_pushstring(L, "ERROR: vec_put1. ");
   return 2;
 }
 //----------------------------------------
@@ -171,9 +176,7 @@ static int l_vec_set( lua_State *L) {
   else if (  lua_isnumber(L, 2) ) {
     double dtemp = luaL_checknumber(L, 2);
     if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-      int8_t val = dtemp; 
-      if ( ( val != 0 ) && ( val != 1 ) ) { go_BYE(-1); }
-      memset(&buf, 255, 8);
+      bool val = dtemp; memcpy(&buf, &val, 1);
     }
     else if ( strcmp(ptr_vec->field_type, "I1") == 0 ) { 
       int8_t val = dtemp; memcpy(&buf, &val, 1);
@@ -210,30 +213,17 @@ BYE:
 //----------------------------------------
 static int l_vec_put_chunk( lua_State *L) {
   int status = 0;
-  // Modify idx and sent to l_vec_set
-  int64_t chunk_num = luaL_checknumber(L, 3);
-  if ( chunk_num < 0 ) { go_BYE(-1); }
-  int64_t idx = chunk_num * Q_CHUNK_SIZE;
-  lua_pushnumber(L, idx);
-  lua_replace(L, 3);
-  // If L, 4 is undefined or is defined and is 0, change to chunk_size
-  int32_t len;
-  if ( lua_isnumber(L, 4) ) { 
-    len = luaL_checknumber(L, 4);
-    if ( len > Q_CHUNK_SIZE ) { go_BYE(-1); }
-    if ( len == 0 ) { 
-      lua_pushnumber(L, Q_CHUNK_SIZE);
-      lua_replace(L, 4);
-    }
-  }
-  else {
-    lua_pushnumber(L, Q_CHUNK_SIZE);
-  }
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  void *addr = luaL_checkudata(L, 2, "CMEM");
+  int32_t len = luaL_checknumber(L, 3);
+  if ( len < 0 ) { go_BYE(-1); }
   //---------------------------------------
-  return l_vec_set(L);
+  status = vec_add(ptr_vec, addr, len); cBYE(status);
+  lua_pushboolean(L, 1);
+  return 1;
 BYE:
   lua_pushnil(L);
-  lua_pushstring(L, "ERROR: vec_push_chunk. ");
+  lua_pushstring(L, "ERROR: vec_put_chunk. ");
   return 2;
 }
 //----------------------------------------
@@ -275,16 +265,17 @@ static int l_vec_free( lua_State *L) {
   return 1;
 }
 //----------------------------------------
-static int l_vec_new( lua_State *L) {
+static int l_vec_new( lua_State *L) 
+{
+  int status = 0;
   luaL_buffinit(L, &g_errbuf);
 
-  int status = 0;
   bool is_read_only = false; 
   //-- START: Get qtype and field size
   const char * const qtype_sz  = luaL_checkstring(L, 1);
   const char *qtype; int field_size;
   if ( strcmp(qtype_sz, "B1") == 0 ) { 
-    qtype = qtype_sz; field_size = 8; // SPECIAL CASE
+    qtype = qtype_sz; field_size = 0; // SPECIAL CASE
   }
   else if ( strcmp(qtype_sz, "I1") == 0 ) { 
     qtype = qtype_sz; field_size = 1;
@@ -326,12 +317,12 @@ static int l_vec_new( lua_State *L) {
     is_materialized = false;
   }
   if ( is_materialized ) { 
-    if ( lua_isboolean(L, 4) ) { // is_read_only specified
-      is_read_only = lua_toboolean(L, 4);
+    if ( lua_isboolean(L, 3) ) { // is_read_only specified
+      is_read_only = lua_toboolean(L, 3);
     }
   }
     
-  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO P0 THIS SHOULD NOT BE HERE 
+  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
 
   VEC_REC_TYPE *ptr_vec = NULL;
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
@@ -362,7 +353,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "check", l_vec_check },
     { "meta", l_vec_meta },
     { "length", l_vec_length },
-    { "append", l_vec_append },
+    { "put1", l_vec_put1 },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
     { "get_chunk", l_vec_get_chunk },
@@ -378,7 +369,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "length", l_vec_length },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
-    { "append", l_vec_append },
+    { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },
     { NULL,  NULL         }

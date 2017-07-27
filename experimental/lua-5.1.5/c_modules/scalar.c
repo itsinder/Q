@@ -130,11 +130,18 @@ static int l_sclr_new( lua_State *L) {
   float   tempF4;
   double  tempF8;
   const char *str_val = NULL;
+  lua_Number  in_val;
 
   // TESTING GC problems lua_gc(L, LUA_GCCOLLECT, 0);  
 
   if ( lua_isstring(L, 1) ) { 
     str_val = luaL_checkstring(L, 1);
+  }
+  else if ( lua_isnumber(L, 1) ) {
+    in_val = luaL_checknumber(L, 1);
+  }
+  else if ( lua_isboolean(L, 1) ) {
+    in_val = lua_toboolean(L, 1);
   }
   else {
     go_BYE(-1);
@@ -148,8 +155,14 @@ static int l_sclr_new( lua_State *L) {
     go_BYE(-1);
   }
   if ( strcmp(qtype, "B1" ) == 0 ) { 
-    status = txt_to_B1(str_val, &tempB1); cBYE(status);
-    memcpy(dst, &tempB1, sizeof(bool)); strcpy(ptr_sclr->field_type, "B1"); 
+    if ( str_val == NULL ) { 
+      tempB1 = in_val;
+    }
+    else {
+      status = txt_to_B1(str_val, &tempB1); cBYE(status);
+    }
+    ptr_sclr->cdata.valB1 = tempB1;
+    strcpy(ptr_sclr->field_type, "B1"); 
     ptr_sclr->field_size = sizeof(bool);
   }
   else if ( strcmp(qtype, "I1" ) == 0 ) { 

@@ -4,6 +4,7 @@ Scalar = require 'libsclr' ;
 num_trials = 32 -- 1024
 tbl_size = 4096 -- 1048576
 sb = Scalar.new("true", "B1")
+sb = Scalar.new(true, "B1")
 print(sb)
 x = Scalar.to_str(sb)
 assert(x == "true")

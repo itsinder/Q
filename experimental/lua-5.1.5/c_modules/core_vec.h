@@ -3,7 +3,8 @@
 #include "mmap_types.h"
 extern int
 chk_field_type(
-    const char * const field_type
+    const char * const field_type,
+    uint32_t field_size
     );
 extern int
 vec_meta(
@@ -71,5 +72,11 @@ extern int
 vec_memo(
     VEC_REC_TYPE *ptr_vec,
     bool is_memo
+    );
+extern int
+vec_add(
+    VEC_REC_TYPE *ptr_vec,
+    char * const addr, 
+    uint32_t len
     );
 #endif

@@ -10,8 +10,6 @@ gcc -g $QC_FLAGS $INCS \
   ../../../UTILS/src/is_valid_chars_for_num.c \
   ../../../UTILS/src/rand_file_name.c \
   ../../../UTILS/src/get_file_size.c \
-  ../../../UTILS/src/mix_UI8.c \
-  ../../../UTILS/src/mix_UI4.c \
   ../../../UTILS/src/buf_to_file.c \
   -shared -o libvec.so
 
