@@ -36,10 +36,6 @@ extern int
 vec_free(
     VEC_REC_TYPE *ptr_vec
     );
-extern bool 
-file_exists (
-    const char * constfilename
-    );
 extern int
 vec_set(
     VEC_REC_TYPE *ptr_vec,
@@ -78,5 +74,14 @@ vec_add(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
     uint32_t len
+    );
+extern int
+vec_add_B1(
+    VEC_REC_TYPE *ptr_vec,
+    char * addr, 
+    uint32_t len
+    );
+extern int flush_buffer_B1(
+    VEC_REC_TYPE *ptr_vec
     );
 #endif

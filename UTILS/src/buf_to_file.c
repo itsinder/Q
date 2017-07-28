@@ -17,6 +17,12 @@ buf_to_file(
   int status = 0;
   FILE *fp = NULL;
 
+  if ( size == 0 ) {  // Unfortunate special case for B1
+    // nmemb must be a multiple of 8
+    if ( ( ( nmemb / 8 ) * 8 ) != nmemb ) { go_BYE(-1); }
+    size = 1;
+    nmemb = nmemb / 8;
+  }
   if ( size == 0 ) { go_BYE(-1); }
   if ( nmemb == 0 ) { go_BYE(-1); }
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(1); }

@@ -13,7 +13,7 @@ for j = 1, num_elements do
   local bval = nil
   if ( ( j % 2 ) == 0 ) then bval = true else bval = false end
   local s1 = Scalar.new(bval, "B1")
-  y:append(s1)
+  y:put1(s1)
 end
 print("writing meta data of nascent vector")
 M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end

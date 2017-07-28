@@ -6,10 +6,35 @@
 #include "_rand_file_name.h"
 #include "_get_file_size.h"
 #include "_buf_to_file.h"
+#include "_file_exists.h"
 
 #include "lauxlib.h"
 
 extern luaL_Buffer g_errbuf;
+
+int flush_buffer_B1(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  int status = 0;
+  if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
+    if ( ptr_vec->is_memo ) {
+      if ( ptr_vec->file_name[0] == '\0' ) {
+        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+        cBYE(status);
+      }
+      status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+          ptr_vec->num_in_chunk, ptr_vec->file_name);
+      cBYE(status);
+    }
+    ptr_vec->num_in_chunk = 0;
+    ptr_vec->chunk_num++;
+    memset(ptr_vec->chunk, '\0', 
+        (ptr_vec->field_size * ptr_vec->chunk_size));
+  }
+BYE:
+  return status;
+}
 
 int
 chk_field_type(
@@ -220,22 +245,6 @@ BYE:
   return status;
 }
 
-bool 
-file_exists (
-    const char * const filename
-    )
-{
-  struct stat buf;
-  if ( ( filename == NULL ) || ( *filename == '\0' ) ) { return false; }
-  int status = stat(filename, &buf );
-  if ( status == 0 ) { /* File found */
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 int
 vec_check(
     VEC_REC_TYPE *ptr_vec
@@ -371,6 +380,41 @@ BYE:
 }
 
 int
+vec_add_B1(
+    VEC_REC_TYPE *ptr_vec,
+    char * addr, 
+    uint32_t len
+    )
+{
+  int status = 0;
+  if ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) { // we are nicely byte aligned
+    for ( ; len > 0 ; ) { 
+      flush_buffer_B1(ptr_vec);
+      uint32_t num_bits_to_copy = len - ptr_vec->num_in_chunk;
+      uint32_t num_byts_to_copy = num_bits_to_copy / 8;
+      char *dst = ptr_vec->chunk + (ptr_vec->num_in_chunk / 8);
+      memcpy(dst, addr, num_byts_to_copy);
+      ptr_vec->num_in_chunk += (num_byts_to_copy * 8);
+      len  -= (num_byts_to_copy * 8);
+      addr += num_byts_to_copy;
+    }
+  }
+  else {
+    uint64_t *uaddr = (uint64_t)addr;
+    for ( uint32_t i = 0; i < len; i++ ) { 
+      flush_buffer_B1(ptr_vec);
+      uint64_t byte_idx = i / 8;
+      uint64_t  bit_idx = i % 8;
+      // bool bit_val = get_bit(uaddr, byte_idx, bit_idx);
+      // set_bit();
+    }
+  }
+
+BYE:
+  return status;
+}
+
+int
 vec_add(
     VEC_REC_TYPE *ptr_vec,
     char * const addr, 
@@ -381,11 +425,12 @@ vec_add(
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    status = vec_add_B1(ptr_vec, addr, len); cBYE(status);
+    goto BYE; 
+  }
   uint64_t initial_num_elements = ptr_vec->num_elements;
   uint32_t num_copied = 0;
-  if ( len == 362 ) { 
-    printf("hello world\n");
-  }
   for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {
     uint32_t space_in_chunk = 
       ptr_vec->chunk_size - ptr_vec->num_in_chunk;
