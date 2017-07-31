@@ -29,12 +29,18 @@ function lVector.new(arg)
   -- for meta data stored in vector
   vector._meta = {}
 
+  local num_elements
+  local qtype
+  local field_width
+  local is_read_only
+  local file_name
+  local nn_file_name
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   -- Validity of qtype will be checked for by vector
-  local qtype = assert(arg.qtype, "lVector needs qtype to be specified")
+  qtype = assert(arg.qtype, "lVector needs qtype to be specified")
    --=============================
-  local field_width = nil
+  field_width = nil
   assert(qconsts.qtypes[qtype], "Invalid qtype provided")
   if qtype == "SC" then
     field_width = assert(arg.width, "Constant length strings need a length to be specified")
@@ -44,7 +50,7 @@ function lVector.new(arg)
     assert(arg.width == nil, "do not provide width except for SC")
   end
    --=============================
-  local is_read_only = false
+  is_read_only = false
   if ( arg.is_read_only ) then
     assert(type(arg.is_read_only) == "boolean")
     is_read_only = arg.is_read_only
@@ -61,39 +67,51 @@ function lVector.new(arg)
     "function will be specified in future")
       vector._nn = arg.nn or false
   else -- materialized vector
-     vector._file_name = assert(arg.file_name, 
+     file_name = assert(arg.file_name, 
      "lVector needs a file_name to read from")
-     assert(type(vector._file_name) == "string", 
+     assert(type(file_name) == "string", 
      "lVector's file_name must be a string")
 
     if arg.nn_file_name then
-      vector._nn_file_name = arg.nn_file_name
-      assert(type(vector._nn_file_name) == "string", 
+      nn_file_name = arg.nn_file_name
+      assert(type(nn_file_name) == "string", 
       "Null vector's file_name must be a string")
       vector._nn = true
     else
       vector._nn = false
     end
   end
+  vector.file_name = file_name
+  vector.nn_file_name = nn_file_name
 
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
   end
-  vector._base_vec = Vector.new(qtype, vector._file_name, 0, is_read_only )
+  if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
+    num_elements = arg.num_elements
+  end
+  vector._base_vec = Vector.new(qtype, file_name, is_read_only,num_elements)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( vector._nn ) then 
     assert(num_elements > 0)
-    vector._nn_vec = Vector.new("B1", vector._nn_file_name, 
-      is_read_only, num_elements)
+    vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, 
+    num_elements)
   end
   return vector
 end
 
+function lVector:num_elements()
+  return Vector.num_elements(self._base_vec)
+end
+
 function lVector:check()
   chk = Vector.check(self._base_vec)
+  local num_elements = Vector.num_elements(self._base_vec)
   assert(chk, "Error on base vector")
   if ( Vector._nn_vec ) then 
+    local nn_num_elements = Vector.num_elements(self._nn_vec)
     chk = Vector.check(self._nn_vec)
+    assert(num_elements == nn_num_elements)
     assert(chk, "Error on nn vector")
   end
   return true
