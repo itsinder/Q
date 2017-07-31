@@ -16,6 +16,9 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_c_free.h : 
 	lua ../lua/cli_extract_func_decl.lua c_free.c ${INCDIR}
 
+../gen_inc/_get_num_elements.h : 
+	lua ../lua/cli_extract_func_decl.lua get_num_elements.c ${INCDIR}
+
 ../gen_inc/_get_file_size.h : 
 	lua ../lua/cli_extract_func_decl.lua get_file_size.c ${INCDIR}
 
@@ -87,6 +90,7 @@ hdr_files = \
 	../inc/vec.h  \
 	../gen_inc/_c_free.h  \
 	../gen_inc/_get_file_size.h  \
+	../gen_inc/_get_num_elements.h  \
 	../gen_inc/_buf_to_file.h  \
 	../gen_inc/_f_mmap.h \
 	../gen_inc/_f_munmap.h \
@@ -107,6 +111,7 @@ SRC_FILES=  \
 	c_copy.c \
 	c_free.c \
 	get_file_size.c \
+	get_num_elements.c \
 	buf_to_file.c \
 	f_mmap.c  \
 	f_munmap.c \

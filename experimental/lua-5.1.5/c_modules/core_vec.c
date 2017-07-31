@@ -95,15 +95,16 @@ vec_materialized(
   cBYE(status);
   if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
   // check nX
-  ptr_vec->num_elements = nX / ptr_vec->field_size;
   // For B1, file can be larger than necessary, not smaller
   // For all others, size must match number of elements
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
     uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
     uint64_t num_bytes = num_words * 8;
     if ( num_bytes < nX ) { go_BYE(-1); }
   }
   else {
+    ptr_vec->num_elements = nX / ptr_vec->field_size;
     if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
       go_BYE(-1);
     }

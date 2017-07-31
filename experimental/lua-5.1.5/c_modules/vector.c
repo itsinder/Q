@@ -328,13 +328,20 @@ static int l_vec_new( lua_State *L)
       is_read_only = lua_toboolean(L, 3);
     }
   }
-    
   int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
 
   VEC_REC_TYPE *ptr_vec = NULL;
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   status = vec_new(ptr_vec, qtype, field_size, chunk_size); cBYE(status);
+
+  // do this after mallocing and memsetting the vector structure
+  int64_t num_elements;
+  if ( strcmp(qtype, "B1") == 0 ) {
+    num_elements = luaL_checknumber(L, 4);
+    ptr_vec->num_elements = num_elements;
+    if ( num_elements <= 0 ) { go_BYE(-1); }
+  }
   if ( is_materialized ) { 
     status = vec_materialized(ptr_vec, file_name, is_read_only); 
     cBYE(status);
