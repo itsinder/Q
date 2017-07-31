@@ -227,6 +227,13 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_vec_num_elements( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_Number num_elements = ptr_vec->num_elements;
+  lua_pushnumber(L, num_elements);
+  return 1;
+}
+//----------------------------------------
 static int l_vec_meta( lua_State *L) {
   char opbuf[4096]; // TODO P3 try not to hard code bound
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -356,6 +363,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "put1", l_vec_put1 },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
+    { "num_elements", l_vec_num_elements },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
 // TODO    { "has_nulls", l_vec_has_nulls },
@@ -369,6 +377,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "length", l_vec_length },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
+    { "num_elements", l_vec_num_elements },
     { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },
