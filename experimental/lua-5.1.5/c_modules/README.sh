@@ -11,6 +11,7 @@ gcc -g $QC_FLAGS $INCS \
   ../../../UTILS/src/rand_file_name.c \
   ../../../UTILS/src/get_file_size.c \
   ../../../UTILS/src/buf_to_file.c \
+  ../../../UTILS/src/file_exists.c \
   -shared -o libvec.so
 
 gcc -g $QC_FLAGS $INCS \

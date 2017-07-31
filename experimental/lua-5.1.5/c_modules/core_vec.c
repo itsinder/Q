@@ -179,7 +179,7 @@ vec_free(
   }
   if ( !ptr_vec->is_persist ) {
     if ( ptr_vec->file_name[0] != '\0' ) {
-      printf("Deleting %s \n", ptr_vec->file_name); 
+      // printf("Deleting %s \n", ptr_vec->file_name); 
       status = remove(ptr_vec->file_name); 
       if ( status != 0 ) { 
         printf("Unable to delete %s \n", ptr_vec->file_name); WHEREAMI;
@@ -190,7 +190,7 @@ vec_free(
   }
   else {
     if ( ptr_vec->file_name[0] != '\0' ) {
-      printf("NOT Deleting %s \n", ptr_vec->file_name); 
+      // printf("NOT Deleting %s \n", ptr_vec->file_name); 
     }
   }
   // Don't do this in C. Lua will do it: free(ptr_vec);
@@ -214,6 +214,7 @@ vec_nascent(
     sz = ptr_vec->field_size * ptr_vec->chunk_size;
   }
   ptr_vec->chunk = malloc(sz);
+  memset( ptr_vec->chunk, '\0', sz);
   return_if_malloc_failed(ptr_vec->chunk);
   ptr_vec->is_nascent = true;
 
@@ -259,9 +260,16 @@ vec_check(
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
       int64_t fsz = get_file_size(ptr_vec->file_name); 
-      if ( fsz / ptr_vec->field_size != 
-          ( ptr_vec->chunk_num * ptr_vec->chunk_size ) ) {
-        go_BYE(-1);
+      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+        if ( fsz != ( ptr_vec->chunk_num * ptr_vec->chunk_size ) / 8 ) {
+          go_BYE(-1);
+        }
+      }
+      else { 
+        if ( fsz / ptr_vec->field_size != 
+            ( ptr_vec->chunk_num * ptr_vec->chunk_size ) ) {
+          go_BYE(-1);
+        }
       }
     }
     else {
@@ -284,10 +292,15 @@ vec_check(
       fprintf(stderr, "File does not exist [%s]\n", ptr_vec->file_name);
       go_BYE(-1); }
     int64_t fsz = get_file_size(ptr_vec->file_name); 
-    if ( (uint64_t)(fsz / ptr_vec->field_size) != ptr_vec->num_elements ) {
-      go_BYE(-1);
+    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+      // TODO: P3 Put invariant in here 
     }
-    if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
+    else {
+      if ( (uint64_t)(fsz/ptr_vec->field_size) != ptr_vec->num_elements ) {
+        go_BYE(-1);
+      }
+      if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
+    }
     if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
   }
   // chunk size must be multiple of 64
@@ -387,26 +400,51 @@ vec_add_B1(
     )
 {
   int status = 0;
-  if ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) { // we are nicely byte aligned
+  if ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) {
+    // we are nicely byte aligned
     for ( ; len > 0 ; ) { 
       flush_buffer_B1(ptr_vec);
-      uint32_t num_bits_to_copy = len - ptr_vec->num_in_chunk;
-      uint32_t num_byts_to_copy = num_bits_to_copy / 8;
+      uint32_t space_in_chunk = ptr_vec->chunk_size - ptr_vec->num_in_chunk;
+      uint32_t num_bits_to_copy;
+      uint32_t num_byts_to_copy;
+      if ( len < space_in_chunk ) { 
+        num_bits_to_copy = len;
+        num_byts_to_copy = ceil(num_bits_to_copy / 8.0);
+      }
+      else {
+        num_bits_to_copy = space_in_chunk; 
+        // this has to be a multiple of 8
+        if ( ( ( num_bits_to_copy / 8 ) * 8 ) != num_bits_to_copy ) {
+          go_BYE(-1);
+        }
+        num_byts_to_copy = num_bits_to_copy / 8;
+      }
       char *dst = ptr_vec->chunk + (ptr_vec->num_in_chunk / 8);
       memcpy(dst, addr, num_byts_to_copy);
-      ptr_vec->num_in_chunk += (num_byts_to_copy * 8);
-      len  -= (num_byts_to_copy * 8);
+      ptr_vec->num_in_chunk += num_bits_to_copy;
+      len  -= num_bits_to_copy;
       addr += num_byts_to_copy;
+      ptr_vec->num_elements += num_bits_to_copy;
     }
   }
   else {
-    uint64_t *uaddr = (uint64_t)addr;
+    uint32_t in_bit_idx = 0;
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
-      uint64_t byte_idx = i / 8;
-      uint64_t  bit_idx = i % 8;
-      // bool bit_val = get_bit(uaddr, byte_idx, bit_idx);
-      // set_bit();
+      uint8_t bit_val = (((uint8_t *)addr)[i] >> in_bit_idx) & 0x1;
+      uint32_t word_idx = ptr_vec->num_in_chunk / 8;
+      uint32_t  bit_idx = ptr_vec->num_in_chunk % 8;
+      if ( bit_val == 1 ) { 
+        uint8_t mask = 1 << bit_idx;
+        ((uint8_t *)ptr_vec->chunk)[word_idx] |= mask;
+      }
+      else {
+        uint8_t mask = ~(1 << bit_idx);
+        ((uint8_t *)ptr_vec->chunk)[word_idx] &= mask;
+      }
+      ptr_vec->num_in_chunk++;
+      ptr_vec->num_elements++;
+      in_bit_idx++; if ( in_bit_idx == 8 ) { in_bit_idx = 0; }
     }
   }
 
@@ -437,8 +475,10 @@ vec_add(
     if ( space_in_chunk == 0 )  {
       if ( ptr_vec->is_memo ) {
         if ( ptr_vec->file_name[0] == '\0' ) {
-          status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-          cBYE(status);
+          do { 
+            status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+            cBYE(status);
+          } while ( file_exists(ptr_vec->file_name));
         }
         status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
             ptr_vec->num_in_chunk, ptr_vec->file_name);
@@ -493,7 +533,7 @@ vec_set(
       int64_t word_idx = idx / 64;
       int64_t bit_idx = idx % 64;
       int64_t *X  =(int64_t *)ptr_vec->map_addr;
-      bool bit_val;
+      bool bit_val = (((uint8_t *)addr)[0]) & 0x1; // TODO CHECK
       if ( bit_val ) { 
         X[word_idx] = X[word_idx] | (1 << bit_idx);
       }
@@ -540,8 +580,10 @@ vec_eov(
   if ( ptr_vec->is_memo == false ) { goto BYE; }
   // this is the case when all data fits into one chunk
   if ( ptr_vec->file_name[0] == '\0' ) {
-    status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-    cBYE(status);
+    do { 
+      status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+      cBYE(status);
+    } while ( file_exists(ptr_vec->file_name));
   }
   status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
       ptr_vec->num_in_chunk, ptr_vec->file_name);

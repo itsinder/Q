@@ -1,4 +1,5 @@
 //START_INCLUDES
+#include <math.h>
 #include "q_incs.h"
 #include "mmap_types.h"
 #include "_f_mmap.h"
@@ -18,10 +19,9 @@ buf_to_file(
   FILE *fp = NULL;
 
   if ( size == 0 ) {  // Unfortunate special case for B1
-    // nmemb must be a multiple of 8
-    if ( ( ( nmemb / 8 ) * 8 ) != nmemb ) { go_BYE(-1); }
-    size = 1;
-    nmemb = nmemb / 8;
+    // we must write out a multiple of 64 bits 
+    size = 8;  // 64 bits = 8 bytes
+    nmemb = ceil(nmemb/64.0);
   }
   if ( size == 0 ) { go_BYE(-1); }
   if ( nmemb == 0 ) { go_BYE(-1); }

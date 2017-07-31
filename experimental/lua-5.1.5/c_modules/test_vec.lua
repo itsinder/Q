@@ -175,9 +175,10 @@ start = 1
 incr  = 1
 buf:seq(start, incr, chunk_size, "I4")
 local cum_size = 0
-for i = 1, 1000 do 
-  status = y:put_chunk(buf, i) -- use cunk size of i
+for i = 1, 10001 do 
+  status = y:put_chunk(buf, i) -- use chunk size of i
   cum_size = cum_size + i
+  print("cum_size = ", cum_size);
 end
 y:persist()
 y:eov()
