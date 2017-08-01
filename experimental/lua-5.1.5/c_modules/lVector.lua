@@ -129,6 +129,27 @@ function lVector:set_generator(gen)
    end
 end
 
+function lVector:eov()
+  Vector.eov(self._base_vec)
+    if self._nn_vec then 
+    Vector:eov(self._nn_vec)
+  end
+end
+
+function lVector:put_chunk(base_addr, nn_addr, len)
+  assert(len)
+  assert(type(len) == "number")
+  assert(len > 0)
+  assert(base_addr)
+  Vector.put_chunk(self._base_vec, base_addr, len)
+  if ( nn_addr ) then 
+    assert(self._nn_vec)
+    Vector.put1(self._nn_vec, nn_addr, len)
+  else
+    assert(not self._nn_vec)
+  end
+end
+
 function lVector:get_chunk(chunk_num)
   local l_chunk_num = -1
   if ( chunk_num ) then 

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e 
+rm -f _*bin
 export PATH=$PATH:../../../UTILS/src
 LJ=/home/subramon/LuaJIT-2.0.5/src/luajit
 which asc2bin

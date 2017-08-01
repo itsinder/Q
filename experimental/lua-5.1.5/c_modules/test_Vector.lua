@@ -69,5 +69,19 @@ assert(v == "some other rand val")
 pr_meta(x, "_meta_data.csv")
 compare("_meta_data.csv", "in2_meta_data.csv")
 
+--====== Testing nascent vector
+local x = lVector( { qtype = "I4", gen = true})
+num_elements = 1024
+field_size = 4
+base_data = cmem.new(num_elements * field_size)
+iptr = ffi.cast("int32_t *", base_data)
+for i = 1, num_elements do
+  iptr[i-1] = i*10
+end
+x:put_chunk(base_data, nil, num_elements)
+x:eov()
+pr_meta(x, "_xxx")
+
+
 print("Completed ", arg[0])
 os.exit()

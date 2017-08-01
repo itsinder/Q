@@ -394,6 +394,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },
+    { "eov", l_vec_eov },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
     { NULL,  NULL         }
