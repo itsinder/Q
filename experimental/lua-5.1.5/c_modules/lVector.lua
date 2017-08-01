@@ -136,15 +136,24 @@ function lVector:eov()
   end
 end
 
+function lVector:put1(s)
+  assert(s)
+  assert(type(s) == "userdata")
+  local status = Vector.put1(self._base_vec, s)
+  assert(status)
+end
+
 function lVector:put_chunk(base_addr, nn_addr, len)
   assert(len)
   assert(type(len) == "number")
   assert(len > 0)
   assert(base_addr)
-  Vector.put_chunk(self._base_vec, base_addr, len)
+  local status = Vector.put_chunk(self._base_vec, base_addr, len)
+  assert(status)
   if ( nn_addr ) then 
     assert(self._nn_vec)
-    Vector.put1(self._nn_vec, nn_addr, len)
+    local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
+    assert(status)
   else
     assert(not self._nn_vec)
   end

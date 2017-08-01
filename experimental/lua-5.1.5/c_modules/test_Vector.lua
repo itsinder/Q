@@ -81,6 +81,19 @@ end
 x:put_chunk(base_data, nil, num_elements)
 x:eov()
 pr_meta(x, "_xxx")
+--
+--====== Testing nascent vector with scalars
+local x = lVector( { qtype = "I4", gen = true})
+num_elements = 1024
+field_size = 4
+base_data = cmem.new(num_elements * field_size)
+iptr = ffi.cast("int32_t *", base_data)
+for i = 1, num_elements do
+  local s1 = Scalar.new(i*11, "I4")
+  x:put1(s1)
+end
+x:eov()
+pr_meta(x, "_yyy")
 
 
 print("Completed ", arg[0])
