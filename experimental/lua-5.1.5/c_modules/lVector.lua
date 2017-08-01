@@ -114,6 +114,10 @@ function lVector.new(arg)
   return vector
 end
 
+function lVector:get_chunk_num()
+  return Vector.chunk_num(self._base_vec)
+end
+
 function lVector:num_elements()
   return Vector.num_elements(self._base_vec)
 end
@@ -127,6 +131,11 @@ function lVector:check()
     chk = Vector.check(self._nn_vec)
     assert(num_elements == nn_num_elements)
     assert(chk, "Error on nn vector")
+  end
+  if ( self._has_nulls ) then 
+    assert(self._nn_vec)
+  else
+    assert(not self._nn_vec)
   end
   return true
 end
@@ -167,7 +176,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   assert(base_addr)
   local status = Vector.put_chunk(self._base_vec, base_addr, len)
   assert(status)
-  if ( self._nn ) then
+  if ( self._has_nulls ) then
     assert(nn_addr)
     assert(self._nn_vec)
   end
@@ -180,19 +189,27 @@ end
 
 function lVector:get_chunk(chunk_num)
   local l_chunk_num = -1
+  local base_addr, base_len
+  local nn_addr,   nn_len  
   if ( chunk_num ) then 
     assert(type(chunk_num) == "number")
     assert(chunk_num >= 0)
     l_chunk_num = chunk_num
   end
-  local base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
-  local nn_addr,   nn_len  
-  if ( ( self._nn_vec ) and ( base_addr ) ) then 
-    nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
-    assert(nn_addr)
-    assert(base_len == nn_len)
+  -- There are 2 conditions under which we do not need to compute
+  local cond1 = not Vector.is_nascent(self._base_vec)
+  local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
+          ( Vector.chunk_num(self._base_vec) == l_chunk_num )
+  if ( cond1 or cond2 ) then 
+    base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
+    if ( ( self._has_nulls ) and ( base_addr ) ) then 
+      nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
+      assert(nn_addr)
+      assert(base_len == nn_len)
+    end
+    return base_addr, nn_addr, base_len
+  else
   end
-  return base_addr, nn_addr, base_len
   --[[
    if self:materialized() == true then
       -- get the chunks from the vectors
@@ -224,7 +241,7 @@ function lVector:meta()
     nn_meta = load(Vector.meta(self._nn_vec))()
   else
   end
-  return { base = base_meta, nn = nn_meta, aux = self.meta_data }
+  return { base = base_meta, nn = nn_meta, aux = self.meta_data}
 end
 
 function lVector:set_meta(k, v)

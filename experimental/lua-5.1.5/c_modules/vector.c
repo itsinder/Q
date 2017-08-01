@@ -76,20 +76,6 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_vec_length( lua_State *L) {
-  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  if ( ptr_vec->is_nascent ) { 
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: vec_eov. ");
-    return 2;
-  }
-  else {
-    int64_t num_elements = ptr_vec->num_elements;
-    lua_pushinteger(L, num_elements);
-    return 1;
-  }
-}
-//----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -233,10 +219,21 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_vec_is_nascent( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushboolean(L, ptr_vec->is_nascent);
+  return 1;
+}
+//----------------------------------------
+static int l_vec_chunk_num( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushnumber(L, ptr_vec->chunk_num);
+  return 1;
+}
+//----------------------------------------
 static int l_vec_num_elements( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  lua_Number num_elements = ptr_vec->num_elements;
-  lua_pushnumber(L, num_elements);
+  lua_pushnumber(L, ptr_vec->num_elements);
   return 1;
 }
 //----------------------------------------
@@ -372,7 +369,6 @@ static const struct luaL_Reg vector_methods[] = {
     { "eov", l_vec_eov },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
-    { "length", l_vec_length },
     { "put1", l_vec_put1 },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
@@ -387,7 +383,6 @@ static const struct luaL_Reg vector_methods[] = {
  
 static const struct luaL_Reg vector_functions[] = {
     { "new", l_vec_new },
-    { "length", l_vec_length },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
@@ -395,6 +390,8 @@ static const struct luaL_Reg vector_functions[] = {
     { "set", l_vec_set },
     { "get", l_vec_get },
     { "eov", l_vec_eov },
+    { "chunk_num", l_vec_chunk_num },
+    { "is_nascent", l_vec_is_nascent },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
     { NULL,  NULL         }
