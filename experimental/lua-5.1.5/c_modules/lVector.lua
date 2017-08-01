@@ -124,16 +124,14 @@ end
 
 function lVector:check()
   local chk = Vector.check(self._base_vec)
-  local num_elements = Vector.num_elements(self._base_vec)
   assert(chk, "Error on base vector")
-  if ( Vector._nn_vec ) then 
+  local num_elements = Vector.num_elements(self._base_vec)
+  if ( self._has_nulls ) then 
+    assert(self._nn_vec)
     local nn_num_elements = Vector.num_elements(self._nn_vec)
     chk = Vector.check(self._nn_vec)
     assert(num_elements == nn_num_elements)
     assert(chk, "Error on nn vector")
-  end
-  if ( self._has_nulls ) then 
-    assert(self._nn_vec)
   else
     assert(not self._nn_vec)
   end
@@ -179,15 +177,13 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   if ( self._has_nulls ) then
     assert(nn_addr)
     assert(self._nn_vec)
-  end
-  if ( nn_addr ) then 
-    assert(self._nn_vec)
     local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
     assert(status)
   end
 end
 
 function lVector:get_chunk(chunk_num)
+  local status
   local l_chunk_num = -1
   local base_addr, base_len
   local nn_addr,   nn_len  
@@ -209,12 +205,13 @@ function lVector:get_chunk(chunk_num)
     end
     return base_addr, nn_addr, base_len
   else
+    -- generate data 
+    assert(self._gen)
+    assert(type(self._gen) == "function")
+    -- status = self._gen(num)
+    -- assert(status)
   end
   --[[
-   if self:materialized() == true then
-      -- get the chunks from the vectors
-      return nil
-   else
       assert(self._gen ~= nil, "The lVector must have a generator")
       -- maybe this check is redundant
       if self._last_chunk_number == nil then
@@ -230,7 +227,6 @@ function lVector:get_chunk(chunk_num)
             self._gen(num)
          end
       end
-   end
    --]]
 end
 

@@ -83,8 +83,10 @@ iptr = ffi.cast("int32_t *", base_data)
 for i = 1, num_elements do
   iptr[i-1] = i*10
 end
-print("putting chunk")
+x:put_chunk(base_data, nil, num_elements)
+assert(x:check())
 x:eov()
+assert(x:check())
 pr_meta(x, "_xxx")
 --
 --====== Testing nascent vector with scalars
@@ -96,6 +98,7 @@ iptr = ffi.cast("int32_t *", base_data)
 for i = 1, num_elements do
   local s1 = Scalar.new(i*11, "I4")
   x:put1(s1)
+  assert(x:check())
 end
 x:eov()
 md = pr_meta(x, "_meta_data")
@@ -105,7 +108,7 @@ local s = plfile.read("_meta_data")
 x, y = string.find(s, "nn_file_name")
 assert(not x)
 
-print("ERROR If you say vector has nulls and don't provide it")
+print("If you say vector has nulls, you must provide nulls")
 local x = lVector( { qtype = "I4", gen = true})
 num_elements = 1024
 field_size = 4
@@ -128,8 +131,10 @@ for i = 1, num_elements do
     s2 = Scalar.new(false, "B1")
   end
   x:put1(s1, s2)
+  assert(x:check())
 end
 x:eov()
+assert(x:check())
 md = pr_meta(x, "_meta_data")
 assert(plpath.getsize(md.base.file_name) == num_elements * field_size)
 assert(plpath.getsize(md.nn.file_name) == num_elements / 8)
