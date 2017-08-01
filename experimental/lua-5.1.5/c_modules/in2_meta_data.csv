@@ -1,12 +1,13 @@
-base:field_type => I4
-base:is_read_only => false
-base:chunk_num => 0
-base:num_in_chunk => 0
-base:is_persist => false
-base:file_name => _in2_I4.bin
-base:num_elements => 10
-base:field_size => 4
-base:is_nascent => false
-base:chunk_size => 65536
-base:is_memo => true
-aux:rand key => some other rand val
+ return { base_field_type = "I4",
+base_is_read_only = "false",
+base_chunk_num = "0",
+base_num_in_chunk = "0",
+base_is_persist = "false",
+base_file_name = "_in2_I4.bin",
+base_num_elements = "10",
+base_field_size = "4",
+base_is_nascent = "false",
+base_chunk_size = "65536",
+base_is_memo = "true",
+aux_rand key = "some other rand val",
+ } 

@@ -14,19 +14,21 @@ local databuf
 function pr_meta(x, file_name)
   local T = x:meta()
   io.output(file_name)
+  io.write(" return { ")
   for k1, v1 in pairs(T) do 
     for k2, v2 in pairs(v1) do 
-      io.write(k1 .. ":" ..  k2 .. " => " .. tostring(v2))
+      io.write(k1 .. "_" ..  k2 .. " = \"" .. tostring(v2) .. "\",")
       io.write("\n")
     end
   end
+  io.write(" } ")
   io.close()
 end
 --=========================
 function compare(f1, f2)
   local s1 = plfile.read(f1)
   local s2 = plfile.read(f2)
-  assert(s1 == s2)
+  assert(s1 == s2, "mismatch in " .. f1 .. " and " .. f2)
 end
 --=========================
 --
@@ -70,7 +72,8 @@ pr_meta(x, "_meta_data.csv")
 compare("_meta_data.csv", "in2_meta_data.csv")
 
 --====== Testing nascent vector
-local x = lVector( { qtype = "I4", gen = true})
+print("Creating nascent vector")
+local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -78,12 +81,13 @@ iptr = ffi.cast("int32_t *", base_data)
 for i = 1, num_elements do
   iptr[i-1] = i*10
 end
+print("putting chunk")
 x:put_chunk(base_data, nil, num_elements)
 x:eov()
 pr_meta(x, "_xxx")
 --
 --====== Testing nascent vector with scalars
-local x = lVector( { qtype = "I4", gen = true})
+local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -93,7 +97,42 @@ for i = 1, num_elements do
   x:put1(s1)
 end
 x:eov()
-pr_meta(x, "_yyy")
+pr_meta(x, "_meta_data")
+-- Check that nn_file_name does not exist
+local s = plfile.read("_meta_data")
+x, y = string.find(s, "nn_file_name")
+assert(not x)
+
+print("ERROR If you say vector has nulls and don't provide it")
+local x = lVector( { qtype = "I4", gen = true})
+num_elements = 1024
+field_size = 4
+base_data = cmem.new(num_elements * field_size)
+status = pcall(x.put_chunk, base_data, nil, num_elements)
+assert(not status)
+--
+print("Testing nascent vector with scalars and nulls")
+local x = lVector( { qtype = "I4", gen = true})
+num_elements = 1024
+field_size = 4
+base_data = cmem.new(num_elements * field_size)
+iptr = ffi.cast("int32_t *", base_data)
+for i = 1, num_elements do
+  local s1 = Scalar.new(i*11, "I4")
+  local s2
+  if ( ( i % 2 ) == 0 ) then
+    s2 = Scalar.new(true, "B1")
+  else
+    s2 = Scalar.new(false, "B1")
+  end
+  x:put1(s1, s2)
+end
+x:eov()
+pr_meta(x, "_meta_data")
+-- Check that nn_file_name exists
+local s = plfile.read("_meta_data")
+x, y = string.find(s, "nn_file_name")
+assert(x)
 
 
 print("Completed ", arg[0])

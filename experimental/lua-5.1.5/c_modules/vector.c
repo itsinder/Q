@@ -342,8 +342,8 @@ static int l_vec_new( lua_State *L)
   status = vec_new(ptr_vec, qtype, field_size, chunk_size); cBYE(status);
 
   // do this after mallocing and memsetting the vector structure
-  int64_t num_elements;
-  if ( strcmp(qtype, "B1") == 0 ) {
+  int64_t num_elements = -1;
+  if ( ( strcmp(qtype, "B1") == 0 ) && ( is_materialized ) ) {
     num_elements = luaL_checknumber(L, 4);
     ptr_vec->num_elements = num_elements;
     if ( num_elements <= 0 ) { go_BYE(-1); }

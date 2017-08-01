@@ -36,6 +36,8 @@ function lVector.new(arg)
   local is_read_only
   local file_name
   local nn_file_name
+  local has_nulls
+  local nascent
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   -- Validity of qtype will be checked for by vector
@@ -62,11 +64,16 @@ function lVector.new(arg)
   vector._is_read_only = is_read_only
 
   if arg.gen ~= nil and arg.gen ~= false then -- nacent vector
+    if ( arg.has_nulls == false ) then 
+      has_nulls = false
+    else
+      has_nulls = true
+    end
     -- vector._gen = arg.gen
     assert(type(arg.gen) == "function" or type(arg.gen) == "boolean" , 
     "supplied generator must be a function or boolean indicating " ..
     "function will be specified in future")
-      vector._nn = arg.nn or false
+    nascent = true
   else -- materialized vector
      file_name = assert(arg.file_name, 
      "lVector needs a file_name to read from")
@@ -77,11 +84,13 @@ function lVector.new(arg)
       nn_file_name = arg.nn_file_name
       assert(type(nn_file_name) == "string", 
       "Null vector's file_name must be a string")
-      vector._nn = true
+      has_nulls = true
     else
-      vector._nn = false
+      has_nulls  = false
     end
+    nascent = false
   end
+  vector._has_nulls = has_nulls
   vector.file_name = file_name
   vector.nn_file_name = nn_file_name
 
@@ -94,8 +103,10 @@ function lVector.new(arg)
   vector._base_vec = Vector.new(qtype, file_name, is_read_only,num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
-  if ( vector._nn ) then 
-    assert(num_elements > 0)
+  if ( vector._has_nulls ) then 
+    if ( not nascent ) then 
+      assert(num_elements > 0)
+    end
     vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, 
       num_elements)
     assert(vector._nn_vec)
@@ -132,15 +143,21 @@ end
 function lVector:eov()
   Vector.eov(self._base_vec)
     if self._nn_vec then 
-    Vector:eov(self._nn_vec)
+    Vector.eov(self._nn_vec)
   end
 end
 
-function lVector:put1(s)
+function lVector:put1(s, nn_s)
   assert(s)
   assert(type(s) == "userdata")
   local status = Vector.put1(self._base_vec, s)
   assert(status)
+  if ( self._has_nulls ) then 
+    assert(nn_s)
+    assert(type(nn_s) == "userdata")
+    local status = Vector.put1(self._nn_vec, nn_s)
+    assert(status)
+  end
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
@@ -150,12 +167,14 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   assert(base_addr)
   local status = Vector.put_chunk(self._base_vec, base_addr, len)
   assert(status)
+  if ( self._nn ) then
+    assert(nn_addr)
+    assert(self._nn_vec)
+  end
   if ( nn_addr ) then 
     assert(self._nn_vec)
     local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
     assert(status)
-  else
-    assert(not self._nn_vec)
   end
 end
 
