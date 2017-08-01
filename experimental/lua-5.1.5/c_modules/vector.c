@@ -126,7 +126,13 @@ BYE:
 static int l_vec_get_chunk( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  int64_t chunk_num = luaL_checknumber(L, 2);
+  int64_t chunk_num = -1;
+  if  ( lua_isnumber(L, 2) ) { 
+    chunk_num = luaL_checknumber(L, 2);
+  }
+  if ( chunk_num < 0 ) { 
+    chunk_num = ptr_vec->chunk_num;
+  }
   uint64_t idx = chunk_num * Q_CHUNK_SIZE;
   status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE); cBYE(status);
   lua_pushlightuserdata(L, ptr_vec->ret_addr);
@@ -388,6 +394,8 @@ static const struct luaL_Reg vector_functions[] = {
     { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },
+    { "get_chunk", l_vec_get_chunk },
+    { "put_chunk", l_vec_put_chunk },
     { NULL,  NULL         }
 };
 

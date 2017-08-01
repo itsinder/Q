@@ -384,7 +384,7 @@ vec_get(
   }
   else {
     if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-    if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+    // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
     addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
     ptr_vec->ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
   }

@@ -6,6 +6,7 @@ local Vector = require 'libvec' ;
 --====================================
 local lVector = {}
 lVector.__index = lVector
+lVector.meta_data = {}
 
 setmetatable(lVector, {
    __call = function (cls, ...)
@@ -91,11 +92,13 @@ function lVector.new(arg)
     num_elements = arg.num_elements
   end
   vector._base_vec = Vector.new(qtype, file_name, is_read_only,num_elements)
+  assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( vector._nn ) then 
     assert(num_elements > 0)
     vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, 
-    num_elements)
+      num_elements)
+    assert(vector._nn_vec)
   end
   return vector
 end
@@ -105,7 +108,7 @@ function lVector:num_elements()
 end
 
 function lVector:check()
-  chk = Vector.check(self._base_vec)
+  local chk = Vector.check(self._base_vec)
   local num_elements = Vector.num_elements(self._base_vec)
   assert(chk, "Error on base vector")
   if ( Vector._nn_vec ) then 
@@ -127,12 +130,20 @@ function lVector:set_generator(gen)
 end
 
 function lVector:get_chunk(chunk_num)
-  if ( not chunk_num ) then 
-  else
-    assert(type(chunk_num) == "integer")
+  local l_chunk_num = -1
+  if ( chunk_num ) then 
+    assert(type(chunk_num) == "number")
     assert(chunk_num >= 0)
+    l_chunk_num = chunk_num
   end
-  return self.get_chunk(chunk_num)
+  local base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
+  local nn_addr,   nn_len  
+  if ( ( self._nn_vec ) and ( base_addr ) ) then 
+    nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
+    assert(nn_addr)
+    assert(base_len == nn_len)
+  end
+  return base_addr, nn_addr, base_len
   --[[
    if self:materialized() == true then
       -- get the chunks from the vectors
@@ -158,16 +169,27 @@ function lVector:get_chunk(chunk_num)
 end
 
 function lVector:meta()
-   local nn_vec = self._nn_vec
-   if nn_vec ~= nil then 
-      nn_vec = (nn_vec:meta())()
-   end
-   --[[ TODO
-   return {
-      "vec" = (self._vec:meta())(),
-      "nn_vec" = nn_vec 
-   }
-   --]]
+  local base_meta = load(Vector.meta(self._base_vec))()
+  local nn_meta = nil
+  if ( self._nn_vec ) then 
+    nn_meta = load(Vector.meta(self._nn_vec))()
+  else
+  end
+  return { base = base_meta, nn = nn_meta, aux = self.meta_data }
 end
+
+function lVector:set_meta(k, v)
+  assert(k)
+  assert(v)
+  assert(type(k) == "string")
+  self.meta_data[k] = v
+end
+
+function lVector:get_meta(k)
+  assert(k)
+  assert(type(k) == "string")
+  return self.meta_data[k]
+end
+
 
 return lVector
