@@ -14,8 +14,6 @@ local function sample_gen1(chunk_idx, col)
     iptr[i-1] = counter
     counter = counter + 1
   end
-  -- local dbg    = require 'Q/UTILS/lua/debugger'
-  -- dbg()
   col:put_chunk(base_data, nil, chunk_size)
   return true
 end
