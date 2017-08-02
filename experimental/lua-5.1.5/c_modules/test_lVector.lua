@@ -1,11 +1,12 @@
-local plfile = require 'pl.file'
-local plpath = require 'pl.path'
-local Vector = require 'libvec'  
-local Scalar = require 'libsclr'  
-local cmem = require 'libcmem'  
+local plfile  = require 'pl.file'
+local plpath  = require 'pl.path'
+local Vector  = require 'libvec'  
+local Scalar  = require 'libsclr'  
+local cmem    = require 'libcmem'  
 local lVector = require 'lVector'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 -- local dbg    = require 'Q/UTILS/lua/debugger'
-local ffi    = require 'Q/UTILS/lua/q_ffi'
 require 'Q/UTILS/lua/strict'
 local v
 local ival
@@ -143,6 +144,22 @@ local s = plfile.read("_meta_data")
 x, y = string.find(s, "nn_file_name")
 assert(x)
 
+--===========================================
+--====== Testing nascent vector with generator
+print("Creating nascent vector with generator")
+sample_gen1 = require 'sample_gen1'
+local x = lVector( { qtype = "I4", gen = sample_gen1, has_nulls = false})
+
+local num_chunks = 10
+local chunk_size = qconsts.chunk_size
+for chunk_num = 1, num_chunks do 
+  a, b, c = x:get_chunk(chunk_num-1)
+  x:check()
+end
+x:eov()
+local T = x:meta()
+assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
+--===========================================
 
 print("Completed ", arg[0])
 os.exit()

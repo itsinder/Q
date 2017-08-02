@@ -56,7 +56,7 @@ vec_persist(
 extern int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
-    uint64_t idx, 
+    int64_t idx, 
     uint32_t len
     );
 extern int

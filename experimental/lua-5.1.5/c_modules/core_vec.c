@@ -286,6 +286,7 @@ vec_check(
     if ( ptr_vec->is_persist         ) { go_BYE(-1); }
   }
   else {
+    if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
     if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
     int is_file = file_exists(ptr_vec->file_name); 
@@ -334,7 +335,7 @@ BYE:
 int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
-    uint64_t idx, 
+    int64_t idx, 
     uint32_t len
     )
 {
@@ -343,23 +344,26 @@ vec_get(
   ptr_vec->ret_addr = NULL;
   ptr_vec->ret_len  = 0;
   // If B1 and you ask for 5 elements starting from 67th, then 
-  // this is translated to asking for (5+3) elements starting from 64th
-  // In other words, if you wanted
+  // this is translated to asking for (8 = 5+3) elements starting 
+  // from 64 = (67 -3) position. In other words, if you wanted
   // 67, 68, 69, 60, 71, you will get 
   // 64, 65, 66, 67, 68, 69, 60, 71 and
   // you have to index into it yourself to get the bits you want
+  // Note that idx has gone down by 3 and len has gone up by 3 
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
     uint32_t bit_idx = idx % 64;
     len += bit_idx;
+    idx -= bit_idx; 
   }
   if ( ptr_vec->is_nascent ) {
+    if ( idx < 0 ) { go_BYE(-1); }
     uint32_t chunk_num = idx / ptr_vec->chunk_size;
     if ( chunk_num != ptr_vec->chunk_num ) { go_BYE(-1); }
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
     if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
     uint32_t offset;
     if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-      offset = chunk_idx * ptr_vec->field_size;
+      offset = chunk_idx / 8; // 8 bits in a byte 
     }
     else {
       offset = chunk_idx * ptr_vec->field_size;
@@ -381,14 +385,20 @@ vec_get(
      *
      *   ret_len should be min(ptr_vec->num_in_chunk - chunk_idx, len)
      */
+    ptr_vec->ret_addr = addr; 
   }
   else {
-    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-    // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-    addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-    ptr_vec->ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
+    if ( idx < 0 ) { 
+      ptr_vec->ret_len  = ptr_vec->num_elements;
+      ptr_vec->ret_addr = ptr_vec->map_addr;
+    }
+    else {
+      if ( (uint64_t)idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+      // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+      ptr_vec->ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      ptr_vec->ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
+    }
   }
-  ptr_vec->ret_addr = addr; 
 BYE:
   return status;
 }

@@ -109,17 +109,30 @@ BYE:
   return 2;
 }
 //------------------------------------------
-static int l_vec_get_chunk( lua_State *L) {
+static int l_vec_get_chunk( lua_State *L) 
+{
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
+  int64_t idx;
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
+    if ( chunk_num < 0 ) { 
+      idx = -1;
+    }
+    else {
+      idx = chunk_num * Q_CHUNK_SIZE;
+    }
   }
-  if ( chunk_num < 0 ) { 
-    chunk_num = ptr_vec->chunk_num;
+  else {
+    if ( ptr_vec->is_nascent ) { 
+      chunk_num = ptr_vec->chunk_num;
+    }
+    else {
+      chunk_num = 0;
+    }
+    idx = chunk_num * Q_CHUNK_SIZE;
   }
-  uint64_t idx = chunk_num * Q_CHUNK_SIZE;
   status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE); cBYE(status);
   lua_pushlightuserdata(L, ptr_vec->ret_addr);
   lua_pushinteger(L, ptr_vec->ret_len);
@@ -228,6 +241,12 @@ static int l_vec_is_nascent( lua_State *L) {
 static int l_vec_chunk_num( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   lua_pushnumber(L, ptr_vec->chunk_num);
+  return 1;
+}
+//----------------------------------------
+static int l_vec_num_in_chunk( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushnumber(L, ptr_vec->num_in_chunk);
   return 1;
 }
 //----------------------------------------
@@ -373,6 +392,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
     { "num_elements", l_vec_num_elements },
+    { "num_in_chunk", l_vec_num_in_chunk },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
 // TODO    { "has_nulls", l_vec_has_nulls },
@@ -386,6 +406,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "check", l_vec_check },
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
+    { "num_in_chunk", l_vec_num_in_chunk },
     { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },

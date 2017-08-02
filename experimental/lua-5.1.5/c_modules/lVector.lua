@@ -37,7 +37,7 @@ function lVector.new(arg)
   local file_name
   local nn_file_name
   local has_nulls
-  local nascent
+  local is_nascent
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   -- Validity of qtype will be checked for by vector
@@ -63,17 +63,16 @@ function lVector.new(arg)
   vector._width = field_width
   vector._is_read_only = is_read_only
 
-  if arg.gen ~= nil and arg.gen ~= false then -- nacent vector
+  if arg.gen then 
+    is_nascent = true
     if ( arg.has_nulls == false ) then 
       has_nulls = false
     else
       has_nulls = true
     end
-    -- vector._gen = arg.gen
     assert(type(arg.gen) == "function" or type(arg.gen) == "boolean" , 
-    "supplied generator must be a function or boolean indicating " ..
-    "function will be specified in future")
-    nascent = true
+    "supplied generator must be a function or boolean as placeholder ")
+    vector._gen = arg.gen
   else -- materialized vector
      file_name = assert(arg.file_name, 
      "lVector needs a file_name to read from")
@@ -88,7 +87,7 @@ function lVector.new(arg)
     else
       has_nulls  = false
     end
-    nascent = false
+    is_nascent = false
   end
   vector._has_nulls = has_nulls
   vector.file_name = file_name
@@ -104,7 +103,7 @@ function lVector.new(arg)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( vector._has_nulls ) then 
-    if ( not nascent ) then 
+    if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
     vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, 
@@ -139,12 +138,12 @@ function lVector:check()
 end
 
 function lVector:set_generator(gen)
-  if ( ( self.num_elements == 0 ) and ( not self._file_name ) )  then 
-    assert(type(gen) == "function")
-    self._gen = gen
-  else
-    error("Cannot change generator once elements generated")
-   end
+  assert(Vector.num_elements(self._base_vec) == 0, 
+    "Cannot set generator once elements generated")
+  assert(Vector.is_nascent(self._base_vec), 
+    "Cannot set generator for materialized vector")
+  assert(type(gen) == "function")
+  self._gen = gen
 end
 
 function lVector:eov()
@@ -180,6 +179,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
     local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
     assert(status)
   end
+  
 end
 
 function lVector:get_chunk(chunk_num)
@@ -193,9 +193,12 @@ function lVector:get_chunk(chunk_num)
     l_chunk_num = chunk_num
   end
   -- There are 2 conditions under which we do not need to compute
+  -- cond1 => Vector has been materialized
   local cond1 = not Vector.is_nascent(self._base_vec)
+  -- cond2 => Vector is nascent and you are asking for current chunk
   local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
-          ( Vector.chunk_num(self._base_vec) == l_chunk_num )
+          ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
+          ( Vector.num_in_chunk(self._base_vec) > 0 )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
     if ( ( self._has_nulls ) and ( base_addr ) ) then 
@@ -205,11 +208,13 @@ function lVector:get_chunk(chunk_num)
     end
     return base_addr, nn_addr, base_len
   else
+    assert(Vector.is_nascent(self._base_vec))
     -- generate data 
     assert(self._gen)
     assert(type(self._gen) == "function")
-    -- status = self._gen(num)
-    -- assert(status)
+    status = self._gen(chunk_num, self)
+    assert(status)
+    return self:get_chunk(chunk_num)
   end
   --[[
       assert(self._gen ~= nil, "The lVector must have a generator")
