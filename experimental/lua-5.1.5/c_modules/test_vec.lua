@@ -1,4 +1,3 @@
-os.execute("rm -f _*.bin")
 local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
@@ -10,7 +9,8 @@ local M
 local is_memo
 local chunk_size = 65536  
 
-local infile = 'in1.bin'
+local infile = '_in1_I4.bin'
+assert(plpath.isfile(infile), "Create the input files")
 local y = Vector.new('I4', infile, false)
 local filesize = plpath.getsize(infile)
 y:persist(true)
@@ -28,11 +28,11 @@ for k, v in pairs(M) do print(k, v) end
 print('------------------')
 y = nil
 collectgarbage()
-assert(plpath.isfile("in1.bin"))
+assert(plpath.isfile("_in1_I4.bin"))
 
 -- try to modify a vector created as read only. Should fail
 local is_read_only = true
-local y = Vector.new('I4', 'in1.bin', is_read_only)
+local y = Vector.new('I4', '_in1_I4.bin', is_read_only)
 y:persist(true)
 s = Scalar.new(123, "I4")
 status = y:set(s, 0)

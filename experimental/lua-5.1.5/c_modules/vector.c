@@ -76,6 +76,24 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_vec_get_vec_buf( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  if ( ptr_vec->is_nascent ) { 
+    lua_pushlightuserdata(L, ptr_vec->chunk);
+    /* Add the metatable to the stack. */
+    luaL_getmetatable(L, "CMEM");
+    /* Set the metatable on the userdata. */
+    lua_setmetatable(L, -2);
+    return 1;
+  }
+  else {
+    lua_pushnil(L);
+    lua_pushstring(L, "ERROR: no chunk for materialized vector");
+    return 2;
+  }
+}
+//----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -218,8 +236,17 @@ BYE:
 //----------------------------------------
 static int l_vec_put_chunk( lua_State *L) {
   int status = 0;
+  void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  void *addr = luaL_checkudata(L, 2, "CMEM");
+  if ( luaL_testudata (L, 2, "CMEM") ) { 
+    fprintf(stderr, "1: verified rhat it was CMEM\n");
+    addr = luaL_checkudata(L, 2, "CMEM");
+    fprintf(stderr, "2: verified rhat it was CMEM\n");
+  }
+  else {
+    fprintf(stderr, "NOT  CMEM\n");
+    go_BYE(-1);
+  }
   int32_t len = luaL_checknumber(L, 3);
   if ( len < 0 ) { go_BYE(-1); }
   //---------------------------------------
@@ -395,6 +422,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "num_in_chunk", l_vec_num_in_chunk },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
+    { "get_vec_buf", l_vec_get_vec_buf },
 // TODO    { "has_nulls", l_vec_has_nulls },
     { "set", l_vec_set },
     { "get", l_vec_get },
@@ -407,6 +435,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
     { "num_in_chunk", l_vec_num_in_chunk },
+    { "get_vec_buf", l_vec_get_vec_buf },
     { "put1", l_vec_put1 },
     { "set", l_vec_set },
     { "get", l_vec_get },

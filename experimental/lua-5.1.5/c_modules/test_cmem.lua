@@ -1,5 +1,7 @@
 cmem = require 'libcmem' ; 
 
+local buf = cmem.new(128)
+
 local num_trials = 10 -- 1024*1048576
 local sz = 65537
 for j = 1, num_trials do 

@@ -6,7 +6,7 @@ local cmem    = require 'libcmem'
 local lVector = require 'lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
--- local dbg    = require 'Q/UTILS/lua/debugger'
+local dbg    = require 'Q/UTILS/lua/debugger'
 require 'Q/UTILS/lua/strict'
 local v
 local ival
@@ -15,6 +15,7 @@ local md -- meta data
 --===================
 function pr_meta(x, file_name)
   local T = x:meta()
+  local temp = io.output() -- this is for debugger to work 
   io.output(file_name)
   io.write(" return { ")
   for k1, v1 in pairs(T) do 
@@ -25,6 +26,7 @@ function pr_meta(x, file_name)
   end
   io.write(" } ")
   io.close()
+  io.output(temp) -- this is for debugger to work 
   return T
 end
 --=========================
@@ -73,6 +75,7 @@ v = x:get_meta("rand key")
 assert(v == "some other rand val")
 pr_meta(x, "_meta_data.csv")
 compare("_meta_data.csv", "in2_meta_data.csv")
+
 
 --====== Testing nascent vector
 print("Creating nascent vector")
@@ -147,8 +150,8 @@ assert(x)
 --===========================================
 --====== Testing nascent vector with generator
 print("Creating nascent vector with generator")
-sample_gen1 = require 'sample_gen1'
-local x = lVector( { qtype = "I4", gen = sample_gen1, has_nulls = false})
+gen1 = require 'gen1'
+local x = lVector( { qtype = "I4", gen = gen1, has_nulls = false})
 
 local num_chunks = 10
 local chunk_size = qconsts.chunk_size
@@ -159,6 +162,30 @@ end
 x:eov()
 local T = x:meta()
 assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
+--===========================================
+--====== Testing nascent vector with generator and Vector's buffer
+--[[
+print("Creating nascent vector with generator")
+gen2 = require 'gen2'
+local x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
+
+local num_chunks = 2
+local chunk_size = qconsts.chunk_size
+print("===================")
+for chunk_num = 1, num_chunks do 
+  a, b, c = x:get_chunk(chunk_num-1)
+  x:check()
+end
+x:eov()
+base_data, nn_data, len = x:get_chunk()
+assert(base_data)
+iptr = ffi.cast("int32_t *", base_data)
+for i = 1, len do
+  assert(iptr[i-1] == (i*10))
+end
+assert(not nn_data)
+assert(len == 100000 )
+--]]
 --===========================================
 
 print("Completed ", arg[0])

@@ -182,6 +182,18 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   
 end
 
+function lVector:get_vec_buf()
+  local nn_buf = nil
+  local base_buf = Vector.get_vec_buf(self._base_vec)
+  assert(base_buf)
+  if ( self._has_nulls ) then
+    nn_buf = Vector.get_vec_buf(self._nn_vec)
+    assert(nn_buf)
+  end
+  print(type(base_buf))
+  return base_buf, nn_buf
+end
+
 function lVector:get_chunk(chunk_num)
   local status
   local l_chunk_num = -1
@@ -216,23 +228,6 @@ function lVector:get_chunk(chunk_num)
     assert(status)
     return self:get_chunk(chunk_num)
   end
-  --[[
-      assert(self._gen ~= nil, "The lVector must have a generator")
-      -- maybe this check is redundant
-      if self._last_chunk_number == nil then
-         assert(num == 0, "Only the same or immediate chunk number can be asked for")
-      else
-         assert(num == self._last_chunk_number or num == self._last_chunk_number + 1,
-         "Only the same or immediate chunk number can be asked for")
-         if num == self._last_chunk_number then
-            -- TODO return the current chunk
-            return nil
-         else
-            -- TODO there is some error checking we need to think about
-            self._gen(num)
-         end
-      end
-   --]]
 end
 
 function lVector:meta()
