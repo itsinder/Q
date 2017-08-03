@@ -8,14 +8,13 @@ local chunk_size = qconsts.chunk_size
 local field_size = 4
 local base_data = cmem.new(chunk_size * field_size)
 
-local function sample_gen1(chunk_idx, col)
+local function gen1(chunk_idx, col)
   local iptr = ffi.cast("int32_t *", base_data)
   for i = 1, chunk_size do
     iptr[i-1] = counter
     counter = counter + 1
   end
-  col:put_chunk(base_data, nil, chunk_size)
-  return true
+  return base_data, nil, chunk_size
 end
-return sample_gen1
+return gen1
 

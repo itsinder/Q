@@ -76,10 +76,31 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_vec_release_vec_buf( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  int32_t num_in_chunk  = luaL_checknumber(L, 2);
+  if ( num_in_chunk < 0 ) { go_BYE(-1); }
+  if ( ( ptr_vec->is_nascent ) && ( ptr_vec->num_in_chunk == 0 ) ) { 
+    ptr_vec->num_in_chunk += num_in_chunk;
+    ptr_vec->num_elements += num_in_chunk;
+    lua_pushboolean(L, true);
+    return 1;
+  }
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: in vec_release_vec_buf");
+  return 2;
+}
+//----------------------------------------
 static int l_vec_get_vec_buf( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  if ( ptr_vec->is_nascent ) { 
+  if ( ptr_vec->is_nascent ) {
+    if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
+      status = flush_buffer(ptr_vec); cBYE(status);
+    }
+    if ( ptr_vec->num_in_chunk != 0 ) { go_BYE(-1); }
     lua_pushlightuserdata(L, ptr_vec->chunk);
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");
@@ -87,11 +108,10 @@ static int l_vec_get_vec_buf( lua_State *L) {
     lua_setmetatable(L, -2);
     return 1;
   }
-  else {
-    lua_pushnil(L);
-    lua_pushstring(L, "ERROR: no chunk for materialized vector");
-    return 2;
-  }
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: no chunk for materialized vector");
+  return 2;
 }
 //----------------------------------------
 static int l_vec_get( lua_State *L) {
@@ -239,9 +259,7 @@ static int l_vec_put_chunk( lua_State *L) {
   void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( luaL_testudata (L, 2, "CMEM") ) { 
-    fprintf(stderr, "1: verified rhat it was CMEM\n");
     addr = luaL_checkudata(L, 2, "CMEM");
-    fprintf(stderr, "2: verified rhat it was CMEM\n");
   }
   else {
     fprintf(stderr, "NOT  CMEM\n");
@@ -423,6 +441,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
     { "get_vec_buf", l_vec_get_vec_buf },
+    { "release_vec_buf", l_vec_release_vec_buf },
 // TODO    { "has_nulls", l_vec_has_nulls },
     { "set", l_vec_set },
     { "get", l_vec_get },
@@ -435,6 +454,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
     { "num_in_chunk", l_vec_num_in_chunk },
+    { "release_vec_buf", l_vec_release_vec_buf },
     { "get_vec_buf", l_vec_get_vec_buf },
     { "put1", l_vec_put1 },
     { "set", l_vec_set },

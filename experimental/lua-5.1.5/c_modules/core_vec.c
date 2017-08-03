@@ -12,6 +12,31 @@
 
 extern luaL_Buffer g_errbuf;
 
+extern int 
+flush_buffer(
+          VEC_REC_TYPE *ptr_vec
+          )
+{
+  int status = 0;
+  if ( ptr_vec->is_memo ) {
+    if ( ptr_vec->file_name[0] == '\0' ) {
+      do { 
+        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+        cBYE(status);
+      } while ( file_exists(ptr_vec->file_name));
+    }
+    status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+        ptr_vec->num_in_chunk, ptr_vec->file_name);
+    cBYE(status);
+  }
+  ptr_vec->num_in_chunk = 0;
+  ptr_vec->chunk_num++;
+  memset(ptr_vec->chunk, '\0', 
+      (ptr_vec->field_size * ptr_vec->chunk_size));
+BYE:
+  return status;
+}
+
 int flush_buffer_B1(
     VEC_REC_TYPE *ptr_vec
     )
@@ -484,21 +509,7 @@ vec_add(
     uint32_t space_in_chunk = 
       ptr_vec->chunk_size - ptr_vec->num_in_chunk;
     if ( space_in_chunk == 0 )  {
-      if ( ptr_vec->is_memo ) {
-        if ( ptr_vec->file_name[0] == '\0' ) {
-          do { 
-            status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-            cBYE(status);
-          } while ( file_exists(ptr_vec->file_name));
-        }
-        status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-            ptr_vec->num_in_chunk, ptr_vec->file_name);
-        cBYE(status);
-      }
-      ptr_vec->num_in_chunk = 0;
-      ptr_vec->chunk_num++;
-      memset(ptr_vec->chunk, '\0', 
-          (ptr_vec->field_size * ptr_vec->chunk_size));
+      status = flush_buffer(ptr_vec); cBYE(status);
     }
     else {
       uint32_t num_to_copy = mcr_min(space_in_chunk, num_left_to_copy);

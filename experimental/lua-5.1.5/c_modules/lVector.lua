@@ -182,6 +182,15 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   
 end
 
+function lVector:release_vec_buf(chunk_size)
+  local status
+  assert(Vector.release_vec_buf(self._base_vec, chunk_size))
+  if ( self._has_nulls ) then
+    assert(Vector.release_vec_buf(self._nn_vec, chunk_size))
+  end
+  return true
+end
+
 function lVector:get_vec_buf()
   local nn_buf = nil
   local base_buf = Vector.get_vec_buf(self._base_vec)
@@ -190,7 +199,6 @@ function lVector:get_vec_buf()
     nn_buf = Vector.get_vec_buf(self._nn_vec)
     assert(nn_buf)
   end
-  print(type(base_buf))
   return base_buf, nn_buf
 end
 
@@ -224,10 +232,24 @@ function lVector:get_chunk(chunk_num)
     -- generate data 
     assert(self._gen)
     assert(type(self._gen) == "function")
+    local base_data, nn_data, buf_size = self._gen(l_chunk_num, self)
+    if ( buf_size ) then 
+      -- this is the simpler case where generator malloc's
+      self:put_chunk(base_data, nn_data, buf_size)
+    else
+      -- this is the advanced case of using the Vector's buffer.
+      local chk =  self:get_chunk_num()
+      assert(chk == l_chunk_num)
+    end
+    return self:get_chunk(l_chunk_num)
+    -- NOTE: Could also do return base_data, nn_data, chunk_size
+    --[[
     status = self._gen(chunk_num, self)
     assert(status)
     return self:get_chunk(chunk_num)
+    --]]
   end
+  -- NOTE: Indrajeet suggests: return self:get_chunk(chunk_num)
 end
 
 function lVector:meta()

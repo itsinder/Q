@@ -164,8 +164,8 @@ local T = x:meta()
 assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
 --===========================================
 --====== Testing nascent vector with generator and Vector's buffer
---[[
-print("Creating nascent vector with generator")
+
+print("Creating nascent vector with generator using Vector buffer")
 gen2 = require 'gen2'
 local x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
 
@@ -181,11 +181,12 @@ base_data, nn_data, len = x:get_chunk()
 assert(base_data)
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, len do
-  assert(iptr[i-1] == (i*10))
+  assert(iptr[i-1] == i)
 end
 assert(not nn_data)
 assert(len == 100000 )
---]]
+
+
 --===========================================
 
 print("Completed ", arg[0])

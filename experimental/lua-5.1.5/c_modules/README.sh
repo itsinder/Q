@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e 
+rm -f *.so
 INCS=" -I. -I./inc/ -I./gen_inc/ -I../../../UTILS/gen_inc/ -I../../../UTILS/inc/ -I../../../OPERATORS/LOAD_CSV/gen_inc/ -I../../../OPERATORS/PRINT/gen_inc/ "
 gcc -g $QC_FLAGS $INCS \
   vector.c \

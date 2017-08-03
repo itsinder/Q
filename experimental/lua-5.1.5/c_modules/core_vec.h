@@ -84,4 +84,8 @@ vec_add_B1(
 extern int flush_buffer_B1(
     VEC_REC_TYPE *ptr_vec
     );
+extern int 
+flush_buffer(
+          VEC_REC_TYPE *ptr_vec
+          );
 #endif
