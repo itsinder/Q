@@ -1,4 +1,3 @@
-os.execute("rm -f _*.bin")
 local plfile  = require 'pl.file'
 local plpath  = require 'pl.path'
 local Vector  = require 'libvec'  
@@ -188,7 +187,26 @@ assert(not nn_data)
 assert(len == 100000 )
 
 
+--====== Testing nascent vector with generator for SC
+field_size = 8
+num_elements = 65537
+buf = cmem.new(field_size)
+cptr = ffi.cast("char *", buf)
+ffi.copy(cptr, "ABCD123")
+print("Testing nascent vector with generator for SC")
+local x = lVector( { qtype = "SC:8" } )
+
+local num_chunks = 10
+local chunk_size = qconsts.chunk_size
+for chunk_num = 1, num_chunks do 
+  a, b, c = x:get_chunk(chunk_num-1)
+  x:check()
+end
+x:eov()
+local T = x:meta()
+assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
 --===========================================
 
+os.execute("rm -f _*.bin")
 print("Completed ", arg[0])
 os.exit()

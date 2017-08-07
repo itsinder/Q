@@ -1,4 +1,3 @@
-os.execute("rm -f _*.bin")
 local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
@@ -191,4 +190,5 @@ assert(M.num_elements == cum_size)
 
 --=========================
 print("Completed ", arg[0])
+os.execute("rm -f _*.bin")
 os.exit()

@@ -29,6 +29,16 @@ os.execute(command)
 s1 = plfile.read("_temp1.txt")
 s2 = plfile.read("out_SC1.txt")
 assert(s1 == s2)
+--=========================
+print("Testing SC Vector from file")
+local infile = 'SC1.bin'
+os.execute("cp " .. infile .. " _SC1.bin ")
+infile = "_" .. infile
+assert(plpath.isfile(infile), "Create the input files")
+y = assert(Vector.new('SC:8', infile, false))
+ret_addr, ret_len = y:get_chunk(0);
+assert(ret_addr)
+assert(ret_len == 10)
 
 --=========================
 print("Completed ", arg[0])
