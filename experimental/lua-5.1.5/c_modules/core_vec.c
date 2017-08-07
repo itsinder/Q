@@ -69,7 +69,7 @@ chk_field_type(
 {
   int status = 0;
   if ( field_type == NULL ) { go_BYE(-1); }
-  // TODO SYNC with qtypes in q_consts.lua
+  // TODO P3: SYNC with qtypes in q_consts.lua
   if ( ( strcmp(field_type, "B1") == 0 ) || 
        ( strcmp(field_type, "I1") == 0 ) || 
        ( strcmp(field_type, "I2") == 0 ) || 

@@ -1,3 +1,4 @@
+os.execute("rm -f _*.bin")
 local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 

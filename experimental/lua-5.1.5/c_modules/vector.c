@@ -181,13 +181,19 @@ BYE:
 //----------------------------------------------------
 static int l_vec_put1( lua_State *L) {
   int status = 0;
+  void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
-  if ( strcmp(ptr_vec->field_type, ptr_sclr->field_type) != 0 ) { 
-    go_BYE(-1);
+  if ( strcmp(ptr_vec->field_type, "SC") == 0 ) { 
+    addr = luaL_checkudata(L, 2, "CMEM");
   }
-  void * addr = (void *)(&ptr_sclr->cdata);
+  else {
+    SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
+    if ( strcmp(ptr_vec->field_type, ptr_sclr->field_type) != 0 ) { 
+      go_BYE(-1);
+    }
+    addr = (void *)(&ptr_sclr->cdata);
+  }
   status = vec_add(ptr_vec, addr, 1); cBYE(status);
   lua_pushinteger(L, status);
   return 1;
@@ -347,32 +353,34 @@ static int l_vec_new( lua_State *L)
   bool is_read_only = false; 
   //-- START: Get qtype and field size
   const char * const qtype_sz  = luaL_checkstring(L, 1);
-  const char *qtype; int field_size;
+  char qtype[4]; int field_size = 0;
+  memset(qtype, '\0', 4);
   if ( strcmp(qtype_sz, "B1") == 0 ) { 
-    qtype = qtype_sz; field_size = 0; // SPECIAL CASE
+    strcpy(qtype, qtype_sz); field_size = 0; // SPECIAL CASE
   }
   else if ( strcmp(qtype_sz, "I1") == 0 ) { 
-    qtype = qtype_sz; field_size = 1;
+    strcpy(qtype, qtype_sz); field_size = 1;
   }
   else if ( strcmp(qtype_sz, "I2") == 0 ) { 
-    qtype = qtype_sz; field_size = 2;
+    strcpy(qtype, qtype_sz); field_size = 2;
   }
   else if ( strcmp(qtype_sz, "I4") == 0 ) { 
-    qtype = qtype_sz; field_size = 4;
+    strcpy(qtype, qtype_sz); field_size = 4;
   }
   else if ( strcmp(qtype_sz, "I8") == 0 ) { 
-    qtype = qtype_sz; field_size = 8;
+    strcpy(qtype, qtype_sz); field_size = 8;
   }
   else if ( strcmp(qtype_sz, "F4") == 0 ) { 
-    qtype = qtype_sz; field_size = 4;
+    strcpy(qtype, qtype_sz); field_size = 4;
   }
   else if ( strcmp(qtype_sz, "F8") == 0 ) { 
-    qtype = qtype_sz; field_size = 8;
+    strcpy(qtype, qtype_sz); field_size = 8;
   }
   else if ( strncmp(qtype_sz, "SC:", 3) == 0 ) { 
     char *cptr = (char *)qtype_sz + 3;
     status = txt_to_I4(cptr, &field_size); cBYE(status);
     if ( field_size < 2 ) { go_BYE(-1); }
+    strcpy(qtype, "SC");
   }
   else if ( strcmp(qtype_sz, "SV") == 0 ) { 
     fprintf(stderr, "TO BE IMPLEMENTED\n"); go_BYE(-1); 
