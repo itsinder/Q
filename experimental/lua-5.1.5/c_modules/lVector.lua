@@ -50,6 +50,7 @@ function lVector.new(arg)
     assert(field_width >= 2)
   else
     assert(arg.width == nil, "do not provide width except for SC")
+    field_width = qconsts.qtypes[qtype].width
   end
    --=============================
   is_read_only = false
@@ -59,7 +60,7 @@ function lVector.new(arg)
   end
 
   vector._qtype = qtype
-  vector._width = field_width
+  vector._field_width = field_width
   vector._is_read_only = is_read_only
 
   if arg.gen then 
@@ -112,6 +113,18 @@ function lVector.new(arg)
   return vector
 end
 
+function lVector:persist(is_persist)
+  if ( is_persist == nil ) then 
+    is_persist = true
+  else
+    assert(type(is_persist) == "boolean")
+  end
+  Vector.persist(self._base_vec, is_persist)
+  if ( vector._has_nulls ) then 
+    Vector.persist(self._nn_vec, is_persist)
+  end
+end
+
 function lVector:get_chunk_num()
   return Vector.chunk_num(self._base_vec)
 end
@@ -122,6 +135,22 @@ end
 
 function lVector:length()
   return Vector.num_elements(self._base_vec)
+end
+
+function lVector:fldtype()
+  return self._qtype
+end
+
+function lVector:qtype()
+  return self._qtype
+end
+
+function lVector:field_size()
+  return self._field_width
+end
+
+function lVector:field_width()
+  return self._field_width
 end
 
 function lVector:check()
@@ -137,6 +166,10 @@ function lVector:check()
   else
     assert(not self._nn_vec)
   end
+  -- TODO: Check that following are same for base_vec and nn_vec
+  -- (a) num_elements DONE
+  -- (b) is_persist  
+  -- (c) Anything else?
   return true
 end
 
@@ -281,7 +314,7 @@ end
 
 function lVector:set_meta(k, v)
   assert(k)
-  assert(v)
+  -- assert(v): do not do this since it is used to set meta of key to nil
   assert(type(k) == "string")
   self._meta[k] = v
 end

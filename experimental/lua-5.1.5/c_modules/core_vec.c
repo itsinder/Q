@@ -464,8 +464,8 @@ vec_add_B1(
     }
   }
   else {
-    uint32_t bit_idx = 0;
-    uint32_t word_idx   = 0;
+    uint32_t bit_idx  = 0;
+    uint32_t word_idx = 0;
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
       uint8_t bit_val = (((uint8_t *)addr)[word_idx] >> bit_idx) & 0x1;
