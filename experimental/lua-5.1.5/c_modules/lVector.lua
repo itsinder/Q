@@ -120,6 +120,10 @@ function lVector:num_elements()
   return Vector.num_elements(self._base_vec)
 end
 
+function lVector:length()
+  return Vector.num_elements(self._base_vec)
+end
+
 function lVector:check()
   local chk = Vector.check(self._base_vec)
   assert(chk, "Error on base vector")

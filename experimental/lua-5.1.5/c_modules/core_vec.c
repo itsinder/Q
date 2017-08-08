@@ -54,8 +54,8 @@ int flush_buffer_B1(
     }
     ptr_vec->num_in_chunk = 0;
     ptr_vec->chunk_num++;
-    memset(ptr_vec->chunk, '\0', 
-        (ptr_vec->field_size * ptr_vec->chunk_size));
+    memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
+    // Note that ptr_vec->field_size  == 0 for B1 
   }
 BYE:
   return status;
@@ -464,12 +464,11 @@ vec_add_B1(
     }
   }
   else {
-    uint32_t in_bit_idx = 0;
+    uint32_t bit_idx = 0;
+    uint32_t word_idx   = 0;
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
-      uint8_t bit_val = (((uint8_t *)addr)[i] >> in_bit_idx) & 0x1;
-      uint32_t word_idx = ptr_vec->num_in_chunk / 8;
-      uint32_t  bit_idx = ptr_vec->num_in_chunk % 8;
+      uint8_t bit_val = (((uint8_t *)addr)[word_idx] >> bit_idx) & 0x1;
       if ( bit_val == 1 ) { 
         uint8_t mask = 1 << bit_idx;
         ((uint8_t *)ptr_vec->chunk)[word_idx] |= mask;
@@ -480,7 +479,10 @@ vec_add_B1(
       }
       ptr_vec->num_in_chunk++;
       ptr_vec->num_elements++;
-      in_bit_idx++; if ( in_bit_idx == 8 ) { in_bit_idx = 0; }
+      bit_idx++; 
+      if ( bit_idx == 8 ) { 
+        word_idx++; bit_idx = 0; 
+      }
     }
   }
 
