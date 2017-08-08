@@ -6,7 +6,6 @@ local Vector = require 'libvec' ;
 --====================================
 local lVector = {}
 lVector.__index = lVector
-lVector.meta_data = {}
 
 setmetatable(lVector, {
    __call = function (cls, ...)
@@ -148,9 +147,10 @@ end
 
 function lVector:eov()
   Vector.eov(self._base_vec)
-    if self._nn_vec then 
+  if self._nn_vec then 
     Vector.eov(self._nn_vec)
   end
+  return true
 end
 
 function lVector:put1(s, nn_s)
@@ -179,7 +179,17 @@ function lVector:put_chunk(base_addr, nn_addr, len)
     local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
     assert(status)
   end
-  
+end
+
+function lVector:eval()
+  if ( Vector.is_nascent(self._base_vec) ) then
+    local chunk_num = self:get_chunk_num() 
+    repeat
+      local base_len, base_addr, nn_addr = self:get_chunk(chunk_num)
+      chunk_num = chunk_num + 1 
+    until base_len ~= qconsts.chunk_size
+  end
+  -- else, nothing do to since vector has been materialized
 end
 
 function lVector:release_vec_buf(chunk_size)
@@ -226,14 +236,14 @@ function lVector:get_chunk(chunk_num)
       assert(nn_addr)
       assert(base_len == nn_len)
     end
-    return base_addr, nn_addr, base_len
+    return base_len, base_addr, nn_addr
   else
     assert(Vector.is_nascent(self._base_vec))
     -- generate data 
     assert(self._gen)
     assert(type(self._gen) == "function")
-    local base_data, nn_data, buf_size = self._gen(l_chunk_num, self)
-    if ( buf_size ) then 
+    local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
+    if ( base_data ) then 
       -- this is the simpler case where generator malloc's
       self:put_chunk(base_data, nn_data, buf_size)
     else
@@ -241,8 +251,11 @@ function lVector:get_chunk(chunk_num)
       local chk =  self:get_chunk_num()
       assert(chk == l_chunk_num)
     end
+    if ( buf_size < qconsts.chunk_size ) then
+      self:eov()
+    end
     return self:get_chunk(l_chunk_num)
-    -- NOTE: Could also do return base_data, nn_data, chunk_size
+    -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
     status = self._gen(chunk_num, self)
     assert(status)
@@ -259,20 +272,20 @@ function lVector:meta()
     nn_meta = load(Vector.meta(self._nn_vec))()
   else
   end
-  return { base = base_meta, nn = nn_meta, aux = self.meta_data}
+  return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
 
 function lVector:set_meta(k, v)
   assert(k)
   assert(v)
   assert(type(k) == "string")
-  self.meta_data[k] = v
+  self._meta[k] = v
 end
 
 function lVector:get_meta(k)
   assert(k)
   assert(type(k) == "string")
-  return self.meta_data[k]
+  return self._meta[k]
 end
 
 

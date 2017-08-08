@@ -11,6 +11,8 @@ require 'Q/UTILS/lua/strict'
 local v
 local ival
 local databuf
+local x
+local T
 local md -- meta data 
 --===================
 function pr_meta(x, file_name)
@@ -37,15 +39,15 @@ function compare(f1, f2)
 end
 --=========================
 --
-local x = lVector(
+x = lVector(
 { qtype = "I4", file_name = "_in1_I4.bin", nn_file_name = "_nn_in1.bin"})
 assert(x:check())
 pr_meta(x, "_meta_data.csv")
 compare("_meta_data.csv", "in1_meta_data.csv")
-base_data, nn_data, len = x:get_chunk()
+len, base_data, nn_data = x:get_chunk()
 assert(base_data)
 assert(nn_data)
-assert(len == 10)
+print(len)
 --=========
 
 x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
@@ -53,7 +55,7 @@ assert(x:check())
 n = x:num_elements()
 assert(n == 10)
 --=========
-base_data, nn_data, len = x:get_chunk()
+len, base_data, nn_data = x:get_chunk()
 assert(base_data)
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, len do
@@ -62,7 +64,7 @@ end
 assert(not nn_data)
 assert(len == 10)
 --=========
-base_data, nn_data, len = x:get_chunk(100)
+len, base_data, nn_data = x:get_chunk(100)
 assert(not base_data)
 assert(not nn_data)
 --=========
@@ -79,7 +81,7 @@ compare("_meta_data.csv", "in2_meta_data.csv")
 
 --====== Testing nascent vector
 print("Creating nascent vector")
-local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
+x = lVector( { qtype = "I4", gen = true, has_nulls = false})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -94,7 +96,7 @@ assert(x:check())
 pr_meta(x, "_xxx")
 --
 --====== Testing nascent vector with scalars
-local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
+x = lVector( { qtype = "I4", gen = true, has_nulls = false})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -113,7 +115,7 @@ x, y = string.find(s, "nn_file_name")
 assert(not x)
 
 print("If you say vector has nulls, you must provide nulls")
-local x = lVector( { qtype = "I4", gen = true})
+x = lVector( { qtype = "I4", gen = true})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -121,7 +123,7 @@ status = pcall(x.put_chunk, base_data, nil, num_elements)
 assert(not status)
 --
 print("Testing nascent vector with scalars and nulls")
-local x = lVector( { qtype = "I4", gen = true})
+x = lVector( { qtype = "I4", gen = true})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
@@ -151,7 +153,7 @@ assert(x)
 --====== Testing nascent vector with generator
 print("Creating nascent vector with generator")
 gen1 = require 'gen1'
-local x = lVector( { qtype = "I4", gen = gen1, has_nulls = false})
+x = lVector( { qtype = "I4", gen = gen1, has_nulls = false})
 
 local num_chunks = 10
 local chunk_size = qconsts.chunk_size
@@ -167,7 +169,7 @@ assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
 
 print("Creating nascent vector with generator using Vector buffer")
 gen2 = require 'gen2'
-local x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
+x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
 
 local num_chunks = 2
 local chunk_size = qconsts.chunk_size
@@ -177,7 +179,7 @@ for chunk_num = 1, num_chunks do
   x:check()
 end
 x:eov()
-base_data, nn_data, len = x:get_chunk()
+len, base_data, nn_data = x:get_chunk()
 assert(base_data)
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, len do
@@ -187,24 +189,18 @@ assert(not nn_data)
 assert(len == 100000 )
 
 
---====== Testing nascent vector with generator for SC
-field_size = 8
-num_elements = 65537
-buf = cmem.new(field_size)
-cptr = ffi.cast("char *", buf)
-ffi.copy(cptr, "ABCD123")
-print("Testing nascent vector with generator for SC")
-local x = lVector( { qtype = "SC:8" } )
-
-local num_chunks = 10
-local chunk_size = qconsts.chunk_size
-for chunk_num = 1, num_chunks do 
-  a, b, c = x:get_chunk(chunk_num-1)
-  x:check()
-end
-x:eov()
-local T = x:meta()
-assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
+--====== Testing materialized vector for SC
+print("Testing materialized vector for SC")
+os.execute(" cp SC1.bin _SC1.bin " )
+x = lVector( { qtype = "SC", width = 8, file_name = '_SC1.bin' } )
+T = x:meta()
+-- local k, v
+for k, v in pairs(T.base)  do print(k,v) end 
+for k, v in pairs(T.aux)  do print(k,v) end 
+local num_aux = 0
+for k, v in pairs(T.aux)  do num_aux = num_aux + 1 end 
+assert(not T.nn) 
+assert(num_aux == 0) -- TODO WHY DO WE HAVE AUX DATA HERE?
 --===========================================
 
 os.execute("rm -f _*.bin")

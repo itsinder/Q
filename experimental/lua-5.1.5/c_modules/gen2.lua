@@ -27,6 +27,6 @@ local function gen2(chunk_idx, col)
   print("returning ", buf_size)
   col:release_vec_buf(buf_size)
   l_chunk_num = l_chunk_num + 1
-  return true
+  return buf_size
 end
 return gen2

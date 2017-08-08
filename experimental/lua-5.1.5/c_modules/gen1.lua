@@ -14,7 +14,7 @@ local function gen1(chunk_idx, col)
     iptr[i-1] = counter
     counter = counter + 1
   end
-  return base_data, nil, chunk_size
+  return chunk_size, base_data, nil
 end
 return gen1
 
