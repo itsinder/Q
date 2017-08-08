@@ -76,7 +76,7 @@ local handle_output_regex = function  (index, status, v, flag, category)
   output = v.output_regex
   return output
 end
-  
+
 -- this function handle testcases where error messages are expected output 
 fns.handle_category1 = function (index, status, ret, v)
   -- print(ret)
@@ -105,8 +105,7 @@ fns.handle_category1 = function (index, status, ret, v)
     return false
   end
 end
-
-
+  
 -- this function handle testcases where table of columns are expected output 
 -- in this table, only one column is present
 fns.handle_category2 = function (index, status, ret, v, output_category3, v_category3)
@@ -133,7 +132,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     return false
   end
   
-  if type(ret) ~= "Column" then
+  if type(ret) ~= "lVector" then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , output of load is not a column")
     return false
   end
@@ -144,7 +143,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , length of Column and output regex does not match")
     return false
   end
-   
+
   for i=1,ret:length() do
    
     local status, result = pcall(convert_c_to_txt,ret,i)
@@ -153,8 +152,10 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
       return false
     end
-    local is_SC = ret:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
-    local is_SV = ret:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
+    --TODO: instead of using member variable _qtype, use method which provides qtype.
+    -- Currently using _qtype member variable as there is no method which returns qtype.
+    local is_SC = ret._qtype == "SC"    -- if field type is SC , then pass field size, else nil
+    local is_SV = ret._qtype == "SV"    -- if field type is SV , then get value from dictionary
     
     local is_string = is_SC or is_SV
     if not is_string then 
@@ -168,6 +169,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
       return false
     end
   end
+  
   number_of_testcases_passed = number_of_testcases_passed + 1 
   return true
 end

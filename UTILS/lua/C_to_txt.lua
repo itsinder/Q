@@ -2,22 +2,23 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require "Q/UTILS/lua/q_ffi"
 
 return function (col, rowidx)
+  local chunk_num = math.floor((rowidx-1)/qconsts.chunk_size)
+  local chunk_idx = (rowidx-1) % qconsts.chunk_size
+  --print("Chunk Num "..tostring(chunk_num))
+  --print("Chunk_idx "..tostring(chunk_idx))
   local temp=""
-  local cbuf = col:get_element(rowidx-1)  
-  
-  local bufsz = 1024
-  local buf = ffi.gc(ffi.C.malloc(bufsz), ffi.C.free) 
+  local len, base_data, nn_data = col:get_chunk(chunk_num)
          
-  if cbuf == ffi.NULL then
+  if base_data == ffi.NULL then
     temp = ""
   else
-    local is_SC = col:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
-    local is_SV = col:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
-    local is_I8 = col:fldtype() == "I8" 
+    local is_SC = col._qtype == "SC"    -- if field type is SC , then pass field size, else nil
+    local is_SV = col._qtype == "SV"    -- if field type is SV , then get value from dictionary
+    local is_I8 = col._qtype == "I8" 
     
-    local ctype =  qconsts.qtypes[col:fldtype()]["ctype"]
-    local str = ffi.cast(ctype.." *",cbuf)
-    temp = tostring(str[0])
+    local ctype =  qconsts.qtypes[col._qtype]["ctype"]
+    local str = ffi.cast(ctype.." *", base_data)
+    temp = tostring(str[chunk_idx])
             
     -- to check if LL is present and then remove LL appended at end of I8 number
     if is_I8 then
@@ -30,7 +31,7 @@ return function (col, rowidx)
             
             
     if is_SC == true then
-      temp = ffi.string(str)
+      temp = ffi.string(str + chunk_idx * col._width)
     end
             
     if is_SV == true then 
@@ -39,6 +40,6 @@ return function (col, rowidx)
       temp = dictionary:get_string_by_index(temp)
     end
   end
-  
+  --print("Returning "..tostring(temp))  
   return temp
 end
