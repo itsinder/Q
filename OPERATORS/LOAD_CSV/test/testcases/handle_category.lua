@@ -245,7 +245,7 @@ fns.handle_category5 = function (index, status, ret, v)
   end
   
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category5 , output of load is not a column")
       return false
     end
