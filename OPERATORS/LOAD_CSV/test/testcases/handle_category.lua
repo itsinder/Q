@@ -152,10 +152,8 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
       return false
     end
-    --TODO: instead of using member variable _qtype, use method which provides qtype.
-    -- Currently using _qtype member variable as there is no method which returns qtype.
-    local is_SC = ret._qtype == "SC"    -- if field type is SC , then pass field size, else nil
-    local is_SV = ret._qtype == "SV"    -- if field type is SV , then get value from dictionary
+    local is_SC = ret:qtype() == "SC"    -- if field type is SC , then pass field size, else nil
+    local is_SV = ret:qtype() == "SV"    -- if field type is SV , then get value from dictionary
     
     local is_string = is_SC or is_SV
     if not is_string then 

@@ -8,15 +8,15 @@ return function (col, rowidx)
   --print("Chunk_idx "..tostring(chunk_idx))
   local temp=""
   local len, base_data, nn_data = col:get_chunk(chunk_num)
-         
+  local qtype = col:qtype() 
   if base_data == ffi.NULL then
     temp = ""
   else
-    local is_SC = col._qtype == "SC"    -- if field type is SC , then pass field size, else nil
-    local is_SV = col._qtype == "SV"    -- if field type is SV , then get value from dictionary
-    local is_I8 = col._qtype == "I8" 
+    local is_SC = qtype == "SC"    -- if field type is SC , then pass field size, else nil
+    local is_SV = qtype == "SV"    -- if field type is SV , then get value from dictionary
+    local is_I8 = qtype == "I8" 
     
-    local ctype =  qconsts.qtypes[col._qtype]["ctype"]
+    local ctype =  qconsts.qtypes[qtype]["ctype"]
     local str = ffi.cast(ctype.." *", base_data)
     temp = tostring(str[chunk_idx])
             
@@ -31,7 +31,7 @@ return function (col, rowidx)
             
             
     if is_SC == true then
-      temp = ffi.string(str + chunk_idx * col._width)
+      temp = ffi.string(str + chunk_idx * col:field_width())
     end
             
     if is_SV == true then 
