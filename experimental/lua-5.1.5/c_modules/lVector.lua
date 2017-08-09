@@ -128,7 +128,7 @@ function lVector:persist(is_persist)
     assert(type(is_persist) == "boolean")
   end
   base_status = Vector.persist(self._base_vec, is_persist)
-  if ( vector._has_nulls ) then 
+  if ( self._has_nulls ) then 
     nn_status = Vector.persist(self._nn_vec, is_persist)
   end
   if ( base_status and nn_status ) then
@@ -147,7 +147,7 @@ function lVector:memo(is_memo)
     assert(type(is_memo) == "boolean")
   end
   base_status = Vector.memo(self._base_vec, is_memo)
-  if ( vector._has_nulls ) then 
+  if ( self._has_nulls ) then 
     nn_status = Vector.persist(self._nn_vec, is_memo)
   end
   if ( base_status and nn_status ) then

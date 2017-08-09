@@ -471,6 +471,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "release_vec_buf", l_vec_release_vec_buf },
     { "get_vec_buf", l_vec_get_vec_buf },
     { "put1", l_vec_put1 },
+    { "persist", l_vec_persist },
     { "set", l_vec_set },
     { "get", l_vec_get },
     { "eov", l_vec_eov },
