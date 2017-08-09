@@ -107,9 +107,12 @@ local qconsts = {}
       max_length="65" 
     }
     qtypes.SV = { 
+      min = 0, -- 0 is undefined, 1 onwards are actual values
+      max = 1048576, -- cannot have more than 1M unique strings in column
       short_code = "SV",
-      width = 4,
-      ctype = "int32_t",
+      max_txt_width = 8,
+      width = 4, -- SV is treated as I4
+      ctype = "int32_t", -- SV is treated as I4
       txt_to_ctype = "txt_to_I4",
       ctype_to_txt = "I4_to_txt",
       max_length="13"

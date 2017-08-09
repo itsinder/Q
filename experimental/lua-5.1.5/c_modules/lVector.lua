@@ -37,7 +37,7 @@ function lVector.new(arg)
   local nn_file_name
   local has_nulls
   local is_nascent
-  local is_memo = false
+  local is_memo = true
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
@@ -112,7 +112,7 @@ function lVector.new(arg)
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
-    vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, 
+    vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, is_memo,
       num_elements)
     assert(vector._nn_vec)
   end

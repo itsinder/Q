@@ -281,6 +281,9 @@ vec_check(
   int status = 0;
   status = chk_field_type(ptr_vec->field_type, ptr_vec->field_size);
   cBYE(status);
+  if ( ( ptr_vec->is_memo == false ) && ( ptr_vec->is_persist == true ) ) {
+    go_BYE(-1);
+  }
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
     if ( ( ptr_vec->is_memo == 1 ) && ( ptr_vec->chunk_num >= 1 ) ) {
@@ -350,6 +353,14 @@ vec_memo(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     ptr_vec->is_memo = is_memo;
+    if ( is_memo == false ) { 
+      memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
+    }
+    else {
+      if ( *ptr_vec->file_name == '\0' ) { 
+        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+      }
+    }
   }
   else {
     go_BYE(-1);
@@ -583,7 +594,7 @@ vec_persist(
     )
 {
   int status = 0;
-  if ( ptr_vec->is_nascent ) { go_BYE(-1); }
+  if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
   ptr_vec->is_persist = is_persist;
 BYE:
   return status;
