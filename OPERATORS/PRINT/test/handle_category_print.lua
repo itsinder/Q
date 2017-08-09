@@ -1,6 +1,6 @@
 local plstring = require 'pl.stringx'
-local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local Vector = require 'Q/experimental/lua-515/c_modules/lVector'
+local Column = require 'Q/experimental/lua-515/c_modules/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
@@ -128,16 +128,17 @@ end
 
 -- vector of type I4 is given as filter input for category 4 testcases
 fns.handle_input_category4 = function ()
-  local v1 = Vector{field_type='I4',chunk_size = 8,
-    filename= script_dir .."/bin/I4.bin",  
+  local v1 = Vector{qtype='I4',
+    file_name= script_dir .."/bin/I4.bin",  
   }
+  print(v1:length())
   return { where = v1 }
 end
 
 -- vector of type B1 is given as filter input for category 3 testcases
 fns.handle_input_category3 = function ()
-  local v1 = Vector{field_type='B1',chunk_size = 8,
-    filename= script_dir .."/bin/B1.bin",  
+  local v1 = Vector{qtype='B1', num_elements=5,
+    file_name= script_dir .."/bin/B1.bin",  
   }
   return { where = v1 }
 end
@@ -219,8 +220,8 @@ end
 fns.handle_category6 = function (index, v, M)
   -- print(v.name)
   
-  local col = Column{field_type='I4',chunk_size = 8,
-    filename= script_dir .."/bin/I4.bin",  
+  local col = Column{qtype='I4',
+    file_name= script_dir .."/bin/I4.bin",  
   }
   
   local arr = {col}
