@@ -20,7 +20,8 @@ vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
     uint32_t field_size,
-    uint32_t chunk_size
+    uint32_t chunk_size,
+    bool  is_memo
     );
 extern int
 vec_materialized(

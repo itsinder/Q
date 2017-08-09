@@ -162,6 +162,7 @@ function lVector:get_chunk_num()
 end
 
 function lVector:num_elements()
+  print("getting num_elements")
   return Vector.num_elements(self._base_vec)
 end
 
