@@ -146,7 +146,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
 
   for i=1,ret:length() do
    
-    local status, result = pcall(convert_c_to_txt,ret,i)
+    local status, result = pcall(convert_c_to_txt, ret, i)
     
     if status == false then
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
