@@ -130,11 +130,11 @@ asc2bin(
           buf_idx = 0;
         }
         if ( bit_val == 1 ) { 
-          uint8_t mask = 1 << buf_idx;
+          uint64_t mask = 1 << buf_idx;
           buf_b1 |= mask;
         }
         else {
-          uint8_t mask = ~(1 << buf_idx);
+          uint64_t mask = ~(1 << buf_idx);
           buf_b1 &= mask;
         }
         buf_idx++;

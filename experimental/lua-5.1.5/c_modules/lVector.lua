@@ -37,8 +37,13 @@ function lVector.new(arg)
   local nn_file_name
   local has_nulls
   local is_nascent
+  local is_memo = false
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
+  if ( arg.is_memo ~= nil ) then 
+    assert(type(arg.is_memo) == "boolean")
+    is_memo = arg.is_memo
+  end
   -- Validity of qtype will be checked for by vector
   qtype = assert(arg.qtype, "lVector needs qtype to be specified")
    --=============================
@@ -50,6 +55,7 @@ function lVector.new(arg)
     assert(field_width >= 2)
   else
     assert(arg.width == nil, "do not provide width except for SC")
+    field_width = qconsts.qtypes[qtype].width
   end
    --=============================
   is_read_only = false
@@ -59,7 +65,7 @@ function lVector.new(arg)
   end
 
   vector._qtype = qtype
-  vector._width = field_width
+  vector._field_width = field_width
   vector._is_read_only = is_read_only
 
   if arg.gen then 
@@ -98,7 +104,8 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, file_name, is_read_only,num_elements)
+  vector._base_vec = Vector.new(qtype, file_name, is_read_only, is_memo, 
+    num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( vector._has_nulls ) then 
@@ -112,6 +119,44 @@ function lVector.new(arg)
   return vector
 end
 
+function lVector:persist(is_persist)
+  local base_status = true
+  local nn_status = true
+  if ( is_persist == nil ) then 
+    is_persist = true
+  else
+    assert(type(is_persist) == "boolean")
+  end
+  base_status = Vector.persist(self._base_vec, is_persist)
+  if ( vector._has_nulls ) then 
+    nn_status = Vector.persist(self._nn_vec, is_persist)
+  end
+  if ( base_status and nn_status ) then
+    return self
+  else
+    return nil
+  end
+end
+
+function lVector:memo(is_memo)
+  local base_status = true
+  local nn_status = true
+  if ( is_memo == nil ) then 
+    is_memo = true
+  else
+    assert(type(is_memo) == "boolean")
+  end
+  base_status = Vector.memo(self._base_vec, is_memo)
+  if ( vector._has_nulls ) then 
+    nn_status = Vector.persist(self._nn_vec, is_memo)
+  end
+  if ( base_status and nn_status ) then
+    return self
+  else
+    return nil
+  end
+end
+
 function lVector:get_chunk_num()
   return Vector.chunk_num(self._base_vec)
 end
@@ -122,6 +167,22 @@ end
 
 function lVector:length()
   return Vector.num_elements(self._base_vec)
+end
+
+function lVector:fldtype()
+  return self._qtype
+end
+
+function lVector:qtype()
+  return self._qtype
+end
+
+function lVector:field_size()
+  return self._field_width
+end
+
+function lVector:field_width()
+  return self._field_width
 end
 
 function lVector:check()
@@ -137,6 +198,10 @@ function lVector:check()
   else
     assert(not self._nn_vec)
   end
+  -- TODO: Check that following are same for base_vec and nn_vec
+  -- (a) num_elements DONE
+  -- (b) is_persist  
+  -- (c) Anything else?
   return true
 end
 
@@ -281,7 +346,7 @@ end
 
 function lVector:set_meta(k, v)
   assert(k)
-  assert(v)
+  -- assert(v): do not do this since it is used to set meta of key to nil
   assert(type(k) == "string")
   self._meta[k] = v
 end

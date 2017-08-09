@@ -253,7 +253,8 @@ vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
     uint32_t field_size,
-    uint32_t chunk_size
+    uint32_t chunk_size,
+    bool is_memo
     )
 {
   int status = 0;
@@ -265,7 +266,7 @@ vec_new(
   status = chk_field_type(field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
-  ptr_vec->is_memo    = true; // default
+  ptr_vec->is_memo    = is_memo;
   strcpy(ptr_vec->field_type, field_type);
 
 BYE:
@@ -464,8 +465,8 @@ vec_add_B1(
     }
   }
   else {
-    uint32_t bit_idx = 0;
-    uint32_t word_idx   = 0;
+    uint32_t bit_idx  = 0;
+    uint32_t word_idx = 0;
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
       uint8_t bit_val = (((uint8_t *)addr)[word_idx] >> bit_idx) & 0x1;
