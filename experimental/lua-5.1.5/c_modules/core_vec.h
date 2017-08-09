@@ -21,7 +21,7 @@ vec_new(
     const char * const field_type,
     uint32_t field_size,
     uint32_t chunk_size,
-    bool  is_memo
+    bool is_memo
     );
 extern int
 vec_materialized(
