@@ -37,8 +37,13 @@ function lVector.new(arg)
   local nn_file_name
   local has_nulls
   local is_nascent
+  local is_memo = false
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
+  if ( arg.is_memo ~= nil ) then 
+    assert(type(arg.is_memo) == "boolean")
+    is_memo = arg.is_memo
+  end
   -- Validity of qtype will be checked for by vector
   qtype = assert(arg.qtype, "lVector needs qtype to be specified")
    --=============================
@@ -99,7 +104,8 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, file_name, is_read_only,num_elements)
+  vector._base_vec = Vector.new(qtype, file_name, is_read_only, is_memo, 
+    num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( vector._has_nulls ) then 
@@ -114,14 +120,40 @@ function lVector.new(arg)
 end
 
 function lVector:persist(is_persist)
+  local base_status = true
+  local nn_status = true
   if ( is_persist == nil ) then 
     is_persist = true
   else
     assert(type(is_persist) == "boolean")
   end
-  Vector.persist(self._base_vec, is_persist)
+  base_status = Vector.persist(self._base_vec, is_persist)
   if ( vector._has_nulls ) then 
-    Vector.persist(self._nn_vec, is_persist)
+    nn_status = Vector.persist(self._nn_vec, is_persist)
+  end
+  if ( base_status and nn_status ) then
+    return self
+  else
+    return nil
+  end
+end
+
+function lVector:memo(is_memo)
+  local base_status = true
+  local nn_status = true
+  if ( is_memo == nil ) then 
+    is_memo = true
+  else
+    assert(type(is_memo) == "boolean")
+  end
+  base_status = Vector.memo(self._base_vec, is_memo)
+  if ( vector._has_nulls ) then 
+    nn_status = Vector.persist(self._nn_vec, is_memo)
+  end
+  if ( base_status and nn_status ) then
+    return self
+  else
+    return nil
   end
 end
 

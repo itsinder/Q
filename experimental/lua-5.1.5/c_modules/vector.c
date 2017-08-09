@@ -390,6 +390,7 @@ static int l_vec_new( lua_State *L)
   }
   //-- STOP: Get qtype and field size
   bool  is_materialized;
+  bool is_memo = true;
   const char *file_name = NULL; 
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);
@@ -403,17 +404,22 @@ static int l_vec_new( lua_State *L)
       is_read_only = lua_toboolean(L, 3);
     }
   }
+  if ( lua_isboolean(L, 4) ) { // is_memo specified
+    is_memo = lua_toboolean(L, 4);
+  }
+
   int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
 
   VEC_REC_TYPE *ptr_vec = NULL;
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
-  status = vec_new(ptr_vec, qtype, field_size, chunk_size); cBYE(status);
+  status = vec_new(ptr_vec, qtype, field_size, chunk_size, is_memo); 
+  cBYE(status);
 
   // do this after mallocing and memsetting the vector structure
   int64_t num_elements = -1;
   if ( ( strcmp(qtype, "B1") == 0 ) && ( is_materialized ) ) {
-    num_elements = luaL_checknumber(L, 4);
+    num_elements = luaL_checknumber(L, 5);
     ptr_vec->num_elements = num_elements;
     if ( num_elements <= 0 ) { go_BYE(-1); }
   }
