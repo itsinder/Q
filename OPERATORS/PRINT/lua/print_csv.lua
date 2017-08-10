@@ -118,6 +118,7 @@ local print_csv = function (column_list, filter, opfile)
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
+      assert(fp ~= nil, g_err.INVALID_FILE_PATH)
       io.output(fp)
     else
       io.output(io.stdout)
