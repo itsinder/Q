@@ -26,9 +26,9 @@ return function (col, rowidx)
       local char_value = casted + char_idx
       local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
       if bit_value == 0 then
-         val = ffi.NULL
+         val = 0
       else
-         val =  1
+         val = 1
       end
     else
       val = tostring(casted[chunk_idx])
@@ -58,10 +58,10 @@ return function (col, rowidx)
       local char_value = nn_casted + char_idx
       local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
       if bit_value == 0 then
-         nn_val = ffi.NULL
+         nn_val = 0
          val = ""
       else
-         nn_val =  1
+         nn_val = 1
       end    
     end
   end
