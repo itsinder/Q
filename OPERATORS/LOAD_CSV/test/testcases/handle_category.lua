@@ -216,11 +216,11 @@ fns.handle_category4 = function (index, status, ret, v)
   end
   local sum = {}
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , output of load is not a column")
       return false
     end
-    sum[i] = ret[i]:length() * ret[i]:sz()
+    sum[i] = ret[i]:length() * ret[i]:field_size()
     if sum[i] ~= output[i] then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , size of each column not matching with output regex")
       return false
