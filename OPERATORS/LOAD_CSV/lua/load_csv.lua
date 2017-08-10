@@ -36,7 +36,7 @@ local function mk_out_buf(
       end
       assert(stridx,
       err_msg .. "dictionary does not have string " .. ffi.string(in_buf))
-      ffi.cast("int *", out_buf)[0] = stridx
+      ffi.cast("int32_t *", out_buf)[0] = stridx
     end   
     --=======================================
     if m.qtype == "SC" then 

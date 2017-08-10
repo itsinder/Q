@@ -44,9 +44,10 @@ return function (col, rowidx)
     elseif ( qtype == "SC" ) then
       val = ffi.string(casted + chunk_idx * col:field_width())
     elseif ( qtype == "SV" ) then 
-      val = casted[0]
+      --print("Index: "..tostring(val))
       local dictionary = col:get_meta("dir")
-      val = dictionary:get_string_by_index(val)
+      val = dictionary:get_string_by_index(tonumber(val))
+      --print("Value: "..tostring(val))
     end
 
     -- Check for nn vector
