@@ -107,7 +107,9 @@ for i = 1, num_elements do
   assert(x:check())
 end
 x:eov()
+assert(x:check())
 md = pr_meta(x, "_meta_data")
+-- print(">>>> ", md.base.file_name)
 assert(plpath.getsize(md.base.file_name) == num_elements * field_size)
 -- Check that nn_file_name does not exist
 local s = plfile.read("_meta_data")

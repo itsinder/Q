@@ -245,6 +245,13 @@ static int l_vec_set( lua_State *L) {
     else if ( strcmp(ptr_vec->field_type, "F8") == 0 ) { 
       double val = dtemp; memcpy(&buf, &val, 8);
     }
+    // Note that SV is treated as I4
+    else if ( strcmp(ptr_vec->field_type, "SV") == 0 ) { 
+      int32_t val = dtemp; memcpy(&buf, &val, 4);
+    }
+    else {
+      go_BYE(-1);
+    }
     addr = (char *)&buf;
     len = 1;
   }
@@ -383,7 +390,7 @@ static int l_vec_new( lua_State *L)
     strcpy(qtype, "SC");
   }
   else if ( strcmp(qtype_sz, "SV") == 0 ) { 
-    fprintf(stderr, "TO BE IMPLEMENTED\n"); go_BYE(-1); 
+    strcpy(qtype, qtype_sz); field_size = 4; // SV is stored as I4
   }
   else {
     go_BYE(-1);

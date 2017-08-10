@@ -118,7 +118,7 @@ assert(y:check())
 --================================
 ---- test put_chunk
 y = Vector.new('I4')
-assert(not y:persist()) -- cannot persist when nascent
+assert(y:persist()) -- can persist when nascent
 local buf = cmem.new(chunk_size * 4)
 local start = 1
 local incr  = 1
