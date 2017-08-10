@@ -145,11 +145,9 @@ local print_csv = function (column_list, filter, opfile)
           if status == false then
             --TODO: Handle this condition
           end         
-
           if result == nil then
-            if is_B1 then result = 0 else result = "" end
+            if is_B1[col_idx] == true then result = 0 else result = "" end
           end
- 
           if ( not ( is_SC[col_idx] or is_SV[col_idx] ) ) 
           and ( result ~= "" ) then
             result = tonumber(result)
