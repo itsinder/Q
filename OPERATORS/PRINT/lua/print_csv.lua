@@ -133,7 +133,7 @@ local print_csv = function (column_list, filter, opfile)
       status, result = pcall(convert_c_to_txt, where, rowidx)
     end
     if ( ( where == nil ) or 
-         ( result ~= "" ) ) then
+         ( result ~= nil ) ) then
       for col_idx = 1, num_cols do
         local status, result = nil
         local col = column_list[col_idx]
@@ -144,10 +144,12 @@ local print_csv = function (column_list, filter, opfile)
           status, result = pcall(convert_c_to_txt, col, rowidx)
           if status == false then
             --TODO: Handle this condition
-          end          
-          if result == nil then 
-            result = "" 
-          end          
+          end         
+
+          if result == nil then
+            if is_B1 then result = 0 else result = "" end
+          end
+ 
           if ( not ( is_SC[col_idx] or is_SV[col_idx] ) ) 
           and ( result ~= "" ) then
             result = tonumber(result)

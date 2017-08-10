@@ -154,14 +154,14 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     end
     local is_SC = ret:qtype() == "SC"    -- if field type is SC , then pass field size, else nil
     local is_SV = ret:qtype() == "SV"    -- if field type is SV , then get value from dictionary
-    
+   
+    if result == nil then result = "" end 
     local is_string = is_SC or is_SV
-    if not is_string then 
+    if ( ( not is_string ) and ( result ~= "" ) ) then 
       result = tonumber(result)
     end
     --print(result, output[i])
     -- if result is nil, then set to empty string
-    if result == nil then result = "" end
     if result ~= output[i] then 
       fns["increment_failed_load"](index, v, "testcase category2 failed , \nresult="..result.." \noutput["..i.."]="..output[i].."\n")
       return false

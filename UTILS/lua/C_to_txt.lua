@@ -15,7 +15,7 @@ return function (col, rowidx)
   --TODO: check below condition if it is proper or not
   if len == nil or len == 0 then return 0 end
   if base_data == ffi.NULL then
-    val = ""
+    val = ffi.NULL
   else
     local qtype = col:qtype()
     local ctype =  qconsts.qtypes[qtype]["ctype"]
@@ -26,7 +26,7 @@ return function (col, rowidx)
       local char_value = casted + char_idx
       local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
       if bit_value == 0 then
-         val = 0
+         val = ffi.NULL
       else
          val = 1
       end
@@ -60,8 +60,8 @@ return function (col, rowidx)
       local char_value = nn_casted + char_idx
       local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
       if bit_value == 0 then
-         nn_val = 0
-         val = ""
+         nn_val = ffi.NULL
+         val = ffi.NULL
       else
          nn_val = 1
       end    

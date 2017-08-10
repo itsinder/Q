@@ -6,7 +6,6 @@ local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
-
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
 
@@ -131,13 +130,12 @@ fns.handle_input_category4 = function ()
   local v1 = Vector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
-  print(v1:length())
   return { where = v1 }
 end
 
 -- vector of type B1 is given as filter input for category 3 testcases
 fns.handle_input_category3 = function ()
-  local v1 = Vector{qtype='B1', num_elements=5,
+  local v1 = Vector{qtype='B1', num_elements=4,
     file_name= script_dir .."/bin/B1.bin",  
   }
   return { where = v1 }
@@ -180,7 +178,6 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
   end
   
   local expected_file_content = file.read(csv_file)
-  
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then

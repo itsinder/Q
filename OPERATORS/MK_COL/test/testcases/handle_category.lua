@@ -94,7 +94,9 @@ fns.category2 = function (index, v, status, ret)
   for i=1,ret:length() do  
     local status, result = pcall(convert_c_to_txt, ret, i)
     assert(status, "Failed to get the value from vector at index: "..tostring(i))
-    if result == nil then result = "" end
+    if result == nil then 
+      if ret:qtype() == "B1" then result = 0 else result = "" end
+    end
     local is_float = ret:qtype() == "F4" or ret:qtype() == "F8"
     -- to handle the extra decimal values put in case of Float
     if is_float then
