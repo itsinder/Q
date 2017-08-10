@@ -226,14 +226,14 @@ fns.handle_category6 = function (index, v, M)
   
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
-  local status, print_ret = pcall(print_csv, arr, nil, "testcase_consumable.csv")
+  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
+  local status, print_ret = pcall(print_csv, arr, nil, filename)
   if status then
-    local status, load_ret = pcall(load_csv,"testcase_consumable.csv", M)
-    --print(status, load_ret)
+    local status, load_ret = pcall(load_csv, filename, M)
+    filename = load_ret[1]:meta().base.file_name
   end
   --print(M[1].name)
   -- local filename = _G["Q_DATA_DIR"].."_"..M[1].name
-  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
   --print(filename) /home/pragati/Q/DATA_DIR/
   
   local actual_file_content1 = file.read(script_dir .."/bin/I4.bin")

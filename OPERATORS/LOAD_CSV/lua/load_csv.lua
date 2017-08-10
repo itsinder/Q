@@ -119,6 +119,7 @@ load_csv = function (
           qtype=M[col_idx].qtype,
           gen = true,
           width=field_size,
+          is_memo=true,
           has_nulls=M[col_idx].has_nulls }
         --==============================
         M[col_idx].num_nulls = 0
