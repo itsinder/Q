@@ -31,16 +31,18 @@ return function (col, rowidx)
          val = 1
       end
     else
-      val = tostring(casted[chunk_idx])
+      val = casted[chunk_idx]
     end
             
     -- to check if LL is present and then remove LL appended at end of I8 number
     if ( qtype == "I8" ) then
+      val = tostring(val)
       local index1, index2 = string.find(val,"LL")
       local string_length = #val
       if index1 == string_length-1 and index2 == string_length then
         val = string.sub(val, 1, -3) 
       end
+      val = tonumber(val)
     elseif ( qtype == "SC" ) then
       val = ffi.string(casted + chunk_idx * col:field_width())
     elseif ( qtype == "SV" ) then 
