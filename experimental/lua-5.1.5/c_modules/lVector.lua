@@ -37,7 +37,7 @@ function lVector.new(arg)
   local nn_file_name
   local has_nulls
   local is_nascent
-  local is_memo = true
+  local is_memo = true -- default to true
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
