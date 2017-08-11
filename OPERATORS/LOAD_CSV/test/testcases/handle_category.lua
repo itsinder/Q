@@ -154,8 +154,11 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     end
     local is_SC = ret:qtype() == "SC"    -- if field type is SC , then pass field size, else nil
     local is_SV = ret:qtype() == "SV"    -- if field type is SV , then get value from dictionary
-   
-    if result == nil then result = "" end 
+
+    if result == nil then
+      if ret:qtype() == "B1" then result = 0 else result = "" end
+    end
+ 
     local is_string = is_SC or is_SV
     if ( ( not is_string ) and ( result ~= "" ) ) then 
       result = tonumber(result)
