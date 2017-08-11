@@ -40,13 +40,22 @@ which luajit &> /dev/null
 RES=$?
 if [[ $RES -ne 0 ]] ; then
    my_print "Installing luajit from source"
-   wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
-   tar -xvf LuaJIT-2.0.4.tar.gz
-   cd LuaJIT-2.0.4/
+   #wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
+   wget http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
+   #tar -xvf LuaJIT-2.0.4.tar.gz
+   tar -xvf LuaJIT-2.1.0-beta3.tar.gz
+   #cd LuaJIT-2.0.4/
+   cd LuaJIT-2.1.0-beta3/
+   sed -i '114s/#//' src/Makefile # to enable gc64 
    make TARGET_FLAGS=-pthread
    sudo make install
+   cd /usr/local/bin
+   sudo ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
+   cd -
    cd ../
-   rm -rf LuaJIT-2.0.4
+   rm -rf LuaJIT-2.1.0-beta3
+   
+   # rm -rf LuaJIT-2.0.4
    echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
    echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 else

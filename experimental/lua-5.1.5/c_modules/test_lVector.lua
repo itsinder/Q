@@ -161,6 +161,7 @@ local num_chunks = 10
 local chunk_size = qconsts.chunk_size
 for chunk_num = 1, num_chunks do 
   a, b, c = x:get_chunk(chunk_num-1)
+  assert(a == chunk_size)
   x:check()
 end
 x:eov()
