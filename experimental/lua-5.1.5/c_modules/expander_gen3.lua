@@ -2,7 +2,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'
 local lVector = require 'lVector'
-
+local dbg = require 'Q/UTILS/lua/debugger'
 local function expander_gen3(f1, f2)
   -- start: hard coding for this test case
   local counter = 1
@@ -10,10 +10,11 @@ local function expander_gen3(f1, f2)
   local qtype = "I4"
   -- stop : hard coding for this test case
   local field_size = qconsts.qtypes[qtype].width
-  local base_data = assert(cmem.new(chunk_size * field_size))
+  local base_data = ffi.cast("int*", assert(cmem.new(chunk_size * field_size)))
    -- currently exapnds f1 with the number of times given in f2
    local state = {}
    local function gen3(chunk_idx, col)
+      dbg()
       local start_f1, f1_len, f1_chunk, f1_chunk_num
       local start_f2, f2_len, f2_chunk, f2_chunk_num
       local count, init_count
@@ -34,14 +35,18 @@ local function expander_gen3(f1, f2)
       repeat
          f1_len, f1_chunk = f1:get_chunk(f1_chunk_num)
          f2_len, f2_chunk = f2:get_chunk(f2_chunk_num)
-         if f1_len == 0 or f2_len == 0 then
+         dbg()
+	 f1_chunk = ffi.cast("int*", f1_chunk)
+	 f2_chunk = ffi.cast("int*", f1_chunk)
+	 if f1_len == 0 or f2_len == 0 then
             break
          end
-         for f1_index=start_f1, f1_chunk_num do
-            local f1_val = f1_chunk[f1_index]
-            for f2_index=start_f2, f2_chunk_num do
-               local f2_val = f2_chunk[f2_index]
+         for f1_index=start_f1, f1_len do
+	    local f1_val = f1_chunk[f1_index - 1]
+            for f2_index=start_f2, f2_len do
+               local f2_val = f2_chunk[f2_index - 1]
                for iter=init_count, f2_val do
+		  dbg()
                   base_data[data_size] = f1_val
                   -- check if full
                   if data_size + 1 == chunk_size then
@@ -54,7 +59,9 @@ local function expander_gen3(f1, f2)
                      prev.curr_chunk = chunk_idx
                      state.prev = prev
                      return chunk_size, base_data, nil
-                  end
+                   else
+                     data_size = data_size + 1
+		   end
                end
             end
          end
