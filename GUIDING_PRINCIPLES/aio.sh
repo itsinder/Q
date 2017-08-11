@@ -50,7 +50,7 @@ if [[ $RES -ne 0 ]] ; then
    make TARGET_FLAGS=-pthread
    sudo make install
    cd /usr/local/bin
-   ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
+   sudo ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
    cd -
    cd ../
    rm -rf LuaJIT-2.1.0-beta3
