@@ -76,7 +76,7 @@ local mk_col = function (input, qtype)
     -- TODO: Look for bit operation in Lua or can we use C code (shift operator) instead of below arithmetic
     for k, v in ipairs(input) do
       if v == 1 then
-        local char_idx = (k-1) / 8
+        local char_idx = math.floor((k-1) / 8)
         local bit_idx = (k-1) % 8
         local char_value = casted + char_idx
         local result = tonumber( qc.set_bit(char_value, bit_idx) )        
