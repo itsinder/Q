@@ -31,6 +31,12 @@ if [[ $RES -ne 0 ]] ; then
    sudo apt-get install lua5.1 -y
    sudo apt-get install liblua5.1-dev -y
    sudo apt-get install unzip -y # for luarocks
+   sudo apt-get install libncurses5-dev # for lua-5.1.5
+   wget https://www.lua.org/ftp/lua-5.1.5.tar.gz
+   tar -xvzf lua-5.1.5.tar.gz
+   cd lua-5.1.5/
+   make linux
+   sudo make install
 else
    my_print "Lua is already installed"
 fi
