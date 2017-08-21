@@ -4,7 +4,7 @@ local err           = require 'Q/UTILS/lua/error_code'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local qc            = require 'Q/UTILS/lua/q_core'
-local cmem    = require 'libcmem'
+local cmem    = require 'Q/experimental/lua-515/c_modules/libcmem'
 
 local Dictionary = require 'Q/UTILS/lua/dictionary'
 local Column     = require 'Q/experimental/lua-515/c_modules/lVector'
@@ -17,13 +17,12 @@ local function mk_out_buf(
   in_buf, 
   m,  -- m is meta data for field 
   d,  -- d is dictiomnary for field 
-  out_buf,
-  err_msg
+  out_buf
 )
     local in_buf_len = assert( tonumber(ffi.C.strlen(in_buf)))
 
     if m.qtype == "SV" then 
-      assert(in_buf_len <= m.max_width, err_msg .. err.STRING_TOO_LONG)
+      assert(in_buf_len <= m.max_width, err.STRING_TOO_LONG)
       local stridx = nil
       if ( in_buf_len == 0 ) then
         stridx = 0
@@ -35,12 +34,12 @@ local function mk_out_buf(
         end
       end
       assert(stridx,
-      err_msg .. "dictionary does not have string " .. ffi.string(in_buf))
-      ffi.cast("int32_t *", out_buf)[0] = stridx
+      "dictionary does not have string " .. ffi.string(in_buf))
+      ffi.cast(qconsts.qtypes.I4.ctype .. " *", out_buf)[0] = stridx
     end   
     --=======================================
     if m.qtype == "SC" then 
-      assert(in_buf_len <= m.width, err_msg .. err.STRING_TOO_LONG)
+      assert(in_buf_len <= m.width, err.STRING_TOO_LONG)
       ffi.copy(out_buf, in_buf, in_buf_len)
     end
     --=======================================
@@ -174,16 +173,16 @@ load_csv = function (
       
       ffi.fill(in_buf, max_txt_width, 0) -- always init to 0        
       -- create an error message that might be needed
-      local err_msg = "error in row " .. row_idx .. " column " .. col_idx
+      -- local err_msg = "error in row " .. row_idx .. " column " .. col_idx
       x_idx = tonumber(
       qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
-      assert(x_idx > 0 , err_msg .. err.INVALID_INDEX_ERROR)
+      assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
       if ( M[col_idx].is_load ) then 
         local str = plstring.strip(ffi.string(in_buf))
         local is_null = (str == "")
         -- Process null value case
         if is_null then 
-          assert(M[col_idx].has_nulls, err_msg .. err.NULL_IN_NOT_NULL_FIELD) 
+          assert(M[col_idx].has_nulls, err.NULL_IN_NOT_NULL_FIELD) 
           M[col_idx].num_nulls = M[col_idx].num_nulls + 1
         else
           local temp_out_buf = ffi.cast("char *", out_buf_array[col_idx]) + (num_in_out_buf * field_size)
@@ -192,7 +191,7 @@ load_csv = function (
           local index = math.floor((num_in_out_buf)/64)
           temp_nn_out_buf[index] = temp_nn_out_buf[index] + math.pow(2, num_in_out_buf)
           
-          mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf, err_msg)            
+          mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)            
         end
       end
         
