@@ -148,7 +148,7 @@ function lVector:memo(is_memo)
   end
   base_status = Vector.memo(self._base_vec, is_memo)
   if ( self._has_nulls ) then 
-    nn_status = Vector.persist(self._nn_vec, is_memo)
+    nn_status = Vector.memo(self._nn_vec, is_memo)
   end
   if ( base_status and nn_status ) then
     return self
