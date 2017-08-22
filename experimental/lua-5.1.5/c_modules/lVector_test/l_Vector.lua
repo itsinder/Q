@@ -47,6 +47,11 @@ end
 -- field_size - required by generate_values function
 return function( M, gen_method, num_elements , field_size)
   local x = lVector( M )
-  local vector = generate_values(x, gen_method, num_elements, field_size, M.qtype)
-  return vector
+  -- calling gen method of nascent vector 
+  -- for generating values ( can be scalar, gen_func, iter )
+  if gen_method then 
+    local vector, num_chunks, chunk_size = generate_values(x, gen_method, num_elements, field_size, M.qtype)
+    return vector
+  end
+  return x
 end
