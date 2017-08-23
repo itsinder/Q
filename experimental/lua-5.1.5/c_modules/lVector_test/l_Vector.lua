@@ -12,8 +12,9 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 -- here in generate_values function like itr*10 
 local generate_values = function( vec, gen_method, num_elements, field_size, qtype)
   local base_data = cmem.new(num_elements * field_size)
-  local iptr = ffi.cast("int32_t *", base_data)
-  
+  local ctype = qconsts.qtypes[qtype].ctype
+  local iptr = ffi.cast(ctype .. " *", base_data)
+
   if gen_method == "itr" then 
     for itr = 1, num_elements do
       iptr[itr-1] = itr*10

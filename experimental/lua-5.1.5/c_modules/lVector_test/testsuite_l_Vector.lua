@@ -5,6 +5,8 @@ local fns =  require 'Q/experimental/lua-515/c_modules/lVector_test/assert_valid
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
+local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+
 local assert_valid = function(test_type, test_name, gen_method, num_elements, field_size)
   return function (x)
     -- common checks for nascent and materialized vectors
@@ -24,11 +26,14 @@ local create_tests = function()
   local T = dofile(script_dir .."/map_lVector.lua")
   for i, v in ipairs(T) do
     local qtype
-    if v.qtype then qtype = v.qtype end
+    if v.qtype then qtype = v.qtype else qtype = all_qtype end
     for j in pairs(qtype) do
       local M
       if v.meta then
         M = dofile(script_dir .."/meta_data/"..v.meta)
+        if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then 
+          M.file_name = string.gsub( M.file_name, "${q_type}", qtype[j] )
+        end
       end
       M.qtype = qtype[j]
       local test_name = v.name .. "_" .. qtype[j]

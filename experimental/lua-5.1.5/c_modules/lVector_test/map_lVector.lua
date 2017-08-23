@@ -21,13 +21,13 @@ return {
 
   -- generating values by itr
   { test_type = "nascent_vector", name = "Creation of nascent vector_itr", meta = "gm_create_nascent_vector3.lua",
-    num_elements = 10, gen_method = "itr", qtype = { "I4" }  },
+    num_elements = 10, gen_method = "itr", qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }  },
   
   
   -- creating materialized vectors 
   -- without nulls 
  
   {  test_type = "materialized_vector", name = "Creation of materialized vector", meta = "gm_create_materialize_vector.lua",
-     num_elements = 10, qtype = { "I1", "I2", "I4", "I8" } }, 
-  
+     num_elements = 10, qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } }, 
+
 }
