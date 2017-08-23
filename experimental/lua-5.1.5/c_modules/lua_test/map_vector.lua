@@ -10,12 +10,26 @@
 return { 
   -- creating nascent vectors
   -- without nulls
-
-  -- generating values by providing gen1 function
-  { test_type = "nascent_vector", name = "create_nascent_vector1", meta = "gm_create_nascent_vector1.lua",
-    num_elements = 100 , gen_method = "cmem_buf", qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } },
   
-  { test_type = "nascent_vector", name = "create_nascent_vector2", meta = "gm_create_nascent_vector1.lua",
-    num_elements = 100 , gen_method = "scalar", qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } }   
+  -- generating values with cmem_buf
+  {
+    testcase_no = 1,
+    test_type = "nascent_vector1",
+    name = "create_nascent_vector1", 
+    meta = "gm_create_nascent_vector1.lua", 
+    num_elements = 1000, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  },
   
+  -- generating values with scalar
+  {
+    testcase_no = 2,
+    test_type = "nascent_vector1",
+    name = "create_nascent_vector1", 
+    meta = "gm_create_nascent_vector1.lua", 
+    num_elements = 1000, 
+    gen_method = "scalar", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  }
 }

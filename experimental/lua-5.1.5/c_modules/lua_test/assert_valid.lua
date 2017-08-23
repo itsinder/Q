@@ -1,40 +1,60 @@
 local plfile  = require 'pl.file'
 local plpath  = require 'pl.path'
 local dbg    = require 'Q/UTILS/lua/debugger'
+local vec_utils = require 'Q/experimental/lua-515/c_modules/lua_test/vec_utility'
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
 
 --===================
-local pr_meta = function (x, file_name)
-  local T = loadstring(x:meta())()
-  local temp = io.output() -- this is for debugger to work 
-  io.output(file_name)
-  io.write(" return { ")
-  for k1, v1 in pairs(T) do 
-    for k2, v2 in pairs(v1) do 
-      io.write(k1 .. "_" ..  k2 .. " = \"" .. tostring(v2) .. "\",")
-      io.write("\n")
-    end
+local validate_meta = function(meta, is_eov)
+  local status = true
+  if is_eov then
+    assert(meta.is_nascent == false)
+    assert(meta.file_name)
+    assert(plpath.exists(meta.file_name))
+  else
+    assert(meta.is_nascent == true)
   end
-  io.write(" } ")
-  io.close()
-  io.output(temp) -- this is for debugger to work 
-  return T
+  return status
 end
---=========================
-local compare = function (f1, f2)
-  local s1 = plfile.read(f1)
-  local s2 = plfile.read(f2)
-  assert(s1 == s2, "mismatch in " .. f1 .. " and " .. f2)
-end
---=========================
 
-fns.assert_nascent_vector = function(vec, test_name, num_elements, field_size, gen_method)
-  vec:eov()
-  --local md = pr_meta(vec, script_dir.. "/_meta_"..test_name)
+fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
+  -- Validate metadata
   local md = loadstring(vec:meta())()
-  assert(plpath.getsize(md.file_name) == num_elements * field_size)
+  local status = validate_meta(md, false)
+  assert(status, "Metadata validation failed before vec:eov()")
+  
+  -- calling gen method for nascent vector to generate values ( can be scalar or cmem buffer )
+  if gen_method then
+    status = vec_utils.generate_values(vec, gen_method, num_elements, md.field_size, md.field_type)
+    assert(status, "Failed to generate values for nascent vector")
+  end
+  
+  -- Call vector eov
+  vec:eov()
+  assert(vec:check())
+  
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  -- Validate metadata after vec:eov()
+  md = loadstring(vec:meta())()
+  status = validate_meta(md, true)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  --[[
+  for i, v in pairs(md) do
+    print(i, v)
+  end
+  os.exit()
+  ]]
+  
+  -- Check file size
+  assert(plpath.getsize(md.file_name) == num_elements * md.field_size)
+  
+  -- Check number of elements in vector
   assert( vec:num_elements() == num_elements )
   return true
 end
