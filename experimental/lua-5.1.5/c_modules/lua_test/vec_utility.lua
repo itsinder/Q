@@ -15,7 +15,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
     local expected = i*15 % qconsts.qtypes[qtype].max
     if ( iptr[i - 1] ~= expected ) then
       status = false
-      print("Value mismatch at index " .. i ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
+      print("Value mismatch at index " .. tostring(i) ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
       break
     end
   end

@@ -12,24 +12,24 @@ return {
   -- creating nascent vectors
   -- without nulls
   
-  -- generating values with cmem_buf
+  -- nascent vector : generating values with cmem_buf
   {
     test_type = "nascent_vector1",
     name = "create_nascent_vector_cmem_buf", 
     meta = "gm_create_nascent_vector1.lua", 
-    num_elements = 100000, 
+    num_elements = 65540, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- generating values with scalar
+  -- nascent vector : generating values with scalar
   {
     test_type = "nascent_vector1",
     name = "create_nascent_vector_scalar", 
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 1000, 
     gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
   -- nascent vector with is_memo false
@@ -39,7 +39,7 @@ return {
     meta = "gm_create_nascent_vector2.lua", 
     num_elements = 10, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }  
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
 
   -- nascent vector with is_read_only true
@@ -51,7 +51,7 @@ return {
     meta = "gm_create_nascent_vector3.lua", 
     num_elements = 10, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }    
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
   -- try modifying memo after chunk is full, operation should fail
@@ -61,7 +61,16 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = qconsts.chunk_size, 
     gen_method = "cmem_buf", 
-    qtype = { "I1" }    
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- materialized vector
+  {
+    test_type = "materialized_vector",
+    name = "create_materialized_vector", 
+    meta = "gm_create_materialized_vector.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
   
 }

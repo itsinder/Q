@@ -4,6 +4,7 @@ local dbg    = require 'Q/UTILS/lua/debugger'
 local vec_utils = require 'Q/experimental/lua-515/c_modules/lua_test/vec_utility'
 local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi = require 'Q/UTILS/lua/q_ffi'
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
@@ -161,18 +162,31 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
 end
 
 fns.assert_materialized_vector = function(vec, test_name, num_elements)
-  pr_meta(vec, script_dir.. "/_meta_"..test_name)
+  -- Validate metadata
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  local status = validate_vec_meta(md, is_materialized)
+  assert(status, "Metadata validation failed for materialized vector")  
+  
+  -- Check num elements
   local n = vec:num_elements()
   print("length of vector",n)
-  -- assert(n == num_elements)
-  local len, base_data, nn_data = vec:get_chunk()
-  assert(base_data)
-  assert(not nn_data)
-  assert(len)
+  assert(n == num_elements)
   
-  len, base_data, nn_data = vec:get_chunk(100)
-  assert(not base_data)
-  assert(not nn_data)
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  -- Try setting value
+  local test_value = 101
+  local s1 = Scalar.new(test_value, md.field_type)
+  status = vec:set(s1, 0)
+  assert(status)
+  assert(vec:check())
+  
+  -- Validate modified value
+  local ret_addr, ret_len = vec:get_chunk(0);
+  assert(test_value == ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", ret_addr)[0])
   
   return true
 end

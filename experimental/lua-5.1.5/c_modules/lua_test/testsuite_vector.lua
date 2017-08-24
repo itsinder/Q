@@ -32,6 +32,11 @@ local create_tests = function()
       if v.meta then
         M = dofile(script_dir .."/meta_data/"..v.meta)
       end
+      
+      if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then
+        M.file_name = string.gsub( M.file_name, "${q_type}", qtype )
+      end
+      
       M.qtype = qtype
       if v.num_elements then
         M.num_elements = v.num_elements
