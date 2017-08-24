@@ -14,7 +14,8 @@ return {
   
   -- nascent vector : generating values with cmem_buf
   {
-    test_type = "nascent_vector1",
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector1",
     name = "create_nascent_vector_cmem_buf", 
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 65540, 
@@ -24,7 +25,8 @@ return {
   
   -- nascent vector : generating values with scalar
   {
-    test_type = "nascent_vector1",
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector1",
     name = "create_nascent_vector_scalar", 
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 1000, 
@@ -34,7 +36,8 @@ return {
   
   -- nascent vector with is_memo false
   {
-    test_type = "nascent_vector2",
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector2",
     name = "create_nascent_vector_memo_false", 
     meta = "gm_create_nascent_vector2.lua", 
     num_elements = 10, 
@@ -46,7 +49,8 @@ return {
   -- try writing to read only vector
   -- for nascent vec, is_read_only is effective at vec:eov(true)
   {
-    test_type = "nascent_vector3",
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector3",
     name = "write_to_nascent_vector_read_only", 
     meta = "gm_create_nascent_vector3.lua", 
     num_elements = 10, 
@@ -56,7 +60,8 @@ return {
   
   -- try modifying memo after chunk is full, operation should fail
   {
-    test_type = "nascent_vector4",
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector4",
     name = "update_memo_after_chunk_size", 
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = qconsts.chunk_size, 
@@ -67,10 +72,50 @@ return {
   -- materialized vector
   {
     test_type = "materialized_vector",
+    assert_fns = "materialized_vector1",
     name = "create_materialized_vector", 
-    meta = "gm_create_materialized_vector.lua",
+    meta = "gm_create_materialized_vector1.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },  
+  },
+
+  -- materialized vector, set value at wrong index
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector2",
+    name = "create_materialized_vector", 
+    meta = "gm_create_materialized_vector1.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },    
+
+  -- materialized vector, try eov
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector3",
+    name = "create_materialized_vector", 
+    meta = "gm_create_materialized_vector1.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },      
+    
+  -- read only materialized vector, try modifying value
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector4",
+    name = "create_materialized_vector", 
+    meta = "gm_create_materialized_vector2.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },        
   
+  -- create materialized vector where file is not present
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector5",
+    name = "create_materialized_vector", 
+    meta = "gm_create_materialized_vector3.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },          
 }

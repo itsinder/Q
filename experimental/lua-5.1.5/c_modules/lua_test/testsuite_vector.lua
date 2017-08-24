@@ -7,13 +7,13 @@ local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
 local allowed_qtypes = {'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV'}
 
-local assert_valid = function(test_type, test_name, gen_method, num_elements)
+local assert_valid = function(assert_fns, test_name, gen_method, num_elements)
   return function (x)
     -- common checks for nascent and materialized vectors
     assert(x:check())
     
     -- calling the assert function based on type of vector
-    local function_name = "assert_" .. test_type
+    local function_name = "assert_" .. assert_fns
     local status = fns[function_name](x, test_name, num_elements, gen_method)
     
     return status
@@ -45,7 +45,7 @@ local create_tests = function()
       if v.gen_method then gen_method = v.gen_method end
       table.insert(tests, {
         input = { M },
-        check = assert_valid( v.test_type, test_name, gen_method, v.num_elements),
+        check = assert_valid( v.assert_fns, test_name, gen_method, v.num_elements),
         name = test_name,
       })                      
     end

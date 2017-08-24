@@ -161,7 +161,7 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   return true
 end
 
-fns.assert_materialized_vector = function(vec, test_name, num_elements)
+fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- Validate metadata
   local md = loadstring(vec:meta())()
   local is_materialized = true
@@ -170,7 +170,6 @@ fns.assert_materialized_vector = function(vec, test_name, num_elements)
   
   -- Check num elements
   local n = vec:num_elements()
-  print("length of vector",n)
   assert(n == num_elements)
   
   -- Validate vector values
@@ -188,6 +187,82 @@ fns.assert_materialized_vector = function(vec, test_name, num_elements)
   local ret_addr, ret_len = vec:get_chunk(0);
   assert(test_value == ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", ret_addr)[0])
   
+  return true
+end
+
+fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
+  -- Validate metadata
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  local status = validate_vec_meta(md, is_materialized)
+  assert(status, "Metadata validation failed for materialized vector")  
+  
+  -- Check num elements
+  local n = vec:num_elements()
+  assert(n == num_elements)
+  
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  -- Try setting value at wrong index, this should fail
+  local test_value = 101
+  local s1 = Scalar.new(test_value, md.field_type)
+  status = vec:set(s1, num_elements + 1)
+  assert(status == nil)
+  
+  return true
+end
+
+fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
+  -- Validate metadata
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  local status = validate_vec_meta(md, is_materialized)
+  assert(status, "Metadata validation failed for materialized vector")  
+  
+  -- Check num elements
+  local n = vec:num_elements()
+  assert(n == num_elements)
+  
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  -- Try setting value at wrong index, this should fail
+  status = vec:eov()
+  assert(status == nil)
+  
+  return true
+end
+
+fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
+  -- Validate metadata
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  local status = validate_vec_meta(md, is_materialized)
+  assert(status, "Metadata validation failed for materialized vector")  
+  
+  -- Check num elements
+  local n = vec:num_elements()
+  assert(n == num_elements)
+  
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  -- Try setting value
+  local test_value = 101
+  local s1 = Scalar.new(test_value, md.field_type)
+  status = vec:set(s1, 0)
+  assert(status == nil)
+  
+  return true
+end
+
+fns.assert_materialized_vector5 = function(vec, test_name, num_elements)
+  print(vec)
+  assert(vec == nil)
   return true
 end
 
