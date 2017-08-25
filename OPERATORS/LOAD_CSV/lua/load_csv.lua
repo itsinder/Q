@@ -135,10 +135,10 @@ load_csv = function (
         end
 
         -- Allocate memory for output buf and add to pool
-        table.insert(out_buf_array, cmem.new(out_buf_size * field_size))
+        out_buf_array[#out_buf_array + 1] = cmem.new(out_buf_size * field_size)
 
         -- Allocate memory for nn buf and add to pool
-        table.insert(out_buf_nn_array, cmem.new(nn_buf_size))
+        out_buf_nn_array[#out_buf_nn_array + 1] = cmem.new(nn_buf_size)
 
         -- Initialize both buffers to 0
         ffi.fill(out_buf_array[col_idx], out_buf_size * field_size, 0)
