@@ -29,7 +29,7 @@ local validate_vec_meta = function(meta, is_materialized, num_elements)
 end
 
 
-local vec_basic_operations = function(vec, test_name, num_elements, gen_method, perform_eov, is_read_only)
+local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_method, perform_eov, is_read_only)
   -- Validate metadata
   local md = loadstring(vec:meta())()
   local is_materialized = false
@@ -56,9 +56,31 @@ local vec_basic_operations = function(vec, test_name, num_elements, gen_method, 
 end
 
 
+local materialized_vec_basic_operations = function(vec, test_name, num_elements)
+  -- Validate metadata
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  local status = validate_vec_meta(md, is_materialized)
+  assert(status, "Metadata validation failed for materialized vector")  
+  
+  -- Check num elements
+  local n = vec:num_elements()
+  assert(n == num_elements)
+  
+  -- Validate vector values
+  status = vec_utils.validate_values(vec, md.field_type)
+  assert(status, "Vector values verification failed")
+  
+  status = vec:persist(true)
+  assert(status)
+  
+  return true
+end
+
+
 fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
   -- Perform vec basic operations
-  local status = vec_basic_operations(vec, test_name, num_elements, gen_method)
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
   
   -- Validate metadata after vec:eov()
@@ -86,7 +108,7 @@ end
 
 fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
   -- Perform vec basic operations  
-  local status = vec_basic_operations(vec, test_name, num_elements, gen_method)
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
       
   -- Validate metadata after vec:eov()
@@ -102,7 +124,7 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- Perform vec basic operations
   local perform_eov = true
   local is_read_only = true
-  local status = vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, is_read_only)
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, is_read_only)
   assert(status, "Failed to perform vec basic operations")
     
   -- Validate metadata after vec:eov()
@@ -130,7 +152,7 @@ end
 fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   -- Perform vec basic operations  
   local perform_eov = false
-  local status = vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov)
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov)
   assert(status, "Failed to perform vec basic operations")
   
   local md = loadstring(vec:meta())()
@@ -162,20 +184,10 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
 end
 
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
-  -- Validate metadata
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  assert(status, "Failed to perform materialized vec basic operations")
   local md = loadstring(vec:meta())()
-  local is_materialized = true
-  local status = validate_vec_meta(md, is_materialized)
-  assert(status, "Metadata validation failed for materialized vector")  
-  
-  -- Check num elements
-  local n = vec:num_elements()
-  assert(n == num_elements)
-  
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")
-  
+
   -- Try setting value
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
@@ -186,25 +198,14 @@ fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- Validate modified value
   local ret_addr, ret_len = vec:get_chunk(0);
   assert(test_value == ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", ret_addr)[0])
-  
   return true
 end
 
 fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
-  -- Validate metadata
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  assert(status, "Failed to perform materialized vec basic operations")
   local md = loadstring(vec:meta())()
-  local is_materialized = true
-  local status = validate_vec_meta(md, is_materialized)
-  assert(status, "Metadata validation failed for materialized vector")  
-  
-  -- Check num elements
-  local n = vec:num_elements()
-  assert(n == num_elements)
-  
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")
-  
+
   -- Try setting value at wrong index, this should fail
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
@@ -215,20 +216,10 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
 end
 
 fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
-  -- Validate metadata
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  assert(status, "Failed to perform materialized vec basic operations")  
   local md = loadstring(vec:meta())()
-  local is_materialized = true
-  local status = validate_vec_meta(md, is_materialized)
-  assert(status, "Metadata validation failed for materialized vector")  
-  
-  -- Check num elements
-  local n = vec:num_elements()
-  assert(n == num_elements)
-  
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")
-  
+
   -- Try setting value at wrong index, this should fail
   status = vec:eov()
   assert(status == nil)
@@ -237,19 +228,9 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
 end
 
 fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
-  -- Validate metadata
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  assert(status, "Failed to perform materialized vec basic operations")  
   local md = loadstring(vec:meta())()
-  local is_materialized = true
-  local status = validate_vec_meta(md, is_materialized)
-  assert(status, "Metadata validation failed for materialized vector")  
-  
-  -- Check num elements
-  local n = vec:num_elements()
-  assert(n == num_elements)
-  
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")
   
   -- Try setting value
   local test_value = 101

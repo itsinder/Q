@@ -83,7 +83,7 @@ return {
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector2",
-    name = "create_materialized_vector", 
+    name = "materialized_vector_set_value_at_wrong_index", 
     meta = "gm_create_materialized_vector1.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
@@ -93,7 +93,7 @@ return {
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector3",
-    name = "create_materialized_vector", 
+    name = "materialized_vector_eov", 
     meta = "gm_create_materialized_vector1.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
@@ -103,7 +103,7 @@ return {
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector4",
-    name = "create_materialized_vector", 
+    name = "modify_read_only_materialized_vector", 
     meta = "gm_create_materialized_vector2.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
@@ -113,9 +113,9 @@ return {
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector5",
-    name = "create_materialized_vector", 
+    name = "create_materialized_vector_file_not_present", 
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },          
+  },  
 }
