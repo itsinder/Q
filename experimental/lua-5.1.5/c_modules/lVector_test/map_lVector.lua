@@ -21,9 +21,9 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 1000, 
     gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }   
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  
   -- generating values by cmem_buf
   { 
     test_type = "nascent_vector", 
@@ -32,7 +32,7 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 1000, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }  
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
   -- generating values by providing gen function,
@@ -48,7 +48,7 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- nascent vector with is_memo false
+  -- nascent vector with is_memo false, eov and persist method should not work
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector3",
@@ -133,4 +133,5 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
+  ]]
 }

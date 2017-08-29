@@ -153,10 +153,15 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- Perform vec basic operations
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
+  
   -- Validate metadata after vec:eov()
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
+  
+  -- Try persist() method with true, it should fail
+  status = vec:persist(true)
+  assert(status == nil, "Able set persist even if memo is false")
   
   return true
 end
