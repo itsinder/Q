@@ -79,6 +79,9 @@ end
 
 
 fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
   -- Perform vec basic operations
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
@@ -107,6 +110,9 @@ end
 
 
 fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
   -- Perform vec basic operations  
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
@@ -121,6 +127,9 @@ end
 
 
 fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
   -- Perform vec basic operations
   local perform_eov = true
   local is_read_only = true
@@ -150,6 +159,9 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
 end
 
 fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
   -- Perform vec basic operations  
   local perform_eov = false
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov)
@@ -184,10 +196,14 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
 end
 
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations    
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")
   local md = loadstring(vec:meta())()
-
+  --[[
   -- Try setting value
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
@@ -198,10 +214,15 @@ fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- Validate modified value
   local ret_addr, ret_len = vec:get_chunk(0);
   assert(test_value == ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", ret_addr)[0])
+  ]]
   return true
 end
 
 fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations    
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")
   local md = loadstring(vec:meta())()
@@ -216,11 +237,14 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
 end
 
 fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations    
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")  
   local md = loadstring(vec:meta())()
 
-  -- Try setting value at wrong index, this should fail
   status = vec:eov()
   assert(status == nil)
   
@@ -228,6 +252,10 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
 end
 
 fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations    
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")  
   local md = loadstring(vec:meta())()
@@ -242,7 +270,6 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
 end
 
 fns.assert_materialized_vector5 = function(vec, test_name, num_elements)
-  print(vec)
   assert(vec == nil)
   return true
 end

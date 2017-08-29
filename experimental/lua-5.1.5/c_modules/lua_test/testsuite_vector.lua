@@ -9,13 +9,13 @@ local allowed_qtypes = {'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV'}
 
 local assert_valid = function(assert_fns, test_name, gen_method, num_elements)
   return function (x)
-    -- common checks for nascent and materialized vectors
-    assert(x:check())
     
     -- calling the assert function based on type of vector
     local function_name = "assert_" .. assert_fns
-    local status = fns[function_name](x, test_name, num_elements, gen_method)
-    
+    local status, result = pcall(fns[function_name], x, test_name, num_elements, gen_method)
+    if not status then
+      print(result)
+    end
     return status
   end
 end

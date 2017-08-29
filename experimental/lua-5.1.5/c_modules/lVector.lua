@@ -215,12 +215,12 @@ function lVector:set_generator(gen)
   self._gen = gen
 end
 
-function lVector:eov()
-  Vector.eov(self._base_vec)
+function lVector:eov(is_read_only)
+  local status = Vector.eov(self._base_vec, is_read_only)
   if self._nn_vec then 
-    Vector.eov(self._nn_vec)
+    status = Vector.eov(self._nn_vec, is_read_only)
   end
-  return true
+  return status
 end
 
 function lVector:put1(s, nn_s)

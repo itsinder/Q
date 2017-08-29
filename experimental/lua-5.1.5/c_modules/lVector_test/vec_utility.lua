@@ -6,17 +6,21 @@ local Scalar  = require 'libsclr'
 local fns = {}
 
 fns.validate_values = function(vec, qtype, chunk_number)
-  local status = true
-  -- local ret_addr, ret_len = vec:get_chunk(chunk_number);
-  local len, base_data, nn_data = vec:get_chunk()
-  assert(base_data)
-  assert(len)
+  if vec:num_elements() <= qconsts.chunk_size then
+    chunk_number = 0
+  end
+  local status, len, base_data, nn_data = pcall(vec.get_chunk, vec, chunk_number)
+  assert(status, "Failed to get the chunk from vector")
+  assert(base_data, "Received base data is nil")
+  assert(len, "Received length is not proper")
+
   local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
-  for i =  1, len do
+  for i = 1, len do
     local expected = i*15 % qconsts.qtypes[qtype].max
     if ( iptr[i - 1] ~= expected ) then
       status = false
       print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
+      break
     end
   end
   return status
@@ -34,7 +38,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
     end
     --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
-    vec:put_chunk(base_data,nil, num_elements)
+    vec:put_chunk(base_data, nil, num_elements)
     assert(vec:check())
     status = true
   end

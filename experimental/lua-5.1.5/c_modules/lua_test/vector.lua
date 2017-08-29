@@ -17,7 +17,10 @@ return function( M )
   end
   
   -- Create Vector
-  local x = Vector.new(M.qtype, M.file_name, M.is_read_only, M.is_memo, M.num_elements)
-  
+  local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_read_only, M.is_memo, M.num_elements)
+  if not status then
+    print(x)
+    x = nil
+  end
   return x
 end

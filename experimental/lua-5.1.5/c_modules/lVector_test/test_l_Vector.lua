@@ -9,7 +9,7 @@ local status, failures = pcall(suite_runner, testsuite_lVector, l_Vector, nil)
 
 --assert(#failures == 0, "Some Tests Failed \n" .. failures)
 --print("Tests passed.")
-print(status)
+print("Failed Testcases are ...")
 print(failures)
 
 require('Q/UTILS/lua/cleanup')()
