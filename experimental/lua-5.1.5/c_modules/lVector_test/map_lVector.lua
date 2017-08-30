@@ -9,11 +9,11 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 -- gen_method: need to specify the generation method ('func', 'scalar', 'cmem_buf')
 
 
-return { 
-  -- creating nascent vectors
+return {
+  --=============================
   -- without nulls
   
-  -- generating values by scalar
+  -- creating nascent vector, generating values by scalar
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
@@ -24,7 +24,7 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
-  -- generating values by scalar, put one element, check file size
+  -- creating nascent vector, generating values by scalar, put one element, check file size
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
@@ -35,7 +35,7 @@ return {
     qtype = { "B1" }
   },
   
-  -- generating values by cmem_buf
+  -- creating nascent vector, generating values by cmem_buf
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
@@ -46,7 +46,7 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
-  -- generating values by cmem_buf, put one element, check file size
+  -- creating nascent vector, generating values by cmem_buf, put one element, check file size
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
@@ -56,9 +56,8 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "B1" }
   },
-  ]]
   
-  -- generating values by providing gen function,
+  -- creating nascent vector, generating values by providing gen function,
   -- in case of gen function num_elements field is
   -- number of chunks (num_chunks) and not number of elements
   { 
@@ -95,7 +94,7 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
   
-  -- try modifying memo after chunk is full, operation should fail
+  -- nascent vector, try modifying memo after chunk is full, operation should fail
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector5",
@@ -105,9 +104,8 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  
   -- creating materialized vectors 
-  -- without nulls 
   { 
     test_type = "materialized_vector", 
     name = "Creation of materialized vector", 
@@ -157,4 +155,18 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
   
+  --=============================
+  -- with nulls
+  
+  -- creating nascent vector, generating values by scalar
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_scalar", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65540, 
+    gen_method = "scalar", 
+    qtype = qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+    
 }

@@ -6,11 +6,6 @@ local Scalar  = require 'libsclr'
 local fns = {}
 
 fns.validate_values = function(vec, qtype, chunk_number)
-  -- Temporary: no validation for B1 type  
-  if qtype == "B1" then
-    return true
-  end
-  
   -- Temporary hack to pass chunk number to get_chunk in case of nascent vector
   if vec:num_elements() <= qconsts.chunk_size then
     chunk_number = 0
@@ -21,6 +16,17 @@ fns.validate_values = function(vec, qtype, chunk_number)
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
 
+  -- Temporary: no validation of vector values for B1 type  
+  if qtype == "B1" then
+    return true
+  end
+  
+  -- Temporary: no validation of vector values if has_nulls == true
+  if vec._has_nulls then
+    assert(nn_data, "Received nn_data is nil")
+    return true
+  end
+  
   local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
   for i = 1, len do
     local expected = i*15 % qconsts.qtypes[qtype].max
@@ -61,15 +67,20 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     --local s1 = Scalar.new(qconsts.qtypes[qtype].min, qtype)
     --vec:put1(s1)
     for i = 1, num_elements do
-      local s1
+      local s1, s1_nn
       if qtype == "B1" then
         local bval
-        if i%2 == 0 then bval = true else bval = false end
+        if i % 2 == 0 then bval = true else bval = false end
         s1 = Scalar.new(bval, qtype)
       else
         s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
       end
-      vec:put1(s1)
+      if vec._has_nulls then
+        local bval
+        if i % 2 == 0 then bval = true else bval = false end
+        s1_nn = Scalar.new(bval, "B1")
+      end
+      vec:put1(s1, s1_nn)
     end
     --s1 = Scalar.new(qconsts.qtypes[qtype].max, qtype)
     --vec:put1(s1)    

@@ -12,35 +12,39 @@ local fns = {}
 --===================
 local validate_vec_meta = function(meta, is_materialized, num_elements)
   local status = true
+  
+  -- meta.base checks
+  assert(meta.base.num_elements == num_elements)
   if is_materialized then
-    if meta.base.is_nascent ~= false or not meta.base.file_name or not plpath.exists(meta.base.file_name) then
-      status = false
-    end
-    --[[
     assert(meta.base.is_nascent == false)
     assert(meta.base.file_name)
     assert(plpath.exists(meta.base.file_name))
-    ]]
+    assert(meta.base.chunk_num == 0)
+    assert(meta.base.num_in_chunk == 0)    
   else
-    if meta.base.is_nascent ~= true then
-      status = false
-    end
+    assert(meta.base.is_nascent == true)
+    assert(meta.base.file_name == nil)
+    assert(meta.base.chunk_num == math.floor(num_elements / qconsts.chunk_size))
+    assert(meta.base.num_in_chunk == num_elements % qconsts.chunk_size)    
   end
   
-  if status and num_elements and not is_materialized then
-    if meta.base.chunk_num ~= math.floor(num_elements / qconsts.chunk_size) then
-      print("chunk_number validation failed")
-      return false
-    end
-    if meta.base.num_in_chunk ~= num_elements % qconsts.chunk_size then
-      print("num_in_chunk validation failed")
-      return false
-    end
-    if meta.base.num_elements ~= num_elements then
-      print("num_elements verification failed")
-      return false
-    end
+  -- meta.nn checks
+  if meta.nn then
+    assert(meta.nn.num_elements == num_elements)
+    if is_materialized then
+      assert(meta.nn.is_nascent == false)
+      assert(meta.nn.file_name)
+      assert(plpath.exists(meta.nn.file_name))
+      assert(meta.nn.chunk_num == 0)
+      assert(meta.nn.num_in_chunk == 0)    
+    else
+      assert(meta.nn.is_nascent == true)
+      assert(meta.nn.file_name == nil)
+      assert(meta.nn.chunk_num == math.floor(num_elements / qconsts.chunk_size))
+      assert(meta.nn.num_in_chunk == num_elements % qconsts.chunk_size)    
+    end    
   end
+  
   return status
 end
 --===================
@@ -49,7 +53,7 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   -- Validate metadata
   local md = vec:meta()
   local is_materialized = false
-  local status = validate_vec_meta(md, is_materialized)
+  local status = validate_vec_meta(md, is_materialized, 0)
   assert(status, "Metadata validation failed before vec:eov()")
   
   -- calling gen method for nascent vector to generate values ( can be scalar or cmem buffer )
@@ -79,7 +83,7 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements)
   -- Validate metadata
   local md = vec:meta()
   local is_materialized = true
-  local status = validate_vec_meta(md, is_materialized)
+  local status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed for materialized vector")  
   
   -- Check num elements
@@ -97,10 +101,10 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements)
 end
 --===================
 
-fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
+fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)  
   -- common checks for vectors
   assert(vec:check())
-    
+  
   -- Perform vec basic operations
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
@@ -108,10 +112,10 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
   -- Validate metadata after vec:eov()
   local md = vec:meta()
   local is_materialized = true
-  status = validate_vec_meta(md, is_materialized)
+  status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed after vec:eov()")
   
-  -- Check file size
+  -- Check file size for base
   local expected_file_size
   if md.base.field_type == "B1" then
     expected_file_size = (math.ceil(num_elements/64.0) * 64) / 8
@@ -119,13 +123,17 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
     expected_file_size = num_elements * md.base.field_size
   end
   local actual_file_size = plpath.getsize(md.base.file_name)
-  
   assert(actual_file_size == expected_file_size, "File size mismatch with expected value")
 
-  -- Check number of elements in vector
-  assert( vec:num_elements() == num_elements, "Num elements mismatch with actual value")
+  if md.nn then
+    -- Check file size for nn
+    expected_file_size = (math.ceil(num_elements/64.0) * 64) / 8
+    actual_file_size = plpath.getsize(md.nn.file_name)
+    assert(actual_file_size == expected_file_size, "File size mismatch with expected value")
+  end
   
   return true
+  
 end
 --===================
 
@@ -138,18 +146,17 @@ fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
   
   -- Validate metadata after vec:eov()
+  local chunk_size = qconsts.chunk_size
   local md = vec:meta()
   local is_materialized = true
-  status = validate_vec_meta(md, is_materialized)
+  -- for gen function, num_elements = num_of_chunks * chunk_size
+  -- here, arg num_elements represents num_of_chunks
+  status = validate_vec_meta(md, is_materialized, num_elements * chunk_size)
   assert(status, "Metadata validation failed after vec:eov()")
   
-  local chunk_size = qconsts.chunk_size
   -- Check file size
   assert(plpath.getsize(md.base.file_name) == num_elements * chunk_size * md.base.field_size, "File size mismatch with expected value")
-  
-  -- Check number of elements in vector
-  assert( vec:num_elements() == num_elements * chunk_size, "Num elements mismatch with actual value")
-  
+
   return true
 end
 --===================
@@ -188,15 +195,12 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   -- Validate metadata after vec:eov()
   local md = vec:meta()
   local is_materialized = true
-  status = validate_vec_meta(md, is_materialized)
+  status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed after vec:eov()")
   
   -- Check file size
   assert(plpath.getsize(md.base.file_name) == num_elements * md.base.field_size, "File size mismatch with expected value")
   
-  -- Check number of elements in vector
-  assert( vec:num_elements() == num_elements, "Num elements mismatch with actual value")
-    
   -- Check read only flag in metadata
   assert(md.base.is_read_only == true, "not a read only vector")
   
