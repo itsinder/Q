@@ -19,10 +19,11 @@ return {
     assert_fns = "nascent_vector1",
     name = "Creation of nascent vector_scalar", 
     meta = "gm_create_nascent_vector2.lua",
-    num_elements = 1000, 
+    num_elements = 65540, 
     gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
+  
   
   -- generating values by cmem_buf
   { 
@@ -133,5 +134,5 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
-  ]]
+
 }
