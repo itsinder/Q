@@ -12,7 +12,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 return {
   --=============================
   -- without nulls
-  --[[
+  
   -- creating nascent vector, generating values by scalar
   { 
     test_type = "nascent_vector", 
@@ -190,7 +190,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  ]]
+  
   -- vec._has_nulls is true but don't provide nn_data in put1
   {
     test_type = "nascent_vector", 
