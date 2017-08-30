@@ -24,6 +24,16 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
+  -- generating values by scalar, put one element, check file size
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_scalar", 
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 1, 
+    gen_method = "scalar", 
+    qtype = { "B1" }
+  },
   
   -- generating values by cmem_buf
   { 
@@ -31,10 +41,22 @@ return {
     assert_fns = "nascent_vector1",
     name = "Creation of nascent vector_cmem_buf", 
     meta = "gm_create_nascent_vector2.lua",
-    num_elements = 1000, 
+    num_elements = 1025, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
+  
+  -- generating values by cmem_buf, put one element, check file size
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_cmem_buf", 
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 1, 
+    gen_method = "cmem_buf", 
+    qtype = { "B1" }
+  },
+  ]]
   
   -- generating values by providing gen function,
   -- in case of gen function num_elements field is
@@ -134,5 +156,5 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
-
+  
 }

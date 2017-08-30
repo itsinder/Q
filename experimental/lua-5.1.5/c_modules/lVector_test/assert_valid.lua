@@ -119,8 +119,9 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
     expected_file_size = num_elements * md.base.field_size
   end
   local actual_file_size = plpath.getsize(md.base.file_name)
-  assert(actual_file_size == expected_file_size, "File size mismatch with expected value")
   
+  assert(actual_file_size == expected_file_size, "File size mismatch with expected value")
+
   -- Check number of elements in vector
   assert( vec:num_elements() == num_elements, "Num elements mismatch with actual value")
   
