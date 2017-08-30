@@ -5,7 +5,7 @@ local vec_utils = require 'Q/experimental/lua-515/c_modules/lVector_test/vec_uti
 local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
-
+local cmem    = require 'libcmem'
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
 
@@ -247,6 +247,40 @@ fns.assert_nascent_vector5 = function(vec, test_name, num_elements, gen_method)
   local is_materialized = false
   status = validate_vec_meta(md, is_materialized, num_elements + 1)
   assert(status, "Metadata validation failed")
+  
+  return true
+end
+--===================
+
+fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)  
+  -- common checks for vectors
+  assert(vec:check())
+  local md = vec:meta()
+  
+  -- create base buffer
+  local base_data = cmem.new(md.base.field_size)
+  local iptr = ffi.cast(qconsts.qtypes[md.base.field_type].ctype .. " *", base_data)
+  iptr[0] = 121
+  
+  -- try put chunk
+  local status = pcall(vec.put_chunk, vec, base_data, nil, 1)
+  assert(status == false)
+  
+  return true
+end
+--===================
+
+fns.assert_nascent_vector7 = function(vec, test_name, num_elements, gen_method)  
+  -- common checks for vectors
+  assert(vec:check())
+  local md = vec:meta()
+  
+  -- create base scalar
+  local s1 = Scalar.new(123, md.base.field_type)
+  
+  -- try put1
+  local status = pcall(vec.put1, vec, s1)
+  assert(status == false)
   
   return true
 end

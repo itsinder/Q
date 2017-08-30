@@ -12,7 +12,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 return {
   --=============================
   -- without nulls
-  
+  --[[
   -- creating nascent vector, generating values by scalar
   { 
     test_type = "nascent_vector", 
@@ -162,11 +162,43 @@ return {
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
-    name = "Creation of nascent vector_scalar", 
+    name = "Creation of nascent vector with null scalar", 
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540, 
     gen_method = "scalar", 
     qtype = qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-    
+  
+  -- creating nascent vector, generating values by cmem_buf
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector with null cmem_buf", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65540, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- vec._has_nulls is true but don't provide nn_data in put_chunk
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector6",
+    name = "nascent vector with null and without nn_data put_chunk", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  ]]
+  -- vec._has_nulls is true but don't provide nn_data in put1
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector7",
+    name = "nascent vector with null and without nn_data put1", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65, 
+    gen_method = "scalar", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },  
 }

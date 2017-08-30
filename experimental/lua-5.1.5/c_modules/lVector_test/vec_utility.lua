@@ -45,20 +45,35 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
   local status = false
   if gen_method == "cmem_buf" then
     local buf_length = num_elements
+    local base_data, nn_data
     if qtype == "B1" then
       -- We will populate a buffer by putting 8 bits at a time
       field_size = 8
       qtype = "I1"
       num_elements = math.ceil(num_elements / 8)
     end
-    local base_data = cmem.new(num_elements * field_size)
+    base_data = cmem.new(num_elements * field_size)
     local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
     --iptr[0] = qconsts.qtypes[qtype].min
     for itr = 1, num_elements do
       iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
     end
     --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
-    vec:put_chunk(base_data, nil, buf_length)
+    
+    -- Check if vec has nulls
+    if vec._has_nulls then
+      field_size = 8
+      qtype = "I1"
+      num_elements = math.ceil(num_elements / 8)
+      
+      nn_data = cmem.new(num_elements * field_size)
+      local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", nn_data)
+      for itr = 1, num_elements do
+        nn_iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+      end      
+    end
+    
+    vec:put_chunk(base_data, nn_data, buf_length)
     assert(vec:check())
     status = true
   end
