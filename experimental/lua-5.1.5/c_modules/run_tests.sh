@@ -24,4 +24,5 @@ $LJ test_vec_writable.lua
 $LJ test_vec_SC.lua
 $LJ test_gen3.lua
 $L test_bvec.lua
+bash test_lVector.sh
 echo "SUCCESS for $0 in $PWD"
