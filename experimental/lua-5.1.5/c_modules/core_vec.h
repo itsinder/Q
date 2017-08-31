@@ -89,4 +89,12 @@ extern int
 flush_buffer(
           VEC_REC_TYPE *ptr_vec
           );
+extern int
+vec_start_write(
+    VEC_REC_TYPE *ptr_vec
+    );
+extern int
+vec_end_write(
+    VEC_REC_TYPE *ptr_vec
+    );
 #endif

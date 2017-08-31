@@ -287,7 +287,7 @@ vec_check(
   }
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
-    if ( ( ptr_vec->is_memo == 1 ) && ( ptr_vec->chunk_num >= 1 ) ) {
+    if ( ( ptr_vec->is_memo ) && ( ptr_vec->chunk_num >= 1 ) ) {
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
       int64_t fsz = get_file_size(ptr_vec->file_name); 
@@ -364,6 +364,8 @@ vec_memo(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     ptr_vec->is_memo = is_memo;
+    /* Krushnakant believes this is not needed. Hence, deleting.
+     * Will wait for more testing before final decision made
     if ( is_memo == false ) { 
       memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
     }
@@ -372,6 +374,7 @@ vec_memo(
         status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
       }
     }
+    */
   }
   else {
     go_BYE(-1);
@@ -681,7 +684,6 @@ vec_eov(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }

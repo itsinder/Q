@@ -207,8 +207,9 @@ static int l_vec_start_write( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   status = vec_start_write(ptr_vec); cBYE(status);
-  lua_pushboolean(L, true);
-  return 1;
+  lua_pushlightuserdata(L, ptr_vec->map_addr);
+  lua_pushinteger(L, ptr_vec->num_elements);
+  return 2;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: vec_start_write. ");
@@ -379,6 +380,7 @@ static int l_vec_free( lua_State *L) {
 static int l_vec_new( lua_State *L) 
 {
   int status = 0;
+  VEC_REC_TYPE *ptr_vec = NULL;
   luaL_buffinit(L, &g_errbuf);
 
   //-- START: Get qtype and field size
@@ -431,13 +433,12 @@ static int l_vec_new( lua_State *L)
   }
   if ( !is_materialized ) { 
     if ( lua_isboolean(L, 3) ) { // is_memo specified
-      is_memo = lua_toboolean(L, 4);
+      is_memo = lua_toboolean(L, 3);
     }
   }
 
   int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
 
-  VEC_REC_TYPE *ptr_vec = NULL;
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   status = vec_new(ptr_vec, qtype, field_size, chunk_size, is_memo); 
@@ -446,7 +447,7 @@ static int l_vec_new( lua_State *L)
   // do this after mallocing and memsetting the vector structure
   int64_t num_elements = -1;
   if ( ( strcmp(qtype, "B1") == 0 ) && ( is_materialized ) ) {
-    num_elements = luaL_checknumber(L, 5);
+    num_elements = luaL_checknumber(L, 4);
     ptr_vec->num_elements = num_elements;
     if ( num_elements <= 0 ) { go_BYE(-1); }
   }

@@ -32,7 +32,6 @@ function lVector.new(arg)
   local num_elements
   local qtype
   local field_width
-  local is_read_only
   local file_name
   local nn_file_name
   local has_nulls
@@ -58,15 +57,9 @@ function lVector.new(arg)
     field_width = qconsts.qtypes[qtype].width
   end
    --=============================
-  is_read_only = false
-  if ( arg.is_read_only ) then
-    assert(type(arg.is_read_only) == "boolean")
-    is_read_only = arg.is_read_only
-  end
 
   vector._qtype = qtype
   vector._field_width = field_width
-  vector._is_read_only = is_read_only
 
   if arg.gen then 
     is_nascent = true
@@ -104,7 +97,7 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, file_name, is_read_only, is_memo, 
+  vector._base_vec = Vector.new(qtype, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
@@ -112,8 +105,7 @@ function lVector.new(arg)
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
-    vector._nn_vec = Vector.new("B1", nn_file_name, is_read_only, is_memo,
-      num_elements)
+    vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
   return vector
@@ -237,13 +229,18 @@ function lVector:put1(s, nn_s)
 end
 
 function lVector:start_write()
-  local status = Vector.start_write(self._base_vec)
-  assert(status)
+  local X, nX = Vector.start_write(self._base_vec)
+  local nn_X, nn_nX
+  assert(X)
+  assert(type(nX) == "number")
+  assert(nX > 0)
   if ( self._has_nulls ) then
     assert(self._nn_vec)
-    local status = Vector.start_write(self._nn_vec)
-    assert(status)
+    local nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    assert(nn_nX == nX)
+    assert(nn_nX)
   end
+  return nX, X, nn_X
 end
 
 function lVector:end_write()
@@ -307,14 +304,22 @@ function lVector:get_chunk(chunk_num)
   local l_chunk_num = -1
   local base_addr, base_len
   local nn_addr,   nn_len  
+  local is_nascent = Vector.is_nascent(self._base_vec)  
   if ( chunk_num ) then 
     assert(type(chunk_num) == "number")
     assert(chunk_num >= 0)
     l_chunk_num = chunk_num
+  else
+    -- Note from Krushnakant: When I get_chunk() method for nascent
+    -- vector without passing chunk number, what should be it's behavior?
+    -- As per my thinking, it should return me the current chunk,
+    if ( is_nascent ) then 
+      l_chunk_num = Vector.chunk_num(self._base_vec)
+    end
   end
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
-  local cond1 = not Vector.is_nascent(self._base_vec)
+  local cond1 = not is_nascent
   -- cond2 => Vector is nascent and you are asking for current chunk
   local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
           ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 

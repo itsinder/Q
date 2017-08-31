@@ -26,7 +26,6 @@ typedef struct _vec_rec_type {
 
   bool is_persist;
   bool is_nascent;
-  int status;
   bool is_memo;
   int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
