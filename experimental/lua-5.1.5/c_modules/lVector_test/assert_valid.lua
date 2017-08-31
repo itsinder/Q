@@ -10,6 +10,12 @@ local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
 
 --===================
+
+local set_value = function(buffer, index, value)
+  buffer[index] = value
+end
+--===================
+
 local validate_vec_meta = function(meta, is_materialized, num_elements)
   local status = true
   
@@ -85,11 +91,7 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements)
   local is_materialized = true
   local status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed for materialized vector")  
-  
-  -- Check num elements
-  local n = vec:num_elements()
-  assert(n == num_elements)
-  
+    
   -- Validate vector values
   status = vec_utils.validate_values(vec, md.base.field_type)
   assert(status, "Vector values verification failed")
@@ -207,7 +209,7 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   -- Try to modify values of a read only vector
   local len, base_data, nn_data = vec:get_chunk()
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  status = pcall(loadstring("iptr[0] = 123"))
+  status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
   return true
 end
@@ -293,9 +295,12 @@ fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- Perform vec basic operations  
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")
-  --[[
-  local md = vec:meta()
   
+  local md = vec:meta()
+  if vec._has_nulls then
+    assert(md.nn)
+  end
+  --[[
   -- Try setting value
   local test_value = 101
   local len, base_data, nn_data = vec:get_chunk()
@@ -327,7 +332,7 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
   local test_value = 101
   local len, base_data, nn_data = vec:get_chunk()
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  status = pcall(loadstring("iptr[num_elements+1] = test_value"))
+  status = pcall(set_value, iptr, num_elements+1, test_value)
   assert(status == false, "Able to modify value at wrong index for materialized vector")
   assert(vec:check())
 
@@ -367,7 +372,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   local test_value = 101
   local len, base_data, nn_data = vec:get_chunk()
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  status = pcall(loadstring("iptr[0] = test_value"))
+  status = pcall(set_value, iptr, 0, test_value)
   assert(status == false, "Able to modify value of read only materialized vector")
   assert(vec:check())
 
@@ -379,5 +384,34 @@ fns.assert_materialized_vector5 = function(vec, test_name, num_elements)
   assert(vec == nil)
   return true
 end
+--===================
+
+fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations  
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  assert(status, "Failed to perform materialized vec basic operations")
+  
+  local md = vec:meta()
+  if vec._has_nulls then
+    assert(md.nn)
+  end
+  
+  -- Try setting value
+  local test_value = 101
+  local len, base_data, nn_data = vec:get_chunk()
+  assert(nn_data)
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  status = pcall(set_value, iptr, 0, test_value)
+  
+  -- Above should fail, 
+  -- as we are modifying materialized vector with nulls without modifying respective nn vec
+  assert(status == false)
+  
+  return true
+end
+--===================
 
 return fns

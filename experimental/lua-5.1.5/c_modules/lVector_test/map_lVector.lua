@@ -24,6 +24,17 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
+  -- creating nascent vector, generating values by cmem_buf
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_cmem_buf", 
+    meta = "gm_create_nascent_vector6.lua",
+    num_elements = 65540, 
+    gen_method = "cmem_buf", 
+    qtype = { "SC" }
+  },
+  
   -- creating nascent vector, generating values by scalar, put one element, check file size
   { 
     test_type = "nascent_vector", 
@@ -116,6 +127,7 @@ return {
   }, 
   
   -- materialized vector, set value at wrong index
+  -- this testcase is failing as we can set value at wrong index without any error
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector2",
@@ -136,6 +148,7 @@ return {
   },
   
   -- read only materialized vector, try modifying value
+  -- This testcase should segfault, how to catch it?
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector4",
@@ -158,47 +171,91 @@ return {
   --=============================
   -- with nulls
   
-  -- creating nascent vector, generating values by scalar
+  -- creating nascent vector with nulls, generating values by scalar
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
-    name = "Creation of nascent vector with null scalar", 
+    name = "create_nascent_vector_with_nulls_scalar", 
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540, 
     gen_method = "scalar", 
     qtype = qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- creating nascent vector, generating values by cmem_buf
+  -- creating nascent vector with nulls, generating values by cmem_buf
   {
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector1",
-    name = "Creation of nascent vector with null cmem_buf", 
+    name = "create_nascent_vector_with_nulls_cmem_buf", 
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540, 
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- vec._has_nulls is true but don't provide nn_data in put_chunk
+  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put_chunk
   {
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector6",
-    name = "nascent vector with null and without nn_data put_chunk", 
+    name = "nascent_vector_with_null_and_without_nn_data_in_put_chunk", 
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65, 
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- vec._has_nulls is true but don't provide nn_data in put1
+  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put1
   {
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector7",
-    name = "nascent vector with null and without nn_data put1", 
+    name = "nascent_vector_with_null_and_without_nn_data_in_put1", 
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65, 
     gen_method = "scalar", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },  
+  },
+  
+  -- create materialized vector with has_nulls true
+  { 
+    test_type = "materialized_vector", 
+    name = "create_materialized_vector_with_nulls", 
+    assert_fns = "materialized_vector1",
+    meta = "gm_create_materialized_vector4.lua",
+    num_elements = 65540, 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- create materialized vector with has_nulls true but don't provide nn_file_name field
+  -- This testcase is failing bcoz, 
+  -- in vector code (lVector.lua) has_nulls is set/unset depending on existance of nn_file_name field
+  { 
+    test_type = "materialized_vector", 
+    name = "materialized_vector_with_nulls_without_nn_file_name_field", 
+    assert_fns = "materialized_vector5",
+    meta = "gm_create_materialized_vector5.lua",
+    num_elements = 65540, 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+
+  -- create materialized vector with has_nulls true but provide wrong value of nn_file_name
+  { 
+    test_type = "materialized_vector", 
+    name = "materialized_vector_with_nulls_with_wrong_nn_file_name", 
+    assert_fns = "materialized_vector5",
+    meta = "gm_create_materialized_vector6.lua",
+    num_elements = 65540, 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- modify the materialized vector with has_nulls true without modifying respective nn vector
+  -- this testcase is failing bcoz without modifying respcective nn_vec value, we can modify vec
+  { 
+    test_type = "materialized_vector", 
+    name = "modify_materialized_vector_with_nulls_without_modifying_nn_vec", 
+    assert_fns = "materialized_vector6",
+    meta = "gm_create_materialized_vector4.lua",
+    num_elements = 65540, 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+
 }
