@@ -101,21 +101,18 @@ BYE:
 int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
-    const char *const file_name,
-    bool is_read_only
+    const char *const file_name
     )
 {
   int status = 0;
   char *X = NULL; size_t nX = 0;
-  bool is_write;
-
   // Sample error luaL_addstring(&g_errbuf, "hello world"); 
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
-  if ( is_read_only ) { is_write = false; } else { is_write = true; }
+  bool is_write = false;
   status = rs_mmap(file_name, &X, &nX, is_write);
   cBYE(status);
   if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
@@ -134,10 +131,9 @@ vec_materialized(
       go_BYE(-1);
     }
   }
-  ptr_vec->map_addr = X;
-  ptr_vec->map_len  = nX;
+  // now unmap the file
+  rs_munmap(X, nX); X = NULL; nX = 0;
   ptr_vec->is_nascent = false;
-  ptr_vec->is_read_only = is_read_only;
   strcpy(ptr_vec->file_name, file_name);
 
 BYE:
@@ -169,7 +165,12 @@ vec_meta(
   strcat(opbuf, buf);
   sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
   strcat(opbuf, buf);
-  sprintf(buf, "is_read_only = %s, ", ptr_vec->is_read_only ? "true" : "false");
+  switch ( ptr_vec->open_mode ) {
+    case 0 : strcpy(buf, "open_mode = \"NOT_OPEN\", "); break;
+    case 1 : strcpy(buf, "open_mode = \"READ\", "); break;
+    case 2 : strcpy(buf, "open_mode = \"WRITE\", "); break;
+    default : go_BYE(-1); break;
+  }
   strcat(opbuf, buf);
   sprintf(buf, "num_elements = %" PRIu64 ", ", ptr_vec->num_elements);
   strcat(opbuf, buf);
@@ -312,9 +313,10 @@ vec_check(
     }
     if ( ptr_vec->map_addr   != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len    != 0    ) { go_BYE(-1); }
-    if ( ptr_vec->is_persist         ) { go_BYE(-1); }
+    if ( ptr_vec->open_mode  != 0    ) { go_BYE(-1); }
   }
   else {
+    if ( ptr_vec->is_memo == false    ) { go_BYE(-1); }
     if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
     if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
@@ -330,9 +332,18 @@ vec_check(
       if ( (uint64_t)(fsz/ptr_vec->field_size) != ptr_vec->num_elements ) {
         go_BYE(-1);
       }
+    }
+    if ( ptr_vec->map_addr != NULL ) { 
       if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
     }
-    if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->open_mode == 0 ) { 
+      if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
+      if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+    }
+    else {
+      if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+      if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+    }
   }
   // chunk size must be multiple of 64
   if ( ( ( ptr_vec->chunk_size / 64 ) * 64 ) != ptr_vec->chunk_size ) { 
@@ -373,13 +384,38 @@ int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
     int64_t idx, 
-    uint32_t len
+    uint32_t len,
+    void **ptr_ret_addr,
+    uint64_t *ptr_ret_len
     )
 {
   int status = 0;
   char *addr = NULL;
-  ptr_vec->ret_addr = NULL;
-  ptr_vec->ret_len  = 0;
+  void *ret_addr = NULL;
+  uint64_t ret_len  = 0;
+  char *X = NULL; uint64_t nX = 0;
+  if ( ptr_vec->is_nascent == false ) {
+    switch ( ptr_vec->open_mode ) {
+      case 0 : 
+        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+        cBYE(status);
+        ptr_vec->map_addr = X;
+        ptr_vec->map_len  = nX;
+        ptr_vec->open_mode = 1; // indicating read */
+        break;
+      case 1 : /* opened in read mode */
+        /* nothing to do */
+        break;
+      case 2 : /* opened in write mode */
+        go_BYE(-1);
+        break;
+      default :  /* invalid value */
+        go_BYE(-1);
+        break;
+    }
+    if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+  }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
   // from 64 = (67 -3) position. In other words, if you wanted
@@ -406,7 +442,7 @@ vec_get(
       offset = chunk_idx * ptr_vec->field_size;
     }
     addr = ptr_vec->chunk + offset;
-    ptr_vec->ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+    ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     /*
      * Consider a following use-case
      * - Create a nascent vector of any type say I4
@@ -422,20 +458,22 @@ vec_get(
      *
      *   ret_len should be min(ptr_vec->num_in_chunk - chunk_idx, len)
      */
-    ptr_vec->ret_addr = addr; 
+    ret_addr = addr; 
   }
   else {
     if ( idx < 0 ) { 
-      ptr_vec->ret_len  = ptr_vec->num_elements;
-      ptr_vec->ret_addr = ptr_vec->map_addr;
+      ret_len  = ptr_vec->num_elements;
+      ret_addr = ptr_vec->map_addr;
     }
     else {
       if ( (uint64_t)idx >= ptr_vec->num_elements ) { go_BYE(-1); }
       // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-      ptr_vec->ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-      ptr_vec->ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
+      ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
     }
   }
+  *ptr_ret_addr = ret_addr;
+  *ptr_ret_len  = ret_len;
 BYE:
   return status;
 }
@@ -545,6 +583,43 @@ BYE:
   return status;
 }
 
+int
+vec_start_write(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  int status = 0;
+  char *X = NULL; uint64_t nX = 0;
+  if ( ptr_vec->open_mode != 0) { go_BYE(-1); }
+  if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
+  if ( ptr_vec->map_len  != 0    )  { go_BYE(-1); }
+  bool is_write = true;
+  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
+  cBYE(status);
+  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+  ptr_vec->map_addr = X;
+  ptr_vec->map_len  = nX;
+  ptr_vec->open_mode = 2; // for write
+BYE:
+  return status;
+}
+
+int
+vec_end_write(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  int status = 0;
+  if ( ptr_vec->open_mode != 2) { go_BYE(-1); }
+  if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+  if ( ptr_vec->map_len  == 0    )  { go_BYE(-1); }
+  munmap(ptr_vec->map_addr, ptr_vec->map_len);
+  ptr_vec->map_addr = NULL;
+  ptr_vec->map_len  = 0;
+  ptr_vec->open_mode = 0; // not opened for read or write
+BYE:
+  return status;
+}
 
 int
 vec_set(
@@ -557,7 +632,7 @@ vec_set(
   int status = 0;
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
-  if ( ptr_vec->is_read_only ) { go_BYE(-1); }
+  if ( ptr_vec->open_mode != 2 ) { go_BYE(-1); }
   if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
   if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
   uint64_t offset = ( idx * ptr_vec->field_size);
@@ -602,8 +677,7 @@ BYE:
 
 int
 vec_eov(
-    VEC_REC_TYPE *ptr_vec,
-    bool is_read_only
+    VEC_REC_TYPE *ptr_vec
     )
 {
   int status = 0;
@@ -629,27 +703,7 @@ vec_eov(
   ptr_vec->chunk_num = 0;
   ptr_vec->num_in_chunk = 0;
 
-  // open as materialized vector
-  bool is_write;
-  if ( is_read_only ) { is_write = false; } else { is_write = true; }
-  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
-  cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  ptr_vec->map_addr = X;
-  ptr_vec->map_len  = nX;
-  ptr_vec->is_read_only = is_read_only;
-
+  // We defer mmaping the file to when access is requested
 BYE:
   return status;
 }
-
-int
-is_eq_I4(
-    void *X,
-    int val
-    )
-{
-  int *iptr = (int *)X;
-  if ( *iptr == val ) { return 0; } else { return 1; }
-}
-

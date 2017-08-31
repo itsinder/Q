@@ -2,7 +2,7 @@
 set -e 
 rm -f _*bin
 export PATH=$PATH:../../../UTILS/src
-LJ=/home/subramon/LuaJIT-2.1.0-beta3/src/luajit
+LJ=luajit
 cd ../../../UTILS/src/
 bash mk_asc2bin.sh
 cd -
