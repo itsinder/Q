@@ -254,17 +254,25 @@ function lVector:end_write()
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
+  local status
   assert(len)
   assert(type(len) == "number")
-  assert(len > 0)
-  assert(base_addr)
-  local status = Vector.put_chunk(self._base_vec, base_addr, len)
-  assert(status)
-  if ( self._has_nulls ) then
-    assert(nn_addr)
-    assert(self._nn_vec)
-    local status = Vector.put_chunk(self._nn_vec, nn_addr, len)
+  assert(len >= 0)
+  if ( len == 0 )  then -- no more data
+    status = Vector.eov(self._base_vec)
+    if ( self._has_nulls ) then
+      status = Vector.eov(self._nn_vec)
+    end
+  else
+    assert(base_addr)
+    status = Vector.put_chunk(self._base_vec, base_addr, len)
     assert(status)
+    if ( self._has_nulls ) then
+      assert(nn_addr)
+      assert(self._nn_vec)
+      status = Vector.put_chunk(self._nn_vec, nn_addr, len)
+      assert(status)
+    end
   end
 end
 
@@ -326,6 +334,9 @@ function lVector:get_chunk(chunk_num)
           ( Vector.num_in_chunk(self._base_vec) > 0 )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
+    if ( base_addr == nil ) then
+      return 0
+    end
     if ( ( self._has_nulls ) and ( base_addr ) ) then 
       nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
       assert(nn_addr)
@@ -338,6 +349,7 @@ function lVector:get_chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
+    print("buf_size = ", buf_size)
     if ( base_data ) then 
       -- this is the simpler case where generator malloc's
       self:put_chunk(base_data, nn_data, buf_size)

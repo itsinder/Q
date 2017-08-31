@@ -25,5 +25,7 @@ repeat
   print("len/chunk_idx = ", len, chunk_idx)
   chunk_idx = chunk_idx + 1
 until (len == 0)
+-- TODO: Confirm why 5600 is correct
+assert(x:num_elements() == 5600)
 print("Completed ", arg[0])
 os.exit()
