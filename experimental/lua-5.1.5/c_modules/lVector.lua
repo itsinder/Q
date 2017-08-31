@@ -148,7 +148,7 @@ function lVector:memo(is_memo)
   end
   base_status = Vector.memo(self._base_vec, is_memo)
   if ( self._has_nulls ) then 
-    nn_status = Vector.memo(self._nn_vec, is_memo)
+    nn_status = Vector.persist(self._nn_vec, is_memo)
   end
   if ( base_status and nn_status ) then
     return self
@@ -215,12 +215,12 @@ function lVector:set_generator(gen)
   self._gen = gen
 end
 
-function lVector:eov(is_read_only)
-  local status = Vector.eov(self._base_vec, is_read_only)
+function lVector:eov()
+  Vector.eov(self._base_vec)
   if self._nn_vec then 
-    status = Vector.eov(self._nn_vec, is_read_only)
+    Vector.eov(self._nn_vec)
   end
-  return status
+  return true
 end
 
 function lVector:put1(s, nn_s)
@@ -232,6 +232,26 @@ function lVector:put1(s, nn_s)
     assert(nn_s)
     assert(type(nn_s) == "userdata")
     local status = Vector.put1(self._nn_vec, nn_s)
+    assert(status)
+  end
+end
+
+function lVector:start_write()
+  local status = Vector.start_write(self._base_vec)
+  assert(status)
+  if ( self._has_nulls ) then
+    assert(self._nn_vec)
+    local status = Vector.start_write(self._nn_vec)
+    assert(status)
+  end
+end
+
+function lVector:end_write()
+  local status = Vector.end_write(self._base_vec)
+  assert(status)
+  if ( self._has_nulls ) then
+    assert(self._nn_vec)
+    local status = Vector.end_write(self._nn_vec)
     assert(status)
   end
 end

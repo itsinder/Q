@@ -33,7 +33,6 @@ y = Vector.new('B1')
 local num_elements = 9
 for j = 1, num_elements do 
   y:put_chunk(buf, 32)
-  print("j= ", j)
 end
 y:eov()
 M = loadstring(y:meta())(); 

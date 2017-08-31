@@ -23,7 +23,7 @@
 
 #include "scalar.h"
 
-int luaopen_libsclr (lua_State *L);
+extern int luaopen_libsclr (lua_State *L);
 
 static int l_sclr_to_cdata( lua_State *L) {
   int status = 0;

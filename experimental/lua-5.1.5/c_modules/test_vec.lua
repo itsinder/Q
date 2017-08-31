@@ -8,6 +8,7 @@ local buf = cmem.new(4096)
 local M
 local is_memo
 local chunk_size = 65536  
+local rslt
 
 local infile = '_in1_I4.bin'
 assert(plpath.isfile(infile), "Create the input files")
@@ -24,8 +25,17 @@ assert(a == nil)
 local i, j = string.find(b, "ERROR")
 assert(i >= 0)
 M = loadstring(y:meta())()
-for k, v in pairs(M) do print(k, v) end
-print('------------------')
+for k, v in pairs(M) do 
+  if ( k == "is_memo") then assert(v == true) end
+  if ( k == "field_type") then assert(v == "I4") end
+  if ( k == "chunk_num") then assert(v == 0) end
+  if ( k == "num_in_chunk") then assert(v == 0) end
+  if ( k == "file_name") then assert(v == "_in1_I4.bin") end
+  if ( k == "is_persist") then assert(v == true) end 
+  if ( k == "is_nascent") then assert(v == false) end 
+  if ( k == "is_write") then assert(v == false) end 
+  if ( k == "chunk_size") then assert(v == 65536) end 
+end
 y = nil
 collectgarbage()
 assert(plpath.isfile("_in1_I4.bin"))
@@ -108,11 +118,23 @@ for j = 1, num_elements do
   local s1 = Scalar.new(j, "I4")
   y:put1(s1)
 end
-print("writing meta data of nascent vector")
-M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
+-- print("writing meta data of nascent vector")
+M = loadstring(y:meta())(); 
+for k, v in pairs(M) do 
+  assert(k ~= "file_name")
+  if ( k == "is_nascent" ) then assert(v == true) end 
+  -- print(k, v) 
+end
 y:eov()
-print("writing meta data of persisted vector")
-M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
+-- print("writing meta data of persisted vector")
+M = loadstring(y:meta())(); 
+local is_file = false
+for k, v in pairs(M) do 
+  if ( k == "file_name" ) then is_file = true end 
+  if ( k == "is_nascent" ) then assert(v == false) end 
+  -- print(k, v) 
+end
+assert(is_file)
 y:persist()
 assert(y:check())
 --================================
@@ -133,15 +155,25 @@ M = loadstring(y:meta())();
 local file_name = M.file_name
 assert(file_name)
 assert(plpath.isfile(file_name))
--- if you do od of file name, you can verify that all is good
-print(file_name)
+print(" od -i " .. file_name .. " # to verify all is good")
 
 --================================
 y = Vector.new('I4', M.file_name)
-print("writing meta data of new vector from old file name ")
-M = loadstring(y:meta())(); for k, v in pairs(M) do print(k, v) end
+print("checking meta data of new vector from old file name ")
+M = loadstring(y:meta())(); 
+for k, v in pairs(M) do 
+  if ( k == "field_type" )   then assert(v ==   "I4") end
+  if ( k == "chunk_num" )    then assert(v ==  0) end
+  if ( k == "num_in_chunk" ) then assert(v ==   0) end
+  if ( k == "open_mode" )    then assert(v ==  "NOT_OPEN") end
+  if ( k == "is_persist" )   then assert(v ==   false) end
+  if ( k == "num_elements" ) then assert(v ==   98304) end
+  if ( k == "is_nascent" )   then assert(v ==   false) end
+  if ( k == "is_memo" )      then assert(v == true) end
+end
 assert(y:check())
 print("==================================")
+assert(y:start_write())
 
 local S = {}
 for j = 1, M.num_elements do
@@ -152,15 +184,23 @@ for j = 1, M.num_elements do
   status = y:set(j*10, j-1)
   assert(status)
   assert(y:check())
-  ret_addr, ret_len, ret_val  = y:get(j-1, 1)
-  assert(ret_addr)
-  assert(ret_len == 1)
-  assert(Scalar.to_str(ret_val) == tostring(j*10))
+  -- you cannot get while you are setting
+  if ( j < 10 ) then  -- test for only a few cases
+    status = y:get(j-1, 1)
+    assert(not status)
+  end
 end
 -- should not be able to set after end of vector
 s = Scalar.new(j*10, "I4")
 status = y:set(s, M.num_elements)
 assert(not status)
+assert(y:end_write())
+-- Can re-open file for writing after closing
+for  i = 1, 5 do
+  assert(y:start_write())
+  assert(y:end_write())
+end
+--===========================
 
 y:persist()
 assert(y:check())

@@ -8,6 +8,10 @@ for i = 1,1000 do
   z = Scalar.add(x, y)
   z = x + y
   w = (z == Scalar.new(579, "F4"))
-assert(w == true)
+  assert(w == true)
+
+  z = Scalar.sub(y, x)
+  w = (z == Scalar.new(333, "F4"))
+  assert(w == true)
 end
 print( "SUCCESS for ", arg[0])
