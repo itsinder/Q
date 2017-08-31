@@ -56,13 +56,16 @@ for i, v in ipairs(T) do
   end
   local status, load_ret = pcall(load_csv,script_dir .."/test_data/"..D, M)
   if status then
+    -- Persist vector or else input csv get deleted
+    --for i=1, #load_ret do
+    --  load_ret[i]:persist(true)
+    --end
     -- if handle_input_function is present, then filter is taken from the output of this function
     -- in other cases , filter object is taken from metadata
     local key = "handle_input_"..v.category
     if fns[key] then
       F = fns[key]()
     end
-    
     local file_path 
     if csv_file then file_path = print_out_dir .. csv_file end
     if csv_file == "" then file_path = "" end

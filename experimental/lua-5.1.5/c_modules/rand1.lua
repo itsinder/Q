@@ -7,6 +7,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local rand_qtype = require 'rand_qtype'
 require 'Q/UTILS/lua/strict'
 local lVector = require 'lVector'
+math.randomseed(os.time())
 
 local xtype = rand_qtype()
 local x = lVector( { qtype = xtype, gen = true, has_nulls = false})
@@ -18,7 +19,7 @@ local counter = 0
 local num_trials = 100000
 for i = 1, num_trials do
   local qtype = rand_qtype()
-  local s1 = Scalar.new(i, qtype)
+  local s1 = Scalar.new(i % 127, qtype)
   if ( qtype == xtype ) then counter = counter + 1 end
   pcall(x.put1, x, s1)
   -- x:put1(s1)
@@ -27,4 +28,4 @@ end
 x:eov()
 assert(x:check())
 assert(x:num_elements() == counter)
-
+print("DONE")

@@ -39,7 +39,6 @@ for i, v in ipairs(T) do
   utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
   ::skip::
 end
-
 fns["print_result"]()
 require('Q/UTILS/lua/cleanup')()
 os.exit()
