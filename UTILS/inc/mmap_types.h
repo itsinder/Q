@@ -24,14 +24,11 @@ typedef struct _vec_rec_type {
   char *map_addr;
   size_t map_len;
 
-  char *ret_addr; // returned to get
-  size_t ret_len; // returned to get
-
   bool is_persist;
   bool is_nascent;
   int status;
   bool is_memo;
-  bool is_read_only;
+  int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
 } VEC_REC_TYPE;
 #endif
