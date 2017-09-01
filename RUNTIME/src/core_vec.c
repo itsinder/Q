@@ -411,13 +411,14 @@ vec_get(
     VEC_REC_TYPE *ptr_vec,
     uint64_t idx, 
     uint32_t len,
-    void **ptr_ret_addr,
+    char **ptr_ret_addr,
     uint64_t *ptr_ret_len
     )
 {
   int status = 0;
+  FILE *fp = NULL;
   char *addr = NULL;
-  void *ret_addr = NULL;
+  char *ret_addr = NULL;
   uint64_t ret_len  = 0;
   char *X = NULL; uint64_t nX = 0;
   if ( ptr_vec->is_nascent == false ) {
@@ -455,19 +456,41 @@ vec_get(
     idx -= bit_idx; 
   }
   if ( ptr_vec->is_nascent ) {
-    if ( idx < 0 ) { go_BYE(-1); }
     uint32_t chunk_num = idx / ptr_vec->chunk_size;
-    if ( chunk_num != ptr_vec->chunk_num ) { go_BYE(-1); }
     uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
-    if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-    uint32_t offset;
-    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-      offset = chunk_idx / 8; // 8 bits in a byte 
+    if ( chunk_num == ptr_vec->chunk_num ) {
+      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
+      uint32_t offset;
+      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+        offset = chunk_idx / 8; // 8 bits in a byte 
+      }
+      else {
+        offset = chunk_idx * ptr_vec->field_size;
+      }
+      addr = ptr_vec->chunk + offset;
     }
-    else {
-      offset = chunk_idx * ptr_vec->field_size;
+    else if ( chunk_num < ptr_vec->chunk_num ) { 
+      if ( ptr_vec->is_memo ) {
+        // If memo is on, should be able to serve data from previous chunks 
+        // as long as request does not bleed into current chunk
+        // this opion only works for chunkls
+        if ( chunk_idx != 0 ) { go_BYE(-1); } 
+        if ( len != ptr_vec->chunk_size ) { go_BYE(-1); }
+        addr = *ptr_ret_addr; // has been allocated before call 
+        if ( addr == NULL ) { go_BYE(-1); }
+        fp = fopen(ptr_vec->file_name, "r");
+        return_if_fopen_failed(fp, ptr_vec->file_name, "r");
+        status = fseek(fp, idx * ptr_vec->field_size, SEEK_SET);
+        fread(addr, ptr_vec->field_size, len, fp);
+        fclose_if_non_null(fp);
+      }
+      else {
+        go_BYE(-1); 
+      }
     }
-    addr = ptr_vec->chunk + offset;
+    else { // asking for a chunk ahead of where we currently are
+      go_BYE(-1);
+    }
     ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     /*
      * Consider a following use-case
@@ -495,6 +518,7 @@ vec_get(
   *ptr_ret_addr = ret_addr;
   *ptr_ret_len  = ret_len;
 BYE:
+  fclose_if_non_null(fp);
   return status;
 }
 
