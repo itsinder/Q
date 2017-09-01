@@ -208,11 +208,11 @@ function lVector:set_generator(gen)
 end
 
 function lVector:eov()
-  Vector.eov(self._base_vec)
+  local status = Vector.eov(self._base_vec)
   if self._nn_vec then 
-    Vector.eov(self._nn_vec)
+    status = Vector.eov(self._nn_vec)
   end
-  return true
+  return status
 end
 
 function lVector:put1(s, nn_s)

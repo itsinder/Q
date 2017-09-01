@@ -115,7 +115,7 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+
   -- creating materialized vectors 
   { 
     test_type = "materialized_vector", 
@@ -127,7 +127,7 @@ return {
   }, 
   
   -- materialized vector, set value at wrong index
-  -- this testcase is failing as we can set value at wrong index without any error
+  -- This testcase should segfault, how to catch it?
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector2",
@@ -179,7 +179,7 @@ return {
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540, 
     gen_method = "scalar", 
-    qtype = qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
   -- creating nascent vector with nulls, generating values by cmem_buf
@@ -257,5 +257,5 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  
 }
