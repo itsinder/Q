@@ -26,9 +26,8 @@ typedef struct _vec_rec_type {
 
   bool is_persist;
   bool is_nascent;
-  int status;
   bool is_memo;
-  int open_mode; // 0 for not open, 1 for read, 2 for write
+  int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
 } VEC_REC_TYPE;
 #endif

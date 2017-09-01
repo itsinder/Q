@@ -132,7 +132,7 @@ vec_materialized(
     }
   }
   // now unmap the file
-  rs_munmap(X, nX); X = NULL; nX = 0;
+  rs_munmap(X, nX); 
   ptr_vec->is_nascent = false;
   strcpy(ptr_vec->file_name, file_name);
 
@@ -287,7 +287,7 @@ vec_check(
   }
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
-    if ( ( ptr_vec->is_memo == 1 ) && ( ptr_vec->chunk_num >= 1 ) ) {
+    if ( ( ptr_vec->is_memo ) && ( ptr_vec->chunk_num >= 1 ) ) {
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
       int64_t fsz = get_file_size(ptr_vec->file_name); 
@@ -364,6 +364,8 @@ vec_memo(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     ptr_vec->is_memo = is_memo;
+    /* Krushnakant believes this is not needed. Hence, deleting.
+     * Will wait for more testing before final decision made
     if ( is_memo == false ) { 
       memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
     }
@@ -372,6 +374,7 @@ vec_memo(
         status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
       }
     }
+    */
   }
   else {
     go_BYE(-1);
@@ -383,7 +386,7 @@ BYE:
 int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
-    int64_t idx, 
+    uint64_t idx, 
     uint32_t len,
     void **ptr_ret_addr,
     uint64_t *ptr_ret_len
@@ -461,16 +464,10 @@ vec_get(
     ret_addr = addr; 
   }
   else {
-    if ( idx < 0 ) { 
-      ret_len  = ptr_vec->num_elements;
-      ret_addr = ptr_vec->map_addr;
-    }
-    else {
-      if ( (uint64_t)idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-      // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-      ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-      ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
-    }
+    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+    // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+    ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+    ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
   }
   *ptr_ret_addr = ret_addr;
   *ptr_ret_len  = ret_len;
@@ -681,7 +678,6 @@ vec_eov(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }

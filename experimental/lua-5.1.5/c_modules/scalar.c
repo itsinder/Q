@@ -27,8 +27,10 @@ extern int luaopen_libsclr (lua_State *L);
 
 static int l_sclr_to_cdata( lua_State *L) {
   int status = 0;
+  SCLR_REC_TYPE *ptr_sclr = NULL;
 
-  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  if ( ptr_sclr == NULL ) { go_BYE(-1); }
   lua_pushlightuserdata(L, &(ptr_sclr->cdata));
   luaL_getmetatable(L, "CMEM");
   lua_setmetatable(L, -2);

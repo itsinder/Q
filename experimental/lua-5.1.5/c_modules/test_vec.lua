@@ -41,15 +41,13 @@ collectgarbage()
 assert(plpath.isfile("_in1_I4.bin"))
 
 -- try to modify a vector created as read only. Should fail
-local is_read_only = true
-local y = Vector.new('I4', '_in1_I4.bin', is_read_only)
+local y = Vector.new('I4', '_in1_I4.bin')
 y:persist(true)
 s = Scalar.new(123, "I4")
 status = y:set(s, 0)
 assert(status == nil)
 --==============================================
 -- try to modify a vector created as read only by eov. Should fail
-local is_read_only = true
 local y = Vector.new('I4')
 status = y:put1(s)
 assert(status)

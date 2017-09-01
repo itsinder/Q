@@ -94,6 +94,15 @@ function gen_code(T1, T3)
   hdr = [[
 #include "q_incs.h"
 #include "scalar.h"
+extern int 
+eval_arith(
+    const char *const fldtype1,
+    const char *const fldtype2,
+    const char *const op,
+    CDATA_TYPE cdata1,
+    CDATA_TYPE cdata2,
+    CDATA_TYPE *ptr_cdata
+    );
 int 
 eval_arith(
     const char *const fldtype1,
