@@ -1,7 +1,7 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'  
-local lVector = require 'lVector'
+-- local lVector = require 'lVector'
 
 local l_chunk_num = 1  -- no connection to Vector's chunk num
 local counter = 1

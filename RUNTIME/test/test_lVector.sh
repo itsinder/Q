@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e 
 rm -f _*bin
-export PATH=$PATH:../../../UTILS/src
+export PATH=$PATH:../../UTILS/src
 LJ=luajit
-cd ../../../UTILS/src/
+cd ../../UTILS/src/
 bash mk_asc2bin.sh
 cd -
 which asc2bin 1>/dev/null 2>&1
