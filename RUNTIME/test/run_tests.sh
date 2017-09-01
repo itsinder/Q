@@ -1,17 +1,16 @@
 #!/bin/bash
 set -e
-L="../src/lua"
+L=lua
 LJ=luajit
 echo "Create a small binary file for I4 called _in1_I4.bin"
 rm -f _*bin
-export PATH=$PATH:../../../UTILS/src
-cd ../../../UTILS/src/
+export PATH=$PATH:../../UTILS/src
+cd ../../UTILS/src/
 bash mk_asc2bin.sh
 cd -
 which asc2bin 1>/dev/null 2>&1
 asc2bin in1_I4.csv I4 _in1_I4.bin
-bash README.sh # compile code. TODO Switch to Makefile
-
+make -C ../src/
 
 $L test_arith.lua
 $L test_cmem.lua

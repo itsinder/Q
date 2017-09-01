@@ -1,12 +1,17 @@
 # Why are we depending on print and load csv?
-INCS=" -I. -I../inc/ -I../../UTILS/gen_inc/ -I../../UTILS/inc -I../../OPERATORS/LOAD_CSV/gen_inc/ -I../../OPERATORS/PRINT/gen_inc/ "
+INCS=-I. -I../inc/ -I../../UTILS/gen_inc/ -I../../UTILS/inc -I../../OPERATORS/LOAD_CSV/gen_inc/ -I../../OPERATORS/PRINT/gen_inc/
 
 all: libvec.so libcmem.so libsclr.so
+	mv libvec.so ${Q_ROOT}/lib/
+	mv libcmem.so ${Q_ROOT}/lib/
+	mv libsclr.so ${Q_ROOT}/lib/
 	echo "done"
 
-
+clean:
+	rm -f *.so *.o _*
+		
 libvec.so:
-	gcc -g ${QC_FLAGS} ${INCS} \
+	gcc -g ${QC_FLAGS} $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \
 		core_vec.c \
@@ -51,9 +56,7 @@ libsclr.so: gen_cmp gen_arith libvec.so libcmem.so
 	rm -f _*.c
 
 gen_cmp:
-	cd ../gen_src;\
-		lua gen_cmp.lua
+	lua gen_cmp.lua
 
 gen_arith:
-	cd ../gen_src;\
-		lua gen_arith.lua
+	lua gen_arith.lua
