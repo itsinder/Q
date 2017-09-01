@@ -143,4 +143,25 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
+   -- nascent vector, vec._has_nulls is true but don't provide nn_data in put_chunk
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector5",
+    name = "nascent_vector_with_null_and_without_nn_data_in_put_chunk", 
+    meta = "gm_create_nascent_vector4.lua",
+    num_elements = 65, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put1
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector6",
+    name = "nascent_vector_with_null_and_without_nn_data_in_put1", 
+    meta = "gm_create_nascent_vector4.lua",
+    num_elements = 65, 
+    gen_method = "scalar", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
 }

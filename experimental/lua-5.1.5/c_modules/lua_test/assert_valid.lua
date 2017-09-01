@@ -5,6 +5,7 @@ local vec_utils = require 'Q/experimental/lua-515/c_modules/lua_test/vec_utility
 local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local cmem    = require 'libcmem'
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
@@ -194,6 +195,39 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   
   return true
 end
+
+fns.assert_nascent_vector5 = function(vec, test_name, num_elements, gen_method)  
+  -- common checks for vectors
+  assert(vec:check())
+  local md = loadstring(vec:meta())()
+  
+  -- create base buffer
+  local base_data = cmem.new(md.field_size)
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", base_data)
+  iptr[0] = 121
+  
+  -- try put chunk
+  local status = pcall(vec.put_chunk, base_data, 1)
+  assert(status == false)
+  
+  return true
+end
+
+fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)  
+  -- common checks for vectors
+  assert(vec:check())
+  local md = loadstring(vec:meta())()
+  
+  -- create base scalar
+  local s1 = Scalar.new(123, md.field_type)
+  
+  -- try put1
+  local status = pcall(vec.put1, s1)
+  assert(status == false)
+  
+  return true
+end
+
 
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- common checks for vectors
