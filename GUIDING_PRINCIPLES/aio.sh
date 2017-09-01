@@ -37,6 +37,8 @@ if [[ $RES -ne 0 ]] ; then
    cd lua-5.1.5/
    make linux
    sudo make install
+   cd ../
+   rm -rf lua-5.1.5 lua-5.1.5.tar.gz
 else
    my_print "Lua is already installed"
 fi
