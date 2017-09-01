@@ -91,6 +91,11 @@ function lVector.new(arg)
   vector.file_name = file_name
   vector.nn_file_name = nn_file_name
 
+  if ( ( not is_nascent ) and has_nulls ) then
+    assert(nn_file_name, "Must provide nn file name")
+    assert(nn_file_name ~= "", "Must provide nn file name")
+  end
+
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
   end
