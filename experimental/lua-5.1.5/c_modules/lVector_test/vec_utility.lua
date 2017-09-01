@@ -7,9 +7,11 @@ local fns = {}
 
 fns.validate_values = function(vec, qtype, chunk_number)
   -- Temporary hack to pass chunk number to get_chunk in case of nascent vector
-  if vec:num_elements() <= qconsts.chunk_size then
-    chunk_number = 0
-  end
+  -- This hack is not required as this case is handled
+  -- Refer mail with sub "Calling get_chunk() method from lVector.lua for nascent vector without passing chunk_num"
+  -- if vec:num_elements() <= qconsts.chunk_size then
+  --  chunk_number = 0
+  -- end
   
   local status, len, base_data, nn_data = pcall(vec.get_chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
