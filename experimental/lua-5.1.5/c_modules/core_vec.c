@@ -400,8 +400,7 @@ vec_get(
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
       case 0 : 
-        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
-        cBYE(status);
+        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0); cBYE(status);
         ptr_vec->map_addr = X;
         ptr_vec->map_len  = nX;
         ptr_vec->open_mode = 1; // indicating read */
