@@ -309,7 +309,7 @@ end
 
 function lVector:get_chunk(chunk_num)
   local status
-  local l_chunk_num = -1
+  local l_chunk_num = 0
   local base_addr, base_len
   local nn_addr,   nn_len  
   local is_nascent = Vector.is_nascent(self._base_vec)  

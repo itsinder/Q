@@ -184,12 +184,13 @@ end
 x:eov()
 len, base_data, nn_data = x:get_chunk()
 assert(base_data)
+assert(not nn_data)
+assert(len == chunk_size )
+
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, len do
   assert(iptr[i-1] == i)
 end
-assert(not nn_data)
-assert(len == 100000 )
 
 
 --====== Testing materialized vector for SC

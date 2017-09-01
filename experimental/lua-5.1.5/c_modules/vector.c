@@ -151,15 +151,11 @@ static int l_vec_get_chunk( lua_State *L)
   uint64_t ret_len = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
-  int64_t idx;
+  uint64_t idx = 0;
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
-    if ( chunk_num < 0 ) { 
-      idx = -1;
-    }
-    else {
-      idx = chunk_num * Q_CHUNK_SIZE;
-    }
+    if ( chunk_num < 0 ) { go_BYE(-1); }
+    idx = chunk_num * Q_CHUNK_SIZE;
   }
   else {
     if ( ptr_vec->is_nascent ) { 

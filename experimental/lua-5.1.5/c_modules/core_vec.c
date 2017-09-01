@@ -132,7 +132,7 @@ vec_materialized(
     }
   }
   // now unmap the file
-  rs_munmap(X, nX); X = NULL; nX = 0;
+  rs_munmap(X, nX); 
   ptr_vec->is_nascent = false;
   strcpy(ptr_vec->file_name, file_name);
 
@@ -386,7 +386,7 @@ BYE:
 int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
-    int64_t idx, 
+    uint64_t idx, 
     uint32_t len,
     void **ptr_ret_addr,
     uint64_t *ptr_ret_len
@@ -464,16 +464,10 @@ vec_get(
     ret_addr = addr; 
   }
   else {
-    if ( idx < 0 ) { 
-      ret_len  = ptr_vec->num_elements;
-      ret_addr = ptr_vec->map_addr;
-    }
-    else {
-      if ( (uint64_t)idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-      // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-      ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-      ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
-    }
+    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+    // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
+    ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+    ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
   }
   *ptr_ret_addr = ret_addr;
   *ptr_ret_len  = ret_len;
