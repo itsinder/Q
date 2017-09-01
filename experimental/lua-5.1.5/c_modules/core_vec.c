@@ -134,6 +134,7 @@ vec_materialized(
   // now unmap the file
   rs_munmap(X, nX); 
   ptr_vec->is_nascent = false;
+  ptr_vec->is_eov     = true;
   strcpy(ptr_vec->file_name, file_name);
 
 BYE:
@@ -282,6 +283,28 @@ vec_check(
   int status = 0;
   status = chk_field_type(ptr_vec->field_type, ptr_vec->field_size);
   cBYE(status);
+  if ( ( ptr_vec->is_eov == false ) && ( ptr_vec->is_nascent == false ) ) {
+    go_BYE(-1);
+  }
+  /*
+   persist nascent memo eov OK?
+   F       F       F    F   F
+   F       F       F    T   F
+   F       F       T    F   X
+   F       F       T    T   X
+   F       T       F    F   X
+   F       T       F    T   T
+   F       T       T    F   X
+   F       T       T    T   F
+   T       F       F    F   F
+   T       F       F    T   F
+   T       F       T    F   X
+   T       F       T    T   T
+   T       T       F    F   F
+   T       T       F    T   F
+   T       T       T    F   X
+   T       T       T    T   F
+  */
   if ( ( ptr_vec->is_memo == false ) && ( ptr_vec->is_persist == true ) ) {
     go_BYE(-1);
   }
@@ -400,7 +423,8 @@ vec_get(
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
       case 0 : 
-        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0); cBYE(status);
+        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+        cBYE(status);
         ptr_vec->map_addr = X;
         ptr_vec->map_len  = nX;
         ptr_vec->open_mode = 1; // indicating read */
@@ -678,10 +702,12 @@ vec_eov(
 {
   int status = 0;
 
+  if ( ptr_vec->is_eov ) { go_BYE(-1); }
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
   // If memo NOT set, return now; do not persist to disk
+  ptr_vec->is_eov = true;
   if ( ptr_vec->is_memo == false ) { goto BYE; }
   // this is the case when all data fits into one chunk
   if ( ptr_vec->file_name[0] == '\0' ) {

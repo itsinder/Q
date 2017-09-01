@@ -91,11 +91,6 @@ function lVector.new(arg)
   vector.file_name = file_name
   vector.nn_file_name = nn_file_name
 
-  if ( ( not is_nascent ) and has_nulls ) then
-    assert(nn_file_name, "Must provide nn file name")
-    assert(nn_file_name ~= "", "Must provide nn file name")
-  end
-
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
   end
@@ -213,11 +208,11 @@ function lVector:set_generator(gen)
 end
 
 function lVector:eov()
-  Vector.eov(self._base_vec)
+  local status = Vector.eov(self._base_vec)
   if self._nn_vec then 
-    Vector.eov(self._nn_vec)
+    status = Vector.eov(self._nn_vec)
   end
-  return true
+  return status
 end
 
 function lVector:put1(s, nn_s)

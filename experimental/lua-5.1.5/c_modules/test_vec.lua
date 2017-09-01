@@ -123,7 +123,11 @@ for k, v in pairs(M) do
   if ( k == "is_nascent" ) then assert(v == true) end 
   -- print(k, v) 
 end
-y:eov()
+rslt = y:eov()
+assert(rslt)
+-- Second call to eov should fail
+rslt = y:eov()
+assert(not rslt)
 -- print("writing meta data of persisted vector")
 M = loadstring(y:meta())(); 
 local is_file = false
