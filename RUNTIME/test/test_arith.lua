@@ -1,6 +1,6 @@
-vec = require 'Q/lib/libvec' ; 
-cmem = require 'Q/lib/libcmem' ; 
-Scalar = require 'Q/lib/libsclr' ; 
+vec = require 'libvec' ; 
+cmem = require 'libcmem' ; 
+Scalar = require 'libsclr' ; 
 
 for i = 1,1000 do
   x = Scalar.new(123, "F4")
