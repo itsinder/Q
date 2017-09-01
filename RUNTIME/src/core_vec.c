@@ -468,6 +468,7 @@ vec_get(
         offset = chunk_idx * ptr_vec->field_size;
       }
       addr = ptr_vec->chunk + offset;
+      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     }
     else if ( chunk_num < ptr_vec->chunk_num ) { 
       if ( ptr_vec->is_memo ) {
@@ -483,6 +484,7 @@ vec_get(
         status = fseek(fp, idx * ptr_vec->field_size, SEEK_SET);
         fread(addr, ptr_vec->field_size, len, fp);
         fclose_if_non_null(fp);
+        ret_len = len;
       }
       else {
         go_BYE(-1); 
@@ -491,7 +493,6 @@ vec_get(
     else { // asking for a chunk ahead of where we currently are
       go_BYE(-1);
     }
-    ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     /*
      * Consider a following use-case
      * - Create a nascent vector of any type say I4

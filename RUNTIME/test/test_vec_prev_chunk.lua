@@ -16,7 +16,11 @@ local rslt
 -- ret_len should be number of elements in chunk
 s = Scalar.new(123, "I4")
 orig_ret_addr = nil
-num_iters = 100000
+num_iters = 1
+if ( #arg == 1 ) then 
+  num_iters = assert(tonumber(arg[1]))
+  print("num_iters = ", num_iters)
+end
 for j = 1, num_iters do
   local y = Vector.new('I4')
   for i = 1, chunk_size do 
@@ -34,8 +38,8 @@ for j = 1, num_iters do
   status = y:put1(s)
   ret_addr, ret_len = y:get_chunk(0);
   assert(ret_addr)
-  print(ret_len)
   assert(ret_len == chunk_size) -- can get previous chunk
   ret_addr, ret_len = y:get_chunk(1);
   assert(ret_len == 1)
+  if ( ( j % 1000 ) == 0 )  then print("Iters ", j) end
 end
