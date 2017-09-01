@@ -118,4 +118,29 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
+  
+  -- with nulls
+  
+  -- creating nascent vector with nulls, generating values by scalar
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "create_nascent_vector_with_nulls_scalar", 
+    meta = "gm_create_nascent_vector4.lua",
+    num_elements = 65540, 
+    gen_method = "scalar", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- creating nascent vector with nulls, generating values by cmem_buf
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "create_nascent_vector_with_nulls_cmem_buf", 
+    meta = "gm_create_nascent_vector4.lua",
+    num_elements = 65540, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
 }
