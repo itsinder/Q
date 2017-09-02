@@ -1,8 +1,8 @@
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
-local plpath = require("pl.path")
-local Vector = require 'libvec' ;
+local plpath = require "pl.path"
+local Vector = require 'libvec'
 --====================================
 local lVector = {}
 lVector.__index = lVector
@@ -63,8 +63,8 @@ function lVector.new(arg)
 
   if arg.gen then 
     is_nascent = true
-    if ( not arg.has_nulls ) then
-      arg.has_nulls = true
+    if ( arg.has_nulls == nil ) then
+      has_nulls = true
     else
       assert(type(arg.has_nulls) == "boolean")
       has_nulls = arg.has_nulls
@@ -303,12 +303,10 @@ function lVector:release_vec_buf(chunk_size)
 end
 
 function lVector:get_vec_buf()
-  local nn_buf = nil
-  local base_buf = Vector.get_vec_buf(self._base_vec)
-  assert(base_buf)
+  local nn_buf
+  local base_buf = assert(Vector.get_vec_buf(self._base_vec))
   if ( self._has_nulls ) then
-    nn_buf = Vector.get_vec_buf(self._nn_vec)
-    assert(nn_buf)
+    nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
   end
   return base_buf, nn_buf
 end
@@ -355,7 +353,6 @@ function lVector:get_chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-    print("buf_size = ", buf_size)
     if ( base_data ) then 
       -- this is the simpler case where generator malloc's
       self:put_chunk(base_data, nn_data, buf_size)
@@ -381,9 +378,11 @@ end
 function lVector:meta()
   local base_meta = load(Vector.meta(self._base_vec))()
   local nn_meta = nil
+  if ( self._has_nulls ) and ( not self._nn_vec ) then 
+    assert(nil)
+  end
   if ( self._nn_vec ) then 
     nn_meta = load(Vector.meta(self._nn_vec))()
-  else
   end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
