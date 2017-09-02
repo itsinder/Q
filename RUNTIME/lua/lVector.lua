@@ -63,10 +63,11 @@ function lVector.new(arg)
 
   if arg.gen then 
     is_nascent = true
-    if ( arg.has_nulls == false ) then 
-      has_nulls = false
+    if ( not arg.has_nulls ) then
+      arg.has_nulls = true
     else
-      has_nulls = true
+      assert(type(arg.has_nulls) == "boolean")
+      has_nulls = arg.has_nulls
     end
     assert(type(arg.gen) == "function" or type(arg.gen) == "boolean" , 
     "supplied generator must be a function or boolean as placeholder ")
@@ -82,14 +83,16 @@ function lVector.new(arg)
       assert(type(nn_file_name) == "string", 
       "Null vector's file_name must be a string")
       has_nulls = true
+      if ( arg.has_nulls ) then assert(arg.has_nulls == true) end
     else
       has_nulls  = false
+      if ( arg.has_nulls ) then assert(arg.has_nulls == false) end
     end
     is_nascent = false
   end
   vector._has_nulls = has_nulls
-  vector.file_name = file_name
-  vector.nn_file_name = nn_file_name
+  vector._file_name = file_name
+  vector._nn_file_name = nn_file_name
 
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
@@ -153,8 +156,11 @@ function lVector:get_chunk_num()
   return Vector.chunk_num(self._base_vec)
 end
 
+function lVector:has_nulls()
+  return self._has_nulls
+end
+
 function lVector:num_elements()
-  print("getting num_elements")
   return Vector.num_elements(self._base_vec)
 end
 
