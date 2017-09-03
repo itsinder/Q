@@ -86,17 +86,19 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
 end
 --===================
 
-local materialized_vec_basic_operations = function(vec, test_name, num_elements)
+local materialized_vec_basic_operations = function(vec, test_name, num_elements, validate_values)
   -- Validate metadata
   local md = vec:meta()
   local is_materialized = true
   local status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed for materialized vector")  
     
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.base.field_type)
-  assert(status, "Vector values verification failed")
-  
+  if validate_values == true or validate_values == nil then
+    -- Validate vector values
+    status = vec_utils.validate_values(vec, md.base.field_type)
+    assert(status, "Vector values verification failed")
+  end
+
   status = vec:persist(true)
   assert(status)
   
@@ -104,6 +106,7 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements)
 end
 --===================
 
+-- write values to nascent vector with cmem_buf or scalar
 fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)  
   -- common checks for vectors
   assert(vec:check())
@@ -140,6 +143,7 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
+-- write values to nascen vector using generator function
 fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -164,7 +168,10 @@ fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
-fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
+-- Validation when is_memo is false
+-- try eov - should not success
+-- try adding element after eov -- can not add
+fns.assert_nascent_vector3_1 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
@@ -172,7 +179,35 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
   
-  -- Validate metadata after vec:eov()
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
+  local md = vec:meta()
+  assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
+  assert(md.base.file_name == nil, "Nascent vector file name should be nil")
+  
+  -- Try adding element to eov'd nascent vector, should fail
+  local s1 = Scalar.new(123, md.base.field_type)
+  status = vec:put1(s1)
+  assert(status == nil, "Able to add value to eov'd nascent vector")
+  print(md.base.num_elements)
+  print(vec:num_elements())
+  assert(md.base.num_elements == vec:num_elements(), "Able to add value to eov'd nascent vector")
+  assert(vec:check())
+  
+  return true
+end
+--===================
+
+-- Validation when is_memo is false
+-- try persist -- should not work
+fns.assert_nascent_vector3_2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
@@ -181,6 +216,25 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   status = vec:persist(true)
   assert(status == nil, "Able set persist even if memo is false")
   
+  return true
+end
+--===================
+
+-- Validation when is_memo is false
+-- set memo true and try vec:check() -- validation should work
+fns.assert_nascent_vector3_3 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
+  local md = vec:meta()
+  assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
+  assert(md.base.file_name == nil, "Nascent vector file name should be nil")
+    
   -- Try setting memo to true when chunk_num is zero i.e num_elements < chunk_size
   -- file_name should not be initialized, vec:check() should be successful
   assert(md.base.chunk_num == 0)
@@ -194,6 +248,7 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
+-- try to modify values of a vec (nascent -> materialized) using mmap ptr withoud start_write()
 fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -216,10 +271,13 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
+  
   return true
 end
 --===================
 
+-- try modifying memo before first chunk is full - should success
+-- try modifying memo after first chunk is flushed - should not work
 fns.assert_nascent_vector5 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -259,6 +317,7 @@ fns.assert_nascent_vector5 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
+-- nascent vector, vector is with nulls but don't provide nn_data in put_chunk
 fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)  
   -- common checks for vectors
   assert(vec:check())
@@ -277,6 +336,7 @@ fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
+-- nascent vector, vector is with nulls but don't provide nn_data in put1
 fns.assert_nascent_vector7 = function(vec, test_name, num_elements, gen_method)  
   -- common checks for vectors
   assert(vec:check())
@@ -293,7 +353,9 @@ fns.assert_nascent_vector7 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
-fns.assert_nascent_vector8 = function(vec, test_name, num_elements, gen_method)
+-- nascet vector -> materialized vector (using eov)
+-- try modifying the vec using start_write() and end_write()
+fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
@@ -309,29 +371,80 @@ fns.assert_nascent_vector8 = function(vec, test_name, num_elements, gen_method)
   status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed after vec:eov()")
   
-  -- Check file size
-  assert(plpath.getsize(md.base.file_name) == num_elements * md.base.field_size, "File size mismatch with expected value")
-  
   -- Try to modify values using start_write()
-  assert(vec:start_write(), "Failed to open the mmaped file in write mode")
-  local len, base_data, nn_data = vec:get_chunk()
-  -- Can't read as open_mode is set to 2, read operation requires it to be 0
-  assert(base_data == nil)
+  local len, base_data, nn_data = vec:start_write()
+  assert(base_data, "Failed to open the mmaped file in write mode")
+  assert(len, "Failed to open the mmaped file in write mode")
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   
-  -- How do a get handle of mmaped pointer
+  -- Set value at index 0
+  local test_value = 121
+  iptr[0] = test_value
+  
+  -- close the write handle
   vec:end_write()
   
-  -- Now get_chunk() should work as open_mode set to 0
+  -- Now get_chunk() should work as open_mode set to 0, validate modified value
   len, base_data, nn_data = vec:get_chunk()
   assert(base_data)
-  -- local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  -- status = pcall(set_value, iptr, 0, 123)
-  -- assert(status == false, "Able to modify read only vector")
+  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   return true
 end
 --===================
 
+-- nascet vector -> materialized vector (using eov)
+-- try consecutive operation of get_chunk(), should work
+fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations, here a get_chunk operation is happening so open_mode set to 1
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = vec:meta()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Now get_chunk() should work as open_mode set to 1
+  local len, base_data, nn_data = vec:get_chunk()
+  assert(base_data)
+  
+  return true
+end
+--===================
+
+-- nascet vector -> materialized vector (using eov)
+-- try start_write() after read operation, this is not allowed
+fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations, here read operation is happening
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = vec:meta()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Try to modify values using start_write()
+  local status, len, base_data, nn_data = pcall(vec.start_write, vec)
+  assert(status == false)
+  assert(base_data == nil)
+  
+  return true
+end
+--===================
+
+-- For nascent vector, try get_chunk() without passing chunk_num
+-- should return the current chunk
 fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -355,6 +468,7 @@ fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
+-- create a materialized vector and validate values
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
@@ -367,46 +481,42 @@ fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   if vec._has_nulls then
     assert(md.nn)
   end
-  --[[
-  -- Try setting value
-  local test_value = 101
-  local len, base_data, nn_data = vec:get_chunk()
-  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  iptr[0] = test_value
-  
-  assert(vec:check())
-  
-  -- Validate modified value
-  len, base_data, nn_data = vec:get_chunk()
-  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  assert(test_value == iptr[0])
-  ]]
+
   return true
 end
 --===================
 
+-- try to add element in materialized vector, i.e add element at index num_elements + 1
 fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
   
   -- Perform vec basic operations  
-  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  local validate_values = false
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
   assert(status, "Failed to perform materialized vec basic operations")
 
   local md = vec:meta()
   
   -- Try setting value at wrong index
-  local test_value = 101
-  local len, base_data, nn_data = vec:get_chunk()
+  local len, base_data, nn_data = vec:start_write()
+  assert(base_data, "Failed to open the mmaped file in write mode")
+  assert(len, "Failed to open the mmaped file in write mode")
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  status = pcall(set_value, iptr, num_elements+1, test_value)
-  assert(status == false, "Able to modify value at wrong index for materialized vector")
-  assert(vec:check())
-
-  return true
+  
+  -- Set value at index 0
+  local test_value = 121
+  status = set_value(iptr, md.base.num_elements + 1, test_value)
+  assert(status == false, "Able to add element at wrong index for materialized vec")
+  
+  -- close the write handle
+  vec:end_write()
+  
+  return false
 end
 --===================
 
+-- try eov over materialized vector
 fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
@@ -416,8 +526,8 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")
   
   -- Try setting value at wrong index
-  status = vec:eov()
-  assert(status == nil)
+  status = pcall(vec.eov, vec)
+  assert(status == false)
 
   assert(vec:check())
 
@@ -425,31 +535,36 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
 end
 --===================
 
+-- try modifying values of materialized vector with start_write()
 fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
   
   -- Perform vec basic operations  
-  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  local validate_values = false
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
   assert(status, "Failed to perform materialized vec basic operations")
 
   local md = vec:meta()
   
-  -- Try to modify values using start_write()
-  assert(vec:start_write(), "Failed to open the mmaped file in write mode")
-  local len, base_data, nn_data = vec:get_chunk()
-  -- Can't read as open_mode is set to 2, read operation requires it to be 0
-  assert(base_data == nil)
+  -- Try to modify value using start_write()
+  local len, base_data, nn_data = vec:start_write()
+  assert(base_data, "Failed to open the mmaped file in write mode")
+  assert(len, "Failed to open the mmaped file in write mode")
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   
-  -- How do a get handle of mmaped pointer
+  -- Set value at index 0
+  local test_value = 121
+  iptr[0] = test_value
+  
+  -- close the write handle
   vec:end_write()
   
-  -- Now get_chunk() should work as open_mode set to 0
+  -- Now get_chunk() should work as open_mode set to 0, validate modified value
   len, base_data, nn_data = vec:get_chunk()
   assert(base_data)
-  -- local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
-  -- status = pcall(set_value, iptr, 0, 123)
-  -- assert(status == false, "Able to modify read only vector")
+  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   assert(vec:check())
 
@@ -476,7 +591,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
     assert(md.nn)
   end
  
-   -- Try to modify values using start_write()
+   -- Try to modify value using start_write()
   assert(vec:start_write(), "Failed to open the mmaped file in write mode")
   local len, base_data, nn_data = vec:get_chunk()
   -- Can't read as open_mode is set to 2, read operation requires it to be 0
