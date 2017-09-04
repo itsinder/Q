@@ -30,7 +30,7 @@ local validate_vec_meta = function(meta, is_materialized, num_elements)
 end
 
 
-local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_method, perform_eov)
+local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
   -- Validate metadata
   local md = loadstring(vec:meta())()
   local is_materialized = false
@@ -50,8 +50,10 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   end
   
   -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")  
+  if validate_values == true or validate_values == nil then
+    status = vec_utils.validate_values(vec, md.field_type)
+    assert(status, "Vector values verification failed")  
+  end
   
   return true
 end
@@ -287,6 +289,93 @@ fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)
   return true
 end
 
+-- nascet vector -> materialized vector (using eov)
+-- try modifying the vec using start_write() and end_write()
+fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local perform_eov = true
+  local validate_values = false
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, nil, validate_values)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Try to modify values using start_write()
+  local map_addr, num_len = vec:start_write()
+  assert(map_addr, "Failed to open the mmaped file in write mode")
+  assert(num_len, "Failed to open the mmaped file in write mode")
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", map_addr)
+  
+  -- Set value at index 0
+  local test_value = 121
+  iptr[0] = test_value
+  
+  -- close the write handle
+  vec:end_write()
+  
+  -- Now get_chunk() should work as open_mode set to 0, validate modified value
+  local addr, len = vec:get_chunk()
+  assert(addr)
+  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  
+  return true
+end
+
+-- nascet vector -> materialized vector (using eov)
+-- try consecutive operation of get_chunk(), should work
+fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations, here a get_chunk operation is happening so open_mode set to 1
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Now get_chunk() should work as open_mode set to 1
+  local addr, len = vec:get_chunk()
+  assert(addr)
+  
+  return true
+end
+
+-- nascent vector -> materialized vector (using eov)
+-- try start_write() after read operation, this is not allowed
+fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations, here read operation is happening
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Try to modify values using start_write()
+  local map_addr, num_len = vec:start_write()
+  print(map_addr, num_len)
+  -- assert(status == false)
+  assert(map_addr == nil)
+  
+  return true
+end
 
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- common checks for vectors

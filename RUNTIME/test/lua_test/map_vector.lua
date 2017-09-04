@@ -94,6 +94,65 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
+    -- try modifying nascent vector after eov with start_write(), should success
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_1",
+    name = "nascent_vector_try_start_write()_after_eov",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent -> materialized vec (after eov)
+  -- try consecutive get_chunk operation, should success 
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_2",
+    name = "nascent_vector_consecutive_get_chunk_operations",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent -> materialized vec (after eov)
+  -- start_write() should not success once vec is opened for reading
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_3",
+    name = "nascent_vector_followed_eov_try_start_write()_after_get_chunk()",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },  
+
+  -- nascent -> materialized vec (after eov)
+  -- try consecutive get_chunk operation, should success 
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_2",
+    name = "nascent_vector_consecutive_get_chunk_operations",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent -> materialized vec (after eov)
+  -- start_write() should not success once vec is opened for reading
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_3",
+    name = "nascent_vector_followed_eov_try_start_write()_after_get_chunk()",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },  
+  
   -- materialized vector
   {
     test_type = "materialized_vector",
@@ -188,5 +247,4 @@ return {
     gen_method = "scalar", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
 }
