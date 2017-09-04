@@ -1,8 +1,8 @@
 -- FUNCTIONAL
 require 'Q/UTILS/lua/strict'
 
-local vector = require 'Q/experimental/lua-515/c_modules/lua_test/vector'
-local testsuite_vector = require 'Q/experimental/lua-515/c_modules/lua_test/testsuite_vector'
+local vector = require 'Q/RUNTIME/test/lua_test/vector'
+local testsuite_vector = require 'Q/RUNTIME/test/lua_test/testsuite_vector'
 local suite_runner = require 'Q/UTILS/lua/suite_runner'
 
 local status, failures = pcall(suite_runner, testsuite_vector, vector, nil)

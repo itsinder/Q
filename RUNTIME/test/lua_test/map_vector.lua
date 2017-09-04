@@ -34,14 +34,39 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- nascent vector with is_memo false
+  -- nascent vector with is_memo false, try eov, this method should not work
+  -- also you can not add element after eov
   {
     test_type = "nascent_vector",
-    assert_fns = "nascent_vector2",
-    name = "create_nascent_vector_memo_false", 
-    meta = "gm_create_nascent_vector2.lua", 
-    num_elements = 10, 
-    gen_method = "cmem_buf", 
+    assert_fns = "nascent_vector2_1",
+    name = "nascent_vector_memo_false_check_add_element_after_eov",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 100,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent vector with is_memo false, try persist, this method should not work
+   {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector2_2",
+    name = "nascent_vector_memo_false_check_persist",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 100,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent vector with is_memo false, set is_memo explicitly to true then try vec:check(), 
+  -- should be successful
+  -- refer mail with subject "Testcase failing when setting memo explicitly with random boolean value"
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector2_3",
+    name = "nascent_vector_memo_false_set_memo_and_vec_check",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 100,
+    gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
 

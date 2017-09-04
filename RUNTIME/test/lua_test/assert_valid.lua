@@ -1,7 +1,7 @@
 local plfile  = require 'pl.file'
 local plpath  = require 'pl.path'
 local dbg    = require 'Q/UTILS/lua/debugger'
-local vec_utils = require 'Q/experimental/lua-515/c_modules/lua_test/vec_utility'
+local vec_utils = require 'Q/RUNTIME/test/lua_test/vec_utility'
 local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
@@ -110,22 +110,82 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
 end
 
 
-fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
+-- Validation when is_memo is false
+-- try eov - should not success
+-- try adding element after eov -- can not add
+fns.assert_nascent_vector2_1 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
-  -- Perform vec basic operations  
+  -- Perform vec basic operations
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
-      
-  -- Validate metadata after vec:eov()
+  
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
   local md = loadstring(vec:meta())()
-  assert(md.is_nascent == true)
-  assert(md.file_name == nil)
+  assert(md.is_nascent == true, "Expected a nascent vector but actual value is not matching")
+  assert(md.file_name == nil, "Nascent vector file name should be nil")
+
+  -- Try adding element to eov'd nascent vector, should fail
+  local s1 = Scalar.new(123, md.field_type)
+  status = vec:put1(s1)
+  assert(status == nil, "Able to add value to eov'd nascent vector")
+  print(md.num_elements)
+  print(vec:num_elements())
+  assert(md.num_elements == vec:num_elements(), "Able to add value to eov'd nascent vector")
+  assert(vec:check())
   
   return true
 end
 
+-- Validation when is_memo is false
+-- try persist -- should not work
+fns.assert_nascent_vector2_2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
+  local md = loadstring(vec:meta())()
+  assert(md.is_nascent == true, "Expected a nascent vector but actual value is not matching")
+  assert(md.file_name == nil, "Nascent vector file name should be nil")
+  
+  -- Try persist() method with true, it should fail
+  status = vec:persist(true)
+  assert(status == nil, "Able set persist even if memo is false")
+  
+  return true
+end
+
+-- Validation when is_memo is false
+-- set memo true and try vec:check() -- validation should work
+fns.assert_nascent_vector2_3 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
+  local md = loadstring(vec:meta())()
+  assert(md.is_nascent == true, "Expected a nascent vector but actual value is not matching")
+  assert(md.file_name == nil, "Nascent vector file name should be nil")
+    
+  -- Try setting memo to true when chunk_num is zero i.e num_elements < chunk_size
+  -- file_name should not be initialized, vec:check() should be successful
+  assert(md.chunk_num == 0)
+  status = vec:memo(true)
+  assert(status, "Failed to update memo even if chunk_num is zero i.e num_elements < chunk_size")
+  md = vec:meta()
+  assert(vec:check())
+  assert(md.file_name == nil, "File name initialized even if num_elements < chunk_size")
+  
+  return true
+end
 
 fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
