@@ -1,6 +1,5 @@
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local utils = require 'Q/UTILS/lua/test_utils'
-local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 return {
   tests = 
