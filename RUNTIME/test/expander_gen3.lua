@@ -1,7 +1,7 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'
-local lVector = require 'lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local dbg = require 'Q/UTILS/lua/debugger'
 local function expander_gen3(f1, f2)
   -- start: hard coding for this test case

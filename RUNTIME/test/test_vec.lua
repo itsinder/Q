@@ -3,11 +3,12 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
 local buf = cmem.new(4096)
+local qconsts = require 'Q/UTILS/lua/q_consts'
 -- for k, v in pairs(vec) do print(k, v) end 
 
 local M
 local is_memo
-local chunk_size = 65536  
+local chunk_size = qconsts.chunk_size
 local rslt
 
 local infile = '_in1_I4.bin'
@@ -103,7 +104,8 @@ for i = 1, chunk_size do
 end
 status = y:put1(s)
 ret_addr, ret_len = y:get_chunk(0);
-assert(ret_addr == nil);
+assert(ret_addr)
+-- TODO RAMESH assert(ret_len == chunk_size)
 ret_addr, ret_len = y:get_chunk(1);
 assert(ret_len == 1)
 -- Test get_chunk

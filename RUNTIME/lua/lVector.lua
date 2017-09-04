@@ -397,5 +397,4 @@ function lVector:get_meta(k)
   return self._meta[k]
 end
 
-
 return lVector

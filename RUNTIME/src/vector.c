@@ -111,12 +111,13 @@ BYE:
 //----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;
-  void *ret_addr = NULL;
+  char *ret_addr = NULL;
   uint64_t ret_len = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t idx = luaL_checknumber(L, 2);
   int32_t len = luaL_checknumber(L, 3);
-  status = vec_get(ptr_vec, idx, len, &ret_addr, &ret_len); cBYE(status);
+  status = vec_get(ptr_vec, idx, len, &ret_addr, &ret_len);
+  cBYE(status);
   int num_to_return = 2;
   lua_pushlightuserdata(L, ret_addr);
   lua_pushinteger(L, ret_len);
@@ -147,7 +148,7 @@ BYE:
 static int l_vec_get_chunk( lua_State *L) 
 {
   int status = 0;
-  void *ret_addr = NULL;
+  char *ret_addr = NULL;
   uint64_t ret_len = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
@@ -166,9 +167,25 @@ static int l_vec_get_chunk( lua_State *L)
     }
     idx = chunk_num * Q_CHUNK_SIZE;
   }
-  status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE, &ret_addr, &ret_len); 
+  bool is_malloc = false; uint64_t sz = 0;
+  if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_nascent ) ) {
+    is_malloc = true;
+    // allocate memory in advance 
+    sz = ptr_vec->chunk_size * ptr_vec->field_size;
+    ret_addr = lua_newuserdata(L, sz); 
+    /* Add the metatable to the stack. */
+    luaL_getmetatable(L, "CMEM");
+    /* Set the metatable on the userdata. */
+    lua_setmetatable(L, -2);
+  }
+  status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE, &ret_addr, &ret_len);
   cBYE(status);
-  lua_pushlightuserdata(L, ret_addr);
+  if ( is_malloc ) { 
+    // already taken care of 
+  }
+  else {
+    lua_pushlightuserdata(L, ret_addr);
+  }
   lua_pushinteger(L, ret_len);
   return 2;
 BYE:

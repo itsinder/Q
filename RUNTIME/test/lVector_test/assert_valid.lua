@@ -1,7 +1,7 @@
 local plfile  = require 'pl.file'
 local plpath  = require 'pl.path'
 local dbg    = require 'Q/UTILS/lua/debugger'
-local vec_utils = require 'Q/experimental/lua-515/c_modules/lVector_test/vec_utility'
+local vec_utils = require 'Q/RUNTIME/test/lVector_test/vec_utility'
 local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'

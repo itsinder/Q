@@ -1,7 +1,7 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'  
-local lVector = require 'Q/experimental/lua-515/c_modules/lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 
 local chunk_size = qconsts.chunk_size
 

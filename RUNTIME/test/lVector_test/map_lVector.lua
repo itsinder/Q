@@ -115,7 +115,7 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  --[[
   -- try modifying nascent vector after eov with mmap_ptr (without start_write()), it should fail
   -- this testcase should segfault, how to catch it?
   {
@@ -127,7 +127,7 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  ]]
   -- try modifying nascent vector after eov with start_write(), should success
   {
     test_type = "nascent_vector",
@@ -194,7 +194,7 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  --[[
   -- materialized vector, set value at wrong index
   -- This testcase should segfault, how to catch it?
   {
@@ -205,7 +205,7 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  ]]
   -- materialized vector, try eov
   {
     test_type = "materialized_vector",
@@ -314,7 +314,7 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  --[[
   -- modify the materialized vector with has_nulls true without modifying respective nn vector
   -- this testcase is causing segfault, how to catch it?
   { 
@@ -325,5 +325,5 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  ]]
 }
