@@ -1,6 +1,6 @@
 local Q       = require 'Q/q_export'
 local err     = require 'Q/UTILS/lua/error_code'
-local Column  = require 'Q/experimental/lua-515/c_modules/lVector'
+local Column  = require 'Q/RUNTIME/lua/lVector'
 local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'

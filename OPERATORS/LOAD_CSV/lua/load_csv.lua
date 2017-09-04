@@ -4,10 +4,10 @@ local err           = require 'Q/UTILS/lua/error_code'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local qc            = require 'Q/UTILS/lua/q_core'
-local cmem    = require 'Q/experimental/lua-515/c_modules/libcmem'
+local cmem    = require 'libcmem'
 
 local Dictionary = require 'Q/UTILS/lua/dictionary'
-local Column     = require 'Q/experimental/lua-515/c_modules/lVector'
+local Column     = require 'Q/RUNTIME/lua/lVector'
 local plstring   = require 'pl.stringx'
 local plfile     = require 'pl.file'
 
