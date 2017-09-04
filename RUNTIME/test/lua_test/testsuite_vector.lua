@@ -1,7 +1,7 @@
 local plpath  = require 'pl.path'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
-local fns =  require 'Q/experimental/lua-515/c_modules/lua_test/assert_valid'
+local fns =  require 'Q/RUNTIME/test/lua_test/assert_valid'
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
