@@ -8,15 +8,21 @@ return {
         name = "mkcol_I1", 
         input = { {10, 20, 30, 40, 50, 60}, "I1" },
         check = function(col)
-              return utils.col_as_str(col) == "10,20,30,40,50,60,"
-          end
+          return utils.col_as_str(col) == "10,20,30,40,50,60,"
+        end
       },
       { 
-        name = "mkcol_I4", 
-        input = { {10, 20, 30, 40, 50, 60}, "I4" },
+        name = "mkcol_F4", 
+        input = { {10.22, 20.11, 30.22, 40.11, 50.22, 60.11}, "F4" },
         check = function(col)
-              return utils.col_as_str(col) == "10,20,30,40,50,60,"
-          end
+          print(utils.col_as_str(col))
+          return utils.col_as_str(col) == "10.22,20.11,30.22,40.11,50.22,60.11,"
+        end
+      },
+      { 
+        name = "mkcol_SC", 
+        input = { {"abc", "pqr"}, "SC" },
+        fail = "Invalid column field type"
       },      
     }
 }
