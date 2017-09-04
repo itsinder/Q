@@ -11,6 +11,12 @@ local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 local fns = {}
 
 --===================
+
+local set_value = function(buffer, index, value)
+  buffer[index] = value
+end
+
+--===================
 local validate_vec_meta = function(meta, is_materialized, num_elements)
   local status = true
   if is_materialized then
@@ -289,6 +295,31 @@ fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)
   return true
 end
 
+-- For nascent vector, try get_chunk() without passing chunk_num
+-- should return the current chunk
+fns.assert_nascent_vector7 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local perform_eov = false
+  local validate_values = false
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = loadstring(vec:meta())()
+  assert(md.is_nascent == true, "Expected a nascent vector, but not a nascent vector")  
+
+  -- Try get_chunk() without passing chunk_num, it should return the current chunk
+  local addr, len = vec:get_chunk()
+  assert(addr)
+  assert(len == md.num_in_chunk)
+  
+  return true
+end
+
+
 -- nascet vector -> materialized vector (using eov)
 -- try modifying the vec using start_write() and end_write()
 fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method)
@@ -376,6 +407,34 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
   
   return true
 end
+
+-- try to modify values of a vec (nascent -> materialized) using mmap ptr withoud start_write()
+fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = loadstring(vec:meta())()
+  local is_materialized = true
+  status = validate_vec_meta(md, is_materialized, num_elements)
+  assert(status, "Metadata validation failed after vec:eov()")
+  
+  -- Check file size
+  assert(plpath.getsize(md.file_name) == num_elements * md.field_size, "File size mismatch with expected value")
+  
+  -- Try to modify values of a read only vector
+  local addr, len = vec:get_chunk()
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  status = pcall(set_value, iptr, 0, 123)
+  assert(status == false, "Able to modify read only vector")
+  
+  return true
+end
+
 
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- common checks for vectors

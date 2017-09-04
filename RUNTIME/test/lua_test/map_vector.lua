@@ -94,6 +94,17 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
+  -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector7",
+    name = "nascent_vec_get_chunk_without_chunk_num_argument",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65540,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
     -- try modifying nascent vector after eov with start_write(), should success
   {
     test_type = "nascent_vector",
@@ -152,7 +163,7 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
-  
+
   -- materialized vector
   {
     test_type = "materialized_vector",
@@ -247,4 +258,17 @@ return {
     gen_method = "scalar", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
+  --[[
+  -- try modifying nascent vector after eov with mmap_ptr (without start_write()), it should fail
+  -- this testcase should segfault, how to catch it?
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector9",
+    name = "write_to_nascent_vector_after_eov_with_mmap_ptr",
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  ]]
 }
