@@ -1,7 +1,7 @@
 local plpath  = require 'pl.path'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
-local fns =  require 'Q/experimental/lua-515/c_modules/lVector_test/assert_valid'
+local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
@@ -35,6 +35,10 @@ local create_tests = function()
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then 
         M.file_name = string.gsub( M.file_name, "${q_type}", qtype[j] )
+        M.file_name = script_dir .. "/" .. M.file_name
+        if M.nn_file_name then
+          M.nn_file_name = script_dir .. "/" .. M.nn_file_name
+        end
       end
       M.qtype = qtype[j]
       

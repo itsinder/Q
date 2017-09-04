@@ -1,4 +1,4 @@
-local lVector = require 'Q/experimental/lua-515/c_modules/lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 
 -- input argument is metadata required for lVector 
 return function( M )
