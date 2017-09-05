@@ -329,15 +329,20 @@ function lVector:get_chunk(chunk_num)
     -- As per my thinking, it should return me the current chunk,
     if ( is_nascent ) then 
       l_chunk_num = Vector.chunk_num(self._base_vec)
+    else
+      assert(nil, "Provide chunk_num for get_chunk on materialized vector")
     end
   end
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
   local cond1 = not is_nascent
   -- cond2 => Vector is nascent and you are asking for current chunk
+  -- or previous chunk 
   local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
-          ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
-          ( Vector.num_in_chunk(self._base_vec) > 0 )
+          ( ( ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
+          ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
+          ( ( Vector.chunk_num(self._base_vec) < l_chunk_num ) and 
+          ( Vector.is_memo(self._base_vec) == true ) ) )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
     if ( base_addr == nil ) then
