@@ -497,7 +497,6 @@ static const struct luaL_Reg vector_methods[] = {
     { "put_chunk", l_vec_put_chunk },
     { "get_vec_buf", l_vec_get_vec_buf },
     { "release_vec_buf", l_vec_release_vec_buf },
-// TODO    { "has_nulls", l_vec_has_nulls },
     { "set", l_vec_set },
     { "get", l_vec_get },
     { "start_write", l_vec_start_write },

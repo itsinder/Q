@@ -1,8 +1,8 @@
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
-local plpath = require("pl.path")
-local Vector = require 'libvec' ;
+local plpath = require "pl.path"
+local Vector = require 'libvec'
 --====================================
 local lVector = {}
 lVector.__index = lVector
@@ -63,10 +63,11 @@ function lVector.new(arg)
 
   if arg.gen then 
     is_nascent = true
-    if ( arg.has_nulls == false ) then 
-      has_nulls = false
-    else
+    if ( arg.has_nulls == nil ) then
       has_nulls = true
+    else
+      assert(type(arg.has_nulls) == "boolean")
+      has_nulls = arg.has_nulls
     end
     assert(type(arg.gen) == "function" or type(arg.gen) == "boolean" , 
     "supplied generator must be a function or boolean as placeholder ")
@@ -82,14 +83,16 @@ function lVector.new(arg)
       assert(type(nn_file_name) == "string", 
       "Null vector's file_name must be a string")
       has_nulls = true
+      if ( arg.has_nulls ) then assert(arg.has_nulls == true) end
     else
       has_nulls  = false
+      if ( arg.has_nulls ) then assert(arg.has_nulls == false) end
     end
     is_nascent = false
   end
   vector._has_nulls = has_nulls
-  vector.file_name = file_name
-  vector.nn_file_name = nn_file_name
+  vector._file_name = file_name
+  vector._nn_file_name = nn_file_name
 
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
@@ -153,8 +156,11 @@ function lVector:get_chunk_num()
   return Vector.chunk_num(self._base_vec)
 end
 
+function lVector:has_nulls()
+  return self._has_nulls
+end
+
 function lVector:num_elements()
-  print("getting num_elements")
   return Vector.num_elements(self._base_vec)
 end
 
@@ -299,12 +305,10 @@ function lVector:release_vec_buf(chunk_size)
 end
 
 function lVector:get_vec_buf()
-  local nn_buf = nil
-  local base_buf = Vector.get_vec_buf(self._base_vec)
-  assert(base_buf)
+  local nn_buf
+  local base_buf = assert(Vector.get_vec_buf(self._base_vec))
   if ( self._has_nulls ) then
-    nn_buf = Vector.get_vec_buf(self._nn_vec)
-    assert(nn_buf)
+    nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
   end
   return base_buf, nn_buf
 end
@@ -351,7 +355,6 @@ function lVector:get_chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-    print("buf_size = ", buf_size)
     if ( base_data ) then 
       -- this is the simpler case where generator malloc's
       self:put_chunk(base_data, nn_data, buf_size)
@@ -377,9 +380,11 @@ end
 function lVector:meta()
   local base_meta = load(Vector.meta(self._base_vec))()
   local nn_meta = nil
+  if ( self._has_nulls ) and ( not self._nn_vec ) then 
+    assert(nil)
+  end
   if ( self._nn_vec ) then 
     nn_meta = load(Vector.meta(self._nn_vec))()
-  else
   end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end

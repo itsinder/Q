@@ -37,6 +37,7 @@ for j = 1, num_iters do
   end
   status = y:put1(s)
   ret_addr, ret_len = y:get_chunk(0);
+  assert(type(ret_addr) == "userdata")
   assert(ret_addr)
   assert(ret_len == chunk_size) -- can get previous chunk
   ret_addr, ret_len = y:get_chunk(1);

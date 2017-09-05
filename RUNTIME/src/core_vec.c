@@ -596,6 +596,7 @@ vec_add(
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov ) { go_BYE(-1); }
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
     status = vec_add_B1(ptr_vec, addr, len); cBYE(status);
     goto BYE; 
