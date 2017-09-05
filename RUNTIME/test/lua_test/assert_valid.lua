@@ -65,7 +65,7 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
 end
 
 
-local materialized_vec_basic_operations = function(vec, test_name, num_elements)
+local materialized_vec_basic_operations = function(vec, test_name, num_elements, validate_values)
   -- Validate metadata
   local md = loadstring(vec:meta())()
   local is_materialized = true
@@ -76,10 +76,12 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements)
   local n = vec:num_elements()
   assert(n == num_elements)
   
-  -- Validate vector values
-  status = vec_utils.validate_values(vec, md.field_type)
-  assert(status, "Vector values verification failed")
-  
+  if validate_values == true or validate_values == nil then
+    -- Validate vector values
+    status = vec_utils.validate_values(vec, md.field_type)
+    assert(status, "Vector values verification failed")
+  end
+
   status = vec:persist(true)
   assert(status)
   
@@ -440,22 +442,15 @@ fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
   
-  -- Perform vec basic operations    
+  -- Perform vec basic operations  
   local status = materialized_vec_basic_operations(vec, test_name, num_elements)
   assert(status, "Failed to perform materialized vec basic operations")
-  local md = loadstring(vec:meta())()
-  --[[
-  -- Try setting value
-  local test_value = 101
-  local s1 = Scalar.new(test_value, md.field_type)
-  status = vec:set(s1, 0)
-  assert(status)
-  assert(vec:check())
   
-  -- Validate modified value
-  local ret_addr, ret_len = vec:get_chunk(0);
-  assert(test_value == ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", ret_addr)[0])
-  ]]
+  local md = loadstring(vec:meta())()
+  if vec._has_nulls then
+    assert(md.nn)
+  end
+
   return true
 end
 
@@ -477,6 +472,7 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
   return true
 end
 
+-- try eov over materialized vector
 fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
@@ -488,6 +484,8 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
 
   status = vec:eov()
   assert(status == nil)
+  
+  assert(vec:check())
   
   return true
 end
@@ -512,6 +510,43 @@ end
 
 fns.assert_materialized_vector5 = function(vec, test_name, num_elements)
   assert(vec == nil)
+  return true
+end
+
+
+-- try modifying values of materialized vector with start_write()
+fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations  
+  local validate_values = false
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
+  assert(status, "Failed to perform materialized vec basic operations")
+
+  local md = loadstring(vec:meta())()
+  
+  -- Try to modify value using start_write()
+  local map_addr, num_len = vec:start_write()
+  assert(map_addr, "Failed to open the mmaped file in write mode")
+  assert(num_len, "Failed to open the mmaped file in write mode")
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", map_addr)
+  
+  -- Set value at index 0
+  local test_value = 121
+  iptr[0] = test_value
+  
+  -- close the write handle
+  vec:end_write()
+  
+  -- Now get_chunk() should work as open_mode set to 0, validate modified value
+  local addr, len = vec:get_chunk()
+  assert(addr)
+  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  
+  assert(vec:check())
+
   return true
 end
 

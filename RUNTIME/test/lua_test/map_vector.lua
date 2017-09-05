@@ -173,7 +173,7 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  
   -- materialized vector, set value at wrong index
   {
     test_type = "materialized_vector",
@@ -193,7 +193,7 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },      
-    
+
   -- read only materialized vector, try modifying value
   {
     test_type = "materialized_vector",
@@ -213,6 +213,17 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
+  
+  -- materialized vector, try modifying value with start_write()
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector6",
+    name = "modify_materialized_vector_with_start_write()",
+    meta = "gm_create_materialized_vector2.lua",
+    num_elements = 65540,
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
   
   -- with nulls
   
