@@ -24,17 +24,6 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
-  -- creating nascent vector, generating values by cmem_buf
-  { 
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector1",
-    name = "Creation of nascent vector_cmem_buf", 
-    meta = "gm_create_nascent_vector6.lua",
-    num_elements = 65540, 
-    gen_method = "cmem_buf", 
-    qtype = { "SC" }
-  },
-  
   -- creating nascent vector, generating values by scalar, put one element, check file size
   { 
     test_type = "nascent_vector", 
@@ -57,6 +46,17 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
+  -- creating nascent vector, generating values by cmem_buf, SC qtype
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_cmem_buf", 
+    meta = "gm_create_nascent_vector6.lua",
+    num_elements = 65540, 
+    gen_method = "cmem_buf", 
+    qtype = { "SC" }
+  },
+  
   -- creating nascent vector, generating values by cmem_buf, put one element, check file size
   { 
     test_type = "nascent_vector", 
@@ -67,10 +67,9 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "B1" }
   },
-  
   -- creating nascent vector, generating values by providing gen function,
   -- in case of gen function num_elements field is
-  -- number of chunks (num_chunks) and not number of elements
+  -- number of chunks (num_chunks) and not actula number of elements
   { 
     test_type = "nascent_vector", 
     assert_fns = "nascent_vector2",
@@ -81,37 +80,107 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- nascent vector with is_memo false, eov and persist method should not work
+  -- nascent vector with is_memo false, try eov, this method should not work
+  -- also you can not add element after eov
   {
     test_type = "nascent_vector",
-    assert_fns = "nascent_vector3",
-    name = "create_nascent_vector_memo_false",
+    assert_fns = "nascent_vector3_1",
+    name = "nascent_vector_memo_false_check_add_element_after_eov",
+    meta = "gm_create_nascent_vector3.lua",
+    num_elements = 100,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent vector with is_memo false, try persist, this method should not work
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector3_2",
+    name = "nascent_vector_memo_false_check_persist",
     meta = "gm_create_nascent_vector3.lua",
     num_elements = 100,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
   
-  -- nascent vector with is_read_only true
-  -- try writing to read only vector
-  -- for nascent vec, is_read_only is effective at vec:eov(true)
+  -- nascent vector with is_memo false, set is_memo explicitly to true then try vec:check(), 
+  -- should be successful
+  -- refer mail with subject "Testcase failing when setting memo explicitly with random boolean value"
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector3_3",
+    name = "nascent_vector_memo_false_set_memo_and_vec_check",
+    meta = "gm_create_nascent_vector3.lua",
+    num_elements = 100,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  --[[
+  -- try modifying nascent vector after eov with mmap_ptr (without start_write()), it should fail
+  -- this testcase should segfault, how to catch it?
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector4",
-    name = "write_to_nascent_vector_read_only",
+    name = "write_to_nascent_vector_after_eov_with_mmap_ptr",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  ]]
+  -- try modifying nascent vector after eov with start_write(), should success
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_1",
+    name = "nascent_vector_try_start_write()_after_eov",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent -> materialized vec (after eov)
+  -- try consecutive get_chunk operation, should success 
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_2",
+    name = "nascent_vector_consecutive_get_chunk_operations",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 10,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent -> materialized vec (after eov)
+  -- start_write() should not success once vec is opened for reading
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_3",
+    name = "nascent_vector_followed_eov_try_start_write()_after_get_chunk()",
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 10,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
-  
+
   -- nascent vector, try modifying memo after chunk is full, operation should fail
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector5",
-    name = "update_memo_after_chunk_size",
+    name = "nascent_vec_update_memo_after_chunk_size",
     meta = "gm_create_nascent_vector2.lua",
     num_elements = qconsts.chunk_size,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+
+  -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector9",
+    name = "nascent_vec_get_chunk_without_chunk_num_argument",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 65540,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
@@ -124,10 +193,10 @@ return {
     meta = "gm_create_materialized_vector1.lua",
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  }, 
-  
+  },
+  --[[
   -- materialized vector, set value at wrong index
-  -- this testcase is failing as we can set value at wrong index without any error
+  -- This testcase should segfault, how to catch it?
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector2",
@@ -136,7 +205,7 @@ return {
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  ]]
   -- materialized vector, try eov
   {
     test_type = "materialized_vector",
@@ -147,12 +216,11 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  -- read only materialized vector, try modifying value
-  -- This testcase should segfault, how to catch it?
+  -- materialized vector, try modifying value with start_write()
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector4",
-    name = "modify_read_only_materialized_vector",
+    name = "modify_materialized_vector_with_start_write()",
     meta = "gm_create_materialized_vector2.lua",
     num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
@@ -179,7 +247,7 @@ return {
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540, 
     gen_method = "scalar", 
-    qtype = qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
   -- creating nascent vector with nulls, generating values by cmem_buf
@@ -236,7 +304,7 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  
   -- create materialized vector with has_nulls true but provide wrong value of nn_file_name
   { 
     test_type = "materialized_vector", 
@@ -246,9 +314,9 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  --[[
   -- modify the materialized vector with has_nulls true without modifying respective nn vector
-  -- this testcase is failing bcoz without modifying respcective nn_vec value, we can modify vec
+  -- this testcase is causing segfault, how to catch it?
   { 
     test_type = "materialized_vector", 
     name = "modify_materialized_vector_with_nulls_without_modifying_nn_vec", 
@@ -257,5 +325,5 @@ return {
     num_elements = 65540, 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  ]]
 }

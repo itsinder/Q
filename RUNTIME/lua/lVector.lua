@@ -215,10 +215,12 @@ end
 
 function lVector:eov()
   local status = Vector.eov(self._base_vec)
+  assert(status)
   if self._nn_vec then 
-    status = Vector.eov(self._nn_vec)
+    local status = Vector.eov(self._nn_vec)
+    assert(status)
   end
-  return status
+  return true
 end
 
 function lVector:put1(s, nn_s)
