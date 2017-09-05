@@ -1,8 +1,9 @@
 local dbg = require 'Q/UTILS/lua/debugger'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local qc      = require 'Q/UTILS/lua/q_core'
+local lVector = require 'Q/RUNTIME/lua/lVector'
+
 local function expander_f1f2opf3(a, f1 , f2, optargs )
   local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name))
@@ -27,29 +28,22 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     nn_f3_buf = ffi.malloc(qconsts.chunk_size)
   end
 
-  local f1_coro = assert(f1:wrap(), "wrap failed for x")
-  local f2_coro = assert(f2:wrap(), "wrap failed for y")
+  local f1_chunk_size = f1:chunk_size()
+  local f2_chunk_size = f2:chunk_size()
+  assert(f1_chunk_size == f2_chunk_size)
 
-  local f3_coro = coroutine.create(function()
-    local f1_status, f1_len, f1_chunk, nn_f1_chunk
-    local f2_status, f2_len, f2_chunk, nn_f2_chunk
-    local f1_chunk_size = f1:chunk_size()
-    local f2_chunk_size = f2:chunk_size()
-     assert(f1_chunk_size == f2_chunk_size)
-     f1_status = true
-     while (f1_status) do
-       f1_status, f1_len, f1_chunk, nn_f1_chunk = coroutine.resume(f1_coro)
-       f2_status, f2_len, f2_chunk, nn_f2_chunk = coroutine.resume(f2_coro)
-       assert(f1_status == f2_status)
-       if f1_status and f1_len then 
-         assert(f1_len == f2_len)
-         assert(f1_len > 0)
-         qc[func_name](f1_chunk, f2_chunk, f1_len, f3_buf)
-         coroutine.yield(f1_len, f3_buf, nn_f3_buf)
-       end
-      end
-    end)
-   return Column{gen=f3_coro, nn=false, field_type=f3_qtype}
+  local f3_gen = function(chunk_idx)
+    local f1_len, f1_chunk, nn_f1_chunk
+    local f2_len, f2_chunk, nn_f2_chunk
+    f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
+    f2_len, f2_chunk, nn_f2_chunk = f2:chunk(chunk_idx)
+    assert(f1_len == f2_len)
+    if f1_len > 0 then
+      qc[func_name](f1_chunk, f2_chunk, f1_len, f3_buf)
+    end
+    return f1_len, f3_buf, nn_f3_buf
+  end
+  return lVector{gen=f3_gen, nn=false, field_type=f3_qtype}
 end
 
 return expander_f1f2opf3
