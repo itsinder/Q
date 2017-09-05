@@ -4,7 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local utils
 utils = {
   arr_from_col = function (c)
-    local sz, vec, nn_vec = c:chunk(-1)
+    local sz, vec, nn_vec = c:get_chunk()
     local ctype = qconsts.qtypes[c:fldtype()].ctype .. " *"
     return ffi.cast(ctype, vec)
   end,
@@ -14,10 +14,21 @@ utils = {
     local vec = utils.arr_from_col(c)
     local N=c:length()
     for i=0,N-1 do
-      s = s .. tostring(vec[i]) .. ","
+      local num = vec[i]
+      if c:qtype() == "F4" or c:qtype() == "F8" then
+        num = utils.round_num_to_x_precision(vec[i])
+      end
+      s = s .. tostring(num) .. ","
     end
     return s
-  end
+  end,
+
+  round_num_to_x_precision = function (num, x)
+    if not x then
+      x = 2   -- default to 2 precision
+    end
+    return math.floor(num * (10 ^ x) + 0.5) / (10 ^ x)
+  end,
 }
 
 return utils

@@ -53,12 +53,13 @@ q_core: q_basic q_operators
 	luajit mk_so.lua
 	echo "all done for q_core"
 
-q_basic: column utils load_csv print
+q_basic: utils load_csv print column
 	luajit mk_so.lua /tmp/
 	echo "Basic Q is built"
 
 column:
-	cd ${BASE_PATH}/RUNTIME/COLUMN/code/src;
+	cd ${BASE_PATH}/RUNTIME/src;
+	make -C ${BASE_PATH}/RUNTIME/src/
 	echo "column done"
 
 utils:
