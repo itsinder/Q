@@ -7,8 +7,8 @@ all: q_core
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
-	rm -f ${Q_ROOT}/lib/libq_core.so
-	rm -f ${Q_ROOT}/include/q_core.h
+	rm -f ${Q_ROOT}/lib/*.so
+	rm -f ${Q_ROOT}/include/*.h
 	rm -f ${Q_BUILD_DIR}/src/*
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
