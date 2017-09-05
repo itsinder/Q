@@ -186,9 +186,8 @@ fns.assert_nascent_vector3_1 = function(vec, test_name, num_elements, gen_method
   
   -- Try adding element to eov'd nascent vector, should fail
   local s1 = Scalar.new(123, md.base.field_type)
-  vec:put1(s1)
-  print(md.base.num_elements)
-  print(vec:num_elements())
+  status = pcall(vec.put1, vec, s1)
+  assert(status == false)
   assert(md.base.num_elements == vec:num_elements(), "Able to add value to eov'd nascent vector")
   assert(vec:check())
   
@@ -571,6 +570,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
 end
 --===================
 
+-- Testcases where vector initialization is expected to fail
 fns.assert_materialized_vector5 = function(vec, test_name, num_elements)
   assert(vec == nil)
   return true
