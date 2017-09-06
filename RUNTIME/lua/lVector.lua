@@ -342,7 +342,8 @@ function lVector:chunk(chunk_num)
     if ( is_nascent ) then 
       l_chunk_num = Vector.chunk_num(self._base_vec)
     else
-      assert(nil, "Provide chunk_num for chunk() on materialized vector")
+      l_chunk_num = 0
+      -- NOT an error assert(nil, "Provide chunk_num for chunk() on materialized vector")
     end
   end
   -- There are 2 conditions under which we do not need to compute
