@@ -165,7 +165,7 @@ function lVector:chunk_num()
 end
 
 function lVector:chunk_size()
-  return Vector.get_chunk_size(self._base_vec)
+  return Vector.chunk_size(self._base_vec)
 end
 
 function lVector:has_nulls()

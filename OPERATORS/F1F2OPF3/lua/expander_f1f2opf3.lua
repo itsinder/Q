@@ -43,7 +43,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     end
     return f1_len, f3_buf, nn_f3_buf
   end
-  return lVector{gen=f3_gen, nn=false, qtype=f3_qtype}
+  return lVector{gen=f3_gen, nn=false, qtype=f3_qtype, has_nulls=false}
 end
 
 return expander_f1f2opf3
