@@ -13,7 +13,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
   --  chunk_number = 0
   -- end
   
-  local status, len, base_data, nn_data = pcall(vec.get_chunk, vec, chunk_number)
+  local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
@@ -125,7 +125,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     local num_chunks = num_elements
     local chunk_size = qconsts.chunk_size
     for chunk_num = 1, num_chunks do 
-      local a, b, c = vec:get_chunk(chunk_num-1)
+      local a, b, c = vec:chunk(chunk_num-1)
       assert(a == chunk_size)
     end
     status = true

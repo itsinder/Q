@@ -20,7 +20,7 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 65540, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
   -- nascent vector : generating values with scalar
@@ -31,7 +31,7 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 1000, 
     gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
   -- nascent vector with is_memo false, try eov, this method should not work
@@ -70,9 +70,9 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
 
-  -- nascent vector with is_read_only true
-  -- try writing to read only vector
-  -- for nascent vec, is_read_only is effective at vec:eov(true)
+  -- try modifying nascent vector after eov 
+  -- call get_chunk which sets open_mode to 1 ( read_only)
+  -- modify with start_write(), which should fail
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector3",
@@ -195,6 +195,7 @@ return {
   },      
 
   -- read only materialized vector, try modifying value
+  -- using start_write(), should fail
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector4",
@@ -214,7 +215,8 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
   
-  -- materialized vector, try modifying value with start_write()
+  -- materialized vector, try modifying value
+  -- with start_write() should success
   {
     test_type = "materialized_vector",
     assert_fns = "materialized_vector6",
@@ -224,51 +226,18 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-  
-  -- with nulls
-  
-  -- creating nascent vector with nulls, generating values by scalar
-  { 
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector1",
-    name = "create_nascent_vector_with_nulls_scalar", 
-    meta = "gm_create_nascent_vector4.lua",
-    num_elements = 65540, 
-    gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },
-  
-  -- creating nascent vector with nulls, generating values by cmem_buf
+  -- materialized vector, try modifying value
+  -- without start_write() should fail
   {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector1",
-    name = "create_nascent_vector_with_nulls_cmem_buf", 
-    meta = "gm_create_nascent_vector4.lua",
-    num_elements = 65540, 
-    gen_method = "cmem_buf", 
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector7",
+    name = "modify_materialized_vector_without_start_write()",
+    meta = "gm_create_materialized_vector2.lua",
+    num_elements = 65540,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
-   -- nascent vector, vec._has_nulls is true but don't provide nn_data in put_chunk
-  {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector5",
-    name = "nascent_vector_with_null_and_without_nn_data_in_put_chunk", 
-    meta = "gm_create_nascent_vector4.lua",
-    num_elements = 65, 
-    gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },
-  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put1
-  {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector6",
-    name = "nascent_vector_with_null_and_without_nn_data_in_put1", 
-    meta = "gm_create_nascent_vector4.lua",
-    num_elements = 65, 
-    gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },
+
   --[[
   -- try modifying nascent vector after eov with mmap_ptr (without start_write()), it should fail
   -- this testcase should segfault, how to catch it?

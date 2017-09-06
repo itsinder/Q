@@ -103,18 +103,15 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
   status = validate_vec_meta(md, is_materialized)
   assert(status, "Metadata validation failed after vec:eov()")
   
-  --[[
-  for i, v in pairs(md) do
-    print(i, v)
-  end
-  os.exit()
-  ]]
-  
   -- Check file size
-  assert(plpath.getsize(md.file_name) == num_elements * md.field_size)
-  
-  -- Check number of elements in vector
-  assert( vec:num_elements() == num_elements )
+  local expected_file_size
+  if md.field_type == "B1" then
+    expected_file_size = (math.ceil(num_elements/64.0) * 64) / 8
+  else
+    expected_file_size = num_elements * md.field_size
+  end
+  local actual_file_size = plpath.getsize(md.file_name)
+  assert(actual_file_size == expected_file_size, "File size mismatch with expected value")
   
   return true
 end
@@ -197,13 +194,20 @@ fns.assert_nascent_vector2_3 = function(vec, test_name, num_elements, gen_method
   return true
 end
 
+-- try modifying nascent vector after eov 
+-- call get_chunk which sets open_mode to 1 ( read_only)
+-- modify with start_write(), which should fail
 fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
   -- Perform vec basic operations
   local perform_eov = true
-  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov)
+  
+  -- set nascent vector to read only 
+  -- i.e. by calling get_chunk it sets open mode to 1 (read_only)
+  local validate_values = true
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
   assert(status, "Failed to perform vec basic operations")
     
   -- Validate metadata after vec:eov()
@@ -218,23 +222,31 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- Check number of elements in vector
   assert( vec:num_elements() == num_elements )
   
-  -- Check read only flag in metadata
-  assert(md.is_read_only == true)
+  -- Try to modify values using start_write(), it should fail
+  local map_addr, num_len = vec:start_write()
+  assert(map_addr == nil)
   
   -- Try writing to read only vector, it should fail
   local s1 = Scalar.new(123, md.field_type)
   status = vec:set(s1, 0)
   assert(status == nil)
+ 
+  -- Check number of elements in vector after write operation
+  assert( vec:num_elements() == num_elements )
+  
+  vec:end_write()
   return true
 end
 
+-- try writing to read only nascent vector
 fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
   -- Perform vec basic operations  
   local perform_eov = false
-  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov)
+  local validate_values = true
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
   assert(status, "Failed to perform vec basic operations")
   
   local md = loadstring(vec:meta())()
@@ -261,38 +273,6 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   local is_materialized = false
   status = validate_vec_meta(md, is_materialized, num_elements + 1)
   assert(status, "Metadata validation failed")
-  
-  return true
-end
-
-fns.assert_nascent_vector5 = function(vec, test_name, num_elements, gen_method)  
-  -- common checks for vectors
-  assert(vec:check())
-  local md = loadstring(vec:meta())()
-  
-  -- create base buffer
-  local base_data = cmem.new(md.field_size)
-  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", base_data)
-  iptr[0] = 121
-  
-  -- try put chunk
-  local status = pcall(vec.put_chunk, base_data, 1)
-  assert(status == false)
-  
-  return true
-end
-
-fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)  
-  -- common checks for vectors
-  assert(vec:check())
-  local md = loadstring(vec:meta())()
-  
-  -- create base scalar
-  local s1 = Scalar.new(123, md.field_type)
-  
-  -- try put1
-  local status = pcall(vec.put1, s1)
-  assert(status == false)
   
   return true
 end
@@ -459,15 +439,22 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
   assert(vec:check())
   
   -- Perform vec basic operations    
-  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  local validate_values = false
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
   assert(status, "Failed to perform materialized vec basic operations")
   local md = loadstring(vec:meta())()
 
+  -- open_mode set to 2 using start_write()
+  local map_addr, num_len = vec:start_write()
+  
   -- Try setting value at wrong index, this should fail
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
   status = vec:set(s1, num_elements + 1)
   assert(status == nil)
+  
+  -- open mode reset back to 0
+  vec:end_write()
   
   return true
 end
@@ -490,20 +477,28 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
   return true
 end
 
+-- read only materialized vector, try modifying value
 fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
   
-  -- Perform vec basic operations    
-  local status = materialized_vec_basic_operations(vec, test_name, num_elements)
+  -- Perform vec basic operations 
+  local validate_values = true
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
   assert(status, "Failed to perform materialized vec basic operations")  
   local md = loadstring(vec:meta())()
+ 
+  -- Try to modify values using start_write(), it should fail
+  local map_addr, num_len = vec:start_write()
+  assert(map_addr == nil)
   
   -- Try setting value
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
   status = vec:set(s1, 0)
   assert(status == nil)
+  
+  vec:end_write()
   
   return true
 end
@@ -547,6 +542,28 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   
   assert(vec:check())
 
+  return true
+end
+
+-- materialized vector, try modifying value
+-- without start_write() should fail
+fns.assert_materialized_vector7 = function(vec, test_name, num_elements)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations 
+  local validate_values = false
+  local status = materialized_vec_basic_operations(vec, test_name, num_elements, validate_values)
+  assert(status, "Failed to perform materialized vec basic operations")  
+  local md = loadstring(vec:meta())()
+
+  
+  -- Try setting value, without calling start_write
+  local test_value = 101
+  local s1 = Scalar.new(test_value, md.field_type)
+  status = vec:set(s1, 0)
+  assert(status == nil)
+  
   return true
 end
 
