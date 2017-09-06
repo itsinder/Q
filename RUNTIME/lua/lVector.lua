@@ -340,7 +340,7 @@ function lVector:chunk(chunk_num)
     -- vector without passing chunk number, what should be it's behavior?
     -- As per my thinking, it should return me the current chunk,
     if ( is_nascent ) then 
-      l_chunk_num = Vector.get_chunk_num(self._base_vec)
+      l_chunk_num = Vector.chunk_num(self._base_vec)
     else
       assert(nil, "Provide chunk_num for chunk() on materialized vector")
     end

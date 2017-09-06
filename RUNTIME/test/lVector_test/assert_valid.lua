@@ -265,7 +265,7 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   assert(plpath.getsize(md.base.file_name) == num_elements * md.base.field_size, "File size mismatch with expected value")
   
   -- Try to modify values of a read only vector
-  local len, base_data, nn_data = vec:get_chunk()
+  local len, base_data, nn_data = vec:chunk()
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
@@ -382,8 +382,8 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   -- close the write handle
   vec:end_write()
   
-  -- Now get_chunk() should work as open_mode set to 0, validate modified value
-  len, base_data, nn_data = vec:get_chunk()
+  -- Now chunk() should work as open_mode set to 0, validate modified value
+  len, base_data, nn_data = vec:chunk()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   assert(iptr[0] == test_value, "Value mismatch with expected value")
@@ -393,7 +393,7 @@ end
 --===================
 
 -- nascet vector -> materialized vector (using eov)
--- try consecutive operation of get_chunk(), should work
+-- try consecutive operation of chunk(), should work
 fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -408,8 +408,8 @@ fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method
   status = validate_vec_meta(md, is_materialized, num_elements)
   assert(status, "Metadata validation failed after vec:eov()")
   
-  -- Now get_chunk() should work as open_mode set to 1
-  local len, base_data, nn_data = vec:get_chunk()
+  -- Now chunk() should work as open_mode set to 1
+  local len, base_data, nn_data = vec:chunk()
   assert(base_data)
   
   return true
@@ -441,7 +441,7 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
 end
 --===================
 
--- For nascent vector, try get_chunk() without passing chunk_num
+-- For nascent vector, try chunk() without passing chunk_num
 -- should return the current chunk
 fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
@@ -457,8 +457,8 @@ fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector, but not a nascnet vector")  
 
-  -- Try get_chunk() without passing chunk_num, it should return the current chunk
-  local len, base_data, nn_data = vec:get_chunk()
+  -- Try chunk() without passing chunk_num, it should return the current chunk
+  local len, base_data, nn_data = vec:chunk()
   assert(base_data)
   assert(len == md.base.num_in_chunk)
   
@@ -558,8 +558,8 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   -- close the write handle
   vec:end_write()
   
-  -- Now get_chunk() should work as open_mode set to 0, validate modified value
-  len, base_data, nn_data = vec:get_chunk()
+  -- Now chunk() should work as open_mode set to 0, validate modified value
+  len, base_data, nn_data = vec:chunk()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   assert(iptr[0] == test_value, "Value mismatch with expected value")
@@ -592,15 +592,15 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
  
    -- Try to modify value using start_write()
   assert(vec:start_write(), "Failed to open the mmaped file in write mode")
-  local len, base_data, nn_data = vec:get_chunk()
+  local len, base_data, nn_data = vec:chunk()
   -- Can't read as open_mode is set to 2, read operation requires it to be 0
   assert(base_data == nil)
   
   -- How do a get handle of mmaped pointer
   vec:end_write()
   
-  -- Now get_chunk() should work as open_mode set to 0
-  len, base_data, nn_data = vec:get_chunk()
+  -- Now chunk() should work as open_mode set to 0
+  len, base_data, nn_data = vec:chunk()
   assert(base_data)
   -- local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   -- status = pcall(set_value, iptr, 0, 123)
@@ -609,7 +609,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   --[[
   -- Try setting value
   local test_value = 101
-  local len, base_data, nn_data = vec:get_chunk()
+  local len, base_data, nn_data = vec:chunk()
   assert(nn_data)
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   status = pcall(set_value, iptr, 0, test_value)
