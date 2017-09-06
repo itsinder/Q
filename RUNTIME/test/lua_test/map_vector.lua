@@ -20,7 +20,7 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 65540, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
   -- nascent vector : generating values with scalar
@@ -31,7 +31,7 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = 1000, 
     gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
   
   -- nascent vector with is_memo false, try eov, this method should not work
@@ -237,6 +237,7 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
+
   --[[
   -- try modifying nascent vector after eov with mmap_ptr (without start_write()), it should fail
   -- this testcase should segfault, how to catch it?
