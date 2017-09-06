@@ -32,7 +32,7 @@ local c2 = Q.mk_col({10, 20, 30, 40, 50, 60, 70, 80}, "I4")
 -- "when vectors are equal"i
 local w = Q.vveq(c1,c1)
 w:eval()
-local f_name = w.vec.filename
+local f_name = w:meta().base.file_name
 assert(plpath.getsize(f_name) == 8)
 local bytes, size = get_file_bytes(f_name)
 assert(size == 8)
@@ -43,7 +43,7 @@ end
 -- " vveq results should be multiples of 8 bytes even when vectors are not equal"
 local w = Q.vveq(c1,c2)
 w:eval()
-local f_name = w.vec.filename
+local f_name = w:meta().base.file_name
 assert(plpath.getsize(f_name) == 8)
 local bytes, size = get_file_bytes(f_name)
 assert(size == 8)

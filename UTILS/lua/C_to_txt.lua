@@ -11,7 +11,7 @@ return function (col, rowidx)
   local chunk_idx = (rowidx-1) % qconsts.chunk_size
   --print("Chunk Num "..tostring(chunk_num))
   --print("Chunk_idx "..tostring(chunk_idx))
-  local len, base_data, nn_data = col:get_chunk(chunk_num)
+  local len, base_data, nn_data = col:chunk(chunk_num)
   --TODO: check below condition if it is proper or not
   if len == nil or len == 0 then return 0 end
   if base_data == ffi.NULL then
