@@ -1,6 +1,6 @@
 local plstring = require 'pl.stringx'
-local Vector = require 'Q/experimental/lua-515/c_modules/lVector'
-local Column = require 'Q/experimental/lua-515/c_modules/lVector'
+local Vector = require 'Q/RUNTIME/lua/lVector'
+local Column = require 'Q/RUNTIME/lua/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
