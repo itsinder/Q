@@ -22,6 +22,28 @@ extern luaL_Buffer g_errbuf;
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
 
+static int l_vec_is_eov( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushboolean(L, ptr_vec->is_eov);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_memo. ");
+  return 2;
+}
+//----------------------------------------
+static int l_vec_is_memo( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushboolean(L, ptr_vec->is_memo);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_memo. ");
+  return 2;
+}
+//----------------------------------------
 static int l_vec_memo( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
@@ -340,6 +362,12 @@ static int l_vec_chunk_num( lua_State *L) {
   return 1;
 }
 //----------------------------------------
+static int l_vec_chunk_size( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushnumber(L, ptr_vec->chunk_size);
+  return 1;
+}
+//----------------------------------------
 static int l_vec_num_in_chunk( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   lua_pushnumber(L, ptr_vec->num_in_chunk);
@@ -493,10 +521,13 @@ static const struct luaL_Reg vector_methods[] = {
     { "memo", l_vec_memo },
     { "num_elements", l_vec_num_elements },
     { "num_in_chunk", l_vec_num_in_chunk },
+    { "chunk_size", l_vec_chunk_size },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
     { "get_vec_buf", l_vec_get_vec_buf },
     { "release_vec_buf", l_vec_release_vec_buf },
+    { "is_memo", l_vec_is_memo },
+    { "is_eov", l_vec_is_eov },
     { "set", l_vec_set },
     { "get", l_vec_get },
     { "start_write", l_vec_start_write },
@@ -519,7 +550,10 @@ static const struct luaL_Reg vector_functions[] = {
     { "get", l_vec_get },
     { "eov", l_vec_eov },
     { "chunk_num", l_vec_chunk_num },
+    { "chunk_size", l_vec_chunk_size },
     { "is_nascent", l_vec_is_nascent },
+    { "is_memo", l_vec_is_memo },
+    { "is_eov", l_vec_is_eov },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
     { "start_write", l_vec_start_write },

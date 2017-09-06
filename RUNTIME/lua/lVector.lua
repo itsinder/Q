@@ -24,6 +24,14 @@ type = function( obj )
    return otype
 end
 
+function lVector:is_memo()
+  return Vector.is_memo(self._base_vec)
+end
+
+function lVector:is_eov()
+  return Vector.is_eov(self._base_vec)
+end
+
 function lVector.new(arg)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
@@ -152,8 +160,12 @@ function lVector:memo(is_memo)
   end
 end
 
-function lVector:get_chunk_num()
+function lVector:chunk_num()
   return Vector.chunk_num(self._base_vec)
+end
+
+function lVector:chunk_size()
+  return Vector.get_chunk_size(self._base_vec)
 end
 
 function lVector:has_nulls()
@@ -286,9 +298,9 @@ end
 
 function lVector:eval()
   if ( Vector.is_nascent(self._base_vec) ) then
-    local chunk_num = self:get_chunk_num() 
+    local chunk_num = self:chunk_num() 
     repeat
-      local base_len, base_addr, nn_addr = self:get_chunk(chunk_num)
+      local base_len, base_addr, nn_addr = self:chunk(chunk_num)
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
   end
@@ -313,7 +325,7 @@ function lVector:get_vec_buf()
   return base_buf, nn_buf
 end
 
-function lVector:get_chunk(chunk_num)
+function lVector:chunk(chunk_num)
   local status
   local l_chunk_num = 0
   local base_addr, base_len
@@ -324,13 +336,13 @@ function lVector:get_chunk(chunk_num)
     assert(chunk_num >= 0)
     l_chunk_num = chunk_num
   else
-    -- Note from Krushnakant: When I get_chunk() method for nascent
+    -- Note from Krushnakant: When I call chunk() method for nascent
     -- vector without passing chunk number, what should be it's behavior?
     -- As per my thinking, it should return me the current chunk,
     if ( is_nascent ) then 
-      l_chunk_num = Vector.chunk_num(self._base_vec)
+      l_chunk_num = Vector.get_chunk_num(self._base_vec)
     else
-      assert(nil, "Provide chunk_num for get_chunk on materialized vector")
+      assert(nil, "Provide chunk_num for chunk() on materialized vector")
     end
   end
   -- There are 2 conditions under which we do not need to compute
@@ -341,7 +353,7 @@ function lVector:get_chunk(chunk_num)
   local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
           ( ( ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
           ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
-          ( ( Vector.chunk_num(self._base_vec) < l_chunk_num ) and 
+          ( ( l_chunk_num < Vector.chunk_num(self._base_vec) ) and 
           ( Vector.is_memo(self._base_vec) == true ) ) )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
@@ -356,7 +368,7 @@ function lVector:get_chunk(chunk_num)
     return base_len, base_addr, nn_addr
   else
     assert(Vector.is_nascent(self._base_vec))
-    -- generate data 
+    -- print(" generate data ", chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
@@ -365,21 +377,21 @@ function lVector:get_chunk(chunk_num)
       self:put_chunk(base_data, nn_data, buf_size)
     else
       -- this is the advanced case of using the Vector's buffer.
-      local chk =  self:get_chunk_num()
+      local chk =  self:chunk_num()
       assert(chk == l_chunk_num)
     end
     if ( buf_size < qconsts.chunk_size ) then
       self:eov()
     end
-    return self:get_chunk(l_chunk_num)
+    return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
     status = self._gen(chunk_num, self)
     assert(status)
-    return self:get_chunk(chunk_num)
+    return self:chunk(chunk_num)
     --]]
   end
-  -- NOTE: Indrajeet suggests: return self:get_chunk(chunk_num)
+  -- NOTE: Indrajeet suggests: return self:chunk(chunk_num)
 end
 
 function lVector:meta()

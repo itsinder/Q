@@ -4,7 +4,7 @@ require 'Q/UTILS/lua/strict'
 
 local x = lVector( { qtype = "B1", file_name = "_nn_in2.bin", num_elements = 10} )
 assert(x:check())
-len, base_data, nn_data = x:get_chunk()
+len, base_data, nn_data = x:chunk()
 assert(base_data)
 --assert(nn_data)
 assert(len == 10)

@@ -8,9 +8,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name))
   assert(f1)
-  assert(type(f1) == "Column", "f1 must be a column")
+  assert(type(f1) == "lVector", "f1 must be a lVector")
   assert(f2)
-  assert(type(f2) == "Column", "f2 must be a column")
+  assert(type(f2) == "lVector", "f2 must be a lVector")
   if ( optargs ) then assert(type(optargs) == "table") end
   local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
   assert(status, "Error in specializer " .. sp_fn_name)
@@ -43,7 +43,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     end
     return f1_len, f3_buf, nn_f3_buf
   end
-  return lVector{gen=f3_gen, nn=false, field_type=f3_qtype}
+  return lVector{gen=f3_gen, nn=false, qtype=f3_qtype}
 end
 
 return expander_f1f2opf3

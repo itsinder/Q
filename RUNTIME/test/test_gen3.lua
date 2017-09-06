@@ -21,7 +21,7 @@ local gen3 = expander_gen3(v1, v1)
 x = lVector( { qtype = "I4", gen = gen3, has_nulls = false})
 local chunk_idx = 0
 repeat
-  local len, addr, nn_addr = x:get_chunk(chunk_idx)
+  local len, addr, nn_addr = x:chunk(chunk_idx)
   print("len/chunk_idx = ", len, chunk_idx)
   chunk_idx = chunk_idx + 1
 until (len == 0)

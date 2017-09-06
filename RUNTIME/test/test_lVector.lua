@@ -44,7 +44,7 @@ x = lVector(
 assert(x:check())
 pr_meta(x, "_meta_data.csv")
 compare("_meta_data.csv", "in1_meta_data.csv")
-len, base_data, nn_data = x:get_chunk()
+len, base_data, nn_data = x:chunk(0)
 assert(base_data)
 assert(nn_data)
 print(len)
@@ -55,7 +55,7 @@ assert(x:check())
 n = x:num_elements()
 assert(n == 10)
 --=========
-len, base_data, nn_data = x:get_chunk()
+len, base_data, nn_data = x:chunk(0)
 assert(base_data)
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, len do
@@ -64,7 +64,7 @@ end
 assert(not nn_data)
 assert(len == 10)
 --=========
-len, base_data, nn_data = x:get_chunk(100)
+len, base_data, nn_data = x:chunk(100)
 assert(not base_data)
 assert(not nn_data)
 --=========
@@ -160,7 +160,8 @@ x = lVector( { qtype = "I4", gen = gen1, has_nulls = false})
 local num_chunks = 10
 local chunk_size = qconsts.chunk_size
 for chunk_num = 1, num_chunks do 
-  a, b, c = x:get_chunk(chunk_num-1)
+  a, b, c = x:chunk(chunk_num-1)
+  if ( a == 0 )  then break end
   assert(a == chunk_size)
   x:check()
 end
@@ -178,11 +179,13 @@ local num_chunks = 2
 local chunk_size = qconsts.chunk_size
 print("===================")
 for chunk_num = 1, num_chunks do 
-  a, b, c = x:get_chunk(chunk_num-1)
+  a, b, c = x:chunk(chunk_num-1)
   x:check()
 end
-x:eov()
-len, base_data, nn_data = x:get_chunk()
+assert(x:is_eov() == true)
+status = pcall(x.eov)
+assert(not status)
+len, base_data, nn_data = x:chunk(0)
 assert(base_data)
 assert(not nn_data)
 assert(len == chunk_size )

@@ -36,3 +36,7 @@ local cond2 =
 Please review code and test 
 
 
+====================
+I have renamed method lVector:get_chunk_num to lVector:chunk_num 
+
+I have renamed method lVector:get_chunk to lVector:get_chunk

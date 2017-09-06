@@ -268,6 +268,7 @@ vec_new(
   status = chk_field_type(field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
+  ptr_vec->is_nascent = true; 
   ptr_vec->is_memo    = is_memo;
   strcpy(ptr_vec->field_type, field_type);
 
@@ -470,7 +471,7 @@ vec_get(
       addr = ptr_vec->chunk + offset;
       ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
     }
-    else if ( chunk_num < ptr_vec->chunk_num ) { 
+    else if ( chunk_num < ptr_vec->chunk_num ) {
       if ( ptr_vec->is_memo ) {
         // If memo is on, should be able to serve data from previous chunks 
         // as long as request does not bleed into current chunk
