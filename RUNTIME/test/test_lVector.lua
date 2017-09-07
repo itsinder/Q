@@ -155,17 +155,25 @@ assert(x)
 --====== Testing nascent vector with generator
 print("Creating nascent vector with generator")
 gen1 = require 'gen1'
-x = lVector( { qtype = "I4", gen = gen1, has_nulls = false})
+x = lVector( { qtype = "I4", gen = gen1, has_nulls = false} )
+x:persist(true)
 
-local num_chunks = 10
+local x_num_chunks = 10
+local num_chunks = 0
 local chunk_size = qconsts.chunk_size
-for chunk_num = 1, num_chunks do 
+for chunk_num = 1, x_num_chunks do 
   a, b, c = x:chunk(chunk_num-1)
-  if ( a == 0 )  then break end
+  if ( a < chunk_size ) then 
+    print("Breaking on chunk", chunk_num); 
+    assert(x:is_eov() == true)
+    break 
+  end
+  num_chunks = num_chunks + 1
   assert(a == chunk_size)
   x:check()
 end
-x:eov()
+status = pcall(x.eov)
+assert(not status)
 local T = x:meta()
 assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
 --===========================================
