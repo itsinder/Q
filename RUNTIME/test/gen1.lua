@@ -9,6 +9,9 @@ local base_data = cmem.new(chunk_size * field_size)
 
 local function gen1(chunk_idx, col)
   print("chunk_idx = ", chunk_idx)
+  if ( chunk_idx == 8 ) then 
+    return 0, nil, nil 
+  end
   local iptr = ffi.cast("int32_t *", base_data)
   for i = 1, chunk_size do
     iptr[i-1] = counter
