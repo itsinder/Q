@@ -27,17 +27,18 @@ function Reducer.new(arg)
   "Reducer: Constructor needs a table as input argument. Instead got " .. type(arg))
 
   local reducer = setmetatable({}, Reducer)
-  -- next_chunk is optional
+  -- gen is optional
   -- value is optional
-  -- get_scalars is necessary
-  assert(type(arg.get_scalars) == "function",
+  -- func is necessary
+  assert(type(arg.func) == "function",
   "Reducer: Table must have arg [func] which must be a function used to extract reducer")
   reducer._get_scalars = arg.get_scalars
 
-  if arg.next_chunk == nil then
-    reducer._value= assert(arg.value, "cannot have a nil value if there is no method to generate new values")
+  if arg.gen == nil then
+    reducer._value= assert(arg.value, "value cannot be nil if there is no method to generate new values")
   else
-    reducer._next = arg.next_chunk
+    assert(type(arg.func) == "function", "Function expected to extract scalars")
+    reducer._func = arg.func
     reducer._value = arg._value
   end
   reducer._index = 0
@@ -45,15 +46,16 @@ function Reducer.new(arg)
 end
 
 function Reducer:next()
-  assert(self._next ~= nil,  'Reducer: The reducer is materialized')
-  local val = self._next(self._index)
+  if self._gen == nil then return false end
+  -- assert(self._gen ~= nil,  'Reducer: The reducer is materialized')
+  local val = self._gen(self._index)
   self._index = self._index + 1
   if val ~= nil then
     self._value = val
   else
-    self._next = nil
+    self._gen = nil
   end
-  return self._next ~= nil
+  return self._gen ~= nil
 end
 
 function Reducer:value()
@@ -63,7 +65,7 @@ function Reducer:value()
 end
 
 function Reducer:eval()
-  local status = self._next ~= nil
+  local status = self._gen ~= nil
   while status == true do
     status = self:next()
   end
