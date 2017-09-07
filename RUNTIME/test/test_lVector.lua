@@ -162,7 +162,6 @@ local x_num_chunks = 10
 local num_chunks = 0
 local chunk_size = qconsts.chunk_size
 for chunk_num = 1, x_num_chunks do 
-  print("Requesting chunk", chunk_num); 
   a, b, c = x:chunk(chunk_num-1)
   if ( a < chunk_size ) then 
     print("Breaking on chunk", chunk_num); 

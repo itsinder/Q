@@ -8,7 +8,6 @@ local field_size = 4
 local base_data = cmem.new(chunk_size * field_size)
 
 local function gen1(chunk_idx, col)
-  print("chunk_idx = ", chunk_idx)
   if ( chunk_idx == 8 ) then 
     return 0, nil, nil 
   end
