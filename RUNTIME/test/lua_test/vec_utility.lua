@@ -6,15 +6,19 @@ local Scalar  = require 'libsclr'
 local fns = {}
 
 fns.validate_values = function(vec, qtype, chunk_number)
-  -- Temporary: no validation of vector values for B1 type  
-  if qtype == "B1" then
-    return true
-  end
-  
   local status = true
-  local ret_addr, ret_len = vec:get_chunk(chunk_number);
+  
+  local ret_addr, ret_len = vec:get_chunk(chunk_number)
   assert(ret_addr)
   assert(ret_len)
+  
+  -- Validation of B1 vector values is working for cmem_buf
+  
+  if qtype == "B1" then
+    qtype = "I1"
+    ret_len = math.ceil( vec:num_elements() / 8 )
+  end
+  
   local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
   for i =  1, ret_len do
     local expected = i*15 % qconsts.qtypes[qtype].max
@@ -24,6 +28,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
       break
     end
   end
+  
   return status
 end
 
@@ -44,6 +49,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     --iptr[0] = qconsts.qtypes[qtype].min
     for itr = 1, num_elements do
       iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+      --print("value ",itr,iptr[itr - 1],qtype)
     end
     --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
     vec:put_chunk(base_data, buf_length)
@@ -51,9 +57,11 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     status = true
   end
   
+  -- TODO: Scalar generation for B1 is not working as desired
+  
   if gen_method == "scalar" then
     for i = 1, num_elements do
-      local s1, s1_nn
+      local s1
       if qtype == "B1" then
         local bval
         if i % 2 == 0 then bval = true else bval = false end
@@ -61,12 +69,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       else
         s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
       end
-      if vec._has_nulls then
-        local bval
-        if i % 2 == 0 then bval = true else bval = false end
-        s1_nn = Scalar.new(bval, "B1")
-      end
-      vec:put1(s1, s1_nn)
+      vec:put1(s1)
     end
     --s1 = Scalar.new(qconsts.qtypes[qtype].max, qtype)
     --vec:put1(s1)    
