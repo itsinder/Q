@@ -41,7 +41,20 @@ fns.validate_values = function(vec, qtype, chunk_number)
   
   -- Temporary: no validation of vector values for SC type
   if qtype == "SC" then
-    return true
+    for itr = 1, len do
+      local actual_str = c_to_txt(vec, itr)
+      local expected_str 
+      if itr % 2 == 0 then expected_str = "temp" else expected_str = "dummy" end
+      -- print("Expected value ",expected_str," Actual value ",actual_str)
+      
+      if expected_str ~= actual_str then
+        status = false
+        print("Value mismatch at index " .. tostring(itr) .. ", expected: " .. tostring(expected_str) .. " .... actual: " .. tostring(actual_str))
+        break
+      end
+      
+    end
+    return status
   end
   
   -- Temporary: no validation of vector values if has_nulls == true
@@ -73,7 +86,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       local base_data = cmem.new(field_size)
       for itr = 1, num_elements do
         local str
-        if itr%2 == 0 then str = "tempstring" else str = "dummystring" end
+        if itr%2 == 0 then str = "temp" else str = "dummy" end
         ffi.copy(base_data, str)
         vec:put1(base_data)
       end
