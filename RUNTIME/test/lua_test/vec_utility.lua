@@ -6,7 +6,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 
 local fns = {}
 
-fns.validate_values = function(vec, qtype, chunk_number)
+fns.validate_values = function(vec, qtype, chunk_number, field_size )
   local status = true
   
   local ret_addr, ret_len = vec:get_chunk(chunk_number)
@@ -38,9 +38,23 @@ fns.validate_values = function(vec, qtype, chunk_number)
     return status
   end
   
-  -- Temporary: no validation of vector values for SC type
   if qtype == "SC" then
-    return true
+    local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+    for itr = 1, ret_len do
+      local chunk_idx = (itr-1) % qconsts.chunk_size
+      local actual_str = ffi.string(iptr + chunk_idx * field_size)
+      local expected_str 
+      if itr % 2 == 0 then expected_str = "temp" else expected_str = "dummy" end
+      --print("Expected value ",expected_str," Actual value ",actual_str)
+      
+      if expected_str ~= actual_str then
+        status = false
+        print("Value mismatch at index " .. tostring(itr) .. ", expected: " .. tostring(expected_str) .. " .... actual: " .. tostring(actual_str))
+        break
+      end
+      
+    end
+    return status
   end
   
   local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
@@ -67,7 +81,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       local base_data = cmem.new(field_size)
       for itr = 1, num_elements do
         local str
-        if itr%2 == 0 then str = "tempstring" else str = "dummystring" end
+        if itr%2 == 0 then str = "temp" else str = "dummy" end
         ffi.copy(base_data, str)
         vec:put1(base_data)
       end

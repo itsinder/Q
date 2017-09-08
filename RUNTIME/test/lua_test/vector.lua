@@ -17,7 +17,6 @@ return function( M )
   end
   
   -- Create Vector
-  print(M.qtype)
   local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_memo, M.num_elements, field_size )
   if not status then
     print(x)
