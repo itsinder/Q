@@ -23,6 +23,7 @@ type = function( obj )
 end
 
 function Reducer.new(arg)
+  assert(arg.coro == nil, "Migrate code to reducer style, where gen, func, value must be specified")
   assert(type(arg) == "table",
   "Reducer: Constructor needs a table as input argument. Instead got " .. type(arg))
 
