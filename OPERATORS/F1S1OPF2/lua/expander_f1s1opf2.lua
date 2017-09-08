@@ -29,13 +29,13 @@
     local buf_sz = qconsts.chunk_size * f2_width
     local f2_buf = assert(ffi.malloc(buf_sz))
     local nn_f2_buf = nil
-  
+    local has_nulls  
     if subs.is_safe then
-        nn_f2_buf = assert(ffi.malloc(qconsts.chunk_size))
-        ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
+      has_nulls = true
+      nn_f2_buf = assert(ffi.malloc(qconsts.chunk_size))
+      ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
     else
-      -- set explicitly to false
-      subs.is_safe = false
+      has_nulls = false
     end
     --============================================
     local f2_gen = function(chunk_idx)
@@ -46,7 +46,7 @@
       return f1_len, f2_buf, nn_f2_buf
     end
     
-    return lVector{gen=f2_gen, has_nulls=subs.is_safe, qtype=f2_qtype}
+    return lVector{gen=f2_gen, has_nulls=has_nulls, qtype=f2_qtype}
   end
 
   return expander_f1s1opf2
