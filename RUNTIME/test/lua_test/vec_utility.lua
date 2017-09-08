@@ -2,6 +2,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local Scalar  = require 'libsclr'
+local qc      = require 'Q/UTILS/lua/q_core'
 
 local fns = {}
 
@@ -12,15 +13,33 @@ fns.validate_values = function(vec, qtype, chunk_number)
   assert(ret_addr)
   assert(ret_len)
   
-  -- Validation of B1 vector values is working for cmem_buf
-  
   if qtype == "B1" then
     qtype = "I1"
-    ret_len = math.ceil( vec:num_elements() / 8 )
+    local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+    for i = 1 , ret_len do 
+      local char_idx = math.floor((i-1) / 8)
+      local bit_idx = (i-1) % 8
+      local char_value = iptr + char_idx
+      local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
+      if bit_value ~= 0 then bit_value = 1 end
+      local expected
+      if i % 2 == 0 then 
+        expected = 0
+      else 
+        expected = 1 
+      end
+      -- print("Expected value ",expected," Actual value ",bit_value)
+      if expected ~= bit_value then
+        status = false
+        print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(bit_value))
+        break
+      end
+    end
+    return status
   end
   
   local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
-  for i =  1, ret_len do
+  for i = 1, ret_len do
     local expected = i*15 % qconsts.qtypes[qtype].max
     if ( iptr[i - 1] ~= expected ) then
       status = false
@@ -33,14 +52,17 @@ fns.validate_values = function(vec, qtype, chunk_number)
 end
 
 -- for generating values ( can be scalar, gen_func, cmem_buf )
+-- for B1, cmem_buf generates values as 01010101 i.e. 85 by treating it as I1
 fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype)
   local status = false
   local buf_length = num_elements
   if gen_method == "cmem_buf" then 
+    local is_B1 = false  
     if qtype == "B1" then 
       -- We will populate a buffer by putting 8 bits at a time
       field_size = 8
       qtype = "I1"
+      is_B1 = true
       num_elements = math.ceil(num_elements / 8)
     end
       
@@ -48,8 +70,11 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
     --iptr[0] = qconsts.qtypes[qtype].min
     for itr = 1, num_elements do
-      iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
-      --print("value ",itr,iptr[itr - 1],qtype)
+      if is_B1 then 
+        iptr[itr - 1] = 85
+      else
+        iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+      end
     end
     --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
     vec:put_chunk(base_data, buf_length)
@@ -57,22 +82,19 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
     status = true
   end
   
-  -- TODO: Scalar generation for B1 is not working as desired
   
   if gen_method == "scalar" then
     for i = 1, num_elements do
       local s1
       if qtype == "B1" then
         local bval
-        if i % 2 == 0 then bval = true else bval = false end
+        if i % 2 == 0 then bval = false else bval = true end
         s1 = Scalar.new(bval, qtype)
       else
         s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
       end
       vec:put1(s1)
-    end
-    --s1 = Scalar.new(qconsts.qtypes[qtype].max, qtype)
-    --vec:put1(s1)    
+    end    
     status = true
   end
   return status
