@@ -1,0 +1,31 @@
+language: erlang
+sudo: required
+dist: trusty
+
+group: edge  # Add this
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+env:
+  - LUA="luajit"
+
+branches:
+  only:
+    - dev
+    - dev_ramesh
+
+install:
+  - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
+  - sudo ./q_install.sh
+
+before_script:
+  - source setup.sh
+
+script:
+  - busted . -v -c --lua=luajit -p="_spec.lua"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

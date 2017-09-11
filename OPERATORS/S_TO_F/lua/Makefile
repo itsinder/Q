@@ -1,0 +1,60 @@
+# For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
+#
+INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ 
+
+DBGFLAGS= 
+DBGFLAGS= -g -DDEBUG
+
+OPTFLAGS= -O4
+OPTFLAGS= 
+
+CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
+
+all : libs_to_f.so _s_to_f.lua
+	
+#----------------------------------
+clean :
+	rm -r -f ../gen_src; 
+	rm -r -f ../gen_inc; 
+	rm -f _*
+	rm -f *.so
+		
+
+libs_to_f.so : ${GEN_FILES}
+	luajit generator.lua operators.lua
+	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libs_to_f.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
+
+_s_to_f.lua : 
+	lua pkg_s_to_f.lua
+
+test_q : libs_to_f.so
+	luajit ../test/test_s_to_f.lua
+
+test_c :  libs_to_f.so
+	bash ../test/test_rand.sh
+
+test : test_q test_c
+
+GEN_FILES = \
+	_const_F4.c \
+	_const_F8.c \
+	_const_I1.c \
+	_const_I2.c \
+	_const_I4.c \
+	_const_I8.c \
+	_rand_F4.c \
+	_rand_F8.c \
+	_rand_I1.c \
+	_rand_I2.c \
+	_rand_I4.c \
+	_rand_I8.c \
+	_seq_F4.c \
+	_seq_F8.c \
+	_seq_I1.c \
+	_seq_I2.c \
+	_seq_I4.c \
+	_seq_I8.c \
+

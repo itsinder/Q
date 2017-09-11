@@ -1,0 +1,42 @@
+local ffi = require 'Q/UTILS/lua/q_ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+return function (
+  in_qtype,
+  scalar
+  )
+  local qconsts       = require "Q/UTILS/lua/q_consts"
+  local qc            = require "Q/UTILS/lua/q_core"
+  local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+  local promote       = require 'Q/UTILS/lua/promote'
+  local conv_lnum_to_cnum       = require 'Q/UTILS/lua/conv_lnum_to_cnum'
+
+  assert(is_base_qtype(in_qtype))
+  local scalar_val = nil
+  local scalar_qtype = nil
+
+  if ( type(scalar) == "table" ) then 
+    scalar_val = scalar.value
+    if ( scalar.qtype ) then 
+      scalar_qtype = scalar.qtype
+    else
+      scalar_qtype = in_qtype
+    end
+  else
+    scalar_val = scalar
+    assert( ( type(scalar_val) == "string") or ( type(scalar_val) == "number") )
+    scalar_qtype = in_qtype
+  end
+  local out_qtype = assert(promote(in_qtype, scalar_qtype))
+  local c_mem  = assert(conv_lnum_to_cnum(scalar_val, out_qtype))
+  --=========================
+  local tmpl = 'arith.tmpl'
+  local subs = {}; 
+  subs.fn = "<<operator>>_" .. in_qtype .. "_" .. scalar_qtype
+  subs.in_ctype = qconsts.qtypes[in_qtype].ctype
+  subs.c_code_for_operator = "<<c_code>>;"
+  subs.c_mem = c_mem
+  subs.out_qtype = out_qtype
+  subs.out_ctype = qconsts.qtypes[out_qtype].ctype
+  subs.scalar_ctype = qconsts.qtypes[scalar_qtype].ctype
+  return subs, tmpl
+end

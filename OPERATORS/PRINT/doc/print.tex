@@ -1,5 +1,5 @@
 \documentclass[letterpaper]{article}
-\input{../../latex/styles/ramesh_abbreviations}
+\input{../../../latex/styles/ramesh_abbreviations}
 \usepackage{times}
 \usepackage{helvet}
 \usepackage{courier}
@@ -21,13 +21,13 @@
 
 \section{Introduction}
 
-This document describes how we print data in one or more vectors into a CSV
+This document describes how we print data in one or more columns into a CSV
 file. 
 
 \subsection{Invocation}
 
 \begin{verbatim}
-print(<table of vectors|vector>, [filter], [destination])
+print(<table of columns|column>, [filter], [destination])
 \end{verbatim}
 So, the first argument to print could be just \(x\) or 
 it could be \(\{x, y\}\)
@@ -35,8 +35,8 @@ it could be \(\{x, y\}\)
 \subsection{Print Filters}
 
 There are a few ways in which we can instruct the print to {\bf not}
-print all the elements of the vector. We can use a range (Section~\ref{range})
-or a ``where clause'' represented as a bit vector, Section~\ref{bit_vector}.
+print all the elements of the column. We can use a range (Section~\ref{range})
+or a ``where clause'' represented as a bit column, Section~\ref{bit_column}.
 
 \subsubsection{Range}
 \label{range}
@@ -49,14 +49,17 @@ Recall that we do C style indexing, so the first element is the \(0^{th}\)
 element. 
 Some time in the future --- support Python's range specification style. 
 
-\subsubsection{Bit Vector}
-\label{bit_vector}
+\subsubsection{Bit column}
+\label{bit_column}
 Prints only those rows where the corresponding bit is set.
 
 \subsection{Print Destination}
 
 The destination of a print can be either 
 \be
+\item nil, in this case print\_csv returns a string. 
+In following two cases, print will return true.  This is not meant to be used
+when the output is large. Its  a good aid for quick and dirty testing.
 \item stdout (user does not specify a file name)
 \item a text file 
 \ee
@@ -67,10 +70,10 @@ character --- comma, double quote, eoln or backslash --- then it must be
 suitable escaped and possibly quoted as well. A null value will be printed out
 as two consescutive dquote characters.
 
-\section{Printing a single vector}
-\label{single_vector}
+\section{Printing a single column}
+\label{single_column}
 
-Let's start with describing how a single vector should be printed. As
+Let's start with describing how a single column should be printed. As
 described in the data loading specification, every type that is
 registered with Q should have a C function that (i) converts an ascii
 string into the C type and (ii) converts a fixed set of bytes into an ascii
@@ -79,21 +82,21 @@ each consecutive block. For example, we would apply {\t fprintf} with the
 \verb+%lf+ format on every successive 8 bytes if the field type were
 {\tt double}
 
-\section{Printing multiple vectors}
-\label{multiple_vectors}
+\section{Printing multiple columns}
+\label{multiple_columns}
 
 We require that 
 \be
 \item 
-the first argument is a Lua table where each element is a single vector. 
-\item all vectors have the same length
+the first argument is a Lua table where each element is a single column. 
+\item all columns have the same length
 \ee
 
 \subsection{Extensions}
 In this section, we describe what happens when the constraints imposed above are
 selectively relaxed.
 \subsubsection{Mismatched number of elements}
-In this case, the vector with insufficient elements starts printing out null
+In this case, the column with insufficient elements starts printing out null
 values once it has exhausted all its values. So, if \(x = \{1, 2,3\}\) and \(y
 = \{4, 5, 6, 7\}\), then we would get
 \begin{verbatim}
@@ -103,7 +106,7 @@ values once it has exhausted all its values. So, if \(x = \{1, 2,3\}\) and \(y
 "",7
 \end{verbatim}
 
-\subsubsection{Scalar not vector}
+\subsubsection{Scalar not column}
 If the table looked like \(\{1, x\}\) where \(x = \{2, 3, 4 \}\), then we would
 get
 \begin{verbatim}

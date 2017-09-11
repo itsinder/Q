@@ -1,42 +1,37 @@
 Entry{
   qtype = "I1",
   fn = 'I1_to_txt',
-  out_type_displ = 'I1',
-  out_type = 'int8_t',
-  default_fmt = '"%d"',
+  out_qtype = 'I1',
+  out_ctype = 'int8_t',
 }
 Entry{
   qtype = "I2",
   fn = 'I2_to_txt',
-  out_type_displ = 'I2',
-  out_type = 'int16_t',
-  default_fmt = '"%d"',
+  out_qtype = 'I2',
+  out_ctype = 'int16_t',
 }
 Entry{
   qtype = "I4",
   fn = 'I4_to_txt',
-  out_type_displ = 'I4',
-  out_type = 'int32_t',
-  default_fmt = '"%d"',
+  out_qtype = 'I4',
+  out_ctype = 'int32_t',
 }
 Entry{
   qtype = "I8",
   fn = 'I8_to_txt',
-  out_type_displ = 'I8',
-  out_type = 'int64_t',
-  default_fmt = '"%lld"',
+  out_qtype = 'I8',
+  out_ctype = 'int64_t',
 }
 Entry{
   qtype = "F4",
   fn = 'F4_to_txt',
-  out_type_displ = 'F4',
-  out_type = 'float',
-  default_fmt = '"%f"',
+  out_qtype = 'F4',
+  out_ctype = 'float',
 }
 Entry{
   qtype = "F8",
   fn = 'F8_to_txt',
-  out_type_displ = 'F8',
-  out_type = 'double',
-  default_fmt = '"%lf"'
+  out_qtype = 'F8',
+  out_ctype = 'double',
+  default_fmt = '"%%lf"'
 }

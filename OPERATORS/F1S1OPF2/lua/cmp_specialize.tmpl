@@ -1,0 +1,29 @@
+return function (
+  in_qtype,
+  scalar
+  )
+    local qconsts = require 'Q/UTILS/lua/q_consts'
+    local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+    local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'
+
+    local scalar_val = nil
+    if ( type(scalar) == "number" ) then 
+      scalar_val = scalar
+    else
+      assert(type(scalar) == "table")
+      scalar_val = assert(scalar.value)
+    end
+
+    assert(is_base_qtype(in_qtype))
+
+    local tmpl = 'f1s1opf2_cmp.tmpl'
+    local subs = {}; 
+    subs.fn = "<<operator>>_" .. in_qtype 
+    subs.in_ctype = qconsts.qtypes[in_qtype].ctype
+    subs.out_qtype = "B1"
+    subs.comparison = ' <<comparison>>  '
+    -- local ffi     = require 'Q/UTILS/lua/q_ffi'
+    -- subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar} )
+    subs.c_mem = conv_lnum_to_cnum(scalar_val, in_qtype)
+    return subs, tmpl
+end

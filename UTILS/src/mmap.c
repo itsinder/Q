@@ -1,21 +1,15 @@
-/* START HDR FILES  */
+//START_INCLUDES
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <string.h>
-#include <assert.h>
 #include <fcntl.h>
-/* STOP HDR FILES  */
 #include "q_macros.h"
-#include "mmap.h"
-
-// START FUNC DECL
+//STOP_INCLUDES
+#include "_mmap.h"
+//START_FUNC_DECL
 int
 rs_mmap(
 	const char *file_name,
@@ -23,7 +17,7 @@ rs_mmap(
 	size_t *ptr_file_size,
 	bool is_write
 	)
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 {
   int status = 0;
   int fd;

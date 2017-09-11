@@ -72,11 +72,11 @@ cd luarocks-2.4.1
 ./configure; sudo make bootstrap
 
 
-# install lua socket #
-sudo luarocks install luasocket
-
 # install luaunit #
-sudo luarocks install luaunit
+# sudo luarocks install luaunit
 
 #install penlight ###
 sudo luarocks install penlight
+
+#install luaposix ###
+# sudo luarocks install luaposix

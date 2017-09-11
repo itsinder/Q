@@ -1,23 +1,13 @@
 #!/bin/lua
-require 'pl'
--- Move isdir to proper place. Use appropriate package
-function is_dir(fn) -- TODO 
-  return true
---      return (posix.stat(fn, "type") == 'directory')
-end
-
-package.path = package.path.. ";../../../UTILS/lua/?.lua"
-require("is_file")
-require("trim")
-n = #arg
-assert( n == 2 ) 
-infile = arg[1]
-opdir  = arg[2]
-assert(is_file(infile)) -- TODO improve
-assert(is_dir(opdir)) -- TODO improve
+return function(infile, opdir)
+local plpath = require 'pl.path'
+local plstr  = require 'pl.stringx'
+local plpath = require 'pl.path'
+local opdir = plstr.strip(opdir)
+assert(plpath.isfile(infile), "Input file not found")
+assert(plpath.isdir(opdir), "Output directory not found")
 io.input(infile)
 code = io.read("*all")
-io.close()
 --=========================================
 incs = string.match(code, "//START_INCLUDES.*//STOP_INCLUDES")
 if ( incs ) then 
@@ -26,18 +16,29 @@ if ( incs ) then
 end 
 --=========================================
 z = string.match(code, "//START_FUNC_DECL.*//STOP_FUNC_DECL")
-assert(z ~= "")
+assert(z ~= "", "Could not find stuff in START_FUNC_DECL .. STOP_FUNC_DECL")
 z = string.gsub(z, "//START_FUNC_DECL", "")
 z = string.gsub(z, "//STOP_FUNC_DECL", "")
+z = plstr.strip(z)
 --=========================================
-opfile = opdir .. "/_" .. string.gsub(infile, ".c", ".h")
-io.output(opfile)
+fn = string.gsub(infile, "^.*/", "")
+fn = string.gsub(fn, ".c$", "")
+if ( opdir ~= "" ) then 
+  local basefile = string.gsub(infile, "^.*/", "") 
+  opfile = opdir .. "/_" .. fn .. ".h"
+  io.open(opfile, "w+")
+  io.output(opfile)
+end
 if ( incs ) then 
   io.write(incs)
 end
-io.write('extern ' .. trim(z) .. ';') -- TODO get semi-colon on previous line
-io.close()
-os.exit()
+-- io.write("#ifndef __" .. fn .. "\n")
+-- io.write("#define __" .. fn .. "\n")
+
+io.write('extern ' .. z .. ';\n') 
+-- io.write("#endif\n")
+return true
+end
 
 --[[
 foreach 

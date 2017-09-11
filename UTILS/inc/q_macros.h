@@ -12,9 +12,12 @@
 #define return_if_fopen_failed(fp, file_name, access_mode) { if ( fp == NULL ) { fprintf(stderr, "Unable to open file %s for %s \n", file_name, access_mode); go_BYE(-1); } }
 #define return_if_malloc_failed(x) { if ( x == NULL ) { fprintf(stderr, "Unable to allocate memory\n"); go_BYE(-1); } }
 
+#define mcr_nop(X)  ((X))
+#define mcr_sqr(X)  ((X) * (X))
 #define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
 #define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define mcr_sum(X, Y)  ((X) + (Y))
+#define mcr_sum_sqr(X, Y)  ((X) + (Y)*(Y))
 #define sqr(X)  ((X) * (X))
 
 #define rs_munmap(X, nX) { \
@@ -47,11 +50,20 @@
 
 #define set_bit(x, i) (x = (x) | ((uint64_t) 1 << (i)))
 
+/* Following assumes word starts at 0's */
+#define set_bit_val(word,  bit_idx, val) { word = word | (val << bit_idx ) }
+
 #define unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
 
-// #define SETBIT(x,0)  { /* do nothing */ }
-#define mcr_set_bit(x,i, val)  x[i/8] |= (1<<(i%8));
-#define mcr_clear_bit(x,i) x[i/8] &= ~(1<<(i%8));
-#define mcr_get_bitt(x,i) x[i/8] & (1<<(i %8) > 0;
+#define mcr_get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))
 
+#define mcr_is_ith_bit_set(x, i) ((x) & ((uint64_t) 1 << (i))) == 0 ? false : true 
+
+#define mcr_set_bit(x, i) (x = (x) | ((uint64_t) 1 << (i)))
+
+#define mcr_unset_bit(x, i) (x = (x) & ~((uint64_t) 1 << (i)))
+
+#define SET_BIT(x,i)  (x)[(i) / 8] |= (1 << ((i) % 8))
+#define CLEAR_BIT(x,i) (x)[(i) / 8] &= ~(1 << ((i) % 8))
+#define GET_BIT(x,i) (((x)[(i) / 8] & (1 << ((i) % 8))) > 0)
 #endif

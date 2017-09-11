@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "q_macros.h"
-#include "mmap.h"
+#include "_mmap.h"
 #include "_txt_to_SC.h"
 #include "_txt_to_I1.h"
 #include "_txt_to_I2.h"
@@ -23,7 +23,7 @@
 #define MAXLINE 64
 
 typedef enum _qtype_type { I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
-// START FUNC DECL
+//START_FUNC_DECL
 int
 asc2bin(
     char *infile,
@@ -31,7 +31,7 @@ asc2bin(
     char *outfile,
     int outlen // for SC
      )
-// STOP FUNC DECL
+//STOP_FUNC_DECL
 {
   int status = 0;
   qtype_type qtype;
@@ -112,19 +112,19 @@ asc2bin(
     }
     switch ( qtype ) { 
       case I1 : 
-        status = txt_to_I1(xptr, 10, &tempI1); cBYE(status);
+        status = txt_to_I1(xptr, &tempI1); cBYE(status);
         fwrite(&tempI1, 1, sizeof(int8_t), ofp);
         break;
       case I2 : 
-        status = txt_to_I2(xptr, 10, &tempI2); cBYE(status);
+        status = txt_to_I2(xptr, &tempI2); cBYE(status);
         fwrite(&tempI2, 1, sizeof(int16_t), ofp);
         break;
       case I4 : 
-        status = txt_to_I4(xptr, 10, &tempI4); cBYE(status);
+        status = txt_to_I4(xptr, &tempI4); cBYE(status);
         fwrite(&tempI4, 1, sizeof(int32_t), ofp);
         break;
       case I8 : 
-        status = txt_to_I8(xptr, 10, &tempI8); cBYE(status);
+        status = txt_to_I8(xptr, &tempI8); cBYE(status);
         fwrite(&tempI8, 1, sizeof(int64_t), ofp);
         break;
       case F4 : 
@@ -169,7 +169,7 @@ main(
   char *opfile    = argv[3];
   if ( argc == 5 ) { 
     char *str_len   = argv[4];
-    status = txt_to_I4(str_len, 10, &len); cBYE(status);
+    status = txt_to_I4(str_len, &len); cBYE(status);
     if ( len <= 1 ) { go_BYE(-1); }
   }
   status = asc2bin(infile, str_qtype, opfile, len); cBYE(status);
