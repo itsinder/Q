@@ -1,8 +1,5 @@
--- FUNCTIONAL
-
-local Q = require 'Q'
+-- FUNCTIONAL 
 require 'Q/UTILS/lua/strict'
-
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qc = require 'Q/UTILS/lua/q_core'
 local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'

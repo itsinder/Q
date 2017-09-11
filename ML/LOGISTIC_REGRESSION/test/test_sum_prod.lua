@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local sum_prod = require( 'Q/ML/LOGISTIC_REGRESSION/lua/sum_prod' )
@@ -18,5 +19,5 @@ for i = 1, #A do
   print("\n")
 end
 print("SUCCESS for ", arg[0])
-
+require('Q/UTILS/lua/cleanup')()
 os.exit()

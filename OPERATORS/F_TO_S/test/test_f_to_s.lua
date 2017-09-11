@@ -1,12 +1,11 @@
--- FUNCTIONAL
-
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
 
 local z= Q.sum(c1)
-assert(type(z) == "Scalar")
+assert(type(z) == "Reducer")
 -- dbg()
 local status = true 
 repeat 
@@ -61,7 +60,6 @@ end
 
 x, y, z = fold({ "sum", "min", "max" }, c1)
 print (x, y, z)
-print("Completed " .. arg[0])
+print("SUCCESS for " .. arg[0])
+require 'Q/UTILS/lua/strict'
 os.exit()
-
---=========================================

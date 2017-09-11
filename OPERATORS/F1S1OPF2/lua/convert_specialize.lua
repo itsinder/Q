@@ -1,5 +1,5 @@
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
-local qconsts = require 'Q/UTILS/lua/q_consts'
+local qconsts       = require 'Q/UTILS/lua/q_consts'
 
 return function (
   in_qtype,
@@ -19,7 +19,7 @@ return function (
   end
   assert(is_base_qtype(out_qtype), "Cannot convert to type " .. out_qtype)
   local out_ctype = qconsts.qtypes[out_qtype].ctype
-  local in_ctype = qconsts.qtypes[in_qtype].ctype
+  local in_ctype  = qconsts.qtypes[in_qtype].ctype
   
   local tmpl = 'f1opf2.tmpl'
   local subs = {};

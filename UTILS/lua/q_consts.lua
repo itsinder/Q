@@ -1,9 +1,11 @@
 local qconsts = {}
 --===========================
+  qconsts.debug = false -- set to TRUE only if you want debugging
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
 
+    qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
     qconsts.chunk_size = 64 * 1024
@@ -105,9 +107,12 @@ local qconsts = {}
       max_length="65" 
     }
     qtypes.SV = { 
+      min = 0, -- 0 is undefined, 1 onwards are actual values
+      max = 1048576, -- cannot have more than 1M unique strings in column
       short_code = "SV",
-      width = 4,
-      ctype = "int32_t",
+      max_txt_width = 8,
+      width = 4, -- SV is treated as I4
+      ctype = "int32_t", -- SV is treated as I4
       txt_to_ctype = "txt_to_I4",
       ctype_to_txt = "I4_to_txt",
       max_length="13"

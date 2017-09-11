@@ -1,8 +1,7 @@
 //START_INCLUDES
 #include <stdio.h>
 #include <string.h>
-#include "q_macros.h"
-#include "q_types.h"
+#include "q_incs.h"
 //STOP_INCLUDES
 #include "_get_cell.h"
 //START_FUNC_DECL
