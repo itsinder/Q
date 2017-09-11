@@ -562,23 +562,29 @@ vec_add_B1(
   else {
     uint32_t bit_idx  = 0;
     uint32_t word_idx = 0;
+    uint32_t chunk_bit_idx = ( ptr_vec->num_in_chunk % 8 );
+    uint32_t chunk_word_idx = ( ptr_vec->num_in_chunk / 8 );
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
       uint8_t bit_val = (((uint8_t *)addr)[word_idx] >> bit_idx) & 0x1;
       if ( bit_val == 1 ) { 
-        uint8_t mask = 1 << bit_idx;
-        ((uint8_t *)ptr_vec->chunk)[word_idx] |= mask;
+        uint8_t mask = 1 << chunk_bit_idx;
+        ((uint8_t *)ptr_vec->chunk)[chunk_word_idx] |= mask;
       }
       else {
-        uint8_t mask = ~(1 << bit_idx);
-        ((uint8_t *)ptr_vec->chunk)[word_idx] &= mask;
+        uint8_t mask = ~(1 << chunk_bit_idx);
+        ((uint8_t *)ptr_vec->chunk)[chunk_word_idx] &= mask;
       }
       ptr_vec->num_in_chunk++;
       ptr_vec->num_elements++;
       bit_idx++; 
+      chunk_bit_idx++;
       if ( bit_idx == 8 ) { 
         word_idx++; bit_idx = 0; 
       }
+      if ( chunk_bit_idx == 8 ) {
+        chunk_word_idx++; chunk_bit_idx = 0;
+      }      
     }
   }
 

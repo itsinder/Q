@@ -57,7 +57,7 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   
   -- Validate vector values
   if validate_values == true or validate_values == nil then
-    status = vec_utils.validate_values(vec, md.field_type)
+    status = vec_utils.validate_values(vec, md.field_type, nil, md.field_size)
     assert(status, "Vector values verification failed")  
   end
   
@@ -78,7 +78,7 @@ local materialized_vec_basic_operations = function(vec, test_name, num_elements,
   
   if validate_values == true or validate_values == nil then
     -- Validate vector values
-    status = vec_utils.validate_values(vec, md.field_type)
+    status = vec_utils.validate_values(vec, md.field_type, nil, md.field_size)
     assert(status, "Vector values verification failed")
   end
 

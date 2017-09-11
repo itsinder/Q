@@ -41,6 +41,7 @@ function Reducer.new(arg)
     assert(type(arg.func) == "function", "Function expected to extract scalars")
     reducer._func = arg.func
     reducer._value = arg._value
+    reducer._gen = arg.gen
   end
   reducer._index = 0
   return reducer
