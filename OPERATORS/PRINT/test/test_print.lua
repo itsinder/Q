@@ -8,7 +8,7 @@ local column_I4 = Column{field_type="I4",chunk_size = 5,filename="./bin/I4.bin"}
 local arr = { column_I4, column_I4, column_I4 }  
 local status,err = pcall(print_csv, arr)
 assert(status == true,"Error in print_csv")
-print("final result = "..err)
+print("final result = \n"..err)
 log.info("All is well")
 
 -- output will be in the format
