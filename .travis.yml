@@ -14,9 +14,8 @@ env:
 
 branches:
   only:
-    - master
-      # - dev
-      # - dev_ramesh
+    - dev
+    - dev_ramesh
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
