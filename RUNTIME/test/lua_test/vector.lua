@@ -10,14 +10,14 @@ return function( M )
   
   -- Check for SC type
   if M.qtype == "SC" then
-    assert(M.field_size, "Field size is not provided for SC")
-    assert(type(M.field_size) == "number", "Provided field_size is not number")
-    M.qtype = "SC:" .. M.field_size
-    field_size = M.field_size
+    assert(M.width, "Field size is not provided for SC")
+    assert(type(M.width) == "number", "Provided field_size is not number")
+    M.qtype = "SC:" .. M.width
+    field_size = M.width
   end
   
   -- Create Vector
-  local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_memo, M.num_elements)
+  local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_memo, M.num_elements, field_size )
   if not status then
     print(x)
     x = nil

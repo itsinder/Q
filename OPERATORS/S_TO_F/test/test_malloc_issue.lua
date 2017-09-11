@@ -3,7 +3,7 @@ local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
-
+local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 local X = {}
 for i = 1,9 do
   X[#X + 1] = 31
@@ -44,13 +44,14 @@ end
 local Q = require 'Q'
 local c1 = Q.const( {val = 65535, qtype = "I4", len = 8 })
 c1:eval()
-local val, nn_val = c1:get_element(0)
+local val, nn_val = c_to_txt(c1, 1)
+--local val, nn_val = c1:get_element(0)
 -- print(val, nn_val)
-assert(ffi.cast("int *", val)[0] == 65535)
+--assert(ffi.cast("int *", val)[0] == 65535)
+assert(val == 65535)
 -- now lets remove all the files in the data folder
 local data_dir = require("Q/q_export").Q_DATA_DIR 
 
 os.execute(string.format("find %s -type f -delete", data_dir))
 require 'Q/UTILS/lua/strict'
 os.exit()--
-
