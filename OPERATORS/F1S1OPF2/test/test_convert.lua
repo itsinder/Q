@@ -26,7 +26,7 @@ converted_col:eval()
 
 -- Compare converted column with expected column
 local n = Q.sum(Q.vveq(expected_col, converted_col))
-assert(type(n) == "Scalar")
+assert(type(n) == "Reducer")
 len = input_col:length()
 assert(n:eval() == len)
 

@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 require 'Q/UTILS/lua/strict'
 
 local input_col = Q.mk_col({22100, 125, 20}, "I4")
@@ -15,7 +16,8 @@ converted_col:eval()
 
 -- Check nn_vec
 for k, v in ipairs(expected_nn_val) do
-  nn_value = converted_col.nn_vec:get_element(k - 1)
+  value, nn_value = c_to_txt(converted_col, k)
+  --nn_value = converted_col.nn_vec:get_element(k - 1)
   if nn_value == nil then nn_value = 0 end
   assert(v == nn_value, "nn vector not matching")
 end
@@ -23,7 +25,7 @@ print("nn_vec check successful")
 
 -- Compare converted column with expected column
 local n = Q.sum(Q.vveq(expected_col, converted_col))
-assert(type(n) == "Scalar")
+assert(type(n) == "Reducer")
 len = input_col:length()
 assert(n:eval() == len, "Converted column not matching with expected result")
 
@@ -45,7 +47,8 @@ converted_col:eval()
 
 -- Check nn_vec
 for k, v in ipairs(expected_nn_val) do
-  nn_value = converted_col.nn_vec:get_element(k - 1)
+  value, nn_value = c_to_txt(converted_col, k)
+  --nn_value = converted_col.nn_vec:get_element(k - 1)
   if nn_value == nil then nn_value = 0 end
   assert(v == nn_value, "nn vector not matching")
 end
@@ -53,7 +56,7 @@ print("nn_vec check successful")
 
 -- Compare converted column with expected column
 local n = Q.sum(Q.vveq(expected_col, converted_col))
-assert(type(n) == "Scalar")
+assert(type(n) == "Reducer")
 len = input_col:length()
 assert(n:eval() == len, "Converted column not matching with expected result")
 
