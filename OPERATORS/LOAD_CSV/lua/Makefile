@@ -23,6 +23,10 @@ all : libload_csv.so
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/get_cell.c ${INCDIR}
 
+../gen_inc/_txt_to_B1.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/txt_to_B1.c ${INCDIR}
+
 ../gen_inc/_txt_to_SC.h : 
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/txt_to_SC.c ${INCDIR}
@@ -50,9 +54,12 @@ clean :
 
 ../src/txt_to_SC.c : ../gen_inc/_txt_to_SC.h
 
+../src/txt_to_B1.c : ../gen_inc/_txt_to_B1.h
+
 SRC_FILES =  \
 	../src/get_cell.c  \
 	../src/txt_to_SC.c \
+	../src/txt_to_B1.c \
 
 AUX_FILES = \
 	../../../UTILS/src/is_valid_chars_for_num.c 
@@ -76,6 +83,7 @@ libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES}
 	cp ${GEN_INC_FILES}        ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_get_cell.h  ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_txt_to_SC.h ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_txt_to_B1.h ${Q_BUILD_DIR}/include/
 
 test_q : libload_csv.so
 	echo "TODO"

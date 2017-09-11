@@ -1,7 +1,7 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 -- local dbg = require 'debugger'
 
 return function (a, x)
@@ -16,15 +16,19 @@ return function (a, x)
   assert(subs.c_mem)
   assert(subs.len > 0)
 
-  local coro = coroutine.create(function()
-    local lb = 0
-    local ub = 0
-    local chunk_size = qconsts.chunk_size
-    local num_blocks = math.ceil(subs.len / chunk_size)
-    local width =  assert(qconsts.qtypes[out_qtype].width)
-    if ( width < 1 ) then width = 1 end 
-    local buff =  assert(ffi.malloc(chunk_size * width), "malloc failed")
-    for i = 1, num_blocks do
+  local chunk_size = qconsts.chunk_size
+  --local num_blocks = math.ceil(subs.len / chunk_size)
+  local width =  assert(qconsts.qtypes[out_qtype].width)
+  if ( width < 1 ) then width = 1 end 
+  local buff =  assert(ffi.malloc(chunk_size * width), "malloc failed")
+  local counter = 1
+  local lb = 0
+  local ub = 0
+  local num_blocks = math.ceil(subs.len / chunk_size)
+
+  local gen1 = function(chunk_idx)
+    while counter <= num_blocks do
+    --for i = 1, num_blocks do
       ub = lb + chunk_size
       if ( ub > subs.len ) then 
         chunk_size = subs.len -lb
@@ -32,9 +36,11 @@ return function (a, x)
       end
       qc[func_name](buff, chunk_size, subs.c_mem, lb)
       -- print(a, lb, ub, chunk_size)
-      coroutine.yield(chunk_size, buff, nil)
       lb = lb + chunk_size
+      counter = counter + 1
+      
+      return chunk_size, buff, nil
     end
-  end)
-  return Column{gen=coro, false, field_type=out_qtype}
+  end
+  return lVector{gen=gen1, has_nulls=false, qtype=out_qtype}
 end

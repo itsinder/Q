@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local ffi = require 'Q/UTILS/lua/q_ffi'
@@ -31,4 +32,5 @@ for i, bi in ipairs(b_bare) do
 end
 
 print("SUCCESS for " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()

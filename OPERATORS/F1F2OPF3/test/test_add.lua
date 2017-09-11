@@ -1,5 +1,4 @@
 -- FUNCTIONAL
-
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
@@ -21,8 +20,7 @@ print(w)
 local status = pcall(Q.vveq, c3, 123)
 assert(status == false)
 
-print("Successfully completed")
-
+print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()
 --[[

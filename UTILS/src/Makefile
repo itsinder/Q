@@ -4,8 +4,23 @@ INCDIR=../gen_inc/
 
 all : libutils.so ${hdr_files} asc2bin
 
+../gen_inc/_file_exists.h : 
+	lua ../lua/cli_extract_func_decl.lua file_exists.c ${INCDIR}
+
 ../gen_inc/_rand_file_name.h : 
 	lua ../lua/cli_extract_func_decl.lua rand_file_name.c ${INCDIR}
+
+../gen_inc/_c_copy.h : 
+	lua ../lua/cli_extract_func_decl.lua c_copy.c ${INCDIR}
+
+../gen_inc/_c_free.h : 
+	lua ../lua/cli_extract_func_decl.lua c_free.c ${INCDIR}
+
+../gen_inc/_get_file_size.h : 
+	lua ../lua/cli_extract_func_decl.lua get_file_size.c ${INCDIR}
+
+../gen_inc/_buf_to_file.h : 
+	lua ../lua/cli_extract_func_decl.lua buf_to_file.c ${INCDIR}
 
 ../gen_inc/_mix_UI4.h : 
 	lua ../lua/cli_extract_func_decl.lua mix_UI4.c ${INCDIR}
@@ -33,6 +48,9 @@ all : libutils.so ${hdr_files} asc2bin
 
 ../gen_inc/_get_bit.h : 
 	lua ../lua/cli_extract_func_decl.lua get_bit.c ${INCDIR}
+
+../gen_inc/_set_bit.h : 
+	lua ../lua/cli_extract_func_decl.lua set_bit.c ${INCDIR}
 
 ../gen_inc/_is_valid_chars_for_num.h : 
 	lua ../lua/cli_extract_func_decl.lua is_valid_chars_for_num.c ${INCDIR}
@@ -67,11 +85,18 @@ hdr_files = \
 	../gen_inc/_mix_UI4.h  \
 	../gen_inc/_mix_UI8.h  \
 	../gen_inc/_rand_file_name.h  \
+	../gen_inc/_file_exists.h  \
+	../gen_inc/_c_copy.h  \
+	../inc/vec.h  \
+	../gen_inc/_c_free.h  \
+	../gen_inc/_get_file_size.h  \
+	../gen_inc/_buf_to_file.h  \
 	../gen_inc/_f_mmap.h \
 	../gen_inc/_f_munmap.h \
 	../gen_inc/_mmap.h \
 	../gen_inc/_write_bits_to_file.h \
         ../gen_inc/_get_bit.h \
+        ../gen_inc/_set_bit.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
 	../gen_inc/_bits_to_bytes.h   \
@@ -82,6 +107,11 @@ SRC_FILES=  \
 	mix_UI4.c \
 	mix_UI8.c \
 	rand_file_name.c \
+	file_exists.c \
+	c_copy.c \
+	c_free.c \
+	get_file_size.c \
+	buf_to_file.c \
 	f_mmap.c  \
 	f_munmap.c \
 	mmap.c \
@@ -89,6 +119,7 @@ SRC_FILES=  \
 	bits_to_bytes.c \
 	write_bits_to_file.c  \
         get_bit.c  \
+        set_bit.c  \
 	is_valid_chars_for_num.c \
 	file_cleanup.c
 

@@ -7,8 +7,8 @@ all: q_core
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
-	rm -f ${Q_ROOT}/lib/libq_core.so
-	rm -f ${Q_ROOT}/include/q_core.h
+	rm -f ${Q_ROOT}/lib/*.so
+	rm -f ${Q_ROOT}/include/*.h
 	rm -f ${Q_BUILD_DIR}/src/*
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
@@ -53,12 +53,13 @@ q_core: q_basic q_operators
 	luajit mk_so.lua
 	echo "all done for q_core"
 
-q_basic: column utils load_csv print
+q_basic: utils load_csv print column
 	luajit mk_so.lua /tmp/
 	echo "Basic Q is built"
 
 column:
-	cd ${BASE_PATH}/RUNTIME/COLUMN/code/src;
+	cd ${BASE_PATH}/RUNTIME/src;
+	make -C ${BASE_PATH}/RUNTIME/src/
 	echo "column done"
 
 utils:

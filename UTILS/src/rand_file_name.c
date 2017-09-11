@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include "q_macros.h"
-#include "_mix_UI8.h"
 #include "_rand_file_name.h"
 
 static inline uint64_t RDTSC()
@@ -24,15 +24,24 @@ rand_file_name(
   int status = 0;
   char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                'A', 'B', 'C', 'D', 'E', 'F' };
-  if (  bufsz < 32 ) { go_BYE(-1); }
+  static uint32_t seed = 0;
+  static struct drand48_data buffer;
+  if (  bufsz < 31 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
-  uint64_t t = RDTSC();
-  t = mix_UI8(t);
-  char ct[8];
-  memcpy(ct, &t, 8);
+  if ( seed == 0 ) { 
+    seed = RDTSC();
+    srand48_r(seed, &buffer);
+  }
+  char ct[32];
+  memset(ct, '\0', 32);
+  for ( int i = 0; i < 4; i++ ) { 
+    int64_t t;
+    lrand48_r(&buffer, &t);
+    memcpy(ct+(i*4), &t, 4);
+  }
   int bufidx = 0;
   buf[bufidx++] = '_';
-  for ( int i = 0; i < 8; i++ ) {  // 8 bytes
+  for ( int i = 0; i < 16; i++ ) {  // 16 bytes
     uint8_t c = ct[i];
     uint8_t c1 = c & 15;
     uint8_t c2 = c >> 4;
@@ -46,12 +55,18 @@ rand_file_name(
 BYE:
   return status;
 }
+// gcc -g rand_file_name.c -I../inc/ -I../gen_inc/
+#undef STAND_ALONE
 #ifdef STAND_ALONE
 int
 main()
 {
   char X[32];
-  rand_file_name(X, 32);
-  fprintf(stderr, "X = %s \n", X);
+  for ( int i = 0; i < 100; i++ ) { 
+    memset(X, '\0', 64);
+    rand_file_name(X, 64);
+    fprintf(stderr, "X = %s \n", X);
+  }
 }
 #endif
+

@@ -1,12 +1,11 @@
 local plstring = require 'pl.stringx'
-local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local Vector = require 'Q/RUNTIME/lua/lVector'
+local Column = require 'Q/RUNTIME/lua/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
-
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
 
@@ -128,16 +127,16 @@ end
 
 -- vector of type I4 is given as filter input for category 4 testcases
 fns.handle_input_category4 = function ()
-  local v1 = Vector{field_type='I4',chunk_size = 8,
-    filename= script_dir .."/bin/I4.bin",  
+  local v1 = Vector{qtype='I4',
+    file_name= script_dir .."/bin/I4.bin",  
   }
   return { where = v1 }
 end
 
 -- vector of type B1 is given as filter input for category 3 testcases
 fns.handle_input_category3 = function ()
-  local v1 = Vector{field_type='B1',chunk_size = 8,
-    filename= script_dir .."/bin/B1.bin",  
+  local v1 = Vector{qtype='B1', num_elements=4,
+    file_name= script_dir .."/bin/B1.bin",  
   }
   return { where = v1 }
 end
@@ -179,7 +178,6 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
   end
   
   local expected_file_content = file.read(csv_file)
-  
   --print(expected_file_content)
   --print(v.output_regex)
   if v.output_regex ~= expected_file_content then
@@ -219,20 +217,20 @@ end
 fns.handle_category6 = function (index, v, M)
   -- print(v.name)
   
-  local col = Column{field_type='I4',chunk_size = 8,
-    filename= script_dir .."/bin/I4.bin",  
+  local col = Column{qtype='I4',
+    file_name= script_dir .."/bin/I4.bin",  
   }
   
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
-  local status, print_ret = pcall(print_csv, arr, nil, "testcase_consumable.csv")
+  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
+  local status, print_ret = pcall(print_csv, arr, nil, filename)
   if status then
-    local status, load_ret = pcall(load_csv,"testcase_consumable.csv", M)
-    --print(status, load_ret)
+    local status, load_ret = pcall(load_csv, filename, M)
+    filename = load_ret[1]:meta().base.file_name
   end
   --print(M[1].name)
   -- local filename = _G["Q_DATA_DIR"].."_"..M[1].name
-  local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
   --print(filename) /home/pragati/Q/DATA_DIR/
   
   local actual_file_content1 = file.read(script_dir .."/bin/I4.bin")

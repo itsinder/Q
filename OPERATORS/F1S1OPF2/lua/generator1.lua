@@ -33,3 +33,9 @@
     end
   end
   assert(num_produced > 0)
+  local msg = "Completed "
+  for i = 0, 10 do 
+    if ( not arg[i] ) then break end
+    msg  = msg .. arg[i] .. " "
+  end
+  print(msg)
