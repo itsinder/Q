@@ -19,7 +19,7 @@ all : mm libmm.so
 	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
 
 libmm.so : matrix_multiply.c 
-	$(CC) -c $(INCS) $(FLAGS) $(LNK_FLAGS) matrix_multiply.c -o libmm.so
+	$(CC) -c $(INCS) $(FLAGS) $(LINK_FLAGS) matrix_multiply.c -o libmm.so
 mm: driver_mm.c matrix_multiply.c
 	$(CC) $(INCS) $(FLAGS) -lgomp -lpthread -lm \
 	  	driver_mm.c matrix_multiply.c mm_helpers.c -o mm
