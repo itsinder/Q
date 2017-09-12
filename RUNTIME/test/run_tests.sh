@@ -22,6 +22,7 @@ $LJ test_vec.lua
 asc2bin in1_I4.csv I4 _in1_I4.bin
 $LJ test_vec_writable.lua
 $LJ test_vec_prev_chunk.lua
+$LJ test_vec_no_chunk_num.lua
 $LJ test_vec_SC.lua
 asc2bin in1_I4.csv I4 _in1_I4.bin
 $LJ test_gen3.lua

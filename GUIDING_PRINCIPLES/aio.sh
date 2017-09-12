@@ -89,6 +89,10 @@ if [[ $RES -ne 0 ]] ; then
 else
    my_print "luarocks is already installed"
 fi
+
+# ######## Install LAPACK stuff #######
+sudo apt-get install liblapacke-dev liblapack-dev -y
+
 #  ######## Build Q #########
 my_print "Building Q"
 source ../setup.sh
