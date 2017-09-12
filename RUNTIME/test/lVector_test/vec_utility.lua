@@ -17,16 +17,26 @@ fns.validate_values = function(vec, qtype, chunk_number)
   --  chunk_number = 0
   -- end
   
-  -- Temporary hack to pass SV type
-  -- TODO : Validation of SV values 
-  if qtype == "SV" then
-    return true
-  end
   
   local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
+  
+
+  if qtype == "SV" then
+    for itr = 1, len do
+      local actual_str = c_to_txt(vec, itr)
+      local expected_str = dict_strings[itr]
+      if expected_str ~= actual_str then
+        status = false
+        print("Value mismatch at index " .. tostring(itr) .. ", expected: " .. tostring(expected_str) .. " .... actual: " .. tostring(actual_str))
+        break
+      end
+    end
+    return status
+  end
+  
   
   if qtype == "B1" then
     for i = 1 , len do 
@@ -48,7 +58,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
     return status
   end
   
-  -- Temporary: no validation of vector values for SC type
+  
   if qtype == "SC" then
     for itr = 1, len do
       local actual_str = c_to_txt(vec, itr)
@@ -91,34 +101,22 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
   local status = false
   if gen_method == "cmem_buf" then
     local is_B1 = false
-    -- TODO: SV type is in progress, will fail for now
+    
     if qtype == "SV" then
-      local buf_length = num_elements
-      -- currently hardcoded for SV type
       local dict = "D1"
-      local is_dict = false
-      local add = true
-      local max_width= 1024
-      
       local dict_obj = assert(Dictionary(dict))
-      -- print(dict_obj)
       vec:set_meta("dir", dict_obj)
       
-      local base_data = cmem.new(field_size)
-      local stridx = 0
+      local base_data = cmem.new(field_size * num_elements)
+      local iptr = ffi.cast(qconsts.qtypes.I4.ctype .. " *", base_data)
       
+      local stridx = 0
       for itr = 1, num_elements do
-        if ( add ) then
-          stridx = dict_obj:add(dict_strings[itr])
-        else
-          stridx = dict_obj:get_index_by_string(dict_strings[itr])
-        end
-        print("Dict data : ",stridx)
-        
-        local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
-        iptr[itr]= stridx
-        vec:put_chunk(base_data, nil, buf_length)
+        stridx = dict_obj:add(dict_strings[itr])
+        -- print("Dict data : ",stridx,dict_strings[itr])
+        iptr[itr - 1] = stridx
       end
+      vec:put_chunk(base_data, nil, num_elements)
       
     elseif qtype == "SC" then
       local base_data = cmem.new(field_size)

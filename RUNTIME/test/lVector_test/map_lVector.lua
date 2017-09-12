@@ -332,7 +332,7 @@ return {
     assert_fns = "nascent_vector1",
     name = "Creation of nascent vector_cmem_buf", 
     meta = "gm_create_nascent_vector8.lua",
-    num_elements = 2, 
+    num_elements = 5, 
     gen_method = "cmem_buf", 
     qtype = { "SV" }
   },
