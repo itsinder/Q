@@ -3,8 +3,11 @@ local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local Scalar  = require 'libsclr'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local Dictionary = require 'Q/UTILS/lua/dictionary'
 
 local fns = {}
+
+local dict_strings = { "test1", "test2", "test3", "test4", "test5" }
 
 fns.validate_values = function(vec, qtype, chunk_number)
   -- Temporary hack to pass chunk number to get_chunk in case of nascent vector
@@ -13,6 +16,12 @@ fns.validate_values = function(vec, qtype, chunk_number)
   -- if vec:num_elements() <= qconsts.chunk_size then
   --  chunk_number = 0
   -- end
+  
+  -- Temporary hack to pass SV type
+  -- TODO : Validation of SV values 
+  if qtype == "SV" then
+    return true
+  end
   
   local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
@@ -82,7 +91,36 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
   local status = false
   if gen_method == "cmem_buf" then
     local is_B1 = false
-    if qtype == "SC" or qtype == "SV" then
+    -- TODO: SV type is in progress, will fail for now
+    if qtype == "SV" then
+      local buf_length = num_elements
+      -- currently hardcoded for SV type
+      local dict = "D1"
+      local is_dict = false
+      local add = true
+      local max_width= 1024
+      
+      local dict_obj = assert(Dictionary(dict))
+      -- print(dict_obj)
+      vec:set_meta("dir", dict_obj)
+      
+      local base_data = cmem.new(field_size)
+      local stridx = 0
+      
+      for itr = 1, num_elements do
+        if ( add ) then
+          stridx = dict_obj:add(dict_strings[itr])
+        else
+          stridx = dict_obj:get_index_by_string(dict_strings[itr])
+        end
+        print("Dict data : ",stridx)
+        
+        local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+        iptr[itr]= stridx
+        vec:put_chunk(base_data, nil, buf_length)
+      end
+      
+    elseif qtype == "SC" then
       local base_data = cmem.new(field_size)
       for itr = 1, num_elements do
         local str
