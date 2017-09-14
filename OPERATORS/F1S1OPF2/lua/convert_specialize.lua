@@ -42,13 +42,13 @@ return function (
   elseif out_qtype == "B1" or in_qtype == "B1" then
     tmpl = 'convert_B1.tmpl'
     if out_qtype == "B1" then
-      subs.in_fn = "in[i];"
+      subs.in_fn = "inv = in[i];"
       subs.out_fn = "if ( inv == 1 ) { mcr_set_bit(out[widx], bidx); }"
-      subs.out_ctype = "uint64_t"
+      --subs.out_ctype = "uint64_t"
     else
-      subs.in_fn = "mcr_get_bit(in[widx], bidx); if ( inv != 0 ) { inv = 1; }"
+      subs.in_fn = "inv = mcr_get_bit(in[widx], bidx); if ( inv != 0 ) { inv = 1; }"
       subs.out_fn = "out[i] = inv;"
-      subs.in_ctype = "uint64_t"
+      --subs.in_ctype = "uint64_t"
     end    
   end
   return subs, tmpl

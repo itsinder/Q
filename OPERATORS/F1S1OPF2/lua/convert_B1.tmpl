@@ -23,16 +23,6 @@ ${fn}(
 
 #include "_${fn}.h"
 
-static void __operation(
-  ${in_ctype} a,
-  ${out_ctype} *ptr_c
-  )
-{
-  ${out_ctype} c;
-  ${c_code_for_operator}  
-  *ptr_c = c;
-}
-
 int
 ${fn}(  
       const ${in_ctype} * restrict in,
@@ -54,7 +44,8 @@ ${fn}(
     uint64_t widx = i >> 8; // word index
     uint64_t bidx = i & 0xFF; // bit index
 
-    ${in_ctype} inv = ${in_fn}
+    ${in_ctype} inv;
+    ${in_fn}
     
     if ( ! (  inv == 0 || inv == 1 ) ) {
       // Use go_BYE(-1)
