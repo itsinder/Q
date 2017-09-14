@@ -33,8 +33,8 @@ main(void) {
     nil_files[i] = malloc(MAX_LEN_FILE_NAME * sizeof(char));
   }
 
-  // We iterate over 4 data sets 
-  for ( int data_set_id = 0; data_set_id < 4; data_set_id++ ) {
+  // We iterate over 5 data sets 
+  for ( int data_set_id = 0; data_set_id < 5; data_set_id++ ) {
     for ( uint32_t i = 0; i < nC; i++ ) {
       memset(fldtypes[i],'\0', 4);
       memset(outfiles[i], '\0', MAX_LEN_FILE_NAME);
@@ -157,6 +157,27 @@ main(void) {
         has_nulls[4] = true;
 
         break;
+      case 4 : 
+        is_hdr = false;
+        nC = 2;
+        strcpy(infile, "I1_I2_input_csv.csv");
+        strcpy(fldtypes[0], "I1");
+        strcpy(fldtypes[1], "I2");
+
+        strcpy(outfiles[0], "_col_ds4_0_I1");
+        strcpy(outfiles[1], "_col_ds4_1_I2");
+
+        is_load[0] = true;
+        is_load[1] = true;
+
+        has_nulls[0] = true;
+        has_nulls[1] = true;
+                
+        
+        strcpy(nil_files[0], "_nil_1");
+        strcpy(nil_files[1], "_nil_2");
+
+        break;
 
       default : 
         nC = 0;
@@ -191,7 +212,32 @@ main(void) {
         break;
       case 3 : 
         // TODO do some testing
+        for ( uint32_t i = 0; i < nC; i++ ) {
+          FILE *fp = NULL;
+          // for col 2 and 4 nulls are present in data 
+          // so nil file ptr can't be null
+          // and for other cols has_null is false
+          // so nil file ptr should be null
+          if (i == 2 || i == 4)
+          {
+            fp = fopen(nil_files[i], "r");
+            if ( fp == NULL ) { go_BYE(-1); } // if nil_file_ptr is null error out
+          }
+          else
+          {
+            fp = fopen(nil_files[i], "r");
+            if ( fp != NULL ) { go_BYE(-1); } // if nil_file_ptr is not null error out
+          }
+        }
         break;
+      case 4 : 
+        for ( uint32_t i = 0; i < nC; i++ ) {
+          FILE *fp = NULL;
+          fp = fopen(nil_files[i], "r");
+          if ( fp != NULL ) { go_BYE(-1); }
+        }
+        break;
+        
       default : 
         go_BYE(-1); 
         break;
