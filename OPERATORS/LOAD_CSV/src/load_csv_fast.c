@@ -41,7 +41,7 @@ load_csv_fast(
     )
 //STOP_FUNC_DECL
 {
-  int status = 0;
+  int status = 0, bak_status = 0;
   char *mmap_file = NULL; //X
   size_t file_size = 0; //nX
   FILE **ofps = NULL;
@@ -222,7 +222,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(int8_t), ofps[col_ctr]);
         }
         else {
-          status = txt_to_I1(buf, &tempI1); cBYE(status);
+          status = txt_to_I1(buf, &tempI1); 
           fwrite(&tempI1, 1, sizeof(int8_t), ofps[col_ctr]);
         }
 //        printf("I1\n");
@@ -232,7 +232,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(int16_t), ofps[col_ctr]);
         }
         else {
-          status = txt_to_I2(buf, &tempI2); cBYE(status);
+          status = txt_to_I2(buf, &tempI2); 
           fwrite(&tempI2, 1, sizeof(int16_t), ofps[col_ctr]);
         }
   //      printf("I2");
@@ -242,7 +242,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(int32_t), ofps[col_ctr]);
         }
         else {
-          status = txt_to_I4(buf, &tempI4); cBYE(status);
+          status = txt_to_I4(buf, &tempI4); 
           fwrite(&tempI4, 1, sizeof(int32_t), ofps[col_ctr]);
         }
     //    printf("I4\n");
@@ -252,7 +252,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(int64_t), ofps[col_ctr]);
         }
         else {
-          status = txt_to_I8(buf, &tempI8); cBYE(status);
+          status = txt_to_I8(buf, &tempI8); 
           fwrite(&tempI8, 1, sizeof(int64_t), ofps[col_ctr]);
         }
         //printf("I8\n");
@@ -262,7 +262,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(float), ofps[col_ctr]);
         }
         else {
-          status = txt_to_F4(buf, &tempF4); cBYE(status);
+          status = txt_to_F4(buf, &tempF4); 
           fwrite(&tempF4, 1, sizeof(float), ofps[col_ctr]);
         }
       //  printf("F4\n");
@@ -272,7 +272,7 @@ load_csv_fast(
           fwrite(&null_val, 1, sizeof(double), ofps[col_ctr]);
         }
         else {
-          status = txt_to_F8(buf, &tempF8); cBYE(status);
+          status = txt_to_F8(buf, &tempF8); 
           fwrite(&tempF8, 1, sizeof(double), ofps[col_ctr]);
         }
         //printf("F8\n");
@@ -282,6 +282,11 @@ load_csv_fast(
         go_BYE(-1);
         break;
     }
+    if ( status < 0 ) { 
+      fprintf(stderr, "Error for row %lu, col %d, cell [%s]\n",
+          row_ctr, col_ctr, buf);
+    }
+    cBYE(status);
     col_ctr++;
     if ( col_ctr == nC ) { 
       col_ctr = 0;
@@ -306,6 +311,7 @@ load_csv_fast(
 
   //*ptr_nil_ctrs = nil_ctrs; TODO TODO TODO
 BYE:
+  bak_status = status;
 
   if ( ofps != NULL ) { 
     for ( uint32_t i = 0; i < nC; i++ ) {
@@ -319,13 +325,19 @@ BYE:
   if ( nofps != NULL ) { 
     for ( uint32_t i = 0; i < nC; i++ ) {
       if ( nil_ctrs[i] == 0 ) {
-        //printf("no nils\n");
+        if ( status == 0 ) { 
+          printf("%s: no nils in Column %d\n", infile, i);
+        }
         if ( nofps[i] != NULL ) { 
           fclose_if_non_null(nofps[i]);
           status = remove(nil_files[i]);
-          //printf("removing file\n");
+          if ( status == 0 ) { 
+            printf("%s: removing file for Column %d\n", infile, i);
+          }
         }
-        cBYE(status);
+      }
+      else {
+        if ( nofps[i] == NULL ) { go_BYE(-1); }
       }
     }
   }
@@ -334,6 +346,6 @@ BYE:
   free_if_non_null(nofps);
   free_if_non_null(nil_ctrs);
 
-  return status;
+  return bak_status;
 }
 
