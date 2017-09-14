@@ -411,6 +411,32 @@ function lVector:meta()
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
 
+function lVector:reincarnate()
+  if ( Vector.is_nascent(self._base_vec) ) then
+    return nil
+  end
+  T = {}
+  T[#T+1] = "lVector ( { "
+
+  T[#T+1] = "qtype = \"" 
+  T[#T+1] = self._qtype
+  T[#T+1] = "\", "
+
+  T[#T+1] = "file_name = \"" 
+  T[#T+1] = self._file_name
+  T[#T+1] = "\", "
+
+  if ( self._nn_file_name ) then 
+    T[#T+1] = "nn_file_name = \"" 
+    T[#T+1] = self._nn_file_name
+    T[#T+1] = "\", "
+  end
+
+  T[#T+1] = " ) } "
+  return table.concat(T, ' ')
+end
+
+
 function lVector:set_meta(k, v)
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
