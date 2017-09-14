@@ -7,5 +7,6 @@
 #include <float.h>
 #include <limits.h>
 #include <assert.h>
+#include <unistd.h>
 #include "q_constants.h"
 #include "q_macros.h"

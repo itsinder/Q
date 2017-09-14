@@ -4,26 +4,29 @@ local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
+-- This is matrix vector multiply, done chunks at a time 
 local cmvmul = function(X, Y)
   -- START: verify inputs
-  assert(type(X) == "table", "X must be a table ")
+  assert(type(X) == "table", "X must be a table of lVectors")
   local m = nil
   for k, v in ipairs(X) do 
-    assert(type(v) == "Column", "each element of X must be a column")
-    assert(v:fldtype() == "F8", "Currently we only support F8")
+    assert(type(v) == "lVector", "each element of X must be a lVector")
+    assert(((v:qtype() == "F8") or (v:qtype()== "F4")), 
+      "qtype must be F4 or F8")
   end
-  assert(type(Y) == "Column", "Y must be a column ")
+  assert(type(Y) == "lVector", "Y must be a lVector ")
   local k = #X
   -- assert(k == Y:length(), "Y must have same length as num cols of X")
-  assert(Y:fldtype() == "F8", "Currently we only support F8")
   --all of y needs to be evaluated
+  assert(((Y:qtype() == "F8") or (Y:qtype()== "F4")), 
+      "qtype of Y must be F4 or F8")
   local y_len, yptr, nn_yptr = Y:chunk(-1)
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
   -- STOP: verify inputs
 
-  local coro = coroutine.create(function()
+  local gen_fn = function()
     -- malloc space for one chunk worth of output z
     local z_sz = qconsts.qtypes["F8"].width * qconsts.chunk_size
     local z_buf = assert(ffi.malloc(z_sz), "malloc failed")
@@ -65,9 +68,8 @@ local cmvmul = function(X, Y)
       end
       cidx = cidx + 1
     until (last_chunk == true )
-  end)
-
-  return Column( {gen=coro, nn=false, field_type="F8"} )
+  end
+  return lVector( {gen = gen_fn, has_nulls = false, qtype = "F8"} )
 end
 return require('Q/q_export').export('cmvmul', cmvmul)
 
