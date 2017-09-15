@@ -11,7 +11,6 @@ local Column     = require 'Q/RUNTIME/lua/lVector'
 local plstring   = require 'pl.stringx'
 local plfile     = require 'pl.file'
 
-local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 
 local function mk_out_buf(
   in_buf, 
@@ -77,7 +76,7 @@ local initialize_buffers = function(M)
   -- If chunk_size is not multiple of num_cols then 
   -- the total of all out_buf size will be larger than chunk_size by margin     
   local out_buf_size = math.ceil(qconsts.chunk_size / num_cols) 
-  local nn_buf_size = math.ceil(out_buf_size/64) * 8  
+  local nn_buf_size = math.ceil(out_buf_size/8)  
   
   -- This loop does following things
   -- (1) calculate max_txt_width 
@@ -160,7 +159,7 @@ load_csv = function (
   local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
   
   -- Memory map the input file
-  local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
+  local f_map = ffi.gc(qc.f_mmap(infile, false), ffi.C.free)
   assert(f_map.status == 0 , err.MMAP_FAILED)
   local X = ffi.cast("char *", f_map.map_addr)
   local nX = tonumber(f_map.map_len)
@@ -197,11 +196,20 @@ load_csv = function (
         assert(M[col_idx].has_nulls, err.NULL_IN_NOT_NULL_FIELD) 
         M[col_idx].num_nulls = M[col_idx].num_nulls + 1
       else
+        -- Update out_buf
         local temp_out_buf = ffi.cast("char *", out_buf_array[col_idx]) + (num_in_out_buf * field_size)
+        mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)
+        
+        -- Update nn_out_buf
+        local widx = math.floor(num_in_out_buf / 8)
+        local bidx = (num_in_out_buf % 8)
         local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
-        local index = math.floor((num_in_out_buf)/64)
-        temp_nn_out_buf[index] = temp_nn_out_buf[index] + math.pow(2, num_in_out_buf)
-        mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)            
+        qc.set_bit(temp_nn_out_buf + widx, bidx)
+        
+        --local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
+        --local index = math.floor((num_in_out_buf)/64)
+        --temp_nn_out_buf[index] = temp_nn_out_buf[index] + math.pow(2, num_in_out_buf)
+        
       end
     end
       
@@ -256,8 +264,9 @@ load_csv = function (
     if ( M[i].is_load ) then 
       cols[i]:eov()
       if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        -- TODO drop the null column. Indrajeet to provide
-        --local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
+        -- Drop the null column, get the nn_file_name from metadata
+        local null_file = cols[i]:meta().nn.file_name
+        -- TODO: discuss: whether to delete nn file? if we delete then col:chunk() won't work
         --assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
       end
       cols_to_return[rc_idx] = cols[i]
