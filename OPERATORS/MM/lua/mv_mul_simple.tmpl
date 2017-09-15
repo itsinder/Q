@@ -19,7 +19,7 @@ ${fn}(
 #include "_${fn}.h"
 int 
 ${fn}(
-    ${in1_ctype} ** x,  /* M by K */
+    ${in1_ctype} ** x,  /* M rows by K columns */
     ${in2_ctype} * y,  /* K by 1 */
     ${out_ctype} * z,  /* M by 1 */
     int M,
@@ -32,7 +32,7 @@ ${fn}(
     double sum = 0;
 #pragma omp simd reduction(+:sum)
     for ( int k = 0; k < K; k++ ) { 
-      sum += y[k] * x[m][k];
+      sum += y[k] * x[k][m];
     }
     z[m] = sum;
   }

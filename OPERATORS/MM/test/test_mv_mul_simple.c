@@ -51,7 +51,7 @@ main(
   cBYE(status);
   print_2d(X, M, K);
   for ( int k = 0; k < K; k++ ) { printf("%f\n", Y[k]); } printf("\n");
-  for ( int k = 0; k < K; k++ ) { printf("%f\n", Z[k]); } printf("\n");
+  for ( int m = 0; m < M; m++ ) { printf("%f\n", Z[m]); } printf("\n");
 
 BYE:
   return status;
