@@ -159,7 +159,7 @@ load_csv = function (
   local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
   
   -- Memory map the input file
-  local f_map = ffi.gc(qc.f_mmap(infile, false), ffi.C.free)
+  local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
   assert(f_map.status == 0 , err.MMAP_FAILED)
   local X = ffi.cast("char *", f_map.map_addr)
   local nX = tonumber(f_map.map_len)
