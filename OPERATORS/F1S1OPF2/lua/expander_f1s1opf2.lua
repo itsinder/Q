@@ -21,6 +21,7 @@
         "scalar must be table/string/number")
     end
     local status, subs, tmpl = pcall(spfn, f1:fldtype(), y)
+    if not status then print(subs) end
     assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
     assert(qc[func_name], "Missing symbol " .. func_name)

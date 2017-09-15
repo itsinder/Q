@@ -3,8 +3,27 @@ local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local Scalar  = require 'libsclr'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local Dictionary = require 'Q/UTILS/lua/dictionary'
 
 local fns = {}
+
+-- SV variable length strings
+local SV_strings = { "test_sv_dummy_string", "test_sv_temp_string", "test_sv_string", "test_sv", "test_string"}
+-- SC fixed length strings
+local SC_strings = { "test_sc_string1", "test_sc_string2" }
+
+--placing random seed once at start for generating random no. each time
+math.randomseed(os.time())
+
+-- function to check if string is present in the table or not
+local function has_value (tab, val)
+  for idx, value in ipairs(tab) do
+    if value == val then
+      return true
+    end
+  end
+  return false
+end
 
 fns.validate_values = function(vec, qtype, chunk_number)
   -- Temporary hack to pass chunk number to get_chunk in case of nascent vector
@@ -13,11 +32,29 @@ fns.validate_values = function(vec, qtype, chunk_number)
   -- if vec:num_elements() <= qconsts.chunk_size then
   --  chunk_number = 0
   -- end
-  
+
+
   local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
+  
+  
+  if qtype == "SV" or qtype == "SC" then
+    local table_type 
+    if qtype == "SV" then table_type = SV_strings else table_type = SC_strings end
+    for itr = 1, len do
+      local actual_str = c_to_txt(vec, itr)
+      local is_str_present = has_value( table_type, actual_str )
+      if not is_str_present then
+        status = false
+        print("Value mismatch in " .. qtype .. " vector at index " .. itr)
+        break
+      end
+    end
+    return status
+  end
+  
   
   if qtype == "B1" then
     for i = 1 , len do 
@@ -39,24 +76,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
     return status
   end
   
-  -- Temporary: no validation of vector values for SC type
-  if qtype == "SC" then
-    for itr = 1, len do
-      local actual_str = c_to_txt(vec, itr)
-      local expected_str 
-      if itr % 2 == 0 then expected_str = "temp" else expected_str = "dummy" end
-      -- print("Expected value ",expected_str," Actual value ",actual_str)
-      
-      if expected_str ~= actual_str then
-        status = false
-        print("Value mismatch at index " .. tostring(itr) .. ", expected: " .. tostring(expected_str) .. " .... actual: " .. tostring(actual_str))
-        break
-      end
-      
-    end
-    return status
-  end
-  
+
   -- Temporary: no validation of vector values if has_nulls == true
   if vec._has_nulls then
     assert(nn_data, "Received nn_data is nil")
@@ -82,11 +102,31 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
   local status = false
   if gen_method == "cmem_buf" then
     local is_B1 = false
-    if qtype == "SC" or qtype == "SV" then
+    
+    if qtype == "SV" then
+      local sv_table_len = #SV_strings
+      local dict = "D1"
+      local dict_obj = assert(Dictionary(dict))
+      vec:set_meta("dir", dict_obj)
+      
+      local base_data = cmem.new(field_size * num_elements)
+      local iptr = ffi.cast(qconsts.qtypes.I4.ctype .. " *", base_data)
+      
+      local stridx = 0
+      for itr = 1, num_elements do
+        local index = math.random(1, sv_table_len)
+        stridx = dict_obj:add(SV_strings[index])
+        -- print("Dict data : ",stridx,SV_strings[index])
+        iptr[itr - 1] = stridx
+      end
+      vec:put_chunk(base_data, nil, num_elements)
+      
+    elseif qtype == "SC" then
+      local sc_table_len = #SC_strings
       local base_data = cmem.new(field_size)
       for itr = 1, num_elements do
-        local str
-        if itr%2 == 0 then str = "temp" else str = "dummy" end
+        local index = math.random(1, sc_table_len)
+        local str = SC_strings[index]
         ffi.copy(base_data, str)
         vec:put1(base_data)
       end

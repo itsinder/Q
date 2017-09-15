@@ -326,4 +326,14 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   ]]
+  -- creating nascent vector, SV qtype
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "Creation of nascent vector_cmem_buf", 
+    meta = "gm_create_nascent_vector8.lua",
+    num_elements = 5, 
+    gen_method = "cmem_buf", 
+    qtype = { "SV" }
+  },
 }

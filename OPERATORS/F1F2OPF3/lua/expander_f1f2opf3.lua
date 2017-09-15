@@ -13,6 +13,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(type(f2) == "lVector", "f2 must be a lVector")
   if ( optargs ) then assert(type(optargs) == "table") end
   local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
+  if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not available" .. func_name)

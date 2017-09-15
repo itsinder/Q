@@ -34,7 +34,7 @@ local mk_col = function (input, qtype)
   for k,v in ipairs(input) do
     assert(type(v) == "number",
     "Error in index " .. k .. " - " .. err.INVALID_DATA_ERROR)
-    --print("v = "..string.format("%18.0f",v))
+    
     if qtype == "B1" then
       --check if number is either 0 or 1
       assert((v == 1 or v == 0), err.INVALID_B1_VALUE)    
@@ -46,12 +46,6 @@ local mk_col = function (input, qtype)
       assert(v <= qconsts.qtypes[qtype].max, err.INVALID_UPPER_BOUND)
     end
   end
-  --if field_type ~= "SC" then width=nil end
-  --[[local col = Column{
-    field_type=qtype,
-    write_vector=true,
-    nn=false }
-  ]]
   
   local ctype =  assert(qconsts.qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
   local table_length = table.getn(input)
@@ -67,22 +61,18 @@ local mk_col = function (input, qtype)
   
   if qtype == "B1" then
     -- Allocate memory (multiple of 8bytes)
-    length_in_bytes = math.ceil(table_length/64)*8
+    length_in_bytes = math.ceil(table_length/8)
     chunk = cmem.new(length_in_bytes)
     ffi.fill(chunk, length_in_bytes, 0)
-    local casted = ffi.cast(ctype .. "*", chunk)
+    local casted = ffi.cast(ctype .. " *", chunk)
 
     -- Copy values to allocated chunk
-    -- TODO: Look for bit operation in Lua or can we use C code (shift operator) instead of below arithmetic
     for k, v in ipairs(input) do
       if v == 1 then
         local char_idx = math.floor((k-1) / 8)
         local bit_idx = (k-1) % 8
         local char_value = casted + char_idx
-        local result = tonumber( qc.set_bit(char_value, bit_idx) )        
-        --print("Set bit result: " ..tostring(result))
-        --local index = math.floor((k-1)/64)
-        --chunk[index] = chunk[index] + math.pow(2, k-1)
+        local result = tonumber( qc.set_bit(char_value, bit_idx) )
       end
     end
   else
