@@ -26,7 +26,7 @@ rand_file_name(
                'A', 'B', 'C', 'D', 'E', 'F' };
   static uint32_t seed = 0;
   static struct drand48_data buffer;
-  if (  bufsz < 31 ) { go_BYE(-1); }
+  if (  bufsz < 47 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
   if ( seed == 0 ) { 
     seed = RDTSC();
