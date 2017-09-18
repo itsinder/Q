@@ -70,18 +70,16 @@ local function save(name, value, saved, file)
                 save(fieldname, v, saved, file)
             end
         end
-    elseif value.persist ~= nil then
+    elseif value.reincarnate ~= nil then
         if saved[value] then
             file:write(saved[value], "\n")
         else
             saved[value] = name
-            local persist_str = value:persist()
-            for k,v in pairs(persist_str) do print(k,v) end
-            dbg()
+            local persist_str = value:reincarnate()
             file:write(persist_str)
             file:write("\n")
             if type(value) == "lVector" then
-                save(name .. ".meta", value.meta, saved, file)
+                save(name .. "._meta", value._meta, saved, file)
             end
         end
     else
@@ -94,7 +92,7 @@ local function save_global(filename)
     local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
     file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
-    file:write("local Vector = require 'libvector'\n")
+    -- file:write("local Vector = require 'libvector'\n")
     -- file:write("local Dictionary = require 'Dictionary'\n")
 
 
