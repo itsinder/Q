@@ -351,7 +351,7 @@ load_csv_fast(
 
   //write any remaining nil element info to file
   for ( uint32_t i = 0; i < nC; i++ ) {
-    if ( nn_ofps[i] != NULL ) {
+    if ( ( nn_ofps[i] != NULL ) && ( row_ctr % 64 != 0 ) ) {
       fwrite(nn_buf + i, 1, sizeof(uint64_t), nn_ofps[i]);
     }
   }
