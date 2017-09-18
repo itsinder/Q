@@ -432,8 +432,8 @@ function lVector:reincarnate()
     T[#T+1] = "\", "
   end
 
-  T[#T+1] = " ) } "
-  return table.concat(T, ' ')
+  T[#T+1] = " } ) "
+  return table.concat(T, '')
 end
 
 

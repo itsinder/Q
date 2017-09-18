@@ -1,5 +1,10 @@
+Pre-requisites:
+Install git
+ubuntu:
+sudo apt install git
+
 1 . Steps to install Q
-git clone git@github.com:NerdWalletOSS/Q.git
+git clone https://github.com/NerdWalletOSS/Q.git
 cd Q
 git checkout dev
 cd GUIDING_PRINCIPLES/
