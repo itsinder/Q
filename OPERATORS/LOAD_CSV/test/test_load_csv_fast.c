@@ -29,7 +29,7 @@ main(
   bool has_nulls[MAX_NUM_COLS];
   bool is_load[MAX_NUM_COLS];
   uint64_t num_nulls[MAX_NUM_COLS];
-
+ 
   if ( argc == 2 ) {
     sz_str_for_lua = atoi(argv[1]);
   }
@@ -45,7 +45,7 @@ main(
   }
 
   // We iterate over 5 data sets 
-  for ( int data_set_id = 0; data_set_id < 5; data_set_id++ ) {
+  for ( int data_set_id = 0; data_set_id < 6; data_set_id++ ) {
     for ( uint32_t i = 0; i < MAX_NUM_COLS; i++ ) {
       memset(fldtypes[i],'\0', 4);
     }
@@ -151,7 +151,18 @@ main(
         has_nulls[1] = true;
                 
         break;
+         
+      case 5 : 
+        is_hdr = false;
+        nC = 1;
+        strcpy(infile, "I1_input.csv");
+        strcpy(fldtypes[0], "I1");
 
+        is_load[0] = true;
+
+        has_nulls[0] = false;
+        break;
+        
       default : 
         nC = 0;
         go_BYE(-1);
@@ -225,7 +236,61 @@ main(
           }
         }
         break;
-        
+      case 5:
+        if ( sz_str_for_lua > 0 ) { 
+            fprintf(stdout, "%s\n", str_for_lua);
+        }
+        else {
+          for ( uint32_t i = 0; i < nC; i++ ) {
+            FILE *fp = NULL;
+            fp = fopen(nil_files[i], "r");
+            if ( fp != NULL ) { go_BYE(-1); }
+          }
+          
+          char *X = NULL; size_t nX = 0; 
+          // checking for valid nR count
+          if (nR != 1024) { go_BYE(-1); }
+            
+          int outfiles_size[1];
+            
+          //checking bin out_files are present
+          for ( uint32_t i = 0; i < nC; i++ ) {
+            FILE *fp = NULL;
+            fp = fopen(out_files[i], "r");
+            if ( fp == NULL ) { go_BYE(-1); }
+            
+            free_if_non_null(fp);
+            // to get out_file size
+            status = rs_mmap(out_files[i], &X, &nX, false);
+            if ( ( X == NULL ) || ( nX == 0 ) )  { go_BYE(-1); }
+            outfiles_size[i] = nX;
+                
+            //checking the out_file bin values
+            if ( strcmp(fldtypes[i], "I1") == 0 ) {
+              int8_t *new_buf = (int8_t *) X;
+              for ( uint32_t jj = 0; jj < nR; jj++ ) {
+                int expected_value = (jj+1) *15 % 127;
+                if (new_buf[jj] != expected_value)
+                {
+                  go_BYE(-1);
+                }
+              }
+            }
+            else {
+              printf("Not Matched\n");
+            }
+          }
+              
+          //checking out_file bin size is valid
+          int col_field_size[] = { 1 };
+          for(int itr = 0; itr < nC; itr++)
+          {
+            int expected_filesize = nR * col_field_size[itr];
+            //printf("\nfile size%d %d\n",outfiles_size[itr],expected_filesize);
+            if (outfiles_size[itr] != expected_filesize ) { go_BYE(-1); }
+          }
+        }
+        break;
       default : 
         go_BYE(-1); 
         break;
