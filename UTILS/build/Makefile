@@ -22,7 +22,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/ clean
-	make -C ${BASE_PATH}/OPERATORS/MM/src/ clean
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT  clean
 	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
