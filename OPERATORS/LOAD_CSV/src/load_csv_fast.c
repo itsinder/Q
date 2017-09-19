@@ -14,7 +14,6 @@
 //STOP_INCLUDES
 #include "load_csv_fast.h"
 
-
 /*Given a csv file, this method will convert the file into nC binary files
  * where nC is the number of columns in the csv file and each file will
  * contain the contents of a column from the csv file*/
@@ -250,7 +249,7 @@ load_csv_fast(
     //element is not nil, write to not nil buffer
     if ( !is_val_null ) { 
       int8_t bit_idx = row_ctr % 64;
-      nn_buf[col_ctr] |= (1 << bit_idx);
+      nn_buf[col_ctr] |= ((uint64_t)1 << bit_idx);
     }
     else {
       // bit already 0 during initialization so no need to set it to 0
@@ -352,7 +351,7 @@ load_csv_fast(
 
   //write any remaining nil element info to file
   for ( uint32_t i = 0; i < nC; i++ ) {
-    if ( nn_ofps[i] != NULL ) {
+    if ( ( nn_ofps[i] != NULL ) && ( row_ctr % 64 != 0 ) ) {
       fwrite(nn_buf + i, 1, sizeof(uint64_t), nn_ofps[i]);
     }
   }
