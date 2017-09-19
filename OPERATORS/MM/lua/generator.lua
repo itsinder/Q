@@ -1,4 +1,5 @@
   local gen_code = require 'Q/UTILS/lua/gen_code'
+  local lVector = require 'Q/RUNTIME/lua/lVector'
   local plpath   = require "pl.path"
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
@@ -12,13 +13,16 @@
 
   local num_produced = 0
   for i, operator in ipairs(operators) do
-    -- local sp_fn = assert(require((operator .. "_specialize")))
-    local sp_fn = assert(require("specialize"))
-    for i, in1_qtype in ipairs(types) do 
-      for j, in2_qtype in ipairs(types) do 
-        for k, out_qtype in ipairs(types) do 
+    local sp_fn = assert(require((operator .. "_specialize")))
+    for i, x_qtype in ipairs(types) do 
+      local X = {}
+      X[1] = lVector( {qtype = x_qtype, has_nulls = false, gen  = true})
+      for j, y_qtype in ipairs(types) do 
+        local y = lVector( {qtype = y_qtype, has_nulls = false, gen = true})
+        for k, z_qtype in ipairs(types) do 
+          local optargs = { z_qtype = z_qtye } 
           local status, subs, tmpl = pcall(
-          sp_fn, operator, in1_qtype, in2_qtype, out_qtype)
+          sp_fn, X, y, optargs)
           if ( status ) then 
             assert(type(subs) == "table")
             assert(type(tmpl) == "string")

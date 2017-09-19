@@ -6,22 +6,22 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <sys/sysinfo.h>
 extern int 
 ${fn}(
-    ${in1_ctype} ** x, 
-    ${in2_ctype} ** y, 
-    ${out_ctype} ** z, 
+    ${x_ctype} ** x, 
+    ${y_ctype} ** y, 
+    ${z_ctype} ** z, 
     int m,
     int k,
     int n
     );
     ]],
     definition = [[
-#include "_mm_mul_simple_${in1_qtype}_${in2_qtype}_${out_qtype}.h"
+#include "_mm_mul_simple_${in1_qtype}_${y_qtype}_${z_qtype}.h"
 
 int 
 ${fn}(
-    ${in1_ctype} ** x, 
-    ${in2_ctype} ** y, 
-    ${out_ctype} ** z, 
+    ${x_ctype} ** x, 
+    ${y_ctype} ** y, 
+    ${z_ctype} ** z, 
     int m,
     int k,
     int n

@@ -7,9 +7,9 @@ return require 'Q/UTILS/lua/code_gen' {
 
 extern int 
 ${fn}(
-    ${in1_ctype} ** x,  /* M by K */
-    ${in2_ctype} * y,  /* K by 1 */
-    ${out_ctype} * z,  /* M by 1 */
+    ${x_ctype} ** x,  /* M by K */
+    ${y_ctype} * y,  /* K by 1 */
+    ${z_ctype} * z,  /* M by 1 */
     int M,
     int K
     );
@@ -19,9 +19,9 @@ ${fn}(
 #include "_${fn}.h"
 int 
 ${fn}(
-    ${in1_ctype} ** x,  /* M rows by K columns */
-    ${in2_ctype} * y,  /* K by 1 */
-    ${out_ctype} * z,  /* M by 1 */
+    ${x_ctype} ** x,  /* M rows by K columns */
+    ${y_ctype} * y,  /* K by 1 */
+    ${z_ctype} * z,  /* M by 1 */
     int M,
     int K
     )
