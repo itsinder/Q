@@ -1,11 +1,11 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector  = require 'Q/RUNTIME/COLUMN/code/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
 -- This is matrix vector multiply, done chunks at a time 
-local cmvmul = function(X, Y)
+local mv_mul = function(X, Y)
   -- START: verify inputs
   assert(type(X) == "table", "X must be a table of lVectors")
   local m = nil
@@ -20,54 +20,46 @@ local cmvmul = function(X, Y)
   --all of y needs to be evaluated
   assert(((Y:qtype() == "F8") or (Y:qtype()== "F4")), 
       "qtype of Y must be F4 or F8")
-  local y_len, yptr, nn_yptr = Y:chunk(-1)
+  local y_len, yptr, nn_yptr = Y:get_all()
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == k)
   -- STOP: verify inputs
 
-  local gen_fn = function()
+  -- START: malloc
     -- malloc space for one chunk worth of output z
     local z_sz = qconsts.qtypes["F8"].width * qconsts.chunk_size
     local z_buf = assert(ffi.malloc(z_sz), "malloc failed")
-   
-    local status, Xptr, len
-    -- malloc space for pointers to chunks of X
+    local nn_z_buf = nil -- since no nils in output
+    local Xptr -- malloc space for pointers to chunks of X
     local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * k), "malloc failed")
     Xptr = ffi.cast("double **", Xptr)
+  -- STOP : malloc
 
-    local cidx = 0 -- chunk index
-    local last_chunk = false
-    repeat 
-      local len = 0
-      -- assemble Xptr
-      for xidx = 1, #X do
-        local x_len, xptr, nn_xptr = X[xidx]:chunk(cidx) 
-        if ( xidx == 1 ) then
-          len = x_len
-          if ( len < qconsts.chunk_size ) then
-            last_chunk = true
-          end
-          assert(len <= qconsts.chunk_size) 
-          if ( len == 0 ) then
-            last_chunk = true
-            break
-          end
-        else 
-          assert(x_len == len)
-        end
-        assert(nn_xptr == nil, "Don't support null values")
-        Xptr[xidx-1] = ffi.cast("double *", xptr)
+  local gen_fn = function(chunk_idx)
+    local len = 0
+    -- START: assemble Xptr
+    for xidx = 1, #X do
+      local x_len, xptr, nn_xptr = X[xidx]:chunk(chunk_idx) 
+      assert(nn_xptr == nil, "Don't support null values")
+      if ( xidx == 1 ) then
+        len = x_len
+        assert(x_len <= qconsts.chunk_size) 
+      else 
+        assert(x_len == len)
       end
-      --=================================
-      if ( len > 0 ) then 
-        -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
-        local status = qc["mvmul_a"](Xptr, yptr, z_buf, len, k)
-        assert(status == 0, "C error in mvmul") 
-        coroutine.yield(len, z_buf, nil)
-      end
-      cidx = cidx + 1
-    until (last_chunk == true )
+      Xptr[xidx-1] = ffi.cast("double *", xptr)
+    end
+    -- STOP : assemble Xptr
+    --=================================
+    if ( len > 0 ) then 
+      -- mvmul_a( double ** x, double * y, double * z, int m, int k); 
+      local status = qc["mvmul_a"](Xptr, yptr, z_buf, len, k)
+      assert(status == 0, "C error in mvmul") 
+      return len, z_buf, nn_z_buf
+    else
+      return 0, nil, nil
+    end
   end
   return lVector( {gen = gen_fn, has_nulls = false, qtype = "F8"} )
 end

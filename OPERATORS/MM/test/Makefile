@@ -29,8 +29,8 @@ MM_SRCS = ../gen_src/_mm_mul_simple_F4_F4_F4.c test_mm_mul_simple.c
 MV_SRCS = ../gen_src/_mv_mul_simple_F4_F4_F4.c test_mv_mul_simple.c 
 
 test_mm_mul_simple : $(MM_SRCS)
-	$(CC) $(MM_SRCS) $(INCS) $(FLAGS) -o test_mm_mul_simple ${Q_LINK_FLAGS}
+	$(CC) $(MM_SRCS) $(INCS) $(FLAGS) -o test_mm_mul_simple -lm
 	  	
 test_mv_mul_simple : $(MV_SRCS)
-	$(CC) $(MV_SRCS) $(INCS) $(FLAGS) -o test_mv_mul_simple ${Q_LINK_FLAGS}
+	$(CC) $(MV_SRCS) $(INCS) $(FLAGS) -o test_mv_mul_simple -lm
 	  	

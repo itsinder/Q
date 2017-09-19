@@ -92,7 +92,7 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 # export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
-export Q_LINK_FLAGS=" -lm "
+export Q_LINK_FLAGS=" -lm -shared "
 echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
 CURR_PATH=`pwd`
 cd $BASE_PATH
