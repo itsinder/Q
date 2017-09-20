@@ -155,6 +155,75 @@ load_csv = function (
   -- Validate Metadata
   validate_meta(M)
   
+  -- checking if there are any SC SV qtype cols
+  local is_SC_SV_present = false
+  
+  local no_of_cols = #M
+  for itr =1, no_of_cols do
+    if(M[itr].qtype == "SC" or M[itr].qtype == "SV" )then
+      is_SC_SV_present = true
+      break
+    end
+  end
+  -- print("status is_SC_SV_present",is_SC_SV_present)
+  
+  -- if SC and SV qtype are not there as cols
+  -- then calling load_csv_fast C function
+  if (not is_SC_SV_present)then
+    local data_dir = "/tmp"
+    local nC = #M
+    local nR = ffi.malloc(ffi.sizeof("uint64_t"))
+    nR = ffi.cast("uint64_t *", nR)
+    local fldtypes = ffi.malloc(#M * ffi.sizeof("char *"))
+
+    fldtypes = ffi.cast("char **", fldtypes)
+    for i = 1, #M do
+      fldtypes[i-1] = ffi.malloc(4 * ffi.sizeof("char"))
+      fldtypes[i-1] = ffi.cast("char *", fldtypes[i-1])
+      ffi.copy(fldtypes[i-1], M[i].qtype)
+    end 
+    
+    local is_hdr = false
+    
+    local is_load = ffi.malloc(#M * ffi.sizeof("bool"))
+    is_load = ffi.cast("bool *", is_load)
+    for i = 1, #M do
+      is_load[i-1] = M[i].is_load
+    end
+    
+    local has_nulls = ffi.malloc(#M * ffi.sizeof("bool"))
+    has_nulls = ffi.cast("bool *", has_nulls)
+    for i = 1, #M do
+      has_nulls[i-1] = M[i].has_nulls
+    end
+    
+    local num_nulls = ffi.malloc(ffi.sizeof("uint64_t"))
+    num_nulls = ffi.cast("uint64_t *", num_nulls) 
+    
+    local out_files = nil
+
+    local nil_files = nil
+    
+    local str_for_lua = ffi.malloc(1024*1024) -- TODO
+    str_for_lua = ffi.cast("char *", str_for_lua)
+    
+    local sz_str_for_lua = 1024 -- TODO
+      
+    -- call to the load_csv_fast function
+    local status = qc["load_csv_fast"](data_dir, infile, nC, nR, fldtypes, 
+      is_hdr, is_load, has_nulls, num_nulls, out_files, nil_files,
+      str_for_lua, sz_str_for_lua) 
+    print("status ",status)
+    print("Number of rows ", tonumber(ffi.cast("uint64_t *", nR)[0]))
+    
+    local vector_string = ffi.string(ffi.cast("char *",str_for_lua))
+
+    local out = loadstring(vector_string)
+    out()
+    -- print("Returned from load_csv_fast method")
+    return T
+  end
+  
   -- Initialize Buffers
   local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
   
@@ -274,6 +343,7 @@ load_csv = function (
       rc_idx = rc_idx + 1
     end
   end
+  -- print("Returned from load_csv lua method")
   return cols_to_return
 end
 
