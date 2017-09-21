@@ -1,7 +1,7 @@
 local T = {} 
 local function vsadd(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsadd", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsadd")
@@ -14,7 +14,7 @@ require('Q/q_export').export('vsadd', vsadd)
 
 local function vssub(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vssub", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vssub")
@@ -26,7 +26,7 @@ require('Q/q_export').export('vssub', vssub)
     
 local function vsmul(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsmul", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsmul")
@@ -38,7 +38,7 @@ require('Q/q_export').export('vsmul', vsmul)
     
 local function vsdiv(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsdiv", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsdiv")
@@ -50,7 +50,7 @@ require('Q/q_export').export('vsdiv', vsdiv)
     
 local function vsltorgt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsltorgt", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsltorgt")
@@ -62,7 +62,7 @@ require('Q/q_export').export('vsltorgt', vsltorgt)
     
 local function vsleqorgeq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsleqorgeq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsleqorgeq")
@@ -74,7 +74,7 @@ require('Q/q_export').export('vsleqorgeq', vsleqorgeq)
     
 local function vsgeqandleq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsgeqandleq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsgeqandleq")
@@ -86,7 +86,7 @@ require('Q/q_export').export('vsgeqandleq', vsgeqandleq)
     
 local function vsgtandlt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsgtandlt", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsgtandlt")
@@ -98,7 +98,7 @@ require('Q/q_export').export('vsgtandlt', vsgtandlt)
     
 local function vseq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vseq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vseq")
@@ -110,7 +110,7 @@ require('Q/q_export').export('vseq', vseq)
     
 local function vsneq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsneq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsneq")
@@ -122,7 +122,7 @@ require('Q/q_export').export('vsneq', vsneq)
     
 local function vsgt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsgt", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsgt")
@@ -134,7 +134,7 @@ require('Q/q_export').export('vsgt', vsgt)
     
 local function vslt(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vslt", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vslt")
@@ -146,7 +146,7 @@ require('Q/q_export').export('vslt', vslt)
     
 local function vsgeq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsgeq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsgeq")
@@ -158,7 +158,7 @@ require('Q/q_export').export('vsgeq', vsgeq)
     
 local function vsleq(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "vsleq", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute vsleq")
@@ -170,7 +170,7 @@ require('Q/q_export').export('vsleq', vsleq)
     
 local function exp(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "exp", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute exp")
@@ -182,7 +182,7 @@ require('Q/q_export').export('exp', exp)
     
 local function log(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "log", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute log")
@@ -194,7 +194,7 @@ require('Q/q_export').export('log', log)
     
 local function incr(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "incr", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute incr")
@@ -206,7 +206,7 @@ require('Q/q_export').export('incr', incr)
     
 local function decr(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "decr", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute decr")
@@ -218,7 +218,7 @@ require('Q/q_export').export('decr', decr)
     
 local function logit(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "logit", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute logit")
@@ -230,7 +230,7 @@ require('Q/q_export').export('logit', logit)
     
 local function logit2(x, optargs)
   local expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
-  if type(x) == "Column" then 
+  if type(x) == "lVector" then 
     local status, col = pcall(expander, "logit2", x, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute logit2")
