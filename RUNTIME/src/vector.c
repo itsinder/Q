@@ -23,25 +23,15 @@ LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
 
 static int l_vec_is_eov( lua_State *L) {
-  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   lua_pushboolean(L, ptr_vec->is_eov);
   return 1;
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: vec_memo. ");
-  return 2;
 }
 //----------------------------------------
 static int l_vec_is_memo( lua_State *L) {
-  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   lua_pushboolean(L, ptr_vec->is_memo);
   return 1;
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: vec_memo. ");
-  return 2;
 }
 //----------------------------------------
 static int l_vec_memo( lua_State *L) {

@@ -1,4 +1,4 @@
-use_terra = false
+local use_terra = false
 if arg[2] then
   if string.lower(arg[2]) == "true" then
     use_terra = true
