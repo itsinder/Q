@@ -7,8 +7,8 @@ all: q_core
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
-	rm -f ${Q_ROOT}/lib/libq_core.so
-	rm -f ${Q_ROOT}/include/q_core.h
+	rm -f ${Q_ROOT}/lib/*.so
+	rm -f ${Q_ROOT}/include/*.h
 	rm -f ${Q_BUILD_DIR}/src/*
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
@@ -22,9 +22,10 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/ clean
-	make -C ${BASE_PATH}/OPERATORS/MM/src/ clean
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT  clean
+	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
 
 install: uninstall 
 	cd ../../;\
@@ -53,12 +54,13 @@ q_core: q_basic q_operators
 	luajit mk_so.lua
 	echo "all done for q_core"
 
-q_basic: column utils load_csv print
+q_basic: utils load_csv print column
 	luajit mk_so.lua /tmp/
 	echo "Basic Q is built"
 
 column:
-	cd ${BASE_PATH}/RUNTIME/COLUMN/code/src;
+	cd ${BASE_PATH}/RUNTIME/src;
+	make -C ${BASE_PATH}/RUNTIME/src/
 	echo "column done"
 
 utils:
@@ -86,7 +88,8 @@ q_operators: f1f2opf3 \
 	ax_equals_b \
 	mvmul \
 	approx_quantile \
-	approx_frequent
+	approx_frequent \
+	corrm
 	echo "all done for operators"
 
 
@@ -129,4 +132,8 @@ approx_frequent: q_basic
 mvmul: q_basic
 	make -C ${BASE_PATH}/OPERATORS/MM/src/
 	echo "mvmul done"
+
+corrm: q_basic
+	make -C ${BASE_PATH}/OPERATORS/PCA/src/
+	echo "corrm done"
 

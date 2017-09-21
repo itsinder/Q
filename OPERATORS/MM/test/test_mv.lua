@@ -1,5 +1,4 @@
--- FUNCTIONAL
-
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local x1 = Q.mk_col({10, 20, 30, 40, 50, 60, 70, 80}, 'F8')

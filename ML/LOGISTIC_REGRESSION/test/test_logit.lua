@@ -1,3 +1,4 @@
+-- FUNCTIONAL 
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 
@@ -43,4 +44,5 @@ end
 
 
 print("SUCCESS for " .. arg[0] )
+require('Q/UTILS/lua/cleanup')()
 os.exit()

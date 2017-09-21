@@ -91,15 +91,18 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # fi
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "
+# export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
+export Q_LINK_FLAGS=" -lm -shared "
 echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
 CURR_PATH=`pwd`
 cd $BASE_PATH
 cd ../
 export LUA_PATH="`pwd`/?.lua;`pwd`/?/init.lua;;"
+export LUA_CPATH="${Q_ROOT}/lib/?.so;;"
 export TERRA_PATH="`pwd`/?.t;;"
 cd $CURR_PATH
 echo "LUA_PATH: $LUA_PATH"
+echo "LUA_CPATH: $LUA_CPATH"
 echo "TERRA_PATH: $TERRA_PATH"
 echo "Q_BUILD_DIR: $Q_BUILD_DIR"
 mkdir -p $Q_BUILD_DIR
