@@ -86,7 +86,7 @@ q_operators: f1f2opf3 \
 	s_to_f \
 	f_to_s \
 	ax_equals_b \
-	mvmul \
+	mv_mul \
 	approx_quantile \
 	approx_frequent \
 	corrm
@@ -129,9 +129,9 @@ approx_frequent: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
 	echo "approx_frequent done"
 
-mvmul: q_basic
-	make -C ${BASE_PATH}/OPERATORS/MM/src/
-	echo "mvmul done"
+mv_mul: q_basic
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/
+	echo "mv_mul done"
 
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/

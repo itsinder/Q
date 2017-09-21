@@ -325,6 +325,19 @@ function lVector:get_vec_buf()
   return base_buf, nn_buf
 end
 
+function lVector:get_all()
+  local nn_addr, nn_len
+  local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
+  assert(base_len > 0)
+  assert(base_addr)
+  if ( self._has_nulls ) then
+    nn_addr, nn_len = assert(Vector.get(self._nn_vec, 0, 0))
+    assert(nn_len == base_len)
+    assert(nn_addr)
+  end
+  return base_len, base_addr, nn_addr
+end
+
 function lVector:chunk(chunk_num)
   local status
   local l_chunk_num = 0

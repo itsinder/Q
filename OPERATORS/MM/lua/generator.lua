@@ -1,3 +1,4 @@
+  require 'Q/UTILS/lua/strict'
   local gen_code = require 'Q/UTILS/lua/gen_code'
   local lVector = require 'Q/RUNTIME/lua/lVector'
   local plpath   = require "pl.path"
@@ -20,7 +21,7 @@
       for j, y_qtype in ipairs(types) do 
         local y = lVector( {qtype = y_qtype, has_nulls = false, gen = true})
         for k, z_qtype in ipairs(types) do 
-          local optargs = { z_qtype = z_qtye } 
+          local optargs = { z_qtype = z_qtype } 
           local status, subs, tmpl = pcall(
           sp_fn, X, y, optargs)
           if ( status ) then 
