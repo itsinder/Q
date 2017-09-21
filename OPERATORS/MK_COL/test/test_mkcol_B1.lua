@@ -11,7 +11,7 @@ local input = {1,0,0,0,1,1,0,1,0}
 local status, ret = pcall(mk_col, input, "B1")
 
 assert(status, "Error in mk col ")
-assert(type(ret) == "lVector", " Output of mk_col is not Column")
+assert(type(ret) == "lVector", " Output of mk_col is not lVector")
 Q.print_csv(ret, nil, "")
 
 for i=1,ret:length() do
