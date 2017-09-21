@@ -1,6 +1,6 @@
 local plstring = require 'pl.stringx'
 local Vector = require 'Q/RUNTIME/lua/lVector'
-local Column = require 'Q/RUNTIME/lua/lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
@@ -217,7 +217,7 @@ end
 fns.handle_category6 = function (index, v, M)
   -- print(v.name)
   
-  local col = Column{qtype='I4',
+  local col = lVector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
   

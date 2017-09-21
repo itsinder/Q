@@ -1,6 +1,6 @@
 local Q       = require 'Q/q_export'
 local err     = require 'Q/UTILS/lua/error_code'
-local Column  = require 'Q/RUNTIME/lua/lVector'
+local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
@@ -52,7 +52,7 @@ local mk_col = function (input, qtype)
   local length_in_bytes = nil
   local chunk = nil
   
-  local col = Column{
+  local col = lVector{
     qtype=qtype,
     gen = true,
     num_elements = table_length,

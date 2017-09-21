@@ -13,7 +13,7 @@ local status, ret = pcall(mk_col, {1,3,4}, "I4")
 --local status, ret = mk_col({1,3,4}, "I4")
 -- local status, ret = pcall(mk_col, {1.1,5.1,4.5}, "F4")
 assert(status, "Error in mk col ")
-assert(type(ret) == "lVector", " Output of mk_col is not Column")
+assert(type(ret) == "lVector", " Output of mk_col is not lVector")
 for i=1, ret:length() do  
   local status, result = pcall(convert_c_to_txt, ret, i)
   assert(status, "Failed to get the value from vector at index: "..tostring(i))

@@ -86,7 +86,7 @@ fns.category2 = function (index, v, status, ret)
   end
   
   if type(ret) ~= 'lVector' then
-    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return Column")
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return lVector")
     return false
   end
   

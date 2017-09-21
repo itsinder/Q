@@ -356,7 +356,7 @@ load_csv_fast(
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
-    strcpy(str_for_lua, "T = {};\n");
+    strcpy(str_for_lua, "local lVector = require 'Q/RUNTIME/lua/lVector'\nT = {};\n");
     char xbuf[2*ddir_len + 128];
     int xcol_ctr = 1; // Lua indexes from 1 
     for ( uint32_t i = 0; i < nC; i++ ) {
@@ -365,7 +365,7 @@ load_csv_fast(
         sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\"});\n", xcol_ctr, fldtypes[i], out_files[i]);
       }
       else {
-        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nil_file_name = \"%s\" });\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i]);
+        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nn_file_name = \"%s\" });\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i]);
       }
       // TODO: Check for buffer overflow 
       strcat(str_for_lua, xbuf);
