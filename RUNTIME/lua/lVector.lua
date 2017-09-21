@@ -99,8 +99,6 @@ function lVector.new(arg)
     is_nascent = false
   end
   vector._has_nulls = has_nulls
-  vector._file_name = file_name
-  vector._nn_file_name = nn_file_name
 
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
@@ -194,6 +192,19 @@ end
 
 function lVector:field_width()
   return self._field_width
+end
+
+function lVector:file_name()
+  return self:meta().base.file_name
+end
+
+function lVector:nn_file_name()
+  local vec_meta = self:meta()
+  local nn_file_name = nil
+  if vec_meta.nn then
+    nn_file_name = vec_meta.nn.file_name
+  end
+  return nn_file_name
 end
 
 function lVector:check()
@@ -428,6 +439,10 @@ function lVector:reincarnate()
   if ( Vector.is_nascent(self._base_vec) ) then
     return nil
   end
+  
+  -- Set persist flag
+  self:persist(true)
+  
   T = {}
   T[#T+1] = "lVector ( { "
 
@@ -436,12 +451,12 @@ function lVector:reincarnate()
   T[#T+1] = "\", "
 
   T[#T+1] = "file_name = \"" 
-  T[#T+1] = self._file_name
+  T[#T+1] = self:file_name()
   T[#T+1] = "\", "
 
-  if ( self._nn_file_name ) then 
+  if ( self:nn_file_name() ) then 
     T[#T+1] = "nn_file_name = \"" 
-    T[#T+1] = self._nn_file_name
+    T[#T+1] = self:nn_file_name()
     T[#T+1] = "\", "
   end
 

@@ -45,7 +45,7 @@ main(
   }
 
   // We iterate over 5 data sets 
-  for ( int data_set_id = 0; data_set_id < 6; data_set_id++ ) {
+  for ( int data_set_id = 0; data_set_id < 7; data_set_id++ ) {
     for ( uint32_t i = 0; i < MAX_NUM_COLS; i++ ) {
       memset(fldtypes[i],'\0', 4);
     }
@@ -161,6 +161,19 @@ main(
         is_load[0] = true;
 
         has_nulls[0] = false;
+        
+        break;
+        
+      case 6 : 
+        is_hdr = false;
+        nC = 1;
+        strcpy(infile, "I2_input_with_nils.csv");
+        strcpy(fldtypes[0], "I2");
+
+        is_load[0] = true;
+
+        has_nulls[0] = true;
+        
         break;
         
       default : 
@@ -291,6 +304,33 @@ main(
           }
         }
         break;
+        
+      case 6:
+        if ( sz_str_for_lua > 0 ) { 
+            fprintf(stdout, "%s\n", str_for_lua);
+        }
+        else {
+          // nil file values are checked as byte by byte
+          int expected_nil_values[] = { 254, 253, 251, 247, 255, 255, 255, 255, 255 };
+          char *X = NULL; //X
+          size_t nX = 0; //nX
+          for ( uint32_t i = 0; i < nC; i++ ) {
+            FILE *fp = NULL;
+            fp = fopen(nil_files[i], "r");
+            if ( fp == NULL ) { go_BYE(-1); }
+            free_if_non_null(fp);
+            status = rs_mmap(nil_files[i], &X, &nX, false);
+            if ( ( X == NULL ) || ( nX == 0 ) )  { go_BYE(-1); }
+            if ( strcmp(fldtypes[i], "I2") == 0 ) {
+              uint8_t *new_buf = (uint8_t *) X;
+              for( uint32_t jj = 0; jj < (nR/8); jj++ ) {
+                if (new_buf[jj] != expected_nil_values[jj] ) { go_BYE(-1); }
+              }
+            }
+          }
+        }
+        break;
+        
       default : 
         go_BYE(-1); 
         break;
