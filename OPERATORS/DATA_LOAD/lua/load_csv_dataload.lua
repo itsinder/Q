@@ -3,7 +3,7 @@ local err = require 'Q/UTILS/lua/error_code'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
 local Dictionary = require 'Q/OPERATORS/DATA_LOAD/lua/dictionary_dataload'
 local plstring = require 'pl.stringx'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local plpath = require 'pl.path'
 local pllist = require 'pl.List'
 local plfile = require 'pl.file'
@@ -57,11 +57,11 @@ return function (
         M[i].has_nulls = true
       end
     
-      column_list[i] = Column{field_type=M[i].qtype, 
-                 field_size=fld_width,
-                 filename= require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name,
-                 write_vector=true,
-                 nn=M[i].has_nulls }
+      column_list[i] = lVector{qtype=M[i].qtype, 
+                 gen = true,
+                 width=fld_width,
+                 is_memo = true,
+                 has_nulls = M[i].has_nulls,}
       col_num_nil[i] = nil
                  
       if M[i].qtype == "SV" then
@@ -77,8 +77,8 @@ return function (
    -- mmap function here
    local f_map = ffi.gc(qc.f_mmap(csv_file_path, false), qc.f_munmap)
    assert(f_map.status == 0 , "Mmap failed")
-   local X = ffi.cast("char *", f_map.ptr_mmapped_file)
-   local nX = tonumber(f_map.file_size)
+   local X = ffi.cast("char *", f_map.map_addr)
+   local nX = tonumber(f_map.map_len)
    assert(nX > 0, "File cannot be empty")
    
    local x_idx = 0
@@ -162,7 +162,7 @@ return function (
           assert( status >= 0 , err.INVALID_DATA_ERROR )
         end   
            
-        column_list[col_idx+1]:put_chunk(1, cbuf, is_null)
+        column_list[col_idx+1]:put_chunk(cbuf, is_null, 1)
 
         if is_last_col then
            row_idx = row_idx + 1
@@ -179,11 +179,12 @@ return function (
 
    for i, column in pairs(column_list) do
       column:eov()
+      print("EOV Done ", i)
       -- print(column:length())
       -- if no nulls are present, then delete the null file
       if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
-        assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
+        --local null_file = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[i].name .. "_nn"
+        --assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
       end
    end
    -- print("Completed successfully")
