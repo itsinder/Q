@@ -10,6 +10,8 @@ c:eval()
 local n = Q.sum(c):eval()
 assert(n == 6)
 
+-- TODO Write one with a much larger A and B vector
+
 print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()
