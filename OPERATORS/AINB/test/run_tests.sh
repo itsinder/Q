@@ -1,7 +1,8 @@
 #!/bibn/bash
 set -e 
 make -C ../../../UTILS/src/
-make -C ../lua/
+make -C ../lua/ clean
+make -C ../lua/ 
 gcc -g -std=gnu99 \
   test_ainb.c \
   ../../../UTILS/src/bytes_to_bits.c  \
@@ -9,7 +10,8 @@ gcc -g -std=gnu99 \
   -I../gen_inc  \
   -I../../../UTILS/inc \
   -I../../../UTILS/gen_inc \
-  ../gen_src/_ainb_I4_I8.c \
+  ../gen_src/_bin_search_ainb_I4_I8.c \
+  ../gen_src/_simple_ainb_I4_I8.c \
   -o a.out
 VG=" "
 VG=" valgrind "

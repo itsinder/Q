@@ -9,9 +9,9 @@ ${fn}(
       const ${a_ctype} * restrict a,  
       uint64_t nA,
       const ${b_ctype} * restrict b,  
-      uint16_t nB,
+      uint32_t nB,
       uint64_t *C, // output 
-      uint64_t nC // output 
+      uint64_t nC 
       );
    ]],
    definition = [[
@@ -23,29 +23,30 @@ ${fn}(
       const ${a_ctype} * restrict A,  
       uint64_t nA,
       const ${b_ctype} * restrict B,  
-      uint16_t nB,
+      uint32_t nB,
       uint64_t *C, // output 
-      uint64_t nC // output 
+      uint64_t nC 
       )
 {
   int status = 0;
-  if ( nB >= 32 ) { go_BYE(-1); }
+  if ( nB >= 65536 ) { go_BYE(-1); }
 
 // #pragma omp parallel for schedule(static, 256)
   for ( uint64_t i = 0; i < nC; i++ ) { 
-    C[i] = 0; 
+    C[i] = 0;
   }
 // #pragma omp parallel for schedule(static, 256)
   for ( uint64_t i = 0; i < nA; i++ ) { 
-    int rslt = 0;
     uint64_t widx = i >> 6; // word index
     uint64_t bidx = i & 0x3F; // bit index
+    if ( bidx ==  0 ) { C[widx] = 0; }
+    uint16_t rslt = 0;
     for ( uint16_t j = 0; j < nB; j++ ) { 
       rslt += (A[i] == B[j]);
     }
-    if ( rslt > 0 ) {
+    if (rslt > 0 ) { 
       mcr_set_bit(C[widx], bidx);
-   }
+    }
   }
 BYE:
   return status;

@@ -1,7 +1,7 @@
 local s = [===[
 local function <<operator>>(x, y, optargs)
   local expander = require 'Q/OPERATORS/AINB/lua/expander_ainb'
-  if type(x) == "Column" and type(y) == "Column" then
+  if type(x) == "lVector" and type(y) == "lVector" then
     local status, col = pcall(expander, "<<operator>>", x, y, optargs)
     if ( not status ) then print(col) end
     assert(status, "Could not execute <<operator>>")

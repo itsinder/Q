@@ -86,6 +86,7 @@ q_operators: f1f2opf3 \
 	s_to_f \
 	f_to_s \
 	ax_equals_b \
+	ainb \
 	mv_mul \
 	approx_quantile \
 	approx_frequent \
