@@ -27,7 +27,8 @@ clean :
 	rm -f _*
 	rm -f *.so
 
-libainb.so : ${GEN_FILES} ${AUX_FILES} bin_search_ainb.tmpl simple_ainb.tmpl
+libainb.so : ${GEN_FILES} ${AUX_FILES} \
+	bin_search_ainb.tmpl simple_ainb.tmpl
 	luajit generator.lua # TODO This should not be here. Hack
 	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libainb.so
 	test -d ${Q_BUILD_DIR}

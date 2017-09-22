@@ -37,7 +37,6 @@ main(
   int64_t *B2 = NULL;
   uint64_t *X = NULL; 
   uint8_t *Y = NULL; 
-  int nX = nA/64; if ( ( nX * 64 ) != nX ) { nX++; }
   int nY = nA;
 
   //----------------------------
@@ -54,13 +53,17 @@ main(
   }
   qsort(B1, nB1, sizeof(int64_t), sortcompare);
   //----------------------------
-  X = malloc(nX * sizeof(uint64_t));
+  X = malloc(nA * sizeof(uint8_t)); // over  allocated 
   return_if_malloc_failed(X);
-  Y = malloc(nY * sizeof(uint8_t));
+  uint8_t *lX = (uint8_t *)X;
+  for ( int i = 0; i < nA; i++ ) { 
+    lX[i] = 0xFF;
+  }
+  Y = malloc(nA * sizeof(uint8_t)); 
   return_if_malloc_failed(Y);
   //----------------------------
-  status = bin_search_ainb_I4_I8(A, nA, B1, nB1, X, nX); cBYE(status);
-  status = bits_to_bytes(X, nX, Y, nY); cBYE(status);
+  status = bin_search_ainb_I4_I8(A, nA, B1, nB1, X); cBYE(status);
+  status = bits_to_bytes(X, nA, Y, nY); cBYE(status);
   for ( int i = 0; i < nA; i++ ) { 
     bool found = false;
     for ( int j = 0; j < nB1; j++ ) { 
@@ -81,8 +84,8 @@ main(
   for ( int i = 0; i < nB2; i++ ) { 
     B2[i] = random () % 1024;
   }
-  status = simple_ainb_I4_I8(A, nA, B2, nB2, X, nX); cBYE(status);
-  status = bits_to_bytes(X, nX, Y, nY); cBYE(status);
+  status = simple_ainb_I4_I8(A, nA, B2, nB2, X); cBYE(status);
+  status = bits_to_bytes(X, nA, Y, nY); cBYE(status);
   for ( int i = 0; i < nA; i++ ) { 
     bool found = false;
     for ( int j = 0; j < nB2; j++ ) { 

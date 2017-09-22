@@ -14,6 +14,7 @@ clean:
 	make -C ${BASE_PATH}/UTILS/src/  clean
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
@@ -67,6 +68,10 @@ utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 	echo "utils done"
 
+ifxthenyelsez:
+	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/
+	echo "ifxthenyelsez done"
+
 ainb:
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
 	echo "ainb done"
@@ -87,6 +92,7 @@ q_operators: f1f2opf3 \
 	f_to_s \
 	ax_equals_b \
 	ainb \
+	ifxthenyelsez \
 	mv_mul \
 	approx_quantile \
 	approx_frequent \

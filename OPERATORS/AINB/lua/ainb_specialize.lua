@@ -19,5 +19,6 @@ return function (
   end
   subs.a_ctype = qconsts.qtypes[a_qtype].ctype
   subs.b_ctype = qconsts.qtypes[b_qtype].ctype
+  subs.b_qtype = b_qtype
   return subs, tmpl
 end

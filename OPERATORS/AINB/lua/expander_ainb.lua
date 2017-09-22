@@ -32,7 +32,7 @@ local expander_ainb = function(op, a, b)
 
 
   -- allocate buffer for output
-  local csz = qconsts.chunk_size / 8 -- 8 bits to a byte
+  local csz = qconsts.chunk_size -- over allocated but needed by C 
   local cbuf = assert(ffi.malloc(csz), "malloc failed")
   local function ainb_gen(chunk_idx)
     local alen, aptr, nn_aptr = a:chunk(chunk_idx) 
@@ -40,7 +40,7 @@ local expander_ainb = function(op, a, b)
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
-    local status = qc[func_name](aptr, alen, bptr, blen, cbuf)
+    local status = qc[func_name](aptr, alen, bptr, blen, cbuf, csz)
     assert(status == 0, "C error in ainb") 
     return alen, cbuf, nil
   end

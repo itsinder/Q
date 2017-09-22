@@ -7,6 +7,7 @@ gcc -g -std=gnu99 \
   test_ainb.c \
   ../../../UTILS/src/bytes_to_bits.c  \
   ../../../UTILS/src/bits_to_bytes.c \
+  ../../../UTILS/gen_src/_bin_search_I8.c \
   -I../gen_inc  \
   -I../../../UTILS/inc \
   -I../../../UTILS/gen_inc \
