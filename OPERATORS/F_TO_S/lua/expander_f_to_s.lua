@@ -2,7 +2,6 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local Reducer = require 'Q/RUNTIME/lua/Reducer'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
--- local dbg = require 'Q/UTILS/lua/debugger'
 
 return function (a, x )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"

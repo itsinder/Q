@@ -1,11 +1,16 @@
-local function ifxthenyelsez(x, y, z)
-  local Q  = require 'Q/q_export'
-  local qc = require 'Q/UTILS/lua/q_core'
+local function ifxthenyelsez(a, x, y, z)
+  local Q       = require 'Q/q_export'
+  local qc      = require 'Q/UTILS/lua/q_core'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+  local ffi     = require 'Q/UTILS/lua/q_ffi'
+  local lVector = require 'Q/RUNTIME/lua/lVector'
 
   assert(type(x) == "lVector", "error")
   assert(type(y) == "lVector", "error")
   assert(type(z) == "lVector", "error")
+  print(x:fldtype())
   local spfn = require("Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez_specialize" )
+  assert(type(spfn) == "function")
   assert(x:fldtype() == "B1")
   assert(y:fldtype() == z:fldtype())
   local status, subs, tmpl = pcall(spfn, y:fldtype())
@@ -14,7 +19,7 @@ local function ifxthenyelsez(x, y, z)
   assert(type(subs) == "table", "error in call to ifxthenyelsez_specialize")
   local func_name = assert(subs.fn)
   -- allocate buffer for output
-  local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.qtype)
+  local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
   local wbuf = assert(ffi.malloc(wbufsz))
   --
   local function ifxthenyelsez_gen(chunk_idx)
@@ -29,10 +34,11 @@ local function ifxthenyelsez(x, y, z)
     assert(nn_zptr == nil, "Not prepared for null values in z")
     assert(xlen == ylen)
     assert(ylen == zlen)
-    local status = qc[func_name](xptr, yptr, zptr, wptr, ylen)
+    local status = qc[func_name](xptr, yptr, zptr, wbuf, ylen)
     assert(status == 0, "C error in ifxthenyelsez") 
-    return ylen, cbuf, nil
+    return ylen, wbuf, nil
   end
-  return lVector( {gen=ifxthenyelsez_gen, has_nulls=false, qtype=qtype} )
+  return lVector( {gen=ifxthenyelsez_gen, has_nulls=false, 
+    qtype=subs.qtype} )
 end
 return require('Q/q_export').export('ifxthenyelsez', ifxthenyelsez)
