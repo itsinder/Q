@@ -40,7 +40,7 @@ local expander_ainb = function(op, a, b)
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
-    local status = qc[func_name](aptr, alen, bptr, blen, cbuf, csz)
+    local status = qc[func_name](aptr, alen, bptr, blen, cbuf)
     assert(status == 0, "C error in ainb") 
     return alen, cbuf, nil
   end

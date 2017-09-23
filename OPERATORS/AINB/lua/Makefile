@@ -15,7 +15,8 @@ all : libainb.so
 AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 
 ../../../UTILS/gen_inc/_bytes_to_bits.h :
-	make -C ../../../UTILS/lua/
+	make -C ../../../UTILS/src/
+
 ../gen_src/_ainb_F4_F4.c :
 	luajit generator.lua # TODO: Should be more specific
 ../gen_src/_ainb_I4_I4.c :
@@ -28,7 +29,8 @@ clean :
 	rm -f *.so
 
 libainb.so : ${GEN_FILES} ${AUX_FILES} \
-	bin_search_ainb.tmpl simple_ainb.tmpl
+	bin_search_ainb.tmpl simple_ainb.tmpl \
+	../../../UTILS/gen_inc/_bytes_to_bits.h
 	luajit generator.lua # TODO This should not be here. Hack
 	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libainb.so
 	test -d ${Q_BUILD_DIR}
