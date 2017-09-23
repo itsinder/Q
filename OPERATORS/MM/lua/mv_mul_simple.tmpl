@@ -30,7 +30,7 @@ ${fn}(
 #pragma omp parallel for schedule (static, 64)
   for ( int m = 0; m < M; m++ ) {
     double sum = 0;
-#pragma omp simd reduction(+:sum)
+// TODO WHY DOES THIS NOT WORK ON SCRABBLE #pragma omp simd reduction(+:sum)
     for ( int k = 0; k < K; k++ ) { 
       sum += y[k] * x[k][m];
     }
