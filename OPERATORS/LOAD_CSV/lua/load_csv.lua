@@ -146,7 +146,8 @@ end
 load_csv = function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
-  global_settings -- TODO unused for now
+  global_settings, -- TODO unused for now
+  opt_args
 )
   local plpath = require 'pl.path'
   assert( infile ~= nil and plpath.isfile(infile),err.INPUT_FILE_NOT_FOUND)
@@ -154,6 +155,19 @@ load_csv = function (
   
   -- Validate Metadata
   validate_meta(M)
+  
+  local use_accesslator
+  if opt_args then
+    assert(type(opt_args) == "table", "opt_args must be of type table")
+    if opt_args["use_accesslator"] ~= nil then
+      assert(type(opt_args["use_accesslator"]) == "boolean", "type of use_accesslator is not boolean")
+      use_accesslator = opt_args["use_accesslator"]
+    else
+      use_accesslator = true
+    end
+  else
+    use_accesslator = true
+  end
   
   local cols_to_return
   
@@ -170,7 +184,7 @@ load_csv = function (
   
   -- if SC and SV qtype are not there as cols
   -- then calling load_csv_fast C function
-  if (not is_SC_SV_present)then
+  if (not is_SC_SV_present and use_accesslator == true)then
     local data_dir = require('Q/q_export').Q_DATA_DIR
     local nC = #M
     local nR = ffi.malloc(ffi.sizeof("uint64_t"))
@@ -203,7 +217,7 @@ load_csv = function (
     local out_files = nil
     local nil_files = nil
     
-    local sz_str_for_lua = 1024
+    local sz_str_for_lua = qconsts.sz_str_for_lua
     
     local str_for_lua = ffi.malloc(sz_str_for_lua)
     str_for_lua = ffi.cast("char *", str_for_lua)
@@ -217,7 +231,7 @@ load_csv = function (
     local vector_string = ffi.string(ffi.cast("char *",str_for_lua))
     assert(( vector_string ) and ( vector_string ~= "" ), "load_csv_fast returned a null string" )
     
-    loadstring(vector_string)()
+    local T = loadstring(vector_string)()
     
     assert( (type(T) == "table" and type(T[1]) == "lVector" ), "type of T is not lVector")
     
@@ -228,7 +242,7 @@ load_csv = function (
     local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
     
     -- Memory map the input file
-    local f_map = ffi.gc(qc.f_mmap(infile, false), ffi.C.free)
+    local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
     assert(f_map.status == 0 , err.MMAP_FAILED)
     local X = ffi.cast("char *", f_map.map_addr)
     local nX = tonumber(f_map.map_len)
