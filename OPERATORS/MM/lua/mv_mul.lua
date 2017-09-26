@@ -15,7 +15,7 @@ local mv_mul = function(X, y)
   assert(qc[func_name], "Symbol not available" .. func_name)
   --
   --all of y needs to be evaluated
-  local y_len, yptr, nn_yptr = y:get_all()
+  local y_len, yptr, nn_yptr = y:chunk()
   assert(nn_yptr == nil, "Don't support null values")
   assert(yptr)
   assert(y_len == #X, "Y must have same length as num cols of X")

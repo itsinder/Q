@@ -296,7 +296,7 @@ main(
               
           //checking out_file bin size is valid
           int col_field_size[] = { 1 };
-          for(int itr = 0; itr < nC; itr++)
+          for( uint32_t itr = 0; itr < nC; itr++)
           {
             int expected_filesize = nR * col_field_size[itr];
             //printf("\nfile size%d %d\n",outfiles_size[itr],expected_filesize);
@@ -351,5 +351,11 @@ main(
   }
 
 BYE:
+  if ( status == 0 ) { 
+    fprintf(stdout, "SUCCESS");
+  }
+  else {
+    fprintf(stdout, "FAILURE");
+  }
   return status;
 }

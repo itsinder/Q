@@ -11,6 +11,7 @@
 #include "_mmap.h"
 #include "_rand_file_name.h"
 #include "_file_exists.h"
+#include "_trim.h"
 //STOP_INCLUDES
 #include "load_csv_fast.h"
 
@@ -35,11 +36,11 @@ load_csv_fast(
     const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char **fldtypes, /* [nC] */
+    char ** const fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
-    bool *is_load, /* [nC] */
-    bool *has_nulls, /* [nC] */
-    uint64_t *num_nulls, /* [nC] */
+    bool * const is_load, /* [nC] */
+    bool * const has_nulls, /* [nC] */
+    uint64_t * const num_nulls, /* [nC] */
     char ***ptr_out_files,
     char ***ptr_nil_files,
     /* Note we set nil_files and out_files only if below == NULL */
@@ -68,13 +69,13 @@ load_csv_fast(
   if ( out_files == NULL ) { go_BYE(-1); }
 #define MAX_LEN_DIR_NAME 255
     char cwd[MAX_LEN_DIR_NAME+1];
+    memset(cwd, '\0', MAX_LEN_DIR_NAME+1);
     if ( getcwd(cwd, MAX_LEN_DIR_NAME) == NULL ) { go_BYE(-1); }
     opdir = strdup(cwd);
   }
   else {
     opdir = strdup(q_data_dir);
   }
-
 
   //---------------------------------
   // allocate space and initialize other resources
@@ -89,7 +90,7 @@ load_csv_fast(
 
   nn_buf = malloc(nC * sizeof(uint64_t));
   return_if_malloc_failed(nn_buf);
-  for(uint32_t i = 0; i < nC; i++ ) {
+  for ( uint32_t i = 0; i < nC; i++ ) {
     nn_buf[i] = 0;
   }
   out_files = malloc(nC * sizeof(char *));
@@ -190,6 +191,7 @@ load_csv_fast(
   char null_val[8];
   memset(null_val, '\0', 8); // we write 0 when value is null
 #define BUFSZ 31
+  char lbuf[BUFSZ+1];
   char buf[BUFSZ+1];
   bool is_val_null;
   //read from the input file and write to the output file
@@ -205,9 +207,10 @@ load_csv_fast(
       is_last_col = false;
     }
 
-    xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, BUFSZ);
+    xidx = get_cell(mmap_file, file_size, xidx, is_last_col, lbuf, BUFSZ);
     if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
+    status = trim(lbuf, buf, BUFSZ); cBYE(status);
 
     //fprintf(stderr, "%llu, %u, %llu, %s \n", 
      //   (unsigned long long)row_ctr, col_ctr, 
@@ -236,7 +239,7 @@ load_csv_fast(
       continue;
     }
     
-    if ( buf[0] == '\0' ) { // got back null value
+    if ( lbuf[0] == '\0' ) { // got back null value
       is_val_null = true;
       if ( !has_nulls[col_ctr] ) { // got null value when user said no null values
         go_BYE(-1);
@@ -404,15 +407,32 @@ BYE:
         if ( file_exists(nil_files[i]) ) { 
           status = remove(nil_files[i]); cBYE(status);
         }
-        free_if_non_null(nil_files[i]);
         printf("%s: removing file for Column %d\n", infile, i);
       }
     }
   }
+  if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
+    // delete nil files and out_files
+    if ( nil_files != NULL ) { 
+      for ( uint32_t i = 0; i < nC; i++ ) {
+        free_if_non_null(nil_files[i]);
+      }
+      free_if_non_null(nil_files);
+    }
+    if ( out_files != NULL ) { 
+      for ( uint32_t i = 0; i < nC; i++ ) {
+        free_if_non_null(out_files[i]);
+      }
+      free_if_non_null(out_files);
+    }
+  }
+
   rs_munmap(mmap_file, file_size);
   free_if_non_null(ofps);
+  free_if_non_null(qtypes);
   free_if_non_null(nn_ofps);
   free_if_non_null(opdir);
+  free_if_non_null(nn_buf);
 
   return bak_status;
 }

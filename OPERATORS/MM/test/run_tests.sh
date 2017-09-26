@@ -12,4 +12,4 @@ luajit test_mv_mul.lua
 diff _out1.txt out1.txt 
 echo "Completed $0 in $PWD"
 make clean
-rm -f _*
+rm -f _* test_mv_mul_simple
