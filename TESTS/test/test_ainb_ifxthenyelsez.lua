@@ -22,10 +22,12 @@ local n = Q.sum(x):eval()
 assert(n == 3)
 
 -- payment matrix
-local y = Q.mk_col({100,100,100,100, 100, 100, 100, 100, 100, 100}, "I4")
---local y = Q.const( { val = 100, qtype = 'I4', len = 10} )
-local z = Q.mk_col({50,50,50,50, 50, 50, 50, 50, 50, 50}, "I4")
---local z = Q.const( { val = 50, qtype = 'I4', len = 10} )
+--local y = Q.mk_col({100,100,100,100, 100, 100, 100, 100, 100, 100}, "I4")
+local y = Q.const( { val = 100, qtype = 'I4', len = 10} )
+y:eval()
+--local z = Q.mk_col({50,50,50,50, 50, 50, 50, 50, 50, 50}, "I4")
+local z = Q.const( { val = 50, qtype = 'I4', len = 10} )
+z:eval()
 
 -- expected expense sheet of the survey
 local exp_r = Q.mk_col({50,50,50,50,100, 50, 100, 100, 50, 50 }, "I4")
