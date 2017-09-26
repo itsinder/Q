@@ -76,7 +76,7 @@ local handle_output_regex = function  (index, status, v, flag, category)
   output = v.output_regex
   return output
 end
-  
+
 -- this function handle testcases where error messages are expected output 
 fns.handle_category1 = function (index, status, ret, v)
   -- print(ret)
@@ -105,8 +105,7 @@ fns.handle_category1 = function (index, status, ret, v)
     return false
   end
 end
-
-
+  
 -- this function handle testcases where table of columns are expected output 
 -- in this table, only one column is present
 fns.handle_category2 = function (index, status, ret, v, output_category3, v_category3)
@@ -133,7 +132,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     return false
   end
   
-  if type(ret) ~= "Column" then
+  if type(ret) ~= "lVector" then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , output of load is not a column")
     return false
   end
@@ -144,30 +143,34 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , length of Column and output regex does not match")
     return false
   end
-   
+
   for i=1,ret:length() do
    
-    local status, result = pcall(convert_c_to_txt,ret,i)
+    local status, result = pcall(convert_c_to_txt, ret, i)
     
     if status == false then
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
       return false
     end
-    local is_SC = ret:fldtype() == "SC"    -- if field type is SC , then pass field size, else nil
-    local is_SV = ret:fldtype() == "SV"    -- if field type is SV , then get value from dictionary
-    
+    local is_SC = ret:qtype() == "SC"    -- if field type is SC , then pass field size, else nil
+    local is_SV = ret:qtype() == "SV"    -- if field type is SV , then get value from dictionary
+
+    if result == nil then
+      if ret:qtype() == "B1" then result = 0 else result = "" end
+    end
+ 
     local is_string = is_SC or is_SV
-    if not is_string then 
+    if ( ( not is_string ) and ( result ~= "" ) ) then 
       result = tonumber(result)
     end
     --print(result, output[i])
     -- if result is nil, then set to empty string
-    if result == nil then result = "" end
     if result ~= output[i] then 
       fns["increment_failed_load"](index, v, "testcase category2 failed , \nresult="..result.." \noutput["..i.."]="..output[i].."\n")
       return false
     end
   end
+  
   number_of_testcases_passed = number_of_testcases_passed + 1 
   return true
 end
@@ -216,11 +219,11 @@ fns.handle_category4 = function (index, status, ret, v)
   end
   local sum = {}
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , output of load is not a column")
       return false
     end
-    sum[i] = ret[i]:length() * ret[i]:sz()
+    sum[i] = ret[i]:length() * ret[i]:field_size()
     if sum[i] ~= output[i] then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , size of each column not matching with output regex")
       return false
@@ -245,7 +248,7 @@ fns.handle_category5 = function (index, status, ret, v)
   end
   
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category5 , output of load is not a column")
       return false
     end

@@ -1,3 +1,4 @@
+-- NO_OP
 require 'init'
 
 register_shcb (function() print('cb1') end)

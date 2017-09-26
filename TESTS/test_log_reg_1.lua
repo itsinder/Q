@@ -1,7 +1,6 @@
+-- FUNCTIONAL 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-local dbg = require 'Q/UTILS/lua/debugger'
-
 
 for iter = 1, 100 do 
   local x_len = 65537
@@ -12,7 +11,6 @@ for iter = 1, 100 do
   local beta = Q.rand({ lb = 0, ub = 1, qtype = "F8", len = 2 } )
   beta:eval()
 
-  -- dbg()
   --[[
   local Xbeta = Q.cmvmul(X, beta)
   local p = Q.logit(Xbeta)
@@ -42,5 +40,6 @@ for iter = 1, 100 do
   end
 end
 print("Completed " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 

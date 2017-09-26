@@ -4,11 +4,10 @@ DBG_FLAGS =
 
 OPT_FLAGS = 
 OPT_FLAGS = -O4
-FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp
-LINK_FLAGS = -fPIC -shared -lgomp -lpthread -lm
+FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) ${QC_FLAGS}
 DEPS = matrix_multiply.h
 
-INCS= -I../inc
+INCS= -I../inc -I../../../UTILS/inc/
 
 all : mm libmm.so
 	test -d ${QQ_BUILD_DIR}
@@ -19,10 +18,10 @@ all : mm libmm.so
 	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
 
 libmm.so : matrix_multiply.c 
-	$(CC) -c $(INCS) $(FLAGS) $(LNK_FLAGS) matrix_multiply.c -o libmm.so
+	$(CC) -c $(INCS) $(FLAGS) ${Q_LINK_FLAGS} matrix_multiply.c -o libmm.so
 mm: driver_mm.c matrix_multiply.c
-	$(CC) $(INCS) $(FLAGS) -lgomp -lpthread -lm \
-	  	driver_mm.c matrix_multiply.c mm_helpers.c -o mm
+	$(CC) $(INCS) $(FLAGS)  \
+	  	driver_mm.c matrix_multiply.c mm_helpers.c -o mm -lm
 	cp matrix_multiply.c ${Q_BUILD_DIR}/src/
 
 clean:

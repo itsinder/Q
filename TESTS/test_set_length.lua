@@ -1,3 +1,4 @@
+-- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local dbg = require 'Q/UTILS/lua/debugger'
@@ -41,5 +42,6 @@ for iter = 1, 100 do
   end
 end
 print("Completed " .. arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()
 

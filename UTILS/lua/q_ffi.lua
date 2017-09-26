@@ -1,4 +1,5 @@
 local ffi = require "ffi"
+local cmem = require'libcmem'
 ffi.cdef([[
 void *memset(void *s, int c, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
@@ -25,13 +26,12 @@ int fflush(FILE *stream);
 ffi.malloc = function(n, free_func)
    assert(n > 0, "Cannot malloc 0 or less bytes")
    local c_mem = nil
-   if free_func == nil then
-      c_mem = assert(ffi.gc(ffi.C.malloc(n), ffi.C.free))
-   elseif type(free_func) == "function" then
-      c_mem = assert(ffi.gc(ffi.C.malloc(n), free_func))
-   else
-      error("Invalid free function specified")
-   end
+   -- if free_func == nil then
+   --    c_mem = assert(ffi.gc(ffi.C.malloc(n), ffi.C.free))
+   -- else -- TODO Review with Indrajeet
+   --    c_mem = assert(ffi.gc(ffi.C.malloc(n), free_func))
+   -- end
+   c_mem = cmem.new(n)
    return c_mem
 end
 

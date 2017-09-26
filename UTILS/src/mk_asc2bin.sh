@@ -49,6 +49,11 @@ diff _yy chk_inF4.txt
 od -i _xx > _yy
 diff _yy chk_inI4.txt
 # echo PREMATURE; exit;
+./asc2bin inB1.csv B1 _xx
+od -d _xx > _yy
+filesize=`stat --printf=%s _xx`
+if [ $filesize != 8 ]; then echo ERROR; exit 1; fi 
+diff _yy chk_inB1.txt
 #------------
 ./asc2bin inSC.csv SC _xx 16 
 od -c --width=16 _xx > _yy

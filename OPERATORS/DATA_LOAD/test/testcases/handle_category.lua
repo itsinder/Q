@@ -133,7 +133,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     return false
   end
   
-  if type(ret) ~= "Column" then
+  if type(ret) ~= "lVector" then
     fns["increment_failed_load"](index, v, "testcase failed: in category2 , output of load is not a column")
     return false
   end
@@ -141,7 +141,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
   --print(ret:length())
   --print(#output)
   if ret:length() ~= #output then
-    fns["increment_failed_load"](index, v, "testcase failed: in category2 , length of Column and output regex does not match")
+    fns["increment_failed_load"](index, v, "testcase failed: in category2 , length of lVector and output regex does not match")
     return false
   end
   
@@ -215,11 +215,11 @@ fns.handle_category4 = function (index, status, ret, v)
   end
   local sum = {}
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , output of load is not a column")
       return false
     end
-    sum[i] = ret[i]:length() * ret[i]:sz()
+    sum[i] = ret[i]:length() * ret[i]:field_size()
     if sum[i] ~= output[i] then
       fns["increment_failed_load"](index, v, "testcase failed: in category4 , size of each column not matching with output regex")
       return false
@@ -244,7 +244,7 @@ fns.handle_category5 = function (index, status, ret, v)
   end
   
   for i=1,#ret do
-    if type(ret[i]) ~= "Column" then
+    if type(ret[i]) ~= "lVector" then
       fns["increment_failed_load"](index, v, "testcase failed: in category5 , output of load is not a column")
       return false
     end

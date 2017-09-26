@@ -18,16 +18,19 @@
   end
 
   -- TODO local sort_order = { 'unsorted', 'asc' }
-  local sort_order = { 'unsorted' }
+  local sort_order = { 'asc', 'unsorted' }
 
   local sp_fn = require 'ainb_specialize'
   local num_produced = 0
 
   for _, b_sort_order  in ipairs(sort_order) do 
-    for i, atype in ipairs(a_qtypes) do 
-      for j, btype in ipairs(b_qtypes) do 
+    local b_len = 1024
+    if ( b_sort_order == "unsorted" ) then b_len = 8 end 
+    for _, atype in ipairs(a_qtypes) do 
+      for _, btype in ipairs(b_qtypes) do 
         print(atype, btype, b_sort_order)
-        local status, subs, tmpl = pcall(sp_fn, atype, btype, b_sort_order)
+        local status, subs, tmpl = pcall(sp_fn, atype, btype, 
+          b_len, b_sort_order)
         if ( status ) then 
           gen_code.doth(subs, tmpl, incdir)
           gen_code.dotc(subs, tmpl, srcdir)

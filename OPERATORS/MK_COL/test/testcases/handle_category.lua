@@ -1,6 +1,7 @@
 local ffi = require 'ffi'
 local plstring = require 'pl.stringx'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 local number_of_testcases_passed = 0
 local number_of_testcases_failed = 0
@@ -84,37 +85,32 @@ fns.category2 = function (index, v, status, ret)
     return false
   end
   
-  if type(ret) ~= 'Column' then
-    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return Column")
+  if type(ret) ~= 'lVector' then
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return lVector")
     return false
   end
   
   
   for i=1,ret:length() do  
-    local result = ret:get_element(i-1)
-    local final_result = nil
-    if ret:fldtype() == "B1" then
-      if result == nil then result = 0 end
-      final_result = result
-    else
-      local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
-      local str = ffi.cast(ctype.." *",result)
-      final_result = str[0]
+    local status, result = pcall(convert_c_to_txt, ret, i)
+    assert(status, "Failed to get the value from vector at index: "..tostring(i))
+    if result == nil then 
+      if ret:qtype() == "B1" then result = 0 else result = "" end
     end
-    local is_float = ret:fldtype() == "F4" or ret:fldtype() == "F8"
+    local is_float = ret:qtype() == "F4" or ret:qtype() == "F8"
     -- to handle the extra decimal values put in case of Float
     if is_float then
       local precision = v.precision
       precision = math.pow(10,precision)
-      final_result = precision * final_result
-      final_result = math.floor(final_result)
-      final_result = final_result / precision
+      result = precision * result
+      result = math.floor(result)
+      result = result / precision
     end
     
-    -- print(final_result , v.input[i])
-    if final_result ~= v.input[i] then
+    print(result , v.input[i])
+    if result ~= v.input[i] then
       fns["increment_failed_mkcol"](index, v, "Mk_col input output mismatch input = "..v.input[i]..
-        " output = "..final_result)
+        " output = "..result)
       return false
     end
     

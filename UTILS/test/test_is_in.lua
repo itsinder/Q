@@ -1,6 +1,9 @@
 -- FUNCTIONAL
+<<<<<<< HEAD
+=======
 
 local Q = require 'Q'
+>>>>>>> dev
 require "Q/UTILS/lua/strict"
 local is_in = require "Q/UTILS/lua/is_in"
 local x = "number"

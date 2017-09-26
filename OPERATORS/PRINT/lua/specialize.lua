@@ -12,7 +12,7 @@ return function (
          ( qtype == "I4" ) or ( qtype == "I8" ) ) then
       default_fmt = "%lld"
     elseif ( ( qtype == "F4" ) or ( qtype == "F8" ) ) then
-      default_fmt = "%llf"
+      default_fmt = "%lf"
     else 
       assert(nil)
     end
