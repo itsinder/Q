@@ -443,7 +443,7 @@ function lVector:reincarnate()
   -- Set persist flag
   self:persist(true)
   
-  T = {}
+  local T = {}
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 
