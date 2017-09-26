@@ -27,7 +27,7 @@ for i, v in ipairs(T) do
   local opt_args = v.opt_args
   local result
   
-  local status, ret = pcall(load_csv,test_input_dir..D,  M, nil, opt_args)
+  local status, ret = pcall(load_csv,test_input_dir..D,  M, opt_args)
   --local status, ret = load_csv(test_input_dir..D,  M)
   local key = "handle_"..v.category
   if fns[key] then

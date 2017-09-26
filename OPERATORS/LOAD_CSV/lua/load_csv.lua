@@ -146,7 +146,6 @@ end
 load_csv = function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
-  global_settings, -- TODO unused for now
   opt_args
 )
   local plpath = require 'pl.path'
@@ -156,17 +155,13 @@ load_csv = function (
   -- Validate Metadata
   validate_meta(M)
   
-  local use_accesslator
+  local use_accesslator = true
   if opt_args then
     assert(type(opt_args) == "table", "opt_args must be of type table")
     if opt_args["use_accesslator"] ~= nil then
       assert(type(opt_args["use_accesslator"]) == "boolean", "type of use_accesslator is not boolean")
       use_accesslator = opt_args["use_accesslator"]
-    else
-      use_accesslator = true
     end
-  else
-    use_accesslator = true
   end
   
   local cols_to_return
@@ -184,7 +179,7 @@ load_csv = function (
   
   -- if SC and SV qtype are not there as cols
   -- then calling load_csv_fast C function
-  if (not is_SC_SV_present and use_accesslator == true)then
+  if ( not is_SC_SV_present and use_accesslator )then
     local data_dir = require('Q/q_export').Q_DATA_DIR
     local nC = #M
     local nR = ffi.malloc(ffi.sizeof("uint64_t"))
