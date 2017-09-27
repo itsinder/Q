@@ -62,7 +62,7 @@ local function eigen(X)
   end
   print("starting eigenvectors C function")
   assert(cfn, "C function for eigenvecrors not found")
-  local status = cfn(m, wptr, Aptr, Xptr)
+  local status = cfn(m, wptr, Aptr_copy, Xptr)
   assert(status == 0, "eigenvectors could not be calculated")
   print("done with C, creating outputs")
   local E = {}
@@ -70,7 +70,7 @@ local function eigen(X)
   for i = 1, m do
     E[i] = lVector.new({qtype = "F8", gen = true, has_nulls = false})
     E[i]:put_chunk(Aptr, nil, m)
-    Aptr_copy = Aptr_copy + m
+    Aptr = Aptr + m
   end
   print("done with E")
   local W = lVector.new({qtype = "F8", gen = true, has_nulls = false})
