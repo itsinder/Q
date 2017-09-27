@@ -372,7 +372,9 @@ BYE:
       free_if_non_null(fldtypes[i]);
     }
   }
-  free_if_non_null(fldtypes);
+  for ( uint32_t i = 0; i < MAX_NUM_COLS; i++ ) {
+    free_if_non_null(fldtypes[i]);
+  }
   if ( status == 0 ) { 
     fprintf(stdout, "SUCCESS");
   }
