@@ -246,7 +246,7 @@ load_csv_fast(
       continue;
     }
     
-    if ( lbuf[0] == '\0' ) { // got back null value
+    if ( buf[0] == '\0' ) { // got back null value
       is_val_null = true;
       if ( !has_nulls[col_ctr] ) { 
         // got null value when user said no null values
