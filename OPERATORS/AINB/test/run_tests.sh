@@ -23,5 +23,6 @@ status=$?
 if [ $status != 0 ]; then echo VG: FAILURE; else echo VG: SUCCESS; fi 
 set -e 
 #-------------------
-# rm _x
+luajit test_ainb.lua
+rm _x a.out
 echo "Completed $0 in $PWD"

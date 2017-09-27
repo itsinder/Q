@@ -337,6 +337,8 @@ function lVector:get_vec_buf()
 end
 
 function lVector:get_all()
+  -- TODO P2. This is the same as chunk() without parameters
+  -- Consider deprecating this in the near future
   local nn_addr, nn_len
   local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
   assert(base_len > 0)
