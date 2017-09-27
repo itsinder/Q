@@ -1,4 +1,4 @@
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
@@ -9,7 +9,7 @@ local function corr_mat(X)
   assert(type(X) == "table", "X must be a table ")
   local n = nil
   for k, v in ipairs(X) do
-    assert(type(v) == "Column", "Each element of X must be a column")
+    assert(type(v) == "lVector", "Each element of X must be a lVector")
     if (n == nil) then
       n = v:length()
     else
@@ -31,7 +31,7 @@ local function corr_mat(X)
   Xptr = ffi.cast("float **", Xptr)
   Aptr[0][0] = 1
   for xidx = 1, m do
-    local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
+    local x_len, xptr, nn_xptr = X[xidx]:chunk()
     assert(nn_xptr == nil, "Null vector should not exist")
     Xptr[xidx-1] = ffi.cast("float *", xptr)
   end
@@ -42,8 +42,8 @@ local function corr_mat(X)
   local CM = {}
   -- for this to work, m needs to be less than q_consts.chunk_size
   for i = 1, m do
-    CM[i] = Column.new({field_type = "F8", write_vector = true})
-    CM[i]:put_chunk(m, Aptr[i - 1], nil)
+    CM[i] = lVector.new({qtype = "F8", gen = true, has_nulls = false})
+    CM[i]:put_chunk(Aptr[i - 1], nil, m)
   end
   return CM
 end

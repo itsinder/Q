@@ -1,4 +1,4 @@
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
@@ -22,7 +22,7 @@ local function eigen(X)
   assert(type(X) == "table", "X must be a table ")
   local m = nil
   for k, v in ipairs(X) do
-    assert(type(v) == "Column", "Each element of X must be a column")
+    assert(type(v) == "lVector", "Each element of X must be a lVector")
     if (m == nil) then
       m = v:length()
     else
@@ -41,12 +41,12 @@ local function eigen(X)
   local wptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m), "malloc failed")
   wptr = ffi.cast("double *", wptr)
   local Aptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m * m), "malloc failed")
-  Aptr = ffi.cast("double *", Aptr)
+  local Aptr_copy = ffi.cast("double *", Aptr)
 
   local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
   Xptr = ffi.cast("double **", Xptr)
   for xidx = 1, m do
-    local x_len, xptr, nn_xptr = X[xidx]:chunk(-1)
+    local x_len, xptr, nn_xptr = X[xidx]:chunk()
     assert(nn_xptr == nil, "Values cannot be nil")
     Xptr[xidx-1] = ffi.cast("double *", xptr)
     print("Printing X[] ", xidx-1)
@@ -68,13 +68,13 @@ local function eigen(X)
   local E = {}
   -- for this to work, m needs to be less than q_consts.chunk_size
   for i = 1, m do
-    E[i] = Column.new({field_type = "F8", write_vector = true})
-    E[i]:put_chunk(m, Aptr, nil)
-    Aptr = Aptr + m
+    E[i] = lVector.new({qtype = "F8", gen = true, has_nulls = false})
+    E[i]:put_chunk(Aptr, nil, m)
+    Aptr_copy = Aptr_copy + m
   end
   print("done with E")
-  local W = Column.new({field_type = "F8", write_vector =true})
-  W:put_chunk(m, wptr, nil)
+  local W = lVector.new({qtype = "F8", gen = true, has_nulls = false})
+  W:put_chunk(wptr, nil, m)
 
   return({eigenvalues = W, eigenvectors = E})
 
