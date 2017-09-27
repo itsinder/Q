@@ -359,11 +359,20 @@ main(
         free_if_non_null(nil_files[i]);
       }
     }
+    free_if_non_null(nil_files);
+    free_if_non_null(out_files);
 
     fprintf(stderr, "Loaded data set %d \n", data_set_id);
   }
 
 BYE:
+  free_if_non_null(str_for_lua);
+  if ( fldtypes != NULL ) { 
+    for ( uint32_t i = 0; i < MAX_NUM_COLS; i++ ) {
+      free_if_non_null(fldtypes[i]);
+    }
+  }
+  free_if_non_null(fldtypes);
   if ( status == 0 ) { 
     fprintf(stdout, "SUCCESS");
   }
