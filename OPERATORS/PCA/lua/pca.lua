@@ -10,7 +10,7 @@ local function pca(X)
   -- Step 1: standardize the input
   local std_X = {}
   for i, X_i in ipairs(X) do
-    assert(type(X_i) == "Column", "need to pass in a table of column")
+    assert(type(X_i) == "lVector", "need to pass in a table of column")
     local mean = Q.sum(X_i):eval() / n
     local diff = Q.vssub(X_i, mean)
     local sum_sqr = Q.sum_sqr(diff):eval()

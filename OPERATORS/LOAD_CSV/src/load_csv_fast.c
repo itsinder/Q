@@ -246,7 +246,7 @@ load_csv_fast(
       continue;
     }
     
-    if ( lbuf[0] == '\0' ) { // got back null value
+    if ( buf[0] == '\0' ) { // got back null value
       is_val_null = true;
       if ( !has_nulls[col_ctr] ) { 
         // got null value when user said no null values
@@ -367,7 +367,7 @@ load_csv_fast(
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
-    strcpy(str_for_lua, "local lVector = require 'Q/RUNTIME/lua/lVector'\nT = {};\n");
+    strcpy(str_for_lua, "local lVector = require 'Q/RUNTIME/lua/lVector'\nlocal T = {};\n");
     char xbuf[2*ddir_len + 128];
     int xcol_ctr = 1; // Lua indexes from 1 
     for ( uint32_t i = 0; i < nC; i++ ) {
@@ -382,6 +382,7 @@ load_csv_fast(
       strcat(str_for_lua, xbuf);
       xcol_ctr++;
     }
+    sprintf(str_for_lua + strlen(str_for_lua),"return T\n");
   }
   else {
     *ptr_out_files = out_files;
