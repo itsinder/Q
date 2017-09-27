@@ -90,18 +90,23 @@ load_csv_fast(
 
   nn_buf = malloc(nC * sizeof(uint64_t));
   return_if_malloc_failed(nn_buf);
-  for ( uint32_t i = 0; i < nC; i++ ) {
-    nn_buf[i] = 0;
-  }
   out_files = malloc(nC * sizeof(char *));
   return_if_malloc_failed(out_files);
   nil_files = malloc(nC * sizeof(char *));
   return_if_malloc_failed(nil_files);
+
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    nn_buf[i] = 0;
+    out_files[i] = NULL;
+    nil_files[i] = NULL;
+  }
+
   if ( opdir[strlen(opdir)-1] == '/' ) { 
     opdir[strlen(opdir)-1] = '\0';
   }
   int ddir_len = strlen(opdir) + 8 + LEN_BASE_FILE_NAME;
   for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) { continue; }
     char buf[LEN_BASE_FILE_NAME+1];
     memset(buf, '\0', LEN_BASE_FILE_NAME+1);
     status = rand_file_name(buf, LEN_BASE_FILE_NAME);
@@ -109,9 +114,11 @@ load_csv_fast(
     sprintf(out_files[i], "%s/", opdir);
     strcat(out_files[i], buf);
 
-    nil_files[i] = malloc(ddir_len * sizeof(char));
-    sprintf(nil_files[i], "%s/_nn", opdir);
-    strcat(nil_files[i], buf);
+    if ( has_nulls[i] ) {
+      nil_files[i] = malloc(ddir_len * sizeof(char));
+      sprintf(nil_files[i], "%s/_nn", opdir);
+      strcat(nil_files[i], buf);
+    }
 
   }
 
@@ -241,7 +248,8 @@ load_csv_fast(
     
     if ( lbuf[0] == '\0' ) { // got back null value
       is_val_null = true;
-      if ( !has_nulls[col_ctr] ) { // got null value when user said no null values
+      if ( !has_nulls[col_ctr] ) { 
+        // got null value when user said no null values
         go_BYE(-1);
       }
     }
@@ -383,32 +391,22 @@ load_csv_fast(
 BYE:
   bak_status = status;
   // Close open files 
-  if ( ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( *out_files[i] != '\0' ) {
-        fclose_if_non_null(ofps[i]);
-      }
-    }
-  }
-  if ( nn_ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( nil_files[i] != NULL ) { 
-        if ( nil_files[i][0] != '\0' ) {
-          fclose_if_non_null(nn_ofps[i]);
-        }
-      }
-    }
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    fclose_if_non_null(ofps[i]);
+    fclose_if_non_null(nn_ofps[i]);
   }
 
-  //delete nil_files with no nil elements
-  if ( nn_ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( ( num_nulls[i] == 0 ) && ( nil_files[i][0] != '\0' ) ) { 
-        if ( file_exists(nil_files[i]) ) { 
-          status = remove(nil_files[i]); cBYE(status);
-        }
-        printf("%s: removing file for Column %d\n", infile, i);
-      }
+  // delete nil_files with no nil elements
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) { continue; }
+    if ( ( has_nulls[i] ) && ( num_nulls[i] == 0 ) ) { 
+      if ( nil_files[i][0] == '\0' ) { WHEREAMI; return -1; }
+      if ( !file_exists(nil_files[i]) ) { 
+        WHEREAMI; return -1; }
+      status = remove(nil_files[i]); 
+      if ( status < 0 ) { WHEREAMI; return -1; }
+      free_if_non_null(nil_files[i]); 
+      printf("%s: removing file for Column %d\n", infile, i);
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
