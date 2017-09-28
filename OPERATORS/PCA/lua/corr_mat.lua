@@ -4,7 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
 local function corr_mat(X)
-  -- X is an n by m matrix (table of lua column)
+  -- X is an n by m matrix (table of lVectors)
   -- START: verify inputs
   local qtype
   assert(type(X) == "table", "X must be a table ")
@@ -25,22 +25,23 @@ local function corr_mat(X)
   
   local m = #X
   -- Currently, m needs to be less than q_consts.chunk_size
-  -- TODO P4 Relax above assumption
-  assert(m < qconsts.chunk_size)
+  assert(m < qconsts.chunk_size) -- TODO P4 Relax above assumption
   -- END: verify inputs
 
   -- malloc space for the variance covariance matrix A 
-  local Aptr = assert(ffi.malloc(ffi.sizeof(ctype .. " **" * m), 
-    "malloc failed"))
-  local Aptr_copy = ffi.cast(ctype .. " **", Aptr)
+  local c_Aptr = assert(ffi.malloc(ffi.sizeof("double *") * m), 
+    "malloc failed")
+  c_Aptr = ffi.cast("double **", c_Aptr)
+  local q_Aptr = {}
   for i = 1, m do
-    Aptr[i -1] = ffi.malloc(ffi.sizeof(ctype) * m)
+    q_Aptr[i-1] = ffi.malloc(ffi.sizeof("double") * m)
+    c_Aptr[i-1] = ffi.cast("double *", q_Aptr[i-1])
   end
 
-  local Xptr = assert(ffi.malloc(ffi.sizeof("float *") * m), 
+  local Xptr = assert(ffi.malloc(ffi.sizeof(ctype .. " *") * m), 
     "malloc failed")
-  local Xptr_copy = ffi.cast("float **", Xptr)
-  Aptr[0][0] = 1
+  local Xptr = ffi.cast(ctype .. " **", Xptr)
+  c_Aptr[0][0] = 1
   for xidx = 1, m do
     local x_len, xptr, nn_xptr = X[xidx]:chunk()
     assert(x_len > 0)
@@ -49,13 +50,13 @@ local function corr_mat(X)
   end
   
   assert(qc["corr_mat"], "Symbol not found corr_mat")
-  local status = qc["corr_mat"](Xptr, m, n, Aptr)
+  local status = qc["corr_mat"](Xptr, m, n, c_Aptr)
   assert(status == 0, "corr matrix could not be calculated")
   local CM = {}
   -- for this to work, m needs to be less than q_consts.chunk_size
   for i = 1, m do
-    CM[i] = lVector.new({qtype = qtype, gen = true, has_nulls = false})
-    CM[i]:put_chunk(Aptr[i - 1], nil, m)
+    CM[i] = lVector.new({qtype = "F8", gen = true, has_nulls = false})
+    CM[i]:put_chunk(q_Aptr[i - 1], nil, m)
     CM[i]:eov()
   end
   return CM
