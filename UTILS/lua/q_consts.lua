@@ -12,6 +12,15 @@ local qconsts = {}
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
+    local base_types = {}
+    base_types["I1"] = true;
+    base_types["I2"] = true;
+    base_types["I4"] = true;
+    base_types["I8"] = true;
+    base_types["F4"] = true;
+    base_types["F8"] = true;
+    qconsts.base_types = base_types
+    --===========================
     local width = {}
     width["I1"]  = 8;
     width["I2"] = 16;

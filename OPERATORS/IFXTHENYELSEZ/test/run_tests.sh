@@ -8,7 +8,7 @@ gcc -g -std=gnu99 \
   -I../gen_inc  \
   -I../../../UTILS/inc \
   -I../../../UTILS/gen_inc \
-  ../gen_src/_ifxthenyelsez_I4.c  \
+  ../gen_src/_vv_ifxthenyelsez_I4.c  \
   -o a.out
 VG=" "
 VG=" valgrind "

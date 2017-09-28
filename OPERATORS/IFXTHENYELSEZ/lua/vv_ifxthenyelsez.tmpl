@@ -3,7 +3,6 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
-#include "_bytes_to_bits.h"
 extern int
 ${fn}(  
       uint64_t * restrict const x, // condition field 
@@ -38,7 +37,7 @@ ${fn}(
     
     uint64_t widx = i >> 6; // word index
     uint64_t bidx = i & 0x3F; // bit index
-    uint32_t rslt = x[widx] >> bidx & 0x1;
+    uint32_t rslt = (x[widx] >> bidx) & 0x1;
     if ( rslt == 1 ) { 
       w[i] = y[i];
     }

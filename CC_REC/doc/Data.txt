@@ -1,1 +1,0 @@
-https://s3.console.aws.amazon.com/s3/object/east1-prod-dwh-ds-shared-s3/cc_rec_airflow000?region=us-east-1&tab=overview

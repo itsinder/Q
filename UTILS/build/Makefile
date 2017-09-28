@@ -68,6 +68,10 @@ utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 	echo "utils done"
 
+drop_null:
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULL/lua/
+	echo "drop_null done"
+
 ifxthenyelsez:
 	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/
 	echo "ifxthenyelsez done"

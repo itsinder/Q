@@ -12,18 +12,22 @@
     qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
   end
 
-  local sp_fn = require 'ifxthenyelsez_specialize'
   local num_produced = 0
 
-  for _, qtype in ipairs(qtypes) do 
-    local status, subs, tmpl = pcall(sp_fn, qtype)
-    if ( status ) then 
-      gen_code.doth(subs, tmpl, incdir)
-      gen_code.dotc(subs, tmpl, srcdir)
-      print("Generated ", subs.fn)
-      num_produced = num_produced + 1
-    else
-      print(subs)
+  variations = { "vv", "vs", "sv", "ss" }
+  for _, variation in ipairs(variations) do 
+    for _, qtype in ipairs(qtypes) do 
+      local sp_fn_name = 'ifxthenyelsez_specialize'
+      local sp_fn = require(sp_fn_name)
+      local status, subs, tmpl = pcall(sp_fn, variation, qtype)
+      if ( status ) then 
+        gen_code.doth(subs, tmpl, incdir)
+        gen_code.dotc(subs, tmpl, srcdir)
+        print("Generated ", subs.fn)
+        num_produced = num_produced + 1
+      else
+        print(subs)
+      end
     end
   end
   assert(num_produced > 0)

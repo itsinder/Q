@@ -12,7 +12,7 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 
 all : libifxthenyelsez.so  
 	
-../gen_src/_ifxthenyelsez_I4.c :
+../gen_src/_vv_ifxthenyelsez_I4.c :
 	luajit generator.lua # TODO: Should be more specific
 #----------------------------------
 clean :
@@ -21,7 +21,11 @@ clean :
 	rm -f _*
 	rm -f *.so
 
-libifxthenyelsez.so : ${GEN_FILES} ifxthenyelsez.tmpl 
+libifxthenyelsez.so : ${GEN_FILES} \
+	vv_ifxthenyelsez.tmpl  \
+	vs_ifxthenyelsez.tmpl  \
+	sv_ifxthenyelsez.tmpl  \
+	ss_ifxthenyelsez.tmpl  
 	luajit generator.lua # TODO This should not be here. Hack
 	gcc  ${CFLAGS} ${GEN_FILES} ${INCS} ${Q_LINK_FLAGS} \
 	  -o libifxthenyelsez.so
@@ -30,10 +34,30 @@ libifxthenyelsez.so : ${GEN_FILES} ifxthenyelsez.tmpl
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 GEN_FILES = \
-	../gen_src/_ifxthenyelsez_I1.c \
-	../gen_src/_ifxthenyelsez_I2.c \
-	../gen_src/_ifxthenyelsez_I4.c \
-	../gen_src/_ifxthenyelsez_I8.c \
-	../gen_src/_ifxthenyelsez_F4.c \
-	../gen_src/_ifxthenyelsez_F8.c \
-
+	../gen_src/_vv_ifxthenyelsez_I1.c \
+	../gen_src/_vv_ifxthenyelsez_I2.c \
+	../gen_src/_vv_ifxthenyelsez_I4.c \
+	../gen_src/_vv_ifxthenyelsez_I8.c \
+	../gen_src/_vv_ifxthenyelsez_F4.c \
+	../gen_src/_vv_ifxthenyelsez_F8.c \
+	\
+	../gen_src/_vs_ifxthenyelsez_I1.c \
+	../gen_src/_vs_ifxthenyelsez_I2.c \
+	../gen_src/_vs_ifxthenyelsez_I4.c \
+	../gen_src/_vs_ifxthenyelsez_I8.c \
+	../gen_src/_vs_ifxthenyelsez_F4.c \
+	../gen_src/_vs_ifxthenyelsez_F8.c \
+	\
+	../gen_src/_sv_ifxthenyelsez_I1.c \
+	../gen_src/_sv_ifxthenyelsez_I2.c \
+	../gen_src/_sv_ifxthenyelsez_I4.c \
+	../gen_src/_sv_ifxthenyelsez_I8.c \
+	../gen_src/_sv_ifxthenyelsez_F4.c \
+	../gen_src/_sv_ifxthenyelsez_F8.c \
+	\
+	../gen_src/_ss_ifxthenyelsez_I1.c \
+	../gen_src/_ss_ifxthenyelsez_I2.c \
+	../gen_src/_ss_ifxthenyelsez_I4.c \
+	../gen_src/_ss_ifxthenyelsez_I8.c \
+	../gen_src/_ss_ifxthenyelsez_F4.c \
+	../gen_src/_ss_ifxthenyelsez_F8.c \
