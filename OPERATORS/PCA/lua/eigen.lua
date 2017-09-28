@@ -3,8 +3,8 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 
-local function eigen(X)
-  local stand_alone_test = true
+local function eigen(X, stand_alone_test)
+  local stand_alone = stand_alone_test or false
   local soqc
   if  stand_alone_test then
     local hdr = [[
@@ -20,39 +20,40 @@ local function eigen(X)
   end
   -- START: verify inputs
   assert(type(X) == "table", "X must be a table ")
-  local m = nil
+  local m
+  local qtype
   for k, v in ipairs(X) do
     assert(type(v) == "lVector", "Each element of X must be a lVector")
     if (m == nil) then
       m = v:length()
+      qtype = v:fldtype()
+      assert( (qtype == "F4") or ( qtype == "F8"), "only F4/F8 supported")
     else
       assert(v:length() == m, "each element of X must have the same length")
+      assert(v:fldtype() == qtype)
     end
-  assert(#X == m, "X must be a square matrix")
-  -- Note: not checking symmetry, left to user's discretion to interpret results
-  -- if they pass in a matrix that is not symmetric
-
+  -- Note: not checking symmetry, left to user's discretion to interpret 
+  -- results if they pass in a matrix that is not symmetric
   end
-
-
+  local ctype = qconsts.qtypes[qtype].ctype
+  local fldsz = qconsts.qtypes[qtype].width
+  assert(#X == m, "X must be a square matrix")
   -- END: verify inputs
 
   -- malloc space for eigenvalues (w) and eigenvectors (A)
-  local wptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m), "malloc failed")
-  wptr = ffi.cast("double *", wptr)
-  local Aptr = assert(ffi.malloc(qconsts.qtypes["F8"].width * m * m), "malloc failed")
-  local Aptr_copy = ffi.cast("double *", Aptr)
+  local wptr = assert(ffi.malloc(fldsz * m), "malloc failed")
+  local wptr_copy = ffi.cast(ctype .. " *", wptr)
 
-  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * m), "malloc failed")
-  Xptr = ffi.cast("double **", Xptr)
+  local Aptr = assert(ffi.malloc(fldsz * m * m), "malloc failed")
+  local Aptr_copy = ffi.cast(ctype .. " *", Aptr)
+
+  local Xptr = assert(ffi.malloc(ffi.sizeof(ctype .. " *") * m), 
+    "malloc failed")
+  Xptr = ffi.cast(ctype .. " **", Xptr)
   for xidx = 1, m do
     local x_len, xptr, nn_xptr = X[xidx]:chunk()
     assert(nn_xptr == nil, "Values cannot be nil")
-    Xptr[xidx-1] = ffi.cast("double *", xptr)
-    print("Printing X[] ", xidx-1)
-    for i = 1, m do 
-      print(Xptr[i-1])
-    end
+    Xptr[xidx-1] = ffi.cast(ctype .. " *",  xptr)
   end
   local cfn = nil
   if ( stand_alone_test ) then
@@ -61,8 +62,8 @@ local function eigen(X)
     cfn = qc["eigenvectors"]
   end
   print("starting eigenvectors C function")
-  assert(cfn, "C function for eigenvecrors not found")
-  local status = cfn(m, wptr, Aptr_copy, Xptr)
+  assert(cfn, "C function for eigenvectors not found")
+  local status = cfn(m, wptr_copy, Aptr_copy, Xptr)
   assert(status == 0, "eigenvectors could not be calculated")
   print("done with C, creating outputs")
   local E = {}
@@ -70,10 +71,10 @@ local function eigen(X)
   for i = 1, m do
     E[i] = lVector.new({qtype = "F8", gen = true, has_nulls = false})
     E[i]:put_chunk(Aptr, nil, m)
-    Aptr = Aptr + m
+    Aptr_copy = Aptr_copy + m
   end
   print("done with E")
-  local W = lVector.new({qtype = "F8", gen = true, has_nulls = false})
+  local W = lVector.new({qtype = qtype, gen = true, has_nulls = false})
   W:put_chunk(wptr, nil, m)
 
   return({eigenvalues = W, eigenvectors = E})

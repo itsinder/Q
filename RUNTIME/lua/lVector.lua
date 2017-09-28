@@ -316,6 +316,7 @@ function lVector:eval()
     until base_len ~= qconsts.chunk_size
   end
   -- else, nothing do to since vector has been materialized
+  return self
 end
 
 function lVector:release_vec_buf(chunk_size)

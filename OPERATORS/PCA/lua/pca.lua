@@ -3,10 +3,11 @@ local qconsts = require 'Q/UTILS//lua/q_consts'
 local eigen   = require 'Q/OPERATORS/PCA/lua/eigen'
 
 local function pca(X)
-  -- TODO add input error checking
-  assert(type(X) == "table", "input needs to be a table of column")
-  local n = X[1]:length()
-  local p = #X
+  assert(type(X) == "table", "input needs to be a table of lVector")
+  assert(#X > 0)
+  local n = X[1]:length() -- number of rows of matrix 
+  assert(n > 0)
+  local p = #X            -- number of columns of marix 
   -- Step 1: standardize the input
   local std_X = {}
   for i, X_i in ipairs(X) do
@@ -15,12 +16,12 @@ local function pca(X)
     local diff = Q.vssub(X_i, mean)
     local sum_sqr = Q.sum_sqr(diff):eval()
     local sigma = math.sqrt( sum_sqr / (n - 1) )
-    local x = Q.vsdiv(diff, sigma)
-    x:eval()
-    std_X[i] = x
+    std_X[i] = Q.vsdiv(diff, sigma):eval()
     print("eval'd x ")
   end
   print("standardization complete")
+  print(std_X)
+  print(#std_X)
 
   -- Step 2: compute the variance covariance matrix
 
