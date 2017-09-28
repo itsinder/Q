@@ -24,13 +24,10 @@ d = Q.const( { val = 1000, qtype = "I4", len = 1000 })
 d:eval()
 
 --========================================
-local n = Q.sum(Q.vveq(d, c))
-m = n:eval()
+local m = Q.sum(Q.vveq(d, c)):eval()
 assert(m == 1000)
-
-
-
 --=======================================
+
 print("SUCCESS for " .. arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()
