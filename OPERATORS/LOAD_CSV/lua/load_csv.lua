@@ -147,7 +147,7 @@ load_csv = function (
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   opt_args
-)
+) 
   local plpath = require 'pl.path'
   assert( infile ~= nil and plpath.isfile(infile),err.INPUT_FILE_NOT_FOUND)
   assert(plpath.getsize(infile) > 0, err.INPUT_FILE_EMPTY)
@@ -155,13 +155,13 @@ load_csv = function (
   -- Validate Metadata
   validate_meta(M)
   
-  local use_accesslator = true
+  local use_accelerator = true
   local is_hdr = false
   if opt_args then
     assert(type(opt_args) == "table", "opt_args must be of type table")
-    if opt_args["use_accesslator"] ~= nil then
-      assert(type(opt_args["use_accesslator"]) == "boolean", "type of use_accesslator is not boolean")
-      use_accesslator = opt_args["use_accesslator"]
+    if opt_args["use_accelerator"] ~= nil then
+      assert(type(opt_args["use_accelerator"]) == "boolean", "type of use_accelerator is not boolean")
+      use_accelerator = opt_args["use_accelerator"]
     end
     if opt_args["is_hdr"] ~= nil then
       assert(type(opt_args["is_hdr"]) == "boolean", "type of is_hdr is not boolean")
@@ -184,7 +184,7 @@ load_csv = function (
   
   -- if SC and SV qtype are not there as cols
   -- then calling load_csv_fast C function
-  if ( not is_SC_SV_present and use_accesslator )then
+  if ( not is_SC_SV_present and use_accelerator )then
     local data_dir = require('Q/q_export').Q_DATA_DIR
     local nC = #M
     local nR = ffi.malloc(ffi.sizeof("uint64_t"))
