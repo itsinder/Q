@@ -11,6 +11,7 @@
 #include "_mmap.h"
 #include "_rand_file_name.h"
 #include "_file_exists.h"
+#include "_trim.h"
 //STOP_INCLUDES
 #include "load_csv_fast.h"
 
@@ -35,11 +36,11 @@ load_csv_fast(
     const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char **fldtypes, /* [nC] */
+    char ** const fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
-    bool *is_load, /* [nC] */
-    bool *has_nulls, /* [nC] */
-    uint64_t *num_nulls, /* [nC] */
+    bool * const is_load, /* [nC] */
+    bool * const has_nulls, /* [nC] */
+    uint64_t * const num_nulls, /* [nC] */
     char ***ptr_out_files,
     char ***ptr_nil_files,
     /* Note we set nil_files and out_files only if below == NULL */
@@ -68,13 +69,13 @@ load_csv_fast(
   if ( out_files == NULL ) { go_BYE(-1); }
 #define MAX_LEN_DIR_NAME 255
     char cwd[MAX_LEN_DIR_NAME+1];
+    memset(cwd, '\0', MAX_LEN_DIR_NAME+1);
     if ( getcwd(cwd, MAX_LEN_DIR_NAME) == NULL ) { go_BYE(-1); }
     opdir = strdup(cwd);
   }
   else {
     opdir = strdup(q_data_dir);
   }
-
 
   //---------------------------------
   // allocate space and initialize other resources
@@ -89,18 +90,23 @@ load_csv_fast(
 
   nn_buf = malloc(nC * sizeof(uint64_t));
   return_if_malloc_failed(nn_buf);
-  for(uint32_t i = 0; i < nC; i++ ) {
-    nn_buf[i] = 0;
-  }
   out_files = malloc(nC * sizeof(char *));
   return_if_malloc_failed(out_files);
   nil_files = malloc(nC * sizeof(char *));
   return_if_malloc_failed(nil_files);
+
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    nn_buf[i] = 0;
+    out_files[i] = NULL;
+    nil_files[i] = NULL;
+  }
+
   if ( opdir[strlen(opdir)-1] == '/' ) { 
     opdir[strlen(opdir)-1] = '\0';
   }
   int ddir_len = strlen(opdir) + 8 + LEN_BASE_FILE_NAME;
   for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) { continue; }
     char buf[LEN_BASE_FILE_NAME+1];
     memset(buf, '\0', LEN_BASE_FILE_NAME+1);
     status = rand_file_name(buf, LEN_BASE_FILE_NAME);
@@ -108,9 +114,11 @@ load_csv_fast(
     sprintf(out_files[i], "%s/", opdir);
     strcat(out_files[i], buf);
 
-    nil_files[i] = malloc(ddir_len * sizeof(char));
-    sprintf(nil_files[i], "%s/_nn", opdir);
-    strcat(nil_files[i], buf);
+    if ( has_nulls[i] ) {
+      nil_files[i] = malloc(ddir_len * sizeof(char));
+      sprintf(nil_files[i], "%s/_nn", opdir);
+      strcat(nil_files[i], buf);
+    }
 
   }
 
@@ -190,6 +198,7 @@ load_csv_fast(
   char null_val[8];
   memset(null_val, '\0', 8); // we write 0 when value is null
 #define BUFSZ 31
+  char lbuf[BUFSZ+1];
   char buf[BUFSZ+1];
   bool is_val_null;
   //read from the input file and write to the output file
@@ -205,9 +214,10 @@ load_csv_fast(
       is_last_col = false;
     }
 
-    xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, BUFSZ);
+    xidx = get_cell(mmap_file, file_size, xidx, is_last_col, lbuf, BUFSZ);
     if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
+    status = trim(lbuf, buf, BUFSZ); cBYE(status);
 
     //fprintf(stderr, "%llu, %u, %llu, %s \n", 
      //   (unsigned long long)row_ctr, col_ctr, 
@@ -238,7 +248,8 @@ load_csv_fast(
     
     if ( buf[0] == '\0' ) { // got back null value
       is_val_null = true;
-      if ( !has_nulls[col_ctr] ) { // got null value when user said no null values
+      if ( !has_nulls[col_ctr] ) { 
+        // got null value when user said no null values
         go_BYE(-1);
       }
     }
@@ -356,7 +367,7 @@ load_csv_fast(
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
-    strcpy(str_for_lua, "local lVector = require 'Q/RUNTIME/lua/lVector'\nT = {};\n");
+    strcpy(str_for_lua, "local lVector = require 'Q/RUNTIME/lua/lVector'\nlocal T = {};\n");
     char xbuf[2*ddir_len + 128];
     int xcol_ctr = 1; // Lua indexes from 1 
     for ( uint32_t i = 0; i < nC; i++ ) {
@@ -371,6 +382,7 @@ load_csv_fast(
       strcat(str_for_lua, xbuf);
       xcol_ctr++;
     }
+    sprintf(str_for_lua + strlen(str_for_lua),"return T\n");
   }
   else {
     *ptr_out_files = out_files;
@@ -380,39 +392,46 @@ load_csv_fast(
 BYE:
   bak_status = status;
   // Close open files 
-  if ( ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( *out_files[i] != '\0' ) {
-        fclose_if_non_null(ofps[i]);
-      }
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    fclose_if_non_null(ofps[i]);
+    fclose_if_non_null(nn_ofps[i]);
+  }
+
+  // delete nil_files with no nil elements
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    if ( !is_load[i] ) { continue; }
+    if ( ( has_nulls[i] ) && ( num_nulls[i] == 0 ) ) { 
+      if ( nil_files[i][0] == '\0' ) { WHEREAMI; return -1; }
+      if ( !file_exists(nil_files[i]) ) { 
+        WHEREAMI; return -1; }
+      status = remove(nil_files[i]); 
+      if ( status < 0 ) { WHEREAMI; return -1; }
+      free_if_non_null(nil_files[i]); 
+      printf("%s: removing file for Column %d\n", infile, i);
     }
   }
-  if ( nn_ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( nil_files[i] != NULL ) { 
-        if ( nil_files[i][0] != '\0' ) {
-          fclose_if_non_null(nn_ofps[i]);
-        }
+  if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
+    // delete nil files and out_files
+    if ( nil_files != NULL ) { 
+      for ( uint32_t i = 0; i < nC; i++ ) {
+        free_if_non_null(nil_files[i]);
       }
+      free_if_non_null(nil_files);
+    }
+    if ( out_files != NULL ) { 
+      for ( uint32_t i = 0; i < nC; i++ ) {
+        free_if_non_null(out_files[i]);
+      }
+      free_if_non_null(out_files);
     }
   }
 
-  //delete nil_files with no nil elements
-  if ( nn_ofps != NULL ) { 
-    for ( uint32_t i = 0; i < nC; i++ ) {
-      if ( ( num_nulls[i] == 0 ) && ( nil_files[i][0] != '\0' ) ) { 
-        if ( file_exists(nil_files[i]) ) { 
-          status = remove(nil_files[i]); cBYE(status);
-        }
-        free_if_non_null(nil_files[i]);
-        printf("%s: removing file for Column %d\n", infile, i);
-      }
-    }
-  }
   rs_munmap(mmap_file, file_size);
   free_if_non_null(ofps);
+  free_if_non_null(qtypes);
   free_if_non_null(nn_ofps);
   free_if_non_null(opdir);
+  free_if_non_null(nn_buf);
 
   return bak_status;
 }

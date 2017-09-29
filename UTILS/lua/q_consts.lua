@@ -8,7 +8,18 @@ local qconsts = {}
     qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
+    qconsts.sz_str_for_lua = 1024 * 1024
+   --===================================
     qconsts.chunk_size = 64 * 1024
+    --===========================
+    local base_types = {}
+    base_types["I1"] = true;
+    base_types["I2"] = true;
+    base_types["I4"] = true;
+    base_types["I8"] = true;
+    base_types["F4"] = true;
+    base_types["F8"] = true;
+    qconsts.base_types = base_types
     --===========================
     local width = {}
     width["I1"]  = 8;

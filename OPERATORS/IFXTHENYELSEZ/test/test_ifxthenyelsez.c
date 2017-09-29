@@ -1,6 +1,6 @@
 #include "q_incs.h"
 #include <strings.h>
-#include "_ifxthenyelsez_I4.h"
+#include "_vv_ifxthenyelsez_I4.h"
 
 int
 main(
@@ -22,7 +22,7 @@ main(
   for ( int i = 0; i < n; i++ ) { 
     X[i] = 0x55;
   }
-  status = ifxthenyelsez_I4((uint64_t *)X, Y, Z, W, n); 
+  status = vv_ifxthenyelsez_I4((uint64_t *)X, Y, Z, W, n); 
   if ( status == 0 ) { 
     fprintf(stderr, "C: SUCCESS\n"); 
   }

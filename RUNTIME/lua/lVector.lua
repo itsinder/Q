@@ -316,6 +316,7 @@ function lVector:eval()
     until base_len ~= qconsts.chunk_size
   end
   -- else, nothing do to since vector has been materialized
+  return self
 end
 
 function lVector:release_vec_buf(chunk_size)
@@ -337,6 +338,8 @@ function lVector:get_vec_buf()
 end
 
 function lVector:get_all()
+  -- TODO P2. This is the same as chunk() without parameters
+  -- Consider deprecating this in the near future
   local nn_addr, nn_len
   local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
   assert(base_len > 0)
@@ -443,7 +446,7 @@ function lVector:reincarnate()
   -- Set persist flag
   self:persist(true)
   
-  T = {}
+  local T = {}
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 

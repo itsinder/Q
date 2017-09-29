@@ -17,6 +17,13 @@ end
 local function chk_cols(column_list)
 
   local qconsts = require 'Q/UTILS/lua/q_consts'
+  assert(column_list)
+  assert(type(column_list) == "table")
+  assert(#column_list > 0)
+  for i, v in ipairs(column_list) do 
+    assert(type(column_list[i]) == "lVector")
+    assert(column_list[i]:length() > 0)
+  end
 
   local is_SC  = {}
   local is_SV  = {}
