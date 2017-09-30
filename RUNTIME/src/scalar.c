@@ -408,7 +408,6 @@ int luaopen_libsclr (lua_State *L) {
   lua_pushcfunction(L, l_sclr_mul); lua_setfield(L, -2, "__mul");
   lua_pushcfunction(L, l_sclr_div); lua_setfield(L, -2, "__div");
 
-  lua_pushcfunction(L, l_fldtype); lua_setfield(L, -2, "__type");
   // Following do not work currently
   lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
   // Above do not work currently

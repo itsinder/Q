@@ -23,7 +23,12 @@ local function vs_ifxthenyelsez(x, y, z)
   local wbuf = assert(ffi.malloc(wbufsz))
   --
   local function vs_ifxthenyelsez_gen(chunk_idx)
+    print("XXX ", type(x))
+    print("XXX ", x:fldtype())
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
+    print("XXX ", type(y))
+    print("XXX ", y:fldtype())
+    print("XXX chunk_idx ", chunk_idx)
     local ylen, yptr, nn_yptr = y:chunk(chunk_idx) 
     if ( ylen == 0 )  then
       return 0, nil, nil

@@ -20,6 +20,7 @@ local function sort(x, ordr)
   qc[func_name](x_chunk, x_len)
   x:end_write()
   x:set_meta("sort_order", ordr)
+  return x
 
 end
 return require('Q/q_export').export('sort', sort)
