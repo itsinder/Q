@@ -16,3 +16,7 @@ load_csv_result[#load_csv_result + 1] = col_average
 --Q.print_csv(load_csv_resut, nil, "")
 
 Q.print_csv(load_csv_result, nil, "average.csv")
+
+print("SUCCESS for ", arg[0])
+require('Q/UTILS/lua/cleanup')()
+os.exit()

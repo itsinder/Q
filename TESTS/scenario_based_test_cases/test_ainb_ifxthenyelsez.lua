@@ -45,8 +45,6 @@ m = Q.sum(Q.vveq(r, exp_r)):eval()
 
 assert(m == 10)
 
-
-
 print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()
