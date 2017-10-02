@@ -13,16 +13,16 @@ setmetatable(lVector, {
    end,
 })
 
--- TODO Indrajeet to change
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-   local otype = original_type( obj )
-   if  otype == "table" and getmetatable( obj ) == lVector then
-      return "lVector"
-   end
-   return otype
-end
+-- -- TODO Indrajeet to change
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--    local otype = original_type( obj )
+--    if  otype == "table" and getmetatable( obj ) == lVector then
+--       return "lVector"
+--    end
+--    return otype
+-- end
 
 function lVector:is_memo()
   return Vector.is_memo(self._base_vec)

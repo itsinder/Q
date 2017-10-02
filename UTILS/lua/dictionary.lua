@@ -10,15 +10,15 @@ setmetatable(Dictionary, {
         end,
     })
 
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-    local otype = original_type( obj )
-    if  otype == "table" and getmetatable( obj ) == Dictionary then
-        return "Dictionary"
-    end
-    return otype
-end
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--     local otype = original_type( obj )
+--     if  otype == "table" and getmetatable( obj ) == Dictionary then
+--         return "Dictionary"
+--     end
+--     return otype
+-- end
 -- STOP: Following is standard stuff for creating a class 
 
 function Dictionary.get_instance(

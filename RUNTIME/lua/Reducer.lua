@@ -12,15 +12,15 @@ setmetatable(Reducer, {
   end,
 })
 
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-  local otype = original_type( obj )
-  if  otype == "table" and getmetatable( obj ) == Reducer then
-    return "Reducer"
-  end
-  return otype
-end
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--   local otype = original_type( obj )
+--   if  otype == "table" and getmetatable( obj ) == Reducer then
+--     return "Reducer"
+--   end
+--   return otype
+-- end
 
 function Reducer.new(arg)
   assert(arg.coro == nil, "Migrate code to reducer style, where gen, func, value must be specified")
