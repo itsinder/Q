@@ -1,4 +1,3 @@
-require 'Q/UTILS/lua/q_types'
 local ffi = require "ffi"
 local cmem = require'libcmem'
 ffi.cdef([[

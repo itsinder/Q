@@ -1,6 +1,7 @@
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
+local register_type = require 'Q/UTILS/lua/q_types'
 local plpath = require "pl.path"
 local Vector = require 'libvec'
 --====================================
@@ -13,6 +14,7 @@ setmetatable(lVector, {
    end,
 })
 
+register_type(lVector, "lVector")
 -- -- TODO Indrajeet to change
 -- local original_type = type  -- saves `type` function
 -- -- monkey patch type function

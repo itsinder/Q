@@ -1,25 +1,22 @@
-local dictionary = require 'Q/UTILS/lua/dictionary'
-local lVector    = require 'Q/RUNTIME/lua/lVector'
-local lScalar    = require 'Q/RUNTIME/lua/lScalar'
-local Reducer    = require 'Q/RUNTIME/lua/Reducer.lua'
-local Scalar     = require 'libsclr'
+local Scalar     = require 'libsclr' --TODO Indrajeet this is hacky
 
+local type_map = {}
 local original_type = type
+
+local function register_type(obj, name)
+  type_map[obj] = name
+end
 
 type = function(obj)
   local m_table = getmetatable(obj)
   if m_table ~= nil then
-    if m_table == dictionary then
-      return "Dictionary"
-    elseif m_table == lVector then
-      return "lVector"
-    elseif m_table == lScalar then
-      return "lScalar"
+    local d_type = type_map[m_table]
+    if d_type ~= nil then return d_type
     elseif m_table == Scalar then
       return "Scalar"
-    elseif m_table == Reducer then
-      return "Reducer"
     end
   end
   return original_type(obj)
 end
+
+return register_type
