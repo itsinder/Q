@@ -53,40 +53,65 @@ q_core: q_basic q_operators
 	cd ${BASE_PATH}/UTILS/lua/
 	lua copy_generated_files.lua 
 	luajit mk_so.lua
-	echo "all done for q_core"
 
 q_basic: utils load_csv print column
 	luajit mk_so.lua /tmp/
-	echo "Basic Q is built"
 
 column:
 	cd ${BASE_PATH}/RUNTIME/src;
 	make -C ${BASE_PATH}/RUNTIME/src/
-	echo "column done"
 
 utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
-	echo "utils done"
 
-drop_null:
-	make -C ${BASE_PATH}/OPERATORS/DROP_NULL/lua/
-	echo "drop_null done"
+drop_nulls:
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/
 
 ifxthenyelsez:
 	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/
-	echo "ifxthenyelsez done"
 
 ainb:
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
-	echo "ainb done"
 
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
-	echo "load_csv done"
 
 print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
-	echo "print_csv done"
+
+
+f1f2opf3: q_basic
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
+
+f1s1opf2: q_basic
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
+
+sort: q_basic
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+
+idx_sort: q_basic
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
+
+s_to_f: q_basic
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
+
+f_to_s: q_basic
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
+
+ax_equals_b: q_basic
+	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
+
+approx_quantile: q_basic
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua
+
+approx_frequent: q_basic
+	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
+
+mv_mul: q_basic
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/
+
+corrm: q_basic
+	make -C ${BASE_PATH}/OPERATORS/PCA/src/
 
 q_operators: f1f2opf3 \
 	f1s1opf2 \
@@ -102,49 +127,4 @@ q_operators: f1f2opf3 \
 	approx_frequent \
 	corrm
 	echo "all done for operators"
-
-
-f1f2opf3: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
-	echo "f1f2opf3 done"
-
-f1s1opf2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
-	echo "f1s1opf2 done"
-
-sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT/lua
-	echo "sort done"
-
-idx_sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
-	echo "idx_sort done"
-
-s_to_f: q_basic
-	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
-	echo "s_to_f done"
-
-f_to_s: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
-	echo "f_to_s done"
-
-ax_equals_b: q_basic
-	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
-	echo "ax_equals_b done"
-
-approx_quantile: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua
-	echo "approx_quantile done"
-
-approx_frequent: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
-	echo "approx_frequent done"
-
-mv_mul: q_basic
-	make -C ${BASE_PATH}/OPERATORS/MM/lua/
-	echo "mv_mul done"
-
-corrm: q_basic
-	make -C ${BASE_PATH}/OPERATORS/PCA/src/
-	echo "corrm done"
 

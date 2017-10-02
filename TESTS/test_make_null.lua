@@ -11,6 +11,12 @@ bady2 = Q.mk_col({1, 0, 1, 0, 1, 0, 1}, "I4")
 -- print(Q.sum(y):eval())
 x:make_nulls(y)
 assert(x:has_nulls() == true)
+-- ptrs should reflect existence of nn vector
+len, xptr, nn_xptr = x:chunk()
+assert(len > 0)
+assert(xptr)
+assert(nn_xptr) -- must have null value now 
+--
 -- cannot set null vector if one already set 
 status = pcall(x.make_nulls, y)
 assert(status == false)
