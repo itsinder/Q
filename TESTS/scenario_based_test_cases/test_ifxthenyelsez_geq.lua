@@ -9,22 +9,22 @@ local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 -- Data set
 local a = Q.rand( { lb = 10, ub = 20, qtype = "I4", len = 10 })
-a:eval()
+--a:eval()
 --Q.print_csv(a, nil, "")
 local b = Q.rand( { lb = 10, ub = 20, qtype = "I4", len = 10 })
-b:eval()
+--b:eval()
 --Q.print_csv(b, nil, "")
 
 -- Comparing data sets
-x = Q.vvgeq(a, b)
-x:eval()
+local x = Q.vvgeq(a, b)
+--x:eval()
 --Q.print_csv(x, nil, "")
 
 -- value set
 local y = Q.const( { val = 1, qtype = 'I4', len = 10} )
-y:eval()
+--y:eval()
 local z = Q.const( { val = 0, qtype = 'I4', len = 10} )
-z:eval()
+--z:eval()
 -- applying logic
 local w = Q.ifxthenyelsez(x, y, z)
 w:eval()

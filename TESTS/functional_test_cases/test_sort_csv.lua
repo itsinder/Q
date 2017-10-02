@@ -4,7 +4,6 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
-
 -- TEST SORT TWICE TEST
 meta = {
  { name = "empid", has_nulls = true, qtype = "I4", is_load = true }
@@ -16,7 +15,6 @@ for i, v in pairs(result) do
   assert(type(x) == "lVector")
 end
  -- Q.print_csv(x, nil, "")
-
 
 -- Desc & Asc = Asc
 Q.sort(x, "dsc")
