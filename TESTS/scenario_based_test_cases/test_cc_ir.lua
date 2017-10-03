@@ -10,21 +10,21 @@ require 'Q/UTILS/lua/strict'
 
 -- Data set
 --ToDo -- cc = {list of credit cards} 
-local cc_ir = Q.rand( { lb = 8, ub = 30, qtype = "F4", len = 100 })
+local cc_ir = Q.rand( { lb = 8, ub = 30, qtype = "F4", len = 10 })
 cc_ir:eval()
---Q.print_csv(a, nil, "")
-local exp_ir = Q.const( { val = 14.25, qtype = "F4", len = 100 })
+--Q.print_csv(cc_ir, nil, "")
+local exp_ir = Q.const( { val = 14.25, qtype = "F4", len = 10 })
 exp_ir:eval()
 -- Comparing data sets
 local x = Q.vvleq(cc_ir, exp_ir)
---x:eval()
---Q.print_csv(x, nil, "")
+x:eval()
+Q.print_csv(x, nil, "")
 
 -- value set
 local y = Q.const( { val = 1, qtype = 'I4', len = 100} )
---y:eval()
+y:eval()
 local z = Q.const( { val = 0, qtype = 'I4', len = 100} )
---z:eval()
+z:eval()
 -- applying logic
 local w = Q.ifxthenyelsez(x, y, z)
 w:eval()
