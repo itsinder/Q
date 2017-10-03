@@ -296,7 +296,7 @@ function lVector:start_write()
   assert(type(nX) == "number")
   assert(nX > 0)
   if ( self._nn_vec ) then
-    local nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    nn_X, nn_nX = Vector.start_write(self._nn_vec)
     assert(nn_nX == nX)
     assert(nn_nX)
   end
