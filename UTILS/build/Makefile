@@ -27,6 +27,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT  clean
 	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -125,6 +126,7 @@ q_operators: f1f2opf3 \
 	mv_mul \
 	approx_quantile \
 	approx_frequent \
-	corrm
+	corrm \
+	drop_nulls
 	echo "all done for operators"
 
