@@ -17,8 +17,8 @@ require "Q/OPERATORS/AINB/lua/ainb"
 require "Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez"
 require "Q/OPERATORS/DROP_NULLS/lua/drop_nulls"
 require "Q/OPERATORS/AX_EQUALS_B/lua/linear_solver"
--- require "Q/OPERATORS/APPROX/QUANTILE/lua/approx_quantile"
--- require "Q/OPERATORS/APPROX/FREQUENT/lua/approx_frequent"
+require "Q/OPERATORS/APPROX/QUANTILE/lua/approx_quantile"
+require "Q/OPERATORS/APPROX/FREQUENT/lua/approx_frequent"
 require "Q/OPERATORS/PCA/lua/corr_mat"
 
 
