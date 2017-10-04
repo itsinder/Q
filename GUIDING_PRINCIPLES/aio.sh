@@ -86,6 +86,7 @@ if [[ $RES -ne 0 ]] ; then
    sudo luarocks install busted
    sudo luarocks install luacov
    sudo luarocks install cluacov
+   sudo luarocks install luaunit
 else
    my_print "luarocks is already installed"
 fi
