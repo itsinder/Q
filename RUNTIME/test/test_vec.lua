@@ -22,9 +22,7 @@ assert(ylen == ylen2)
 assert(ylen*4 == filesize)
 assert(y:check())
 local a, b = y:eov()
-assert(a == nil)
-local i, j = string.find(b, "ERROR")
-assert(i >= 0)
+assert(a) -- unnecessary eov is not an erro
 M = loadstring(y:meta())()
 for k, v in pairs(M) do 
   if ( k == "is_memo") then assert(v == true) end
@@ -127,9 +125,9 @@ for k, v in pairs(M) do
 end
 rslt = y:eov()
 assert(rslt)
--- Second call to eov should fail
+-- Second call to eov used to be considered an error. No longer
 rslt = y:eov()
-assert(not rslt)
+assert(rslt)
 -- print("writing meta data of persisted vector")
 M = loadstring(y:meta())(); 
 local is_file = false
@@ -195,6 +193,7 @@ for j = 1, M.num_elements do
   end
 end
 -- should not be able to set after end of vector
+j = 100000
 s = Scalar.new(j*10, "I4")
 status = y:set(s, M.num_elements)
 assert(not status)

@@ -744,7 +744,7 @@ vec_eov(
 {
   int status = 0;
 
-  if ( ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }

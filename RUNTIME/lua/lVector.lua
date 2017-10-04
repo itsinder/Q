@@ -25,10 +25,12 @@ type = function( obj )
 end
 
 function lVector:is_memo()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.is_memo(self._base_vec)
 end
 
 function lVector:is_eov()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.is_eov(self._base_vec)
 end
 
@@ -131,6 +133,7 @@ function lVector:persist(is_persist)
   if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_persist)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   if ( base_status and nn_status ) then
     return self
   else
@@ -149,6 +152,7 @@ function lVector:nn_vec()
   vector._base_vec = self._nn_vec
   vector._qtype = "B1"
   vector._field_width = 0 -- for B1
+  if ( os.getenv("Q_DBG")) then self:check() end
   return vector
 end
   
@@ -156,6 +160,7 @@ function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
   self:set_meta("num_nulls")
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self
 end
 
@@ -168,6 +173,7 @@ function lVector:make_nulls(bvec)
   assert(bvec:has_nulls() == false)
   self._nn_vec = bvec._base_vec
   self:set_meta("num_nulls")
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self
 end
   
@@ -184,6 +190,7 @@ function lVector:memo(is_memo)
   if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_memo)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   if ( base_status and nn_status ) then
     return self
   else
@@ -192,42 +199,52 @@ function lVector:memo(is_memo)
 end
 
 function lVector:chunk_num()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.chunk_num(self._base_vec)
 end
 
 function lVector:chunk_size()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.chunk_size(self._base_vec)
 end
 
 function lVector:has_nulls()
+  if ( os.getenv("Q_DBG")) then self:check() end
   if ( self._nn_vec ) then return true else return false end
 end
 
 function lVector:num_elements()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
 
 function lVector:length()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
 
 function lVector:fldtype()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self._qtype
 end
 
 function lVector:qtype()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self._qtype
 end
 
 function lVector:field_size()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self._field_width
 end
 
 function lVector:field_width()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self._field_width
 end
 
 function lVector:file_name()
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self:meta().base.file_name
 end
 
@@ -237,6 +254,7 @@ function lVector:nn_file_name()
   if vec_meta.nn then
     nn_file_name = vec_meta.nn.file_name
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return nn_file_name
 end
 
@@ -273,6 +291,7 @@ function lVector:eov()
     local status = Vector.eov(self._nn_vec)
     assert(status)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return true
 end
 
@@ -287,6 +306,7 @@ function lVector:put1(s, nn_s)
     local status = Vector.put1(self._nn_vec, nn_s)
     assert(status)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
 end
 
 function lVector:start_write()
@@ -300,6 +320,7 @@ function lVector:start_write()
     assert(nn_nX == nX)
     assert(nn_nX)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return nX, X, nn_X
 end
 
@@ -310,6 +331,7 @@ function lVector:end_write()
     local status = Vector.end_write(self._nn_vec)
     assert(status)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
@@ -332,17 +354,22 @@ function lVector:put_chunk(base_addr, nn_addr, len)
       assert(status)
     end
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
 end
 
 function lVector:eval()
   if ( Vector.is_nascent(self._base_vec) ) then
     local chunk_num = self:chunk_num() 
+    local base_len, base_addr, nn_addr 
     repeat
-      local base_len, base_addr, nn_addr = self:chunk(chunk_num)
+      base_len, base_addr, nn_addr = self:chunk(chunk_num)
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
+    self:eov()
+
   end
   -- else, nothing do to since vector has been materialized
+  if ( os.getenv("Q_DBG")) then self:check() end
   return self
 end
 
@@ -352,6 +379,7 @@ function lVector:release_vec_buf(chunk_size)
   if ( self._nn_vec ) then
     assert(Vector.release_vec_buf(self._nn_vec, chunk_size))
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return true
 end
 
@@ -361,6 +389,7 @@ function lVector:get_vec_buf()
   if ( self._nn_vec ) then
     nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return base_buf, nn_buf
 end
 
@@ -376,6 +405,7 @@ function lVector:get_all()
     assert(nn_len == base_len)
     assert(nn_addr)
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return base_len, base_addr, nn_addr
 end
 
@@ -413,6 +443,7 @@ function lVector:chunk(chunk_num)
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
     if ( base_addr == nil ) then
+      if ( os.getenv("Q_DBG")) then self:check() end
       return 0
     end
     if ( ( self._nn_vec ) and ( base_addr ) ) then 
@@ -420,6 +451,7 @@ function lVector:chunk(chunk_num)
       assert(nn_addr)
       assert(base_len == nn_len)
     end
+    if ( os.getenv("Q_DBG")) then self:check() end
     return base_len, base_addr, nn_addr
   else
     assert(Vector.is_nascent(self._base_vec))
@@ -442,6 +474,7 @@ function lVector:chunk(chunk_num)
         assert(chk == l_chunk_num)
       end
     end
+    if ( os.getenv("Q_DBG")) then self:check() end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
@@ -459,10 +492,12 @@ function lVector:meta()
   if ( self._nn_vec ) then 
     nn_meta = load(Vector.meta(self._nn_vec))()
   end
+  if ( os.getenv("Q_DBG")) then self:check() end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
 
 function lVector:reincarnate()
+  if ( os.getenv("Q_DBG")) then self:check() end
   if ( Vector.is_nascent(self._base_vec) ) then
     return nil
   end
@@ -488,11 +523,13 @@ function lVector:reincarnate()
   end
 
   T[#T+1] = " } ) "
+  if ( os.getenv("Q_DBG")) then self:check() end
   return table.concat(T, '')
 end
 
 
 function lVector:set_meta(k, v)
+  if ( os.getenv("Q_DBG")) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
   assert(type(k) == "string")
@@ -500,6 +537,7 @@ function lVector:set_meta(k, v)
 end
 
 function lVector:get_meta(k)
+  if ( os.getenv("Q_DBG")) then self:check() end
   assert(k)
   assert(type(k) == "string")
   return self._meta[k]
