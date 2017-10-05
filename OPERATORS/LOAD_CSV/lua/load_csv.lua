@@ -7,7 +7,7 @@ local qc            = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 
 local Dictionary = require 'Q/UTILS/lua/dictionary'
-local Column     = require 'Q/RUNTIME/lua/lVector'
+local lVector     = require 'Q/RUNTIME/lua/lVector'
 local plstring   = require 'pl.stringx'
 local plfile     = require 'pl.file'
 
@@ -105,7 +105,7 @@ local initialize_buffers = function(M)
       
       --==============================
       -- Column Pool Initialization start
-      cols[col_idx] = Column{
+      cols[col_idx] = lVector{
         qtype=M[col_idx].qtype,
         gen = true,
         width=field_size,
@@ -146,7 +146,7 @@ end
 load_csv = function ( 
   infile,   -- input file to read (string)
   M,  -- metadata (table)
-  global_settings -- TODO unused for now
+  opt_args
 )
   local plpath = require 'pl.path'
   assert( infile ~= nil and plpath.isfile(infile),err.INPUT_FILE_NOT_FOUND)
@@ -155,123 +155,218 @@ load_csv = function (
   -- Validate Metadata
   validate_meta(M)
   
-  -- Initialize Buffers
-  local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
-  
-  -- Memory map the input file
-  local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
-  assert(f_map.status == 0 , err.MMAP_FAILED)
-  local X = ffi.cast("char *", f_map.map_addr)
-  local nX = tonumber(f_map.map_len)
-  assert(nX > 0, err.FILE_EMPTY)
-
-  local x_idx = 0
-  local in_buf  = ffi.malloc(max_txt_width)
-  local row_idx = 1
-  local col_idx = 1
-  local num_in_out_buf = 0
-  local num_cols = #M
-
-  while true do
-    local is_last_col = false
-    if ( col_idx == num_cols ) then
-      is_last_col = true;
+  local use_accesslator = true
+  local is_hdr = false
+  if opt_args then
+    assert(type(opt_args) == "table", "opt_args must be of type table")
+    if opt_args["use_accesslator"] ~= nil then
+      assert(type(opt_args["use_accesslator"]) == "boolean", "type of use_accesslator is not boolean")
+      use_accesslator = opt_args["use_accesslator"]
     end
-    local field_size = assert(qconsts.qtypes[M[col_idx].qtype].width)
-    if ( M[col_idx].qtype == "SC" ) then
-      field_size = M[col_idx].width
+    if opt_args["is_hdr"] ~= nil then
+      assert(type(opt_args["is_hdr"]) == "boolean", "type of is_hdr is not boolean")
+      is_hdr = opt_args["is_hdr"]
+    end
+  end
+  
+  local cols_to_return
+  
+  -- checking if there are any SC SV qtype cols
+  local is_SC_SV_present = false
+  
+  local no_of_cols = #M
+  for itr =1, no_of_cols do
+    if(M[itr].qtype == "SC" or M[itr].qtype == "SV" )then
+      is_SC_SV_present = true
+      break
+    end
+  end
+  
+  -- if SC and SV qtype are not there as cols
+  -- then calling load_csv_fast C function
+  if ( not is_SC_SV_present and use_accesslator )then
+    local data_dir = require('Q/q_export').Q_DATA_DIR
+    local nC = #M
+    local nR = ffi.malloc(ffi.sizeof("uint64_t"))
+
+    local fldtypes = ffi.malloc(#M * ffi.sizeof("char *"))
+    fldtypes = ffi.cast("char **", fldtypes)
+    for i = 1, #M do
+      fldtypes[i-1] = ffi.malloc(4 * ffi.sizeof("char"))
+      fldtypes[i-1] = ffi.cast("char *", fldtypes[i-1])
+      ffi.copy(fldtypes[i-1], M[i].qtype)
+    end 
+    
+    local is_load = ffi.malloc(#M * ffi.sizeof("bool"))
+    is_load = ffi.cast("bool *", is_load)
+    for i = 1, #M do
+      is_load[i-1] = M[i].is_load
     end
     
-    ffi.fill(in_buf, max_txt_width, 0) -- always init to 0        
-    -- create an error message that might be needed
-    -- local err_msg = "error in row " .. row_idx .. " column " .. col_idx
-    x_idx = tonumber(
-    qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
-    assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
-    if ( M[col_idx].is_load ) then 
-      local str = plstring.strip(ffi.string(in_buf))
-      local is_null = (str == "")
-      -- Process null value case
-      if is_null then 
-        assert(M[col_idx].has_nulls, err.NULL_IN_NOT_NULL_FIELD) 
-        M[col_idx].num_nulls = M[col_idx].num_nulls + 1
-      else
-        -- Update out_buf
-        local temp_out_buf = ffi.cast("char *", out_buf_array[col_idx]) + (num_in_out_buf * field_size)
-        mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)
-        
-        -- Update nn_out_buf
-        local widx = math.floor(num_in_out_buf / 8)
-        local bidx = (num_in_out_buf % 8)
-        local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
-        qc.set_bit(temp_nn_out_buf + widx, bidx)
-        
-        --local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
-        --local index = math.floor((num_in_out_buf)/64)
-        --temp_nn_out_buf[index] = temp_nn_out_buf[index] + math.pow(2, num_in_out_buf)
-        
-      end
+    local has_nulls = ffi.malloc(#M * ffi.sizeof("bool"))
+    has_nulls = ffi.cast("bool *", has_nulls)
+    for i = 1, #M do
+      has_nulls[i-1] = M[i].has_nulls
     end
-      
-    --=======================================
-    if ( is_last_col ) then
-      row_idx = row_idx + 1
-      col_idx = 1;
-      -- increment out_buf count
-      num_in_out_buf = num_in_out_buf + 1
-      
-      -- Check number of elements in all out_buf, if all buffers are full, write it to column
-      if ( num_in_out_buf == out_buf_size ) then
-        print("Intermediate Flush ..")
-        for i = 1, num_cols do   
-          -- write to column
-          cols[i]:put_chunk(out_buf_array[i], out_buf_nn_array[i], out_buf_size)
-
-          -- Initialize buffer to 0
-          ffi.fill(out_buf_array[i], out_buf_size)
-          ffi.fill(out_buf_nn_array[i], nn_buf_size)
-        end
-        num_in_out_buf = 0
-      end        
-    else
-      col_idx = col_idx + 1 
-    end
-    assert(x_idx <= nX) 
-    if  (x_idx >= nX) then break end
-  end
-  assert(x_idx == nX, err.DID_NOT_END_PROPERLY)
-  assert(col_idx == 1, err.BAD_NUMBER_COLUMNS)
+    
+    local num_nulls = ffi.malloc(ffi.sizeof("uint64_t"))
+    num_nulls = ffi.cast("uint64_t *", num_nulls) 
+    
+    local out_files = nil
+    local nil_files = nil
+    
+    local sz_str_for_lua = qconsts.sz_str_for_lua
+    
+    local str_for_lua = ffi.malloc(sz_str_for_lua)
+    str_for_lua = ffi.cast("char *", str_for_lua)
   
-  if ( num_in_out_buf > 0 ) then
-    print("Flushing values to all columns.."..tostring(num_in_out_buf))
-    for i = 1, num_cols do
-      cols[i]:put_chunk(out_buf_array[i], out_buf_nn_array[i], num_in_out_buf)
-      ffi.fill(out_buf_array[i], out_buf_size)
-      ffi.fill(out_buf_nn_array[i], nn_buf_size)           
-      
-      -- Set buffer to nil
-      out_buf_array[i] = nil
-      out_buf_nn_array[i] = nil
-    end
-  end      
-  out_buf_array = nil
-  out_buf_nn_array = nil
-  --======================================
-  --print("Preparing return columns")
-  local cols_to_return = {} 
-  local rc_idx = 1
-  for i = 1, #M do
-    if ( M[i].is_load ) then 
-      cols[i]:eov()
-      if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        -- Drop the null column, get the nn_file_name from metadata
-        local null_file = cols[i]:meta().nn.file_name
-        -- TODO: discuss: whether to delete nn file? if we delete then col:chunk() won't work
-        --assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
+    -- call to the load_csv_fast function
+    local status = qc["load_csv_fast"](data_dir, infile, nC, nR, fldtypes, 
+      is_hdr, is_load, has_nulls, num_nulls, out_files, nil_files,
+      str_for_lua, sz_str_for_lua)  
+    assert(status == 0, "load_csv_fast failed")
+    
+    local vector_string = ffi.string(ffi.cast("char *",str_for_lua))
+    assert(( vector_string ) and ( vector_string ~= "" ), "load_csv_fast returned a null string" )
+    
+    local T = loadstring(vector_string)()
+    
+    assert( (type(T) == "table" and type(T[1]) == "lVector" ), "type of T is not lVector")
+    
+    cols_to_return = T
+  else
+    
+    -- Initialize Buffers
+    local cols, dicts, out_buf_array, out_buf_nn_array, out_buf_size, nn_buf_size, max_txt_width = initialize_buffers(M)
+    
+    -- Memory map the input file
+    local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
+    assert(f_map.status == 0 , err.MMAP_FAILED)
+    local X = ffi.cast("char *", f_map.map_addr)
+    local nX = tonumber(f_map.map_len)
+    assert(nX > 0, err.FILE_EMPTY)
+
+    local x_idx = 0
+    local in_buf  = ffi.malloc(max_txt_width)
+    local row_idx = 1
+    local col_idx = 1
+    local num_in_out_buf = 0
+    local num_cols = #M
+
+    while true do
+      local is_last_col = false
+      if ( col_idx == num_cols ) then
+        is_last_col = true;
       end
-      cols_to_return[rc_idx] = cols[i]
-      cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
-      rc_idx = rc_idx + 1
+      local field_size = assert(qconsts.qtypes[M[col_idx].qtype].width)
+      if ( M[col_idx].qtype == "SC" ) then
+        field_size = M[col_idx].width
+      end
+      
+      ffi.fill(in_buf, max_txt_width, 0) -- always init to 0        
+      -- create an error message that might be needed
+      -- local err_msg = "error in row " .. row_idx .. " column " .. col_idx
+      if ( is_hdr and row_idx == 1)then
+        x_idx = tonumber(
+        qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
+        assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
+        col_idx = col_idx + 1
+        
+        if ( is_last_col ) then
+          row_idx = row_idx + 1
+          col_idx = 1;
+        end
+         
+      else
+        x_idx = tonumber(
+        qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width))
+        assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
+        if ( M[col_idx].is_load ) then 
+          local str = plstring.strip(ffi.string(in_buf))
+          local is_null = (str == "")
+          -- Process null value case
+          if is_null then 
+            assert(M[col_idx].has_nulls, err.NULL_IN_NOT_NULL_FIELD) 
+            M[col_idx].num_nulls = M[col_idx].num_nulls + 1
+          else
+            -- Update out_buf
+            local temp_out_buf = ffi.cast("char *", out_buf_array[col_idx]) + (num_in_out_buf * field_size)
+            mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)
+            
+            -- Update nn_out_buf
+            local widx = math.floor(num_in_out_buf / 8)
+            local bidx = (num_in_out_buf % 8)
+            local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
+            qc.set_bit(temp_nn_out_buf + widx, bidx)
+            
+            --local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
+            --local index = math.floor((num_in_out_buf)/64)
+            --temp_nn_out_buf[index] = temp_nn_out_buf[index] + math.pow(2, num_in_out_buf)
+            
+          end
+        end
+          
+        --=======================================
+        if ( is_last_col ) then
+          row_idx = row_idx + 1
+          col_idx = 1;
+          -- increment out_buf count
+          num_in_out_buf = num_in_out_buf + 1
+          
+          -- Check number of elements in all out_buf, if all buffers are full, write it to column
+          if ( num_in_out_buf == out_buf_size ) then
+            print("Intermediate Flush ..")
+            for i = 1, num_cols do   
+              -- write to column
+              cols[i]:put_chunk(out_buf_array[i], out_buf_nn_array[i], out_buf_size)
+
+              -- Initialize buffer to 0
+              ffi.fill(out_buf_array[i], out_buf_size)
+              ffi.fill(out_buf_nn_array[i], nn_buf_size)
+            end
+            num_in_out_buf = 0
+          end        
+        else
+          col_idx = col_idx + 1 
+        end
+        assert(x_idx <= nX) 
+        if  (x_idx >= nX) then break end
+      end
+    end
+    assert(x_idx == nX, err.DID_NOT_END_PROPERLY)
+    assert(col_idx == 1, err.BAD_NUMBER_COLUMNS)
+    
+    if ( num_in_out_buf > 0 ) then
+      print("Flushing values to all columns.."..tostring(num_in_out_buf))
+      for i = 1, num_cols do
+        cols[i]:put_chunk(out_buf_array[i], out_buf_nn_array[i], num_in_out_buf)
+        ffi.fill(out_buf_array[i], out_buf_size)
+        ffi.fill(out_buf_nn_array[i], nn_buf_size)           
+        
+        -- Set buffer to nil
+        out_buf_array[i] = nil
+        out_buf_nn_array[i] = nil
+      end
+    end      
+    out_buf_array = nil
+    out_buf_nn_array = nil
+    --======================================
+    --print("Preparing return columns")
+    cols_to_return = {} 
+    local rc_idx = 1
+    for i = 1, #M do
+      if ( M[i].is_load ) then 
+        cols[i]:eov()
+        if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
+          -- Drop the null column, get the nn_file_name from metadata
+          local null_file = cols[i]:meta().nn.file_name
+          -- TODO: discuss: whether to delete nn file? if we delete then col:chunk() won't work
+          --assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
+        end
+        cols_to_return[rc_idx] = cols[i]
+        cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
+        rc_idx = rc_idx + 1
+      end
     end
   end
   return cols_to_return

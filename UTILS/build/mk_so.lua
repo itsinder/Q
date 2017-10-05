@@ -66,10 +66,15 @@ pldir.copyfile(tgt_h, final_h)
 print("Copied " .. tgt_h .. " to " .. final_h)
 
 ----------Create q_core.so
-local FLAGS = assert(os.getenv("QC_FLAGS"), "Need compile flags from os env QC_FLAGS")
+local QC_FLAGS = assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
+local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
+assert(QC_FLAGS ~= "", "QC_FLAGS not provided")
+assert(Q_LINK_FLAGS ~= "", "Q_LINK_FLAGS not provided")
 local q_c_files = pldir.getfiles(cdir, "*.c")
 local q_c = table.concat(q_c_files, " ")
-local q_cmd = string.format("gcc %s %s -I %s -lgomp -pthread -shared -o %s", FLAGS, q_c, hdir, tgt_so)
+--  "gcc %s %s -I %s %s -lgomp -pthread -shared -o %s", 
+local q_cmd = string.format("gcc %s %s -I %s %s -o %s", 
+  QC_FLAGS, q_c, hdir, Q_LINK_FLAGS, tgt_so)
 q_cmd = "cd " .. cdir .. "; " .. q_cmd
 local status = os.execute(q_cmd)
 assert(status, "gcc failed")

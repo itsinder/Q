@@ -77,6 +77,13 @@ BYE:
   return 2;
 }
 
+static int l_fldtype(lua_State *L) {
+  int status = 0;
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  lua_pushstring(L, ptr_sclr->field_type);
+  return 1;
+}
+
 static int l_sclr_to_str( lua_State *L) {
 int status = 0;
 #define BUFLEN 31
@@ -351,12 +358,14 @@ BYE:
 static const struct luaL_Reg sclr_methods[] = {
     { "cdata", l_sclr_to_cdata },
     { "to_str", l_sclr_to_str },
+    { "fldtype", l_fldtype },
     { NULL,          NULL               },
 };
  
 static const struct luaL_Reg sclr_functions[] = {
     { "new", l_sclr_new },
     { "cdata", l_sclr_to_cdata },
+    { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
     { "eq", l_sclr_eq },
@@ -398,6 +407,7 @@ int luaopen_libsclr (lua_State *L) {
   lua_pushcfunction(L, l_sclr_sub); lua_setfield(L, -2, "__sub");
   lua_pushcfunction(L, l_sclr_mul); lua_setfield(L, -2, "__mul");
   lua_pushcfunction(L, l_sclr_div); lua_setfield(L, -2, "__div");
+
   // Following do not work currently
   lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
   // Above do not work currently

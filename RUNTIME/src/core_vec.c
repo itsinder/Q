@@ -422,6 +422,10 @@ vec_get(
   char *ret_addr = NULL;
   uint64_t ret_len  = 0;
   char *X = NULL; uint64_t nX = 0;
+  if ( len == 0 ) { // vector must be materialized, we want everything
+    if ( !ptr_vec->is_eov ) { go_BYE(-1); }
+    if ( ptr_vec->is_nascent ) { go_BYE(-1); }
+  }
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
       case 0 : 
@@ -443,6 +447,11 @@ vec_get(
     }
     if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+    if ( len == 0 ) {  // nothing more to do 
+      *ptr_ret_addr = ptr_vec->map_addr;
+      *ptr_ret_len  = ptr_vec->num_elements;
+      goto BYE;
+    }
   }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 

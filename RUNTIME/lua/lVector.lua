@@ -98,9 +98,6 @@ function lVector.new(arg)
     end
     is_nascent = false
   end
-  vector._has_nulls = has_nulls
-  vector._file_name = file_name
-  vector._nn_file_name = nn_file_name
 
   if ( qtype == "SC" ) then 
     qtype = qtype .. ":" .. tostring(field_width)
@@ -112,7 +109,7 @@ function lVector.new(arg)
     num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
-  if ( vector._has_nulls ) then 
+  if ( has_nulls ) then 
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
@@ -131,7 +128,7 @@ function lVector:persist(is_persist)
     assert(type(is_persist) == "boolean")
   end
   base_status = Vector.persist(self._base_vec, is_persist)
-  if ( self._has_nulls ) then 
+  if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_persist)
   end
   if ( base_status and nn_status ) then
@@ -140,6 +137,40 @@ function lVector:persist(is_persist)
     return nil
   end
 end
+
+function lVector:nn_vec()
+  -- TODO Can only do this when vector has been materialized
+  -- That is because one generator starts feeding 2 vectors and 
+  -- we are not prepared for that
+  -- P1 Fix this code. In current state, it is not working
+  assert(self:is_eov())
+  local vector = setmetatable({}, lVector)
+  vector._meta = {}
+  vector._base_vec = self._nn_vec
+  vector._qtype = "B1"
+  vector._field_width = 0 -- for B1
+  return vector
+end
+  
+function lVector:drop_nulls()
+  assert(self:is_eov())
+  self._nn_vec = nil
+  self:set_meta("num_nulls")
+  return self
+end
+
+function lVector:make_nulls(bvec)
+  assert(self:is_eov())
+  assert(self._nn_vec == nil) 
+  assert(type(bvec) == "lVector")
+  assert(bvec:fldtype() == "B1")
+  assert(bvec:num_elements() == self:num_elements())
+  assert(bvec:has_nulls() == false)
+  self._nn_vec = bvec._base_vec
+  self:set_meta("num_nulls")
+  return self
+end
+  
 
 function lVector:memo(is_memo)
   local base_status = true
@@ -150,7 +181,7 @@ function lVector:memo(is_memo)
     assert(type(is_memo) == "boolean")
   end
   base_status = Vector.memo(self._base_vec, is_memo)
-  if ( self._has_nulls ) then 
+  if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_memo)
   end
   if ( base_status and nn_status ) then
@@ -169,7 +200,7 @@ function lVector:chunk_size()
 end
 
 function lVector:has_nulls()
-  return self._has_nulls
+  if ( self._nn_vec ) then return true else return false end
 end
 
 function lVector:num_elements()
@@ -196,18 +227,28 @@ function lVector:field_width()
   return self._field_width
 end
 
+function lVector:file_name()
+  return self:meta().base.file_name
+end
+
+function lVector:nn_file_name()
+  local vec_meta = self:meta()
+  local nn_file_name = nil
+  if vec_meta.nn then
+    nn_file_name = vec_meta.nn.file_name
+  end
+  return nn_file_name
+end
+
 function lVector:check()
   local chk = Vector.check(self._base_vec)
   assert(chk, "Error on base vector")
   local num_elements = Vector.num_elements(self._base_vec)
-  if ( self._has_nulls ) then 
-    assert(self._nn_vec)
+  if ( self._nn_vec ) then 
     local nn_num_elements = Vector.num_elements(self._nn_vec)
     chk = Vector.check(self._nn_vec)
     assert(num_elements == nn_num_elements)
     assert(chk, "Error on nn vector")
-  else
-    assert(not self._nn_vec)
   end
   -- TODO: Check that following are same for base_vec and nn_vec
   -- (a) num_elements DONE
@@ -240,7 +281,7 @@ function lVector:put1(s, nn_s)
   assert(type(s) == "userdata")
   local status = Vector.put1(self._base_vec, s)
   assert(status)
-  if ( self._has_nulls ) then 
+  if ( self._nn_vec ) then 
     assert(nn_s)
     assert(type(nn_s) == "userdata")
     local status = Vector.put1(self._nn_vec, nn_s)
@@ -254,9 +295,8 @@ function lVector:start_write()
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
-  if ( self._has_nulls ) then
-    assert(self._nn_vec)
-    local nn_X, nn_nX = Vector.start_write(self._nn_vec)
+  if ( self._nn_vec ) then
+    nn_X, nn_nX = Vector.start_write(self._nn_vec)
     assert(nn_nX == nX)
     assert(nn_nX)
   end
@@ -266,8 +306,7 @@ end
 function lVector:end_write()
   local status = Vector.end_write(self._base_vec)
   assert(status)
-  if ( self._has_nulls ) then
-    assert(self._nn_vec)
+  if ( self._nn_vec ) then
     local status = Vector.end_write(self._nn_vec)
     assert(status)
   end
@@ -280,16 +319,15 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   assert(len >= 0)
   if ( len == 0 )  then -- no more data
     status = Vector.eov(self._base_vec)
-    if ( self._has_nulls ) then
+    if ( self._nn_vec ) then
       status = Vector.eov(self._nn_vec)
     end
   else
     assert(base_addr)
     status = Vector.put_chunk(self._base_vec, base_addr, len)
     assert(status)
-    if ( self._has_nulls ) then
+    if ( self._nn_vec ) then
       assert(nn_addr)
-      assert(self._nn_vec)
       status = Vector.put_chunk(self._nn_vec, nn_addr, len)
       assert(status)
     end
@@ -305,12 +343,13 @@ function lVector:eval()
     until base_len ~= qconsts.chunk_size
   end
   -- else, nothing do to since vector has been materialized
+  return self
 end
 
 function lVector:release_vec_buf(chunk_size)
   local status
   assert(Vector.release_vec_buf(self._base_vec, chunk_size))
-  if ( self._has_nulls ) then
+  if ( self._nn_vec ) then
     assert(Vector.release_vec_buf(self._nn_vec, chunk_size))
   end
   return true
@@ -319,10 +358,25 @@ end
 function lVector:get_vec_buf()
   local nn_buf
   local base_buf = assert(Vector.get_vec_buf(self._base_vec))
-  if ( self._has_nulls ) then
+  if ( self._nn_vec ) then
     nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
   end
   return base_buf, nn_buf
+end
+
+function lVector:get_all()
+  -- TODO P2. This is the same as chunk() without parameters
+  -- Consider deprecating this in the near future
+  local nn_addr, nn_len
+  local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
+  assert(base_len > 0)
+  assert(base_addr)
+  if ( self._nn_vec ) then
+    nn_addr, nn_len = assert(Vector.get(self._nn_vec, 0, 0))
+    assert(nn_len == base_len)
+    assert(nn_addr)
+  end
+  return base_len, base_addr, nn_addr
 end
 
 function lVector:chunk(chunk_num)
@@ -361,7 +415,7 @@ function lVector:chunk(chunk_num)
     if ( base_addr == nil ) then
       return 0
     end
-    if ( ( self._has_nulls ) and ( base_addr ) ) then 
+    if ( ( self._nn_vec ) and ( base_addr ) ) then 
       nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
       assert(nn_addr)
       assert(base_len == nn_len)
@@ -402,9 +456,6 @@ end
 function lVector:meta()
   local base_meta = load(Vector.meta(self._base_vec))()
   local nn_meta = nil
-  if ( self._has_nulls ) and ( not self._nn_vec ) then 
-    assert(nil)
-  end
   if ( self._nn_vec ) then 
     nn_meta = load(Vector.meta(self._nn_vec))()
   end
@@ -415,7 +466,11 @@ function lVector:reincarnate()
   if ( Vector.is_nascent(self._base_vec) ) then
     return nil
   end
-  T = {}
+  
+  -- Set persist flag
+  self:persist(true)
+  
+  local T = {}
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 
@@ -423,12 +478,12 @@ function lVector:reincarnate()
   T[#T+1] = "\", "
 
   T[#T+1] = "file_name = \"" 
-  T[#T+1] = self._file_name
+  T[#T+1] = self:file_name()
   T[#T+1] = "\", "
 
-  if ( self._nn_file_name ) then 
+  if ( self:nn_file_name() ) then 
     T[#T+1] = "nn_file_name = \"" 
-    T[#T+1] = self._nn_file_name
+    T[#T+1] = self:nn_file_name()
     T[#T+1] = "\", "
   end
 
