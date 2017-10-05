@@ -22,8 +22,34 @@ extern luaL_Buffer g_errbuf;
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
 
+//----------------------------------------
+static int l_vec_set_name( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  const char * const name  = luaL_checkstring(L, 2);
+  status = vec_set_name(ptr_vec, name); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_set_name. ");
+  return 2;
+}
+//-----------------------------------
+static int l_vec_get_name( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  lua_pushlightuserdata(L, ptr_vec->name);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_get_name");
+  return 2;
+}
+//----------------------------------------
 static int l_vec_is_eov( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+BYE:
   lua_pushboolean(L, ptr_vec->is_eov);
   return 1;
 }
@@ -520,6 +546,8 @@ static const struct luaL_Reg vector_methods[] = {
     { "is_eov", l_vec_is_eov },
     { "set", l_vec_set },
     { "get", l_vec_get },
+    { "set_name", l_vec_set_name },
+    { "get_name", l_vec_get_name },
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },
     { NULL,          NULL               },
@@ -538,6 +566,8 @@ static const struct luaL_Reg vector_functions[] = {
     { "memo", l_vec_memo },
     { "set", l_vec_set },
     { "get", l_vec_get },
+    { "set_name", l_vec_set_name },
+    { "get_name", l_vec_get_name },
     { "eov", l_vec_eov },
     { "chunk_num", l_vec_chunk_num },
     { "chunk_size", l_vec_chunk_size },

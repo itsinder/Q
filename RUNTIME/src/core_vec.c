@@ -738,6 +738,31 @@ BYE:
 }
 
 int
+vec_set_name(
+    VEC_REC_TYPE *ptr_vec,
+    const char * const name
+    )
+{
+  int status = 0;
+  if ( name == NULL ) { go_BYE(-1); }
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  
+  memset(ptr_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
+  if ( strlen(name) > Q_MAX_LEN_INTERNAL_NAME ) {go_BYE(-1); }
+  strcpy(ptr_vec->name, name);
+BYE:
+  return status;
+}
+
+char *
+vec_get_name(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  return ptr_vec->name;
+}
+
+int
 vec_eov(
     VEC_REC_TYPE *ptr_vec
     )

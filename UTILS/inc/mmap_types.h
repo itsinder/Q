@@ -19,6 +19,7 @@ typedef struct _vec_rec_type {
   uint32_t num_in_chunk;
   uint32_t chunk_num;   
 
+  char name[Q_MAX_LEN_INTERNAL_NAME+1]; 
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
   char *map_addr;
