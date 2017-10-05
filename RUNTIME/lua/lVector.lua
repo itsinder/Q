@@ -1,6 +1,7 @@
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
+local register_type = require 'Q/UTILS/lua/q_types'
 local plpath = require "pl.path"
 local Vector = require 'libvec'
 --====================================
@@ -13,16 +14,17 @@ setmetatable(lVector, {
    end,
 })
 
--- TODO Indrajeet to change
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-   local otype = original_type( obj )
-   if  otype == "table" and getmetatable( obj ) == lVector then
-      return "lVector"
-   end
-   return otype
-end
+register_type(lVector, "lVector")
+-- -- TODO Indrajeet to change
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--    local otype = original_type( obj )
+--    if  otype == "table" and getmetatable( obj ) == lVector then
+--       return "lVector"
+--    end
+--    return otype
+-- end
 
 function lVector:is_memo()
   return Vector.is_memo(self._base_vec)
