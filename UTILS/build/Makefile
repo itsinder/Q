@@ -121,6 +121,7 @@ q_operators: f1f2opf3 \
 	f_to_s \
 	ax_equals_b \
 	ainb \
+	drop_nulls \
 	ifxthenyelsez \
 	mv_mul \
 	approx_quantile \

@@ -8,6 +8,9 @@
 #include "_buf_to_file.h"
 #include "_file_exists.h"
 
+// #define Q_MAX_LEN_FILE_NAME  255
+// #define Q_MAX_LEN_INTERNAL_NAME  31
+
 #include "lauxlib.h"
 
 extern luaL_Buffer g_errbuf;
@@ -778,6 +781,7 @@ vec_eov(
   // If memo NOT set, return now; do not persist to disk
   ptr_vec->is_eov = true;
   if ( ptr_vec->is_memo == false ) { goto BYE; }
+  // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
   if ( ptr_vec->file_name[0] == '\0' ) {
     do { 

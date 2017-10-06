@@ -328,8 +328,8 @@ function lVector:put1(s, nn_s)
 end
 
 function lVector:start_write()
-  local X, nX = Vector.start_write(self._base_vec)
   local nn_X, nn_nX
+  local X, nX = Vector.start_write(self._base_vec)
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
