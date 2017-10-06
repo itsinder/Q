@@ -23,7 +23,15 @@ assert(ylen*4 == filesize)
 assert(y:check())
 local a, b = y:eov()
 assert(a) -- unnecessary eov is not an erro
+z = y:meta()
+print(z)
+M = loadstring(z)
+print(M)
+X = M()
+print(X)
 M = loadstring(y:meta())()
+print(M)
+os.exit()
 for k, v in pairs(M) do 
   if ( k == "is_memo") then assert(v == true) end
   if ( k == "field_type") then assert(v == "I4") end

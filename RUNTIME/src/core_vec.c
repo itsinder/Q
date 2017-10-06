@@ -158,6 +158,10 @@ vec_meta(
   if ( ptr_vec->file_name[0] != '\0' ) {
     sprintf(buf, "file_name = \"%s\", ", ptr_vec->file_name);
     strcat(opbuf, buf);
+    int64_t file_size = get_file_size(ptr_vec->file_name);
+    if ( file_size <= 0 ) { go_BYE(-1);}
+    sprintf(buf, "file_size = %d, ", (unsigned long long)file_size);
+    strcat(opbuf, buf);
   }
   sprintf(buf, "field_type = \"%s\", ", ptr_vec->field_type);
   strcat(opbuf, buf);
@@ -169,7 +173,7 @@ vec_meta(
   strcat(opbuf, buf);
   sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
   strcat(opbuf, buf);
-  sprintf(buf, "name = %s, ", ptr_vec->name);
+  sprintf(buf, "name = \"%s\", ", ptr_vec->name);
   strcat(opbuf, buf);
   switch ( ptr_vec->open_mode ) {
     case 0 : strcpy(buf, "open_mode = \"NOT_OPEN\", "); break;
@@ -754,6 +758,15 @@ vec_set_name(
   
   memset(ptr_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
   if ( strlen(name) > Q_MAX_LEN_INTERNAL_NAME ) {go_BYE(-1); }
+  for ( char *cptr = name; *cptr != '\0'; cptr++ ) { 
+    if ( !isascii(*cptr) ) { 
+      fprintf(stderr, "Cannot have character [%c] in name \n", *cptr);
+      go_BYE(-1); 
+    }
+    if ( ( *cptr == ',' ) || ( *cptr == '"' ) || ( *cptr == '\\') ) {
+      go_BYE(-1);
+    }
+  }
   strcpy(ptr_vec->name, name);
 BYE:
   return status;

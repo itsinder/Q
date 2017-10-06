@@ -315,12 +315,14 @@ end
 
 function lVector:put1(s, nn_s)
   assert(s)
-  assert(type(s) == "userdata")
+  print(type(s))
+  assert(type(s) == "Scalar")
   local status = Vector.put1(self._base_vec, s)
   assert(status)
   if ( self._nn_vec ) then 
     assert(nn_s)
-    assert(type(nn_s) == "userdata")
+    assert(type(nn_s) == "Scalar")
+    assert(nn_s:fldtype() == "B1")
     local status = Vector.put1(self._nn_vec, nn_s)
     assert(status)
   end

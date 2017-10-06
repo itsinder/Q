@@ -16,6 +16,11 @@ vname = "01234567890123456789012345678901"
 status = pcall(x.set_name, vname)
 assert(not status)
 --=========================
+-- cannot have comma in name 
+vname = "abc,def"
+status = pcall(x.set_name, vname)
+assert(not status)
+--=========================
 -- test at lVector level
 vname = "def"
 x = lVector( { qtype = "I4", gen = true})
