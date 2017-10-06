@@ -39,12 +39,8 @@ BYE:
 static int l_vec_get_name( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  lua_pushlightuserdata(L, ptr_vec->name);
+  lua_pushstring(L, ptr_vec->name);
   return 1;
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: vec_get_name");
-  return 2;
 }
 //----------------------------------------
 static int l_vec_is_eov( lua_State *L) {
