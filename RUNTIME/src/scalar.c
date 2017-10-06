@@ -384,6 +384,7 @@ static const struct luaL_Reg sclr_functions[] = {
 /*
 ** Open test library
 */
+
 int luaopen_libsclr (lua_State *L) {
   /* Create the metatable and put it on the stack. */
   luaL_newmetatable(L, "Scalar");
@@ -435,8 +436,22 @@ int luaopen_libsclr (lua_State *L) {
   }
   /* Register the object.func functions into the table that is at the
    op of the stack. */
+  
+  // Registering with Q
+  status = luaL_dostring(L, "return require('Q/q_export').export");
+  if (status != 0 ) {
+    printf("Running Q registeration require failed:  %s\n", lua_tostring(L, -1));
+    exit(1);
+  }
+  lua_pushstring(L, "scalar");
   lua_createtable(L, 0, 0);
   luaL_register(L, NULL, sclr_functions);
-
+  status = lua_pcall(L, 2, 1, 0);
+  if (status != 0 ){
+     printf("%d\n", status);
+     printf("Registering with q_export failed: %s\n", lua_tostring(L, -1));
+     exit(1);
+  }
+  
   return 1;
 }
