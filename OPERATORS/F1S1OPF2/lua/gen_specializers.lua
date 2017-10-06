@@ -60,11 +60,11 @@ y = string.gsub(y, "<<comparison>>", " >= " )
 plfile.write("vsgeq_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vsgt")
-y = string.gsub(y, "<<comparison>>", " == " )
+y = string.gsub(y, "<<comparison>>", " > " )
 plfile.write("vsgt_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "vslt")
-y = string.gsub(y, "<<comparison>>", " == " )
+y = string.gsub(y, "<<comparison>>", " < " )
 plfile.write("vslt_specialize.lua", y)
 --=======================
 -- assert(plpath.isfile("cmp2_specialize.tmpl"), "File not found")
@@ -118,12 +118,22 @@ y = string.gsub(y, "<<out_qtype>>", "in_qtype")
 plfile.write("decr_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit")
-y = string.gsub(y, "<<c_code_for_operator>>", "double temp = exp((double)a); c = temp/(1+temp);")
+y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 1;} else{double temp = exp((double)a); c = temp/(1+temp);}")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit2")
-y = string.gsub(y, "<<c_code_for_operator>>", "double temp = exp((double)a); c = temp/((1+temp)*(1+temp));")
+y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 0;} else{double temp = exp((double)a); c = temp/((1+temp)*(1+temp));}")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit2_specialize.lua", y)
+--=======================
+local tbl = 'local funcs = {I1 = "abs", I2 = "abs", I4 = "abs", I8 = "abs", F4 = "fabsf", F8 = "fabs"}\n'
+local tbl2 = 'local cast = {I1 = "(int8_t)", I2 = "(int16_t)", I4 = "(int32_t)", I8 = "(int64_t)", F4 = "", F8 = ""}\n'
+local z = x
+local w = ")\n" .. tbl .. tbl2
+y = string.gsub(z, "[)]", w)
+y = string.gsub(y, "<<operator>>", "abs")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = ".. '".. cast[in_qtype] .. funcs[in_qtype] .."'.."(a);")
+y = string.gsub(y, "<<out_qtype>>", "in_qtype")
+plfile.write("abs_specialize.lua", y)
 --=======================

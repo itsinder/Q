@@ -24,8 +24,8 @@ return function (
       subs.ctype = qconsts.qtypes[qtype].ctype
       subs.qtype = qtype
       subs.initial_val = 0
-      if ( ( ctype == "I1" ) or ( ctype == "I2" ) or 
-        ( ctype == "I4" ) or ( ctype == "I8" ) ) then
+      if ( ( subs.ctype == "I1" ) or ( subs.ctype == "I2" ) or 
+        ( subs.ctype == "I4" ) or ( subs.ctype == "I8" ) ) then
         subs.reduce_ctype = "uint64_t" 
       else
         subs.reduce_ctype = "double" 

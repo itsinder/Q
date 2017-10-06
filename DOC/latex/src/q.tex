@@ -269,6 +269,14 @@ uppercase is recommended for readability. It handles both decimal (42LL)
 and hexadecimal (0x2aLL) literals.
 
 
+\subsection{Writing tests}
+
+\subsubsection{strict}
+
+In all your Lua tests, remember to start with 
+\begin{verbatim}
+require 'Q/UTILS/lua/strict'
+\end{verbatim}
 \subsection{Where to place your require statements in a function}
 In many functions, we have something like
 
@@ -318,11 +326,12 @@ happens with programs that are statically linked against it.
 \section{Data Types}
 
 \subsection{Bit Vectors}
+
 \section{General coding guidelines}
 \subsection{No seg faults}
 Number of things we need to achieve this. 
 \be 
-\item  Trust nobody. Assert everything.
+\item  Trust nobody. Assert everything. 
 \item \TBC
 \ee
 

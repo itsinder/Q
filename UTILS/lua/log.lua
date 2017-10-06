@@ -96,10 +96,10 @@ for i, x in ipairs(modes) do
 end
 
 -- Not overriding if already defined
+--[[
 if oassert == nil then
     oassert = assert
 end
---[[
 assert = function(cond, ...)
     if cond then
         return cond, ...

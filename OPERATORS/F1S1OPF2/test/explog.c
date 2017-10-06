@@ -28,8 +28,8 @@ main(
   Z = malloc(N * sizeof(double));
   return_if_malloc_failed(Y);
   //-----------TESTING-------------
-  status = exp_F8(X, N, NULL, Y);
-  status = log_F8(Y, N, NULL, Z);
+  status = exp_F8(X, N, NULL, Y, NULL);
+  status = log_F8(Y, N, NULL, Z, NULL);
   double threshold = 0.01;
 
   for ( int i = 0; i < N; i++ ) {
@@ -43,7 +43,7 @@ main(
   for ( double x = 0.01; xidx < 100; xidx++, x = x + 0.01 ) { 
     X[xidx] = x;
   }
-  status = logit_F8(X, N, NULL, Y);
+  status = logit_F8(X, N, NULL, Y, NULL);
   for ( xidx = 0; xidx < N; xidx++ ) { 
     double temp = exp(X[xidx]) / (1 + exp(X[xidx]));
     if ( fabs(temp - Y[xidx]) > threshold) {
@@ -52,7 +52,7 @@ main(
     }
   }
   printf("LOGIT SUCCESS\n");
-  status = logit2_F8(X, N, NULL, Y);
+  status = logit2_F8(X, N, NULL, Y, NULL);
   for ( xidx = 0; xidx < N; xidx++ ) { 
     double temp = exp(X[xidx]) / ((1 + exp(X[xidx]))*(1 + exp(X[xidx])));
     if ( fabs(temp - Y[xidx]) > threshold) {

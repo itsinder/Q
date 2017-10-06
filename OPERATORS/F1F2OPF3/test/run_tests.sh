@@ -1,4 +1,4 @@
-#!/bibn/bash
+#!/bin/bash
 set -e 
 INCS=" -I.  -I../../../UTILS/inc/ -I../gen_inc/ "
 test -f ../lua/libf1f2opf3.so

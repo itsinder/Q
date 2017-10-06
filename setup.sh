@@ -70,7 +70,7 @@ mkdir -p $Q_ROOT/lib
 # export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
 export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
 echo "Q_SRC_ROOT: $Q_SRC_ROOT"
-C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp'
+C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wno-unused-parameter -pedantic -fopenmp'
 
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
 echo "QC_FLAGS: $QC_FLAGS"
@@ -91,14 +91,19 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # fi
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "
+# export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
+export Q_LINK_FLAGS=" -llapacke -llapack -lblas -lm -shared "
 echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
 CURR_PATH=`pwd`
 cd $BASE_PATH
 cd ../
 export LUA_PATH="`pwd`/?.lua;`pwd`/?/init.lua;;"
+export LUA_CPATH="${Q_ROOT}/lib/?.so;;"
+export TERRA_PATH="`pwd`/?.t;;"
 cd $CURR_PATH
 echo "LUA_PATH: $LUA_PATH"
+echo "LUA_CPATH: $LUA_CPATH"
+echo "TERRA_PATH: $TERRA_PATH"
 echo "Q_BUILD_DIR: $Q_BUILD_DIR"
 mkdir -p $Q_BUILD_DIR
 mkdir -p $Q_BUILD_DIR/src/

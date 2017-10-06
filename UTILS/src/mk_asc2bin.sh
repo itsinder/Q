@@ -1,21 +1,9 @@
 #!/bin/bash
 set -e
-bash gen_files.sh
+make 
 
-cd ../../OPERATORS/LOAD_CSV/lua/
-bash gen_files.sh
-cd -
-cd ../../OPERATORS/LOAD_CSV/src/
-bash gen_files.sh
-cd -
-
-cd ../../OPERATORS/PRINT/lua/
-bash gen_files.sh
-cd -
-
-cd ../../OPERATORS/PRINT/src/
-bash gen_files.sh
-cd -
+make -C  ../../OPERATORS/LOAD_CSV/lua/
+make -C  ../../OPERATORS/PRINT/lua/
 
 gcc -g -std=gnu99 \
   asc2bin.c \
@@ -61,6 +49,11 @@ diff _yy chk_inF4.txt
 od -i _xx > _yy
 diff _yy chk_inI4.txt
 # echo PREMATURE; exit;
+./asc2bin inB1.csv B1 _xx
+od -d _xx > _yy
+filesize=`stat --printf=%s _xx`
+if [ $filesize != 8 ]; then echo ERROR; exit 1; fi 
+diff _yy chk_inB1.txt
 #------------
 ./asc2bin inSC.csv SC _xx 16 
 od -c --width=16 _xx > _yy

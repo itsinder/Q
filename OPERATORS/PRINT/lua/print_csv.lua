@@ -3,6 +3,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 local function strip_trailing_LL(temp)
   local index1, index2 = string.find(temp,"LL")
@@ -16,42 +17,48 @@ end
 local function chk_cols(column_list)
 
   local qconsts = require 'Q/UTILS/lua/q_consts'
+  assert(column_list)
+  assert(type(column_list) == "table")
+  assert(#column_list > 0)
+  for i, v in ipairs(column_list) do 
+    assert(type(column_list[i]) == "lVector")
+    assert(column_list[i]:length() > 0)
+  end
 
-  local max_length = 0
   local is_SC  = {}
   local is_SV  = {}
   local is_I8  = {}
   local is_col = {}
+  local is_B1 = {}
   local max_length = column_list[1]:length()
   for i = 1, #column_list do
-    assert( ((type(column_list[i]) == "Column") or 
+    assert( ((type(column_list[i]) == "lVector") or 
              (type(column_list[i]) == "number")),
       err.INPUT_NOT_COLUMN_NUMBER)
     
-    is_col[i] = type(column_list[i]) == "Column" 
+    is_col[i] = type(column_list[i]) == "lVector" 
     if is_col[i] then
-      assert(qconsts.qtypes[column_list[i]:fldtype()], 
-      err.INVALID_COLUMN_TYPE)
-      assert(qconsts.qtypes[column_list[i]:fldtype()] ~= "B1", 
-        err.COLUMN_B1_ERROR) --TODO TO BE IMPLEMENTED
+      local qtype = column_list[i]:qtype()
+      assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
       -- dictionary cannot be null in get_meta for SV data type
-      if column_list[i]:fldtype() == "SV" then 
+      if qtype == "SV" then 
         assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
       if  column_list[i]:length() > max_length then 
         max_length = column_list[i]:length() 
       end
-      is_SC[i] = column_list[i]:fldtype() == "SC"    
+      is_B1[i] = qtype == "B1"
+      is_SC[i] = qtype == "SC"    
             -- if field type is SC , then pass field size, else nil
-      is_SV[i] = column_list[i]:fldtype() == "SV"    
+      is_SV[i] = qtype == "SV"    
             -- if field type is SV , then get value from dictionary
-      is_I8[i] = column_list[i]:fldtype() == "I8" 
+      is_I8[i] = qtype == "I8" 
             -- if field type is I8 , then remove LL appended at end
     end
     assert(max_length > 0, "Nothing to print")
   end
-  return is_SC, is_SV, is_I8, is_col, max_length
+  return is_SC, is_SV, is_I8, is_col, is_B1, max_length
 end
 
 --Sri 27/05/17 TODO WHY ISN'T this local?? making it for now, to see if something breaks
@@ -63,9 +70,9 @@ local function process_filter(filter, max_length)
     ub = filter.ub
     where = filter.where
     if ( where ) then
-      assert(type(where) == "Vector",err.FILTER_TYPE_ERROR)
-      -- VIJAY: Should above be Column instead of Vector?  
-      assert(where:fldtype() == "B1",err.FILTER_INVALID_FIELD_TYPE)
+      assert(type(where) == "lVector",err.FILTER_TYPE_ERROR)
+      -- What should be the type of above, lVector?  
+      assert(where:qtype() == "B1",err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
       assert(type(lb) == "number", err.INVALID_LOWER_BOUND_TYPE )
@@ -97,18 +104,18 @@ local print_csv = function (column_list, filter, opfile)
   end
   
   assert( ((type(column_list) == "table") or 
-          (type(column_list) == "Column")), err.INPUT_NOT_TABLE)
+          (type(column_list) == "lVector")), err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
-  if type(column_list) == "Column" then
+  if type(column_list) == "lVector" then
     column_list = {column_list}
   end
   
   -- Initially, all columns had to be same length. That has been relaxed.
 
-  local is_SC, is_SV, is_I8, is_col, max_length = chk_cols(column_list)
+  local is_SC, is_SV, is_I8, is_col, is_B1, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   -- TODO remove hardcoding of 1024
-  local buf = ffi.malloc(1024) 
+  local buf = assert(ffi.malloc(1024))
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
@@ -118,55 +125,51 @@ local print_csv = function (column_list, filter, opfile)
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
+      assert(fp ~= nil, g_err.INVALID_FILE_PATH)
       io.output(fp)
     else
       io.output(io.stdout)
     end
-    
   end
   
   lb = lb + 1 -- for Lua style indexing
   -- recall that upper bounds are inclusive in Lua
   for rowidx = lb, ub do
+    local status, result = nil
+    if ( where ~= nil ) then
+      status, result = pcall(convert_c_to_txt, where, rowidx)
+    end
     if ( ( where == nil ) or 
-         ( where:get_element(rowidx -1 ) ~= ffi.NULL ) ) then
+         ( result ~= nil ) ) then
       for col_idx = 1, num_cols do
-        
-        local temp = nil
+        local status, result = nil
         local col = column_list[col_idx]
         -- if input is scalar, assign scalar value
         if not is_col[col_idx] then 
-          temp = col 
+          result = col 
         else
-          local cbuf = col:get_element(rowidx-1)          
-          if cbuf == ffi.NULL then
-            temp = ""
-          else
-            local ctype =  assert(qconsts.qtypes[col:fldtype()]["ctype"])
-            local str = ffi.cast(ctype.." *",cbuf)
-            temp = tostring(str[0])
-            if is_I8[col_idx] then
-              temp = strip_trailing_LL(temp)
-            end
-            if is_SC[col_idx] then
-              temp = ffi.string(str)
-            end
-            if is_SV[col_idx] then 
-               temp = str[0]
-               local dictionary = col:get_meta("dir")
-               temp = dictionary:get_string_by_index(temp)
-            end
+          status, result = pcall(convert_c_to_txt, col, rowidx)
+          if status == false then
+            --TODO: Handle this condition
+          end         
+          if result == nil then
+            if is_B1[col_idx] == true then result = 0 else result = "" end
           end
+          if ( not ( is_SC[col_idx] or is_SV[col_idx] ) ) 
+          and ( result ~= "" ) then
+            result = tonumber(result)
+          end          
+          --print("Value is: "..tostring(result))                    
         end
         if tbl_rslt then 
-          table.insert(tbl_rslt, temp) 
+          table.insert(tbl_rslt, result) 
           if ( col_idx ~= num_cols ) then 
             table.insert(tbl_rslt, ",") 
           else
             table.insert(tbl_rslt,"\n") 
           end
         else
-          assert(io.write(temp), "Write failed")
+          assert(io.write(result), "Write failed")
           if ( col_idx ~= num_cols ) then 
             assert(io.write(","), "Write failed")
           else

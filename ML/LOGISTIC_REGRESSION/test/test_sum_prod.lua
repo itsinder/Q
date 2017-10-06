@@ -1,3 +1,5 @@
+-- FUNCTIONAL 
+require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local sum_prod = require( 'Q/ML/LOGISTIC_REGRESSION/lua/sum_prod' )
 
@@ -9,7 +11,6 @@ local X = {c1, c2, c3}
 local w = Q.mk_col ( { 2, 0, 1, 4} , "I4")
 
 local A = sum_prod(X, w)
-print "XXXXXXXXXXXXXXX"
 
 for i = 1, #A do
   for j = i, #A do
@@ -17,5 +18,6 @@ for i = 1, #A do
   end
   print("\n")
 end
-
+print("SUCCESS for ", arg[0])
+require('Q/UTILS/lua/cleanup')()
 os.exit()

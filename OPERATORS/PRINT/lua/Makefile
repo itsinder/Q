@@ -19,6 +19,10 @@ all : libprint_csv.so
 ../../UTILS/gen_inc/_is_valid_chars_for_num.h :
 	make -C ../../../UTILS/src/ 
 
+../gen_inc/_B1_to_txt.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/B1_to_txt.c ${INCDIR}
+
 ../gen_inc/_SC_to_txt.h : 
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/SC_to_txt.c ${INCDIR}
@@ -42,11 +46,13 @@ clean :
 	rm -f _*
 	rm -f *.so
 
+../src/B1_to_txt.c : ../gen_inc/_B1_to_txt.h
 
 ../src/SC_to_txt.c : ../gen_inc/_SC_to_txt.h
 
 SRC_FILES =  \
 	../src/SC_to_txt.c \
+	../src/B1_to_txt.c \
 
 GEN_FILES = \
 	../gen_src/_I1_to_txt.c \
@@ -61,6 +67,7 @@ libprint_csv.so : ${SRC_FILES} ${GEN_FILES}
 	test -d  ${Q_BUILD_DIR}/
 	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/_SC_to_txt.h ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_B1_to_txt.h ${Q_BUILD_DIR}/include/
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 

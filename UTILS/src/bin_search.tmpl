@@ -22,7 +22,6 @@ return require 'Q/UTILS/lua/code_gen' {
 
 #include "_${fn}.h"
 
-      //START_FUNC_DECL
       int
       ${fn}(
           const ${ftype} *X,
@@ -31,7 +30,6 @@ return require 'Q/UTILS/lua/code_gen' {
           const char * const str_direction,
           int64_t *ptr_pos
           )
-      //STOP_FUNC_DECL
       {
         int status = 0;
         uint64_t pos, lb, ub, mid;
@@ -51,7 +49,7 @@ return require 'Q/UTILS/lua/code_gen' {
 
         lb = 0; ub = nX - 1;
         *ptr_pos = pos = -1;
-        for ( ; lb <= ub ; ) { 
+        for ( ; lb < ub ; ) {  // TODO P2 Confirm that this is not <=
           mid = ( lb + ub )  / 2 ;
           if ( X[mid] == key ) { 
             pos = mid;

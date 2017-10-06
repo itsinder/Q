@@ -1,5 +1,5 @@
 local lu = require('luaunit')
-local Dictionary = require "dictionary_dataload"
+local Dictionary = require "Q/OPERATORS/DATA_LOAD/lua/dictionary_dataload"
 
 test_dictionary = {}
 

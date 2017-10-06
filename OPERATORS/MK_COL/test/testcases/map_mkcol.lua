@@ -35,6 +35,9 @@ return {
 -- simple I8 values given to mk_col
   { name = "simple F8 values", input = { 1.1, 3.2, 5.3}, qtype = "F8", category= "category2",  precision = 1 },
 
+-- simple B1 values given to mk_col
+  { name = "simple B1 values", input = { 0, 1, 1, 0}, qtype = "B1", category= "category2"},
+
 -- border I1 values given to mk_col
   { name = "border I1 values", input = { 127, -128}, qtype = "I1", category= "category2"},
 
@@ -84,4 +87,8 @@ return {
   -- Overflow I4 values given to mk_col
   { name = "Overflow I4 values", input = { -2147483649 }, qtype = "I4", category= "category1",
     output_regex = g_err.INVALID_LOWER_BOUND},
+
+  -- Overflow I4 values given to mk_col
+  { name = "Invalid B1 values", input = { 2 }, qtype = "B1", category= "category1",
+    output_regex = g_err.INVALID_B1_VALUE}
 }

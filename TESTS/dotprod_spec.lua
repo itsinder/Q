@@ -1,4 +1,5 @@
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 
 local X = {}
 for i = 1,9 do
@@ -37,4 +38,5 @@ for i = 1,1000 do
   assert(btmp == b, "original result: "..b..", different result: "..btmp)
 end
 
+print("SUCCESS for ", arg[0])
 os.exit()

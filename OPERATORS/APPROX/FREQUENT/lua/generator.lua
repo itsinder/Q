@@ -10,7 +10,7 @@ local qtypes = require 'qtypes'
 
 local spfn = require 'specializer_approx_frequent'
 for _, f in ipairs(qtypes) do
-  status, subs, tmpl = pcall(spfn, f)
+  local status, subs, tmpl = pcall(spfn, f)
   if ( not status ) then print(subs) end
   assert(status)
   assert(type(subs) == "table")
