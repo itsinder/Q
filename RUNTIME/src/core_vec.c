@@ -166,6 +166,8 @@ vec_meta(
   strcat(opbuf, buf);
   sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
   strcat(opbuf, buf);
+  sprintf(buf, "name = %s, ", ptr_vec->name);
+  strcat(opbuf, buf);
   switch ( ptr_vec->open_mode ) {
     case 0 : strcpy(buf, "open_mode = \"NOT_OPEN\", "); break;
     case 1 : strcpy(buf, "open_mode = \"READ\", "); break;

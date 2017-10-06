@@ -26,6 +26,22 @@ register_type(lVector, "lVector")
 --    return otype
 -- end
 
+function lVector:get_name()
+  -- the name of an lVector is the name of its base Vector
+  if ( qconsts.debug ) then self:check() end
+  return Vector.get_name(self._base_vec)
+end
+
+function lVector:set_name(vname)
+  -- the name of an lVector is the name of its base Vector
+  if ( qconsts.debug ) then self:check() end
+  assert(vname)
+  assert(type(vname) == "string")
+  local status = Vector.set_name(self._base_vec, vname)
+  assert(status)
+  return self
+end
+
 function lVector:is_memo()
   if ( qconsts.debug ) then self:check() end
   return Vector.is_memo(self._base_vec)
