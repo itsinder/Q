@@ -23,6 +23,7 @@ typedef struct _vec_rec_type {
   char name[31+1]; 
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
+  uint64_t file_size; // valid only after eov()
   char *map_addr;
   size_t map_len;
 

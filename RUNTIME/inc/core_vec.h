@@ -106,4 +106,10 @@ extern char *
 vec_get_name(
     VEC_REC_TYPE *ptr_vec
     );
+extern int 
+vec_cast(
+    VEC_REC_TYPE *ptr_vec,
+    const char * const new_qtype,
+    uint32_t new_width
+    );
 #endif

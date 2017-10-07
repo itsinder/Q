@@ -2,6 +2,7 @@ local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
 local register_type = require 'Q/UTILS/lua/q_types'
+local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local plpath = require "pl.path"
 local Vector = require 'libvec'
 --====================================
@@ -42,10 +43,30 @@ function lVector:set_name(vname)
   return self
 end
 
+function lVector:cast(new_field_type)
+  assert(new_field_type)
+  assert(type(new_field_type) == "string")
+  assert ( ((is_base_qtype(new_field_type)) or (new_field_type == "B1")))
+  if ( self._nn_vec ) then 
+    assert(nil, "TO BE IMPLEMENTED")
+  end
+  new_field_width = qconsts.qtypes[new_field_type].width
+  local status = Vector.cast(self._base_vec,new_field_type,new_field_width)
+  assert(status)
+  if ( qconsts.debug ) then self:check() end
+  return self
+end
+
 function lVector:is_memo()
   if ( qconsts.debug ) then self:check() end
   return Vector.is_memo(self._base_vec)
 end
+
+function lVector:file_size()
+  if ( qconsts.debug ) then self:check() end
+  return Vector.file_size(self._base_vec)
+end
+
 
 function lVector:is_eov()
   if ( qconsts.debug ) then self:check() end
@@ -85,9 +106,6 @@ function lVector.new(arg)
     field_width = qconsts.qtypes[qtype].width
   end
    --=============================
-
-  vector._qtype = qtype
-  vector._field_width = field_width
 
   if arg.gen then 
     is_nascent = true
@@ -168,8 +186,6 @@ function lVector:nn_vec()
   local vector = setmetatable({}, lVector)
   vector._meta = {}
   vector._base_vec = self._nn_vec
-  vector._qtype = "B1"
-  vector._field_width = 0 -- for B1
   if ( qconsts.debug ) then self:check() end
   return vector
 end
@@ -243,22 +259,22 @@ end
 
 function lVector:fldtype()
   if ( qconsts.debug ) then self:check() end
-  return self._qtype
+  return Vector.fldtype(self._base_vec)
 end
 
 function lVector:qtype()
   if ( qconsts.debug ) then self:check() end
-  return self._qtype
+  return Vector.fldtype(self._base_vec)
 end
 
 function lVector:field_size()
   if ( qconsts.debug ) then self:check() end
-  return self._field_width
+  return Vector.field_size(self._base_vec)
 end
 
 function lVector:field_width()
   if ( qconsts.debug ) then self:check() end
-  return self._field_width
+  return Vector.field_size(self._base_vec)
 end
 
 function lVector:file_name()
@@ -531,7 +547,7 @@ function lVector:reincarnate()
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 
-  T[#T+1] = self._qtype
+  T[#T+1] = Vector.fldtype(self._base_vec)
   T[#T+1] = "\", "
 
   T[#T+1] = "file_name = \"" 
