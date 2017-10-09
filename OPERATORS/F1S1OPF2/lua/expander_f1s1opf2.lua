@@ -27,6 +27,7 @@
     assert(qc[func_name], "Missing symbol " .. func_name)
     local f2_qtype = assert(subs.out_qtype)
     local f2_width = qconsts.qtypes[f2_qtype].width
+    if f2_qtype == "B1" then f2_width = 1/8 end
     local buf_sz = qconsts.chunk_size * f2_width
     local f2_buf = assert(ffi.malloc(buf_sz))
     local nn_f2_buf = nil
