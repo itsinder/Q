@@ -21,51 +21,51 @@ return {
     
     -- testing whether csv input file exists
     { testcase_no = 1, meta= "gm_input_file_not_found.lua",data= "dummy.csv", category= "category1", 
-      output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found", opt_args = { use_accelerator = false } },
     -- testing whether csv input file is not empty
     { testcase_no = 2, meta= "gm_input_file_not_found.lua",data= "file_empty.csv", category= "category1", 
-      output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty", opt_args = { use_accelerator = false } },
     -- bad double quote mismatch, string not ending properly with double quotes
     { testcase_no = 3, meta= "gm_double_quotes_mismatch.lua",data= "bad_quote_mismatch.csv", category= "category1", 
-      output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch", opt_args = { use_accelerator = false } },
     -- testing whether appropriate number of commas are given in the csv file
     { testcase_no = 4, meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "invalid 2D data", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "invalid 2D data", opt_args = { use_accelerator = false } },
     -- column count in csv file are less than column count specified in metadata 
     { testcase_no = 5, meta= "gm_column_is_more.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more", opt_args = { use_accesslator = false }  },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more", opt_args = { use_accelerator = false }  },
     -- column count in csv file are more than column count specified in metadata 
     { testcase_no = 6, meta= "gm_column_is_less.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_less", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_less", opt_args = { use_accelerator = false } },
     -- number of columns not same on each csv line
     { testcase_no = 7, meta="gm_column_not_same.lua",data= "bad_col_data_mismatch_each_line.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "column_not_same", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "column_not_same", opt_args = { use_accelerator = false } },
     -- null value in not null field column 1
     { testcase_no = 8, meta= "gm_nil_in_not_nil_field1.lua", data= "I4_2_null.csv", category= "category1",
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field1", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field1", opt_args = { use_accelerator = false } },
     -- null value in not null field column 2
     { testcase_no = 9, meta= "gm_nil_in_not_nil_field2.lua", data= "I4_2_4_null.csv", category= "category1", 
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field2", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field2", opt_args = { use_accelerator = false } },
     -- I1 qtype overflow test
     { testcase_no = 10, meta= "gm_I1_overflow.lua", data= "I1_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I1_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I1_overflow", opt_args = { use_accelerator = false } },
     -- I2 qtype overflow test
     { testcase_no = 11, meta= "gm_I2_overflow.lua", data= "I2_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I2_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I2_overflow", opt_args = { use_accelerator = false } },
     -- I4 qtype overflow test
     { testcase_no = 12, meta= "gm_I4_overflow.lua", data= "I4_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I4_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I4_overflow", opt_args = { use_accelerator = false } },
     -- I8 qtype overflow test
     { testcase_no = 13, meta= "gm_I8_overflow.lua", data= "I8_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I8_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I8_overflow", opt_args = { use_accelerator = false } },
     -- testing for invalid data ( i.e. string in I1 field )
     { testcase_no = 14, meta= "gm_bad_str_in_I1.lua", data= "bad_string_in_I1.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "bad_str_in_I1", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "bad_str_in_I1", opt_args = { use_accelerator = false } },
     -- escaping character in SV field is missing  
     { testcase_no = 15, meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
-      output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char", opt_args = { use_accelerator = false } },
     { testcase_no = 16, meta = "gm_invalid_SC_width.lua", data = "invalid_SC_width.csv", category= "category1",
-      output_regex= g_err.STRING_TOO_LONG, name = "SC width value is invalid", opt_args = { use_accesslator = false } },
+      output_regex= g_err.STRING_TOO_LONG, name = "SC width value is invalid", opt_args = { use_accelerator = false } },
     
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file
