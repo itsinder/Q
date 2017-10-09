@@ -18,12 +18,13 @@ rand_B1(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  uint64_t l_sum  = 0;
+  static uint64_t l_sum;
 
   uint64_t seed = ptr_in->seed;
   double p = ptr_in->probability;
   if ( ( p < 0 ) || ( p > 1 ) ) { go_BYE(-1); }
   if ( idx == 0 ) { //seed has not yet been set
+    l_sum = 0;
     if ( seed == 0 ) {
      seed = RDTSC();
     }
@@ -40,7 +41,7 @@ rand_B1(
       l_sum++;
     }
   }
-  fprintf(stderr, "%llu, %lld, %lf \n", nX, l_sum, p);
+  fprintf(stderr, "randB1: %llu, %lld, %lf \n", nX, l_sum, p);
 BYE:
   return status;
 }
