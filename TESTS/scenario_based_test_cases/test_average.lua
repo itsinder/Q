@@ -1,13 +1,8 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
-local metadata = {
- { name = "eng", has_nulls = true, qtype = "I4", is_load = true }, 
- { name = "phy", has_nulls = true, qtype = "I4", is_load = true }
-}
-
 local M = dofile("meta.lua")
-load_csv_result = Q.load_csv("test.csv", metadata, {use_accesslator = false})
+load_csv_result = Q.load_csv("test.csv", M, {use_accesslator = false})
 
 
 Q.print_csv(load_csv_result, nil, "")
