@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ 
+INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/  -I../inc/
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG
@@ -19,10 +19,16 @@ clean :
 	rm -f _*
 	rm -f *.so
 		
+SRC_FILES = \
+	../src/rand_B1.c \
 
-libs_to_f.so : ${GEN_FILES}
+INC_FILES = \
+	../inc/rand_B1.h \
+
+
+libs_to_f.so : ${GEN_FILES} ${SRC_FILES} ${INC_FILES}
 	luajit generator.lua operators.lua
-	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libs_to_f.so
+	gcc ../gen_src/*.c ${SRC_FILES} ${CFLAGS} ${INCS} -shared -o libs_to_f.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/

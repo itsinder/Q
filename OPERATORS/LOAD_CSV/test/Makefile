@@ -19,6 +19,7 @@ all : test_load_csv_fast
 SRCS = ../src/load_csv_fast.c \
        test_load_csv_fast.c  \
        ../../../UTILS/src/rand_file_name.c \
+       ../../../UTILS/src/get_file_size.c \
        ../../../UTILS/src/trim.c \
        ../../../UTILS/src/file_exists.c \
        ../../../UTILS/src/mmap.c \

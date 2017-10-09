@@ -7,6 +7,10 @@ return function (
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   --=================================
   local hdr = [[
+  typedef struct _rand_B1_rec_type { 
+    uint64_t seed;
+    double probability;
+  } RAND_B1_REC_TYPE;
   typedef struct _rand_<<qtype>>_rec_type { 
     uint64_t seed;
     <<ctype>> lb;
