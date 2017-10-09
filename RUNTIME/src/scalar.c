@@ -409,6 +409,7 @@ int luaopen_libsclr (lua_State *L) {
   lua_pushcfunction(L, l_sclr_div); lua_setfield(L, -2, "__div");
 
   // Following do not work currently
+  // Will not work in 5.1 as per Indrajeet
   lua_pushcfunction(L, l_sclr_to_num); lua_setfield(L, -2, "__tonumber");
   // Above do not work currently
 
@@ -419,8 +420,22 @@ int luaopen_libsclr (lua_State *L) {
    * object:func */
   luaL_register(L, NULL, sclr_methods);
 
+  /* Register Scalar in types table */
+  int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
+  if (status != 0 ) {
+    printf("Running require failed:  %s\n", lua_tostring(L, -1));
+    exit(1);
+  } 
+  luaL_getmetatable(L, "Scalar");
+  lua_pushstring(L, "Scalar");
+  status =  lua_pcall(L, 2, 0, 0);
+  if (status != 0 ){
+     printf("%d\n", status);
+     printf("Registering type failed: %s\n", lua_tostring(L, -1));
+     exit(1);
+  }
   /* Register the object.func functions into the table that is at the
-   * top of the stack. */
+   op of the stack. */
   lua_createtable(L, 0, 0);
   luaL_register(L, NULL, sclr_functions);
 

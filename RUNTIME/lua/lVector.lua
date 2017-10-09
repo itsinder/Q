@@ -1,6 +1,8 @@
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local qconsts= require 'Q/UTILS/lua/q_consts'
 local log    = require 'Q/UTILS/lua/log'
+local register_type = require 'Q/UTILS/lua/q_types'
+local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local plpath = require "pl.path"
 local Vector = require 'libvec'
 --====================================
@@ -13,22 +15,61 @@ setmetatable(lVector, {
    end,
 })
 
--- TODO Indrajeet to change
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-   local otype = original_type( obj )
-   if  otype == "table" and getmetatable( obj ) == lVector then
-      return "lVector"
-   end
-   return otype
+register_type(lVector, "lVector")
+-- -- TODO Indrajeet to change
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--    local otype = original_type( obj )
+--    if  otype == "table" and getmetatable( obj ) == lVector then
+--       return "lVector"
+--    end
+--    return otype
+-- end
+
+function lVector:get_name()
+  -- the name of an lVector is the name of its base Vector
+  if ( qconsts.debug ) then self:check() end
+  return Vector.get_name(self._base_vec)
+end
+
+function lVector:set_name(vname)
+  -- the name of an lVector is the name of its base Vector
+  if ( qconsts.debug ) then self:check() end
+  assert(vname)
+  assert(type(vname) == "string")
+  local status = Vector.set_name(self._base_vec, vname)
+  assert(status)
+  return self
+end
+
+function lVector:cast(new_field_type)
+  assert(new_field_type)
+  assert(type(new_field_type) == "string")
+  assert ( ((is_base_qtype(new_field_type)) or (new_field_type == "B1")))
+  if ( self._nn_vec ) then 
+    assert(nil, "TO BE IMPLEMENTED")
+  end
+  new_field_width = qconsts.qtypes[new_field_type].width
+  local status = Vector.cast(self._base_vec,new_field_type,new_field_width)
+  assert(status)
+  if ( qconsts.debug ) then self:check() end
+  return self
 end
 
 function lVector:is_memo()
+  if ( qconsts.debug ) then self:check() end
   return Vector.is_memo(self._base_vec)
 end
 
+function lVector:file_size()
+  if ( qconsts.debug ) then self:check() end
+  return Vector.file_size(self._base_vec)
+end
+
+
 function lVector:is_eov()
+  if ( qconsts.debug ) then self:check() end
   return Vector.is_eov(self._base_vec)
 end
 
@@ -65,9 +106,6 @@ function lVector.new(arg)
     field_width = qconsts.qtypes[qtype].width
   end
    --=============================
-
-  vector._qtype = qtype
-  vector._field_width = field_width
 
   if arg.gen then 
     is_nascent = true
@@ -131,6 +169,7 @@ function lVector:persist(is_persist)
   if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_persist)
   end
+  if ( qconsts.debug ) then self:check() end
   if ( base_status and nn_status ) then
     return self
   else
@@ -147,8 +186,7 @@ function lVector:nn_vec()
   local vector = setmetatable({}, lVector)
   vector._meta = {}
   vector._base_vec = self._nn_vec
-  vector._qtype = "B1"
-  vector._field_width = 0 -- for B1
+  if ( qconsts.debug ) then self:check() end
   return vector
 end
   
@@ -156,6 +194,7 @@ function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
   self:set_meta("num_nulls")
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
@@ -168,6 +207,7 @@ function lVector:make_nulls(bvec)
   assert(bvec:has_nulls() == false)
   self._nn_vec = bvec._base_vec
   self:set_meta("num_nulls")
+  if ( qconsts.debug ) then self:check() end
   return self
 end
   
@@ -184,6 +224,7 @@ function lVector:memo(is_memo)
   if ( self._nn_vec ) then 
     nn_status = Vector.persist(self._nn_vec, is_memo)
   end
+  if ( qconsts.debug ) then self:check() end
   if ( base_status and nn_status ) then
     return self
   else
@@ -192,42 +233,52 @@ function lVector:memo(is_memo)
 end
 
 function lVector:chunk_num()
+  if ( qconsts.debug ) then self:check() end
   return Vector.chunk_num(self._base_vec)
 end
 
 function lVector:chunk_size()
+  if ( qconsts.debug ) then self:check() end
   return Vector.chunk_size(self._base_vec)
 end
 
 function lVector:has_nulls()
+  if ( qconsts.debug ) then self:check() end
   if ( self._nn_vec ) then return true else return false end
 end
 
 function lVector:num_elements()
+  if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
 
 function lVector:length()
+  if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
 
 function lVector:fldtype()
-  return self._qtype
+  if ( qconsts.debug ) then self:check() end
+  return Vector.fldtype(self._base_vec)
 end
 
 function lVector:qtype()
-  return self._qtype
+  if ( qconsts.debug ) then self:check() end
+  return Vector.fldtype(self._base_vec)
 end
 
 function lVector:field_size()
-  return self._field_width
+  if ( qconsts.debug ) then self:check() end
+  return Vector.field_size(self._base_vec)
 end
 
 function lVector:field_width()
-  return self._field_width
+  if ( qconsts.debug ) then self:check() end
+  return Vector.field_size(self._base_vec)
 end
 
 function lVector:file_name()
+  if ( qconsts.debug ) then self:check() end
   return self:meta().base.file_name
 end
 
@@ -237,6 +288,7 @@ function lVector:nn_file_name()
   if vec_meta.nn then
     nn_file_name = vec_meta.nn.file_name
   end
+  if ( qconsts.debug ) then self:check() end
   return nn_file_name
 end
 
@@ -273,25 +325,29 @@ function lVector:eov()
     local status = Vector.eov(self._nn_vec)
     assert(status)
   end
+  if ( qconsts.debug ) then self:check() end
   return true
 end
 
 function lVector:put1(s, nn_s)
   assert(s)
-  assert(type(s) == "userdata")
+  print(type(s))
+  assert(type(s) == "Scalar")
   local status = Vector.put1(self._base_vec, s)
   assert(status)
   if ( self._nn_vec ) then 
     assert(nn_s)
-    assert(type(nn_s) == "userdata")
+    assert(type(nn_s) == "Scalar")
+    assert(nn_s:fldtype() == "B1")
     local status = Vector.put1(self._nn_vec, nn_s)
     assert(status)
   end
+  if ( qconsts.debug ) then self:check() end
 end
 
 function lVector:start_write()
-  local X, nX = Vector.start_write(self._base_vec)
   local nn_X, nn_nX
+  local X, nX = Vector.start_write(self._base_vec)
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
@@ -300,6 +356,7 @@ function lVector:start_write()
     assert(nn_nX == nX)
     assert(nn_nX)
   end
+  if ( qconsts.debug ) then self:check() end
   return nX, X, nn_X
 end
 
@@ -310,6 +367,7 @@ function lVector:end_write()
     local status = Vector.end_write(self._nn_vec)
     assert(status)
   end
+  if ( qconsts.debug ) then self:check() end
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
@@ -332,17 +390,24 @@ function lVector:put_chunk(base_addr, nn_addr, len)
       assert(status)
     end
   end
+  if ( qconsts.debug ) then self:check() end
 end
 
 function lVector:eval()
   if ( Vector.is_nascent(self._base_vec) ) then
     local chunk_num = self:chunk_num() 
+    local base_len, base_addr, nn_addr 
     repeat
-      local base_len, base_addr, nn_addr = self:chunk(chunk_num)
+      base_len, base_addr, nn_addr = self:chunk(chunk_num)
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
+    print("START TO CALL eov from eval ");
+    self:eov()
+    print("STOP  TO CALL eov from eval ");
+
   end
   -- else, nothing do to since vector has been materialized
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
@@ -352,6 +417,7 @@ function lVector:release_vec_buf(chunk_size)
   if ( self._nn_vec ) then
     assert(Vector.release_vec_buf(self._nn_vec, chunk_size))
   end
+  if ( qconsts.debug ) then self:check() end
   return true
 end
 
@@ -361,6 +427,7 @@ function lVector:get_vec_buf()
   if ( self._nn_vec ) then
     nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
   end
+  if ( qconsts.debug ) then self:check() end
   return base_buf, nn_buf
 end
 
@@ -376,6 +443,7 @@ function lVector:get_all()
     assert(nn_len == base_len)
     assert(nn_addr)
   end
+  if ( qconsts.debug ) then self:check() end
   return base_len, base_addr, nn_addr
 end
 
@@ -413,6 +481,7 @@ function lVector:chunk(chunk_num)
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
     if ( base_addr == nil ) then
+      if ( qconsts.debug ) then self:check() end
       return 0
     end
     if ( ( self._nn_vec ) and ( base_addr ) ) then 
@@ -420,6 +489,7 @@ function lVector:chunk(chunk_num)
       assert(nn_addr)
       assert(base_len == nn_len)
     end
+    if ( qconsts.debug ) then self:check() end
     return base_len, base_addr, nn_addr
   else
     assert(Vector.is_nascent(self._base_vec))
@@ -442,6 +512,7 @@ function lVector:chunk(chunk_num)
         assert(chk == l_chunk_num)
       end
     end
+    if ( qconsts.debug ) then self:check() end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
@@ -459,10 +530,12 @@ function lVector:meta()
   if ( self._nn_vec ) then 
     nn_meta = load(Vector.meta(self._nn_vec))()
   end
+  if ( qconsts.debug ) then self:check() end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
 
 function lVector:reincarnate()
+  if ( qconsts.debug ) then self:check() end
   if ( Vector.is_nascent(self._base_vec) ) then
     return nil
   end
@@ -474,7 +547,7 @@ function lVector:reincarnate()
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 
-  T[#T+1] = self._qtype
+  T[#T+1] = Vector.fldtype(self._base_vec)
   T[#T+1] = "\", "
 
   T[#T+1] = "file_name = \"" 
@@ -488,11 +561,13 @@ function lVector:reincarnate()
   end
 
   T[#T+1] = " } ) "
+  if ( qconsts.debug ) then self:check() end
   return table.concat(T, '')
 end
 
 
 function lVector:set_meta(k, v)
+  if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
   assert(type(k) == "string")
@@ -500,6 +575,7 @@ function lVector:set_meta(k, v)
 end
 
 function lVector:get_meta(k)
+  if ( qconsts.debug ) then self:check() end
   assert(k)
   assert(type(k) == "string")
   return self._meta[k]
