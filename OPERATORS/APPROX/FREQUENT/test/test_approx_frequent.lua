@@ -37,8 +37,8 @@ end
 
 local x = Q.mk_col(x_bare, "I4")
 local y, f, out_len = Q.approx_frequent(x, min_freq, err):eval()
-local _, y_c, _ = y:chunk(-1)
-local _, f_c, _ = f:chunk(-1)
+local _, y_c, _ = y:chunk()
+local _, f_c, _ = f:chunk()
 y = ffi.cast("int*", y_c)
 f = ffi.cast("uint64_t*", f_c)
 

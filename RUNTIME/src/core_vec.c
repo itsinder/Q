@@ -8,9 +8,51 @@
 #include "_buf_to_file.h"
 #include "_file_exists.h"
 
+// #define Q_MAX_LEN_FILE_NAME  255
+// #define Q_MAX_LEN_INTERNAL_NAME  31
+
 #include "lauxlib.h"
 
 extern luaL_Buffer g_errbuf;
+
+int 
+vec_cast(
+    VEC_REC_TYPE *ptr_vec,
+    const char * const new_field_type,
+    uint32_t new_field_size
+    )
+{
+  int status = 0;
+  //--- START ERROR CHECKING
+  status = chk_field_type(new_field_type, new_field_size); cBYE(status);
+  if ( !ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( *ptr_vec->file_name == '\0' ) { go_BYE(-1); }
+  if ( strcmp(new_field_type, "B1") == 0 ) {
+    if ( ( ( ptr_vec->file_size / 8 )  * 8 ) != ptr_vec->file_size ) {
+      go_BYE(-1);
+    }
+  }
+  else {
+    if ( ( ( ptr_vec->file_size / new_field_size )  * new_field_size ) != 
+        ptr_vec->file_size ) {
+      go_BYE(-1);
+    }
+  }
+  if ( ptr_vec->open_mode == 2 ) { go_BYE(-1); }
+  if ( strlen(new_field_type) > 2 ) { go_BYE(-1); }
+  //--- STOP ERROR CHECKING
+  strcpy(ptr_vec->field_type, new_field_type);
+  if ( strcmp(new_field_type, "B1") == 0 ) {
+    ptr_vec->num_elements = ptr_vec->file_size * 8;
+  }
+  else {
+    ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
+  }
+  ptr_vec->field_size   = new_field_size;
+  
+BYE:
+  return status;
+}
 
 extern int 
 flush_buffer(
@@ -155,6 +197,10 @@ vec_meta(
   if ( ptr_vec->file_name[0] != '\0' ) {
     sprintf(buf, "file_name = \"%s\", ", ptr_vec->file_name);
     strcat(opbuf, buf);
+    int64_t file_size = get_file_size(ptr_vec->file_name);
+    if ( file_size <= 0 ) { go_BYE(-1);}
+    sprintf(buf, "file_size = %lld, ", (unsigned long long)file_size);
+    strcat(opbuf, buf);
   }
   sprintf(buf, "field_type = \"%s\", ", ptr_vec->field_type);
   strcat(opbuf, buf);
@@ -165,6 +211,8 @@ vec_meta(
   sprintf(buf, "is_persist = %s, ", ptr_vec->is_persist ? "true" : "false");
   strcat(opbuf, buf);
   sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
+  strcat(opbuf, buf);
+  sprintf(buf, "name = \"%s\", ", ptr_vec->name);
   strcat(opbuf, buf);
   switch ( ptr_vec->open_mode ) {
     case 0 : strcpy(buf, "open_mode = \"NOT_OPEN\", "); break;
@@ -314,7 +362,7 @@ vec_check(
     if ( ( ptr_vec->is_memo ) && ( ptr_vec->chunk_num >= 1 ) ) {
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
-      int64_t fsz = get_file_size(ptr_vec->file_name); 
+      uint64_t fsz = get_file_size(ptr_vec->file_name); 
       if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
         if ( fsz != ( ptr_vec->chunk_num * ptr_vec->chunk_size ) / 8 ) {
           go_BYE(-1);
@@ -738,19 +786,54 @@ BYE:
 }
 
 int
+vec_set_name(
+    VEC_REC_TYPE *ptr_vec,
+    const char * const name
+    )
+{
+  int status = 0;
+  if ( name == NULL ) { go_BYE(-1); }
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  
+  memset(ptr_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
+  if ( strlen(name) > Q_MAX_LEN_INTERNAL_NAME ) {go_BYE(-1); }
+  for ( char *cptr = (char *)name; *cptr != '\0'; cptr++ ) { 
+    if ( !isascii(*cptr) ) { 
+      fprintf(stderr, "Cannot have character [%c] in name \n", *cptr);
+      go_BYE(-1); 
+    }
+    if ( ( *cptr == ',' ) || ( *cptr == '"' ) || ( *cptr == '\\') ) {
+      go_BYE(-1);
+    }
+  }
+  strcpy(ptr_vec->name, name);
+BYE:
+  return status;
+}
+
+char *
+vec_get_name(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  return ptr_vec->name;
+}
+
+int
 vec_eov(
     VEC_REC_TYPE *ptr_vec
     )
 {
   int status = 0;
 
-  if ( ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
   // If memo NOT set, return now; do not persist to disk
   ptr_vec->is_eov = true;
   if ( ptr_vec->is_memo == false ) { goto BYE; }
+  // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
   if ( ptr_vec->file_name[0] == '\0' ) {
     do { 
@@ -761,6 +844,7 @@ vec_eov(
   status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
       ptr_vec->num_in_chunk, ptr_vec->file_name);
   cBYE(status);
+  ptr_vec->file_size = get_file_size(ptr_vec->file_name);
   ptr_vec->is_nascent = false;
   free_if_non_null(ptr_vec->chunk);
   ptr_vec->chunk_num = 0;

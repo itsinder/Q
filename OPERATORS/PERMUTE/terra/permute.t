@@ -1,6 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
-local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/COLUMN/code/lua/lVector'
 require 'Q/OPERATORS/PERMUTE/terra/terra_globals'
 
 local t_permute = function(elemtyp, idxtyp)
@@ -19,19 +19,17 @@ end
 
 t_permute = terralib.memoize(t_permute)
 
--- TODO can move to Column/globals? (nn may be issue)
+-- TODO can move to lVector/globals? (nn may be issue)
 function create_col_with_meta(c)
-  return Column{
-    field_type=c:fldtype(),
-    -- field_size=c:sz(), 
-    --filename= _G["Q_DATA_DIR"] .. "/_" .. M[i].name,
-    write_vector=true }
+  return lVector{
+    qtype=c:fldtype(),
+    gen=true, has_nulls=false}
     -- TODO NULLS, nn_vector
 end
 
 return function(val_col, idx_col, idx_in_src)
-  assert(type(idx_col) == "Column", err.INPUT_NOT_COLUMN) 
-  assert(type(val_col) == "Column", err.INPUT_NOT_COLUMN) 
+  assert(type(idx_col) == "lVector", err.INPUT_NOT_COLUMN) 
+  assert(type(val_col) == "lVector", err.INPUT_NOT_COLUMN) 
   assert(not idx_col:has_nulls(), "Index column cannot have nulls")
   assert(not val_col:has_nulls(), "As of now, Value column cannot have nulls")
 

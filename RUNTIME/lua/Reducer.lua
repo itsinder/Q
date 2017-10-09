@@ -1,6 +1,7 @@
 -- Coding convention. Local variables start with underscore
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local log = require 'Q/UTILS/lua/log'
+local register_type = require 'Q/UTILS/lua/q_types'
 local plpath = require("pl.path")
 local Reducer = {}
 Reducer.__index = Reducer
@@ -12,15 +13,16 @@ setmetatable(Reducer, {
   end,
 })
 
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-  local otype = original_type( obj )
-  if  otype == "table" and getmetatable( obj ) == Reducer then
-    return "Reducer"
-  end
-  return otype
-end
+register_type(Reducer, "Reducer")
+-- local original_type = type  -- saves `type` function
+-- -- monkey patch type function
+-- type = function( obj )
+--   local otype = original_type( obj )
+--   if  otype == "table" and getmetatable( obj ) == Reducer then
+--     return "Reducer"
+--   end
+--   return otype
+-- end
 
 function Reducer.new(arg)
   assert(arg.coro == nil, "Migrate code to reducer style, where gen, func, value must be specified")
