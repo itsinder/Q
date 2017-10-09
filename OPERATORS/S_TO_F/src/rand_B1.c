@@ -18,6 +18,7 @@ rand_B1(
 //STOP_FUNC_DECL
 {
   int status = 0;
+  uint64_t l_sum  = 0;
 
   uint64_t seed = ptr_in->seed;
   double p = ptr_in->probability;
@@ -36,8 +37,10 @@ rand_B1(
     if ( rval <= p ) { 
       uint64_t bval = ( (uint64_t)1 << bit_idx );
       X[word_idx] |= bval;
+      l_sum++;
     }
   }
+  fprintf(stderr, "%llu, %lld, %lf \n", nX, l_sum, p);
 BYE:
   return status;
 }

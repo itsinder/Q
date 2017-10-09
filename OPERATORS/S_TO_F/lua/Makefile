@@ -32,6 +32,8 @@ libs_to_f.so : ${GEN_FILES} ${SRC_FILES} ${INC_FILES}
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
+	cp ${SRC_FILES} ${Q_BUILD_DIR}/src/
+	cp ${INC_FILES} ${Q_BUILD_DIR}/include/
 
 _s_to_f.lua : 
 	lua pkg_s_to_f.lua
