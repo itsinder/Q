@@ -16,6 +16,7 @@ branches:
   only:
     - dev
     - dev_ramesh
+    - dev-inder
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
@@ -26,6 +27,7 @@ before_script:
 
 script:
   - busted . -v -c --lua=luajit -p="_spec.lua"
+  - luacov
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
