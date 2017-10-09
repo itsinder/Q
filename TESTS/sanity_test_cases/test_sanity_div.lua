@@ -1,3 +1,4 @@
+-- This test checks that division of a vector by null vector dies with "floating point expection" error.
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 

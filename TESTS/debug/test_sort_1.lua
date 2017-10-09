@@ -1,4 +1,4 @@
-
+-- When 2 complete vectors are added its resultant can be sorted. At present an issue to be fixed 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
