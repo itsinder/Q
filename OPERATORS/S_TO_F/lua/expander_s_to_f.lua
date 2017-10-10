@@ -30,11 +30,11 @@ return function (a, args)
       chunk_size = subs.len - lb
     end
     if ( chunk_size <= 0 ) then
-      return 0, nil, nil
+      return nil
     else
       qc[func_name](buff, chunk_size, subs.c_mem, lb)
+      return chunk_size, buff, nil
     end
-    return chunk_size, buff, nil
   end
   return lVector{gen=gen1, has_nulls=false, qtype=out_qtype}
 end

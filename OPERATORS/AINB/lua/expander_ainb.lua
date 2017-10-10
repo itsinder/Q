@@ -37,7 +37,7 @@ local expander_ainb = function(op, a, b)
   local cbuf = assert(ffi.malloc(csz), "malloc failed")
   local function ainb_gen(chunk_idx)
     local alen, aptr, nn_aptr = a:chunk(chunk_idx) 
-    if ( alen == 0 )  then
+    if ( ( not alen ) or ( alen == 0 ) ) then
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
