@@ -18,15 +18,14 @@ return function (a, x )
   local getter = assert(subs.getter)
   assert(type(getter) == "function")
   --==================
-  local idx = 0
   local lgen = function(chunk_index)
+    local idx = chunk_index * qconsts.chunk_size
     local x_len, x_chunk, nn_x_chunk
     x_len, x_chunk, nn_x_chunk = x:chunk(chunk_index)
     if x_len and x_len > 0 then
       qc[func_name](x_chunk, x_len, reduce_struct, idx);
-      idx = idx + x_len
       return reduce_struct
-    end -- if
+    end 
   end
   local s =  Reducer ( { gen = lgen, func = getter, value = reduce_struct} )
   return s

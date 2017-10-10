@@ -2,7 +2,7 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 --========================================
-len = 200000
+len =65536 * 4 
 p = 0.25;
 actual = Q.sum(Q.rand( { probability = p, qtype = "B1", len = len })):eval()
 expected = len * p

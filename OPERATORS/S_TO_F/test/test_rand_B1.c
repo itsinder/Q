@@ -6,20 +6,19 @@ int main(
     ) 
 {
   int status = 0;
-  int n = 1048576;
-  uint64_t *X = (uint64_t *) malloc((n+1)*sizeof(uint64_t));
-  for ( int i = 0; i < n+1; i++ ) {
-    X[i] = 0;
-  }
+  int n = 1048576+8;
+  void *Y = malloc(n);
+  uint8_t *X = (uint8_t *) Y;
+  memset(X, '\0', n);
   RAND_B1_REC_TYPE args;
-  double p = 0.01;
+  double p = 0.02;
   args.seed = 0;
   args.probability = p;
 
-  int m = n*64+3;
+  int m = 1048576+3;
   status = rand_B1(X, m, &args, 0); cBYE(status);
   int actual_cnt = 0;
-  for ( int i = 0; i < n+1; i ++ ) { 
+  for ( int i = 0; i < n+8; i ++ ) { 
     actual_cnt += __builtin_popcountll(X[i]);
   }
   int theoretical_cnt = (int)(m * args.probability);

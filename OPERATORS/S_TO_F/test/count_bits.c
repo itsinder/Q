@@ -16,8 +16,11 @@ main(
   uint64_t sum = 0;
   for ( int i = 0; i < n; i++ ) { 
     sum += __builtin_popcountll(X[i]);
+    if ( i % 65536 == 0 ) {
+      printf("%d:%d \n", i, actual_cnt);
+    }
   }
-  printf("sum = %llu\n", sum);
+  printf("n = %d, sum = %llu\n", n, sum);
 BYE:
   return  status;
 }

@@ -30,6 +30,14 @@ rand_B1(
     }
     srand48(seed);
   }
+  //-- Initialize to 0
+  uint8_t *lX = X;
+  uint64_t lnX = nX / 8; 
+  if ( ( lnX * 8 ) != nX ) { lnX++; } 
+// #pragma omp parallel for
+  for ( uint64_t i = 0; i < lnX; i++ ) { 
+    lX[i] = 0;
+  }
 // #pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
     uint64_t word_idx = i >> 6; /* divide by 64 */
@@ -41,7 +49,7 @@ rand_B1(
       l_sum++;
     }
   }
-  fprintf(stderr, "randB1: %llu, %lld, %lf \n", nX, l_sum, p);
+  fprintf(stderr, "randB1: %d, %llu, %lld, %lf \n", idx, nX, l_sum, p);
 BYE:
   return status;
 }
