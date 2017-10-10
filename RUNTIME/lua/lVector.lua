@@ -497,23 +497,25 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-    if ( buf_size < qconsts.chunk_size ) then
-      if ( base_data ) then
-        self:put_chunk(base_data, nn_data, buf_size)
-      end
-      self:eov()
+
+    if ( base_data ) then 
+      -- this is the simpler case where generator malloc's
+      self:put_chunk(base_data, nn_data, buf_size)
     else
-      if ( base_data ) then 
-        -- this is the simpler case where generator malloc's
-        self:put_chunk(base_data, nn_data, buf_size)
-      else
-        -- this is the advanced case of using the Vector's buffer.
-        local chk =  self:chunk_num()
-        assert(chk == l_chunk_num)
-      end
+      -- this is the advanced case of using the Vector's buffer.
+      local chk =  self:chunk_num()
+      assert(chk == l_chunk_num)
     end
+    
+    local len, buf, nn_buf = self:chunk(l_chunk_num)
+    
+    if ( buf_size < qconsts.chunk_size ) then
+      self:eov()
+    end
+    
     if ( qconsts.debug ) then self:check() end
-    return self:chunk(l_chunk_num)
+    
+    return len, buf, nn_buf
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
     status = self._gen(chunk_num, self)
