@@ -508,7 +508,9 @@ function lVector:chunk(chunk_num)
       assert(chk == l_chunk_num)
     end
 
-    if ( buf_size == 0 and self:length() < 1 ) then
+    if ( buf_size == 0 and self:length() > 1 ) then
+      self:eov()
+    else
       return 0, nil, nil
     end
     
