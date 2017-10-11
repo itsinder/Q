@@ -26,15 +26,22 @@ local function expander_where(op, a, b)
   local function where_gen(chunk_idx)
     local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
     local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
-    local out_len = assert(ffi.malloc(ffi.sizeof("size_t")))
     if a_len == 0 then
       return 0, nil, nil
     end
     assert(a_len == b_len)
     assert(a_nn_chunk == nil, "Null is not supported")
+    local out_len = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+    out_len = ffi.cast("uint64_t *", out_len)
     local status = qc[func_name](a_chunk, b_chunk, a_len, out_buf, out_len)
     assert(status == 0, "C error in WHERE")
-    return tonumber(out_len), out_buf, nil 
+    out_len = tonumber(out_len[0])
+    if out_len == 0 then
+      return 0, nil, nil
+    end
+    return out_len, out_buf, nil 
   end
   return lVector( { gen = where_gen, has_nulls = false, qtype = a:qtype() } )
 end
+
+return expander_where
