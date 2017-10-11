@@ -28,7 +28,7 @@
 #define LEN_BASE_FILE_NAME 64
 #define MAX_LEN_DIR_NAME 255
 
-typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8 } qtype_type;
+typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8, B1 } qtype_type;
 //START_FUNC_DECL
 int
 load_csv_fast(
@@ -59,6 +59,7 @@ load_csv_fast(
   char **out_files = NULL;
   char **nil_files = NULL;
   char *opdir = NULL; 
+  uint64_t *word_B1 = NULL; // used for 64 bit integer buffer if col is B1
 
   //---------------------------------
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
@@ -82,6 +83,10 @@ load_csv_fast(
 
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
     memset(str_for_lua, '\0', sz_str_for_lua);
+  }
+  word_B1 = malloc(nC * sizeof(uint64_t));
+  for ( uint32_t i = 0; i < nC; i++ ) {
+    word_B1[i] = 0;
   }
 
   for ( uint32_t i = 0; i < nC; i++ ) {
@@ -150,6 +155,9 @@ load_csv_fast(
     }
     else if ( strcasecmp(fldtypes[i], "F8") == 0 ) {
       qtypes[i] = F8;
+    }
+    else if ( strcasecmp(fldtypes[i], "B1") == 0 ) {
+      qtypes[i] = B1;
     }
     else { go_BYE(-1); }
   }
@@ -275,6 +283,25 @@ load_csv_fast(
 
     //write element to file
     switch ( qtypes[col_ctr] ) {
+      case B1:
+        {
+          int8_t bit_idx = row_ctr % 64;
+          uint8_t bit_val = 0;
+          if ( bit_idx == 63 ) {
+            fwrite(word_B1+col_ctr, 1, sizeof(uint64_t), ofps[col_ctr]);
+          }
+          if ( bit_idx == 64 ) { word_B1[col_ctr] = 0; }
+          if ( is_val_null ) { 
+            bit_val = 0;
+          }
+          else {
+            status = txt_to_I1(buf, &tempI1); 
+            if ( ( tempI1 < 0 ) || ( tempI1 > 1 ) )  { go_BYE(-1); }
+            bit_val = (uint8_t)tempI1;
+          }
+          word_B1[col_ctr] |= (bit_val << bit_idx);
+        }
+        break;
       case I1:
         if ( is_val_null ) { 
           fwrite(&null_val, 1, sizeof(int8_t), ofps[col_ctr]);
@@ -283,7 +310,6 @@ load_csv_fast(
           status = txt_to_I1(buf, &tempI1); 
           fwrite(&tempI1, 1, sizeof(int8_t), ofps[col_ctr]);
         }
-//        printf("I1\n");
         break;
       case I2:
         if ( is_val_null ) { 
@@ -293,7 +319,6 @@ load_csv_fast(
           status = txt_to_I2(buf, &tempI2); 
           fwrite(&tempI2, 1, sizeof(int16_t), ofps[col_ctr]);
         }
-  //      printf("I2");
         break;
       case I4:
         if ( is_val_null ) { 
@@ -303,7 +328,6 @@ load_csv_fast(
           status = txt_to_I4(buf, &tempI4); 
           fwrite(&tempI4, 1, sizeof(int32_t), ofps[col_ctr]);
         }
-    //    printf("I4\n");
         break;
       case I8:
         if ( is_val_null ) { 
@@ -313,7 +337,6 @@ load_csv_fast(
           status = txt_to_I8(buf, &tempI8); 
           fwrite(&tempI8, 1, sizeof(int64_t), ofps[col_ctr]);
         }
-        //printf("I8\n");
         break;
       case F4:
         if ( is_val_null ) { 
@@ -323,7 +346,6 @@ load_csv_fast(
           status = txt_to_F4(buf, &tempF4); 
           fwrite(&tempF4, 1, sizeof(float), ofps[col_ctr]);
         }
-      //  printf("F4\n");
         break;
       case F8:
         if ( is_val_null ) { 
@@ -333,7 +355,6 @@ load_csv_fast(
           status = txt_to_F8(buf, &tempF8); 
           fwrite(&tempF8, 1, sizeof(double), ofps[col_ctr]);
         }
-        //printf("F8\n");
         break;
       default:
         //should not come here
@@ -360,10 +381,16 @@ load_csv_fast(
   //header row
   *ptr_nR = row_ctr;
 
-  //write any remaining nil element info to file
+  // Handle any buffers that need to be flushed
   for ( uint32_t i = 0; i < nC; i++ ) {
+    //write any remaining nil element info to file
     if ( ( nn_ofps[i] != NULL ) && ( row_ctr % 64 != 0 ) ) {
       fwrite(nn_buf + i, 1, sizeof(uint64_t), nn_ofps[i]);
+    }
+    //write any remaining B1 element info to file
+    if ( ( ofps[i] != NULL ) && ( row_ctr % 64 != 0 ) && 
+        ( qtypes[i] == B1 ) ) {
+      fwrite(word_B1+i, 1, sizeof(uint64_t), ofps[i]);
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
@@ -432,6 +459,7 @@ BYE:
   free_if_non_null(nn_ofps);
   free_if_non_null(opdir);
   free_if_non_null(nn_buf);
+  free_if_non_null(word_B1);
 
   return bak_status;
 }

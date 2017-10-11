@@ -14,10 +14,24 @@ return function (
   } RAND_<<qtype>>_REC_TYPE;
 ]]
 
+  local tmpl
+  local subs = {};
+  local status
   assert(type(args) == "table")
+  local qtype = assert(args.qtype)
+  if ( qtype == "B1" ) then
+    local spfn = require 'Q/OPERATORS/S_TO_F/lua/rand_specialize_B1'
+    status, subs, tmpl = pcall(spfn, args)
+    if ( not status ) then 
+      print(subs) 
+      return 
+    else 
+      return subs, tmpl
+    end
+  end
+
   local lb   = assert(args.lb)
   local ub   = assert(args.ub)
-  local qtype = assert(args.qtype)
   local len   = assert(args.len)
   local seed   = args.seed
 
@@ -38,7 +52,6 @@ return function (
   assert(type(len) == "number")
   assert(len > 0)
 
-  local subs = {};
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
@@ -60,7 +73,7 @@ return function (
     assert(nil, "Unknown type " .. qtype)
   end
   --=========================
-  local tmpl = 'rand.tmpl'
+  tmpl = 'rand.tmpl'
   subs.fn = "rand_" .. qtype
   subs.c_mem = c_mem
   subs.out_ctype = qconsts.qtypes[qtype].ctype
