@@ -402,7 +402,9 @@ function lVector:eval()
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
     print("START TO CALL eov from eval ");
-    self:eov()
+    if ( self:length() > 0 ) then
+      self:eov()
+    end
     print("STOP  TO CALL eov from eval ");
 
   end
@@ -497,7 +499,6 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-
     if ( base_data ) then 
       -- this is the simpler case where generator malloc's
       self:put_chunk(base_data, nn_data, buf_size)
@@ -506,9 +507,13 @@ function lVector:chunk(chunk_num)
       local chk =  self:chunk_num()
       assert(chk == l_chunk_num)
     end
+
+    if ( buf_size == 0 and self:length() < 1 ) then
+      return 0, nil, nil
+    end
     
     local len, buf, nn_buf = self:chunk(l_chunk_num)
-    
+
     if ( buf_size < qconsts.chunk_size ) then
       self:eov()
     end
