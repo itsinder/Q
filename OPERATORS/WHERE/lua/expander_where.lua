@@ -13,6 +13,16 @@ local function expander_where(op, a, b)
   local sp_fn_name = "Q/OPERATORS/WHERE/lua/where_specialize"
   local spfn = assert(require(sp_fn_name))
 
+  -- Check min and max value from bit vector metadata
+  local meta = b:meta()
+  if meta.aux and meta.aux["min"] and meta.aux["max"] then
+    if meta.aux["min"] == 1 and meta.aux["max"] == 1 then
+      return a
+    elseif meta.aux["min"] == 0 and meta.aux["max"] == 0 then
+      return nil
+    end
+  end
+
   local status, subs, len = pcall(spfn, a:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)

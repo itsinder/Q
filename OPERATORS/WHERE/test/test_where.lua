@@ -28,7 +28,6 @@ c:eval()
 
 assert(c:length() == 0, "Length Mismatch")
 --======================================
-
 print("=======================================")
 b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
 
@@ -45,8 +44,23 @@ for i = 1, c:length() do
 end
 
 Q.print_csv(c, nil, "")
+--======================================
+print("=======================================")
+b = Q.mk_col({0, 0, 0, 0, 0}, "B1")
+b:set_meta("min", 0)
+b:set_meta("max", 0)
+local c = Q.where(a, b)
+assert(c == nil)
 
 --======================================
+print("=======================================")
+b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
+b:set_meta("min", 1)
+b:set_meta("max", 1)
+local c = Q.where(a, b)
+assert(c == a)
+--======================================
+
 
 print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
