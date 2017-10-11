@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "load_csv_fast.h"
+#include "_get_file_size.h"
 #include "q_incs.h"
 #include "_mmap.h"
 
@@ -27,6 +28,7 @@ main(
   uint64_t nR = 0;
   bool is_hdr = false;
   bool has_nulls[MAX_NUM_COLS];
+  int field_width[MAX_NUM_COLS];
   bool is_load[MAX_NUM_COLS];
   uint64_t num_nulls[MAX_NUM_COLS];
  
@@ -84,19 +86,27 @@ main(
         break;
       case 1 : 
         is_hdr = true;
-        nC = 3;
+        nC = 4;
         strcpy(infile, "small_with_header.csv");
-        strcpy(fldtypes[0], "I4");
+        strcpy(fldtypes[0], "I8");
         strcpy(fldtypes[1], "F4");
-        strcpy(fldtypes[2], "I4");
+        strcpy(fldtypes[2], "I1");
+        strcpy(fldtypes[3], "B1");
+
+        field_width[0] = 8;
+        field_width[1] = 4;
+        field_width[2] = 1;
+        field_width[3] = 0; // this  is special case of B1
 
         is_load[0] = true;
         is_load[1] = true;
         is_load[2] = true;
+        is_load[3] = true;
 
         has_nulls[0] = false;
         has_nulls[1] = false;
         has_nulls[2] = false;
+        has_nulls[3] = false;
         break;
       case 2 : 
         is_hdr = true;
@@ -203,7 +213,19 @@ main(
           fprintf(stdout, "%s\n", str_for_lua);
         }
         else {
+          if ( nR != 6 ) { go_BYE(-1); }
           /* Verify that there are no nil files */
+          for ( uint32_t i = 0; i < nC; i++ ) {
+            int64_t fsz = get_file_size(out_files[i]);
+            if ( fsz < 0 ) { go_BYE(-1); }
+            if ( strcmp(fldtypes[i], "B1") == 0 ) { 
+              if ( fsz != 8 ) { go_BYE(-1); }
+            }
+            else {
+              if ( (uint64_t)fsz != field_width[i] * nR ) { 
+                go_BYE(-1); }
+            }
+          }
           for ( uint32_t i = 0; i < nC; i++ ) {
             if ( nil_files[i] != NULL ) { go_BYE(-1); }
           }
@@ -376,10 +398,10 @@ BYE:
     free_if_non_null(fldtypes[i]);
   }
   if ( status == 0 ) { 
-    fprintf(stdout, "SUCCESS");
+    fprintf(stdout, "SUCCESS\n");
   }
   else {
-    fprintf(stdout, "FAILURE");
+    fprintf(stdout, "FAILURE\n");
   }
   return status;
 }

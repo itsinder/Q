@@ -128,10 +128,10 @@ local initialize_buffers = function(M)
       end
       
       -- Allocate memory for output buf and add to pool
-      out_buf_array[#out_buf_array + 1] = cmem.new(out_buf_size * field_size)
+      out_buf_array[#out_buf_array + 1] = ffi.malloc(out_buf_size * field_size)
 
       -- Allocate memory for nn buf and add to pool
-      out_buf_nn_array[#out_buf_nn_array + 1] = cmem.new(nn_buf_size)
+      out_buf_nn_array[#out_buf_nn_array + 1] = ffi.malloc(nn_buf_size)
 
       -- Initialize both buffers to 0
       ffi.fill(out_buf_array[col_idx], out_buf_size * field_size, 0)

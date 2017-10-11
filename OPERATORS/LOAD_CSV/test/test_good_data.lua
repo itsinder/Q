@@ -3,6 +3,7 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
+local dbg = require 'Q/UTILS/lua/debugger'
 local load_csv = Q.load_csv
 
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))

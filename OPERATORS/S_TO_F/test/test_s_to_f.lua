@@ -6,7 +6,7 @@ z = Q.const( { val = 5, qtype = "I4", len = 10 })
 z:eval()
 Q.print_csv(z, nil, "")
 --========================================
-z = Q.rand( { lb = 10, ub = 20, seed = 1234, qtype = "I4", len = 10 })
+z = Q.rand( { lb = 100, ub = 200, seed = 1234, qtype = "I4", len = 10 })
 z:eval()
 Q.print_csv(z, nil, "")
 --========================================

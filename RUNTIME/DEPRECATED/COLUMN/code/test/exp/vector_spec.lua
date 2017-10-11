@@ -1,4 +1,3 @@
-require("busted")
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Vector = require 'Q/RUNTIME/COLUMN/code/lua/Vector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
@@ -10,6 +9,13 @@ local v_type = "I4"
 describe("Vector" , function(vector_type)
    vector_type = vector_type or v_type
       
+   describe("should read from files", function()
+     pending("need a valid filename")    
+     pending("needs a valid type")
+     pending("needs a valid length")
+     pending("verify number of chunks")
+   end)
+   
    describe("should allow push semantics", function()
            local v1 = Vector({filename=f_name, field_type=vector_type })
            local d_type= qconsts.qtypes[v1:fldtype()].ctype
@@ -31,16 +37,22 @@ describe("Vector" , function(vector_type)
             else
                  assert.True(size < qconsts.chunk_size)
                  assert.True(size == v1:length())
-
              end
          end)
-         it("with correct offsets", function()
+         it("whose bytes should depdend  on the type", function()
+         
+         end)
+         it("whose length should be independent of the type", function()
+                 
+         end)
+        
+         it("which should have correct offsets", function()
             assert.True(tonumber(ptr[size - 1]) == chunk_num * qconsts.chunk_size + size - 1 )
          end)
      end)
 
      describe("whose length", function()
-         it("matches file size", function() 
+         it("should match the file size", function() 
             local size = plpath.getsize(v1.filename)/ ffi.sizeof(d_type)
             local chunk, chunk_size = v1:chunk(-1)
             assert.True(size == chunk_size)
