@@ -23,8 +23,9 @@ return function (suite, fn, tests_to_run)
   end
   
   local function myassert(cond, i, name, msg) 
-    if not cond then 
-      failures = failures .. i .. ' - ' .. name .. '\n'
+    if not cond then
+      failures = failures .. i
+      if name then failures = failures .. ' - ' .. name .. '\n' end
       if msg then failures = failures .. "[" .. msg .. "],\n" end
     end
   end
@@ -49,7 +50,7 @@ return function (suite, fn, tests_to_run)
         myassert (result, test_num, test.name)
       else      
         result = status
-        myassert (result, test_num, res, test.name)
+        myassert (result, test_num, test.name, res)
       end
     end
     utils["testcase_results"](test, suite.test_for, suite.test_type, result, "")
