@@ -1,6 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
-local lVector = require 'Q/RUNTIME/COLUMN/code/lua/lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 require 'Q/OPERATORS/PERMUTE/terra/terra_globals'
 
 local t_permute = function(elemtyp, idxtyp)

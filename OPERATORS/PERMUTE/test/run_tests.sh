@@ -5,5 +5,5 @@ then
   exit -1
 fi
 CDIR=`pwd`
-export LUA_PATH="$LUA_PATH;$CDIR/../../../../?.t;;"
-luajit $Q_SRC_ROOT/UTILS/lua/test_runner.lua Q/OPERATORS/PERMUTE/terra/permute Q/OPERATORS/PERMUTE/test/testsuite_permute $1
+
+luajit -e "require('terra')" $Q_SRC_ROOT/UTILS/lua/test_runner.lua Q/OPERATORS/PERMUTE/terra/permute Q/OPERATORS/PERMUTE/test/testsuite_permute $1
