@@ -168,7 +168,7 @@ load_csv = function (
   end
   -- currently qtype not supported in load_csv lua code
   -- TODO: support B1 in load_csv lua code
-  assert(M.qtype ~= "B1" and use_accelerator ~= false," qtype B1 not supported in load_csv lua")
+  -- assert(M.qtype ~= "B1" and use_accelerator ~= false," qtype B1 not supported in load_csv lua")
   
   local cols_to_return
   
