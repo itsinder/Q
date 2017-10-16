@@ -30,7 +30,7 @@ local function expander_where(op, a, b)
   assert(qc[func_name], "Symbol not defined " .. func_name)
   
   -- allocate buffer for output
-  local out_buf_size = a:length() * qconsts.qtypes[a:qtype()].width
+  local out_buf_size = qconsts.chunk_size * qconsts.qtypes[a:qtype()].width
   local out_buf = assert(ffi.malloc(out_buf_size))
   
   local function where_gen(chunk_idx)
