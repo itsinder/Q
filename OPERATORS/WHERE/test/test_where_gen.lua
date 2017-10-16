@@ -15,6 +15,7 @@ local b_input_table = {1, 0, 0, 1, 0}
 -- generator validator function
 local function my_magic_function(a_chunk, b_chunk, a_len, out_buf, out_len)
   print("Validating Generator Function")
+  
   a_chunk = ffi.cast(a_ctype .. " *", a_chunk)
   b_chunk = ffi.cast(b_ctype .. " *", b_chunk)
   out_buf = ffi.cast(a_ctype .. " *", out_buf)
@@ -47,11 +48,33 @@ qc[fns_name] = my_magic_function
 local Q = require 'Q'
 local a = Q.mk_col(a_input_table, a_qtype)
 local b = Q.mk_col(b_input_table, b_qtype)
+
 local c = Q.where(a, b)
 c:eval()
 Q.print_csv(c, nil, "")
-
 --======================================
+--[[
+print("===================================================")
+local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65540} )
+a:eval()
+
+local b = Q.rand( {lb = 0, ub = 1, qtype = "I1", len = 65540})
+b:eval()
+
+local b_B1 = Q.convert(b, {qtype = "B1"})
+b_B1:eval()
+Q.print_csv(b_B1, nil, "")
+
+--print(Q.sum(b_B1):eval())
+
+local c = Q.where(a, b_B1)
+c:eval()
+
+print(c:length())
+-- Q.print_csv(c, nil, "")
+]]
+--======================================
+
 os.execute("rm _*")
 print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
