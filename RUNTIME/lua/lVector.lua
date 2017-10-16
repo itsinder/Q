@@ -507,15 +507,11 @@ function lVector:chunk(chunk_num)
       local chk =  self:chunk_num()
       assert(chk == l_chunk_num)
     end
-
-    if ( buf_size == 0 and self:length() > 1 ) then
-      self:eov()
-    else
+    
+    if ( buf_size == 0 and self:length() == 0 ) then
       return 0, nil, nil
     end
-    
     local len, buf, nn_buf = self:chunk(l_chunk_num)
-
     if ( buf_size < qconsts.chunk_size ) then
       self:eov()
     end
