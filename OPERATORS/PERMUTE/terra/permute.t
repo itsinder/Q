@@ -1,6 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
 local lVector = require 'Q/RUNTIME/lua/lVector'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 require 'Q/OPERATORS/PERMUTE/terra/terra_globals'
 
 local t_permute = function(elemtyp, idxtyp)
@@ -51,14 +52,15 @@ return function(val_col, idx_col, idx_in_src)
   if ( idx_n > 2147483647 ) then assert(idx_qtype ~= "I4") end
   
   -- get one chunk with everything in it
-  local chk_val_n, val_vec, nn_val_vec = val_col:chunk(-1)
+  local chk_val_n, val_vec, nn_val_vec = val_col:chunk()
   assert (chk_val_n == val_n, "Didn't get full input array in permute()")
 
-  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:chunk(-1)
+  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:chunk()
   assert (chk_idx_n == idx_n, "Didn't get full input array in permute()")
 
   -- TODO setting size as (val_n - 1) also passes test-cases. WHY ??!!!
-  local out_arr = t_Array(val_qtype, val_n)
+  -- local out_arr = t_Array(val_qtype, val_n)
+  local out_arr = ffi.malloc(qconsts.qtypes[val_qtype].width * val_n)
   
   -- Below also works, but GC unclear
   --local out_arr = terralib.new(tertyp[val_n])
@@ -68,7 +70,7 @@ return function(val_col, idx_col, idx_in_src)
   
   t_permute(tertyp, terra_types[idx_qtype])(val_vec, idx_vec, out_arr, val_n, idx_in_src)
   local out_col = create_col_with_meta(val_col)
-  out_col:put_chunk(val_n, out_arr, nil) 
+  out_col:put_chunk(out_arr, nil, val_n) 
   out_col:eov()
   return out_col
 end

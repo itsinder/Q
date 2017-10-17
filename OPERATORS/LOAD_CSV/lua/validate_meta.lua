@@ -18,7 +18,6 @@ return function (
     assert(type(fld_M) == "table", col .. err.COLUMN_DESC_ERROR)
     assert(fld_M.name,  col .. err.METADATA_NAME_NULL)
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
-    assert(fld_M.qtype ~= "B1", col .. " qtype B1 not supported in load_csv")
     assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
     if fld_M.has_nulls ~= nil then 
       assert((fld_M.has_nulls == true  or fld_M.has_nulls == false ), col .. err.INVALID_NN_BOOL_VALUE )

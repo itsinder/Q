@@ -4,8 +4,6 @@ local err           = require 'Q/UTILS/lua/error_code'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local qc            = require 'Q/UTILS/lua/q_core'
-local cmem    = require 'libcmem'
-
 local Dictionary = require 'Q/UTILS/lua/dictionary'
 local lVector     = require 'Q/RUNTIME/lua/lVector'
 local plstring   = require 'pl.stringx'
@@ -168,6 +166,9 @@ load_csv = function (
       is_hdr = opt_args["is_hdr"]
     end
   end
+  -- currently qtype not supported in load_csv lua code
+  -- TODO: support B1 in load_csv lua code
+  -- assert(M.qtype ~= "B1" and use_accelerator ~= false," qtype B1 not supported in load_csv lua")
   
   local cols_to_return
   
@@ -188,7 +189,8 @@ load_csv = function (
     local data_dir = require('Q/q_export').Q_DATA_DIR
     local nC = #M
     local nR = ffi.malloc(ffi.sizeof("uint64_t"))
-
+    nR = ffi.cast("uint64_t *", nR)
+    
     local fldtypes = ffi.malloc(#M * ffi.sizeof("char *"))
     fldtypes = ffi.cast("char **", fldtypes)
     for i = 1, #M do
@@ -219,7 +221,6 @@ load_csv = function (
     
     local str_for_lua = ffi.malloc(sz_str_for_lua)
     str_for_lua = ffi.cast("char *", str_for_lua)
-  
     -- call to the load_csv_fast function
     local status = qc["load_csv_fast"](data_dir, infile, nC, nR, fldtypes, 
       is_hdr, is_load, has_nulls, num_nulls, out_files, nil_files,
@@ -232,7 +233,6 @@ load_csv = function (
     local T = loadstring(vector_string)()
     
     assert( (type(T) == "table" and type(T[1]) == "lVector" ), "type of T is not lVector")
-    
     cols_to_return = T
   else
     

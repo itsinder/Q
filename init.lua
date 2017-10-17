@@ -22,5 +22,6 @@ require "Q/OPERATORS/APPROX/QUANTILE/lua/approx_quantile"
 require "Q/OPERATORS/APPROX/FREQUENT/lua/approx_frequent"
 require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
+require 'Q/OPERATORS/WHERE/lua/where'
 
 return require 'Q/q_export'
