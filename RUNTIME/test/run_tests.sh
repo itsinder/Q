@@ -27,5 +27,6 @@ $LJ test_vec_SC.lua
 asc2bin in1_I4.csv I4 _in1_I4.bin
 $LJ test_gen3.lua
 $L test_bvec.lua
+$LJ test_gen4.lua
 bash test_lVector.sh
 echo "SUCCESS for $0 in $PWD"

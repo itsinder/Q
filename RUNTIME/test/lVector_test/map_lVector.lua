@@ -158,7 +158,7 @@ return {
     assert_fns = "nascent_vector8_3",
     name = "nascent_vector_followed_eov_try_start_write()_after_get_chunk()",
     meta = "gm_create_nascent_vector2.lua",
-    num_elements = 10,
+    num_elements = 65540,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },  
