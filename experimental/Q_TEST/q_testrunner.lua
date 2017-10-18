@@ -1,5 +1,5 @@
 --[[
-For the purposes of this tool, below are axiomatic defintions:
+For the purposes of this tool, below are axiomatic definitions:
 "Test"/"Test case": A lua function that takes no arguments, and returns nothing. It is typically 
 expected that this function will test some behavior using assert's.
 
