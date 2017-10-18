@@ -12,14 +12,13 @@ local operators = dofile(operator_file)
 
 qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
-local num_produced = 0
 local args = {}
 args.len = 100
 for i, operator in ipairs(operators) do
+  local num_produced = 0
   print("working on " .. operator)
   local sp_fn = assert(require(operator .. "_specialize"))
   for i, qtype in ipairs(qtypes) do
-    print("qtype " .. qtype)
     -- args.qtype = qtype
     args.qtype = qtype
     if ( operator == "const" ) then 
@@ -31,6 +30,10 @@ for i, operator in ipairs(operators) do
     elseif (operator == "seq" ) then
       args.start = 1
       args.by = 3
+    elseif (operator == "period" ) then
+      args.start = 1
+      args.by = 3
+      args.period = 4
     else
       assert(nil, "Control should not come here")
     end
@@ -38,7 +41,6 @@ for i, operator in ipairs(operators) do
     assert(status, subs)
     gen_code.doth(subs, tmpl, incdir)
     gen_code.dotc(subs, tmpl, srcdir)
-    print("produced ", subs.fn)
   end
+  assert(num_produced >= 0)
 end
---assert(num_produced >= 0)

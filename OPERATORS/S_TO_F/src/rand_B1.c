@@ -31,7 +31,7 @@ rand_B1(
     srand48(seed);
   }
   //-- Initialize to 0
-  uint8_t *lX = X;
+  uint8_t *lX = (uint8_t *)X;
   uint64_t lnX = nX / 8; 
   if ( ( lnX * 8 ) != nX ) { lnX++; } 
 // #pragma omp parallel for
@@ -49,7 +49,7 @@ rand_B1(
       l_sum++;
     }
   }
-  fprintf(stderr, "randB1: %d, %llu, %lld, %lf \n", idx, nX, l_sum, p);
+  // fprintf(stderr, "randB1: %d, %llu, %lld, %lf \n", idx, nX, l_sum, p);
 BYE:
   return status;
 }
