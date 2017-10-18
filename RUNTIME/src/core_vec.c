@@ -390,8 +390,8 @@ vec_check(
   else {
     if ( ptr_vec->is_memo == false    ) { go_BYE(-1); }
     if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
-    if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
-    if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
+    //if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
+    //if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
     int is_file = file_exists(ptr_vec->file_name); 
     if ( is_file != 1 ) { 
       fprintf(stderr, "File does not exist [%s]\n", ptr_vec->file_name);
@@ -455,6 +455,23 @@ vec_memo(
 BYE:
   return status;
 }
+
+int
+vec_clean_chunk(
+    VEC_REC_TYPE *ptr_vec
+)
+{
+  int status = 0;
+  if ( ptr_vec->chunk != NULL ) {
+    // Clean the chunk and chunk metadata
+    free_if_non_null(ptr_vec->chunk);
+    ptr_vec->chunk_num = 0;
+    ptr_vec->num_in_chunk = 0;          
+  }
+BYE:
+  return status;      
+}
+
 int
 vec_get(
     VEC_REC_TYPE *ptr_vec,
@@ -474,33 +491,6 @@ vec_get(
     if ( !ptr_vec->is_eov ) { go_BYE(-1); }
     if ( ptr_vec->is_nascent ) { go_BYE(-1); }
   }
-  if ( ptr_vec->is_nascent == false ) {
-    switch ( ptr_vec->open_mode ) {
-      case 0 : 
-        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
-        cBYE(status);
-        ptr_vec->map_addr = X;
-        ptr_vec->map_len  = nX;
-        ptr_vec->open_mode = 1; // indicating read */
-        break;
-      case 1 : /* opened in read mode */
-        /* nothing to do */
-        break;
-      case 2 : /* opened in write mode */
-        go_BYE(-1);
-        break;
-      default :  /* invalid value */
-        go_BYE(-1);
-        break;
-    }
-    if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
-    if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
-    if ( len == 0 ) {  // nothing more to do 
-      *ptr_ret_addr = ptr_vec->map_addr;
-      *ptr_ret_len  = ptr_vec->num_elements;
-      goto BYE;
-    }
-  }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
   // from 64 = (67 -3) position. In other words, if you wanted
@@ -513,9 +503,61 @@ vec_get(
     len += bit_idx;
     idx -= bit_idx; 
   }
-  if ( ptr_vec->is_nascent ) {
-    uint32_t chunk_num = idx / ptr_vec->chunk_size;
-    uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
+  uint32_t chunk_num = idx / ptr_vec->chunk_size;
+  uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
+  if ( ptr_vec->is_nascent == false) {
+    // Check if required chunk is the last chunk and chunk is not yet cleaned
+    if ( chunk_num == ptr_vec->chunk_num && ptr_vec->chunk != NULL ) {
+      // printf("Serving request from in-memory buffer\n");
+      // Serve request from buffer
+      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
+      uint32_t offset;
+      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+        offset = chunk_idx / 8; // 8 bits in a byte 
+      }
+      else {
+        offset = chunk_idx * ptr_vec->field_size;
+      }
+      ret_addr = ptr_vec->chunk + offset;
+      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));    
+    }
+    else {
+      // printf("Serving request from file\n");
+      if ( ptr_vec->chunk != NULL ) {
+        status = vec_clean_chunk(ptr_vec); cBYE(status);
+      }
+      switch ( ptr_vec->open_mode ) {
+        case 0 : 
+          status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+          cBYE(status);
+          ptr_vec->map_addr = X;
+          ptr_vec->map_len  = nX;
+          ptr_vec->open_mode = 1; // indicating read */
+          break;
+        case 1 : /* opened in read mode */
+          /* nothing to do */
+          break;
+        case 2 : /* opened in write mode */
+          go_BYE(-1);
+          break;
+        default :  /* invalid value */
+          go_BYE(-1);
+          break;
+      }
+      if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+      if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+      if ( len == 0 ) {  // nothing more to do
+        ret_addr = ptr_vec->map_addr;
+        ret_len  = ptr_vec->num_elements;
+      }
+      else {
+        if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+        ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+        ret_len  = mcr_min(ptr_vec->num_elements - idx, len);            
+      }
+    }
+  }
+  else {
     if ( chunk_num == ptr_vec->chunk_num ) {
       if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
       uint32_t offset;
@@ -567,12 +609,6 @@ vec_get(
      *   ret_len should be min(ptr_vec->num_in_chunk - chunk_idx, len)
      */
     ret_addr = addr; 
-  }
-  else {
-    if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
-    // bad check: if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
-    ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-    ret_len  = mcr_min(ptr_vec->num_elements - idx, len);
   }
   *ptr_ret_addr = ret_addr;
   *ptr_ret_len  = ret_len;
@@ -703,6 +739,9 @@ vec_start_write(
   if ( ptr_vec->open_mode != 0) { go_BYE(-1); }
   if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
   if ( ptr_vec->map_len  != 0    )  { go_BYE(-1); }
+  if ( ptr_vec->chunk != NULL ) {
+    status = vec_clean_chunk(ptr_vec); cBYE(status);
+  }
   bool is_write = true;
   status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
   cBYE(status);
@@ -825,8 +864,8 @@ vec_eov(
     )
 {
   int status = 0;
-
   if ( ptr_vec->is_eov ) { go_BYE(-1); } // TODO P1 Do we have to be so harsh?
+  // if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
@@ -846,9 +885,6 @@ vec_eov(
   cBYE(status);
   ptr_vec->file_size = get_file_size(ptr_vec->file_name);
   ptr_vec->is_nascent = false;
-  free_if_non_null(ptr_vec->chunk);
-  ptr_vec->chunk_num = 0;
-  ptr_vec->num_in_chunk = 0;
 
   // We defer mmaping the file to when access is requested
 BYE:

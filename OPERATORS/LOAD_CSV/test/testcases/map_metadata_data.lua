@@ -18,7 +18,7 @@ local g_err = require 'Q/UTILS/lua/error_code'
 return { 
   -- error messages test cases
   -- falls in category 1
-    
+  
     -- testing whether csv input file exists
     { testcase_no = 1, meta= "gm_input_file_not_found.lua",data= "dummy.csv", category= "category1", 
       output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found", opt_args = { use_accelerator = false } },
@@ -117,11 +117,15 @@ return {
     --{ meta = "gm_valid_SC_dict_exists_add_true.lua", data = "SV_valid.csv", category= "category2",
     --  output_regex =  {"Sample","String","For","Varchar"}, name = "valid_SC_dict_exists_add_true" 
     --},
-    
+    -- CSV file with valid B1 values
+    {
+      testcase_no = 29, meta = "gm_valid_B1.lua", data = "B1_valid.csv", category= "category2",
+      output_regex = {1, 0, 1, 0, 1, 0, 0, 1}, name = "valid B1"  
+    },
     
     -- category 3 testcases contains more than 1 Column.
     -- combination of I2, I2 and SV data type
-    { testcase_no = 29, meta = "gm_load_success.lua", data = "I2_I2_SV_3_4.csv", category= "category3", 
+    { testcase_no = 30, meta = "gm_load_success.lua", data = "I2_I2_SV_3_4.csv", category= "category3", 
       output_regex = {
                         {1001,1002,1003},
                         {2012,2013,2014},
@@ -131,39 +135,50 @@ return {
     },
     
     -- third row is null
-    { testcase_no = 30, meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv", category= "category3",
+    { testcase_no = 31, meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv", category= "category3",
       output_regex = {
                         {"hello","hii","","hey"},
                         {92514.2,9459.1,"",987548.5}
                      },
       name = "whole_row_null" 
     },
-
     -- null present in I4 datatype in CSV file
-    { testcase_no = 31, meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
+    { testcase_no = 32, meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
       output_regex = {
                         {111,111,333,"",444},
                         {222,222,"",123,444}
                      },
       name = "nil_data_I4" 
     },
-    
     -- null present in SV data type in CSV file
-    { testcase_no = 32, meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", category= "category3",
+    { testcase_no = 33, meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", category= "category3",
       output_regex = {
                         {"hello","hii","","","hey"},
                         {92514,9459,925,987,987548}
                      },
       name = "nil_data_SV"
     },
+    -- more than 1 column testing with B1 
+    -- cols are I4 and B1
+    { testcase_no = 34, meta = "gm_valid_I4_B1.lua", data = "I4_B1_valid.csv", category= "category3", 
+      output_regex = {
+                       {1001,1002,1003,1004,1005,1006},
+                       {1,1,1,1,1,0}
+                     },
+      name = "testing B1 with more than one cols" 
+    },
     
     -- check the size of output binary file is correct, 
-    { testcase_no = 33, meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
+    { testcase_no = 35, meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
       output_regex= {12, 6, 12}, name = "valid_bin_file_size" 
     },
     
     -- if has_nulls = true, but no nulls present in CSV file, then null file should be deleted
-    { testcase_no = 34, meta = "gm_nil_data_file_deletion.lua", data = "I4_valid.csv", category= "category5",
+    { testcase_no = 36, meta = "gm_nil_data_file_deletion.lua", data = "I4_valid.csv", category= "category5",
       output_regex = 1, name = "nil_data_file_deletion" 
-    }
+    },
+    
+        
+
+    
 }

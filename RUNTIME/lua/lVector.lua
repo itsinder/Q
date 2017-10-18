@@ -331,7 +331,6 @@ end
 
 function lVector:put1(s, nn_s)
   assert(s)
-  print(type(s))
   assert(type(s) == "Scalar")
   local status = Vector.put1(self._base_vec, s)
   assert(status)

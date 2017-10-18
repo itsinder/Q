@@ -25,9 +25,8 @@ clean :
 	rm -f *.so
 
 libwhere.so : ${GEN_FILES} \
-	where.tmpl \
-	../../../UTILS/gen_inc/_bytes_to_bits.h
-	luajit generator.lua # TODO This should not be here. Hack
+	where.tmpl
+	luajit generator.lua
 	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libwhere.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/

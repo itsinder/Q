@@ -400,10 +400,10 @@ load_csv_fast(
     for ( uint32_t i = 0; i < nC; i++ ) {
       if ( !is_load[i] ) { continue; }
       if ( num_nulls[i] == 0 ) {  
-        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\"});\n", xcol_ctr, fldtypes[i], out_files[i]);
+        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", num_elements = %d});\n", xcol_ctr, fldtypes[i], out_files[i],row_ctr);
       }
       else {
-        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nn_file_name = \"%s\" });\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i]);
+        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nn_file_name = \"%s\", num_elements = %d});\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i],row_ctr);
       }
       // TODO: Check for buffer overflow 
       strcat(str_for_lua, xbuf);
