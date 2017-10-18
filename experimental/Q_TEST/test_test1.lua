@@ -9,4 +9,4 @@ assert (1==2)
 end
 
 -- tests are identified by the index
-return {t1,t2, tag="FUNCTIONAL"}
+return {t1,t2}

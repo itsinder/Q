@@ -16,14 +16,19 @@ local run_tests = function(tests, name)
 end
 
 local run_suite = function(suite_name, test_name)
-    print ("Running suite " .. suite_name)
-    if (test_name) then print ("Running only test in unsafe mode " .. test_name) end
+    print ("Running suite " .. suite_name .. "...")
+    if (test_name) then print ("Running only test " .. test_name .. " in unsafe mode..." ) end
     local tests = dofile(suite_name)
     if (test_name) then
         run_tests(tests, test_name)  -- one shot
     else
         return run_tests(tests)
     end
+end
+
+local usage = function() 
+    print("USAGE:")
+    print("luajit q_testrunner <suite_file/root_dir>")
 end
 
 local plpath = require 'pl.path'
@@ -34,16 +39,22 @@ assert(plpath.isdir(q_root .. "/data/"))
 os.execute("rm -r -f " .. q_root .. "/data/*")
 require('Q/UTILS/lua/cleanup')()
 
-local suite_name = arg[1]
+local path = arg[1]
 local test_name = arg[2]
 
-if (suite_name) then
-    local pass,fail = run_suite(suite_name, test_name)
+if (path and plpath.isfile(path)) then
+    local pass,fail = run_suite(path, test_name)
     if pass then
         print("PASS: " .. plpretty.write(pass, "") .. "; FAIL: " .. plpretty.write(fail, ""))
     end
 else
-    local files = (require "q_test_discovery")("/home/srinath/Ramesh/Q/experimental/Q_TEST/")
+    -- run all tests in a DIR, either custom or default Q_SRC_ROOT
+    if not (path and plpath.isdir(path)) then 
+        usage()
+        os.exit()
+    end
+    print ("Discovering and running all test suites under " .. path)
+    local files = (require "q_test_discovery")(path)
     local res = {}
     for _,f in pairs(files) do
         res[f] = {}
