@@ -28,7 +28,8 @@ end
 
 local usage = function() 
     print("USAGE:")
-    print("luajit q_testrunner <suite_file/root_dir>")
+    print("luajit q_testrunner.lua <root_dir>")    
+    print("luajit q_testrunner.lua <suite_file> [<test_case_id>]")
 end
 
 local plpath = require 'pl.path'
