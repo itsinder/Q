@@ -42,16 +42,18 @@ period_${out_qtype}(
   ${out_ctype} by    = ptr_in->by;
   int         period = ptr_in->period;
 
-  ${out_ctype} j = start;
+  int offset = idx % period;
+  ${out_ctype} j = start + (by * ( idx % period));
   for ( uint64_t i = 0; i < nX; i += 1 ) { 
-    if ( idx % period == 0 ) {
+    X[i] = j;
+    offset++;
+    if ( offset == period ) { 
+      offset = 0;
       j = start;
     }
     else {
       j += by;
     }
-    X[i] = j;
-    idx++;
   }
   return status;
 }

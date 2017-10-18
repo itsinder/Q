@@ -12,8 +12,8 @@
 
   local types = { 'B1', 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
-  local num_produced = 0
   for i, operator in ipairs(operators) do
+    local num_produced = 0
     local sp_fn = assert(require(operator .. "_specialize"))
     for i, intype in ipairs(types) do 
       local status, subs, tmpl = pcall(sp_fn, intype)
@@ -29,5 +29,5 @@
         print("Failed ", intype, subs)
       end
     end
+    assert(num_produced > 0)
   end
-  assert(num_produced > 0)

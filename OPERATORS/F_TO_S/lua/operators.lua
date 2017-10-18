@@ -1,6 +1,6 @@
 return { 
-"min",
-"max",
+ "min",
+ "max",
 "sum",
-"sum_sqr"
+ "sum_sqr"
 }

@@ -43,7 +43,8 @@ sum_B1(
   } 
   ptr_args->sum_val += g_sum;
   ptr_args->num     += nR;
-  fprintf(stderr, "sumB1: %d, %d: %d ===> %d: %d \n", 
+  /* fprintf(stderr, "sumB1: %d, %d: %d ===> %d: %d \n", 
       idx, g_sum, nR, ptr_args->sum_val, ptr_args->num);
+      */
   return status;
 }

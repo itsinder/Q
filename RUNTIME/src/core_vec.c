@@ -864,8 +864,9 @@ vec_eov(
     )
 {
   int status = 0;
-  if ( ptr_vec->is_eov ) { go_BYE(-1); } // TODO P1 Do we have to be so harsh?
-  // if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
+  // if ( ptr_vec->is_eov ) { go_BYE(-1); } 
+  // TODO Discuss above with Krushnakant
+  if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }

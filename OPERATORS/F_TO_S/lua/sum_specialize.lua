@@ -24,11 +24,13 @@ return function (
       subs.ctype = qconsts.qtypes[qtype].ctype
       subs.qtype = qtype
       subs.initial_val = 0
-      if ( ( subs.ctype == "I1" ) or ( subs.ctype == "I2" ) or 
-        ( subs.ctype == "I4" ) or ( subs.ctype == "I8" ) ) then
-        subs.reduce_ctype = "uint64_t" 
-      else
+      if ( ( subs.qtype == "I1" ) or ( subs.qtype == "I2" ) or 
+        ( subs.qtype == "I4" ) or ( subs.qtype == "I8" ) ) then
+        subs.reduce_ctype = "int64_t" 
+      elseif ( ( subs.qtype == "F4" ) or ( subs.qtype == "F8" ) ) then
         subs.reduce_ctype = "double" 
+      else
+        assert(nil)
       end
       subs.reducer = "mcr_nop"
       subs.t_reducer = "mcr_sum"

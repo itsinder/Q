@@ -25,8 +25,10 @@ SRC_FILES = \
 INC_FILES = \
 	../inc/rand_B1.h \
 
+TMPL_FILES = period.tmpl rand.tmpl seq.tmpl const.tmpl
 
-libs_to_f.so : ${GEN_FILES} ${SRC_FILES} ${INC_FILES}
+
+libs_to_f.so : ${GEN_FILES} ${SRC_FILES} ${INC_FILES} ${TMPL_FILES}
 	luajit generator.lua operators.lua
 	gcc ../gen_src/*.c ${SRC_FILES} ${CFLAGS} ${INCS} -shared -o libs_to_f.so
 	test -d ${Q_BUILD_DIR}

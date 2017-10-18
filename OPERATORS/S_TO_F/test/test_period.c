@@ -5,7 +5,7 @@
 
 int main() {
   int status = 0;
-  int n = 10;
+  int n = 11;
   double *X = malloc(n*sizeof(double));
   PERIOD_F8_REC_TYPE args;
   args.start = 1.5;

@@ -7,9 +7,19 @@ for iter = 1, 100 do
   local c2 = Q.sum(c1)
   c2:eval()
 end
+
 local status = pcall(Q.sum, 123)
 assert(status == false)
-print("SUCCESS for " .. arg[0])
+
+n = 1048576+17
+y = Q.seq({start = 1, by = 1, qtype = "I4", len = n })
+z = Q.sum(y):eval()
+if ( z ~= (n * (n+1) / 2 ) ) then 
+  print("FAILURE for " .. arg[0])
+else
+  print("SUCCESS for " .. arg[0])
+end
+  
 require('Q/UTILS/lua/cleanup')()
 os.exit()
 --=========================================
