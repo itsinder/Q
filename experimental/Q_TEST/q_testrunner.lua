@@ -1,3 +1,19 @@
+--[[
+For the purposes of this tool, below are axiomatic defintions:
+"Test"/"Test case": A lua function that takes no arguments, and returns nothing. It is typically 
+expected that this function will test some behavior using assert's.
+
+"Pass": A test is considered to pass if it returns successfully without any errors
+"Fail": A test is considered to fail if it raises an error (typically due to a failed assert)
+
+"Test suite": A .lua file that, when require'd, returns an table of test cases. For each entry of the
+table, the key acts as the identifier/name of a test case, the value is the test case itself.
+Note that the table can also be an array, in which case the index-into-array is the identifier for the
+test cases in that suite.
+
+Run luajit q_testrunner.lua to see its usage.
+]]
+
 local run_tests = function(tests, name)
     if (name) then 
         local n = tonumber(name)
