@@ -26,11 +26,10 @@
 extern int luaopen_libsclr (lua_State *L);
 
 static int l_sclr_to_cdata( lua_State *L) {
-  int status = 0;
   SCLR_REC_TYPE *ptr_sclr = NULL;
 
   ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
-  if ( ptr_sclr == NULL ) { go_BYE(-1); }
+  if ( ptr_sclr == NULL ) { WHEREAMI; goto BYE; }
   lua_pushlightuserdata(L, &(ptr_sclr->cdata));
   luaL_getmetatable(L, "CMEM");
   lua_setmetatable(L, -2);
@@ -42,7 +41,6 @@ BYE:
 }
 
 static int l_sclr_to_num( lua_State *L) {
-  int status = 0;
 
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
@@ -68,7 +66,7 @@ static int l_sclr_to_num( lua_State *L) {
     lua_pushnumber(L, ptr_sclr->cdata.valF8);
   }
   else {
-    go_BYE(-1);
+    WHEREAMI; goto BYE;
   }
   return 1;
 BYE:
@@ -78,14 +76,12 @@ BYE:
 }
 
 static int l_fldtype(lua_State *L) {
-  int status = 0;
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   lua_pushstring(L, ptr_sclr->field_type);
   return 1;
 }
 
 static int l_sclr_to_str( lua_State *L) {
-int status = 0;
 #define BUFLEN 31
   char buf[BUFLEN+1];
 
@@ -120,7 +116,7 @@ int status = 0;
     snprintf(buf, BUFLEN, "%lf", ptr_sclr->cdata.valF8);
   }
   else {
-    go_BYE(-1);
+    WHEREAMI; goto BYE;
   }
   lua_pushstring(L, buf);
   return 1;

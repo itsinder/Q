@@ -112,4 +112,8 @@ vec_cast(
     const char * const new_qtype,
     uint32_t new_width
     );
+extern int
+vec_clean_chunk(
+    VEC_REC_TYPE *ptr_vec
+    );
 #endif

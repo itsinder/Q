@@ -42,8 +42,10 @@ assert(plpath.isfile("_in1_I4.bin"))
 local y = Vector.new('I4', '_in1_I4.bin')
 y:persist(true)
 s = Scalar.new(123, "I4")
+print("START: Deliberate error attempt")
 status = y:set(s, 0)
 assert(status == nil)
+print("STOP : Deliberate error attempt")
 --==============================================
 -- try to modify a vector created as read only by eov. Should fail
 local y = Vector.new('I4')
@@ -51,8 +53,10 @@ status = y:put1(s)
 assert(status)
 status = y:eov(true)
 assert(status)
+print("START: Deliberate error attempt")
 status = y:set(s, 0)
 assert(status == nil)
+print("STOP : Deliberate error attempt")
 --==============================================
 -- can memo a vector until it hits chunk size. then must fail
 local y = Vector.new('I4')
@@ -65,8 +69,10 @@ for i = 1, chunk_size do
 end
 status = y:put1(s)
 assert(status)
+print("START: Deliberate error attempt")
 status = y:memo(is_memo)
 assert(status == nil)
+print("STOP : Deliberate error attempt")
 --==============================================
 -- num_in_chunk should increase steadily and then reset after chunk_sizr
 local y = Vector.new('I4')
@@ -114,6 +120,7 @@ local num_elements = 10000
 for j = 1, num_elements do 
   local s1 = Scalar.new(j, "I4")
   y:put1(s1)
+  assert(y:check())
 end
 -- print("writing meta data of nascent vector")
 M = loadstring(y:meta())(); 
@@ -122,14 +129,16 @@ for k, v in pairs(M) do
   if ( k == "is_nascent" ) then assert(v == true) end 
   -- print(k, v) 
 end
+-- Now send the eov signal 
 rslt = y:eov()
 assert(rslt)
+assert(y:check())
 -- print("writing meta data of persisted vector")
 M = loadstring(y:meta())(); 
 local is_file = false
 for k, v in pairs(M) do 
   if ( k == "file_name" ) then is_file = true end 
-  if ( k == "is_nascent" ) then assert(v == false) end 
+  if ( k == "is_nascent" ) then assert(v == true) end 
   -- print(k, v) 
 end
 assert(is_file)
@@ -170,7 +179,7 @@ for k, v in pairs(M) do
   if ( k == "is_memo" )      then assert(v == true) end
 end
 assert(y:check())
-print("==================================")
+--======================================
 assert(y:start_write())
 
 local S = {}

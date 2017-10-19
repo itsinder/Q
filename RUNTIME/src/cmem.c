@@ -38,7 +38,6 @@ ERR:
 }
 // Following only for debugging 
 static int l_cmem_seq( lua_State *L) {
-  int status = 0;
 #define BUFLEN 31
   char buf[BUFLEN+1]; 
   void  *X          = luaL_checkudata( L, 1, "CMEM");
@@ -72,9 +71,10 @@ static int l_cmem_seq( lua_State *L) {
     for ( int i = 1; i < num; i++ ) { ptr[i] = ptr[i-1] + incr; }
   }
   else {
-    go_BYE(-1);
+    WHEREAMI; goto BYE;
   }
-  return 0;
+  lua_pushboolean(L, true);
+  return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: tostring. ");
@@ -82,7 +82,6 @@ BYE:
 }
 // Following only for debugging 
 static int l_cmem_set( lua_State *L) {
-  int status = 0;
 #define BUFLEN 31
   char buf[BUFLEN+1]; 
   void  *X          = luaL_checkudata( L, 1, "CMEM");
@@ -108,9 +107,10 @@ static int l_cmem_set( lua_State *L) {
     double *ptr = (double *)X; ptr[0] = val;
   }
   else {
-    go_BYE(-1);
+    WHEREAMI; goto BYE;
   }
-  return 0;
+  lua_pushboolean(L, true);
+  return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: tostring. ");

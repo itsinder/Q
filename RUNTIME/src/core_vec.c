@@ -13,6 +13,52 @@
 
 #include "lauxlib.h"
 
+static bool 
+is_file_size_okay(
+    VEC_REC_TYPE *ptr_vec, 
+    uint64_t num_elements
+    )
+{
+  int64_t fsz = get_file_size(ptr_vec->file_name); 
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+    if ( ptr_vec->is_nascent ) { 
+      if ( fsz != ( ptr_vec->chunk_num * ptr_vec->chunk_size ) / 8 ) {
+        WHEREAMI; return false;
+      }
+    }
+    else {
+      return true; // TODO: P3 Put invariant in here 
+    }
+  }
+  else {
+    if ( (uint64_t)(fsz/ptr_vec->field_size) != num_elements ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static int 
+chk_name(
+    const char * const name
+    )
+{
+  int status = 0;
+  if ( name == NULL ) { go_BYE(-1); }
+  if ( strlen(name) > Q_MAX_LEN_INTERNAL_NAME ) {go_BYE(-1); }
+  for ( char *cptr = (char *)name; *cptr != '\0'; cptr++ ) { 
+    if ( !isascii(*cptr) ) { 
+      fprintf(stderr, "Cannot have character [%c] in name \n", *cptr);
+      go_BYE(-1); 
+    }
+    if ( ( *cptr == ',' ) || ( *cptr == '"' ) || ( *cptr == '\\') ) {
+      go_BYE(-1);
+    }
+  }
+BYE:
+  return status;
+}
+
 extern luaL_Buffer g_errbuf;
 
 int 
@@ -173,10 +219,12 @@ vec_materialized(
       go_BYE(-1);
     }
   }
+  ptr_vec->file_size = nX;
   // now unmap the file
   rs_munmap(X, nX); 
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov     = true;
+  ptr_vec->is_memo    = true;
   strcpy(ptr_vec->file_name, file_name);
 
 BYE:
@@ -329,50 +377,89 @@ vec_check(
     VEC_REC_TYPE *ptr_vec
     )
 {
+  /* When a vector is created from a file,
+   * is_nascent = false, is_eov = true, is_memo = true */
+  /* State changes
+   * is_nascent = true, is_eov = false
+   * is_nascent = true, is_eov = true
+   * is_nascent = false, is_eov = true
+   * is_nascent = false, is_eov = false // ILLEGAL
+   * */
   int status = 0;
+  // Field type, field size must be defined and legit 
   status = chk_field_type(ptr_vec->field_type, ptr_vec->field_size);
   cBYE(status);
-  if ( ( ptr_vec->is_eov == false ) && ( ptr_vec->is_nascent == false ) ) {
+  // chunk size must be multiple of 64
+  if ( ptr_vec->chunk_size == 0 ) { go_BYE(-1); }
+  if ( ( ( ptr_vec->chunk_size / 64 ) * 64 ) != ptr_vec->chunk_size ) { 
     go_BYE(-1);
   }
-  /*
-   persist nascent memo eov OK?
-   F       F       F    F   F
-   F       F       F    T   F
-   F       F       T    F   X
-   F       F       T    T   X
-   F       T       F    F   X
-   F       T       F    T   T
-   F       T       T    F   X
-   F       T       T    T   F
-   T       F       F    F   F
-   T       F       F    T   F
-   T       F       T    F   X
-   T       F       T    T   T
-   T       T       F    F   F
-   T       T       F    T   F
-   T       T       T    F   X
-   T       T       T    T   F
-  */
-  if ( ( ptr_vec->is_memo == false ) && ( ptr_vec->is_persist == true ) ) {
-    go_BYE(-1);
+  // Cannot persist a vector that is not memo-ized
+  if ( ptr_vec->is_memo == false ) {
+    if ( ptr_vec->is_persist == true ) { go_BYE(-1); }
   }
-  if ( ptr_vec->is_nascent ) {
+  /* file size set only after is_eov */
+  if ( ptr_vec->is_eov == false ) {
+    if ( ptr_vec->file_size != 0 ) { go_BYE(-1); }
+  }
+  /* if name set, should be valid */
+  if ( ptr_vec->name[0] != '\0' ) {
+    status = chk_name(ptr_vec->name); cBYE(status);
+  }
+  // Open mode == 0 IFF map_addr == \bot
+  // Open mode == 0 IFF map_len  == 0
+  switch ( ptr_vec->open_mode ) { 
+    case 0 : 
+      if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
+      if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+      break;
+    case 1 :
+    case 2 :
+      if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+      if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+      if ( ptr_vec->is_nascent == true ) { go_BYE(-1); }
+      if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
+      break;
+    default : 
+      go_BYE(-1);
+      break;
+  }
+  // Cannot have vector with 0 elements. 
+  // TODO P3 Think about how to handle this if it happens
+  if ( ptr_vec->is_eov == true ) {
+    if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
+  }
+  // when map_len > 0, must match file_size 
+  // It is possible for map_len == 0 and file_size > 0
+  if ( ptr_vec->map_len > 0 ) { 
+    if ( ptr_vec->file_size != ptr_vec->map_len ) { 
+      go_BYE(-1); 
+    }
+    if (get_file_size(ptr_vec->file_name) != (int64_t)ptr_vec->file_size){ 
+      go_BYE(-1); 
+    }
+  }
+  /* When is_eov and is_memo, 
+     Backup file should exist and have space for num_elements in it */
+  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
+    bool exists = file_exists(ptr_vec->file_name); 
+    if ( !exists ) { go_BYE(-1); }
+    if ( !is_file_size_okay(ptr_vec, ptr_vec->num_elements) ) { go_BYE(-1);}
+    if ( ptr_vec->map_addr != NULL ) { 
+    }
+  }
+  //-----------------------------------------------
+  if ( ( ptr_vec->is_nascent == true ) && ( ptr_vec->is_eov == false ) ) {
     if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
     if ( ( ptr_vec->is_memo ) && ( ptr_vec->chunk_num >= 1 ) ) {
+      // Check that file exists 
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
-      uint64_t fsz = get_file_size(ptr_vec->file_name); 
-      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-        if ( fsz != ( ptr_vec->chunk_num * ptr_vec->chunk_size ) / 8 ) {
+      // Check that file is of proper size
+      if ( !is_file_size_okay(ptr_vec, 
+            // Note that we do NOT use ptr_vec->num_elements
+            (ptr_vec->chunk_num * ptr_vec->chunk_size) ) )  {
           go_BYE(-1);
-        }
-      }
-      else { 
-        if ( fsz / ptr_vec->field_size != 
-            ( ptr_vec->chunk_num * ptr_vec->chunk_size ) ) {
-          go_BYE(-1);
-        }
       }
     }
     else {
@@ -387,38 +474,25 @@ vec_check(
     if ( ptr_vec->map_len    != 0    ) { go_BYE(-1); }
     if ( ptr_vec->open_mode  != 0    ) { go_BYE(-1); }
   }
-  else {
-    if ( ptr_vec->is_memo == false    ) { go_BYE(-1); }
-    if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
-    //if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
-    //if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
-    int is_file = file_exists(ptr_vec->file_name); 
-    if ( is_file != 1 ) { 
-      fprintf(stderr, "File does not exist [%s]\n", ptr_vec->file_name);
-      go_BYE(-1); }
-    int64_t fsz = get_file_size(ptr_vec->file_name); 
-    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-      // TODO: P3 Put invariant in here 
-    }
-    else {
-      if ( (uint64_t)(fsz/ptr_vec->field_size) != ptr_vec->num_elements ) {
-        go_BYE(-1);
-      }
-    }
-    if ( ptr_vec->map_addr != NULL ) { 
-      if ( (uint64_t)fsz !=  ptr_vec->map_len ) { go_BYE(-1); }
-    }
-    if ( ptr_vec->open_mode == 0 ) { 
-      if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
-      if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
-    }
-    else {
-      if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
-      if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
-    }
+  else if (( ptr_vec->is_nascent == false ) && ( ptr_vec->is_eov == true )){
+    /* file mode (as opposed to buffer mode */
+    if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
+    if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
+    if ( ptr_vec->chunk_num    != 0    ) { go_BYE(-1); }
   }
-  // chunk size must be multiple of 64
-  if ( ( ( ptr_vec->chunk_size / 64 ) * 64 ) != ptr_vec->chunk_size ) { 
+  else if (( ptr_vec->is_nascent == true )&&( ptr_vec->is_eov == true ) ){
+    if ( ptr_vec->num_in_chunk == 0    ) { go_BYE(-1); }
+    if ( ptr_vec->chunk        == NULL ) { go_BYE(-1); }
+    // May be only 1 chunk if ( ptr_vec->chunk_num    == 0    ) { go_BYE(-1); }
+    if ( ptr_vec->open_mode    != 0 ) { go_BYE(-1); }
+    if ( ptr_vec->map_addr     != NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len      != 0    ) { go_BYE(-1); }
+  }
+  else if (( ptr_vec->is_nascent == false )&&( ptr_vec->is_eov == false )){
+    go_BYE(-1);
+  }
+  else {
+    // Control cannot come here
     go_BYE(-1);
   }
 
@@ -462,11 +536,17 @@ vec_clean_chunk(
 )
 {
   int status = 0;
+  if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
     // Clean the chunk and chunk metadata
     free_if_non_null(ptr_vec->chunk);
-    ptr_vec->chunk_num = 0;
+    ptr_vec->chunk_num    = 0;
     ptr_vec->num_in_chunk = 0;          
+    ptr_vec->is_nascent   = false;          
+  }
+  else {
+    if ( ptr_vec->chunk_num    != 0 ) { go_BYE(-1); }
+    if ( ptr_vec->num_in_chunk != 0 ) { go_BYE(-1); }          
   }
 BYE:
   return status;      
@@ -551,7 +631,10 @@ vec_get(
         ret_len  = ptr_vec->num_elements;
       }
       else {
-        if ( idx >= ptr_vec->num_elements ) { go_BYE(-1); }
+        if ( idx >= ptr_vec->num_elements ) { 
+          // not clear this is an error even though it cannot be fulfilled
+          status = -2; goto BYE;
+        }
         ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
         ret_len  = mcr_min(ptr_vec->num_elements - idx, len);            
       }
@@ -736,18 +819,24 @@ vec_start_write(
 {
   int status = 0;
   char *X = NULL; uint64_t nX = 0;
+  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_nascent == false ) &&
+       ( ptr_vec->is_memo == true ) ) {
+    /* all is well */
+  }
+  else {
+    go_BYE(-1);
+  }
   if ( ptr_vec->open_mode != 0) { go_BYE(-1); }
-  if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len  != 0    )  { go_BYE(-1); }
+  if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
+  if ( ptr_vec->map_len   != 0    )  { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
   bool is_write = true;
-  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write);
-  cBYE(status);
+  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
   if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  ptr_vec->map_addr = X;
-  ptr_vec->map_len  = nX;
+  ptr_vec->map_addr  = X;
+  ptr_vec->map_len   = nX;
   ptr_vec->open_mode = 2; // for write
 BYE:
   return status;
@@ -759,12 +848,19 @@ vec_end_write(
     )
 {
   int status = 0;
-  if ( ptr_vec->open_mode != 2) { go_BYE(-1); }
-  if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len  == 0    )  { go_BYE(-1); }
+  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_nascent == false ) &&
+       ( ptr_vec->is_memo == true ) ) {
+    /* all is well */
+  }
+  else {
+    go_BYE(-1);
+  }
+  if ( ptr_vec->open_mode != 2    ) { go_BYE(-1); }
+  if ( ptr_vec->map_addr  == NULL ) { go_BYE(-1); }
+  if ( ptr_vec->map_len   == 0    )  { go_BYE(-1); }
   munmap(ptr_vec->map_addr, ptr_vec->map_len);
-  ptr_vec->map_addr = NULL;
-  ptr_vec->map_len  = 0;
+  ptr_vec->map_addr  = NULL;
+  ptr_vec->map_len   = 0;
   ptr_vec->open_mode = 0; // not opened for read or write
 BYE:
   return status;
@@ -831,20 +927,10 @@ vec_set_name(
     )
 {
   int status = 0;
-  if ( name == NULL ) { go_BYE(-1); }
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   
   memset(ptr_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
-  if ( strlen(name) > Q_MAX_LEN_INTERNAL_NAME ) {go_BYE(-1); }
-  for ( char *cptr = (char *)name; *cptr != '\0'; cptr++ ) { 
-    if ( !isascii(*cptr) ) { 
-      fprintf(stderr, "Cannot have character [%c] in name \n", *cptr);
-      go_BYE(-1); 
-    }
-    if ( ( *cptr == ',' ) || ( *cptr == '"' ) || ( *cptr == '\\') ) {
-      go_BYE(-1);
-    }
-  }
+  status = chk_name(name); cBYE(status);
   strcpy(ptr_vec->name, name);
 BYE:
   return status;
@@ -870,8 +956,8 @@ vec_eov(
   if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
-  // If memo NOT set, return now; do not persist to disk
   ptr_vec->is_eov = true;
+  // If memo NOT set, return now; do not persist to disk
   if ( ptr_vec->is_memo == false ) { goto BYE; }
   // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
@@ -885,9 +971,10 @@ vec_eov(
       ptr_vec->num_in_chunk, ptr_vec->file_name);
   cBYE(status);
   ptr_vec->file_size = get_file_size(ptr_vec->file_name);
-  ptr_vec->is_nascent = false;
+  // Commenting this out ptr_vec->is_nascent = false;
 
   // We defer mmaping the file to when access is requested
+  // We defer deleting the chunk until vec_clean_chunk is called
 BYE:
   return status;
 }

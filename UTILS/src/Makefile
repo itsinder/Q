@@ -49,18 +49,8 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_write_bits_to_file.h : 
 	lua ../lua/cli_extract_func_decl.lua write_bits_to_file.c ${INCDIR}
 
-../gen_inc/_get_bit.h : 
-	lua ../lua/cli_extract_func_decl.lua get_bit.c ${INCDIR}
-
-../gen_inc/_set_bit.h : 
-	lua ../lua/cli_extract_func_decl.lua set_bit.c ${INCDIR}
-
 ../gen_inc/_is_valid_chars_for_num.h : 
 	lua ../lua/cli_extract_func_decl.lua is_valid_chars_for_num.c ${INCDIR}
-
-../gen_inc/_file_cleanup.h:
-	lua ../lua/cli_extract_func_decl.lua file_cleanup.c ${INCDIR}
-
 
 
 ../gen_src/_bin_search_I1.c : bin_search.tmpl bin_search_generator.lua
@@ -91,7 +81,6 @@ hdr_files = \
 	../gen_inc/_file_exists.h  \
 	../gen_inc/_trim.h  \
 	../gen_inc/_c_copy.h  \
-	../inc/vec.h  \
 	../gen_inc/_c_free.h  \
 	../gen_inc/_get_file_size.h  \
 	../gen_inc/_buf_to_file.h  \
@@ -99,12 +88,9 @@ hdr_files = \
 	../gen_inc/_f_munmap.h \
 	../gen_inc/_mmap.h \
 	../gen_inc/_write_bits_to_file.h \
-        ../gen_inc/_get_bit.h \
-        ../gen_inc/_set_bit.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
 	../gen_inc/_bits_to_bytes.h   \
-	../gen_inc/_file_cleanup.h
 
 #--------
 SRC_FILES=  \
@@ -123,10 +109,7 @@ SRC_FILES=  \
 	bytes_to_bits.c \
 	bits_to_bytes.c \
 	write_bits_to_file.c  \
-        get_bit.c  \
-        set_bit.c  \
 	is_valid_chars_for_num.c \
-	file_cleanup.c
 
 libutils.so : ${bin_search_files} ${hdr_files}
 	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${INCS} ${SRC_FILES} ../gen_src/*.c -o libutils.so

@@ -10,7 +10,7 @@ local dbg    = require 'Q/UTILS/lua/debugger'
 require 'Q/UTILS/lua/strict'
 --===========================================
 --====== Testing nascent vector with generator
-status = os.execute("../../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
+status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
 assert(status)
 print("Creating nascent vector with generator gen3")
 local expander_gen3 = require 'expander_gen3'
