@@ -448,6 +448,22 @@ function lVector:get_all()
   return base_len, base_addr, nn_addr
 end
 
+function lVector:get_one(idx)
+  -- TODO More checks to make sure that this is only for 
+  -- vectors in file mode. We may need to move vector from buffer 
+  -- mode to file mode if we are at last chunk and is_eov == true
+  local nn_addr, nn_len
+  local base_scalar = assert(Vector.get(self._base_vec, idx, 1))
+  assert(type(base_scalar) == "Scalar")
+  if ( self._nn_vec ) then
+    nn_scalar = assert(Vector.get(self._nn_vec, 0, 0))
+    assert(type(nn_scalar) == "Scalar")
+  end
+  if ( qconsts.debug ) then self:check() end
+  return base_scalar, nn_scalar
+end
+
+
 function lVector:chunk(chunk_num)
   local status
   local l_chunk_num = 0

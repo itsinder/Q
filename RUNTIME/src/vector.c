@@ -194,7 +194,7 @@ static int l_vec_get( lua_State *L) {
   int num_to_return = 2;
   lua_pushlightuserdata(L, ret_addr);
   lua_pushinteger(L, ret_len);
-  if ( len == 1 ) {  // this is for debugging help
+  if ( len == 1 ) {  // this is for debugging help and for get_one()
     num_to_return++;
     SCLR_REC_TYPE *ptr_sclr = 
       (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
