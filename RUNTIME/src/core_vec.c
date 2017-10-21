@@ -13,6 +13,8 @@
 
 #include "lauxlib.h"
 
+extern luaL_Buffer g_errbuf;
+
 static bool 
 is_file_size_okay(
     VEC_REC_TYPE *ptr_vec, 
@@ -59,95 +61,6 @@ BYE:
   return status;
 }
 
-extern luaL_Buffer g_errbuf;
-
-int 
-vec_cast(
-    VEC_REC_TYPE *ptr_vec,
-    const char * const new_field_type,
-    uint32_t new_field_size
-    )
-{
-  int status = 0;
-  //--- START ERROR CHECKING
-  status = chk_field_type(new_field_type, new_field_size); cBYE(status);
-  if ( !ptr_vec->is_eov ) { go_BYE(-1); }
-  if ( *ptr_vec->file_name == '\0' ) { go_BYE(-1); }
-  if ( strcmp(new_field_type, "B1") == 0 ) {
-    if ( ( ( ptr_vec->file_size / 8 )  * 8 ) != ptr_vec->file_size ) {
-      go_BYE(-1);
-    }
-  }
-  else {
-    if ( ( ( ptr_vec->file_size / new_field_size )  * new_field_size ) != 
-        ptr_vec->file_size ) {
-      go_BYE(-1);
-    }
-  }
-  if ( ptr_vec->open_mode == 2 ) { go_BYE(-1); }
-  if ( strlen(new_field_type) > 2 ) { go_BYE(-1); }
-  //--- STOP ERROR CHECKING
-  strcpy(ptr_vec->field_type, new_field_type);
-  if ( strcmp(new_field_type, "B1") == 0 ) {
-    ptr_vec->num_elements = ptr_vec->file_size * 8;
-  }
-  else {
-    ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
-  }
-  ptr_vec->field_size   = new_field_size;
-  
-BYE:
-  return status;
-}
-
-extern int 
-flush_buffer(
-          VEC_REC_TYPE *ptr_vec
-          )
-{
-  int status = 0;
-  if ( ptr_vec->is_memo ) {
-    if ( ptr_vec->file_name[0] == '\0' ) {
-      do { 
-        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-        cBYE(status);
-      } while ( file_exists(ptr_vec->file_name));
-    }
-    status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-        ptr_vec->num_in_chunk, ptr_vec->file_name);
-    cBYE(status);
-  }
-  ptr_vec->num_in_chunk = 0;
-  ptr_vec->chunk_num++;
-  memset(ptr_vec->chunk, '\0', 
-      (ptr_vec->field_size * ptr_vec->chunk_size));
-BYE:
-  return status;
-}
-
-int flush_buffer_B1(
-    VEC_REC_TYPE *ptr_vec
-    )
-{
-  int status = 0;
-  if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
-    if ( ptr_vec->is_memo ) {
-      if ( ptr_vec->file_name[0] == '\0' ) {
-        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-        cBYE(status);
-      }
-      status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-          ptr_vec->num_in_chunk, ptr_vec->file_name);
-      cBYE(status);
-    }
-    ptr_vec->num_in_chunk = 0;
-    ptr_vec->chunk_num++;
-    memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
-    // Note that ptr_vec->field_size  == 0 for B1 
-  }
-BYE:
-  return status;
-}
 
 int
 chk_field_type(
@@ -186,6 +99,96 @@ BYE:
   return status;
 }
 
+
+int 
+vec_cast(
+    VEC_REC_TYPE *ptr_vec,
+    const char * const new_field_type,
+    uint32_t new_field_size
+    )
+{
+  int status = 0;
+  //--- START ERROR CHECKING
+  status = chk_field_type(new_field_type, new_field_size); cBYE(status);
+  if ( !ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( *ptr_vec->file_name == '\0' ) { go_BYE(-1); }
+  if ( strcmp(new_field_type, "B1") == 0 ) {
+    if ( ( ( ptr_vec->file_size / 8 )  * 8 ) != ptr_vec->file_size ) {
+      go_BYE(-1);
+    }
+  }
+  else {
+    if ( ( ( ptr_vec->file_size / new_field_size )  * new_field_size ) != 
+        ptr_vec->file_size ) {
+      go_BYE(-1);
+    }
+  }
+  if ( ptr_vec->open_mode == 2 ) { go_BYE(-1); }
+  //--- STOP ERROR CHECKING
+  strcpy(ptr_vec->field_type, new_field_type);
+  if ( strcmp(new_field_type, "B1") == 0 ) {
+    ptr_vec->num_elements = ptr_vec->file_size * 8;
+  }
+  else {
+    ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
+  }
+  ptr_vec->field_size   = new_field_size;
+  
+BYE:
+  return status;
+}
+
+// TODO: P1 Combine flush_buffer and flush_buffer_B1 
+int 
+flush_buffer(
+          VEC_REC_TYPE *ptr_vec
+          )
+{
+  int status = 0;
+  if ( ptr_vec->is_memo ) {
+    if ( ptr_vec->file_name[0] == '\0' ) {
+      do { 
+        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+        cBYE(status);
+      } while ( file_exists(ptr_vec->file_name));
+    }
+    status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+        ptr_vec->num_in_chunk, ptr_vec->file_name);
+    cBYE(status);
+  }
+  ptr_vec->num_in_chunk = 0;
+  ptr_vec->chunk_num++;
+  // TODO P4: memset is not really needed
+  memset(ptr_vec->chunk, '\0', 
+      (ptr_vec->field_size * ptr_vec->chunk_size));
+BYE:
+  return status;
+}
+
+int flush_buffer_B1(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  int status = 0;
+  if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
+    if ( ptr_vec->is_memo ) {
+      if ( ptr_vec->file_name[0] == '\0' ) {
+        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
+        cBYE(status);
+      }
+      status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+          ptr_vec->num_in_chunk, ptr_vec->file_name);
+      cBYE(status);
+    }
+    ptr_vec->num_in_chunk = 0;
+    ptr_vec->chunk_num++;
+    memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
+    // Note that ptr_vec->field_size  == 0 for B1 
+  }
+BYE:
+  return status;
+}
+
 int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
@@ -214,19 +217,20 @@ vec_materialized(
     if ( num_bytes < nX ) { go_BYE(-1); }
   }
   else {
+    // TODO Discuss following check with Krushnakant
+    if ( ptr_vec->num_elements != 0 ) { go_BYE(-1); }
     ptr_vec->num_elements = nX / ptr_vec->field_size;
     if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
       go_BYE(-1);
     }
   }
-  ptr_vec->file_size = nX;
-  // now unmap the file
-  rs_munmap(X, nX); 
+  ptr_vec->file_size  = nX;
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov     = true;
   ptr_vec->is_memo    = true;
   strcpy(ptr_vec->file_name, file_name);
-
+  // now unmap the file
+  rs_munmap(X, nX); 
 BYE:
   return status;
 }
@@ -289,15 +293,12 @@ vec_free(
 {
   int status = 0;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
-  // fprintf(stderr, "file = %s \n", ptr_vec->file_name);
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);
     ptr_vec->map_addr = NULL;
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
-  // fprintf(stderr, "FREE: chunk = %llu \n", (unsigned long long)ptr_vec->chunk);
-    // printf("%8x\n", ptr_vec->chunk);
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
@@ -330,6 +331,10 @@ vec_nascent(
   int status = 0;
   uint32_t sz = 0;
   if ( ptr_vec == NULL ) { go_BYE(-1); }
+  if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
+  if ( ptr_vec->chunk_num    != 0    ) { go_BYE(-1); }
+  if ( ptr_vec->num_in_chunk != 0    ) { go_BYE(-1); }
+
   // chunk size must be multiple of 64
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
     sz = ptr_vec->chunk_size / 8;
@@ -338,9 +343,11 @@ vec_nascent(
     sz = ptr_vec->field_size * ptr_vec->chunk_size;
   }
   ptr_vec->chunk = malloc(sz);
+  return_if_malloc_failed(ptr_vec->chunk);
   memset( ptr_vec->chunk, '\0', sz);
   return_if_malloc_failed(ptr_vec->chunk);
   ptr_vec->is_nascent = true;
+  // not needed 'cos done at vec_new() ptr_vec->is_eov     = false;
 
 BYE:
   return status;
@@ -364,7 +371,7 @@ vec_new(
   status = chk_field_type(field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
-  ptr_vec->is_nascent = true; 
+  ptr_vec->is_nascent = true;  // TODO P1 Why is this needed?
   ptr_vec->is_memo    = is_memo;
   strcpy(ptr_vec->field_type, field_type);
 
@@ -510,17 +517,6 @@ vec_memo(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     ptr_vec->is_memo = is_memo;
-    /* Krushnakant believes this is not needed. Hence, deleting.
-     * Will wait for more testing before final decision made
-    if ( is_memo == false ) { 
-      memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
-    }
-    else {
-      if ( *ptr_vec->file_name == '\0' ) { 
-        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-      }
-    }
-    */
   }
   else {
     go_BYE(-1);
@@ -826,10 +822,10 @@ vec_start_write(
   else {
     go_BYE(-1);
   }
-  if ( ptr_vec->open_mode != 0) { go_BYE(-1); }
+  if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
   if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len   != 0    )  { go_BYE(-1); }
-  if ( ptr_vec->chunk != NULL ) {
+  if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
+  if ( ptr_vec->chunk     != NULL ) {
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
   bool is_write = true;
@@ -950,12 +946,10 @@ vec_eov(
     )
 {
   int status = 0;
-  // if ( ptr_vec->is_eov ) { go_BYE(-1); } 
-  // TODO Discuss above with Krushnakant
-  if ( ptr_vec->is_eov ) { return status; } // Nothing to do 
-  if ( ptr_vec->is_nascent == false ) { go_BYE(-1); }
-  if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
-  if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov       == true  ) { return status; } // Nothing to do 
+  if ( ptr_vec->is_nascent   == false ) { go_BYE(-1); }
+  if ( ptr_vec->chunk        == NULL  ) { go_BYE(-1); }
+  if ( ptr_vec->num_elements == 0     ) { go_BYE(-1); }
   ptr_vec->is_eov = true;
   // If memo NOT set, return now; do not persist to disk
   if ( ptr_vec->is_memo == false ) { goto BYE; }

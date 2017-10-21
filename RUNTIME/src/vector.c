@@ -536,8 +536,8 @@ static int l_vec_new( lua_State *L)
   int64_t num_elements = -1;
   if ( ( strcmp(qtype, "B1") == 0 ) && ( is_materialized ) ) {
     num_elements = luaL_checknumber(L, 4);
-    ptr_vec->num_elements = num_elements;
     if ( num_elements <= 0 ) { go_BYE(-1); }
+    ptr_vec->num_elements = (uint64_t) num_elements;
   }
   if ( is_materialized ) { 
     status = vec_materialized(ptr_vec, file_name);
