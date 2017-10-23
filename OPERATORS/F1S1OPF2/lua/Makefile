@@ -13,6 +13,7 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libf1s1opf2.so _f1s1opf2.lua
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
+	sqrt_specialize.lua \
 	log_specialize.lua exp_specialize.lua \
 	logit_specialize.lua logit2_specialize.lua 
 	luajit gen_specializers.lua f1opf2
@@ -56,6 +57,7 @@ clean :
 	rm -f exp_specialize.lua
 	rm -f incr_specialize.lua
 	rm -f log_specialize.lua
+	rm -f sqrt_specialize.lua
 	rm -f logit_specialize.lua
 	rm -f logit2_specialize.lua
 	rm -f abs_specialize.lua
@@ -97,6 +99,8 @@ incr_specialize.lua  : f1opf2_specialize.tmpl
 decr_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 log_specialize.lua  : f1opf2_specialize.tmpl
+	lua gen_specializers.lua f1opf2
+sqrt_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 exp_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
