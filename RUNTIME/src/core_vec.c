@@ -563,7 +563,8 @@ vec_get(
   char *ret_addr = NULL;
   uint64_t ret_len  = 0;
   char *X = NULL; uint64_t nX = 0;
-  if ( len == 0 ) { // vector must be materialized, we want everything
+  if ( len == 0 ) { 
+    // Providing len == 0 => vector must be materialized, we want everything
     if ( !ptr_vec->is_eov ) { go_BYE(-1); }
     if ( ptr_vec->is_nascent ) { go_BYE(-1); }
   }
@@ -653,14 +654,22 @@ vec_get(
       if ( ptr_vec->is_memo ) {
         // If memo is on, should be able to serve data from previous chunks 
         // as long as request does not bleed into current chunk
-        // this opion only works for chunkls
+        // this option only works for whole chunks
+        uint64_t offset = 0;
+        // TODO Krushnakant to review following if statement
+        if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+          offset = idx * ptr_vec->field_size;
+        }
+        else {
+          offset = idx / 8;
+        }
         if ( chunk_idx != 0 ) { go_BYE(-1); } 
         if ( len != ptr_vec->chunk_size ) { go_BYE(-1); }
         addr = *ptr_ret_addr; // has been allocated before call 
         if ( addr == NULL ) { go_BYE(-1); }
         fp = fopen(ptr_vec->file_name, "r");
         return_if_fopen_failed(fp, ptr_vec->file_name, "r");
-        status = fseek(fp, idx * ptr_vec->field_size, SEEK_SET);
+        status = fseek(fp, offset, SEEK_SET); cBYE(status);
         fread(addr, ptr_vec->field_size, len, fp);
         fclose_if_non_null(fp);
         ret_len = len;
@@ -878,21 +887,29 @@ vec_set(
   if ( idx+len > ptr_vec->num_elements ) { go_BYE(-1); }
   uint64_t offset = ( idx * ptr_vec->field_size);
   if ( offset > ptr_vec->map_len ) { go_BYE(-1); }
-  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
     /* you can either set one bit or set on word boundary */
-    if ( ( len != 1 ) && ( ( idx % 64 ) != 0 ) ) { go_BYE(-1); }
-    if ( len == 1 ) {
-      int64_t word_idx = idx / 64;
-      int64_t bit_idx = idx % 64;
-      int64_t *X  =(int64_t *)ptr_vec->map_addr;
-      bool bit_val = (((uint8_t *)addr)[0]) & 0x1; // TODO CHECK
-      if ( bit_val ) { 
-        X[word_idx] = X[word_idx] | (1 << bit_idx);
+    if ( ( len == 1 ) || ( ( idx % 64 ) == 0 ) ) { 
+      if ( len == 1 ) {
+        int64_t word_idx = idx / 64;
+        int64_t bit_idx = idx % 64;
+        uint64_t *X  =(uint64_t *)ptr_vec->map_addr;
+        // TODO CHECK: Indrajeet and Krushnakant please review
+        bool bit_val = (((uint8_t *)addr)[0]) & 0x1; 
+        if ( bit_val ) { 
+          X[word_idx] = X[word_idx] | (1 << bit_idx);
+        }
+        else {
+          X[word_idx] = X[word_idx] & ~((1 << bit_idx));
+        }
       }
       else {
+        // TODO: Needs to be finished. To discuss with Indrajeet
       }
     }
     else {
+      go_BYE(-1);
     }
   }
   else {

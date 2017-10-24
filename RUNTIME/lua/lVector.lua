@@ -400,11 +400,9 @@ function lVector:eval()
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
-    print("START TO CALL eov from eval ");
     if ( self:length() > 0 ) then
       self:eov()
     end
-    print("STOP  TO CALL eov from eval ");
 
   end
   -- else, nothing do to since vector has been materialized

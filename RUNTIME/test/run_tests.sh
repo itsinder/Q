@@ -24,9 +24,9 @@ $LJ test_vec_writable.lua
 $LJ test_vec_prev_chunk.lua
 $LJ test_vec_no_chunk_num.lua
 $LJ test_vec_SC.lua
+$L test_bvec.lua
+bash test_lVector.sh
 asc2bin in1_I4.csv I4 _in1_I4.bin
 $LJ test_gen3.lua
-$L test_bvec.lua
 $LJ test_gen4.lua
-bash test_lVector.sh
 echo "SUCCESS for $0 in $PWD"
