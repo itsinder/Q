@@ -1,6 +1,5 @@
 require 'Q/UTILS/lua/strict'
 local lVector = require 'Q/RUNTIME/lua/lVector'
-local dbg     = require 'Q/UTILS/lua/debugger'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local T
@@ -20,10 +19,11 @@ assert(T.base.open_mode == "NOT_OPEN")
 
 -- print("=========================================")
 
+assert(type(x) == "lVector")
 x:eval()
 
 T = x:meta()
-assert(T.base.is_nascent == false)
+assert(T.base.is_nascent == true)
 assert(T.base.open_mode == "NOT_OPEN")
 assert(T.base.num_in_chunk == 10)
 assert(T.base.chunk_num == 3)
@@ -35,25 +35,26 @@ assert(T.base.chunk_num == 3)
 
 len, base_data, nn_data = x:chunk(x:chunk_num())
 assert(base_data)
+print(len)
 assert(len == 10)
 
 T = x:meta()
-assert(T.base.is_nascent == false)
+assert(T.base.is_nascent == true)
 assert(T.base.open_mode == "NOT_OPEN")
 assert(T.base.num_in_chunk == 10)
 assert(T.base.chunk_num == 3)
 
--- for k, v in pairs(T.base)  do print(k,v) end
 -- for k, v in pairs(T.aux)  do print(k,v) end
+-- for k, v in pairs(T.base)  do print(k,v) end
+print("=========================================")
 
--- print("=========================================")
-
--- Call previous chunk
+print("Call previous chunk");
 len, base_data, nn_data = x:chunk(0)
 assert(base_data)
 assert(len == qconsts.chunk_size)
 
 T = x:meta()
+for k, v in pairs(T.base)  do print(k,v) end
 assert(T.base.is_nascent == false)
 assert(T.base.open_mode == "READ")
 assert(T.base.num_in_chunk == 0)

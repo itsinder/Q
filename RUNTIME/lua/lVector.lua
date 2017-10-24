@@ -400,10 +400,13 @@ function lVector:eval()
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
       chunk_num = chunk_num + 1 
     until base_len ~= qconsts.chunk_size
-    if ( self:length() > 0 ) then
-      self:eov()
+    -- if ( self:length() > 0 ) then self:eov() end
+    -- Changed above to following
+    if ( self:length() == 0 ) then 
+      return nil 
+    else 
+      self:eov() 
     end
-
   end
   -- else, nothing do to since vector has been materialized
   if ( qconsts.debug ) then self:check() end
@@ -495,11 +498,11 @@ function lVector:chunk(chunk_num)
           ( Vector.is_memo(self._base_vec) == true ) ) )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
-    if ( base_addr == nil ) then
+    if ( not base_addr ) then
       if ( qconsts.debug ) then self:check() end
       return 0
     end
-    if ( ( self._nn_vec ) and ( base_addr ) ) then 
+    if ( self._nn_vec ) then 
       nn_addr,   nn_len   = Vector.get_chunk(self._nn_vec, l_chunk_num)
       assert(nn_addr)
       assert(base_len == nn_len)
@@ -507,11 +510,14 @@ function lVector:chunk(chunk_num)
     if ( qconsts.debug ) then self:check() end
     return base_len, base_addr, nn_addr
   else
-    assert(Vector.is_nascent(self._base_vec))
-    -- print(" generate data ", chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
+    if ( buf_size == 0 ) then
+      self:eov()
+      if ( qconsts.debug ) then self:check() end
+      return 0
+    end
     if ( buf_size < qconsts.chunk_size ) then
       if ( base_data ) then
         self:put_chunk(base_data, nn_data, buf_size)

@@ -3,7 +3,6 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
-local dbg = require 'Q/UTILS/lua/debugger'
 -- for k, v in pairs(vec) do print(k, v) end 
 
 num_trials = 1000000

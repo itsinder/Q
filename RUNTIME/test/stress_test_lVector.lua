@@ -4,7 +4,6 @@ local Vector = require 'libvec'
 local Scalar = require 'libsclr'  
 local cmem = require 'libcmem'  
 local lVector = require 'lVector'
--- local dbg    = require 'Q/UTILS/lua/debugger'
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 require 'Q/UTILS/lua/strict'
 --

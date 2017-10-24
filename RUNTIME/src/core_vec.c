@@ -24,7 +24,9 @@ is_file_size_okay(
   int64_t fsz = get_file_size(ptr_vec->file_name); 
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
     if ( ptr_vec->is_nascent ) { 
-      if ( fsz != ( ptr_vec->chunk_num * ptr_vec->chunk_size ) / 8 ) {
+      int cnum = ptr_vec->chunk_num;
+      int sz = ptr_vec->num_elements / 8;
+      if ( ( fsz != ( cnum * sz) ) && ( fsz != (cnum+1) * sz ) ) {
         WHEREAMI; return false;
       }
     }
@@ -34,7 +36,7 @@ is_file_size_okay(
   }
   else {
     if ( (uint64_t)(fsz/ptr_vec->field_size) != num_elements ) {
-      return false;
+      WHEREAMI; return false;
     }
   }
   return true;
@@ -261,6 +263,8 @@ vec_meta(
   sprintf(buf, "is_nascent = %s, ", ptr_vec->is_nascent ? "true" : "false");
   strcat(opbuf, buf);
   sprintf(buf, "is_persist = %s, ", ptr_vec->is_persist ? "true" : "false");
+  strcat(opbuf, buf);
+  sprintf(buf, "is_eov = %s, ", ptr_vec->is_eov ? "true" : "false");
   strcat(opbuf, buf);
   sprintf(buf, "is_memo = %s, ", ptr_vec->is_memo ? "true" : "false");
   strcat(opbuf, buf);
@@ -582,7 +586,7 @@ vec_get(
   }
   uint32_t chunk_num = idx / ptr_vec->chunk_size;
   uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
-  if ( ptr_vec->is_nascent == false) {
+  if ( ( ptr_vec->is_nascent == true) && ( ptr_vec->is_eov == true ) ) { 
     // Check if required chunk is the last chunk and chunk is not yet cleaned
     if ( chunk_num == ptr_vec->chunk_num && ptr_vec->chunk != NULL ) {
       // printf("Serving request from in-memory buffer\n");
@@ -597,44 +601,50 @@ vec_get(
       }
       ret_addr = ptr_vec->chunk + offset;
       ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));    
+      *ptr_ret_addr = ret_addr;
+      *ptr_ret_len  = ret_len;
+      // Nothing more to do. Get out of here
+      goto BYE;
     }
     else {
-      // printf("Serving request from file\n");
+      printf("cleaning chunk \n");
       if ( ptr_vec->chunk != NULL ) {
         status = vec_clean_chunk(ptr_vec); cBYE(status);
       }
-      switch ( ptr_vec->open_mode ) {
-        case 0 : 
-          status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
-          cBYE(status);
-          ptr_vec->map_addr = X;
-          ptr_vec->map_len  = nX;
-          ptr_vec->open_mode = 1; // indicating read */
-          break;
-        case 1 : /* opened in read mode */
-          /* nothing to do */
-          break;
-        case 2 : /* opened in write mode */
-          go_BYE(-1);
-          break;
-        default :  /* invalid value */
-          go_BYE(-1);
-          break;
+    }
+  }
+  if ( ptr_vec->is_nascent == false ) {
+    switch ( ptr_vec->open_mode ) {
+      case 0 : 
+        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+        cBYE(status);
+        ptr_vec->map_addr = X;
+        ptr_vec->map_len  = nX;
+        ptr_vec->open_mode = 1; // indicating read */
+        break;
+      case 1 : /* opened in read mode */
+        /* nothing to do */
+        break;
+      case 2 : /* opened in write mode */
+        go_BYE(-1);
+        break;
+      default :  /* invalid value */
+        go_BYE(-1);
+        break;
+    }
+    if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
+    if ( len == 0 ) {  // nothing more to do
+      ret_addr = ptr_vec->map_addr;
+      ret_len  = ptr_vec->num_elements;
+    }
+    else {
+      if ( idx >= ptr_vec->num_elements ) { 
+        // not clear this is an error even though it cannot be fulfilled
+        status = -2; goto BYE;
       }
-      if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
-      if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
-      if ( len == 0 ) {  // nothing more to do
-        ret_addr = ptr_vec->map_addr;
-        ret_len  = ptr_vec->num_elements;
-      }
-      else {
-        if ( idx >= ptr_vec->num_elements ) { 
-          // not clear this is an error even though it cannot be fulfilled
-          status = -2; goto BYE;
-        }
-        ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
-        ret_len  = mcr_min(ptr_vec->num_elements - idx, len);            
-      }
+      ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      ret_len  = mcr_min(ptr_vec->num_elements - idx, len);            
     }
   }
   else {

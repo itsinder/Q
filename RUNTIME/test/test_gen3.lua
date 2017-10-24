@@ -6,7 +6,6 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local dbg    = require 'Q/UTILS/lua/debugger'
 require 'Q/UTILS/lua/strict'
 --===========================================
 --====== Testing nascent vector with generator
