@@ -56,8 +56,10 @@ local function package_betas(betas)
       x_with_1[i] = x_chunk[i-1]
     end
     x_with_1[x_size + 1] = 1
-    x_col = Column({field_type = 'F8', write_vector = true})
-    x_col:put_chunk(x_size + 1, x_with_1)
+    --x_col = Column({field_type = 'F8', write_vector = true})
+    x_col = lVector( { qtype = "F8", gen = true} )
+    --x_col:put_chunk(x_size + 1, x_with_1)
+    x_col:put_chunk(x_with_1, nil, x_size + 1)
     x_col:eov()
     return x_col
   end

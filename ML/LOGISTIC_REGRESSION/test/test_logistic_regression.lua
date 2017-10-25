@@ -2,10 +2,10 @@ local Q = require 'Q'
 local save = require 'Q/UTILS/lua/save'
 local log_reg = require 'Q/ML/LOGISTIC_REGRESSION/lua/logistic_regression'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local dbg = require 'Q/UTILS/lua/debugger'
 
 return function(file_name, data_file, num_cols, num_classes)
   local meta_file = 'LR-test-' .. file_name .. '.lua'
-
   local status = pcall(dofile, os.getenv("Q_METADATA_DIR")..'/'..meta_file)
   if not status or not train_X or not train_y or not test_X or not test_y then
     local data_folder = 'data'
@@ -27,8 +27,8 @@ return function(file_name, data_file, num_cols, num_classes)
       local y_cols = {{ name = 'y'..suff, qtype = "F8", has_nulls = false, is_dict = false, is_load = true }}
       return x_cols, y_cols
     end
-
     local x_cols, y_cols = cols('train')
+    dbg()
     train_X = Q.load_csv(train_X_file, x_cols)
     print('loaded train_X')
     train_y = Q.load_csv(train_y_file, y_cols)[1]
