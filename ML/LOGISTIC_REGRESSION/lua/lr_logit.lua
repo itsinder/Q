@@ -4,7 +4,7 @@ local function lr_logit(x)
   -- Given x, return (1) e^x/(1+e^x) and (2) e^x/((1+e^x)^2)
 
   assert(x)
-  assert(type(x) == "Column", "input must be a column")
+  assert(type(x) == "lVector", "input must be a column")
   local fldtype = x:fldtype()
   assert( ( fldtype == "F4" ) or ( ( fldtype == "F8" ) ) )
 
