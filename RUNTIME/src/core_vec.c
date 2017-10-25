@@ -26,7 +26,7 @@ is_file_size_okay(
     if ( ptr_vec->is_nascent ) { 
       int cnum = ptr_vec->chunk_num;
       int sz = ptr_vec->num_elements / 8;
-      if ( ( fsz != ( cnum * sz) ) && ( fsz != (cnum+1) * sz ) ) {
+      if ( fsz != ((cnum+1) * sz) ) { 
         WHEREAMI; return false;
       }
     }
@@ -219,8 +219,6 @@ vec_materialized(
     if ( num_bytes < nX ) { go_BYE(-1); }
   }
   else {
-    // TODO Discuss following check with Krushnakant
-    if ( ptr_vec->num_elements != 0 ) { go_BYE(-1); }
     ptr_vec->num_elements = nX / ptr_vec->field_size;
     if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
       go_BYE(-1);
@@ -375,7 +373,6 @@ vec_new(
   status = chk_field_type(field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
-  ptr_vec->is_nascent = true;  // TODO P1 Why is this needed?
   ptr_vec->is_memo    = is_memo;
   strcpy(ptr_vec->field_type, field_type);
 
@@ -388,6 +385,11 @@ vec_check(
     VEC_REC_TYPE *ptr_vec
     )
 {
+  /*
+is_nascent = true, is_eov = false (nascent vector without eov())
+is_nascent = true, is_eov = true (nascent vector, after eov() call)
+is_nascent = false, is_eov = true (file_mode or start_write call or materialized vec)
+  */
   /* When a vector is created from a file,
    * is_nascent = false, is_eov = true, is_memo = true */
   /* State changes
@@ -456,8 +458,6 @@ vec_check(
     bool exists = file_exists(ptr_vec->file_name); 
     if ( !exists ) { go_BYE(-1); }
     if ( !is_file_size_okay(ptr_vec, ptr_vec->num_elements) ) { go_BYE(-1);}
-    if ( ptr_vec->map_addr != NULL ) { 
-    }
   }
   //-----------------------------------------------
   if ( ( ptr_vec->is_nascent == true ) && ( ptr_vec->is_eov == false ) ) {
@@ -666,12 +666,11 @@ vec_get(
         // as long as request does not bleed into current chunk
         // this option only works for whole chunks
         uint64_t offset = 0;
-        // TODO Krushnakant to review following if statement
         if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
-          offset = idx * ptr_vec->field_size;
+          offset = idx / 8;
         }
         else {
-          offset = idx / 8;
+          offset = idx * ptr_vec->field_size;
         }
         if ( chunk_idx != 0 ) { go_BYE(-1); } 
         if ( len != ptr_vec->chunk_size ) { go_BYE(-1); }

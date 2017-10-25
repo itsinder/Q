@@ -206,7 +206,7 @@ function lVector:make_nulls(bvec)
   assert(bvec:num_elements() == self:num_elements())
   assert(bvec:has_nulls() == false)
   self._nn_vec = bvec._base_vec
-  self:set_meta("num_nulls")
+  self:set_meta("has_nulls", true)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -513,11 +513,6 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-    if ( buf_size == 0 ) then
-      self:eov()
-      if ( qconsts.debug ) then self:check() end
-      return 0
-    end
     if ( buf_size < qconsts.chunk_size ) then
       if ( base_data ) then
         self:put_chunk(base_data, nn_data, buf_size)

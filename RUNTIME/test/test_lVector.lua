@@ -128,6 +128,7 @@ x = lVector( { qtype = "I4", gen = true})
 num_elements = 1024
 field_size = 4
 base_data = cmem.new(num_elements * field_size)
+print("----------------------_XXX----------")
 iptr = ffi.cast("int32_t *", base_data)
 for i = 1, num_elements do
   local s1 = Scalar.new(i*11, "I4")
