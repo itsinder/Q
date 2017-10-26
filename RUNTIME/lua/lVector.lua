@@ -552,7 +552,7 @@ end
 
 function lVector:reincarnate()
   if ( qconsts.debug ) then self:check() end
-  if ( Vector.is_nascent(self._base_vec) ) then
+  if ( Vector.is_nascent(self._base_vec) and not self:is_eov()) then
     return nil
   end
   
