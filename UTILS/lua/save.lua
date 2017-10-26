@@ -70,7 +70,7 @@ local function save(name, value, saved, file)
                 save(fieldname, v, saved, file)
             end
         end
-    elseif value.reincarnate ~= nil then
+    elseif type(value) == "lVector" then
         if saved[value] then
             file:write(saved[value], "\n")
         else
@@ -83,7 +83,7 @@ local function save(name, value, saved, file)
             end
         end
     else
-        error("cannot save a " .. type(value))
+        --error("cannot save a " .. type(value))
     end
 end
 
