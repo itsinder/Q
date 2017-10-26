@@ -23,10 +23,10 @@ is_file_size_okay(
 {
   int64_t fsz = get_file_size(ptr_vec->file_name); 
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-    if ( ptr_vec->is_nascent ) { 
+    if ( ptr_vec->is_nascent && !ptr_vec->is_eov ) { 
       int cnum = ptr_vec->chunk_num;
       int sz = ptr_vec->num_elements / 8;
-      if ( fsz != ((cnum+1) * sz) ) { 
+      if ( fsz != (cnum * sz) ) { 
         WHEREAMI; return false;
       }
     }
@@ -198,7 +198,6 @@ vec_materialized(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
   // Sample error luaL_addstring(&g_errbuf, "hello world"); 
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
@@ -206,31 +205,29 @@ vec_materialized(
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
   bool is_write = false;
-  status = rs_mmap(file_name, &X, &nX, is_write);
-  cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  // check nX
+  size_t fsz = get_file_size(file_name);
+  if ( fsz <= 0 ) { go_BYE(-1); }
+  // check fsz
   // For B1, file can be larger than necessary, not smaller
   // For all others, size must match number of elements
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
     if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
     uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
     uint64_t num_bytes = num_words * 8;
-    if ( num_bytes < nX ) { go_BYE(-1); }
+    if ( num_bytes < fsz ) { go_BYE(-1); }
   }
   else {
-    ptr_vec->num_elements = nX / ptr_vec->field_size;
-    if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
+    ptr_vec->num_elements = fsz / ptr_vec->field_size;
+    if (( ptr_vec->num_elements * ptr_vec->field_size) != fsz ) { 
       go_BYE(-1);
     }
   }
-  ptr_vec->file_size  = nX;
+  ptr_vec->file_size  = fsz;
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov     = true;
   ptr_vec->is_memo    = true;
   strcpy(ptr_vec->file_name, file_name);
   // now unmap the file
-  rs_munmap(X, nX); 
 BYE:
   return status;
 }
