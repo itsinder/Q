@@ -4,37 +4,39 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local T = {}
 
 local function beta_step(X, y, beta)
-  local Xbeta = Q.mvmul(X, beta)
+  local Xbeta = Q.mv_mul(X, beta)
   local p = Q.logit(Xbeta)
   local w = Q.logit2(Xbeta)
   local ysubp = Q.vvsub(y, p)
+ysubp:eval()
+ysubp:set_name("ysubp")
+  local temp = ysubp:meta()
+for k, v in pairs(temp.base) do print(k, v) end
+print("============")
 
   local A = {}
   local b = {}
   for i, X_i in ipairs(X) do
     A[i] = {}
-    b[i] = Q.sum(Q.vvmul(X_i, ysubp))
+    X_i:set_name("X" .. i)
+    b[i] = Q.sum(Q.vvmul(X_i, ysubp)) 
     for j, X_j in ipairs(X) do
       A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
     end
   end
 
-  local status = true
-  while status do
-    for i = 1, #A do
-      status = status and b[i]:next()
-      if not status then
-        b[i] = b[i]:value()
-      end
-      for j = 1, #A[i] do
-        if status then
-          A[i][j]:next()
-        else
-          A[i][j] = A[i][j]:value()
-        end
-      end
+  for i = 1, #A do
+print("START: evaluating b_" .. i)
+    b[i]:eval()
+print("STOP:  evaluating b_" .. i)
+--[[
+    for j = 1, #A[i] do
+      A[i][j]:eval()
     end
+--]]
   end
+  print("beta_step: sum_prod eval done, EXITING")
+  os.exit()
 
   b = Q.mk_col(b, "F8")
   for i = 1, #A do
@@ -51,7 +53,7 @@ local function package_betas(betas)
   local function append_1(x)
     -- TODO: this is awful
     local x_with_1 = {}
-    x_size, x_chunk = x:chunk(-1)
+    x_size, x_chunk = x:chunk()
     for i = 1, x_size do
       x_with_1[i] = x_chunk[i-1]
     end
@@ -83,12 +85,12 @@ local function package_betas(betas)
     X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
     local denoms = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
     for _, beta in pairs(betas) do
-      denoms = Q.exp(Q.vvsum(Q.mvmul(X, beta)))
+      denoms = Q.exp(Q.vvsum(Q.mv_mul(X, beta)))
     end
 
     local nums = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
     if i < #betas then
-      nums = Q.exp(Q.mvmul(X, betas[i]))
+      nums = Q.exp(Q.mv_mul(X, betas[i]))
     end
 
     return Q.vvdiv(nums, denoms)
@@ -117,8 +119,8 @@ local function package_betas(betas)
     local vals = {}
     local len = 0
     for i = 1, #betas - 1 do
-      val = Q.mvmul(X, betas[i])
-      len, val, _ = val:chunk(-1)
+      val = Q.mv_mul(X, betas[i])
+      len, val, _ = val:chunk()
       val = ffi.cast('double*', val)
       vals[i] = val
     end
@@ -157,7 +159,7 @@ local function make_trainer(X, y, classes)
   for i = 1, #classes - 1 do
     betas[i] = Q.const({ val = 0, len = #X, qtype = 'F8' })
     betas[i]:eval()
-    local _, ytmp, _ = y:chunk(-1)
+    local _, ytmp, _ = y:chunk()
     ytmp = ffi.cast('double*', ytmp)
     local ytab = {}
     for i = 1, y:length() do

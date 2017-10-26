@@ -511,6 +511,10 @@ function lVector:chunk(chunk_num)
     return base_len, base_addr, nn_addr
   else
     assert(self._gen)
+    if ( type(self._gen) ~= "function") then 
+      print("XX ", type(self._gen))
+      print("XX ", self:get_name())
+   end
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
     if ( buf_size < qconsts.chunk_size ) then
@@ -518,6 +522,7 @@ function lVector:chunk(chunk_num)
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()
+      return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
     else
       if ( base_data ) then 
         -- this is the simpler case where generator malloc's

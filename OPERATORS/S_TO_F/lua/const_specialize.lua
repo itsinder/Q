@@ -17,19 +17,18 @@ return function (
   local out_ctype = qconsts.qtypes[qtype].ctype
 
   --=======================
-  --[[
   local width = qconsts.qtypes[qtype].width
   local c_mem = assert(ffi.malloc(width), "malloc failed")
-  print("ADDRESS = ", c_mem)
   ffi.fill(c_mem, width, 0)
   local conv_fn = assert(qc["txt_to_" .. qtype], "No converter function")
   local status = nil
   status = conv_fn(tostring(val), c_mem)
   assert(status, "Unable to convert to scalar " .. args.val)
-  --]]
 
+  --[[
   local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'
   local c_mem = assert(conv_lnum_to_cnum(val, qtype))
+  --]]
   --=======================
 
   local tmpl = 'const.tmpl'

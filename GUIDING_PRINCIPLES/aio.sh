@@ -28,6 +28,7 @@ which lua &> /dev/null
 RES=$?
 if [[ $RES -ne 0 ]] ; then
    my_print "Installing lua from apt-get"
+   sudo apt-get install make -y
    sudo apt-get install lua5.1 -y
    sudo apt-get install liblua5.1-dev -y
    sudo apt-get install unzip -y # for luarocks

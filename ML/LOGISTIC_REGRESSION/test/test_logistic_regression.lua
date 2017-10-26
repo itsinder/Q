@@ -2,7 +2,6 @@ local Q = require 'Q'
 local save = require 'Q/UTILS/lua/save'
 local log_reg = require 'Q/ML/LOGISTIC_REGRESSION/lua/logistic_regression'
 local ffi = require 'Q/UTILS/lua/q_ffi'
-local dbg = require 'Q/UTILS/lua/debugger'
 
 return function(file_name, data_file, num_cols, num_classes)
   local meta_file = 'LR-test-' .. file_name .. '.lua'
@@ -28,7 +27,6 @@ return function(file_name, data_file, num_cols, num_classes)
       return x_cols, y_cols
     end
     local x_cols, y_cols = cols('train')
-    dbg()
     train_X = Q.load_csv(train_X_file, x_cols)
     print('loaded train_X')
     train_y = Q.load_csv(train_y_file, y_cols)[1]
@@ -42,7 +40,7 @@ return function(file_name, data_file, num_cols, num_classes)
     save(meta_file)
   end
 
-  local len, test_y_c, _ = test_y:chunk(-1)
+  local len, test_y_c, _ = test_y:chunk()
   test_y_c = ffi.cast('double*', test_y_c)
 
   local classes = {}
@@ -54,7 +52,7 @@ return function(file_name, data_file, num_cols, num_classes)
   local function fraction_correct()
     local _, _, get_classes = log_reg.package_betas(betas)
     local classes = get_classes(test_X)
-    _, classes, _ = classes:chunk(-1)
+    _, classes, _ = classes:chunk()
     classes = ffi.cast('double*', classes)
     local num_correct = 0
     for i = 0, len - 1 do
@@ -67,6 +65,7 @@ return function(file_name, data_file, num_cols, num_classes)
   end
 
   for i = 1, 100 do
+print("i = ", i)
     step()
     print(fraction_correct() * 100 .. "% correct after training step " .. i)
   end
