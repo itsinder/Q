@@ -6,7 +6,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local rand_qtype = require 'rand_qtype'
 require 'Q/UTILS/lua/strict'
-local lVector = require 'lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 math.randomseed(os.time())
 
 local xtype = rand_qtype()
