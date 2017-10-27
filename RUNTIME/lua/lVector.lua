@@ -193,7 +193,7 @@ end
 function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
-  self:set_meta("num_nulls")
+  self:set_meta("has_nulls", false)
   if ( qconsts.debug ) then self:check() end
   return self
 end
