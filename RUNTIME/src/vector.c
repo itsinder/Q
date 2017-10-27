@@ -471,81 +471,29 @@ static int l_vec_new( lua_State *L)
   VEC_REC_TYPE *ptr_vec = NULL;
   luaL_buffinit(L, &g_errbuf);
 
-  //-- START: Get qtype and field size
-  const char * const qtype_sz  = luaL_checkstring(L, 1);
-  char qtype[4]; int field_size = 0;
-  memset(qtype, '\0', 4);
-  if ( strcmp(qtype_sz, "B1") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 0; // SPECIAL CASE
-  }
-  else if ( strcmp(qtype_sz, "I1") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 1;
-  }
-  else if ( strcmp(qtype_sz, "I2") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 2;
-  }
-  else if ( strcmp(qtype_sz, "I4") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 4;
-  }
-  else if ( strcmp(qtype_sz, "I8") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 8;
-  }
-  else if ( strcmp(qtype_sz, "F4") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 4;
-  }
-  else if ( strcmp(qtype_sz, "F8") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 8;
-  }
-  else if ( strncmp(qtype_sz, "SC:", 3) == 0 ) { 
-    char *cptr = (char *)qtype_sz + 3;
-    status = txt_to_I4(cptr, &field_size); cBYE(status);
-    if ( field_size < 2 ) { go_BYE(-1); }
-    strcpy(qtype, "SC");
-  }
-  else if ( strcmp(qtype_sz, "SV") == 0 ) { 
-    strcpy(qtype, qtype_sz); field_size = 4; // SV is stored as I4
-  }
-  else {
-    go_BYE(-1);
-  }
-  //-- STOP: Get qtype and field size
-  bool  is_materialized;
   bool is_memo = true;
-  const char *file_name = NULL; 
+  const char *file_name = NULL;
+  int64_t num_elements = -1;
+  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
+  const char * const qtype_sz  = luaL_checkstring(L, 1);
+
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);
-    is_materialized = true;
   }
-  else { 
-    is_materialized = false;
+  if ( lua_isboolean(L, 3) ) { // is_memo specified
+    is_memo = lua_toboolean(L, 3);
   }
-  if ( !is_materialized ) { 
-    if ( lua_isboolean(L, 3) ) { // is_memo specified
-      is_memo = lua_toboolean(L, 3);
-    }
+  if ( file_name != NULL && strcmp(qtype_sz, "B1") == 0 ) { // num_elements provided for materialized B1 vec
+    num_elements = luaL_checknumber(L, 4);
+    if ( num_elements <= 0 ) { go_BYE(-1); }
   }
-
-  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
 
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
-  status = vec_new(ptr_vec, qtype, field_size, chunk_size, is_memo); 
+
+  status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
 
-  // do this after mallocing and memsetting the vector structure
-  int64_t num_elements = -1;
-  if ( ( strcmp(qtype, "B1") == 0 ) && ( is_materialized ) ) {
-    num_elements = luaL_checknumber(L, 4);
-    if ( num_elements <= 0 ) { go_BYE(-1); }
-    ptr_vec->num_elements = (uint64_t) num_elements;
-  }
-  if ( is_materialized ) { 
-    status = vec_materialized(ptr_vec, file_name);
-    cBYE(status);
-  }
-  else {
-    status = vec_nascent(ptr_vec); cBYE(status);
-  }
   /* Add the metatable to the stack. */
   luaL_getmetatable(L, "Vector");
   /* Set the metatable on the userdata. */

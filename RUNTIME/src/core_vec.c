@@ -360,9 +360,10 @@ int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
-    uint32_t field_size,
     uint32_t chunk_size,
-    bool is_memo
+    bool is_memo,
+    const char *const file_name,
+    int64_t num_elements
     )
 {
   int status = 0;
@@ -371,11 +372,58 @@ vec_new(
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
-  status = chk_field_type(field_type, field_size); cBYE(status);
+  char qtype[4]; int field_size = 0;
+  memset(qtype, '\0', 4);
+  if ( strcmp(field_type, "B1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 0; // SPECIAL CASE
+  }
+  else if ( strcmp(field_type, "I1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 1;
+  }
+  else if ( strcmp(field_type, "I2") == 0 ) {
+    strcpy(qtype, field_type); field_size = 2;
+  }
+  else if ( strcmp(field_type, "I4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "I8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strcmp(field_type, "F4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "F8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strncmp(field_type, "SC:", 3) == 0 ) {
+    char *cptr = (char *)field_type + 3;
+    status = txt_to_I4(cptr, &field_size); cBYE(status);
+    if ( field_size < 2 ) { go_BYE(-1); }
+    strcpy(qtype, "SC");
+  }
+  else if ( strcmp(field_type, "SV") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
+  }
+  else {
+    go_BYE(-1);
+  }
+
+  status = chk_field_type(qtype, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = is_memo;
-  strcpy(ptr_vec->field_type, field_type);
+  strcpy(ptr_vec->field_type, qtype);
+
+  if ( file_name != NULL ) { // filename provided for materialized vec
+    if ( strcmp(qtype, "B1") == 0 ) { // Set num_elements for materialized B1 vec
+      if ( num_elements <= 0 ) { go_BYE(-1); }
+      ptr_vec->num_elements = (uint64_t) num_elements;
+    }
+    status = vec_materialized(ptr_vec, file_name); cBYE(status);
+  }
+  else {
+    status = vec_nascent(ptr_vec); cBYE(status);
+  }
 
 BYE:
   return status;
