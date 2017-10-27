@@ -1,4 +1,4 @@
-local dbg = require 'Q/UTILS/lua/debugger'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
@@ -34,6 +34,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(f1_chunk_size == f2_chunk_size)
 
   local f3_gen = function(chunk_idx)
+  print("expander_f1f2opf3: chunk_idx = ", chunk_idx)
     local f1_len, f1_chunk, nn_f1_chunk
     local f2_len, f2_chunk, nn_f2_chunk
     f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)

@@ -1,5 +1,5 @@
 --==== From https://www.lua.org/pil/12.1.2.html
-local dbg = require 'Q/UTILS/lua/debugger'
+-- local -- dbg = require 'Q/UTILS/lua/debugger'
 local function basicSerialize (o)
     if type(o) == "number" or type(o) == "boolean" then
         return tostring(o)
@@ -50,41 +50,38 @@ end
 -- TODO Indrajeet make 2 args, one is name of table, other is filename
 -- function save(name, value, saved)
 local function save(name, value, saved, file)
-    if is_l_exception(name, value) then return end
-    saved = saved or {}       -- initial value
-    file = file or io
-    file:write(name, " = ")
-    if type(value) == "number" or 
-       type(value) == "string" or 
-       type(value) == "boolean" then
-        file:write(basicSerialize(value), "\n")
-    elseif type(value) == "table" then
-        if saved[value] then    -- value already saved?
-            file:write(saved[value], "\n")  -- use its previous name
-        else
-            saved[value] = name   -- save name for next time
-            file:write("{}\n")     -- create a new table
-            for k,v in pairs(value) do      -- save its fields
-                local fieldname = string.format("%s[%s]", name,
-                    basicSerialize(k))
-                save(fieldname, v, saved, file)
-            end
-        end
-    elseif type(value) == "lVector" then
-        if saved[value] then
-            file:write(saved[value], "\n")
-        else
-            saved[value] = name
-            local persist_str = value:reincarnate()
-            file:write(persist_str)
-            file:write("\n")
-            if type(value) == "lVector" then
-                save(name .. "._meta", value._meta, saved, file)
-            end
-        end
+  if is_l_exception(name, value) then return end
+  saved = saved or {}       -- initial value
+  file = file or io
+  file:write(name, " = ")
+  if ( ( type(value) == "number" ) or ( type(value) == "string" ) or 
+         ( type(value) == "boolean" ) ) then
+      file:write(basicSerialize(value), "\n")
+  elseif type(value) == "table" then
+    if saved[value] then    -- value already saved?
+      file:write(saved[value], "\n")  -- use its previous name
     else
-        --error("cannot save a " .. type(value))
+      saved[value] = name   -- save name for next time
+      file:write("{}\n")     -- create a new table
+      for k,v in pairs(value) do      -- save its fields
+        local fieldname = string.format("%s[%s]", name, basicSerialize(k))
+                save(fieldname, v, saved, file)
+      end
     end
+  elseif ( type(value) == "lVector" ) then 
+    -- TODO Indrajeet to check
+    local x = value:reincarnate()
+    local persist_str = value:reincarnate()
+    file:write(persist_str)
+    file:write("\n")
+    if type(value) == "lVector" then
+      save(name .. "._meta", value._meta, saved, file)
+    end
+  elseif ( type(value) == "userdata" ) then 
+    -- print("not saving a userdata")
+  else
+    error("cannot save a " .. type(value))
+  end
 end
 
 local function save_global(filename)
@@ -101,7 +98,7 @@ local function save_global(filename)
     -- TODO get requires in place to be added in v2 like require "Vector"
     for k,v in pairs(_G) do
         if not is_g_exception(k,v) then
-          print("Saving ", k, v)
+          -- print("Saving ", k, v)
           save(k, v, saved, file)
         end
     end

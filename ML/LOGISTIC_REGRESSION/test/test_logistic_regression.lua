@@ -5,7 +5,6 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 
 return function(file_name, data_file, num_cols, num_classes)
   local meta_file = 'LR-test-' .. file_name .. '.lua'
-
   local status = pcall(dofile, os.getenv("Q_METADATA_DIR")..'/'..meta_file)
   if not status or not train_X or not train_y or not test_X or not test_y then
     local data_folder = 'data'
@@ -27,7 +26,6 @@ return function(file_name, data_file, num_cols, num_classes)
       local y_cols = {{ name = 'y'..suff, qtype = "F8", has_nulls = false, is_dict = false, is_load = true }}
       return x_cols, y_cols
     end
-
     local x_cols, y_cols = cols('train')
     train_X = Q.load_csv(train_X_file, x_cols)
     print('loaded train_X')
@@ -42,7 +40,7 @@ return function(file_name, data_file, num_cols, num_classes)
     save(meta_file)
   end
 
-  local len, test_y_c, _ = test_y:chunk(-1)
+  local len, test_y_c, _ = test_y:chunk()
   test_y_c = ffi.cast('double*', test_y_c)
 
   local classes = {}
@@ -54,7 +52,7 @@ return function(file_name, data_file, num_cols, num_classes)
   local function fraction_correct()
     local _, _, get_classes = log_reg.package_betas(betas)
     local classes = get_classes(test_X)
-    _, classes, _ = classes:chunk(-1)
+    _, classes, _ = classes:chunk()
     classes = ffi.cast('double*', classes)
     local num_correct = 0
     for i = 0, len - 1 do
@@ -67,6 +65,7 @@ return function(file_name, data_file, num_cols, num_classes)
   end
 
   for i = 1, 100 do
+print("i = ", i)
     step()
     print(fraction_correct() * 100 .. "% correct after training step " .. i)
   end

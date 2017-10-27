@@ -519,6 +519,7 @@ function lVector:chunk(chunk_num)
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
     else
       if ( base_data ) then 
         -- this is the simpler case where generator malloc's
