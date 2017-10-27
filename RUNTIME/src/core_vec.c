@@ -17,29 +17,33 @@ extern luaL_Buffer g_errbuf;
 
 static bool 
 is_file_size_okay(
-    VEC_REC_TYPE *ptr_vec, 
-    uint64_t num_elements
+    VEC_REC_TYPE *ptr_vec 
     )
 {
-  int64_t fsz = get_file_size(ptr_vec->file_name); 
-  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-    if ( ptr_vec->is_nascent && !ptr_vec->is_eov ) { 
-      int cnum = ptr_vec->chunk_num;
-      int sz = ptr_vec->num_elements / 8;
-      if ( fsz != (cnum * sz) ) { 
-        WHEREAMI; return false;
-      }
-    }
-    else {
-      return true; // TODO: P3 Put invariant in here 
-    }
+  if ( ptr_vec->is_memo == false ) {
+    return true; // TODO: what should be appropriate return value
+  }
+  int64_t actual_fsz = get_file_size(ptr_vec->file_name);
+  int64_t expected_fsz;
+  int num_elements;
+  if ( ptr_vec->is_eov ) {
+    num_elements = ptr_vec->num_elements;
   }
   else {
-    if ( (uint64_t)(fsz/ptr_vec->field_size) != num_elements ) {
-      WHEREAMI; return false;
-    }
+    num_elements = ( ptr_vec->chunk_num * ptr_vec->chunk_size );
   }
-  return true;
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    expected_fsz = ceil( num_elements / 64.0 ) * 8;
+  }
+  else {
+    expected_fsz = num_elements * ptr_vec->field_size;
+  }
+  if ( expected_fsz != actual_fsz ) {
+    WHEREAMI; return false;
+  }
+  else {
+    return true;
+  }
 }
 
 static int 
@@ -346,7 +350,7 @@ vec_nascent(
   memset( ptr_vec->chunk, '\0', sz);
   return_if_malloc_failed(ptr_vec->chunk);
   ptr_vec->is_nascent = true;
-  // not needed 'cos done at vec_new() ptr_vec->is_eov     = false;
+  ptr_vec->is_eov     = false;
 
 BYE:
   return status;
@@ -454,7 +458,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
     bool exists = file_exists(ptr_vec->file_name); 
     if ( !exists ) { go_BYE(-1); }
-    if ( !is_file_size_okay(ptr_vec, ptr_vec->num_elements) ) { go_BYE(-1);}
+    if ( !is_file_size_okay(ptr_vec) ) { go_BYE(-1);}
   }
   //-----------------------------------------------
   if ( ( ptr_vec->is_nascent == true ) && ( ptr_vec->is_eov == false ) ) {
@@ -464,9 +468,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
       // Check that file is of proper size
-      if ( !is_file_size_okay(ptr_vec, 
-            // Note that we do NOT use ptr_vec->num_elements
-            (ptr_vec->chunk_num * ptr_vec->chunk_size) ) )  {
+      if ( !is_file_size_okay(ptr_vec) )  {
           go_BYE(-1);
       }
     }
@@ -830,8 +832,7 @@ vec_start_write(
 {
   int status = 0;
   char *X = NULL; uint64_t nX = 0;
-  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_nascent == false ) &&
-       ( ptr_vec->is_memo == true ) ) {
+  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
     /* all is well */
   }
   else {

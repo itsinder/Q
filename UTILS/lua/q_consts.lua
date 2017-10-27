@@ -8,7 +8,7 @@ local qconsts = {}
     qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
-    qconsts.sz_str_for_lua = 128 -- TODO Should be much bigger
+    qconsts.sz_str_for_lua = 1024 * 1024
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
