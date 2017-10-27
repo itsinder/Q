@@ -17,29 +17,33 @@ extern luaL_Buffer g_errbuf;
 
 static bool 
 is_file_size_okay(
-    VEC_REC_TYPE *ptr_vec, 
-    uint64_t num_elements
+    VEC_REC_TYPE *ptr_vec 
     )
 {
-  int64_t fsz = get_file_size(ptr_vec->file_name); 
-  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-    if ( ptr_vec->is_nascent ) { 
-      int cnum = ptr_vec->chunk_num;
-      int sz = ptr_vec->num_elements / 8;
-      if ( fsz != ((cnum+1) * sz) ) { 
-        WHEREAMI; return false;
-      }
-    }
-    else {
-      return true; // TODO: P3 Put invariant in here 
-    }
+  if ( ptr_vec->is_memo == false ) {
+    return true; // TODO: what should be appropriate return value
+  }
+  int64_t actual_fsz = get_file_size(ptr_vec->file_name);
+  int64_t expected_fsz;
+  int num_elements;
+  if ( ptr_vec->is_eov ) {
+    num_elements = ptr_vec->num_elements;
   }
   else {
-    if ( (uint64_t)(fsz/ptr_vec->field_size) != num_elements ) {
-      WHEREAMI; return false;
-    }
+    num_elements = ( ptr_vec->chunk_num * ptr_vec->chunk_size );
   }
-  return true;
+  if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+    expected_fsz = ceil( num_elements / 64.0 ) * 8;
+  }
+  else {
+    expected_fsz = num_elements * ptr_vec->field_size;
+  }
+  if ( expected_fsz != actual_fsz ) {
+    WHEREAMI; return false;
+  }
+  else {
+    return true;
+  }
 }
 
 static int 
@@ -198,7 +202,6 @@ vec_materialized(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
   // Sample error luaL_addstring(&g_errbuf, "hello world"); 
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
@@ -206,31 +209,29 @@ vec_materialized(
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
   bool is_write = false;
-  status = rs_mmap(file_name, &X, &nX, is_write);
-  cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  // check nX
+  size_t fsz = get_file_size(file_name);
+  if ( fsz <= 0 ) { go_BYE(-1); }
+  // check fsz
   // For B1, file can be larger than necessary, not smaller
   // For all others, size must match number of elements
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
     if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
     uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
     uint64_t num_bytes = num_words * 8;
-    if ( num_bytes < nX ) { go_BYE(-1); }
+    if ( num_bytes < fsz ) { go_BYE(-1); }
   }
   else {
-    ptr_vec->num_elements = nX / ptr_vec->field_size;
-    if (( ptr_vec->num_elements * ptr_vec->field_size) != nX ) { 
+    ptr_vec->num_elements = fsz / ptr_vec->field_size;
+    if (( ptr_vec->num_elements * ptr_vec->field_size) != fsz ) { 
       go_BYE(-1);
     }
   }
-  ptr_vec->file_size  = nX;
+  ptr_vec->file_size  = fsz;
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov     = true;
   ptr_vec->is_memo    = true;
   strcpy(ptr_vec->file_name, file_name);
   // now unmap the file
-  rs_munmap(X, nX); 
 BYE:
   return status;
 }
@@ -349,7 +350,7 @@ vec_nascent(
   memset( ptr_vec->chunk, '\0', sz);
   return_if_malloc_failed(ptr_vec->chunk);
   ptr_vec->is_nascent = true;
-  // not needed 'cos done at vec_new() ptr_vec->is_eov     = false;
+  ptr_vec->is_eov     = false;
 
 BYE:
   return status;
@@ -359,9 +360,10 @@ int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
-    uint32_t field_size,
     uint32_t chunk_size,
-    bool is_memo
+    bool is_memo,
+    const char *const file_name,
+    int64_t num_elements
     )
 {
   int status = 0;
@@ -370,11 +372,58 @@ vec_new(
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
-  status = chk_field_type(field_type, field_size); cBYE(status);
+  char qtype[4]; int field_size = 0;
+  memset(qtype, '\0', 4);
+  if ( strcmp(field_type, "B1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 0; // SPECIAL CASE
+  }
+  else if ( strcmp(field_type, "I1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 1;
+  }
+  else if ( strcmp(field_type, "I2") == 0 ) {
+    strcpy(qtype, field_type); field_size = 2;
+  }
+  else if ( strcmp(field_type, "I4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "I8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strcmp(field_type, "F4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "F8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strncmp(field_type, "SC:", 3) == 0 ) {
+    char *cptr = (char *)field_type + 3;
+    status = txt_to_I4(cptr, &field_size); cBYE(status);
+    if ( field_size < 2 ) { go_BYE(-1); }
+    strcpy(qtype, "SC");
+  }
+  else if ( strcmp(field_type, "SV") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
+  }
+  else {
+    go_BYE(-1);
+  }
+
+  status = chk_field_type(qtype, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = is_memo;
-  strcpy(ptr_vec->field_type, field_type);
+  strcpy(ptr_vec->field_type, qtype);
+
+  if ( file_name != NULL ) { // filename provided for materialized vec
+    if ( strcmp(qtype, "B1") == 0 ) { // Set num_elements for materialized B1 vec
+      if ( num_elements <= 0 ) { go_BYE(-1); }
+      ptr_vec->num_elements = (uint64_t) num_elements;
+    }
+    status = vec_materialized(ptr_vec, file_name); cBYE(status);
+  }
+  else {
+    status = vec_nascent(ptr_vec); cBYE(status);
+  }
 
 BYE:
   return status;
@@ -457,7 +506,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
     bool exists = file_exists(ptr_vec->file_name); 
     if ( !exists ) { go_BYE(-1); }
-    if ( !is_file_size_okay(ptr_vec, ptr_vec->num_elements) ) { go_BYE(-1);}
+    if ( !is_file_size_okay(ptr_vec) ) { go_BYE(-1);}
   }
   //-----------------------------------------------
   if ( ( ptr_vec->is_nascent == true ) && ( ptr_vec->is_eov == false ) ) {
@@ -467,9 +516,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       bool exists = file_exists(ptr_vec->file_name); 
       if ( !exists ) { go_BYE(-1); }
       // Check that file is of proper size
-      if ( !is_file_size_okay(ptr_vec, 
-            // Note that we do NOT use ptr_vec->num_elements
-            (ptr_vec->chunk_num * ptr_vec->chunk_size) ) )  {
+      if ( !is_file_size_okay(ptr_vec) )  {
           go_BYE(-1);
       }
     }
@@ -570,7 +617,6 @@ vec_get(
   if ( len == 0 ) { 
     // Providing len == 0 => vector must be materialized, we want everything
     if ( !ptr_vec->is_eov ) { go_BYE(-1); }
-    if ( ptr_vec->is_nascent ) { go_BYE(-1); }
   }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
@@ -833,8 +879,7 @@ vec_start_write(
 {
   int status = 0;
   char *X = NULL; uint64_t nX = 0;
-  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_nascent == false ) &&
-       ( ptr_vec->is_memo == true ) ) {
+  if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
     /* all is well */
   }
   else {

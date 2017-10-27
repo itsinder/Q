@@ -193,7 +193,7 @@ end
 function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
-  self:set_meta("num_nulls")
+  self:set_meta("has_nulls", false)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -312,7 +312,7 @@ end
 function lVector:set_generator(gen)
   assert(Vector.num_elements(self._base_vec) == 0, 
     "Cannot set generator once elements generated")
-  assert(Vector.is_nascent(self._base_vec), 
+  assert(not self:is_eov(), 
     "Cannot set generator for materialized vector")
   assert(type(gen) == "function")
   self._gen = gen
@@ -393,7 +393,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
 end
 
 function lVector:eval()
-  if ( Vector.is_nascent(self._base_vec) ) then
+  if ( not self:is_eov() ) then
     local chunk_num = self:chunk_num() 
     local base_len, base_addr, nn_addr 
     repeat
@@ -470,7 +470,8 @@ function lVector:chunk(chunk_num)
   local l_chunk_num = 0
   local base_addr, base_len
   local nn_addr,   nn_len  
-  local is_nascent = Vector.is_nascent(self._base_vec)  
+  local is_nascent = Vector.is_nascent(self._base_vec)
+  local is_eov = self:is_eov() 
   if ( chunk_num ) then 
     assert(type(chunk_num) == "number")
     assert(chunk_num >= 0)
@@ -488,10 +489,10 @@ function lVector:chunk(chunk_num)
   end
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
-  local cond1 = not is_nascent
+  local cond1 = is_eov
   -- cond2 => Vector is nascent and you are asking for current chunk
   -- or previous chunk 
-  local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
+  local cond2 = ( not is_eov ) and 
           ( ( ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
           ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
           ( ( l_chunk_num < Vector.chunk_num(self._base_vec) ) and 
@@ -511,10 +512,6 @@ function lVector:chunk(chunk_num)
     return base_len, base_addr, nn_addr
   else
     assert(self._gen)
-    if ( type(self._gen) ~= "function") then 
-      print("XX ", type(self._gen))
-      print("XX ", self:get_name())
-   end
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
     if ( buf_size < qconsts.chunk_size ) then
@@ -522,7 +519,7 @@ function lVector:chunk(chunk_num)
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()
-      return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
     else
       if ( base_data ) then 
         -- this is the simpler case where generator malloc's
@@ -557,7 +554,7 @@ end
 
 function lVector:reincarnate()
   if ( qconsts.debug ) then self:check() end
-  if ( Vector.is_nascent(self._base_vec) ) then
+  if ( not self:is_eov()) then
     return nil
   end
   
