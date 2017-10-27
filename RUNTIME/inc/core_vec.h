@@ -117,4 +117,8 @@ extern int
 vec_clean_chunk(
     VEC_REC_TYPE *ptr_vec
     );
+extern char *
+vec_get_buf(
+  VEC_REC_TYPE *ptr_vec
+);
 #endif

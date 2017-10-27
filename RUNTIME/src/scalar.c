@@ -28,6 +28,7 @@ extern int luaopen_libsclr (lua_State *L);
 static int l_sclr_to_cdata( lua_State *L) {
   SCLR_REC_TYPE *ptr_sclr = NULL;
 
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   if ( ptr_sclr == NULL ) { WHEREAMI; goto BYE; }
   lua_pushlightuserdata(L, &(ptr_sclr->cdata));
@@ -42,6 +43,7 @@ BYE:
 
 static int l_sclr_to_num( lua_State *L) {
 
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
   if ( strcmp(field_type, "B1" ) == 0 ) { 
@@ -76,15 +78,21 @@ BYE:
 }
 
 static int l_fldtype(lua_State *L) {
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   lua_pushstring(L, ptr_sclr->field_type);
   return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: fldtype. ");
+  return 2;
 }
 
 static int l_sclr_to_str( lua_State *L) {
 #define BUFLEN 31
   char buf[BUFLEN+1];
 
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   // TODO Allow user to provide format
   memset(buf, '\0', BUFLEN+1);
@@ -139,6 +147,7 @@ static int l_sclr_new( lua_State *L) {
 
   // TESTING GC problems lua_gc(L, LUA_GCCOLLECT, 0);  
 
+  if ( lua_gettop(L) < 2 ) { go_BYE(-1); }
   if ( lua_isstring(L, 1) ) { 
     str_val = luaL_checkstring(L, 1);
   }

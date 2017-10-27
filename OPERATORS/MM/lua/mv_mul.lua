@@ -14,23 +14,35 @@ local mv_mul = function(X, y)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not available" .. func_name)
   --
-  --all of y needs to be evaluated
-  local y_len, yptr, nn_yptr = y:chunk()
-  assert(nn_yptr == nil, "Don't support null values")
-  assert(yptr)
-  assert(y_len == #X, "Y must have same length as num cols of X")
 
-  -- START: malloc
-  -- malloc space for one chunk worth of output z
-  local z_sz = qconsts.qtypes["F8"].width * qconsts.chunk_size
-  local z_buf = assert(ffi.malloc(z_sz), "malloc failed")
-  local nn_z_buf = nil -- since no nils in output
+  local z_buf = nil 
+  local nn_z_buf = nil 
+  local ztype = "F8" -- hard coded for now
+  local z_sz = qconsts.qtypes[ztype].width * qconsts.chunk_size
   local Xptr -- malloc space for pointers to chunks of X
-  local Xptr = assert(ffi.malloc(ffi.sizeof("double *") * #X))
-  Xptr = ffi.cast("double **", Xptr)
-  -- STOP : malloc
+  local first_call = true
+  local y_len, yptr, nn_yptr 
 
   local gen_fn = function(chunk_idx)
+    if  ( first_call ) then 
+      -- print("malloc'ing for generator of mv_mul")
+      -- START: malloc
+      -- malloc space for one chunk worth of output z
+      Xptr = ffi.malloc(ffi.sizeof("double *") * #X)
+      Xptr = ffi.cast("double **", Xptr)
+      -- STOP : malloc
+      z_buf = ffi.malloc(z_sz)
+
+      --all of y needs to be evaluated
+      y_len, yptr, nn_yptr = y:chunk()
+      assert(nn_yptr == nil, "Don't support null values")
+      assert(yptr)
+      assert(y_len == #X, "Y must have same length as num cols of X")
+
+      first_call = false
+    end
+    assert(z_buf, "malloc failed")
+    assert(Xptr, "malloc failed")
     local len = 0
     -- START: assemble Xptr
     for xidx = 1, #X do

@@ -7,6 +7,7 @@
 #include "_get_file_size.h"
 #include "_buf_to_file.h"
 #include "_file_exists.h"
+#include "_txt_to_I4.h"
 
 // #define Q_MAX_LEN_FILE_NAME  255
 // #define Q_MAX_LEN_INTERNAL_NAME  31
@@ -105,6 +106,31 @@ BYE:
   return status;
 }
 
+char *
+vec_get_buf(
+  VEC_REC_TYPE *ptr_vec
+)
+{
+  int status = 0;
+  char *chunk = NULL;
+  if ( ptr_vec->is_nascent ) {
+    if ( ptr_vec->chunk == NULL ) { 
+      ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+      if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
+      memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+    }
+    else {
+      if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
+        status = flush_buffer(ptr_vec); cBYE(status);
+      }
+    }
+    if ( ptr_vec->num_in_chunk != 0 ) { WHEREAMI; goto BYE; }
+    if ( ptr_vec->chunk_sz     == 0 ) {  WHEREAMI; goto BYE; }
+    chunk = ptr_vec->chunk;
+  }
+BYE:
+  return chunk;
+}
 
 int 
 vec_cast(
@@ -208,7 +234,6 @@ vec_materialized(
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
-  bool is_write = false;
   size_t fsz = get_file_size(file_name);
   if ( fsz <= 0 ) { go_BYE(-1); }
   // check fsz
@@ -295,6 +320,8 @@ vec_free(
     )
 {
   int status = 0;
+  static int ctr = 0;
+  // fprintf(stderr, "Freeing vector %d\n", ++ctr);
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);
@@ -332,7 +359,6 @@ vec_nascent(
     )
 {
   int status = 0;
-  uint32_t sz = 0;
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   if ( ptr_vec->chunk        != NULL ) { go_BYE(-1); }
   if ( ptr_vec->chunk_num    != 0    ) { go_BYE(-1); }
@@ -340,15 +366,13 @@ vec_nascent(
 
   // chunk size must be multiple of 64
   if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
-    sz = ptr_vec->chunk_size / 8;
+    ptr_vec->chunk_sz = ptr_vec->chunk_size / 8;
   }
   else {
-    sz = ptr_vec->field_size * ptr_vec->chunk_size;
+    ptr_vec->chunk_sz = ptr_vec->field_size * ptr_vec->chunk_size;
   }
-  ptr_vec->chunk = malloc(sz);
-  return_if_malloc_failed(ptr_vec->chunk);
-  memset( ptr_vec->chunk, '\0', sz);
-  return_if_malloc_failed(ptr_vec->chunk);
+
+
   ptr_vec->is_nascent = true;
   ptr_vec->is_eov     = false;
 
@@ -510,7 +534,10 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   }
   //-----------------------------------------------
   if ( ( ptr_vec->is_nascent == true ) && ( ptr_vec->is_eov == false ) ) {
-    if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->chunk_sz == 0 ) { go_BYE(-1); }
+    /* Not an error because of lazy malloc 
+      if ( ptr_vec->chunk == NULL ) { go_BYE(-1); }
+    */
     if ( ( ptr_vec->is_memo ) && ( ptr_vec->chunk_num >= 1 ) ) {
       // Check that file exists 
       bool exists = file_exists(ptr_vec->file_name); 
@@ -653,7 +680,7 @@ vec_get(
       goto BYE;
     }
     else {
-      printf("cleaning chunk \n");
+      // printf("cleaning chunk \n");
       if ( ptr_vec->chunk != NULL ) {
         status = vec_clean_chunk(ptr_vec); cBYE(status);
       }
@@ -768,6 +795,12 @@ vec_add_B1(
     )
 {
   int status = 0;
+  if ( ptr_vec->chunk == NULL ) { 
+    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    return_if_malloc_failed(ptr_vec->chunk);
+    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+  }
+
   if ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) {
     // we are nicely byte aligned
     for ( ; len > 0 ; ) { 
@@ -844,6 +877,13 @@ vec_add(
     status = vec_add_B1(ptr_vec, addr, len); cBYE(status);
     goto BYE; 
   }
+
+  if ( ptr_vec->chunk == NULL ) { 
+    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    return_if_malloc_failed(ptr_vec->chunk);
+    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+  }
+
   uint64_t initial_num_elements = ptr_vec->num_elements;
   uint32_t num_copied = 0;
   for ( uint32_t num_left_to_copy = len; num_left_to_copy > 0; ) {

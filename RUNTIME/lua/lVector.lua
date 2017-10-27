@@ -325,6 +325,8 @@ function lVector:eov()
     local status = Vector.eov(self._nn_vec)
     assert(status)
   end
+-- destroy generator and therebuy release resources held by it 
+  self._gen = nil 
   if ( qconsts.debug ) then self:check() end
   return true
 end

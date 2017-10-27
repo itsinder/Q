@@ -5,10 +5,10 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 
 return function(func_name, A, b)
-  print(func_name)
+  print("start: ", func_name, g_iter)
   -- TODO change positive_solver to to general_linear_solver
   assert( ( func_name == "positive_solver") or 
-          ( func_name == "posdef_linear_solver") )
+          ( func_name == "full_posdef_positive_solver") )
   assert(type(A) == "table", "A should be a table of columns")
   assert(type(b) == "lVector", "b should be a column")
   local b_qtype = b:fldtype()
@@ -17,19 +17,19 @@ return function(func_name, A, b)
   assert( (b_qtype == "F4") or (b_qtype == "F8"), 
   "b should be a column of doubles/floats")
 
-  for i, v in ipairs(A) do
-    assert(type(v) == "lVector", "A["..i.."] should be a column")
-    assert(v:fldtype() == b_qtype, 
+  for i, a in ipairs(A) do
+    assert(type(a) == "lVector", "A["..i.."] should be a column")
+    assert(a:fldtype() == b_qtype, 
       "A["..i.."] should be a column of same type as b")
   end
 
-  local n, b_chunk, nn_b_chunk = b:chunk()
+  local n, bptr, nn_bptr = b:chunk()
   assert(n > 0)
-  assert(nn_b_chunk == nil, "b should have no nil elements")
+  assert(nn_bptr == nil, "b should have no nil elements")
 
   assert(#A == n, "A should have same width as b")
   local Aptr = assert(ffi.malloc(n * ffi.sizeof(b_ctype .. " *")))
-  local xptr = assert(ffi.malloc(n * ffi.sizeof(b_ctype .. " *")))
+  local xptr = assert(ffi.malloc(n * ffi.sizeof(b_ctype)))
   Aptr = ffi.cast(b_ctype .. " **", Aptr)
   -- Creating separate pointer copy 'copy_xptr' because if we 
   -- modify 'xptr' as below
@@ -45,9 +45,10 @@ return function(func_name, A, b)
   end
 
   assert(qc[func_name], "Symbol not found " .. func_name)
-  local status = qc[func_name](Aptr, copy_xptr, b_chunk, n)
+  print("qc: ", func_name, g_iter)
+  local status = qc[func_name](Aptr, copy_xptr, bptr, n)
   assert(status == 0, "solver failed")
-  assert(qc["full_positive_solver_check"](Aptr, copy_xptr, b_chunk, n, 0),
+  assert(qc["full_positive_solver_check"](Aptr, copy_xptr, bptr, n, 0),
          "solution returned by solver "..func_name.." is invalid")
 
   local x_col = lVector({qtype = b_qtype, gen = true, has_nulls=false})

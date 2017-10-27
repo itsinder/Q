@@ -1,10 +1,11 @@
-local plfile = require 'pl.file'
-local plpath = require 'pl.path'
-local Vector = require 'libvec'  
-local Scalar = require 'libsclr'  
-local cmem = require 'libcmem'  
-local lVector = require 'lVector'
-local ffi    = require 'Q/UTILS/lua/q_ffi'
+local plfile  = require 'pl.file'
+local plpath  = require 'pl.path'
+local Vector  = require 'libvec'  
+local Scalar  = require 'libsclr'  
+local cmem    = require 'libcmem'  
+local lVector = require 'Q/RUNTIME/lua/lVector'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 require 'Q/UTILS/lua/strict'
 --
 num_iters = 1024

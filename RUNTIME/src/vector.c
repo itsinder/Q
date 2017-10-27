@@ -159,12 +159,9 @@ BYE:
 static int l_vec_get_vec_buf( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  if ( ptr_vec->is_nascent ) {
-    if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
-      status = flush_buffer(ptr_vec); cBYE(status);
-    }
-    if ( ptr_vec->num_in_chunk != 0 ) { go_BYE(-1); }
-    lua_pushlightuserdata(L, ptr_vec->chunk);
+  char *chunk = vec_get_buf(ptr_vec); cBYE(status);
+  if ( chunk != NULL ) { 
+    lua_pushlightuserdata(L, chunk);
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");
     /* Set the metatable on the userdata. */

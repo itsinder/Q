@@ -5,48 +5,40 @@ local T = {}
 
 local function beta_step(X, y, beta)
   local Xbeta = Q.mv_mul(X, beta)
-  local p = Q.logit(Xbeta)
-  local w = Q.logit2(Xbeta)
-  local ysubp = Q.vvsub(y, p)
-ysubp:eval()
-ysubp:set_name("ysubp")
-  local temp = ysubp:meta()
-for k, v in pairs(temp.base) do print(k, v) end
-print("============")
+  local p = Q.logit(Xbeta):set_name("p")
+  local w = Q.logit2(Xbeta):set_name("w")
+  local ysubp = Q.vvsub(y, p):set_name("ysubp")
+  local A = {} -- initially a table of Lua tables, later a table of Q vectors
+  local b = {} -- initially a Lua table, later a Q vector
 
-  local A = {}
-  local b = {}
   for i, X_i in ipairs(X) do
+    b[i] = Q.sum(Q.vvmul(X_i, ysubp):set_name("b_" .. i))
     A[i] = {}
-    X_i:set_name("X" .. i)
-    b[i] = Q.sum(Q.vvmul(X_i, ysubp)) 
     for j, X_j in ipairs(X) do
-      A[i][j] = Q.sum(Q.vvmul(X_i, Q.vvmul(w, X_j)))
+      A[i][j] = Q.sum(
+                  Q.vvmul(X_i, 
+                    Q.vvmul(w, X_j):set_name("tmp1")
+                  ):set_name("tmp2")
+                ):set_name("sum_Aij")
     end
   end
-
   for i = 1, #A do
-print("START: evaluating b_" .. i)
-    b[i]:eval()
-print("STOP:  evaluating b_" .. i)
---[[
+     b[i] = b[i]:eval()
     for j = 1, #A[i] do
-      A[i][j]:eval()
+      A[i][j] = A[i][j]:eval()
     end
---]]
   end
-  print("beta_step: sum_prod eval done, EXITING")
-  os.exit()
-
+  -- convert from Lua table to Q vector
   b = Q.mk_col(b, "F8")
   for i = 1, #A do
     A[i] = Q.mk_col(A[i], "F8")
   end
-
+  return b
+--[[
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
-
   return beta_new
+--]]
 end
 
 local function package_betas(betas)
@@ -151,37 +143,22 @@ end
 T.package_betas = package_betas
 require('Q/q_export').export('package_logistic_regression_betas', package_betas)
 
-local function make_trainer(X, y, classes)
-  X[#X + 1] = Q.const({ val = 1, len = y:length(), qtype = 'F8' })
+local function lr_setup(
+  X, -- table of M columns of length N
+  y  -- vector of length M containing classification label
+)
+  -- add an additional column to X of 1's. Math justification in documentation
+  local xtype = X[1]:fldtype()
+  local N = y:length()
+  X[#X + 1] = Q.const({ val = 1, len = N, qtype = xtype })
   X[#X]:eval()
-  local betas = {}
-  local ys = {}
-  for i = 1, #classes - 1 do
-    betas[i] = Q.const({ val = 0, len = #X, qtype = 'F8' })
-    betas[i]:eval()
-    local _, ytmp, _ = y:chunk()
-    ytmp = ffi.cast('double*', ytmp)
-    local ytab = {}
-    for i = 1, y:length() do
-      ytab[i] = 0
-      if ytmp[i - 1] == classes[i] then
-        ytab[i] = 1
-      end
-    end
-    ys[i] = Q.mk_col(ytab, 'F8')
-    ys[i]:eval()
-  end
-
-  local function step_betas()
-    for i = 1, #betas do
-      betas[i] = beta_step(X, ys[i], betas[i])
-      betas[i]:eval()
-    end
-  end
-
-  return betas, step_betas
+  local M = #X
+  --- initialize beta to 0 
+  beta = Q.const({ val = 0, len = M, qtype = 'F8' })
+  return beta
 end
-T.make_trainer = make_trainer
-require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
+T.beta_step = beta_step
+T.lr_setup  = lr_setup
+-- require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
 
 return T

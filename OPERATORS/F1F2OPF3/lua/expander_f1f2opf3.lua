@@ -22,19 +22,25 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   if ( f3_width < 1 ) then f3_width = 1 end
 
   local buf_sz = qconsts.chunk_size * f3_width
-  local f3_buf = ffi.malloc(buf_sz)
-
+  local f3_buf = nil
   local nn_f3_buf = nil -- Will be created if nulls in input
-  if f1:has_nulls() or f2:has_nulls() then
-    nn_f3_buf = ffi.malloc(qconsts.chunk_size)
-  end
 
   local f1_chunk_size = f1:chunk_size()
   local f2_chunk_size = f2:chunk_size()
   assert(f1_chunk_size == f2_chunk_size)
 
+  local first_call = true
+
   local f3_gen = function(chunk_idx)
-  print("expander_f1f2opf3: chunk_idx = ", chunk_idx)
+    if ( first_call ) then 
+      -- print("malloc for generator for f1f2opf3", a, g_iter)
+      first_call = false
+      f3_buf = ffi.malloc(buf_sz)
+      if f1:has_nulls() or f2:has_nulls() then
+        nn_f3_buf = nn_f3_buf or ffi.malloc(qconsts.chunk_size)
+      end
+    end
+    assert(f3_buf)
     local f1_len, f1_chunk, nn_f1_chunk
     local f2_len, f2_chunk, nn_f2_chunk
     f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)

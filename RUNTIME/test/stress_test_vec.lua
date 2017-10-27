@@ -20,7 +20,7 @@ for i = 1, num_trials do
   end
   y:eov()
   assert(y:check())
-  print("Iter ", i) 
+  if ( ( i % 10 ) == 0 ) then print("Iter ", i)  end
 end
 --=========================
 print("Completed ", arg[0])
