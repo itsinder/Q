@@ -569,7 +569,6 @@ vec_get(
   if ( len == 0 ) { 
     // Providing len == 0 => vector must be materialized, we want everything
     if ( !ptr_vec->is_eov ) { go_BYE(-1); }
-    if ( ptr_vec->is_nascent ) { go_BYE(-1); }
   }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
