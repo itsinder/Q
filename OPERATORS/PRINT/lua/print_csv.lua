@@ -185,7 +185,7 @@ local print_csv = function (column_list, filter, opfile)
     return table.concat(tbl_rslt)
   else
     if fp then io.close(fp) end
-    return true
+    -- return true
   end
 end
 
