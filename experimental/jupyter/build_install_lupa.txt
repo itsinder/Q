@@ -1,0 +1,19 @@
+Following are the steps to build lupa with lua5.1 (Assuming lua5.1 is default)
+
+- Download lupa source from https://pypi.python.org/pypi/lupa/ (lupa-1.5.tar.gz)
+
+- Extract the distribution
+$ tar zxf tar zxf lupa-1.5.tar.gz
+$ cd lupa-1.5/
+
+- Install lupa
+$ sudo apt-get install python-dev
+$ sudo python setup.py install --no-luajit
+
+- How to test installation
+start python interpreter and try importing lupa
+$ cd /tmp
+$ python
+import lua
+
+above command should work
