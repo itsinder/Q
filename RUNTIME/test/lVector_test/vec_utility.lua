@@ -33,12 +33,10 @@ fns.validate_values = function(vec, qtype, chunk_number)
   --  chunk_number = 0
   -- end
 
-
   local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
-  
   
   if qtype == "SV" or qtype == "SC" then
     local table_type 
@@ -83,12 +81,14 @@ fns.validate_values = function(vec, qtype, chunk_number)
     return true
   end
   
-  local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+  --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
   for i = 1, len do
     local expected = i*15 % qconsts.qtypes[qtype].max
-    if ( iptr[i - 1] ~= expected ) then
+    local value = c_to_txt(vec,i)
+    -- print(expected, value)
+    if ( value ~= expected ) then
       status = false
-      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
+      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(value))
       break
     end
   end

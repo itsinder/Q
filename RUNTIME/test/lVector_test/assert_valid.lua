@@ -7,6 +7,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+
 local fns = {}
 
 --===================
@@ -23,12 +24,14 @@ local validate_vec_meta = function(meta, is_materialized, num_elements)
   assert(meta.base.num_elements == num_elements)
   if is_materialized then
     assert(meta.base.is_nascent == false)
+    assert(meta.base.is_eov == true)
     assert(meta.base.file_name)
     assert(plpath.exists(meta.base.file_name))
     --assert(meta.base.chunk_num == 0)
     --assert(meta.base.num_in_chunk == 0)    
   else
     assert(meta.base.is_nascent == true)
+    assert(meta.base.is_eov == false)
     assert(meta.base.file_name == nil)
     assert(meta.base.chunk_num == math.floor(num_elements / qconsts.chunk_size))
     assert(meta.base.num_in_chunk == num_elements % qconsts.chunk_size)    
@@ -72,13 +75,17 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
     vec:eov()
     assert(vec:check(), "Failed in vector check after vec:eov()")
   end
-  
   -- Validate vector values
   -- TODO: modify validate values to work with gen_method == func
   if gen_method ~= "func" then
     if validate_values == true or validate_values == nil then
-      status = vec_utils.validate_values(vec, md.base.field_type)
-      assert(status, "Vector values verification failed")
+        local num_elements = vec:num_elements()
+        local no_of_chunks = math.ceil(num_elements/65536)
+        -- print("number of chunks are==========",no_of_chunks)
+        for chunk_no = 0,no_of_chunks-1 do
+          status = vec_utils.validate_values(vec, md.base.field_type, chunk_no)
+          assert(status, "Vector values verification failed")
+        end
     end
   end
   return true
@@ -207,7 +214,6 @@ fns.assert_nascent_vector3_2 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
-  
   -- Try persist() method with true, it should fail
   status = vec:persist(true)
   assert(status == nil, "Able set persist even if memo is false")
@@ -230,7 +236,7 @@ fns.assert_nascent_vector3_3 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
-    
+  
   -- Try setting memo to true when chunk_num is zero i.e num_elements < chunk_size
   -- file_name should not be initialized, vec:check() should be successful
   assert(md.base.chunk_num == 0)
