@@ -87,7 +87,7 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   if gen_method ~= "func" then
     if validate_values == true or validate_values == nil then
         local num_elements = vec:num_elements()
-        local no_of_chunks = math.ceil(num_elements/65536)
+        local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
         -- print("number of chunks are==========",no_of_chunks)
         for chunk_no = 0,no_of_chunks-1 do
           status = vec_utils.validate_values(vec, md.base.field_type, chunk_no)
@@ -135,7 +135,7 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
   -- now the vector becomes a materialized vector
   local is_materialized
   local performed_eov = true 
-  if md.base.num_elements > 65536 then
+  if md.base.num_elements > qconsts.chunk_size then
     is_materialized = true
   else
     is_materialized = false
@@ -392,7 +392,7 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   local is_materialized
   local performed_eov = true 
-  if md.base.num_elements > 65536 then
+  if md.base.num_elements > qconsts.chunk_size then
     is_materialized = true
   else
     is_materialized = false
@@ -438,7 +438,7 @@ fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   local is_materialized
   local performed_eov = true 
-  if md.base.num_elements > 65536 then
+  if md.base.num_elements > qconsts.chunk_size then
     is_materialized = true
   else
     is_materialized = false
@@ -468,7 +468,7 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   local is_materialized
   local performed_eov = true 
-  if md.base.num_elements > 65536 then
+  if md.base.num_elements > qconsts.chunk_size then
     is_materialized = true
   else
     is_materialized = false
