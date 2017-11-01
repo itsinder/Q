@@ -1,6 +1,6 @@
 -- FUNCTIONAL
-local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
+local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 local a = Q.mk_col({10, 20, 30, 40, 50}, "I4") 

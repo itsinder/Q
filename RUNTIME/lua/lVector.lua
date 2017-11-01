@@ -154,6 +154,9 @@ function lVector.new(arg)
     vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
+  if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
+    Vector.set_name(vector._base_vec, arg.name)
+  end 
   return vector
 end
 
@@ -327,6 +330,9 @@ function lVector:eov()
   end
 -- destroy generator and therebuy release resources held by it 
   self._gen = nil 
+  if ( Vector.num_elements(self._base_vec) == 0 ) then 
+    return nil
+  end
   if ( qconsts.debug ) then self:check() end
   return true
 end
