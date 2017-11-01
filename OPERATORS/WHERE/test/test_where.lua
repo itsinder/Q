@@ -1,3 +1,4 @@
+-- luajit q_testrunner.lua /home/subramon/WORK/Q/OPERATORS/WHERE/test/test_where.lua
 -- FUNCTIONAL
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
