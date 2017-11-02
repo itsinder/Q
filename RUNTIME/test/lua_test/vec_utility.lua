@@ -15,11 +15,18 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
   
   if qtype == "B1" then
     qtype = "I1"
-    local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+    --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
     for i = 1 , ret_len do 
+      local chunk_num = math.floor((i-1)/qconsts.chunk_size)
+      local chunk_idx = (i-1) % qconsts.chunk_size
+      
+      local ret_addr, ret_len = vec:get_chunk(chunk_num)
+      local ctype =  qconsts.qtypes[qtype]["ctype"]
+      local casted = ffi.cast(ctype.." *", ret_addr)
+      
       local char_idx = math.floor((i-1) / 8)
       local bit_idx = (i-1) % 8
-      local char_value = iptr + char_idx
+      local char_value = casted + char_idx
       local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
       if bit_value ~= 0 then bit_value = 1 end
       local expected
@@ -57,12 +64,22 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
     return status
   end
   
-  local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+  -- local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+
   for i = 1, ret_len do
+    local chunk_num = math.floor((i-1)/qconsts.chunk_size)
+    local chunk_idx = (i-1) % qconsts.chunk_size
+    
+    local ret_addr, ret_len = vec:get_chunk(chunk_num)
+    local ctype =  qconsts.qtypes[qtype]["ctype"]
+    local casted = ffi.cast(ctype.." *", ret_addr)
+    
     local expected = i*15 % qconsts.qtypes[qtype].max
-    if ( iptr[i - 1] ~= expected ) then
+  
+    local actual_val = casted[chunk_idx]
+    if ( actual_val ~= expected ) then
       status = false
-      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
+      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(actual_val))
       break
     end
   end
