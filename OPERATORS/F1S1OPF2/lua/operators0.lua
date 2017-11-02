@@ -7,5 +7,6 @@ return {
   "logit", 
   "logit2",
   "convert",
+  "reciprocal",
   "abs"
 }

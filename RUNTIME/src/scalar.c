@@ -449,7 +449,7 @@ int luaopen_libsclr (lua_State *L) {
     printf("Running Q registeration require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
   }
-  lua_pushstring(L, "scalar");
+  lua_pushstring(L, "Scalar");
   lua_createtable(L, 0, 0);
   luaL_register(L, NULL, sclr_functions);
   status = lua_pcall(L, 2, 1, 0);

@@ -9,9 +9,12 @@ return function (
     local scalar_val = nil
     if ( type(scalar) == "number" ) then 
       scalar_val = scalar
-    else
-      assert(type(scalar) == "table")
+    elseif type(scalar) == "table" then 
       scalar_val = assert(scalar.value)
+    elseif type(scalar) == "Scalar" then 
+      -- all is well 
+    else
+      assert(nil, "no valid scalar provided")
     end
 
     assert(is_base_qtype(in_qtype))
@@ -24,6 +27,10 @@ return function (
     subs.comparison = ' <<comparison>>  '
     -- local ffi     = require 'Q/UTILS/lua/q_ffi'
     -- subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar} )
-    subs.c_mem = conv_lnum_to_cnum(scalar_val, in_qtype)
+    if ( type(scalar) == "Scalar" ) then 
+      subs.c_mem = scalar:cdata()
+    else
+      subs.c_mem = conv_lnum_to_cnum(scalar_val, in_qtype)
+    end
     return subs, tmpl
 end
