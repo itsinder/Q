@@ -6,21 +6,21 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 
 
 -- F1F2OPF3 TEST
-a = Q.mk_col({1, 2, 3}, "I4")
-b = Q.mk_col({1, 2, 3}, "I4")
+local a = Q.mk_col({1, 2, 3}, "I4")
+local b = Q.mk_col({1, 2, 3}, "I4")
 
 local tests = {}
 tests.t1 = function ()
 
 -- ADD
-c = Q.mk_col({2, 4, 6}, "I4")
+local c = Q.mk_col({2, 4, 6}, "I4")
 
-add_result = Q.vvadd(a, b, { junk = "junk" })
+local add_result = Q.vvadd(a, b, { junk = "junk" })
 add_result:eval()
 assert(type(add_result) == "lVector")
 
 --print("##########")
-cmp_result = Q.vveq(add_result, c)
+local cmp_result = Q.vveq(add_result, c)
 cmp_result:eval()
 assert(type(cmp_result) == "lVector")
 --Q.print_csv(cmp_result, nil, "")
