@@ -4,6 +4,9 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
+local tests = {}
+tests.t1 = function ()
+
 -- TEST SORT TWICE TEST
 meta = {
  { name = "empid", has_nulls = true, qtype = "I4", is_load = true }
@@ -35,7 +38,6 @@ assert(sort2:eval() == y:length())
 print("##########")
 print("Nested SORT Test DONE !!")
 print("------------------------------------------")
-
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+os.execute("rm _*.bin") 
+end
+return tests

@@ -1,9 +1,8 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local ffi = require 'Q/UTILS/lua/q_ffi'
-local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
+local tests = {}
+tests.t1 = function ()
 -- TEST MIN MAX WITH SORT
 meta = {
  { name = "cd", has_nulls = true, qtype = "I2", is_load = true }
@@ -41,7 +40,8 @@ assert(min == max, "Value mismatch in the case of min & max of a null vector")
 print("##########")
 print("MIN MAX ON NULL VECTOR DONE !!")
 print("------------------------------------------")
+os.execute("rm _*.bin") 
 
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+end
+return tests
+
