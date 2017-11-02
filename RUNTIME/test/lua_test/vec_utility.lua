@@ -18,7 +18,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
     --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
     for i = 1 , ret_len do 
       local chunk_num = math.floor((i-1)/qconsts.chunk_size)
-      local chunk_idx = (i-1) % qconsts.chunk_size
+      --local chunk_idx = (i-1) % qconsts.chunk_size
       
       local ret_addr, ret_len = vec:get_chunk(chunk_num)
       local ctype =  qconsts.qtypes[qtype]["ctype"]
@@ -46,10 +46,17 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
   end
   
   if qtype == "SC" then
-    local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
+    -- local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
     for itr = 1, ret_len do
+      local chunk_num = math.floor((itr-1)/qconsts.chunk_size)
+      --local chunk_id = (i-1) % qconsts.chunk_size
+      
+      local ret_addr, ret_len = vec:get_chunk(chunk_num)
+      local ctype =  qconsts.qtypes[qtype]["ctype"]
+      local casted = ffi.cast(ctype.." *", ret_addr)
+      
       local chunk_idx = (itr-1) % qconsts.chunk_size
-      local actual_str = ffi.string(iptr + chunk_idx * field_size)
+      local actual_str = ffi.string(casted + chunk_idx * field_size)
       local expected_str 
       if itr % 2 == 0 then expected_str = "temp" else expected_str = "dummy" end
       --print("Expected value ",expected_str," Actual value ",actual_str)
