@@ -86,13 +86,13 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   -- TODO: modify validate values to work with gen_method == func
   if gen_method ~= "func" then
     if validate_values == true or validate_values == nil then
-        local num_elements = vec:num_elements()
-        local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
-        -- print("number of chunks are==========",no_of_chunks)
-        for chunk_no = 0,no_of_chunks-1 do
-          status = vec_utils.validate_values(vec, md.base.field_type, chunk_no)
-          assert(status, "Vector values verification failed")
-        end
+      local num_elements = vec:num_elements()
+      local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
+      -- print("number of chunks are==========",no_of_chunks)
+      for chunk_no = 0,no_of_chunks-1 do
+        status = vec_utils.validate_values(vec, md.base.field_type, chunk_no)
+        assert(status, "Vector values verification failed")
+      end
     end
   end
   return true
@@ -384,7 +384,10 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   
   -- Perform vec basic operations
   local perform_eov = true
-  local validate_values = false
+  -- we want a materialized vector so
+  -- now to convert nascent vector to materialized 
+  -- reading(open_mode is set to 0) from previous chunk i.e. file 
+  local validate_values = true 
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, nil, validate_values)
   assert(status, "Failed to perform vec basic operations")
   
@@ -397,11 +400,13 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   else
     is_materialized = false
   end
-  
+  -- local md = vec:meta()
+  -- print(md.base.is_nascent)
   status = validate_vec_meta(md, is_materialized, num_elements, performed_eov)
   assert(status, "Metadata validation failed after vec:eov()")
-  
+
   -- Try to modify values using start_write()
+  -- is failing as open_mode set to 0
   local len, base_data, nn_data = vec:start_write()
   assert(base_data, "Failed to open the mmaped file in write mode")
   assert(len, "Failed to open the mmaped file in write mode")
