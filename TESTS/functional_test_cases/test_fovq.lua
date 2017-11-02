@@ -37,13 +37,13 @@ end
 tests.t2 = function ()
 
 -- SUBTRACT
-d = Q.mk_col({0, 0, 0}, "I4")
-sub_result = Q.vvsub(a, b, { junk = "junk" })
+local d = Q.mk_col({0, 0, 0}, "I4")
+local sub_result = Q.vvsub(a, b, { junk = "junk" })
 sub_result:eval()
 assert(type(sub_result) == "lVector")
 
 --print("##########")
-cmp_result = Q.vveq(sub_result, d)
+local cmp_result = Q.vveq(sub_result, d)
 cmp_result:eval()
 assert(type(cmp_result) == "lVector")
 --Q.print_csv(cmp_result, nil, "")
@@ -60,13 +60,13 @@ end
 tests.t3 = function()
 
 -- MULTIPLY
-e = Q.mk_col({1, 4, 9}, "I4")
-mul_result = Q.vvmul(a, b, { junk = "junk" })
+local e = Q.mk_col({1, 4, 9}, "I4")
+local mul_result = Q.vvmul(a, b, { junk = "junk" })
 mul_result:eval()
 assert(type(mul_result) == "lVector")
 ---Q.print_csv(mul_result, nil, "")
 --print("##########")
-cmp_result = Q.vveq(mul_result, e)
+local cmp_result = Q.vveq(mul_result, e)
 cmp_result:eval()
 assert(type(cmp_result) == "lVector")
 
@@ -84,13 +84,13 @@ tests.t4 = function ()
 
 
 -- DIVIDE
-f = Q.mk_col({1, 1, 1}, "I4")
-div_result = Q.vvdiv(a, b, { junk = "junk" })
+local f = Q.mk_col({1, 1, 1}, "I4")
+local div_result = Q.vvdiv(a, b, { junk = "junk" })
 div_result:eval()
 assert(type(div_result) == "lVector")
 
 --print("##########")
-cmp_result = Q.vveq(div_result, f)
+local cmp_result = Q.vveq(div_result, f)
 cmp_result:eval()
 assert(type(cmp_result) == "lVector")
 
