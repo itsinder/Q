@@ -126,8 +126,11 @@ libutils.so : ${bin_search_files} ${hdr_files}
 	mkdir -p ${Q_BUILD_DIR}/include/
 	mkdir -p ${Q_BUILD_DIR}/src/
 	cp ${INCDIR}/*.h         ${Q_BUILD_DIR}/include/
+	echo "Done copying ${INCDIR} files"
 	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
+	echo "Done copying src files"
 	cp ../inc/*          ${Q_BUILD_DIR}/include/
+	echo "Done copying ../inc/*  files"
 
 clean :
 	rm -f ../gen_src/*

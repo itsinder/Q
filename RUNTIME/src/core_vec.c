@@ -511,9 +511,11 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       break;
   }
   // Cannot have vector with 0 elements. 
-  // TODO P3 Think about how to handle this if it happens
   if ( ptr_vec->is_eov == true ) {
+    return status;
+    /* TODO P1 Think about how to handle this if it happens
     if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
+    */
   }
   // when map_len > 0, must match file_size 
   // It is possible for map_len == 0 and file_size > 0
@@ -1059,8 +1061,16 @@ vec_eov(
   int status = 0;
   if ( ptr_vec->is_eov       == true  ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent   == false ) { go_BYE(-1); }
+  if ( ptr_vec->num_elements == 0     ) { 
+    // unlikely but one has to account for this corner case 
+    ptr_vec->is_eov = true;
+    if ( ptr_vec->is_memo ) { 
+      ptr_vec->file_size = get_file_size(ptr_vec->file_name);
+    }
+    return status;
+  } 
+  //----------------------------------------
   if ( ptr_vec->chunk        == NULL  ) { go_BYE(-1); }
-  if ( ptr_vec->num_elements == 0     ) { go_BYE(-1); }
   ptr_vec->is_eov = true;
   // If memo NOT set, return now; do not persist to disk
   if ( ptr_vec->is_memo == false ) { goto BYE; }

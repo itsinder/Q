@@ -33,12 +33,11 @@ local function beta_step(X, y, beta)
   for i = 1, #A do
     A[i] = Q.mk_col(A[i], "F8")
   end
-  return b
---[[
+
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
   return beta_new
---]]
+
 end
 
 local function package_betas(betas)
