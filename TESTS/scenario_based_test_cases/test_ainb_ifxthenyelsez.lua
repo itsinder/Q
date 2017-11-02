@@ -39,12 +39,12 @@ local r = Q.ifxthenyelsez(x, y, z)
 r:eval()
 Q.print_csv(r, nil, "")
 
-s = Q.sum(r):eval()
+local s = Q.sum(r):eval()
 print(s)
 
 print("The expense on conducting the survey is $",s)
 
-m = Q.sum(Q.vveq(r, exp_r)):eval()
+local m = Q.sum(Q.vveq(r, exp_r)):eval()
 
 assert(m == 10)
 print("=======================================")
