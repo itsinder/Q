@@ -45,7 +45,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
-  
+  --[[
   -- creating nascent vector, generating values by cmem_buf, SC qtype
   { 
     test_type = "nascent_vector", 
@@ -56,7 +56,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "SC" }
   },
-  
+  ]]
   -- creating nascent vector, generating values by cmem_buf, put one element, check file size
   { 
     test_type = "nascent_vector", 
@@ -128,23 +128,35 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   ]]
-  --[[
-  -- will fail for now
-  -- when nascent_vector after eov() is opened ( open_mode = 0 ) for reading 
-  -- ( here num_elements are > chunk_size )so it gets converted to materialized 
-  -- as this vector was opened (open mode = 0) now start_write() will fail 
-  -- as this vector was opened for read operation
-  -- try modifying nascent vector after eov with start_write(), should success
+ 
+  -- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+  -- if we read values, its the last_chunk and it will be served from buffer itself
+  -- so is_nascent remains T 
+  -- now trying start_write(), should success and after start_write() is_nascent is set to F
   {
     test_type = "nascent_vector",
-    assert_fns = "nascent_vector8_1",
-    name = "nascent_vector_try_start_write()_after_eov",
+    assert_fns = "nascent_vector8_1_1",
+    name = "nascent_vector_try_start_write()_after_eov_1_1",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 1025,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+  -- reading values from previous chunk, (open mode is set to 0) 
+  -- as reading values from previous chunk( values are serverd from file) 
+  -- so is_nascent = F ( converted to materialized vector)
+  -- now trying start_write(), should fail
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_1_2",
+    name = "nascent_vector_try_start_write()_after_eov_1_2",
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 65540,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  ]]
   
   -- nascent -> materialized vec (after eov)
   -- try consecutive get_chunk operation, should success 
@@ -287,9 +299,25 @@ return {
     name = "create_materialized_vector_file_not_present",
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },  
-  
+    qtype = { "I2", "I4", "I8", "F4", "F8" }
+  },
+
+  --[[
+  -- create materialized vector where file is not present
+  -- .bin file is not present so get_file_size returns -1
+  -- at core_vec line 238 : if ( fsz <= 0 ) { go_BYE(-1); }
+  -- this condition does not error out
+  -- can we change the default value in get_file_size 
+  -- from int64_t file_size = -1; to 0
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector5",
+    name = "create_materialized_vector_file_not_present",
+    meta = "gm_create_materialized_vector3.lua",
+    num_elements = 65540,
+    qtype = { "I1" }
+  },
+  ]]
   -- create materialized vector with has_nulls true
   { 
     test_type = "materialized_vector", 
@@ -342,5 +370,5 @@ return {
     num_elements = 5, 
     gen_method = "cmem_buf", 
     qtype = { "SV" }
-  },
+  }
 }

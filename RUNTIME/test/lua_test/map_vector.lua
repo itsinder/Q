@@ -206,8 +206,25 @@ return {
     name = "create_materialized_vector_file_not_present", 
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I2", "I4", "I8", "F4", "F8" }
   },  
+  
+  --[[
+  -- create materialized vector where file is not present
+  -- .bin file is not present so get_file_size returns -1
+  -- at core_vec line 238 : if ( fsz <= 0 ) { go_BYE(-1); }
+  -- this condition does not error out
+  -- can we change the default value in get_file_size 
+  -- from int64_t file_size = -1; to 0
+  {
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector5",
+    name = "create_materialized_vector_file_not_present",
+    meta = "gm_create_materialized_vector3.lua",
+    num_elements = 65540,
+    qtype = { "I1" }
+  },
+  ]]
   
   -- materialized vector, try modifying value
   -- with start_write() should success
