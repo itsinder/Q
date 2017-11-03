@@ -7,6 +7,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
 local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+
 local fns = {}
 
 --===================
@@ -16,22 +17,30 @@ local set_value = function(buffer, index, value)
 end
 --===================
 
-local validate_vec_meta = function(meta, is_materialized, num_elements)
+local validate_vec_meta = function(meta, is_materialized, num_elements, performed_eov)
   local status = true
   
   -- meta.base checks
   assert(meta.base.num_elements == num_elements)
   if is_materialized then
     assert(meta.base.is_nascent == false)
+    assert(meta.base.is_eov == true)
     assert(meta.base.file_name)
     assert(plpath.exists(meta.base.file_name))
     --assert(meta.base.chunk_num == 0)
     --assert(meta.base.num_in_chunk == 0)    
   else
     assert(meta.base.is_nascent == true)
-    assert(meta.base.file_name == nil)
-    assert(meta.base.chunk_num == math.floor(num_elements / qconsts.chunk_size))
-    assert(meta.base.num_in_chunk == num_elements % qconsts.chunk_size)    
+    -- assert(meta.base.chunk_num == math.floor(num_elements / qconsts.chunk_size))
+    -- assert(meta.base.num_in_chunk == num_elements % qconsts.chunk_size)
+    if performed_eov then
+       assert(meta.base.is_eov == true)
+       assert(plpath.exists(meta.base.file_name))
+    elseif performed_eov == false then
+       assert(meta.base.is_eov == false)
+       assert(meta.base.file_name == nil)
+    end
+    
   end
   
   -- meta.nn checks
@@ -59,7 +68,8 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
   -- Validate metadata
   local md = vec:meta()
   local is_materialized = false
-  local status = validate_vec_meta(md, is_materialized, 0)
+  local performed_eov = false
+  local status = validate_vec_meta(md, is_materialized, 0, performed_eov)
   assert(status, "Metadata validation failed before vec:eov()")
   
   -- calling gen method for nascent vector to generate values ( can be scalar or cmem buffer )
@@ -72,13 +82,17 @@ local nascent_vec_basic_operations = function(vec, test_name, num_elements, gen_
     vec:eov()
     assert(vec:check(), "Failed in vector check after vec:eov()")
   end
-  
   -- Validate vector values
   -- TODO: modify validate values to work with gen_method == func
   if gen_method ~= "func" then
     if validate_values == true or validate_values == nil then
-      status = vec_utils.validate_values(vec, md.base.field_type)
-      assert(status, "Vector values verification failed")
+      local num_elements = vec:num_elements()
+      local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
+      -- print("number of chunks are==========",no_of_chunks)
+      for chunk_no = 0,no_of_chunks-1 do
+        status = vec_utils.validate_values(vec, md.base.field_type, chunk_no)
+        assert(status, "Vector values verification failed")
+      end
     end
   end
   return true
@@ -111,12 +125,23 @@ fns.assert_nascent_vector1 = function(vec, test_name, num_elements, gen_method)
   assert(vec:check())
   
   -- Perform vec basic operations
+  -- in basic operations, vector values are validated
   local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
   assert(status, "Failed to perform vec basic operations")
   -- Validate metadata after vec:eov()
   local md = vec:meta()
-  local is_materialized = true
-  status = validate_vec_meta(md, is_materialized, num_elements)
+  -- for validating values if num_elements are greater than chunk_size
+  -- then elements are read from file 
+  -- now the vector becomes a materialized vector
+  local is_materialized
+  local performed_eov = true 
+  if md.base.num_elements > qconsts.chunk_size then
+    is_materialized = true
+  else
+    is_materialized = false
+  end
+ 
+  status = validate_vec_meta(md, is_materialized, num_elements, performed_eov)
   assert(status, "Metadata validation failed after vec:eov()")
   
   -- Check file size for base
@@ -153,7 +178,10 @@ fns.assert_nascent_vector2 = function(vec, test_name, num_elements, gen_method)
   -- Validate metadata after vec:eov()
   local chunk_size = qconsts.chunk_size
   local md = vec:meta()
-  local is_materialized = true
+  --- here validate value for gen is not done 
+  -- so it remains a nascent vector
+  local is_materialized = false
+  
   -- for gen function, num_elements = num_of_chunks * chunk_size
   -- here, arg num_elements represents num_of_chunks
   status = validate_vec_meta(md, is_materialized, num_elements * chunk_size)
@@ -207,7 +235,6 @@ fns.assert_nascent_vector3_2 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
-  
   -- Try persist() method with true, it should fail
   status = vec:persist(true)
   assert(status == nil, "Able set persist even if memo is false")
@@ -230,7 +257,7 @@ fns.assert_nascent_vector3_3 = function(vec, test_name, num_elements, gen_method
   local md = vec:meta()
   assert(md.base.is_nascent == true, "Expected a nascent vector but actual value is not matching")
   assert(md.base.file_name == nil, "Nascent vector file name should be nil")
-    
+  
   -- Try setting memo to true when chunk_num is zero i.e num_elements < chunk_size
   -- file_name should not be initialized, vec:check() should be successful
   assert(md.base.chunk_num == 0)
@@ -349,25 +376,35 @@ fns.assert_nascent_vector7 = function(vec, test_name, num_elements, gen_method)
 end
 --===================
 
--- nascet vector -> materialized vector (using eov)
--- try modifying the vec using start_write() and end_write()
-fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method)
+-- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+-- if we read values, its the last_chunk and it will be served from buffer itself
+-- so is_nascent remains T 
+-- now trying start_write(), should success and after start_write() is_nascent is set to F
+fns.assert_nascent_vector8_1_1 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
   
   -- Perform vec basic operations
   local perform_eov = true
-  local validate_values = false
-  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, nil, validate_values)
+  -- validating(reading) values servers me from buffer itself
+  local validate_values = true 
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
   assert(status, "Failed to perform vec basic operations")
   
   -- Validate metadata after vec:eov()
   local md = vec:meta()
-  local is_materialized = true
-  status = validate_vec_meta(md, is_materialized, num_elements)
+  local is_materialized
+  local performed_eov = true 
+  is_materialized = false
+
+  -- local md = vec:meta()
+  -- print(md.base.is_nascent)
+  status = validate_vec_meta(md, is_materialized, num_elements, performed_eov)
   assert(status, "Metadata validation failed after vec:eov()")
-  
+
   -- Try to modify values using start_write()
+  -- so is_nascent remains T 
+  -- modifying vector using start_write() should success
   local len, base_data, nn_data = vec:start_write()
   assert(base_data, "Failed to open the mmaped file in write mode")
   assert(len, "Failed to open the mmaped file in write mode")
@@ -390,6 +427,47 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
 end
 --===================
 
+-- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+-- reading values from previous chunk, (open mode is set to 0) 
+-- as reading values from previous chunk( values are serverd from file) 
+-- so is_nascent = F ( converted to materialized vector)
+-- now trying start_write(), should fail
+fns.assert_nascent_vector8_1_2 = function(vec, test_name, num_elements, gen_method)
+  -- common checks for vectors
+  assert(vec:check())
+  
+  -- Perform vec basic operations
+  local perform_eov = true
+  -- validating(reading) values servers current chunk from buffer, 
+  -- but previous chunk servers from file (i.e.open mode is set to 0) 
+  -- is_nascent = F
+  local validate_values = true 
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, perform_eov, validate_values)
+  assert(status, "Failed to perform vec basic operations")
+  
+  -- Validate metadata after vec:eov()
+  local md = vec:meta()
+  local is_materialized
+  local performed_eov = true
+  
+  is_materialized = true
+ 
+  -- local md = vec:meta()
+  -- print(md.base.is_nascent)
+  status = validate_vec_meta(md, is_materialized, num_elements, performed_eov)
+  assert(status, "Metadata validation failed after vec:eov()")
+
+  
+  -- Try to modify values using start_write(), should fail
+  -- but open mode is set to 0, 
+  local status, len, base_data, nn_data = pcall(vec.start_write, vec)
+  assert(status == false)
+  assert(base_data == nil)
+  
+  return true
+end
+--===================
+
 -- nascet vector -> materialized vector (using eov)
 -- try consecutive operation of chunk(), should work
 fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method)
@@ -402,8 +480,14 @@ fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method
   
   -- Validate metadata after vec:eov()
   local md = vec:meta()
-  local is_materialized = true
-  status = validate_vec_meta(md, is_materialized, num_elements)
+  local is_materialized
+  local performed_eov = true 
+  if md.base.num_elements > qconsts.chunk_size then
+    is_materialized = true
+  else
+    is_materialized = false
+  end
+  status = validate_vec_meta(md, is_materialized, num_elements,performed_eov)
   assert(status, "Metadata validation failed after vec:eov()")
   
   -- Now chunk() should work as open_mode set to 1
@@ -426,8 +510,14 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
   
   -- Validate metadata after vec:eov()
   local md = vec:meta()
-  local is_materialized = true
-  status = validate_vec_meta(md, is_materialized, num_elements)
+  local is_materialized
+  local performed_eov = true 
+  if md.base.num_elements > qconsts.chunk_size then
+    is_materialized = true
+  else
+    is_materialized = false
+  end
+  status = validate_vec_meta(md, is_materialized, num_elements, performed_eov)
   assert(status, "Metadata validation failed after vec:eov()")
   
   -- Try to modify values using start_write()
