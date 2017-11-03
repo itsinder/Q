@@ -62,5 +62,26 @@ tests.t4 = function()
   end
   print("test 4 passed")
 end
+tests.t5 = function()
+  -- test very small and very large numbers
+  local X = { 
+    I1 = { "127", "-128"}, 
+    I2 = { "32767", "-32768"}, 
+    I4 = { "2147483647", "-2147483648"}, 
+    I8 = { "9223372036854775807", "-9223372036854775808"}, 
+    F4 = { "1.175494e-38", "3.402823e+38" },
+    F8 = { "2.225074e-308", "1.797693e+308" },
+  }
+  for qtype, v in pairs(X) do
+    for _, val in ipairs(v) do 
+      print(qtype, val)
+      local s = Scalar.new(val, qtype)
+      local x = s:cdata()
+      local t = Scalar.new(x, qtype)
+      assert(Scalar.eq(s, t) == true)
+    end
+  end
+  print("test 5 passed")
+end
 return tests
 
