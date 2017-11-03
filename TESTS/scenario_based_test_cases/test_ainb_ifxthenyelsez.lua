@@ -1,3 +1,4 @@
+-- luajit q_testrunner.lua $HOME/WORK/Q/TESTS/scenario_based_test_cases/test_ainb_ifxthenyelsez.lua
 -- Scenario based testing
 -- ## Using ainb & ifxthenyelsez to solve a problem
 -- ## Let b is the expected sample space
@@ -8,6 +9,9 @@
 -- Libraray Calls
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
+
+local tests = {}
+tests.t1 = function ()
 
 -- Expected data sample space
 local b = Q.mk_col({97.4, 94, 99.3, 92.5 }, "F4")
@@ -22,7 +26,6 @@ local n = Q.sum(x):eval()
 assert(n == 3)
 
 -- payment matrix
---local y = Q.mk_col({100,100,100,100, 100, 100, 100, 100, 100, 100}, "I4")
 local y = Q.const( { val = 100, qtype = 'I4', len = 10} )
 y:eval()
 --local z = Q.mk_col({50,50,50,50, 50, 50, 50, 50, 50, 50}, "I4")
@@ -35,18 +38,17 @@ local exp_r = Q.mk_col({50,50,50,50,100, 50, 100, 100, 50, 50 }, "I4")
 local r = Q.ifxthenyelsez(x, y, z)
 r:eval()
 Q.print_csv(r, nil, "")
-sum = Q.sum(r)
---r:eval()
-s = sum:eval()
+
+local s = Q.sum(r):eval()
+print(s)
 
 print("The expense on conducting the survey is $",s)
---Q.print_csv(r, nil, "")
---Q.print_csv({r, exp_r}, nil, "")
--- Verifying the expected results
-m = Q.sum(Q.vveq(r, exp_r)):eval()
+
+local m = Q.sum(Q.vveq(r, exp_r)):eval()
 
 assert(m == 10)
+print("=======================================")
+end
+--======================================
+return tests
 
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()

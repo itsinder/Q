@@ -1,3 +1,4 @@
+-- luajit q_testrunner.lua $HOME/WORK/Q/TESTS/scenario_based_test_cases/test_absolute.lua
 -- SANITY TEST
 -- ## Problem: Verifying the sum of opposite vector and the change when abs operator comes into play.
 -- ## Using Q.seq & absolute function to solve a problem
@@ -8,16 +9,19 @@ local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
 -- Negative Series
-a = Q.seq( {start = -100, by = 1, qtype = "I4", len = 100} )
+a = Q.seq( {start = -100, by = 1, qtype = "I4", len = 10} )
 
 -- Positive Series
-b = Q.seq( {start = 1, by = 1, qtype = "I4", len = 100} )
+b = Q.seq( {start = 1, by = 1, qtype = "I4", len = 10} )
 
+local tests = {}
+tests.t1 = function ()
 -- Sort a
 a:eval()
 Q.sort(a, "dsc")
 
 -- Vector Sum of sorted dsc a & b
+
 ab_sum = Q.vvsum(a, b)
 ab_sum:eval()
 --assert(type(ab_sum) == "lVector")
@@ -28,10 +32,10 @@ m1 = n1:eval()
 print(m1)
 -- Expected Outcome
 assert(m1 == 0)
-
+end
 --=======================================
 -- Apply abs function
-
+tests.t2 = function ()
 local b1 = Q.abs(b)
 --b1:eval()
 
@@ -45,8 +49,6 @@ local n2 = Q.sum(ab_sum2)
 m2 = n2:eval()
 -- Expected Outcome
 assert(m1 == 2*sum_b1)
-
---=======================================
-print("SUCCESS for " .. arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+end
+return tests
+--[[-======================================

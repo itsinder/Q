@@ -35,7 +35,7 @@ local function expander_where(op, a, b)
   local first_call = true
   local n_out = nil
   local aidx  = nil
-  local chunk_idx = 0
+  local a_chunk_idx = 0
   
   local function where_gen()
     if ( first_call ) then 
@@ -53,8 +53,8 @@ local function expander_where(op, a, b)
       first_call = false
     end
     repeat 
-      local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
-      local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
+      local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      local b_len, b_chunk, b_nn_chunk = b:chunk(a_chunk_idx)
       if a_len == 0 then
         return tonumber(n_out[0]), out_buf, nil 
       end
@@ -65,12 +65,12 @@ local function expander_where(op, a, b)
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
       if ( n_out[0] < sz_out ) then
-        chunk_idx = chunk_idx + 1
+        a_chunk_idx = a_chunk_idx + 1
       end
     until ( n_out[0] == sz_out )
     return tonumber(n_out[0]), out_buf, nil 
   end
-  return lVector( { name = "test_where", gen = where_gen, has_nulls = false, qtype = a:qtype() } )
+  return lVector( { gen = where_gen, has_nulls = false, qtype = a:qtype() } )
 end
 
 return expander_where

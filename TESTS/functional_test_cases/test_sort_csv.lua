@@ -1,8 +1,9 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local ffi = require 'Q/UTILS/lua/q_ffi'
-local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+
+
+local tests = {}
+tests.t1 = function ()
 
 -- TEST SORT TWICE TEST
 meta = {
@@ -14,7 +15,6 @@ for i, v in pairs(result) do
     x = result[i]
   assert(type(x) == "lVector")
 end
- -- Q.print_csv(x, nil, "")
 
 -- Desc & Asc = Asc
 Q.sort(x, "dsc")
@@ -55,7 +55,6 @@ assert(sort22:eval() == z:length())
 print("##########")
 print("Nested SORT Test DONE !!")
 print("------------------------------------------")
-
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+os.execute("rm _*.bin") 
+end
+return tests
