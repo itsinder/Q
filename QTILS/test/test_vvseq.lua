@@ -28,11 +28,4 @@ tests.t3 = function ()
   assert(z == true)
 end
 --======================================
-local local_testing = false
-if local_testing then 
-  tests.t1()
-  tests.t2()
-  tests.t3()
-else
-  return tests
-end
+return tests

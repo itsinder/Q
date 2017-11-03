@@ -46,6 +46,9 @@ return function (
     c_mem.num = 0
     subs.c_mem = c_mem
     --==============================
-    subs.getter = function (x) return x[0].sum_val, x[0].num end
+    subs.getter = function (x) 
+    return Scalar.new(x[0].sum_val, reduce_qtype), 
+           Scalar.new(x[0].num_val, "I8")
+    end
     return subs, tmpl
 end

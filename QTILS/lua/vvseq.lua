@@ -24,7 +24,15 @@ local function vvseq(x, y, s)
   else
     assert(nil, "bad type for scalar")
   end
-  return (sum(vsgt(abs(sub(x, y)), s)):eval() == 0)
+  local sval = assert(tonumber(Scalar.to_str(s)))
+  assert(sval >= 0)
+  local a = sum(vsgt(abs(sub(x, y)), s)):eval()
+  print(a)
+  print(type(a))
+  local b = (a == 0)
+  print(a)
+  print(b)
+  return ( x == 0 )
   --================================================
 end
 T.vvseq = vvseq

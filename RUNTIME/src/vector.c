@@ -159,7 +159,7 @@ BYE:
 static int l_vec_get_vec_buf( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  char *chunk = vec_get_buf(ptr_vec); cBYE(status);
+  char *chunk = vec_get_buf(ptr_vec); 
   if ( chunk != NULL ) { 
     lua_pushlightuserdata(L, chunk);
     /* Add the metatable to the stack. */

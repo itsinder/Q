@@ -144,6 +144,7 @@ static int l_sclr_new( lua_State *L) {
   double  tempF8;
   const char *str_val = NULL;
   lua_Number  in_val;
+  void *in_cmem = NULL;
 
   // TESTING GC problems lua_gc(L, LUA_GCCOLLECT, 0);  
 
@@ -151,10 +152,17 @@ static int l_sclr_new( lua_State *L) {
   if ( lua_isstring(L, 1) ) { 
     str_val = luaL_checkstring(L, 1);
   }
+  else if ( lua_isuserdata(L, 1) ) { 
+    // in_cmem = luaL_checkudata(L, 1, "CMEM");
+    in_cmem = lua_touserdata(L, 1);
+  }
   else if ( lua_isnumber(L, 1) ) {
+    // No matter how I invoke it, Lua sends value as string
+    go_BYE(-1); 
     in_val = luaL_checknumber(L, 1);
   }
   else if ( lua_isboolean(L, 1) ) {
+    // However, if I invoke as true, then it comes here
     in_val = lua_toboolean(L, 1);
   }
   else {
@@ -164,49 +172,89 @@ static int l_sclr_new( lua_State *L) {
   SCLR_REC_TYPE *ptr_sclr = NULL;
   ptr_sclr = (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
   char *dst = (char *)&(ptr_sclr->cdata);
-  if ( qtype == NULL ) {
-    // TODO Infer qtype 
-    go_BYE(-1);
-  }
-  if ( strcmp(qtype, "B1" ) == 0 ) { 
-    if ( str_val == NULL ) { 
-      tempB1 = in_val;
+
+  if ( qtype == NULL ) { /* TODO P4 Infer qtype go_BYE(-1); */ }
+
+  if ( strcmp(qtype, "B1" ) == 0 ) {
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 1);
     }
     else {
-      status = txt_to_B1(str_val, &tempB1); cBYE(status);
+      if ( str_val == NULL ) { 
+        tempB1 = in_val;
+      }
+      else {
+        status = txt_to_B1(str_val, &tempB1); cBYE(status);
+      }
+      ptr_sclr->cdata.valB1 = tempB1;
     }
-    ptr_sclr->cdata.valB1 = tempB1;
     strcpy(ptr_sclr->field_type, "B1"); 
     ptr_sclr->field_size = sizeof(bool);
   }
   else if ( strcmp(qtype, "I1" ) == 0 ) { 
-    status = txt_to_I1(str_val, &tempI1); cBYE(status);
-    memcpy(dst, &tempI1, 1); strcpy(ptr_sclr->field_type, "I1"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 1);
+    }
+    else {
+      status = txt_to_I1(str_val, &tempI1); cBYE(status);
+      memcpy(dst, &tempI1, 1); 
+    }
+    strcpy(ptr_sclr->field_type, "I1"); 
     ptr_sclr->field_size = 1;
   }
   else if ( strcmp(qtype, "I2" ) == 0 ) { 
-    status = txt_to_I2(str_val, &tempI2); cBYE(status);
-    memcpy(dst, &tempI2, 2); strcpy(ptr_sclr->field_type, "I2"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 2);
+    }
+    else {
+      status = txt_to_I2(str_val, &tempI2); cBYE(status);
+      memcpy(dst, &tempI2, 2); 
+    }
+    strcpy(ptr_sclr->field_type, "I2"); 
     ptr_sclr->field_size = 2;
   }
   else if ( strcmp(qtype, "I4" ) == 0 ) { 
-    status = txt_to_I4(str_val, &tempI4); cBYE(status);
-    memcpy(dst, &tempI4, 4); strcpy(ptr_sclr->field_type, "I4"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 4);
+    }
+    else {
+      status = txt_to_I4(str_val, &tempI4); cBYE(status);
+      memcpy(dst, &tempI4, 4); 
+    }
+    strcpy(ptr_sclr->field_type, "I4"); 
     ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "I8" ) == 0 ) { 
-    status = txt_to_I8(str_val, &tempI8); cBYE(status);
-    memcpy(dst, &tempI8, 8); strcpy(ptr_sclr->field_type, "I8"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 8);
+    }
+    else {
+      status = txt_to_I8(str_val, &tempI8); cBYE(status);
+      memcpy(dst, &tempI8, 8); 
+    }
+    strcpy(ptr_sclr->field_type, "I8"); 
     ptr_sclr->field_size = 8;
   }
   else if ( strcmp(qtype, "F4" ) == 0 ) { 
-    status = txt_to_F4(str_val, &tempF4); cBYE(status);
-    memcpy(dst, &tempF4, 4); strcpy(ptr_sclr->field_type, "F4"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 4);
+    }
+    else {
+      status = txt_to_F4(str_val, &tempF4); cBYE(status);
+      memcpy(dst, &tempF4, 4); 
+    }
+    strcpy(ptr_sclr->field_type, "F4"); 
     ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "F8" ) == 0 ) { 
-    status = txt_to_F8(str_val, &tempF8); cBYE(status);
-    memcpy(dst, &tempF8, 8); strcpy(ptr_sclr->field_type, "F8"); 
+    if ( in_cmem != NULL ) { 
+      memcpy(dst, in_cmem, 8);
+    }
+    else {
+      status = txt_to_F8(str_val, &tempF8); cBYE(status);
+      memcpy(dst, &tempF8, 8); 
+    }
+    strcpy(ptr_sclr->field_type, "F8"); 
     ptr_sclr->field_size = 8;
   }
   else {

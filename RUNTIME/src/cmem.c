@@ -159,13 +159,13 @@ BYE:
 static const struct luaL_Reg cmem_methods[] = {
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
-    { "print",        l_cmem_to_str },
+    { "to_str",        l_cmem_to_str },
     { NULL,          NULL               },
 };
  
 static const struct luaL_Reg cmem_functions[] = {
     { "new", l_cmem_malloc },
-    { "print",        l_cmem_to_str },
+    { "to_str",        l_cmem_to_str },
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
     { NULL,  NULL         }
@@ -195,10 +195,46 @@ int luaopen_libcmem (lua_State *L) {
    * object:func */
   luaL_register(L, NULL, cmem_methods);
 
+  /* Register CMEM in types table */
+  int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
+  if (status != 0 ) {
+    printf("Running require failed:  %s\n", lua_tostring(L, -1));
+    exit(1);
+  } 
+  luaL_getmetatable(L, "CMEM");
+  lua_pushstring(L, "CMEM");
+  status =  lua_pcall(L, 2, 0, 0);
+  if (status != 0 ){
+     printf("%d\n", status);
+     printf("Registering type failed: %s\n", lua_tostring(L, -1));
+     exit(1);
+  }
+  /* Register the object.func functions into the table that is at the
+   op of the stack. */
+  
+  // Registering with Q
+  status = luaL_dostring(L, "return require('Q/q_export').export");
+  if (status != 0 ) {
+    printf("Running Q registeration require failed:  %s\n", lua_tostring(L, -1));
+    exit(1);
+  }
+  lua_pushstring(L, "CMEM");
+  lua_createtable(L, 0, 0);
+  luaL_register(L, NULL, cmem_functions);
+  status = lua_pcall(L, 2, 1, 0);
+  if (status != 0 ){
+     printf("%d\n", status);
+     printf("Registering with q_export failed: %s\n", lua_tostring(L, -1));
+     exit(1);
+  }
+  
+  return 1;
+}
+#ifdef OLD
   /* Register the object.func functions into the table that is at the
    * top of the stack. */
   lua_createtable(L, 0, 0);
   luaL_register(L, NULL, cmem_functions);
 
   return 1;
-}
+#endif
