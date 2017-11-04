@@ -14,13 +14,13 @@ local function vvseq(x, y, s)
 
   assert(x and type(x) == "lVector")
   assert(y and type(y) == "lVector")
-  assert(x:fldtype() == y:fldtype())
+-- NOT a valid check  assert(x:fldtype() == y:fldtype())
   assert(is_base_qtype(x:fldtype()))
   assert(s)
   if ( ( type(s) == "number" ) or ( type(s) == "string") ) then 
     s = assert(Scalar.new(s, x:fldtype()))
   elseif ( type(s) == "Scalar" ) then 
-    assert(s:fldtype() == x:fldtype())
+    -- NOT a valid check assert(s:fldtype() == x:fldtype())
   else
     assert(nil, "bad type for scalar")
   end
