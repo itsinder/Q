@@ -60,5 +60,6 @@ return function (
       return Scalar.new(x, subs.reduce_qtype), 
            Scalar.new(tonumber(y[0].num), "I8")
     end
+    --==============================
     return subs, tmpl
 end

@@ -40,14 +40,16 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     -- Set c_mem using info from args
     local sz_c_mem = ffi.sizeof("REDUCE_sum_sqr_" .. qtype .. "_ARGS")
     local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+    local bak_c_mem = c_mem
     c_mem = ffi.cast("REDUCE_sum_sqr_" .. qtype .. "_ARGS *", c_mem)
     c_mem.sum_sqr_val  = 0
     c_mem.num = 0
-    subs.c_mem = c_mem
+    subs.c_mem = bak_c_mem
     --==============================
     subs.getter = function (x) 
-     return Scalar.new(tonumber(x[0].sum_sqr_val), subs.reduce_qtype), 
-           Scalar.new(tonumber(x[0].num), "I8")
+      local y = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", c_mem)
+     return Scalar.new(x, subs.reduce_qtype), 
+           Scalar.new(tonumber(y[0].num), "I8")
     end
     return subs, tmpl
 end
