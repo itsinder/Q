@@ -14,8 +14,13 @@ local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 -- Should take relative difference not absolute difference
 -- or provide an option to specify which one
 local T = {} 
-local function vvseq(x, y, s)
+local function vvseq(x, y, s, optargs)
 
+  local mode = "difference"
+  if  optargs  and optargs.mode then
+    assert(type(optargs.mode) == "string")
+    mode = optargs.mode
+  end
   assert(x and type(x) == "lVector")
   assert(y and type(y) == "lVector")
 -- NOT a valid check  assert(x:fldtype() == y:fldtype())
@@ -30,7 +35,15 @@ local function vvseq(x, y, s)
   end
   local sval = assert(tonumber(Scalar.to_str(s)))
   assert(sval >= 0)
-  return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
+  
+  if ( mode == "difference" ) then 
+    return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
+  elseif ( mode == "ratio" ) then
+    return (sum(vsgt(div(abs(sub(x, y)), max(x, y)), s)):eval():to_num() == 0 )
+  elseif ( mode == "ratio" ) then
+  else
+    assert(nil, "Invalid mode = ", mode)
+  end
   --================================================
 end
 T.vvseq = vvseq

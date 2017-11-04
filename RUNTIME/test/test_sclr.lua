@@ -57,7 +57,7 @@ tests.t4 = function()
   for _, qtype in ipairs(qtypes) do
     local s = Scalar.new(123, qtype)
     local x = s:cdata()
-    local t = Scalar.new(x, qtype)
+    local t = assert(Scalar.new(x, qtype))
     assert(Scalar.eq(s, t) == true)
   end
   print("test 4 passed")
@@ -72,13 +72,16 @@ tests.t5 = function()
     F4 = { "1.175494e-38", "3.402823e+38" },
     F8 = { "2.225074e-308", "1.797693e+308" },
   }
+  -- TODO Why is this not working?????
   for qtype, v in pairs(X) do
     for _, val in ipairs(v) do 
       print(qtype, val)
       local s = Scalar.new(val, qtype)
       local x = s:cdata()
-      local t = Scalar.new(x, qtype)
-      assert(Scalar.eq(s, t) == true)
+      local t = assert(Scalar.new(x, qtype))
+      assert(type(t) == "Scalar")
+      print(Scalar.eq(s, t))
+      assert(Scalar.eq(s, t))
     end
   end
   print("test 5 passed")
@@ -106,5 +109,17 @@ tests.t7 = function()
   -- in as many cases as possible
   assert(nil, "UTPAL TODO")
 end
-return tests
+tests.t8 = function()
+ -- just bad values 
+  local status, err
+  status, err = Scalar.new("128", "I1"); assert(not status)
+  status, err = Scalar.new("-129", "I1"); assert(not status)
 
+  status, err = Scalar.new("32768", "I2"); assert(not status)
+  status, err = Scalar.new("-32769", "I2"); assert(not status)
+
+ -- TODO COmplete 
+
+  print("test 8 passed")
+end
+return tests
