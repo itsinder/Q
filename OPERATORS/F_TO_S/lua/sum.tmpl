@@ -56,7 +56,7 @@ ${fn}(
     ${reduce_ctype} lval = ${initial_val};
 #pragma omp simd reduction(+:lval)
     for ( uint64_t i  = lb; i < ub; i++ ) {  
-      lval += in[i];
+      lval += ${macro}(in[i]);
     }
 #pragma omp critical (_${fn})
     {

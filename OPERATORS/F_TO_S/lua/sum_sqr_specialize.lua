@@ -1,5 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local Scalar  = require 'libsclr'
 local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
 
 return function (
@@ -15,6 +16,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     local subs = {}
     assert(is_base_qtype(qtype), "qtype must be base type, not" .. qtype) 
     subs.op = "sum_sqr" 
+    subs.macro = "mcr_sqr"
     subs.fn = subs.op .. "_" .. qtype 
     subs.ctype = qconsts.qtypes[qtype].ctype
     subs.qtype = qtype
@@ -22,8 +24,10 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     if ( ( qtype == "I1" ) or ( qtype == "I2" ) or 
          ( qtype == "I4" ) or ( qtype == "I8" ) ) then
       subs.reduce_ctype = "uint64_t" 
+      subs.reduce_qtype = "I8" 
     elseif ( ( qtype == "F4" ) or ( qtype == "F8" ) ) then
       subs.reduce_ctype = "double"
+      subs.reduce_qtype = "F8"
     else
       assert(nil, "Invalid qtype " .. qtype)
     end
@@ -41,6 +45,9 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     c_mem.num = 0
     subs.c_mem = c_mem
     --==============================
-    subs.getter = function (x) return x[0].sum_sqr_val, x[0].num end
+    subs.getter = function (x) 
+     return Scalar.new(tonumber(x[0].sum_sqr_val), subs.reduce_qtype), 
+           Scalar.new(tonumber(x[0].num), "I8")
+    end
     return subs, tmpl
 end

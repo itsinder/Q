@@ -152,6 +152,10 @@ static int l_sclr_new( lua_State *L) {
   if ( lua_isstring(L, 1) ) { 
     str_val = luaL_checkstring(L, 1);
   }
+  else if ( lua_islightuserdata(L, 1) ) { 
+    // TODO P3
+    go_BYE(-1);
+  }
   else if ( lua_isuserdata(L, 1) ) { 
     // in_cmem = luaL_checkudata(L, 1, "CMEM");
     in_cmem = lua_touserdata(L, 1);
@@ -411,6 +415,7 @@ BYE:
 static const struct luaL_Reg sclr_methods[] = {
     { "cdata", l_sclr_to_cdata },
     { "to_str", l_sclr_to_str },
+    { "to_num", l_sclr_to_num },
     { "fldtype", l_fldtype },
     { NULL,          NULL               },
 };
@@ -477,15 +482,15 @@ int luaopen_libsclr (lua_State *L) {
   /* Register Scalar in types table */
   int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
   if (status != 0 ) {
-    printf("Running require failed:  %s\n", lua_tostring(L, -1));
+    fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
   } 
   luaL_getmetatable(L, "Scalar");
   lua_pushstring(L, "Scalar");
   status =  lua_pcall(L, 2, 0, 0);
-  if (status != 0 ){
-     printf("%d\n", status);
-     printf("Registering type failed: %s\n", lua_tostring(L, -1));
+  if (status != 0 ) {
+     fprintf(sdterr, "%d\n", status);
+     fprintf(stderr, "Type registration failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }
   /* Register the object.func functions into the table that is at the
@@ -494,7 +499,7 @@ int luaopen_libsclr (lua_State *L) {
   // Registering with Q
   status = luaL_dostring(L, "return require('Q/q_export').export");
   if (status != 0 ) {
-    printf("Running Q registeration require failed:  %s\n", lua_tostring(L, -1));
+    fprintf(stderr, "Q registration require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
   }
   lua_pushstring(L, "Scalar");
@@ -502,10 +507,10 @@ int luaopen_libsclr (lua_State *L) {
   luaL_register(L, NULL, sclr_functions);
   status = lua_pcall(L, 2, 1, 0);
   if (status != 0 ){
-     printf("%d\n", status);
-     printf("Registering with q_export failed: %s\n", lua_tostring(L, -1));
+     fprintf(stderr, "%d\n", status);
+     fprintf(stderr, "q_export registration failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }
-  
+  // TODO: Why is return code not 0?  
   return 1;
 }
