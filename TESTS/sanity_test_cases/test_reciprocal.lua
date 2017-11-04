@@ -4,6 +4,7 @@
 
 -- Library Calls
 local Q = require 'Q'
+local Scalar = require 'libsclr' -- TODO Remove this. Ask Indrajeet
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
@@ -12,16 +13,14 @@ tests.t1 = function ()
   local x = Q.rand( { lb = 1, ub = 10000000, qtype = "F4", len = 100000 })
   -- 1/(1/x) = x
   assert(Q.vvseq(
-           Q.convert(
              Q.reciprocal(
                Q.reciprocal(x)
              ),
-             {qtype = "F4"}
-           ),
-           x, 
-           0.01
+             x,
+	     Scalar.new(0.01, "F4")
+           )
          )
-       )
+  print("Succeeded in test reciprocal t1")
 end
 --======================================
 return tests
