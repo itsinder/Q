@@ -5,15 +5,15 @@ return function (
     local qconsts = require 'Q/UTILS/lua/q_consts'
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
     local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'
+    local Scalar = require 'libsclr'
 
     local scalar_val = nil
-    if ( type(scalar) == "number" ) then 
-      scalar_val = scalar
-    elseif type(scalar) == "table" then 
-      scalar_val = assert(scalar.value)
+    if ( ( type(scalar) == "number" ) or ( type(scalar) == "string" ) ) then
+      scalar = assert(Scalar.new(scalar, in_qtype))
     elseif type(scalar) == "Scalar" then 
-      -- all is well 
+      scalar = assert(scalar:conv(in_qtype))
     else
+      print(type(scalar))
       assert(nil, "no valid scalar provided")
     end
 
@@ -27,10 +27,6 @@ return function (
     subs.comparison = ' <<comparison>>  '
     -- local ffi     = require 'Q/UTILS/lua/q_ffi'
     -- subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar} )
-    if ( type(scalar) == "Scalar" ) then 
-      subs.c_mem = scalar:cdata()
-    else
-      subs.c_mem = conv_lnum_to_cnum(scalar_val, in_qtype)
-    end
+    subs.c_mem = scalar:cdata()
     return subs, tmpl
 end

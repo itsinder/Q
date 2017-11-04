@@ -3,12 +3,16 @@ local sub = (require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3").vvsub
 local abs = (require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2").abs
 local vsgt = (require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2").vsgt
 local sum = (require "Q/OPERATORS/F_TO_S/lua/_f_to_s").sum
+local prcsv = (require "Q/OPERATORS/PRINT/lua/print_csv")
 local Scalar = require 'libsclr'
 
 local qc  = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
+-- TODO P1 
+-- Should take relative difference not absolute difference
+-- or provide an option to specify which one
 local T = {} 
 local function vvseq(x, y, s)
 
@@ -26,13 +30,7 @@ local function vvseq(x, y, s)
   end
   local sval = assert(tonumber(Scalar.to_str(s)))
   assert(sval >= 0)
-  local a = sum(vsgt(abs(sub(x, y)), s)):eval()
-  print(a)
-  print(type(a))
-  local b = (a == 0)
-  print(a)
-  print(b)
-  return ( x == 0 )
+  return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
   --================================================
 end
 T.vvseq = vvseq

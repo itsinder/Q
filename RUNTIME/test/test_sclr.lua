@@ -83,5 +83,28 @@ tests.t5 = function()
   end
   print("test 5 passed")
 end
+tests.t6 = function ()
+  local vals = { 127, -128 }
+  local orig_qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  local qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  for _, orig_qtype in pairs(orig_qtypes) do 
+    for _, val in pairs(vals) do 
+      for _, qtype in pairs(qtypes) do 
+        s1 = Scalar.new(val, orig_qtype)
+        s2 = s1:conv(qtype)
+        assert(s1:fldtype() == qtype)
+        assert(s1 == s2)
+        print(orig_qtype, qtype, val, s2)
+        assert(s2:to_num() == val)
+      end
+    end
+  end
+  print("test 6 passed")
+end
+tests.t7 = function()
+  -- WRite like t6 but try to make the conversion fail 
+  -- in as many cases as possible
+  assert(nil, "UTPAL TODO")
+end
 return tests
 

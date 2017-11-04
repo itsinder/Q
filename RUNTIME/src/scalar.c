@@ -133,6 +133,187 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_to_str. ");
   return 2;
 }
+
+#define mcr_chk_int(x) { if ( ceil(x) != floor(x) ) { go_BYE(-1); } }
+#define mcr_chk_range_set(x, y, lb, ub) { \
+      if ( ( x < lb ) || ( x > ub ) ) { go_BYE(-1); } \
+       y = x;  \
+}
+
+static int l_sclr_conv( lua_State *L) {
+  int status = 0;
+
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  const char *qtype   = luaL_checkstring(L, 2);
+  if ( strcmp(ptr_sclr->field_type, "I1") == 0 ) {
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      // Nothing to do 
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      ptr_sclr->cdata.valI2 = ptr_sclr->cdata.valI1;
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      ptr_sclr->cdata.valI4 = ptr_sclr->cdata.valI1;
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      ptr_sclr->cdata.valI8 = ptr_sclr->cdata.valI1;
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      ptr_sclr->cdata.valF4 = ptr_sclr->cdata.valI1;
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      ptr_sclr->cdata.valF8 = ptr_sclr->cdata.valI1;
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(ptr_sclr->field_type, "I2") == 0 ) { 
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI2, ptr_sclr->cdata.valI2, SCHAR_MIN, SCHAR_MAX);
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      // Nothing to do 
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      ptr_sclr->cdata.valI4 = ptr_sclr->cdata.valI2;
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      ptr_sclr->cdata.valI8 = ptr_sclr->cdata.valI2;
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      ptr_sclr->cdata.valF4 = ptr_sclr->cdata.valI2;
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      ptr_sclr->cdata.valF8 = ptr_sclr->cdata.valI2;
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(ptr_sclr->field_type, "I4") == 0 ) { 
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI4, ptr_sclr->cdata.valI1, SCHAR_MIN, SCHAR_MAX);
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI4, ptr_sclr->cdata.valI2, SHRT_MIN, SHRT_MAX);
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      // nothing to do 
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      ptr_sclr->cdata.valI8 = ptr_sclr->cdata.valI4;
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      if ( ptr_sclr->cdata.valI4 > 16777217 ) { go_BYE(-1); }
+      if ( ptr_sclr->cdata.valI4 < -16777217 ) { go_BYE(-1); }
+      ptr_sclr->cdata.valF4 = ptr_sclr->cdata.valI4;
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      ptr_sclr->cdata.valF8 = ptr_sclr->cdata.valI4;
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(ptr_sclr->field_type, "I8") == 0 ) { 
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI8, ptr_sclr->cdata.valI1, SCHAR_MIN, SCHAR_MAX);
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI8, ptr_sclr->cdata.valI1, SHRT_MIN, SHRT_MAX);
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      mcr_chk_range_set(ptr_sclr->cdata.valI8, ptr_sclr->cdata.valI1, INT_MIN, INT_MAX);
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      // nothing to do 
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      if ( ptr_sclr->cdata.valI8 > 16777217 ) { go_BYE(-1); }
+      if ( ptr_sclr->cdata.valI8 < -16777217 ) { go_BYE(-1); }
+      ptr_sclr->cdata.valF4 = ptr_sclr->cdata.valI8;
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      if ( ptr_sclr->cdata.valI8 > 9007199254740993LL ) { go_BYE(-1); }
+      if ( ptr_sclr->cdata.valI8 < -9007199254740993LL ) { go_BYE(-1); }
+      ptr_sclr->cdata.valF8 = ptr_sclr->cdata.valI8;
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(ptr_sclr->field_type, "F4") == 0 ) { 
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF4);
+      ptr_sclr->cdata.valI1 = ptr_sclr->cdata.valF4;
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF4);
+      ptr_sclr->cdata.valI2 = ptr_sclr->cdata.valF4;
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF4);
+      ptr_sclr->cdata.valI4 = ptr_sclr->cdata.valF4;
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF4);
+      ptr_sclr->cdata.valI8 = ptr_sclr->cdata.valF4;
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      // Nothing to do 
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      ptr_sclr->cdata.valF8 = ptr_sclr->cdata.valF4;
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else if ( strcmp(ptr_sclr->field_type, "F8") == 0 ) { 
+    if ( strcmp(qtype, "I1") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF8);
+      ptr_sclr->cdata.valI1 = (double)ptr_sclr->cdata.valF8;
+    }
+    else if ( strcmp(qtype, "I2") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF8);
+      ptr_sclr->cdata.valI2 = (double)ptr_sclr->cdata.valF8;
+    }
+    else if ( strcmp(qtype, "I4") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF8);
+      ptr_sclr->cdata.valI4 = (double)ptr_sclr->cdata.valF8;
+    }
+    else if ( strcmp(qtype, "I8") == 0 ) { 
+      mcr_chk_int(ptr_sclr->cdata.valF8);
+      ptr_sclr->cdata.valI8 = (double)ptr_sclr->cdata.valF8;
+    }
+    else if ( strcmp(qtype, "F4") == 0 ) { 
+      if ( ptr_sclr->cdata.valF8 >    FLT_MAX ) { go_BYE(-1); }
+      if ( ptr_sclr->cdata.valF8 < -1*FLT_MAX ) { go_BYE(-1); }
+      ptr_sclr->cdata.valF4 = (double)ptr_sclr->cdata.valF8;
+    }
+    else if ( strcmp(qtype, "F8") == 0 ) { 
+      // Nothing to do 
+    }
+    else {
+      go_BYE(-1);
+    }
+  }
+  else {
+    go_BYE(-1);
+  }
+  strcpy(ptr_sclr->field_type, qtype);
+
+  // Push the scalar back 
+  lua_pop(L, 1);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_conv. ");
+  return 2;
+}
+
 static int l_sclr_new( lua_State *L) {
   int status = 0;
   bool    tempB1;
@@ -262,6 +443,7 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 8;
   }
   else {
+    fprintf(stderr, "Unknown qtype [%s] \n", qtype);
     go_BYE(-1);
   }
   /* Add the metatable to the stack. */
@@ -274,6 +456,7 @@ BYE:
   lua_pushstring(L, "ERROR: sclr_new. ");
   return 2;
 }
+
 static int set_output_field_type(
     const char *const fldtype1,
     const char *const fldtype2,
@@ -416,6 +599,7 @@ static const struct luaL_Reg sclr_methods[] = {
     { "cdata", l_sclr_to_cdata },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "conv", l_sclr_conv },
     { "fldtype", l_fldtype },
     { NULL,          NULL               },
 };
@@ -426,6 +610,7 @@ static const struct luaL_Reg sclr_functions[] = {
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },
     { "neq", l_sclr_neq },
     { "gt", l_sclr_gt },
