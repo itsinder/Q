@@ -489,7 +489,7 @@ int luaopen_libsclr (lua_State *L) {
   lua_pushstring(L, "Scalar");
   status =  lua_pcall(L, 2, 0, 0);
   if (status != 0 ) {
-     fprintf(sdterr, "%d\n", status);
+     fprintf(stderr, "%d\n", status);
      fprintf(stderr, "Type registration failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }

@@ -53,8 +53,10 @@ return function (
     subs.c_mem = bak_c_mem
     --==============================
     subs.getter = function (x) 
-    -- return Scalar.new(tonumber(x[0].sum_val), subs.reduce_qtype), 
       local y = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", c_mem)
+      local z = ffi.cast("void *", y[0].num);
+      -- TODO P2 I do not like the fact that I cannot send
+      -- &(x[0].num) to Scalar.new for second Scalar call
       return Scalar.new(x, subs.reduce_qtype), 
            Scalar.new(tonumber(y[0].num), "I8")
     end
