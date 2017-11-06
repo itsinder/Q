@@ -606,16 +606,17 @@ int luaopen_libvec (lua_State *L) {
   luaL_register(L, NULL, vector_methods);
 
   int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
-  if (status != 0 ) {
-    printf("Running require failed:  %s\n", lua_tostring(L, -1));
+  if ( status != 0 ) {
+    WHEREAMI;
+    fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
   } 
   luaL_getmetatable(L, "Vector");
   lua_pushstring(L, "Vector");
   status =  lua_pcall(L, 2, 0, 0);
-  if (status != 0 ){
-     printf("%d\n", status);
-     printf("Registering type failed: %s\n", lua_tostring(L, -1));
+  if (status != 0 ) {
+     WHEREAMI; 
+     fprintf(stderr, "Type Registering failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }
 
@@ -623,6 +624,6 @@ int luaopen_libvec (lua_State *L) {
    * top of the stack. */
   lua_createtable(L, 0, 0);
   luaL_register(L, NULL, vector_functions);
-
+  // Why is return code not 0
   return 1;
 }
