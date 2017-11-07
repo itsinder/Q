@@ -1,9 +1,12 @@
 -- local Q = require 'Q'
 local sub = (require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3").vvsub
+local div = (require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3").vvdiv
 local abs = (require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2").abs
+local max = (require "Q/OPERATORS/F_TO_S/lua/_f_to_s").max
 local vsgt = (require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2").vsgt
 local sum = (require "Q/OPERATORS/F_TO_S/lua/_f_to_s").sum
 local prcsv = (require "Q/OPERATORS/PRINT/lua/print_csv")
+local vvmax = (require "Q/QTILS/lua/vvmax").vvmax
 local Scalar = require 'libsclr'
 
 local qc  = require 'Q/UTILS/lua/q_core'
@@ -39,7 +42,7 @@ local function vvseq(x, y, s, optargs)
   if ( mode == "difference" ) then 
     return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
   elseif ( mode == "ratio" ) then
-    return (sum(vsgt(div(abs(sub(x, y)), max(x, y)), s)):eval():to_num() == 0 )
+    return (sum(vsgt(div(abs(sub(x, y)), vvmax(x, y)), s)):eval():to_num() == 0 )
   elseif ( mode == "ratio" ) then
   else
     assert(nil, "Invalid mode = ", mode)

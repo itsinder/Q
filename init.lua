@@ -24,6 +24,7 @@ require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
 require 'Q/OPERATORS/WHERE/lua/where'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
+require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 

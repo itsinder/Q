@@ -33,6 +33,8 @@ if [[ $RES -ne 0 ]] ; then
    sudo apt-get install liblua5.1-dev -y
    sudo apt-get install unzip -y # for luarocks
    sudo apt-get install libncurses5-dev # for lua-5.1.5
+   sudo apt-get install libssl-dev # for QLI
+   sudo apt-get install m4         # for QLI
    wget https://www.lua.org/ftp/lua-5.1.5.tar.gz
    tar -xvzf lua-5.1.5.tar.gz
    cd lua-5.1.5/
@@ -87,6 +89,7 @@ if [[ $RES -ne 0 ]] ; then
    sudo luarocks install busted
    sudo luarocks install luacov
    sudo luarocks install cluacov
+   sudo luarocks install http      # for QLI
 else
    my_print "luarocks is already installed"
 fi
