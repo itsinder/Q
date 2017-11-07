@@ -71,7 +71,7 @@ else
         os.exit()
     end
     print ("Discovering and running all test suites under " .. path)
-    local files = (require "q_test_discovery")(path)
+    local files = (require "Q/TEST_RUNNER/q_test_discovery")(path)
     local res = {}
     for _,f in pairs(files) do
         res[f] = {}

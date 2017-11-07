@@ -11,7 +11,7 @@ local expected_col = Q.mk_col({0, 125, 20}, "I1")
 local expected_nn_val = {0, 1, 1}
 
 -- Convert column
-local converted_col = Q.convert(input_col, {qtype = "I1", is_safe=true})
+local converted_col = Q.convert(input_col, "I1", {is_safe=true})
 converted_col:eval()
 
 -- Check nn_vec
@@ -42,7 +42,7 @@ local expected_col = Q.mk_col({2211, 125, 20}, "I2")
 local expected_nn_val = {1, 1, 1}
 
 -- Convert column
-local converted_col = Q.convert(input_col, {qtype = "I2", is_safe=true})
+local converted_col = Q.convert(input_col, "I2", {is_safe=true})
 converted_col:eval()
 
 -- Check nn_vec
