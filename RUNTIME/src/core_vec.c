@@ -320,8 +320,6 @@ vec_free(
     )
 {
   int status = 0;
-  static int ctr = 0;
-  // fprintf(stderr, "Freeing vector %d\n", ++ctr);
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);

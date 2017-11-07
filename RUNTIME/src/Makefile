@@ -62,7 +62,6 @@ libsclr.so: gen_cmp gen_arith libvec.so libcmem.so
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_F8.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
 		-shared -o libsclr.so
-	rm -f _*.c
 
 gen_cmp:
 	lua gen_cmp.lua
