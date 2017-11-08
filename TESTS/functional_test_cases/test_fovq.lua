@@ -61,7 +61,9 @@ tests.t4 = function ()
   assert(Q.sum(y):eval():to_num() == a:length())
   print("Test t4 succeeded")
 end
+
 --=======================================
+
 os.execute("rm _*.bin") 
 return tests
 
