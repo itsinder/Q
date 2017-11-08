@@ -48,6 +48,7 @@ tests.t3 = function()
   print("Successfully completed test t3")
 end
 
+--===========================
 tests.t4 = function()
   input_col = Q.mk_col({1, 0, 1}, "I1")
   local expected_res = {1, 0, 1}
@@ -60,6 +61,14 @@ tests.t4 = function()
   end
   Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t4")
+end
+--===========================
+tests.t5 = function()
+  -- test for no-op when no conversionneeded
+  local incol = Q.mk_col({1, 0, 1}, "I1")
+  local outcol = Q.convert(incol, "I1")
+  assert(incol == outcol)
+  print("Successfully completed test t5")
 end
 --===========================
 return tests
