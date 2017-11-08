@@ -461,8 +461,8 @@ function lVector:get_one(idx)
   -- TODO More checks to make sure that this is only for 
   -- vectors in file mode. We may need to move vector from buffer 
   -- mode to file mode if we are at last chunk and is_eov == true
-  local nn_addr, nn_len
-  local base_scalar = assert(Vector.get(self._base_vec, idx, 1))
+  local nn_addr, nn_len, nn_scalar
+  local base_data, base_len, base_scalar = assert(Vector.get(self._base_vec, idx, 1))
   assert(type(base_scalar) == "Scalar")
   if ( self._nn_vec ) then
     nn_scalar = assert(Vector.get(self._nn_vec, 0, 0))

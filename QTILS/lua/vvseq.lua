@@ -13,9 +13,6 @@ local qc  = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
--- TODO P1 
--- Should take relative difference not absolute difference
--- or provide an option to specify which one
 local T = {} 
 local function vvseq(x, y, s, optargs)
 

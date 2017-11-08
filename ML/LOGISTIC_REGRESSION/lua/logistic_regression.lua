@@ -5,27 +5,17 @@ local T = {}
 
 local function beta_step(X, y, beta)
   local Xbeta = Q.mv_mul(X, beta)
-  local p = Q.logit(Xbeta):set_name("p")
-  local w = Q.logit2(Xbeta):set_name("w")
-  local ysubp = Q.vvsub(y, p):set_name("ysubp")
+  local p = Q.logit(Xbeta)
+  local w = Q.logit2(Xbeta)
+  local ysubp = Q.vvsub(y, p)
   local A = {} -- initially a table of Lua tables, later a table of Q vectors
   local b = {} -- initially a Lua table, later a Q vector
 
   for i, X_i in ipairs(X) do
-    b[i] = Q.sum(Q.vvmul(X_i, ysubp):set_name("b_" .. i))
+    b[i] = Q.sum(Q.vvmul(X_i, ysubp)):eval()
     A[i] = {}
     for j, X_j in ipairs(X) do
-      A[i][j] = Q.sum(
-                  Q.vvmul(X_i, 
-                    Q.vvmul(w, X_j):set_name("tmp1")
-                  ):set_name("tmp2")
-                ):set_name("sum_Aij")
-    end
-  end
-  for i = 1, #A do
-     b[i] = b[i]:eval()
-    for j = 1, #A[i] do
-      A[i][j] = A[i][j]:eval()
+      A[i][j] = Q.sum( Q.vvmul(X_i, Q.vvmul(w, X_j))):eval()
     end
   end
   -- convert from Lua table to Q vector
@@ -148,14 +138,16 @@ local function lr_setup(
 )
   -- add an additional column to X of 1's. Math justification in documentation
   local xtype = X[1]:fldtype()
-  local N = y:length()
-  X[#X + 1] = Q.const({ val = 1, len = N, qtype = xtype })
+  local M = y:length()
+  X[#X + 1] = Q.const({ val = 1, len = M, qtype = xtype })
   X[#X]:eval()
   local M = #X
   --- initialize beta to 0 
   beta = Q.const({ val = 0, len = M, qtype = 'F8' })
   return beta
 end
+
+--===============================================
 T.beta_step = beta_step
 T.lr_setup  = lr_setup
 -- require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
