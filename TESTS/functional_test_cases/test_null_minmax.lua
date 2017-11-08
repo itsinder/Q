@@ -1,47 +1,37 @@
+-- Test to check min & max of a null vector
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
 tests.t1 = function ()
--- TEST MIN MAX WITH SORT
-meta = {
- { name = "cd", has_nulls = true, qtype = "I2", is_load = true }
-}
-local result = Q.load_csv("I4_null.csv", meta)
-assert(type(result) == "table")
-for i, v in pairs(result) do
-    x = result[i]
-  assert(type(x) == "lVector")
+  -- TEST MIN MAX WITH SORT
+  local meta = {
+    { name = "cd", has_nulls = true, qtype = "I2", is_load = true }
+  }
+  local x = Q.load_csv("I4_null.csv", meta)
+  assert(type(x) == "table")
+  for i, v in pairs(x) do
+    local y = x[i]
+    assert(type(y) == "lVector")
+    -- find min & max
+    local z = Q.min(y)
+    local status = true repeat status = z:next() until not status
+    local val = z:value()
+    assert(val:to_num() == 0 )
+    assert(Q.min(y):eval():to_num() == 0)
+    local min = Q.min(y):eval():to_num()
+    local z = Q.max(y)
+    local status = true repeat status = z:next() until not status
+    local val = z:value()
+    assert(val:to_num() == 0 )
+    assert(Q.max(y):eval():to_num() == 0)
+    local max = Q.max(y):eval():to_num()
+    assert(min == max, "Value mismatch in the case of min & max of a null vector")
+  end
+  print("Test t1 succeeded")
 end
- -- Q.print_csv(x, nil, "")
 
--- find min & max
-local y = Q.min(x)
-local status = true repeat status = y:next() until not status
-local val = y:value()
-assert(val == 0 )
-assert(Q.min(x):eval() == 0)
-min = Q.min(x):eval()
-print(min)
-
-local z = Q.max(x)
-print(z)
-local status = true repeat status = z:next() until not status
-local val = z:value()
-assert(val == 0 )
-assert(Q.max(x):eval() == 0)
-max = Q.max(x):eval()
-print(max)
-
-
-assert(min == max, "Value mismatch in the case of min & max of a null vector")
-
-
-print("##########")
-print("MIN MAX ON NULL VECTOR DONE !!")
-print("------------------------------------------")
-os.execute("rm _*.bin") 
-
-end
+--======================================
+                                
 return tests
 
