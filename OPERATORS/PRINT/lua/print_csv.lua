@@ -15,7 +15,6 @@ local function strip_trailing_LL(temp)
 end
 
 local function chk_cols(column_list)
-
   local qconsts = require 'Q/UTILS/lua/q_consts'
   assert(column_list)
   assert(type(column_list) == "table")
@@ -97,6 +96,7 @@ local function process_filter(filter, max_length)
 end
 
 local print_csv = function (column_list, filter, opfile)  
+  print("START print_csv")
   
   -- trimming whitespace if any
   if opfile ~= nil then
