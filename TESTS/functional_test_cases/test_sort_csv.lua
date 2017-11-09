@@ -1,4 +1,4 @@
--- Test sort behaviour of Q
+-- Test sort behaviour of Q with load csv
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
