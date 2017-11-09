@@ -71,8 +71,12 @@ f_mmap(
   close(fd);
   ptr_mmap->map_len = filestat.st_size;
   ptr_mmap->status  = 0;
-  ptr_mmap->is_persist = false;
   strcpy(ptr_mmap->file_name, file_name);
 BYE:
-  if ( status < 0 ) { return NULL; } else { return ptr_mmap; }
+  if ( status < 0 ) { 
+    return NULL; 
+  } 
+  else { 
+    return ptr_mmap; 
+  }
 }

@@ -234,7 +234,7 @@ vec_materialized(
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
-  size_t fsz = get_file_size(file_name);
+  int64_t fsz = get_file_size(file_name);
   if ( fsz <= 0 ) { go_BYE(-1); }
   // check fsz
   // For B1, file can be larger than necessary, not smaller

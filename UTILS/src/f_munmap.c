@@ -31,20 +31,7 @@ f_munmap(
   if ( ptr_mmap->map_len == 0 ) { go_BYE(-1); }
   if ( ptr_mmap->file_name == NULL ) { go_BYE(-1); }
   int rc = munmap(ptr_mmap->map_addr, ptr_mmap->map_len);
-  /*
-  if ( ptr_mmap->is_persist != 1 ) { 
-    fprintf(stderr, "Deleting %s \n", ptr_mmap->file_name);
-    status = remove(ptr_mmap->file_name); cBYE(status);
-    int64_t sz = get_file_size(ptr_mmap->file_name);
-    if ( sz >= 0 ) { 
-      fprintf(stderr, "Delete failed, sz = %d\n", (int32_t)sz); 
-      go_BYE(-1); 
-    }
-  }
-  else {
-    fprintf(stderr, "NOT Deleting %s \n", ptr_mmap->file_name);
-  }*/
-  if ( rc != 0 ) { go_BYE(-1); }
+  if ( rc != 0 ) { WHEREAMI; }
   free(ptr_mmap);
 BYE:
   return status;

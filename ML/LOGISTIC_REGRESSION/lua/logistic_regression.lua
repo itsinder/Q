@@ -19,13 +19,27 @@ local function beta_step(X, y, beta)
     end
   end
   -- convert from Lua table to Q vector
+  for i = 1, #A do
+    for j = 1, #A do
+      local a_ij = A[i][j]:to_num()
+      io.write(a_ij, " " )
+    end
+    io.write(b[i]:to_num(), " " )
+    io.write("\n")
+  end
+  print("=====================")
   b = Q.mk_col(b, "F8")
   for i = 1, #A do
     A[i] = Q.mk_col(A[i], "F8")
   end
 
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
+  print(type( beta_new_sub_beta))
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
+  for i = 1, #A do
+    print(beta_new_sub_beta:get_one(i-1):to_num())
+  end
+  print("=++++++++++++++++++++")
   return beta_new
 
 end

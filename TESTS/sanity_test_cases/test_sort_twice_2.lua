@@ -1,30 +1,16 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
--- TEST SORT TWICE TEST
-x = Q.mk_col({10,50,40,30}, 'I4')
-
-z = Q.mk_col({50,40,30,10}, 'I4')
-
-assert(type(x) == "lVector")
-
-assert(type(z) == "lVector")
-
--- Asc & Dsc = Dsc
-Q.sort(x, "asc")
-Q.sort(x, "dsc")
-Q.print_csv(x, nil, "")
-
-cmp_result22 = Q.vveq(x, z)
-cmp_result22:eval()
-assert(type(cmp_result22) == "lVector")
-local sort22 = Q.sum(cmp_result22)
-assert(sort22:eval() == z:length())
-
-print("##########")
-print("Nested SORT Test DONE !!")
-print("------------------------------------------")
-
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+local tests = {}
+tests.t1 = function() 
+  local x = Q.seq({start = -1000000, by = 1, qtype = "I4", len = 2000000} )
+  assert(type(x) == "lVector")
+ -- sort needs eov nad will fail if x is not eval'd
+  local status = pcall(Q.sort, x, "asc")
+  assert(not status)
+  x:eval()
+  Q.sort(x, "dsc")
+  Q.sort(x, "asc")
+  assert(Q.sum(Q.vveq(x, Q.seq({start = -1000000, by = 1, qtype = "I4", len = 2000000}))):eval():to_num() == x:length())
+end
+return tests
