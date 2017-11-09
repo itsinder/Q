@@ -2,7 +2,6 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
-
 local tests = {}
 tests.t1 = function ()
   -- Test that c = (a+b)/a
@@ -17,6 +16,8 @@ tests.t1 = function ()
   print("Test t1 succeeded")
 end
 
+--======================================
+
 tests.t2 = function()
   --  test that a + b/a
   local a = Q.mk_col({1, 2, 3}, "I4")
@@ -28,10 +29,12 @@ tests.t2 = function()
   local y = Q.vveq(x, d)
   assert(type(y) == "lVector")
   assert(y:fldtype() == "B1")
-
   assert(Q.sum(y):eval():to_num() == a:length())
   print("Test t2 succeeded")
 end
+
 --======================================
+
+os.execute("rm _*.bin") 
 return tests
 
