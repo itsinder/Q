@@ -2,30 +2,16 @@ local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
-local number_of_testcases_passed = 0
-local number_of_testcases_failed = 0
-
-local failed_testcases = {}
-
 local fns = {}
 
 fns.increment_failed_load = function (index, v, str)
+  print("--------------Failure summary-----------------")
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   print("csv file: "..v.data)
-  
   print("reason for failure "..str)
-  number_of_testcases_failed = number_of_testcases_failed + 1
-  table.insert(failed_testcases,index)
-  --[[
-  print("\n-----Meta Data File------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_metadata/"..v.meta)
-  print("\n\n-----CSV File-------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/LOAD_CSV/test/testcases/test_data/"..v.data)
-  print("\n--------------------\n")
-  --]]
 end
-
+--[[
 fns.print_result = function () 
   local str
   
@@ -47,7 +33,7 @@ fns.print_result = function ()
   assert(io.write(str), "Nightly build file write error")
   assert(io.close(file), "Nighty build file close error")
 end
-
+]]
 -- this function checks whether the output regex is present or not
 -- it also checks the status returned by load.
 -- for category 1 and category6, if status is false then only testcase will succeed
@@ -95,8 +81,7 @@ fns.handle_category1 = function (index, status, ret, v)
   -- check this line can be skipped with the duplicate line below
   -- if error_msg is subset of err
   local count = plstring.count(err, error_msg)
-  if count > 0 then
-    number_of_testcases_passed = number_of_testcases_passed + 1 
+  if count > 0 then 
     return true
   else
     fns["increment_failed_load"](index, v, "testcase category1 failed , actual and expected error message does not match")
@@ -170,8 +155,6 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
       return false
     end
   end
-  
-  number_of_testcases_passed = number_of_testcases_passed + 1 
   return true
 end
 
@@ -199,9 +182,7 @@ fns.handle_category3 = function (index, status, ret, v)
     --print(type(ret[i]))
     local ret = fns.handle_category2(index, status, ret[i], nil, output[i], v)
     if not ret then return nil end
-    number_of_testcases_passed = number_of_testcases_passed - 1
   end
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -229,7 +210,6 @@ fns.handle_category4 = function (index, status, ret, v)
       return false
     end
   end
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -260,7 +240,6 @@ fns.handle_category5 = function (index, status, ret, v)
     return false
   end
 
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
