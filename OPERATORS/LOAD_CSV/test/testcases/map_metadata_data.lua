@@ -142,6 +142,7 @@ return {
                      },
       name = "whole_row_null" 
     },
+    --[[
     -- null present in I4 datatype in CSV file
     { testcase_no = 32, meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
       output_regex = {
@@ -150,6 +151,7 @@ return {
                      },
       name = "nil_data_I4" 
     },
+    ]]
     -- null present in SV data type in CSV file
     { testcase_no = 33, meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", category= "category3",
       output_regex = {
@@ -158,6 +160,7 @@ return {
                      },
       name = "nil_data_SV"
     },
+    --[[
     -- more than 1 column testing with B1 
     -- cols are I4 and B1
     { testcase_no = 34, meta = "gm_valid_I4_B1.lua", data = "I4_B1_valid.csv", category= "category3", 
@@ -167,7 +170,7 @@ return {
                      },
       name = "testing B1 with more than one cols" 
     },
-    
+    ]]
     -- check the size of output binary file is correct, 
     { testcase_no = 35, meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
       output_regex= {12, 6, 12}, name = "valid_bin_file_size" 
