@@ -6,7 +6,6 @@ return function (
   out_qtype,
   args
   )
-  print("XX", in_qtype, out_qtype, args)
   local is_safe   = nil
   if ( args ) then 
     assert(type(args) == "table" )
@@ -32,7 +31,6 @@ return function (
   if is_safe then
     tmpl = 'safe_f1opf2.tmpl'
     subs.fn = "safe_convert_" .. in_qtype .. "_" .. out_qtype
-    print("XXXXXXXXX")
     subs.min_val = assert(qconsts.qtypes[out_qtype].min)
     subs.max_val = assert(qconsts.qtypes[out_qtype].max)
     subs.is_safe = is_safe
