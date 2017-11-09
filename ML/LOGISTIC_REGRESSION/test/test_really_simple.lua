@@ -12,15 +12,12 @@ local num_cols = 1
 train_X, train_y, test_X, test_y = load_data(data_file, num_cols)
 beta = log_reg.lr_setup(train_X, train_y)
 local num_iters = 10
-g_iter = 0
 for i = 1, num_iters do
-  g_iter = i
   beta = log_reg.beta_step(train_X, train_y, beta)
+  assert(beta)
   if ( ( i % 1000 )  == 0 ) then 
-    -- collectgarbage()
     print("completed iterations ", g_iter) 
   end
 end
 print("completed iterations ", g_iter)
 print("Completed test_really_simple")
-os.exit()

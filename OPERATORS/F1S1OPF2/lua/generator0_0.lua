@@ -10,8 +10,8 @@
   local num_produced = 0
   local sp_fn = assert(require("convert_specialize"))
 
-  local function generate_files(in_qtype, args)
-    local status, subs, tmpl = pcall(sp_fn, in_qtype, args)
+  local function generate_files(in_qtype, out_qtype, args)
+    local status, subs, tmpl = pcall(sp_fn, in_qtype, out_qtype, args)
     if ( status ) then
       assert(type(subs) == "table")
       gen_code.doth(subs,tmpl, incdir)
@@ -19,35 +19,21 @@
       print("Produced ", subs.fn)
       num_produced = num_produced + 1
     else
-      print(subs)
-      os.exit()
+      assert(nil, subs)
     end
+    return true
   end
 
   for _, in_qtype in ipairs(qtypes) do 
     for _, out_qtype in ipairs(qtypes) do 
       if ( out_qtype ~= in_qtype ) then
-        args = {}
-        args.qtype = out_qtype
-        local safe_flag = true
-        local unsafe_flag = true
-        if out_qtype == "B1" or in_qtype == "B1" then
-          safe_flag = false
-          if out_qtype == "F4" or out_qtype == "F8" or in_qtype == "F4" or in_qtype == "F8" then
-            unsafe_flag = false
-          end
-        end
-        if unsafe_flag then
-          --Generate files for unsafe mode
-          args.is_safe = false
-          status = pcall(generate_files, in_qtype, args)
+        status = pcall(generate_files, in_qtype, out_qtype, { is_safe = true })
+        assert(status, "Failed to generate files for safe mode")
+        if ( ( in_qtype == "B1" ) or ( out_qtype == "B1" ) )  then 
+          print("TODO ")
+        else
+          status = pcall(generate_files, in_qtype, out_qtype, {is_safe = false})
           assert(status, "Failed to generate files for unsafe mode")
-        end
-        if safe_flag then
-          --Generate files for safe mode
-          args.is_safe = true
-          status = pcall(generate_files, in_qtype, args)
-          assert(status, "Failed to generate files for safe mode")
         end
       end
     end

@@ -6,7 +6,7 @@ return function (
   out_qtype,
   args
   )
-  --local out_qtype = nil
+  print("XX", in_qtype, out_qtype, args)
   local is_safe   = nil
   if ( args ) then 
     assert(type(args) == "table" )
@@ -15,12 +15,10 @@ return function (
       assert(type(is_safe) == "boolean")
     end
   end
-  if out_qtype == "SC" or out_qtype == "SV" then
-    assert(nil, "Cannot convert to type " .. out_qtype)
-  end
-  --assert(is_base_qtype(out_qtype), "Cannot convert to type " .. out_qtype)
-  local out_ctype = qconsts.qtypes[out_qtype].ctype
-  local in_ctype  = qconsts.qtypes[in_qtype].ctype
+  assert(is_base_qtype(out_qtype) or ( out_qtype == "B1" ) )
+  assert(is_base_qtype(in_qtype) or ( in_qtype == "B1" ) )
+  local out_ctype = assert(qconsts.qtypes[out_qtype].ctype, out_qtype)
+  local in_ctype  = assert(qconsts.qtypes[in_qtype].ctype, in_qtype)
   
   local tmpl = 'f1opf2.tmpl'
   local subs = {};
@@ -33,9 +31,10 @@ return function (
   
   if is_safe then
     tmpl = 'safe_f1opf2.tmpl'
-    subs.min_val = qconsts.qtypes[out_qtype].min
-    subs.max_val = qconsts.qtypes[out_qtype].max
     subs.fn = "safe_convert_" .. in_qtype .. "_" .. out_qtype
+    print("XXXXXXXXX")
+    subs.min_val = assert(qconsts.qtypes[out_qtype].min)
+    subs.max_val = assert(qconsts.qtypes[out_qtype].max)
     subs.is_safe = is_safe
   elseif out_qtype == "B1" or in_qtype == "B1" then
     tmpl = 'convert_B1.tmpl'
