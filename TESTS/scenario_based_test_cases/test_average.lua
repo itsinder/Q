@@ -1,24 +1,17 @@
+-- Calculating average and adding it to the attached csv file
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
-local M = dofile("meta.lua")
-load_csv_result = Q.load_csv("test.csv", M, {use_accelerator = false})
-
-Q.print_csv(load_csv_result, nil, "")
-
-col_add = Q.vvadd(load_csv_result[1], load_csv_result[2])
-
-div = Q.mk_col({2, 2, 2, 2}, "I4")
-
-col_average = Q.vvdiv(col_add, div)
-
-load_csv_result[#load_csv_result + 1] = col_average:eval()
-
-Q.print_csv(load_csv_result, nil, "")
-
-Q.print_csv(load_csv_result, nil, "average.csv")
-
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.execute("rm _*.bin") 
-os.exit()
+local tests = {}
+tests.t1 = function ()
+  local M = dofile(os.getenv("Q_SRC_ROOT") .. "/TESTS/scenario_based_test_cases/meta.lua")
+  local x = Q.load_csv(os.getenv("Q_SRC_ROOT") .. "/TESTS/scenario_based_test_cases/test.csv", M, {use_accelerator = false})
+  local y = Q.vvadd(x[1], x[2])
+  local a = Q.mk_col({2, 2, 2, 2}, "I4")
+  local b = Q.vvdiv(y, a)
+  x[#x + 1] = b:eval()
+  Q.print_csv(x, nil, "average.csv")
+  print("Succeeded in test average t1")
+end
+--======================================
+return tests
