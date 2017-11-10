@@ -19,9 +19,17 @@ tests.t1 = function ()
   --========================================
   local d = Q.vveq(a, c)
   assert(Q.sum(d):eval():to_num() == a:length())
---=======================================
+  print("Test t1 succeeded")
 end
-
---======================================
-
+--=======================================
+tests.t2 = function ()
+  local qtypes = { "F4", "F8" }
+  for _, qtype in ipairs(qtypes) do 
+    local a = Q.rand( {lb = 1000000, ub = 2000000, qtype = qtype, len = 10000000})
+    local b = Q.sqrt(a)
+    local c = Q.vvmul(b, b)
+    assert(Q.vvseq(a, c, 0.01, { mode = "ratio" } ))
+  end
+  print("Test t2 succeeded")
+end
 return tests

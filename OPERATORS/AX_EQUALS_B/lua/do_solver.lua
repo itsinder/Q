@@ -5,7 +5,6 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 
 return function(func_name, A, b)
-  print("start: ", func_name, g_iter)
   -- TODO change positive_solver to to general_linear_solver
   assert( ( func_name == "positive_solver") or 
           ( func_name == "full_posdef_positive_solver") )
@@ -45,7 +44,6 @@ return function(func_name, A, b)
   end
 
   assert(qc[func_name], "Symbol not found " .. func_name)
-  print("qc: ", func_name, g_iter)
   local status = qc[func_name](Aptr, copy_xptr, bptr, n)
   assert(status == 0, "solver failed")
   assert(qc["full_positive_solver_check"](Aptr, copy_xptr, bptr, n, 0),

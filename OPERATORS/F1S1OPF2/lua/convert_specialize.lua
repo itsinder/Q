@@ -3,19 +3,17 @@ local qconsts       = require 'Q/UTILS/lua/q_consts'
 
 return function (
   in_qtype,
+  out_qtype,
   args
   )
-  local out_qtype = nil
+  --local out_qtype = nil
   local is_safe   = nil
-  if ( type(args) == "table" ) then
-    out_qtype = assert(args.qtype)
-    is_safe = args.is_safe
-    if ( not is_safe ) then is_safe = false end 
-  elseif ( type(args) == "string" ) then
-    out_qtype = args
-    is_safe = false
-  else
-    assert(nil, "ERROR")
+  if ( args ) then 
+    assert(type(args) == "table" )
+    if ( args.is_safe ) then 
+      is_safe = args.is_safe
+      assert(type(is_safe) == "boolean")
+    end
   end
   if out_qtype == "SC" or out_qtype == "SV" then
     assert(nil, "Cannot convert to type " .. out_qtype)

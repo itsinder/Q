@@ -10,8 +10,8 @@ local function vvpromote(x, y)
   if ( x:fldtype() == y:fldtype() ) then 
     return x, y
   end
-  local newxtype = promote(x:fldtype(), y:fldtype())
-  local newytype = promote(y:fldtype(), x:fldtype())
+  local newxtype = assert(promote(x:fldtype(), y:fldtype()))
+  local newytype = assert(promote(y:fldtype(), x:fldtype()))
   return convert(x, newxtype), convert(y, newytype)
 end
 T.vvpromote = vvpromote
