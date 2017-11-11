@@ -2,7 +2,7 @@
 -- data for concat operation
 -- data field contains inputs in table 'a' and table 'b'
 -- and output in table 'z'
-local qtype = require 'Q/OPERATORS/F1F2OPF3/test/testcases/output_qtype'
+local qtype = require 'Q/OPERATORS/F1F2OPF3/test/testcases/c_testing/output_qtype'
 return { 
   data = {
   

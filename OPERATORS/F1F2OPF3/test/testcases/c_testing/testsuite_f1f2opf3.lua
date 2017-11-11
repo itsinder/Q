@@ -1,7 +1,8 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plpath = require 'pl.path'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+
 -- list of qtypes to be operated on
 local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
 local concat_in_qtypes = { "I1", "I2", "I4" }
@@ -31,7 +32,7 @@ end
 local create_tests = function() 
   local tests = {}  
   for i in pairs(operators) do -- traverse every operation
-    local M = dofile(script_dir .."/test_" .. operators[i] .. ".lua")
+    local M = dofile(script_dir .."/input_" .. operators[i] .. ".lua")
     for m, n in pairs(M.data) do
       local q_type
       if n.qtype then q_type = n.qtype else q_type = all_qtype end
@@ -52,7 +53,7 @@ local create_tests = function()
     end
   end
   
-  local M = dofile(script_dir .."/test_concat.lua")
+  local M = dofile(script_dir .."/input_concat.lua")
   for m, n in pairs(M.data) do
     local q_type
     if n.qtype then q_type = n.qtype end
