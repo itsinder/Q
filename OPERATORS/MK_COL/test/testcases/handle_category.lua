@@ -59,7 +59,7 @@ fns.category1 = function (index, v, status, ret)
   end
   
   
-  local a, b, err = plstring.splitv(ret,':')
+  local a, b, c, err = plstring.splitv(ret,':')
   err = plstring.strip(err) 
   
   -- trimming whitespace
@@ -72,7 +72,6 @@ fns.category1 = function (index, v, status, ret)
     fns["increment_failed_mkcol"](index, v, "testcase category1 failed , actual and expected error message does not match")
     -- print("actual output:"..err)
     -- print("expected output:"..error_msg)
-  
   end
 
 end
