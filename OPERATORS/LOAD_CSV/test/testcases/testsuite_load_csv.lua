@@ -17,11 +17,11 @@ local T = dofile(script_dir .."/map_metadata_data.lua")
 local test_load = {}
 
 for i, v in ipairs(T) do
+  assert(v.testcase_no,"Specify testcase_no in map file for '" .. v.name .. "' testcase")
+  
   -- testcase number which is entered in map file is an index into test_load table 
   -- which acts as an identifier for the test cases in this test suite.
-  assert(v.testcase_no,"Specify testcase_no in map file for '" .. v.name .. "' testcase")
   test_load[v.testcase_no] = function()
-    
     print("Running testcase " .. v.testcase_no ..": ".. v.name)
     local M = dofile(test_metadata_dir..v.meta)
     local D = v.data
@@ -41,16 +41,14 @@ for i, v in ipairs(T) do
     local key = "handle_"..v.category
     if fns[key] then
       result = fns[key](i, status, ret, v)
+      -- preamble
+      utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
+      assert(result,"handle " .. v.category .. " assertions failed")
     else
       fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
-      result = false
+      utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
+      assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
     end
-    -- preamble
-    utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
-    if (result == false) then
-      assert(result,"handle " .. v.category .. " assertions failed")
-    end
-    
   end
 end
 
