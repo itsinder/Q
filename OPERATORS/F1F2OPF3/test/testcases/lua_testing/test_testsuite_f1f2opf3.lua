@@ -12,9 +12,7 @@ local call_if_exists = function (f)
   end
 end
 --[[ 
-Refer comments in test_runner to understand the parameters of this function
-suite: Suite as defined in test_runner
-fn: Lua function to be tested
+f1f1opf3: Lua function to be tested
 tests_to_run: OPTIONAL;table-array of test-numbers specifying which tests are to be run. If unspecified, all tests are run
 --]]
 
