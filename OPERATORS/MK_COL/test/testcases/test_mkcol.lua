@@ -19,6 +19,7 @@ for i, v in ipairs(T) do
   end
   
   print("--------------------------------")
+  print("Running testcase " .. v.testcase_no ..": ".. v.name)
   local input = v.input
   local qtype = v.qtype
   local result

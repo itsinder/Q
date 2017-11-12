@@ -3,7 +3,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local script_dir = plpath.dirname(plpath.abspath(arg[1]))
 
 local all_qtype = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV' }
 

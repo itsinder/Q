@@ -5,11 +5,7 @@ local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
-local number_of_testcases_passed = 0
-local number_of_testcases_failed = 0
-
-local failed_testcases = {}
+local script_dir = plpath.dirname(plpath.abspath(arg[1]))
 
 local fns = {}
 
@@ -20,8 +16,6 @@ fns.increment_failed = function (index, v, str)
     print("csv file: "..v.data)
   end
   print("reason for failure "..str)
-  number_of_testcases_failed = number_of_testcases_failed + 1
-  table.insert(failed_testcases,index)
   --[[
   print("\n-----Meta Data File------\n")
   os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_metadata/"..v.meta)
@@ -45,10 +39,10 @@ end
 
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
-local check_again = function (index, csv_file, meta)
+local check_again = function (index, csv_file, meta, v)
   local M = dofile(script_dir .."/test_metadata/"..meta)
   -- print(csv_file)
-  local status_load, load_ret = pcall(load_csv,csv_file, M)
+  local status_load, load_ret = pcall(load_csv,csv_file, M, {use_accelerator = false})
   if status_load == false then
     fns["increment_failed"](index, v, "testcase failed: in category1, output of load_csv fail in second attempt")
     return false
@@ -65,7 +59,6 @@ local check_again = function (index, csv_file, meta)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -94,7 +87,7 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
 
   -- original data -> load -> print -> Data A -> load -> print -> Data B. 
   -- In this function Data A is matched with Data B 
-  return check_again(index, csv_file, v.meta)
+  return check_again(index, csv_file, v.meta, v)
 end
 
 -- in this category invalid filter input are given 
@@ -121,7 +114,6 @@ fns.handle_category2 = function (index, v, csv_file, ret, status)
      fns["increment_failed"](index, v, "testcase failed: in category2, actual and expected error message does  not match")
      return false
   end
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -161,7 +153,6 @@ fns.handle_category4 = function (index, v, csv_file, ret, status)
      fns["increment_failed"](index, v, "testcase failed: in category 4, actual and expected error does  not match")
      return false
   end
-   number_of_testcases_passed = number_of_testcases_passed + 1
    return true
 end
 
@@ -185,7 +176,6 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
      return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -209,7 +199,6 @@ fns.handle_category5 = function (index, v, csv_file, ret, status)
      return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -226,7 +215,7 @@ fns.handle_category6 = function (index, v, M)
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
   local status, print_ret = pcall(print_csv, arr, nil, filename)
   if status then
-    local status, load_ret = pcall(load_csv, filename, M)
+    local status, load_ret = pcall(load_csv, filename, M, {use_accelerator = false})
     filename = load_ret[1]:meta().base.file_name
   end
   --print(M[1].name)
@@ -240,7 +229,6 @@ fns.handle_category6 = function (index, v, M)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -268,7 +256,6 @@ fns.handle_category7 = function (index, v, csv_file,ret, status)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -283,12 +270,10 @@ fns.handle_category8 = function (index, v, csv_file,ret, status)
     return false
   end
 
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
-
-
+--[[
 -- this function prints all the result
 fns.print_result = function ()
   local str
@@ -309,7 +294,6 @@ fns.print_result = function ()
   assert(io.output(file), "Nightly build file write error")
   assert(io.write(str), "Nightly build file write error")
   assert(io.close(file), "Nighty build file close error")
-  
 end
-
+]]
 return fns
