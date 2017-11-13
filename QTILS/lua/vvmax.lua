@@ -6,9 +6,9 @@ local vvpromote = (require "Q/QTILS/lua/vvpromote").vvpromote
 local T = {} 
 local function vvmax(x, y)
 
-  x, y = vvpromote(x, y)
   assert(x and type(x) == "lVector")
   assert(y and type(y) == "lVector")
+  x, y = vvpromote(x, y)
   local t1 = vvgt(x, y)
   local t2 = ifxthenyelsez(t1, x, y)
   return t2

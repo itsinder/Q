@@ -243,11 +243,11 @@ vec_materialized(
     if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
     uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
     uint64_t num_bytes = num_words * 8;
-    if ( num_bytes < fsz ) { go_BYE(-1); }
+    if ( num_bytes < (uint64_t)fsz ) { go_BYE(-1); }
   }
   else {
     ptr_vec->num_elements = fsz / ptr_vec->field_size;
-    if (( ptr_vec->num_elements * ptr_vec->field_size) != fsz ) { 
+    if (( ptr_vec->num_elements * ptr_vec->field_size) != (uint64_t)fsz ) { 
       go_BYE(-1);
     }
   }

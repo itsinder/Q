@@ -335,7 +335,8 @@ static int l_sclr_new( lua_State *L) {
   }
   else if ( lua_islightuserdata(L, 1) ) { 
     // TODO P3
-    go_BYE(-1);
+    // go_BYE(-1);
+    in_cmem = lua_touserdata(L, 1);
   }
   else if ( lua_isuserdata(L, 1) ) { 
     // in_cmem = luaL_checkudata(L, 1, "CMEM");
@@ -696,6 +697,6 @@ int luaopen_libsclr (lua_State *L) {
      fprintf(stderr, "q_export registration failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }
-  // TODO: Why is return code not 0?  
-  return 1;
+BYE:
+  return 1; // TODO: Why is return code not 0?  
 }

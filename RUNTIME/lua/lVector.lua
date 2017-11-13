@@ -358,14 +358,21 @@ function lVector:put1(s, nn_s)
   if ( qconsts.debug ) then self:check() end
 end
 
-function lVector:start_write()
+function lVector:start_write(is_read_only_nn)
+  if ( is_read_only_nn ) then 
+    assert(type(is_read_only_nn) == "boolean")
+  end
   local nn_X, nn_nX
   local X, nX = Vector.start_write(self._base_vec)
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
   if ( self._nn_vec ) then
-    nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    if ( is_read_only_nn ) then 
+      nn_X, nn_nX = assert(Vector.get(self._nn_vec, 0, 0))
+    else
+      nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    end
     assert(nn_nX == nX)
     assert(nn_nX)
   end
@@ -602,7 +609,8 @@ function lVector:set_meta(k, v)
   if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
-  assert(type(k) == "string")
+  -- NOT VALID CHECK assert(type(k) == "string")
+  -- value acn be number or boolean or string or Scalar
   self._meta[k] = v
 end
 

@@ -19,16 +19,19 @@ local function drop_nulls(x, sval)
   assert(type(subs) == "table", "error in call to drop_nulls_specialize")
   local func_name = assert(subs.fn)
 
-  -- TODO Check is already sorted correct way and don't repeat
-  local xlen, xptr, nn_xptr = x:start_write()
-  xptr = ffi.cast(subs.ctype .. " *", xptr)
-  nn_xptr = ffi.cast("uint64_t *", nn_xptr)
+  -- early return if no nulls 
+  if ( x:has_nulls() == false ) then return x end
+    
+  local xlen, xptr, nn_xptr = x:start_write(true)
   assert(xlen > 0, "Cannot have null vector")
+  assert(xptr)
   assert(nn_xptr, "Must have nulls in order to drop them")
+  xptr    = ffi.cast(subs.ctype .. " *", xptr)
+  nn_xptr = ffi.cast("uint64_t *", nn_xptr)
   assert(qc[func_name], "Unknown function " .. func_name)
   qc[func_name](xptr, nn_xptr, sval:cdata(), xlen)
-  x:end_write()
   x:drop_nulls()
+  x:end_write()
   return x
   --================================================
 end
