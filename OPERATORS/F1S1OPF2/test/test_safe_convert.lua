@@ -33,7 +33,7 @@ tests.t1 = function()
   assert(n:eval():to_num() == len, "Converted column not matching with expected result")
 
   -- Check the compare result
-  Q.print_csv(converted_col, nil, "")
+  -- Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t1")
 end
 --===========================
