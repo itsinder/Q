@@ -596,7 +596,8 @@ function lVector:set_meta(k, v)
   if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
-  assert(type(k) == "string")
+  -- NOT VALID CHECK assert(type(k) == "string")
+  -- value acn be number or boolean or string or Scalar
   self._meta[k] = v
 end
 
