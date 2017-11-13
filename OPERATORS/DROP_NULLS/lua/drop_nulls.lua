@@ -10,7 +10,7 @@ local function drop_nulls(x, sval)
   end
   assert(x:is_eov(), "Vector must be materialized before dropping nulls")
   assert(sval)
-  assert(type(sval) == "userdata") -- TODO Change to Scalar
+  assert(type(sval) == "Scalar") 
   assert(x:fldtype() == sval:fldtype())
   --================================================
   local spfn = require("Q/OPERATORS/DROP_NULLS/lua/drop_nulls_specialize" )

@@ -46,12 +46,18 @@ end
 function lVector:cast(new_field_type)
   assert(new_field_type)
   assert(type(new_field_type) == "string")
-  assert ( ((is_base_qtype(new_field_type)) or (new_field_type == "B1")))
+  local new_field_width
+  if is_base_qtype(new_field_type) then 
+    new_field_width = qconsts.qtypes[new_field_type].width
+  elseif ( new_field_type == "B1" ) then
+    new_field_width = 0
+  else
+    assert(nil, "Cannot cast to ", new_field_type)
+  end
   if ( self._nn_vec ) then 
     assert(nil, "TO BE IMPLEMENTED")
   end
-  new_field_width = qconsts.qtypes[new_field_type].width
-  local status = Vector.cast(self._base_vec,new_field_type,new_field_width)
+  local status = Vector.cast(self._base_vec,new_field_type, new_field_width)
   assert(status)
   if ( qconsts.debug ) then self:check() end
   return self

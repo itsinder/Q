@@ -25,6 +25,7 @@ local function vvseq(x, y, s, optargs)
   assert(y and type(y) == "lVector")
 -- NOT a valid check  assert(x:fldtype() == y:fldtype())
   assert(is_base_qtype(x:fldtype()))
+  assert(is_base_qtype(y:fldtype()))
   assert(s)
   if ( ( type(s) == "number" ) or ( type(s) == "string") ) then 
     s = assert(Scalar.new(s, x:fldtype()))
@@ -33,6 +34,7 @@ local function vvseq(x, y, s, optargs)
   else
     assert(nil, "bad type for scalar")
   end
+ -- TODO Ramesh Check scalar directly
   local sval = assert(tonumber(Scalar.to_str(s)))
   assert(sval >= 0)
   
@@ -40,7 +42,6 @@ local function vvseq(x, y, s, optargs)
     return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
   elseif ( mode == "ratio" ) then
     return (sum(vsgt(div(abs(sub(x, y)), vvmax(x, y)), s)):eval():to_num() == 0 )
-  elseif ( mode == "ratio" ) then
   else
     assert(nil, "Invalid mode = ", mode)
   end
