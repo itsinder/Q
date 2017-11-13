@@ -2,6 +2,7 @@ cmem   = require 'libcmem' ;
 Scalar = require 'libsclr' ; 
 num_trials = 32 -- 1024
 tbl_size = 4096 -- 1048576
+cmem   = require 'libcmem' ; 
 local tests = {}
 tests.t1 = function()
   -- create boolean scalars in several different ways
@@ -118,8 +119,25 @@ tests.t8 = function()
   status, err = Scalar.new("32768", "I2"); assert(not status)
   status, err = Scalar.new("-32769", "I2"); assert(not status)
 
- -- TODO COmplete 
+ -- TODO complete 
 
   print("test 8 passed")
 end
+tests.t9 = function()
+  -- test arithmetic operators 
+  local s1 = Scalar.new("123", "I1")
+  local s2 = Scalar.new("123", "I1") 
+  assert(s1 == s2)
+  s2 = Scalar.new("124", "I1") 
+  assert(s1 < s2)
+  s2 = Scalar.new("122", "I1") 
+  assert(s1 > s2)
+  s1 = Scalar.new("123", "I2")
+  s2 = Scalar.new("123", "I2") 
+  local s3 = s1 + s2
+  assert(s3:to_num() == 2*123)
+  s3 = s1 - s2
+  assert(s3:to_num() == 0)
+end
+-- 
 return tests
