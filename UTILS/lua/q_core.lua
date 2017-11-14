@@ -1,5 +1,6 @@
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
+local pldir = require 'pl.dir'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
@@ -9,12 +10,33 @@ local lib_dir = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$')) .. "/"
 local incfile = Q_ROOT .. "/include/q_core.h"
 local compile = require 'Q/UTILS/lua/compiler'
 
-local dbg = require 'Q/UTILS/lua/debugger'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 assert(plpath.isfile(incfile), "File not found " .. incfile)
 ffi.cdef(plfile.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
+
+----- Init Lookup ----
+local function add_libs()
+  local h_files = pldir.getfiles(Q_ROOT .. "/include", "*.h")
+  local libs = {}
+  for file_id=1,#h_files do
+    local file = h_files[file_id]
+    file = file:match('[^/]*$')
+    assert(#file > 0, "filename must be valid")
+    local lib_name, subs = file:gsub("%.h$", "")
+    assert(subs == 1, "Should be only one extension")
+    local so_name = "lib" .. lib_name .. ".so"
+    if so_name ~= "libq_core.so" then
+      ffi.cdef(plfile.read(h_files[file_id]))
+      local q_tmp = ffi.load(so_name)
+      assert(function_lookup[lib_name] == nil,
+        "Library name is already declared: " .. lib_name)
+      function_lookup[lib_name] = q_tmp[lib_name]
+    end
+  end
+end
 
 local function get_qc_val(val)
   return qc[val]
@@ -58,4 +80,5 @@ local qc_mt = {
   end
 }
 setmetatable(qt, qc_mt)
+add_libs()
 return qt
