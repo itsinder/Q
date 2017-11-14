@@ -30,6 +30,10 @@
           num_produced = num_produced + 1
         else
           print(subs)
+          print(operator)
+          print(fldtype)
+          print(scalar_type)
+          os.exit()
         end
       end
     end
