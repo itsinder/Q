@@ -7,28 +7,32 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 require 'Q/UTILS/lua/strict'
---
-num_iters = 1024
-for i = 1, num_iters do
-  local x = lVector( { qtype = "I4", gen = true})
-  num_elements = 1048576+3
-  field_size = 4
-  base_data = cmem.new(num_elements * field_size)
-  iptr = ffi.cast("int32_t *", base_data)
-  for i = 1, num_elements do
-    local s1 = Scalar.new(i*11, "I4")
-    local s2
-    if ( ( i % 2 ) == 0 ) then
-      s2 = Scalar.new(true, "B1")
-    else
-      s2 = Scalar.new(false, "B1")
+local tests = {} 
+-- 
+tests.t1 = function()
+  local num_iters = 1024
+  for i = 1, num_iters do
+    local x = lVector( { qtype = "I4", gen = true})
+    local num_elements = 1048576+3
+    local field_size = 4
+    local base_data = cmem.new(num_elements * field_size)
+    local iptr = ffi.cast("int32_t *", base_data)
+    for i = 1, num_elements do
+      local s1 = Scalar.new(i*11, "I4")
+      local s2
+      if ( ( i % 2 ) == 0 ) then
+        s2 = Scalar.new(true, "B1")
+      else
+        s2 = Scalar.new(false, "B1")
+      end
+      x:put1(s1, s2)
     end
-    x:put1(s1, s2)
+    x:eov()
+    local T = x:meta()
+    assert(plpath.isfile(T.base.file_name))
+    print("Iter = ", i)
   end
-  x:eov()
-  local T = x:meta()
-  assert(plpath.isfile(T.base.file_name))
-  print("Iter = ", i)
+  print("Successfully completed test t1")
 end
-print("Completed ", arg[0])
-os.exit()
+
+return tests
