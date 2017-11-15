@@ -18,11 +18,11 @@ tests.t1 = function()
   assert(base_addr)
   local X = ffi.cast("int32_t *", base_addr)
   for i = 1, 10 do
-    print(X[i-1])
+    -- print(X[i-1])
     assert(X[i-1] == i*10)
   end
-    print("Successfully completed test t1")
-  end
+  print("Successfully completed test t1")
+end
   --====================
 
 return tests
