@@ -52,7 +52,6 @@ typedef struct _reduce_min_<<qtype>>_args {
     --==============================
       subs.getter = function (x) 
         local y = ffi.cast("REDUCE_min_" .. qtype .. "_ARGS *", c_mem)
-        print("XXX ", y[0].min_val, y[0].num)
         return Scalar.new(x, subs.reduce_qtype), 
            Scalar.new(tonumber(y[0].num), "I8")
       end

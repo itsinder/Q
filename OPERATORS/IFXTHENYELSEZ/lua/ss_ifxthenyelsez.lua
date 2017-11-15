@@ -6,8 +6,8 @@ local function ss_ifxthenyelsez(x, y, z)
   local lVector = require 'Q/RUNTIME/lua/lVector'
 
   assert(type(x) == "lVector", "error")
-  assert(type(y) == "userdata", "error") -- TODO Should be Scalar
-  assert(type(z) == "userdata", "error") -- TODO Should be Scalar
+  assert(type(y) == "Scalar", "error") 
+  assert(type(z) == "Scalar", "error") 
   local spfn = require("Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez_specialize" )
   assert(type(spfn) == "function")
   assert(x:fldtype() == "B1")

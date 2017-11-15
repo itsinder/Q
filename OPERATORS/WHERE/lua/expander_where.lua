@@ -61,7 +61,7 @@ local function expander_where(op, a, b)
       assert(a_len == b_len)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Where vector cannot have nulls")
-        local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
+      local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
       if ( n_out[0] < sz_out ) then

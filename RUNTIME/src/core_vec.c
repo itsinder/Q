@@ -160,12 +160,13 @@ vec_cast(
   strcpy(ptr_vec->field_type, new_field_type);
   if ( strcmp(new_field_type, "B1") == 0 ) {
     ptr_vec->num_elements = ptr_vec->file_size * 8;
+    ptr_vec->num_in_chunk = ptr_vec->num_in_chunk * ptr_vec->field_size * 8;
+    ptr_vec->field_size   = new_field_size;
   }
   else {
     ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
+    ptr_vec->field_size   = 0; // special for B1
   }
-  ptr_vec->field_size   = new_field_size;
-  
 BYE:
   return status;
 }
@@ -1062,9 +1063,6 @@ vec_eov(
   if ( ptr_vec->num_elements == 0     ) { 
     // unlikely but one has to account for this corner case 
     ptr_vec->is_eov = true;
-    if ( ptr_vec->is_memo ) { 
-      ptr_vec->file_size = get_file_size(ptr_vec->file_name);
-    }
     return status;
   } 
   //----------------------------------------

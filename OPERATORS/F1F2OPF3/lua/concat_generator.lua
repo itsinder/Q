@@ -19,7 +19,6 @@
         for k, out_qtype in ipairs(types) do 
           local optargs = {}
           optargs.out_qtype = out_qtype
-          -- print("Lua premature", stat_chk); os.exit()
           local status, subs, tmpl = pcall(
           sp_fn, in1type, in2type, optargs)
           if ( status) then
