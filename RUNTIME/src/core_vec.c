@@ -161,12 +161,12 @@ vec_cast(
   if ( strcmp(new_field_type, "B1") == 0 ) {
     ptr_vec->num_elements = ptr_vec->file_size * 8;
     ptr_vec->num_in_chunk = ptr_vec->num_in_chunk * ptr_vec->field_size * 8;
-    ptr_vec->field_size   = new_field_size;
+    if ( new_field_size != 0 ) { go_BYE(-1); } // special case for B1
   }
   else {
     ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
-    ptr_vec->field_size   = 0; // special for B1
   }
+  ptr_vec->field_size   = new_field_size; 
 BYE:
   return status;
 }
