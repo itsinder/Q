@@ -7,6 +7,8 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 require 'Q/UTILS/lua/strict'
+local expander_gen3 = require 'Q/RUNTIME/test/expander_gen3'
+
 local tests = {} 
 
 --====== Testing nascent vector with generator (gen3)
@@ -15,7 +17,6 @@ tests.t1 = function()
   local status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
   assert(status)
   print("Creating nascent vector with generator gen3")
-  local expander_gen3 = require 'expander_gen3'
 
   local v1 = lVector( { qtype = "I4", file_name = "_in1_I4.bin"})
   local gen3 = expander_gen3(v1, v1)
