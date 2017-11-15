@@ -15,7 +15,7 @@ return function (
   for k, x in ipairs(X) do 
     assert(type(x) == "lVector", "each element of X must be a lVector")
     x_qtype  = x:qtype()
-    assert(ok_types[xtype], "qtype not F4 or F8 for column " .. k)
+    assert(ok_types[x_qtype], "qtype not F4 or F8 for column " .. k)
   end
   assert(type(y) == "lVector", "Y must be a lVector ")
   local k = #X
