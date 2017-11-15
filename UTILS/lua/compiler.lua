@@ -26,26 +26,26 @@ local function write_to_file(content, fname)
 
 end
 
-local function compile(doth, dotc, libname)
-  assert(dotc ~= nil and type(dotc) == "string", "need a valid string that is the dot c file")
+local function compile(doth, h_path, dotc, so_path, libname)
   assert(doth ~= nil and type(doth) == "string", "need a valid string that is the  dot h file")
-  local lib_path = string.format("%s/lib%s.so", Q_PATH, libname)
+  assert( h_path ~= nil and type(h_path) == "string", "need a valid h_path")
+  assert(dotc ~= nil and type(dotc) == "string", "need a valid string that is the dot c file")
+  assert(so_path ~= nil and type(so_path) == "string", "need a valid so_path")
   local tmp_c, tmp_h = string.format("/tmp/%s.c", libname), string.format("/tmp/%s.h", libname)
   write_to_file(dotc, tmp_c)
   write_to_file(doth, tmp_h)
   local q_cmd = string.format("gcc %s %s -I %s %s -o %s", QC_FLAGS, tmp_c,
-    '/tmp/', Q_LINK_FLAGS, lib_path)
+    '/tmp/', Q_LINK_FLAGS, so_path)
   local status = os.execute(q_cmd)
   assert(status == 0, "gcc failed for command: " .. q_cmd)
-  assert(plpath.isfile(lib_path), "Target " .. libname .. " not created")
+  assert(plpath.isfile(so_path), "Target " .. libname .. " not created")
   -- print("Successfully created " .. libname)
   -- if qconsts.debug ~= true then
   --   plfile.delete(tmp_c)
   --   plfile.delete(tmp_h)
   -- end
   local h_file = cleaned_h_file(tmp_h)
-  local h_file_path = H_DIR ..  libname .. ".h"
-  plfile.write(h_file_path, h_file)
+  plfile.write(h_path, h_file)
 end
 
 return compile

@@ -48,7 +48,7 @@ local function q_add(doth, dotc, lib_name)
     local h_path = inc_dir .. lib_name .. ".h"
     local so_path = lib_dir .. "lib" .. lib_name .. ".so"
     if plpath.isfile(h_path) == false or plpath.isfile(so_path) == false then
-      compile(doth, dotc, lib_name)
+      compile(doth, h_path, dotc, so_path, lib_name)
     end
     ffi.cdef(plfile.read(h_path))
     local q_tmp = ffi.load("lib" .. lib_name .. ".so")

@@ -11,7 +11,7 @@ return 0;
 }
 ]]
 local doth = [[ #include <stdio.h>
-int boom();
+extern int boom(void);
 ]]
 
 assert( qc.q_add(doth, dotc, 'boom') == true)
