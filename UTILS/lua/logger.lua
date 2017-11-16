@@ -1,9 +1,9 @@
 local Logger= {}
 Logger.__index = Logger
 setmetatable(Logger, {
-   __call = function (cls, ...)
-      return cls.new(...)
-   end,
+  __call = function (cls, ...)
+    return cls.new(...)
+  end,
 })
 
 
@@ -28,6 +28,10 @@ for i, x in ipairs(modes) do
   local name = x.name:upper()
   Logger[x.name] = function(self, ...)
     assert(type(self) == "table" and getmetatable(self) == Logger, "Use : to call")
+    local my_level = levels[x.name]
+    if self.level ~= nil and my_level < self.level then
+      return false
+    end
     local msg = table.concat({...}, " ")
     local my_name = debug.getinfo(1, "Sl").short_src
     local idx = 2
@@ -51,16 +55,20 @@ for i, x in ipairs(modes) do
       string.format("%s[%-6s%s]%s %s: %s",
       x.color, name, os.date("%H:%M:%S"), "\27[0m", lineinfo, msg))
     end
-
+    return true
   end
 end
 function Logger.new(args)
   assert(type(args) == "table" or args == nil, "Args if specified should be a table")
   local log = setmetatable({}, Logger)
-  if args == nil then 
-    return log 
+  if args == nil then
+    return log
   end
   log.outfile = args.outfile
+  if args.level ~= nil then
+    log.level =  assert(levels[args.level], "must be a valid level")
+  end
+  log.level = args.level
   return log
 end
 
