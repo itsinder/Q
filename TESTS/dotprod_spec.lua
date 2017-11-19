@@ -1,6 +1,9 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
+local tests = {}
+
+tests.t1 = function ()
 local X = {}
 for i = 1,9 do
   X[#X + 1] = 31
@@ -28,15 +31,16 @@ for i = 1,32 do
 end
 local ysubp = Q.const({ val = 0.5, len = #X, qtype = 'F8' })
 X = Q.mk_col(X, 'F8')
-ysubp:eval()
+--ysubp:eval()
 
-local b = Q.sum(Q.vvmul(X, ysubp))
-b = b:eval()
+local b = Q.sum(Q.vvmul(X, ysubp)):eval():to_num()
 for i = 1,1000 do
-  local btmp = Q.sum(Q.vvmul(X, ysubp)):eval()
+  local btmp = Q.sum(Q.vvmul(X, ysubp)):eval():to_num()
   print("Iteration ", i)
   assert(btmp == b, "original result: "..b..", different result: "..btmp)
 end
 
-print("SUCCESS for ", arg[0])
-os.exit()
+end
+--=======================================
+return tests
+

@@ -1,5 +1,7 @@
 Q = require 'Q'
 
+local tests = {}
+tests.t1 = function ()
 print(
   Q.sum(
     Q.vvmul(
@@ -9,6 +11,9 @@ print(
   ):eval()
 )
 print("========================")
+end
+--======================================
+tests.t2 = function ()
 
 
 print(
@@ -24,3 +29,7 @@ print(
     )
   ):eval()
 )
+
+end
+--======================================
+return tests

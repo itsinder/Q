@@ -47,14 +47,24 @@ tests.t5 = function ()
   print("Test t5 succeeded")
 end
 tests.t6 = function ()
-  local x = Q.seq( {start = -1, by = -1, qtype = "I1", len = 10} )
-  local y =Q.seq( {start = 1, by = 1, qtype = "I4", len = 10} )
+  local x = Q.seq( {start = -1, by = -1, qtype = "I1", len = 999} )
+  local y =Q.seq( {start = 1, by = 1, qtype = "I4", len = 999} )
   local a, b = Q.vvpromote(x,y)
   assert(a:fldtype() == "I4")
   Q.sort(a:eval(), "asc")
-  Q.abs(a) -- ToDo: Check why there is no effect of absolute operation after promote.
   Q.sort(b:eval(), "dsc")
   assert(Q.sum(Q.vvadd(a,b)):eval():to_num() == 0)
   print("Test t6 succeeded")
+end
+tests.t7 = function ()
+  local x = Q.seq( {start = -1, by = -1, qtype = "I1", len = 100} )
+  local y =Q.seq( {start = 1, by = 1, qtype = "I4", len = 100} )
+  local a, b = Q.vvpromote(x,y)
+  assert(a:fldtype() == "I4")
+  Q.sort(a:eval(), "asc")
+  local c = Q.abs(a)
+  Q.sort(b:eval(), "dsc")
+  assert(Q.sum(Q.vveq(b,c)):eval():to_num() == 100)
+  print("Test t7 succeeded")
 end
 return tests
