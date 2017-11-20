@@ -48,8 +48,8 @@ random_func.random_SC = function(length_inp)
 end
 
 random_func.random_SV = function(size)
-    random_len = math.random(1,size)
-    string = random_func.random_SC(random_len)
+    local random_len = math.random(1,size)
+    local string = random_func.random_SC(random_len)
     return string
 end
 
