@@ -14,7 +14,7 @@ test cases in that suite.
 Run luajit q_testrunner.lua to see its usage.
 
 Update 16-Nov-2017: 
-If q_testrunner find a global variable called test_aux, it invokes test_aux as a function, passing it the results as a parameter. When running from command line, use -l to load any aux functions that can initialize a global test_aux variable. Example is q_test_runner_auxsummary.lua
+If q_testrunner find a global variable called "test_aux", it invokes test_aux as a function, passing it the results as a parameter. When running from command line, use -l to load any aux functions that can initialize a global test_aux variable. Example is q_test_runner_auxsummary.lua
 ]]
 
 local run_tests = function(tests, name)
@@ -85,4 +85,6 @@ else
 end
 print(plpretty.write(test_res))
 
-if (test_aux) then test_aux(test_res) end
+for k,v in pairs(_G) do
+    if (k == 'test_aux') then test_aux(test_res) end
+end
