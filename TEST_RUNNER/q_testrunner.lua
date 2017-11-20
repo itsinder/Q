@@ -12,6 +12,9 @@ Note that the table can also be an array, in which case the index-into-array is 
 test cases in that suite.
 
 Run luajit q_testrunner.lua to see its usage.
+
+Update 16-Nov-2017: 
+If q_testrunner find a global variable called "test_aux", it invokes test_aux as a function, passing it the results as a parameter. When running from command line, use -l to load any aux functions that can initialize a global test_aux variable. Example is q_test_runner_auxsummary.lua
 ]]
 
 local run_tests = function(tests, name)
@@ -20,6 +23,7 @@ local run_tests = function(tests, name)
         if n then name = n end
         local test = tests[name]
         if test then test() else print("Test " .. name .. " not found!") end
+        return {name}, {} -- we're here means it passed :)
     else
         local pass = {}
         local fail = {}
@@ -36,7 +40,7 @@ local run_suite = function(suite_name, test_name)
     if (test_name) then print ("Running only test " .. test_name .. " in unsafe mode..." ) end
     local tests = dofile(suite_name)
     if (test_name) then
-        run_tests(tests, test_name)  -- one shot
+        return run_tests(tests, test_name)  -- one shot
     else
         return run_tests(tests)
     end
@@ -59,11 +63,11 @@ require('Q/UTILS/lua/cleanup')()
 local path = arg[1]
 local test_name = arg[2]
 
+local test_res = {}
+
 if (path and plpath.isfile(path)) then
-    local pass,fail = run_suite(path, test_name)
-    if pass then
-        print("PASS: " .. plpretty.write(pass, "") .. "; FAIL: " .. plpretty.write(fail, ""))
-    end
+    test_res[path] = {}
+    test_res[path].pass,test_res[path].fail = run_suite(path, test_name)
 else
     -- run all tests in a DIR, either custom or default Q_SRC_ROOT
     if not (path and plpath.isdir(path)) then 
@@ -72,12 +76,15 @@ else
     end
     print ("Discovering and running all test suites under " .. path)
     local files = (require "Q/TEST_RUNNER/q_test_discovery")(path)
-    local res = {}
     for _,f in pairs(files) do
-        res[f] = {}
-        res[f].pass, res[f].fail = run_suite(f)
+        test_res[f] = {}
+        test_res[f].pass, test_res[f].fail = run_suite(f)
     end
-    print(plpretty.write(res))
     -- TODO?
     --utils["testcase_results"](test, suite.test_for, suite.test_type, result, "")
+end
+print(plpretty.write(test_res))
+
+for k,v in pairs(_G) do
+    if (k == 'test_aux') then test_aux(test_res) end
 end
