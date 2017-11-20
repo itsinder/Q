@@ -4,21 +4,21 @@ local Q = require 'Q'
 -- this must work because B1 must be multiple of 8 bytes
 c1 = Q.mk_col( {1,1,1,1}, "I4")
 c2 = Q.cast(c1, "B1")
-assert(Q.sum(c2):eval() == 4)
+assert(Q.sum(c2):eval():to_num() == 4)
 --=========== Note that since we are counting number of bits, same rslt
 c1 = Q.mk_col( {2,2,2,2}, "I4")
 c2 = Q.cast(c1, "B1")
-assert(Q.sum(c2):eval() == 4)
+assert(Q.sum(c2):eval():to_num() == 4)
 --============================= Now twice as many bits set 
 c1 = Q.mk_col( {3,3,3,3}, "I4")
 c2 = Q.cast(c1, "B1")
-assert(Q.sum(c2):eval() == 8)
+assert(Q.sum(c2):eval():to_num() == 8)
 --=============================
 c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I8")
-sum1 = Q.sum(c1):eval()
+sum1 = Q.sum(c1):eval():to_num()
 c2 = Q.cast(c1, "I4")
 assert(c2:num_elements() == 16)
-sum2 = Q.sum(c2):eval()
+sum2 = Q.sum(c2):eval():to_num()
 assert(sum1 == sum2)
 -- let's do some things that should not work
 -- this will not work because file size not multiple of element size

@@ -7,9 +7,8 @@ local function cast(x, new_qtype)
   assert(type(x) == "lVector")
   assert(x:is_eov(), "Vector must be materialized before casting")
   assert(new_qtype)
-  if ( x:has_nulls() ) then 
-    assert(nil, "TO BE IMPLEMENTED")
-  end
+  if ( x:fldtype() == new_qtype ) then return x end
+  if ( x:has_nulls() ) then assert(nil, "TO BE IMPLEMENTED") end
   return x:cast(new_qtype)
   --================================================
 end

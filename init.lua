@@ -27,6 +27,7 @@ require 'Q/OPERATORS/WHERE/lua/where'
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'
 require 'Q/QTILS/lua/vvpromote'
+require 'Q/QTILS/lua/fold'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 
 return require 'Q/q_export'
