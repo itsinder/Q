@@ -471,8 +471,17 @@ static int l_vec_new( lua_State *L)
   bool is_memo = true;
   const char *file_name = NULL;
   int64_t num_elements = -1;
-  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
+  // int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
+  
   const char * const qtype_sz  = luaL_checkstring(L, 1);
+  status = luaL_dostring(L, "return require('Q/UTILS/lua/q_consts').chunk_size");
+   if (status != 0 ) {
+    fprintf(stderr, "Failed in getting chunk_size:  %s\n", lua_tostring(L, -1));
+    exit(1);
+  }
+  int32_t chunk_size = lua_tonumber(L, -1);
+  lua_pop(L, 1); 
+  // printf("chunk size is %d\n", chunk_size);
 
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);
