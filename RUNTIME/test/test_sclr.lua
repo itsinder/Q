@@ -210,5 +210,38 @@ tests.t10_I8 = function()
   local s2 = assert(s1:conv("I8"))
   assert(s1 == s2)
 end
+tests.t11 = function()
+  local s1 = Scalar.new(127, "I1") 
+  local s2 = Scalar.new(-127, "I1")
+  local s3 = s2:abs()
+  assert(s1 == s3)
+ --==========
+  assert(Scalar.new(32767, "I2") == Scalar.new(-32767, "I2"):abs())
+  assert(Scalar.new(2147483647, "I4") == Scalar.new(-2147483647, "I4"):abs())
+  -- TODO Utpal 
+  -- Write tests for I8/F4/F8
+  s1 = Scalar.new(1.79769313486231470e+308, "F8")
+  s2 = Scalar.new(-1.79769313486231470e+308, "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+end
+
+tests.t11 = function()
+  s1 = Scalar.new("1.79769313486231470e+308", "F8")
+  s2 = Scalar.new("-1.79769313486231470e+308", "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+
+  s1 = Scalar.new(3.40282346638528860e+38, "F4")
+  s2 = Scalar.new(-1.79769313486231470e+308, "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+
 
 return tests
