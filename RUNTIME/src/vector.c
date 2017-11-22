@@ -9,7 +9,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#include "q_constants.h" // gets us Q_CHUNK_SIZE 
+// #include "q_constants.h" // gets us Q_CHUNK_SIZE 
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
@@ -18,6 +18,28 @@
 // TODO Delete luaL_Buffer g_errbuf;
 extern luaL_Buffer g_errbuf;
 
+static int 
+get_chunk_size(
+  lua_State *L,
+  int32_t *ptr_chunk_size
+)
+{
+  int status = 0;
+  *ptr_chunk_size = 0;
+  static int32_t chunk_size = 0; 
+  if ( chunk_size == 0 ) { 
+    status = luaL_dostring(L, "return require('Q/UTILS/lua/q_consts').chunk_size");
+    if ( status != 0 ) {
+      fprintf(stderr, "Failed in getting chunk_size:  %s\n", lua_tostring(L, -1));
+      exit(1);
+    }
+    chunk_size = lua_tonumber(L, -1);
+    lua_pop(L, 1); 
+  }
+  *ptr_chunk_size = chunk_size;
+BYE:
+  return status;
+}
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
 
@@ -217,10 +239,12 @@ static int l_vec_get_chunk( lua_State *L)
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
   uint64_t idx = 0;
+  int32_t chunk_size;
+  status = get_chunk_size(L, &chunk_size); cBYE(status);
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
     if ( chunk_num < 0 ) { go_BYE(-1); }
-    idx = chunk_num * Q_CHUNK_SIZE;
+    idx = chunk_num * chunk_size;
   }
   else {
     if ( ptr_vec->is_nascent ) { 
@@ -229,7 +253,7 @@ static int l_vec_get_chunk( lua_State *L)
     else {
       chunk_num = 0;
     }
-    idx = chunk_num * Q_CHUNK_SIZE;
+    idx = chunk_num * chunk_size;
   }
   bool is_malloc = false; uint64_t sz = 0;
   if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_nascent ) ) {
@@ -242,7 +266,7 @@ static int l_vec_get_chunk( lua_State *L)
     /* Set the metatable on the userdata. */
     lua_setmetatable(L, -2);
   }
-  status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE, &ret_addr, &ret_len);
+  status = vec_get(ptr_vec, idx, chunk_size, &ret_addr, &ret_len);
   if ( status == -2 ) { goto BYE; } // asked for too far
   cBYE(status);
   if ( is_malloc ) { 
@@ -470,17 +494,12 @@ static int l_vec_new( lua_State *L)
   bool is_memo = true;
   const char *file_name = NULL;
   int64_t num_elements = -1;
-  // int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
-  
+  int32_t chunk_size;
   const char * const qtype_sz  = luaL_checkstring(L, 1);
-  status = luaL_dostring(L, "return require('Q/UTILS/lua/q_consts').chunk_size");
-   if (status != 0 ) {
-    fprintf(stderr, "Failed in getting chunk_size:  %s\n", lua_tostring(L, -1));
-    exit(1);
-  }
-  int32_t chunk_size = lua_tonumber(L, -1);
-  lua_pop(L, 1); 
-  // printf("chunk size is %d\n", chunk_size);
+  /* Note that I would have normally called it qtype 
+     instead of qtype_sz but in the case of SC we send 
+     SC:len where len is an integer */
+  status = get_chunk_size(L, &chunk_size); cBYE(status);
 
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);
