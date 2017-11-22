@@ -41,3 +41,4 @@ return function (
   subs.z_qtype = z_qtype
   return subs, tmpl
 end
+-- test
