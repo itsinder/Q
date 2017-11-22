@@ -140,4 +140,75 @@ tests.t9 = function()
   assert(s3:to_num() == 0)
 end
 -- 
+tests.t10_I1 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I2", "I4", "I8", "F4", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("127", qtype)
+    assert(s1:conv("I1"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-128", qtype)
+    assert(s1:conv("I1"), " should work qtype = " .. qtype)
+  end
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("128", qtype)
+    local s2 = s1:conv("I1")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-129", qtype)
+    local s2 = s1:conv("I1")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I2 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I4", "I8", "F4", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("32767", qtype)
+    assert(s1:conv("I2"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-32768", qtype)
+    assert(s1:conv("I2"), " should work qtype = " .. qtype)
+  end
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("32768", qtype)
+    local s2 = s1:conv("I2")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-32769", qtype)
+    local s2 = s1:conv("I2")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I4 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I8", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("2147483647", qtype)
+    assert(s1:conv("I4"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-2147483648", qtype)
+    assert(s1:conv("I4"), " should work qtype = " .. qtype)
+  end
+
+  local s1 = Scalar.new(16777217, "F4")
+  local s2 = assert(s1:conv("I4"))
+  assert(s1 == s2)
+
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("2147483648", qtype)
+    local s2 = s1:conv("I4")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-2147483649", qtype)
+    local s2 = s1:conv("I4")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I8 = function()
+  local s1 = Scalar.new(9007199254740993, "F8")
+  local s2 = assert(s1:conv("I8"))
+  assert(s1 == s2)
+end
+
 return tests

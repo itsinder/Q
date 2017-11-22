@@ -25,9 +25,10 @@ end
 tests.t2 = function ()
   local qtypes = { "F4", "F8" }
   for _, qtype in ipairs(qtypes) do 
-    local a = Q.rand( {lb = 1000000, ub = 2000000, qtype = qtype, len = 10000000})
+    local a = Q.rand( {lb = 1000000, ub = 2000000, qtype = qtype, len = 10})
     local b = Q.sqrt(a)
     local c = Q.vvmul(b, b)
+    -- Q.print_csv({a, c}, nil, "")
     assert(Q.vvseq(a, c, 0.01, { mode = "ratio" } ))
   end
   print("Test t2 succeeded")

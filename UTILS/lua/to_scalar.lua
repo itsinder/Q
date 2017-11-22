@@ -7,7 +7,8 @@ local function to_scalar(x, qtype)
     retval = assert(Scalar.new(x, qtype), "bad value for Scalar")
     return retval
   elseif ( type(x) == "Scalar") then 
-    return x
+    -- see if you can promote to desired type
+    return x:conv(qtype)
   else
     assert(nil, "bad value for Scalar")
   end

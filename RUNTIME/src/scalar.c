@@ -245,21 +245,24 @@ static int l_sclr_conv( lua_State *L) {
     }
   }
   else if ( strcmp(ptr_sclr->field_type, "F4") == 0 ) { 
+    float val = ptr_sclr->cdata.valF4;
     if ( strcmp(qtype, "I1") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF4);
-      ptr_sclr->cdata.valI1 = ptr_sclr->cdata.valF4;
+      mcr_chk_int(val);
+      if ( ( val < SCHAR_MIN ) || ( val > SCHAR_MAX ) ) { go_BYE(-1); }
+      ptr_sclr->cdata.valI1 = val;
     }
     else if ( strcmp(qtype, "I2") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF4);
-      ptr_sclr->cdata.valI2 = ptr_sclr->cdata.valF4;
+      mcr_chk_int(val);
+      if ( ( val < SHRT_MIN ) || ( val > SHRT_MAX ) ) { go_BYE(-1); }
+      ptr_sclr->cdata.valI2 = val;
     }
     else if ( strcmp(qtype, "I4") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF4);
-      ptr_sclr->cdata.valI4 = ptr_sclr->cdata.valF4;
+      mcr_chk_int(val);
+      ptr_sclr->cdata.valI4 = val;
     }
     else if ( strcmp(qtype, "I8") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF4);
-      ptr_sclr->cdata.valI8 = ptr_sclr->cdata.valF4;
+      mcr_chk_int(val);
+      ptr_sclr->cdata.valI8 = val;
     }
     else if ( strcmp(qtype, "F4") == 0 ) { 
       // Nothing to do 
@@ -272,26 +275,32 @@ static int l_sclr_conv( lua_State *L) {
     }
   }
   else if ( strcmp(ptr_sclr->field_type, "F8") == 0 ) { 
+    double val = ptr_sclr->cdata.valF8;
     if ( strcmp(qtype, "I1") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF8);
-      ptr_sclr->cdata.valI1 = (double)ptr_sclr->cdata.valF8;
+      mcr_chk_int(val);
+      if ( ( val < SCHAR_MIN ) || ( val > SCHAR_MAX ) ) { go_BYE(-1); }
+      ptr_sclr->cdata.valI1 = val;
     }
     else if ( strcmp(qtype, "I2") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF8);
-      ptr_sclr->cdata.valI2 = (double)ptr_sclr->cdata.valF8;
+      mcr_chk_int(val);
+      if ( ( val < SHRT_MIN ) || ( val > SHRT_MAX ) ) { go_BYE(-1); }
+      ptr_sclr->cdata.valI2 = val;
     }
     else if ( strcmp(qtype, "I4") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF8);
-      ptr_sclr->cdata.valI4 = (double)ptr_sclr->cdata.valF8;
+      mcr_chk_int(val);
+      if ( ( val < INT_MIN ) || ( val > INT_MAX ) ) { go_BYE(-1); }
+      ptr_sclr->cdata.valI4 = val;
     }
     else if ( strcmp(qtype, "I8") == 0 ) { 
-      mcr_chk_int(ptr_sclr->cdata.valF8);
-      ptr_sclr->cdata.valI8 = (double)ptr_sclr->cdata.valF8;
+      mcr_chk_int(val);
+      ptr_sclr->cdata.valI8 = val;
     }
     else if ( strcmp(qtype, "F4") == 0 ) { 
       if ( ptr_sclr->cdata.valF8 >    FLT_MAX ) { go_BYE(-1); }
       if ( ptr_sclr->cdata.valF8 < -1*FLT_MAX ) { go_BYE(-1); }
       ptr_sclr->cdata.valF4 = (double)ptr_sclr->cdata.valF8;
+      // TODO P3 Consider case where double value is close
+      // to 0 but coercion to float makes it 0
     }
     else if ( strcmp(qtype, "F8") == 0 ) { 
       // Nothing to do 
