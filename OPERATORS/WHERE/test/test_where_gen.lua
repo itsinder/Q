@@ -16,12 +16,12 @@ local b_ctype = qconsts.qtypes[b_qtype].ctype
 
 local a_input_table = {}
 for i = 1, 66 do
-  table.insert(a_input_table, i)
+  a_input_table[i] = i
 end
 
 local b_input_table = {}
 for i = 1, 66 do
-  table.insert(b_input_table, 0)
+  b_input_table[i] = 0
 end
 b_input_table[2] = 1
 b_input_table[4] = 1
@@ -41,7 +41,7 @@ local function my_magic_function(a_chunk, b_chunk, aidx, a_len, out_buf, sz_out,
     -- validate a vector
     local a_value = a_chunk[i - 1]
     print("a_value: ", a_value)
-    assert(a_value == a_input_table[table_index + i], "Expected value is: " .. a_input_table[table_index + i])
+    assert(a_value == a_input_table[table_index + i])
     
     -- validate b vector
     local char_idx = (i - 1) / 8
@@ -69,12 +69,12 @@ tests.t1 = function()
   -- call where operator
   local Q = require 'Q'
   local a = Q.mk_col(a_input_table, a_qtype)
-  --Q.print_csv(a, nil, "")
+  --Q.print_csv(a, nil, "/tmp/a_out.txt")
   local b = Q.mk_col(b_input_table, b_qtype)
-  --Q.print_csv(b, nil, "")
+  --Q.print_csv(b, nil, "/tmp/b_out.txt")
   local c = Q.where(a, b)
   c:eval()
-  Q.print_csv(c, nil, "")
+  --Q.print_csv(c, nil, "")
 end
 --======================================
 --[[
