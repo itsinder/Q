@@ -6,6 +6,7 @@ Steps to modify chunk_size to 64
 ]]
 
 -- For all tests, set chunk size to 64
+-- Weird behavior: if I uncomment Q.print_csv() statement from below tests then all tests works except t1
 
 local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
