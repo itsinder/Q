@@ -9,8 +9,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#define Q_CHUNK_SIZE 65536 //  TODO P1 
-// Above should not be needed. Should come from q_constants.h
+#include "q_constants.h" // gets us Q_CHUNK_SIZE 
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
