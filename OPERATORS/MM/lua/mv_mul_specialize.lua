@@ -21,7 +21,6 @@ return function (
   local k = #X
   y_qtype  = y:qtype()
   assert(ok_types[y_qtype], "qtype must be F4 or F8")
-  assert(y:is_eov(), "y must be fully evaluated")
 
   if ( ( optargs ) and ( optargs.z_qtype ) ) then 
     z_qtype = assert(optargs.z_qtype)
@@ -42,3 +41,4 @@ return function (
   subs.z_qtype = z_qtype
   return subs, tmpl
 end
+-- test

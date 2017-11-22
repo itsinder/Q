@@ -20,6 +20,7 @@ tests.t1 = function()
   os.execute("rm -f _out1.txt")
 end
 tests.t2 = function()
+ --[[
   local num_cols = 8
   local num_rows = 1048576 + 17
   local X = {}
@@ -31,11 +32,7 @@ tests.t2 = function()
   local X = {x1, x2}
   local Y = Q.mk_col({100, 200}, 'F8')
   local Z = Q.mv_mul(X, Y):eval()
-  end
-  assert(Z:num_elements() == x1:length())
-  print("Completed mv_mul")
-  Q.print_csv(Z, nil, "_out1.txt")
-  assert(diff("out1.txt", "_out1.txt"))
-  os.execute("rm -f _out1.txt")
+  --]]
+  print("TODO")
 end
 return tests

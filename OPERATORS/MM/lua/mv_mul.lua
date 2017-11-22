@@ -13,6 +13,9 @@ local mv_mul = function(X, y)
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not available" .. func_name)
+ 
+  -- run time checks not made in compile time specializer
+  assert(y:is_eov(), "y must be fully evaluated")
 
   local z_buf = nil 
   local nn_z_buf = nil 
