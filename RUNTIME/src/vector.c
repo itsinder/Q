@@ -137,7 +137,8 @@ static int l_vec_eov( lua_State *L) {
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: vec_eov. ");
-  return 2;
+  lua_pushnumber(L, status);
+  return 3;
 }
 //----------------------------------------
 static int l_vec_release_vec_buf( lua_State *L) {
@@ -157,7 +158,6 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_get_vec_buf( lua_State *L) {
-  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   char *chunk = vec_get_buf(ptr_vec); 
   if ( chunk != NULL ) { 
@@ -168,7 +168,6 @@ static int l_vec_get_vec_buf( lua_State *L) {
     lua_setmetatable(L, -2);
     return 1;
   }
-BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: no chunk for materialized vector");
   return 2;

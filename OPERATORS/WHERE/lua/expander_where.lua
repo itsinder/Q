@@ -9,7 +9,9 @@ local function expander_where(op, a, b)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(b:qtype() == "B1", "b must be of type B1")
-  assert(a:length() == b:length(), "size of a and b is not same")
+  -- Condition is good but we do not know enough to evaluate it 
+  -- at this stage since vectors coyld be in nascent state
+  -- assert(a:length() == b:length(), "size of a and b is not same")
   local sp_fn_name = "Q/OPERATORS/WHERE/lua/where_specialize"
   local spfn = assert(require(sp_fn_name))
 

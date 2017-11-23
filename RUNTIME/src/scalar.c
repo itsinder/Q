@@ -87,14 +87,17 @@ BYE:
 }
 
 static int l_sclr_to_str( lua_State *L) {
-#define BUFLEN 31
+  int status = 0;
+#define BUFLEN 127
   char buf[BUFLEN+1];
+  int nw = 0;
 
   if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   // TODO Allow user to provide format
   memset(buf, '\0', BUFLEN+1);
   const char *field_type = ptr_sclr->field_type;
+
   if ( strcmp(field_type, "B1" ) == 0 ) { 
     if (  ptr_sclr->cdata.valB1 ) { 
       strncpy(buf, "true", BUFLEN);
@@ -104,32 +107,34 @@ static int l_sclr_to_str( lua_State *L) {
     }
   }
   else if ( strcmp(field_type, "I1" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI1);
+    nw = snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI1);
   }
   else if ( strcmp(field_type, "I2" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI2);
+    nw = snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI2);
   }
   else if ( strcmp(field_type, "I4" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI4);
+    nw = snprintf(buf, BUFLEN, "%d", ptr_sclr->cdata.valI4);
   }
   else if ( strcmp(field_type, "I8" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%" PRId64, ptr_sclr->cdata.valI8);
+    nw = snprintf(buf, BUFLEN, "%" PRId64, ptr_sclr->cdata.valI8);
   }
   else if ( strcmp(field_type, "F4" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%f", ptr_sclr->cdata.valF4);
+    nw = snprintf(buf, BUFLEN, "%e", ptr_sclr->cdata.valF4);
   }
   else if ( strcmp(field_type, "F8" ) == 0 ) { 
-    snprintf(buf, BUFLEN, "%lf", ptr_sclr->cdata.valF8);
+    nw = snprintf(buf, BUFLEN, "%e", ptr_sclr->cdata.valF8);
   }
   else {
-    WHEREAMI; goto BYE;
+    go_BYE(-1);
   }
+  if ( ( nw < 0 ) || ( nw >= BUFLEN ) )  { go_BYE(-1); }
   lua_pushstring(L, buf);
   return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: sclr_to_str. ");
-  return 2;
+  lua_pushnumber(L, status);
+  return 3;
 }
 
 #define mcr_chk_int(x) { if ( ceil(x) != floor(x) ) { go_BYE(-1); } }
@@ -156,10 +161,10 @@ static int l_sclr_abs( lua_State *L) {
     ptr_sclr->cdata.valI8 = llabs(ptr_sclr->cdata.valI8);
   }
   else if ( strcmp(ptr_sclr->field_type, "F4") == 0 ) { 
-    ptr_sclr->cdata.valF4 = fabsf(ptr_sclr->cdata.valI4);
+    ptr_sclr->cdata.valF4 = fabsf(ptr_sclr->cdata.valF4);
   }
   else if ( strcmp(ptr_sclr->field_type, "F8") == 0 ) { 
-    ptr_sclr->cdata.valF8 = fabs(ptr_sclr->cdata.valI8);
+    ptr_sclr->cdata.valF8 = fabs(ptr_sclr->cdata.valF8);
   }
   else {
     go_BYE(-1);
@@ -169,7 +174,8 @@ static int l_sclr_abs( lua_State *L) {
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: sclr_abs. ");
-  return 2;
+  lua_pushnumber(L, status);
+  return 3;
 }
 static int l_sclr_conv( lua_State *L) {
   int status = 0;
@@ -351,7 +357,8 @@ static int l_sclr_conv( lua_State *L) {
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: sclr_conv. ");
-  return 2;
+  lua_pushnumber(L, status);
+  return 3;
 }
 
 static int l_sclr_new( lua_State *L) {
@@ -739,7 +746,6 @@ int luaopen_libsclr (lua_State *L) {
      fprintf(stderr, "q_export registration failed: %s\n", lua_tostring(L, -1));
      exit(1);
   }
-BYE:
   return 1; // TODO: Why is return code not 0?  
 }
 
