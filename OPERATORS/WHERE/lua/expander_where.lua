@@ -47,13 +47,13 @@ local function expander_where(op, a, b)
 
       aidx = assert(ffi.malloc(ffi.sizeof("uint64_t")))
       aidx = ffi.cast("uint64_t *", aidx)
-
+      aidx[0] = 0
+      
       first_call = false
     end
     
     -- Initialize to zero
     n_out[0] = 0
-    aidx[0] = 0
     
     repeat
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
@@ -67,7 +67,7 @@ local function expander_where(op, a, b)
       local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
-      if ( n_out[0] <= sz_out ) then
+      if ( aidx[0] == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
       end

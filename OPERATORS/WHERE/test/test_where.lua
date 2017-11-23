@@ -75,8 +75,8 @@ tests.t6 = function ()
 
   local expected_out = {2, 4, 66}
   
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  Q.print_csv(a, nil, "/tmp/a_out.txt")
+  Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()
@@ -113,8 +113,8 @@ tests.t7 = function ()
   end
   expected_out[65] = 66
   
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  Q.print_csv(a, nil, "/tmp/a_out.txt")
+  Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()
