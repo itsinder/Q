@@ -20,18 +20,22 @@
      local status, subs, tmpl
       if ( operator == "is_next" ) then 
         for _, comparison in ipairs(comparisons) do 
-          status, subs, tmpl = pcall(sp_fn, intype, 
-            comparison)
-          if ( status ) then 
-            assert(type(subs) == "table")
-            if ( type(tmpl) == "string") then 
-              gen_code.doth(subs, tmpl, incdir)
-              gen_code.dotc(subs, tmpl, srcdir)
-              print("Generated ", subs.fn)
-              num_produced = num_produced + 1
+          for j = 1, 2 do 
+            local optargs = {}
+            if ( j == 2 ) then optargs.mode = "fast" end 
+            status, subs, tmpl = pcall(sp_fn, intype, 
+              comparison, optargs)
+            if ( status ) then 
+              assert(type(subs) == "table")
+              if ( type(tmpl) == "string") then 
+                gen_code.doth(subs, tmpl, incdir)
+                gen_code.dotc(subs, tmpl, srcdir)
+                print("Generated ", subs.fn)
+                num_produced = num_produced + 1
+              end
+            else
+              print("Failed ", intype, subs)
             end
-          else
-            print("Failed ", intype, subs)
           end
         end
       else

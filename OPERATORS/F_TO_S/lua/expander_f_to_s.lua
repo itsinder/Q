@@ -3,14 +3,14 @@ local Reducer = require 'Q/RUNTIME/lua/Reducer'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 
-return function (a, x, y )
+return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name),
   "Specializer missing " .. sp_fn_name)
   assert(type(x) == "lVector", "input should be a lVector")
   assert(x:has_nulls() == false, "Not set up for null values as yet")
   local x_qtype = assert(x:fldtype())
-  local status, subs, tmpl = pcall(spfn, x_qtype, y)
+  local status, subs, tmpl = pcall(spfn, x_qtype, y, optargs)
   assert(status, "Failure of specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Function does not exist " .. func_name)
