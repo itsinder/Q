@@ -8,8 +8,10 @@ local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
-local test_input_dir = script_dir .."/test_data/"
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/PRINT/test"
+
+local test_input_dir = script_dir .."/data/"
 local print_out_dir = script_dir .."/test_print_data/print_tmp/"
 
 -- command setting which needs to be done for all test-cases
@@ -18,8 +20,8 @@ if plpath.isdir(script_dir .."/test_print_data") then
 end
 dir.makepath(script_dir .."/test_print_data/print_tmp/")
 --set environment variables for test-case (LOAD CSV) 
--- _G["Q_DATA_DIR"] = "./test_data/out/"
--- _G["Q_META_DATA_DIR"] = "./test_data/metadata/"
+-- _G["Q_DATA_DIR"] = "./data/out/"
+-- _G["Q_META_DATA_DIR"] = "./data/metadata/"
 
 -- dir.makepath(_G["Q_DATA_DIR"])
 -- dir.makepath(_G["Q_META_DATA_DIR"])
@@ -34,7 +36,7 @@ for i, v in ipairs(T) do
   test_print[v.testcase_no] = function()
 
     print("Running testcase " .. v.testcase_no ..": " .. v.name)
-    local M = dofile(script_dir .."/test_metadata/" .. v.meta)
+    local M = dofile(script_dir .."/metadata/" .. v.meta)
     local D = v.data
     local F = v.filter
     local csv_file = v.csv_file
@@ -55,7 +57,7 @@ for i, v in ipairs(T) do
       goto skip
     end
     
-    local status, load_ret = pcall(load_csv,script_dir .."/test_data/"..D, M, {use_accelerator = false})
+    local status, load_ret = pcall(load_csv,script_dir .."/data/"..D, M, {use_accelerator = false})
     if status then
       -- Persist vector or else input csv get deleted
       --for i=1, #load_ret do
