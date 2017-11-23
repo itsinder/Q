@@ -41,6 +41,7 @@ tests.t3 = function ()
 	end
 	print("test t3 succeeded: LOAD CSV Test DONE !!")
 	print("------------------------------------------")
+	os.execute("rm -f _*.bin")
 end
 --=======================================
 return tests
