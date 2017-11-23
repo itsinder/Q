@@ -262,6 +262,9 @@ function lVector:num_elements()
 end
 
 function lVector:length()
+  if ( not self:is_eov() ) then 
+    return nil
+  end
   if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end

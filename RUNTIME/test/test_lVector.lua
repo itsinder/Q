@@ -6,6 +6,8 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
+assert(plpath.isdir(path_to_here))
 require 'Q/UTILS/lua/strict'
 
 local v
@@ -83,17 +85,6 @@ tests.t2 = function()
   assert(not base_data)
   assert(not nn_data)
   --=========
-
-  x:set_meta("rand key", "rand val")
-  v = x:get_meta("rand key")
-  assert(v == "rand val")
-  x:set_meta("rand key", "some other rand val")
-  v = x:get_meta("rand key")
-  assert(v == "some other rand val")
-  pr_meta(x, "_meta_data.csv")
-  compare("_meta_data.csv", "in2_meta_data.csv")
-
-  print("Successfully completed test t2")
 end
 
 --====== Testing nascent vector
@@ -255,6 +246,32 @@ tests.t9 = function()
   assert(num_aux == 0) -- TODO WHY DO WE HAVE AUX DATA HERE?
   --===========================================
   print("Successfully completed test t9")
+end
+
+tests.t10 = function()
+  -- testing setting and getting of meta data 
+  local x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
+  x:set_meta("rand key", "rand val")
+  v = x:get_meta("rand key")
+  assert(v == "rand val")
+  x:set_meta("rand key", "some other rand val")
+  v = x:get_meta("rand key")
+  assert(v == "some other rand val")
+  plfile.delete("./_meta_data.csv")
+  pr_meta(x, "_meta_data.csv")
+  compare("_meta_data.csv", "in2_meta_data.csv")
+
+  print("Successfully completed test t10")
+end
+--==============================================
+tests.t11 = function()
+  -- testing setting and getting of meta data with a Scalar
+  local x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
+  local s = Scalar.new(1000, "I8")
+  x:set_meta("rand scalar key", s)
+  v = x:get_meta("rand scalar key")
+  assert(v == s)
+  print("Successfully completed test t11")
 end
 
 return tests
