@@ -4,7 +4,7 @@ local Q = require 'Q'
 local tests = {}
 --=========================================
 tests.t1 = function()
-  local len = 10
+  local len = 1048576 + 65537
   local val = Q.rand({ lb = -65537, ub = 65537, qtype = "I4", len = len}):eval()
   local idx = Q.seq({start = 0,by =1, qtype = "I4", len = len}):eval()
   Q.idx_sort(idx, val, "ascending")
