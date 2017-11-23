@@ -49,5 +49,17 @@ tests.t_sum_sqr = function ()
   print("t_sum_sqr succeeded")
 end
 
+tests.t_is_next = function ()
+  local z = Q.is_next(c1, "gt")
+  assert(type(z) == "Reducer")
+  local a, b = z:eval()
+  assert(type(a) == "boolean")
+  assert(type(b) == "number")
+  print(a)
+  assert(a == true)
+  assert(b == c1:length())
+  print("t_is_next succeeded")
+end
+
 return tests
 

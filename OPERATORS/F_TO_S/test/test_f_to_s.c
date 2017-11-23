@@ -119,7 +119,7 @@ main(
     if ( b == (num_blocks-1) ) { ub = N_bits; }
     status = sum_B1(V+(lb/64), (ub-lb), &vargs, lb); cBYE(status);
     fprintf(stderr, "lb/ub/sum/N = %d, %d, %d, %d \n",  
-        lb, ub, vargs.sum_val, vargs.num);
+        lb, ub, (int)vargs.sum_val, (int)vargs.num);
   }
   if ( vargs.num != N_bits ) { go_BYE(-1); }
   if ( vargs.sum_val != chk_sum ) { go_BYE(-1); }
