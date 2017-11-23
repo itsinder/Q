@@ -7,10 +7,11 @@ local fns = require 'Q/OPERATORS/LOAD_CSV/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/testcases"
 
-local test_input_dir = script_dir .."/test_data/"
-local test_metadata_dir = script_dir .."/test_metadata/"
+local test_input_dir = script_dir .."/data/"
+local test_metadata_dir = script_dir .."/metadata/"
 
 local T = dofile(script_dir .."/map_metadata_data.lua")
 
