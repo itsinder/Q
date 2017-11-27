@@ -8,7 +8,8 @@ local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local fns = require 'Q/OPERATORS/MK_COL/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1])) 
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/MK_COL/test/testcases" 
 local T = dofile(script_dir .."/map_mkcol.lua")
 
 local test_mkcol = {}
