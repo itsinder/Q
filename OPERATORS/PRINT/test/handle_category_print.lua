@@ -123,6 +123,7 @@ fns.handle_input_category4 = function ()
   local v1 = Vector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -131,6 +132,7 @@ fns.handle_input_category3 = function ()
   local v1 = Vector{qtype='B1', num_elements=4,
     file_name= script_dir .."/bin/B1.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -210,7 +212,7 @@ fns.handle_category6 = function (index, v, M)
   local col = lVector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
-  
+  col:persist(true) 
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
