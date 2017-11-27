@@ -5,7 +5,8 @@ local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/PRINT/test"
 
 local fns = {}
 
@@ -18,9 +19,9 @@ fns.increment_failed = function (index, v, str)
   print("reason for failure "..str)
   --[[
   print("\n-----Meta Data File------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_metadata/"..v.meta)
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/metadata/"..v.meta)
   print("\n\n-----CSV File-------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_data/"..v.data)
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/data/"..v.data)
   print("\n--------------------\n")
   ]]--
 end
@@ -40,7 +41,7 @@ end
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
 local check_again = function (index, csv_file, meta, v)
-  local M = dofile(script_dir .."/test_metadata/"..meta)
+  local M = dofile(script_dir .."/metadata/"..meta)
   -- print(csv_file)
   local status_load, load_ret = pcall(load_csv,csv_file, M, {use_accelerator = false})
   if status_load == false then
@@ -79,7 +80,7 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
   end
   
   -- match input and output files
-  if file_match(script_dir .."/test_data/"..v.data, csv_file) == false then
+  if file_match(script_dir .."/data/"..v.data, csv_file) == false then
      fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match")
      return false
   end
@@ -122,6 +123,7 @@ fns.handle_input_category4 = function ()
   local v1 = Vector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -130,6 +132,7 @@ fns.handle_input_category3 = function ()
   local v1 = Vector{qtype='B1', num_elements=4,
     file_name= script_dir .."/bin/B1.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -209,7 +212,7 @@ fns.handle_category6 = function (index, v, M)
   local col = lVector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
-  
+  col:persist(true) 
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name

@@ -3,7 +3,8 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/F1F2OPF3/test/testcases/lua_testing"
 
 -- list of qtypes to be operated on
 local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }

@@ -6,7 +6,6 @@ local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
 local fns = {}
 
