@@ -106,6 +106,9 @@ tests.t6 = function ()
   print("test 6 passed")
 end
 tests.t7 = function()
+  -- WRite like t6 but try to make the conversion fail 
+  -- in as many cases as possible
+  --assert(nil, "UTPAL TODO")
   local vals = { 127, -128 }
   local orig_qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
   local qtypes = { "SC", "SV", "B1" } 
@@ -119,9 +122,6 @@ tests.t7 = function()
     end
   end
   print("test 7 passed")
-  -- WRite like t6 but try to make the conversion fail 
-  -- in as many cases as possible
-  --assert(nil, "UTPAL TODO")
 end
 tests.t8 = function()
  -- just bad values 
