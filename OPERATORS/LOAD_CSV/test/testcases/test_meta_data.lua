@@ -21,7 +21,7 @@ for i, m in ipairs(T) do
   
   tests[m.testcase_no] = function()
     print("Testing " .. m.meta)
-    local M = dofile(script_dir .."/test_metadata/"..m.meta)
+    local M = dofile(script_dir .."/metadata/"..m.meta)
     local status, ret = pcall(validate_meta, M)
     --local status, ret = validate_meta(M)
     if ( not status ) then 
