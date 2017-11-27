@@ -108,7 +108,20 @@ end
 tests.t7 = function()
   -- WRite like t6 but try to make the conversion fail 
   -- in as many cases as possible
-  assert(nil, "UTPAL TODO")
+  --assert(nil, "UTPAL TODO")
+  local vals = { 127, -128 }
+  local orig_qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  local qtypes = { "SC", "SV", "B1" } 
+  for _, orig_qtype in pairs(orig_qtypes) do 
+    for _, val in pairs(vals) do 
+      for _, qtype in pairs(qtypes) do 
+        s1 = Scalar.new(val, orig_qtype)
+        status = s1:conv(qtype)
+        assert(not status)
+      end
+    end
+  end
+  print("test 7 passed")
 end
 tests.t8 = function()
  -- just bad values 
