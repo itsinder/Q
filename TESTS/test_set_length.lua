@@ -1,30 +1,30 @@
 -- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-local dbg = require 'Q/UTILS/lua/debugger'
 
+local tests = {}
+tests.t1 = function ()
+	local x_len = 65537
+	local y = Q.rand({ lb = 0, ub = 1, seed = 1234, qtype = "I1", len = x_len } )
+	local c1 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F8", len = x_len } )
+	local c2 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F8", len = x_len } )
+	local X = {c1, c2}
 
-local x_len = 65537
-local y = Q.rand({ lb = 0, ub = 1, seed = 1234, qtype = "I1", len = x_len } )
-local c1 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F8", len = x_len } )
-local c2 = Q.rand({ lb = -1048576, ub = 1048576, seed = 1234, qtype = "F8", len = x_len } )
-X = {c1, c2}
+	local A = {}
+	local lengths = {}
+	for i, _ in ipairs(X) do 
+  	lengths[i] = 0
+	end
 
-local A = {}
-lengths = {}
-for i, _ in ipairs(X) do 
-  lengths[i] = 0
-end
-
-for iter = 1, 100 do 
-  if ( iter == 1 ) then 
+	for iter = 1, 100 do 
+		if ( iter == 1 ) then 
+		for i, X_i in ipairs(X) do
+			assert(X_i:materialized() == false)
+			assert(X_i:length() == 0)
+			end
+		else
     for i, X_i in ipairs(X) do
-      assert(X_i:materialized() == false)
-      assert(X_i:length() == 0)
-    end
-  else
-    for i, X_i in ipairs(X) do
-      assert(X_i:materialized() == true)
+    	assert(X_i:materialized() == true)
       assert(X_i:length() > 0)
     end
   end
@@ -41,7 +41,8 @@ for iter = 1, 100 do
     end
   end
 end
-print("Completed " .. arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+  print("test t1 succeeded")
+end
+--=======================================
+return tests
 
