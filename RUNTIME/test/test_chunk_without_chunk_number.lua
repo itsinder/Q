@@ -10,6 +10,9 @@ tests.t1 = function()
   input_table[65537] = 0
   input_table[65538] = 1
   local b = Q.mk_col(input_table, "I1")
+  local metadata = b:meta()
+  assert(metadata.base.is_nascent == true)
+  assert(metadata.base.is_eov == true)
   local len, base_data, nn_data = b:chunk()
   print("Length: " .. len)
   assert(len == 65538)
