@@ -16,16 +16,20 @@ end
 
 tests.t2 = function()
 -- TODO Write one with a much larger A and B vector
-  local b = Q.seq({ len = 1000000, start = 1, by = 2, qtype = "I8"})
+  local vec_len = 65540
+  local b = Q.seq({ len = vec_len, start = 1, by = 2, qtype = "I8"})
   b:eval()
   b:set_meta("sort_order", "asc") 
-  local a = Q.seq({ len = 1000000, start = 1, by = 1, qtype = "I8"})
+  local a = Q.seq({ len = vec_len, start = 1, by = 1, qtype = "I8"})
   local c = Q.ainb(a, b)
   local n = Q.sum(c):eval():to_num()
-  -- print(n)
+  --print(n)
+  Q.print_csv(c, nil, "/tmp/c_out.txt")
+  assert(n == math.ceil(vec_len / 2))
   a:eval()
   Q.print_csv(a, { lb = 0, ub = 10 }, "")
   Q.print_csv(b, { lb = 0, ub = 10 }, "")
+  Q.print_csv(c, nil, "/tmp/c_out.txt")
 end
 
 return tests

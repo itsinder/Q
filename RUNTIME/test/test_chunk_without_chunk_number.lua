@@ -13,7 +13,7 @@ tests.t1 = function()
   local metadata = b:meta()
   assert(metadata.base.is_nascent == true)
   assert(metadata.base.is_eov == true)
-  local len, base_data, nn_data = b:chunk()
+  local len, base_data, nn_data = b:get_all()
   print("Length: " .. len)
   assert(len == 65538)
 end

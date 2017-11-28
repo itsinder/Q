@@ -38,7 +38,7 @@ local mv_mul = function(X, y)
       -- STOP : malloc
 
       --all of y needs to be evaluated
-      y_len, yptr, nn_yptr = y:chunk()
+      y_len, yptr, nn_yptr = y:get_all()
       assert(nn_yptr == nil, "Don't support null values")
       assert(yptr)
       assert(y_len == #X, "Y must have same length as num cols of X")

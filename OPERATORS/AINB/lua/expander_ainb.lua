@@ -13,8 +13,7 @@ local expander_ainb = function(op, a, b)
   local spfn = assert(require(sp_fn_name))
 
   --all of b needs to be evaluated
---   local blen, bptr, nn_bptr = b:get_all()
-  local blen, bptr, nn_bptr = b:chunk()
+  local blen, bptr, nn_bptr = b:get_all()
   assert(nn_bptr == nil, "Don't support null values")
   assert(blen > 0)
   assert(bptr)
