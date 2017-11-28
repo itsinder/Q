@@ -22,7 +22,7 @@ return function(func_name, A, b)
       "A["..i.."] should be a column of same type as b")
   end
 
-  local n, bptr, nn_bptr = b:chunk()
+  local n, bptr, nn_bptr = b:get_all()
   assert(n > 0)
   assert(nn_bptr == nil, "b should have no nil elements")
 
@@ -37,7 +37,7 @@ return function(func_name, A, b)
   -- "NOT CMEM" type, Line 329 of File vector.c
   local copy_xptr = ffi.cast(b_ctype .. " *", xptr)
   for i = 1, n do
-    local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:chunk()
+    local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:get_all()
     assert(Ai_len == n, "A["..i.."] should have same height as b")
     assert(nn_Ai_chunk == nil, "A["..i.."] should have no nil elements")
     Aptr[i-1] = Ai_chunk

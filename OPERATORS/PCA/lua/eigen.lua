@@ -51,7 +51,7 @@ local function eigen(X, stand_alone_test)
     "malloc failed")
   Xptr = ffi.cast(ctype .. " **", Xptr)
   for xidx = 1, m do
-    local x_len, xptr, nn_xptr = X[xidx]:chunk()
+    local x_len, xptr, nn_xptr = X[xidx]:get_all()
     assert(nn_xptr == nil, "Values cannot be nil")
     Xptr[xidx-1] = ffi.cast(ctype .. " *",  xptr)
   end

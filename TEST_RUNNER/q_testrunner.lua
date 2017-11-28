@@ -38,7 +38,11 @@ end
 local run_suite = function(suite_name, test_name)
     print ("Running suite " .. suite_name .. "...")
     if (test_name) then print ("Running only test " .. test_name .. " in unsafe mode..." ) end
-    local tests = dofile(suite_name)
+    local status, tests = pcall(dofile, suite_name)
+    if not status then
+      return {}, { msg = "Failed to load suit" }
+    end
+
     if (test_name) then
         return run_tests(tests, test_name)  -- one shot
     else
@@ -62,7 +66,7 @@ require('Q/UTILS/lua/cleanup')()
 
 local path = arg[1]
 local test_name = arg[2]
-
+arg = nil
 local test_res = {}
 
 if (path and plpath.isfile(path)) then

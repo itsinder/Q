@@ -674,7 +674,12 @@ vec_get(
         offset = chunk_idx * ptr_vec->field_size;
       }
       ret_addr = ptr_vec->chunk + offset;
-      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));    
+      if ( len == 0 ) {
+        ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+      }
+      else {
+        ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+      }
       *ptr_ret_addr = ret_addr;
       *ptr_ret_len  = ret_len;
       // Nothing more to do. Get out of here

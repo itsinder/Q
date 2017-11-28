@@ -27,7 +27,7 @@ tests.t1 = function()
   -- Call chunk() method without parameter,
   -- it should be serverd from buffer not from file
 
-  local len, base, nn = x:chunk()
+  local len, base, nn = x:get_all()
   assert(base)
   assert(len == 1024)
 

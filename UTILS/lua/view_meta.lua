@@ -18,7 +18,7 @@ local function view_meta ()
       -- print("Saving ", k, v)
     end
   end
-  jV = json.stringify(V)
+  local jV = json.stringify(V)
   return V, jV
 end
 T.view_meta = view_meta

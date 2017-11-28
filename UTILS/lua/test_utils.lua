@@ -4,7 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local utils
 utils = {
   arr_from_col = function (c)
-    local sz, vec, nn_vec = c:chunk()
+    local sz, vec, nn_vec = c:get_all()
     local ctype = qconsts.qtypes[c:fldtype()].ctype .. " *"
     return ffi.cast(ctype, vec)
   end,
