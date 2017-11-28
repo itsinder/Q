@@ -17,11 +17,12 @@ local function my_magic_function(aptr, alen, bptr, blen, cbuf)
   return 0
 end
 
--- set custom validation function
-qc[fns_name] = my_magic_function
-
 local tests = {}
 tests.t1 = function()
+  -- set custom validation function
+  local fns_value = qc[fns_name]
+  qc[fns_name] = my_magic_function
+
   local Q = require 'Q'
   local b = Q.mk_col({-2, 0, 2, 4 }, "I4")
   --local a = Q.mk_col({-2, -2, -1, -1, 0, 1, 1, 2, 2, 3, 3}, "I4")
@@ -31,6 +32,8 @@ tests.t1 = function()
   local c = Q.ainb(a, b)
   c:eval()
 
+  -- reset to original function
+  qc[fns_name] = fns_value
   --Q.print_csv(c, nil, "")
 end
 

@@ -3,14 +3,16 @@ require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local diff = require 'Q/UTILS/lua/diff'
 local tests = {}
+local script_dir = os.getenv("Q_SRC_ROOT") .. "/OPERATORS/AINB/test/"
 tests.t1 = function() 
   local b = Q.mk_col({-2, 0, 2, 4 }, "I4")
   local a = Q.mk_col({-2, -2, -1, -1, 0, 1, 1, 2, 2, 3, 3}, "I4")
   local c = Q.ainb(a, b)
   local n = Q.sum(c):eval():to_num()
   assert(n == 5)
-  Q.print_csv({a, c}, nil, "_out1.txt")
-  assert(diff("out1.txt", "_out1.txt"))
+  Q.print_csv({a, c}, nil, "/tmp/_out1.txt")
+  -- prepending script_dir so that this test will work from any location
+  assert(diff(script_dir .. "out1.txt", "/tmp/_out1.txt"))
   print("Test t1 succeeded")
 end
 
@@ -24,7 +26,6 @@ tests.t2 = function()
   local c = Q.ainb(a, b)
   local n = Q.sum(c):eval():to_num()
   --print(n)
-  Q.print_csv(c, nil, "/tmp/c_out.txt")
   assert(n == math.ceil(vec_len / 2))
   a:eval()
   Q.print_csv(a, { lb = 0, ub = 10 }, "")
