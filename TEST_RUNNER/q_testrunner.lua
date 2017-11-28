@@ -62,7 +62,7 @@ require('Q/UTILS/lua/cleanup')()
 
 local path = arg[1]
 local test_name = arg[2]
-
+arg = nil
 local test_res = {}
 
 if (path and plpath.isfile(path)) then
