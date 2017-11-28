@@ -4,6 +4,7 @@ require 'Q/UTILS/lua/strict'
 
 local log = require 'Q/UTILS/lua/log'
 local plpath = require 'pl.path'
+local plfile = require 'pl.file'
 local dir = require 'pl.dir'
 local fns = require 'Q/UTILS/lua/utils'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
@@ -28,6 +29,11 @@ tests.t1 = function ()
   -- after each 32 bits (elements) it sets bits to 1's
   Q.print_csv(ret[1], nil, "output_file_B1.csv")
   print("Num of elements = "..ret[1]:num_elements())
+  
+  local input_csv = plfile.read("input_file_B1.csv")
+  local output_csv = plfile.read("outfile_file_B1.csv")
+  assert(input_csv == output_csv,"Input and Output csv file not matched")
+  
   log.info("All is well")
 end
 
