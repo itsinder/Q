@@ -9,31 +9,18 @@ require 'Q/UTILS/lua/strict'
 
 local tests = {}
 tests.t1 = function ()
--- Creating a vector
-local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 10} )
-
--- Creating another vector which is square of the vector a
-local b = Q.vvmul(a, a)
-
--- Finding square root of the elements of the series b
-local c = Q.sqrt(b)
-
--- Expected Outcome
---========================================
-local result = Q.vveq(a, c)
-Q.print_csv(result:eval(),nil, "")
-assert(Q.sum(result):eval() == 10)
---=======================================
+	-- Creating a vector
+	local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 10} )
+	-- Creating another vector which is square of the vector a
+	local b = Q.vvmul(a, a)
+	-- Finding square root of the elements of the series b
+	local c = Q.sqrt(b)
+	-- Expected Outcome
+	--========================================
+	local result = Q.vveq(a, c)
+	assert(Q.sum(result):eval():to_num() == 10)
+  print("Succeeded in test square root t1")
+  --=======================================
 end
-
+  --=======================================
 return tests
-
-
---[[
-print("SUCCESS for " .. arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.execute("rm _*.bin") 
-os.exit()
-]]--
-
-

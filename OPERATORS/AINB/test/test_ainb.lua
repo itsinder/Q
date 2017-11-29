@@ -3,19 +3,34 @@ require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local diff = require 'Q/UTILS/lua/diff'
 local tests = {}
+local script_dir = os.getenv("Q_SRC_ROOT") .. "/OPERATORS/AINB/test/"
 tests.t1 = function() 
   local b = Q.mk_col({-2, 0, 2, 4 }, "I4")
   local a = Q.mk_col({-2, -2, -1, -1, 0, 1, 1, 2, 2, 3, 3}, "I4")
   local c = Q.ainb(a, b)
   local n = Q.sum(c):eval():to_num()
-  print(n)
-  -- TODO assert(n == 6)
-  Q.print_csv({a, c}, nil, "_out1.txt")
-  assert(diff("out1.txt", "_out1.txt"))
+  assert(n == 5)
+  Q.print_csv({a, c}, nil, "/tmp/_out1.txt")
+  -- prepending script_dir so that this test will work from any location
+  assert(diff(script_dir .. "out1.txt", "/tmp/_out1.txt"))
   print("Test t1 succeeded")
 end
 
 tests.t2 = function()
 -- TODO Write one with a much larger A and B vector
-  print("Test t2 to be written")
+  local vec_len = 65540
+  local b = Q.seq({ len = vec_len, start = 1, by = 2, qtype = "I8"})
+  b:eval()
+  b:set_meta("sort_order", "asc") 
+  local a = Q.seq({ len = vec_len, start = 1, by = 1, qtype = "I8"})
+  local c = Q.ainb(a, b)
+  local n = Q.sum(c):eval():to_num()
+  --print(n)
+  assert(n == math.ceil(vec_len / 2))
+  a:eval()
+  Q.print_csv(a, { lb = 0, ub = 10 }, "")
+  Q.print_csv(b, { lb = 0, ub = 10 }, "")
+  Q.print_csv(c, nil, "/tmp/c_out.txt")
 end
+
+return tests

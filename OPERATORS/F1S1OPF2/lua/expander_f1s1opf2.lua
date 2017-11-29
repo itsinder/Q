@@ -20,7 +20,11 @@
       assert(is_in(ytype, {"Scalar", "number", "string"}), 
         "scalar must be Scalar/string/number")
     end
-    local status, subs, tmpl = pcall(spfn, f1:fldtype(), y)
+    --==   Special case of no-op for convert 
+    if ( ( a == "convert" ) and ( f1:fldtype() == y ) ) then
+      return f1
+    end
+    local status, subs, tmpl = pcall(spfn, f1:fldtype(), y, optargs)
     if not status then print(subs) end
     assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
@@ -37,20 +41,21 @@
     else
       has_nulls = false
     end
+    local chunk_idx = 0
     --============================================
-    local f2_gen = function(chunk_idx)
+    local f2_gen = function()
       f2_buf = f2_buf or ffi.malloc(buf_sz)
       assert(f2_buf)
-      if not nn_f2_buf then 
+      if not nn_f2_buf and has_nulls then 
         nn_f2_buf = ffi.malloc(qconsts.chunk_size)
         assert(nn_f2_buf)
         ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
       end
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
       if f1_len > 0 then
-
         qc[func_name](f1_chunk, nn_f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
       end
+      chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf
     end
     

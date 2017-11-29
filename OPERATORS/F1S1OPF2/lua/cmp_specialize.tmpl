@@ -1,23 +1,13 @@
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
 return function (
   in_qtype,
   scalar
   )
     local qconsts = require 'Q/UTILS/lua/q_consts'
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
-    local conv_lnum_to_cnum = require 'Q/UTILS/lua/conv_lnum_to_cnum'
-    local Scalar = require 'libsclr'
-
-    local scalar_val = nil
-    if ( ( type(scalar) == "number" ) or ( type(scalar) == "string" ) ) then
-      scalar = assert(Scalar.new(scalar, in_qtype))
-    elseif type(scalar) == "Scalar" then 
-      scalar = assert(scalar:conv(in_qtype))
-    else
-      print(type(scalar))
-      assert(nil, "no valid scalar provided")
-    end
 
     assert(is_base_qtype(in_qtype))
+    local scalar = assert(to_scalar(scalar, in_qtype))
 
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 

@@ -32,8 +32,13 @@ fns.validate_values = function(vec, qtype, chunk_number)
   -- if vec:num_elements() <= qconsts.chunk_size then
   --  chunk_number = 0
   -- end
-
-  local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
+  local status, len, base_data, nn_data 
+  if not chunk_number then
+    assert(vec:is_eov())
+    status, len, base_data, nn_data = pcall(vec.get_all, vec)
+  else
+    status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
+  end
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")

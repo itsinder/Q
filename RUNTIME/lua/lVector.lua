@@ -46,12 +46,18 @@ end
 function lVector:cast(new_field_type)
   assert(new_field_type)
   assert(type(new_field_type) == "string")
-  assert ( ((is_base_qtype(new_field_type)) or (new_field_type == "B1")))
+  local new_field_width
+  if is_base_qtype(new_field_type) then 
+    new_field_width = qconsts.qtypes[new_field_type].width
+  elseif ( new_field_type == "B1" ) then
+    new_field_width = 0
+  else
+    assert(nil, "Cannot cast to ", new_field_type)
+  end
   if ( self._nn_vec ) then 
     assert(nil, "TO BE IMPLEMENTED")
   end
-  new_field_width = qconsts.qtypes[new_field_type].width
-  local status = Vector.cast(self._base_vec,new_field_type,new_field_width)
+  local status = Vector.cast(self._base_vec,new_field_type, new_field_width)
   assert(status)
   if ( qconsts.debug ) then self:check() end
   return self
@@ -256,6 +262,9 @@ function lVector:num_elements()
 end
 
 function lVector:length()
+  if ( not self:is_eov() ) then 
+    return nil
+  end
   if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
@@ -352,14 +361,21 @@ function lVector:put1(s, nn_s)
   if ( qconsts.debug ) then self:check() end
 end
 
-function lVector:start_write()
+function lVector:start_write(is_read_only_nn)
+  if ( is_read_only_nn ) then 
+    assert(type(is_read_only_nn) == "boolean")
+  end
   local nn_X, nn_nX
   local X, nX = Vector.start_write(self._base_vec)
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
   if ( self._nn_vec ) then
-    nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    if ( is_read_only_nn ) then 
+      nn_X, nn_nX = assert(Vector.get(self._nn_vec, 0, 0))
+    else
+      nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    end
     assert(nn_nX == nX)
     assert(nn_nX)
   end
@@ -442,8 +458,7 @@ function lVector:get_vec_buf()
 end
 
 function lVector:get_all()
-  -- TODO P2. This is the same as chunk() without parameters
-  -- Consider deprecating this in the near future
+  assert(self:is_eov())
   local nn_addr, nn_len
   local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
   assert(base_len > 0)
@@ -461,8 +476,8 @@ function lVector:get_one(idx)
   -- TODO More checks to make sure that this is only for 
   -- vectors in file mode. We may need to move vector from buffer 
   -- mode to file mode if we are at last chunk and is_eov == true
-  local nn_addr, nn_len
-  local base_scalar = assert(Vector.get(self._base_vec, idx, 1))
+  local nn_addr, nn_len, nn_scalar
+  local base_data, base_len, base_scalar = assert(Vector.get(self._base_vec, idx, 1))
   assert(type(base_scalar) == "Scalar")
   if ( self._nn_vec ) then
     nn_scalar = assert(Vector.get(self._nn_vec, 0, 0))
@@ -475,26 +490,14 @@ end
 
 function lVector:chunk(chunk_num)
   local status
-  local l_chunk_num = 0
   local base_addr, base_len
   local nn_addr,   nn_len  
   local is_nascent = Vector.is_nascent(self._base_vec)
-  local is_eov = self:is_eov() 
-  if ( chunk_num ) then 
-    assert(type(chunk_num) == "number")
-    assert(chunk_num >= 0)
-    l_chunk_num = chunk_num
-  else
-    -- Note from Krushnakant: When I call chunk() method for nascent
-    -- vector without passing chunk number, what should be it's behavior?
-    -- As per my thinking, it should return me the current chunk,
-    if ( is_nascent ) then 
-      l_chunk_num = Vector.chunk_num(self._base_vec)
-    else
-      l_chunk_num = 0
-      -- NOT an error assert(nil, "Provide chunk_num for chunk() on materialized vector")
-    end
-  end
+  local is_eov = self:is_eov()
+  assert(chunk_num, "chunk_num is a mandatory argument")
+  assert(type(chunk_num) == "number")
+  assert(chunk_num >= 0)
+  local l_chunk_num = chunk_num
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
   local cond1 = is_eov
@@ -596,7 +599,8 @@ function lVector:set_meta(k, v)
   if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
-  assert(type(k) == "string")
+  -- NOT VALID CHECK assert(type(k) == "string")
+  -- value acn be number or boolean or string or Scalar
   self._meta[k] = v
 end
 

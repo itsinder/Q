@@ -145,6 +145,8 @@ local qconsts = {}
     }
     qtypes.B1 = { 
       short_code = "B1",
+      min = 0,
+      max = 1,
       max_txt_width = 2,
       width = 1, -- This has to be handled as a special case
       ctype = "unsigned char",

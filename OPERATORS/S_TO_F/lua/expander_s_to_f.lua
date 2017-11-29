@@ -21,13 +21,15 @@ return function (a, args)
   local width =  assert(qconsts.qtypes[out_qtype].width)
   local bufsz =  multiple_of_8(chunk_size * width)
   local buff =  nil
-
-  local gen1 = function(chunk_idx)
+  local chunk_idx = 0
+  
+  local gen1 = function()
     buff = buff or ffi.malloc(bufsz)
     assert(buff, "malloc failed")
     local lb = chunk_size * chunk_idx
     local ub = lb + chunk_size
     local chunk_size = ub - lb;
+    chunk_idx = chunk_idx + 1
     if ( ub > subs.len ) then 
       chunk_size = subs.len - lb
     end

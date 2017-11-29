@@ -160,12 +160,13 @@ vec_cast(
   strcpy(ptr_vec->field_type, new_field_type);
   if ( strcmp(new_field_type, "B1") == 0 ) {
     ptr_vec->num_elements = ptr_vec->file_size * 8;
+    ptr_vec->num_in_chunk = ptr_vec->num_in_chunk * ptr_vec->field_size * 8;
+    if ( new_field_size != 0 ) { go_BYE(-1); } // special case for B1
   }
   else {
     ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
   }
-  ptr_vec->field_size   = new_field_size;
-  
+  ptr_vec->field_size   = new_field_size; 
 BYE:
   return status;
 }
@@ -234,7 +235,7 @@ vec_materialized(
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
 
-  size_t fsz = get_file_size(file_name);
+  int64_t fsz = get_file_size(file_name);
   if ( fsz <= 0 ) { go_BYE(-1); }
   // check fsz
   // For B1, file can be larger than necessary, not smaller
@@ -243,11 +244,11 @@ vec_materialized(
     if ( ptr_vec->num_elements == 0 ) { go_BYE(-1); }
     uint64_t num_words = ceil(ptr_vec->num_elements/64.0);
     uint64_t num_bytes = num_words * 8;
-    if ( num_bytes < fsz ) { go_BYE(-1); }
+    if ( num_bytes < (uint64_t)fsz ) { go_BYE(-1); }
   }
   else {
     ptr_vec->num_elements = fsz / ptr_vec->field_size;
-    if (( ptr_vec->num_elements * ptr_vec->field_size) != fsz ) { 
+    if (( ptr_vec->num_elements * ptr_vec->field_size) != (uint64_t)fsz ) { 
       go_BYE(-1);
     }
   }
@@ -673,7 +674,12 @@ vec_get(
         offset = chunk_idx * ptr_vec->field_size;
       }
       ret_addr = ptr_vec->chunk + offset;
-      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));    
+      if ( len == 0 ) {
+        ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+      }
+      else {
+        ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+      }
       *ptr_ret_addr = ret_addr;
       *ptr_ret_len  = ret_len;
       // Nothing more to do. Get out of here
@@ -1062,9 +1068,6 @@ vec_eov(
   if ( ptr_vec->num_elements == 0     ) { 
     // unlikely but one has to account for this corner case 
     ptr_vec->is_eov = true;
-    if ( ptr_vec->is_memo ) { 
-      ptr_vec->file_size = get_file_size(ptr_vec->file_name);
-    }
     return status;
   } 
   //----------------------------------------

@@ -6,7 +6,6 @@ return {
   "decr", 
   "logit", 
   "logit2",
-  "convert",
   "reciprocal",
   "abs"
 }

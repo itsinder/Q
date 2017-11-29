@@ -17,7 +17,7 @@ tests.t1 = function()
   assert(type(n) == "Reducer")
   local len = input_col:length()
   assert(n:eval():to_num() == len)
-  Q.print_csv(converted_col, nil, "")
+  -- Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t1")
 end
 --===========================
@@ -30,7 +30,7 @@ tests.t2 = function()
   assert(type(n) == "Reducer")
   local len = input_col:length()
   assert(n:eval():to_num() == len)
-  Q.print_csv(converted_col, nil, "")
+  -- Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t2")
 end
 --===========================
@@ -44,10 +44,11 @@ tests.t3 = function()
     local val = c_to_txt(converted_col, i)
     assert(val == v, "Value mismatch")
   end
-  Q.print_csv(converted_col, nil, "")
+ --  Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t3")
 end
 
+--===========================
 tests.t4 = function()
   input_col = Q.mk_col({1, 0, 1}, "I1")
   local expected_res = {1, 0, 1}
@@ -58,8 +59,16 @@ tests.t4 = function()
     if not val then val = 0 end
     assert(val == v, "Value mismatch")
   end
-  Q.print_csv(converted_col, nil, "")
+  -- Q.print_csv(converted_col, nil, "")
   print("Successfully completed test t4")
+end
+--===========================
+tests.t5 = function()
+  -- test for no-op when no conversionneeded
+  local incol = Q.mk_col({1, 0, 1}, "I1")
+  local outcol = Q.convert(incol, "I1")
+  assert(incol == outcol)
+  print("Successfully completed test t5")
 end
 --===========================
 return tests

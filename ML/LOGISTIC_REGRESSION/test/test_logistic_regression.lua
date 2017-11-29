@@ -45,7 +45,7 @@ return function(
     print('loaded test_y')
   end
 
-  local len, test_y_c, _ = test_y:chunk()
+  local len, test_y_c, _ = test_y:get_all()
   test_y_c = ffi.cast('double*', test_y_c)
 
   local betas, step = log_reg.make_trainer(train_X, train_y)
@@ -53,7 +53,7 @@ return function(
   local function fraction_correct()
     local _, _, get_classes = log_reg.package_betas(betas)
     local classes = get_classes(test_X)
-    _, classes, _ = classes:chunk()
+    _, classes, _ = classes:get_all()
     classes = ffi.cast('double*', classes)
     local num_correct = 0
     for i = 0, len - 1 do

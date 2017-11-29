@@ -1,10 +1,12 @@
+local Scalar = require 'libsclr'
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
 return function (
   args
   )
   local qconsts = require 'Q/UTILS/lua/q_consts'
-  local qc  = require "Q/UTILS/lua/q_core"
-  local ffi = require "Q/UTILS/lua/q_ffi"
-  local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
+  local qc      = require "Q/UTILS/lua/q_core"
+  local ffi     = require "Q/UTILS/lua/q_ffi"
+  local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   --=================================
   local hdr = [[
   typedef struct _rand_<<qtype>>_rec_type { 
@@ -46,8 +48,8 @@ return function (
   end
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
-  assert(type(lb) == "number")
-  assert(type(ub) == "number")
+  lb = assert(to_scalar(lb, qtype))
+  ub = assert(to_scalar(ub, qtype))
   assert(ub > lb, "upper bound should be strictly greater than lower bound")
   assert(type(len) == "number")
   assert(len > 0)
@@ -57,8 +59,9 @@ return function (
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
   local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
   c_mem = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", c_mem)
-  c_mem.lb = lb
-  c_mem.ub = ub
+  local ctype = qconsts.qtypes[qtype].ctype
+  c_mem.lb = ffi.cast(ctype .. " *", lb:cdata())[0]
+  c_mem.ub = ffi.cast(ctype .. " *", ub:cdata())[0]
   c_mem.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 

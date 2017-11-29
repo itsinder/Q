@@ -15,7 +15,6 @@ return function (
   elseif type(scalar) == "Scalar" then 
     scalar = assert(scalar:conv(in_qtype))
   else
-    print(type(scalar))
     assert(nil, "no valid scalar provided")
   end
   --=========================

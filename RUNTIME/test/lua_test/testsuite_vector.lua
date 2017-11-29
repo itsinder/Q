@@ -3,7 +3,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local fns =  require 'Q/RUNTIME/test/lua_test/assert_valid'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lua_test"
 
 local allowed_qtypes = {'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV'}
 
@@ -35,6 +36,10 @@ local create_tests = function()
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then
         M.file_name = string.gsub( M.file_name, "${q_type}", qtype )
+        M.file_name = script_dir .. "/" .. M.file_name
+        if M.nn_file_name then
+          M.nn_file_name = script_dir .. "/" .. M.nn_file_name
+        end
       end
       
       M.qtype = qtype

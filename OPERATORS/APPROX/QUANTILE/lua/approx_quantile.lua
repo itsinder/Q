@@ -44,7 +44,7 @@ local approx_quantile = function(x, args)
   local ctype = qconsts.qtypes[qtype].ctype
   local qptr = assert(ffi.malloc(num_quantiles*ffi.sizeof(ctype)), "malloc failed")
   
-  local x_len, xptr, nn_xptr = x:chunk()
+  local x_len, xptr, nn_xptr = x:get_all()
   assert(nn_xptr == nil, "Not set up for null values")
 
   local status

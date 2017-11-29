@@ -96,7 +96,6 @@ local function process_filter(filter, max_length)
 end
 
 local print_csv = function (column_list, filter, opfile)  
-  print("START print_csv")
   
   -- trimming whitespace if any
   if opfile ~= nil then

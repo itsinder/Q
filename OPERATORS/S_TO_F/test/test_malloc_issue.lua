@@ -1,6 +1,7 @@
 -- STRESS
-local Q = require 'Q'
+-- TODO WHAT THE HECK IS THIS TEST TRYING TO DO?
 require 'Q/UTILS/lua/strict'
+local Q = require 'Q'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
@@ -53,5 +54,3 @@ assert(val == 65535)
 local data_dir = require("Q/q_export").Q_DATA_DIR 
 
 os.execute(string.format("find %s -type f -delete", data_dir))
-require 'Q/UTILS/lua/strict'
-os.exit()--

@@ -6,26 +6,31 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
--- Creating a vector
-local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 10} )
-
--- Creating another vector which is square of the vector a
-local b = Q.vvmul(a, a)
-Q.print_csv(b:eval(),nil, "")
-
--- Finding square root of the elements of the series b
-local c = Q.sqrt(b)
-Q.print_csv(c:eval(),nil, "")
-
-
--- Expected Outcome
---========================================
-result = Q.vveq(a, c):eval()
-Q.print_csv(result,nil, "")
-assert(Q.sum(result) == a:length())
+local tests = {}
+tests.t1 = function ()
+  -- Creating a vector
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 46000} )
+  -- TODO Get square root of natural number above 46000 (approx)
+  -- Creating another vector which is square of the vector a
+  local b = Q.vvmul(a, a)
+  -- Finding square root of the elements of the series b
+  local c = Q.sqrt(b)
+  -- Expected Outcome
+  --========================================
+  local d = Q.vveq(a, c)
+  assert(Q.sum(d):eval():to_num() == a:length())
+  print("Test t1 succeeded")
+end
 --=======================================
-
-print("SUCCESS for " .. arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.execute("rm _*.bin") 
-os.exit()
+tests.t2 = function ()
+  local qtypes = { "F4", "F8" }
+  for _, qtype in ipairs(qtypes) do 
+    local a = Q.rand( {lb = 1000000, ub = 2000000, qtype = qtype, len = 10})
+    local b = Q.sqrt(a)
+    local c = Q.vvmul(b, b)
+    -- Q.print_csv({a, c}, nil, "")
+    assert(Q.vvseq(a, c, 0.01, { mode = "ratio" } ))
+  end
+  print("Test t2 succeeded")
+end
+return tests

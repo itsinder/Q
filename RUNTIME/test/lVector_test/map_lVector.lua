@@ -192,8 +192,9 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  -- Commenting out below testcase as this scenario is not supported - refer jira issue QQ-32
   -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
+  --[[
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector9",
@@ -203,7 +204,7 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-  
+  ]]
   --=============================
   -- with nulls
   

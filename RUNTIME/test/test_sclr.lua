@@ -2,6 +2,7 @@ cmem   = require 'libcmem' ;
 Scalar = require 'libsclr' ; 
 num_trials = 32 -- 1024
 tbl_size = 4096 -- 1048576
+cmem   = require 'libcmem' ; 
 local tests = {}
 tests.t1 = function()
   -- create boolean scalars in several different ways
@@ -107,19 +108,157 @@ end
 tests.t7 = function()
   -- WRite like t6 but try to make the conversion fail 
   -- in as many cases as possible
-  assert(nil, "UTPAL TODO")
+  --assert(nil, "UTPAL TODO")
+  local vals = { 127, -128 }
+  local orig_qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
+  local qtypes = { "SC", "SV", "B1" } 
+  print("START: Deliberate error")
+  for _, orig_qtype in pairs(orig_qtypes) do 
+    for _, val in pairs(vals) do 
+      for _, qtype in pairs(qtypes) do 
+        s1 = Scalar.new(val, orig_qtype)
+        status = s1:conv(qtype)
+        assert(not status)
+      end
+    end
+  end
+  print("STOP : Deliberate error")
+  print("test 7 passed")
 end
 tests.t8 = function()
  -- just bad values 
   local status, err
+  print("START: Deliberate error")
   status, err = Scalar.new("128", "I1"); assert(not status)
   status, err = Scalar.new("-129", "I1"); assert(not status)
 
   status, err = Scalar.new("32768", "I2"); assert(not status)
   status, err = Scalar.new("-32769", "I2"); assert(not status)
 
- -- TODO COmplete 
+ -- TODO complete 
 
+  print("STOP : Deliberate error")
   print("test 8 passed")
 end
+tests.t9 = function()
+  -- test arithmetic operators 
+  local s1 = Scalar.new("123", "I1")
+  local s2 = Scalar.new("123", "I1") 
+  assert(s1 == s2)
+  s2 = Scalar.new("124", "I1") 
+  assert(s1 < s2)
+  s2 = Scalar.new("122", "I1") 
+  assert(s1 > s2)
+  s1 = Scalar.new("123", "I2")
+  s2 = Scalar.new("123", "I2") 
+  local s3 = s1 + s2
+  assert(s3:to_num() == 2*123)
+  s3 = s1 - s2
+  assert(s3:to_num() == 0)
+end
+-- 
+tests.t10_I1 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I2", "I4", "I8", "F4", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("127", qtype)
+    assert(s1:conv("I1"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-128", qtype)
+    assert(s1:conv("I1"), " should work qtype = " .. qtype)
+  end
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("128", qtype)
+    local s2 = s1:conv("I1")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-129", qtype)
+    local s2 = s1:conv("I1")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I2 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I4", "I8", "F4", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("32767", qtype)
+    assert(s1:conv("I2"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-32768", qtype)
+    assert(s1:conv("I2"), " should work qtype = " .. qtype)
+  end
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("32768", qtype)
+    local s2 = s1:conv("I2")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-32769", qtype)
+    local s2 = s1:conv("I2")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I4 = function()
+  -- Test boundary cases of conversion, both success and failure
+  local qtypes = { "I8", "F8" } 
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("2147483647", qtype)
+    assert(s1:conv("I4"), " should work qtype = " .. qtype)
+    local s1 = Scalar.new("-2147483648", qtype)
+    assert(s1:conv("I4"), " should work qtype = " .. qtype)
+  end
+
+  local s1 = Scalar.new(16777217, "F4")
+  local s2 = assert(s1:conv("I4"))
+  assert(s1 == s2)
+
+  print("START Deliberate error")
+  for _, qtype in ipairs(qtypes) do
+    local s1 = Scalar.new("2147483648", qtype)
+    local s2 = s1:conv("I4")
+    assert(not s2, " should not work qtype = " .. qtype)
+    local s1 = Scalar.new("-2147483649", qtype)
+    local s2 = s1:conv("I4")
+    assert(not s2, " should not work qtype = " .. qtype)
+  end
+  print("STOP  Deliberate error")
+end
+tests.t10_I8 = function()
+  local s1 = Scalar.new(9007199254740993, "F8")
+  local s2 = assert(s1:conv("I8"))
+  assert(s1 == s2)
+end
+tests.t11 = function()
+  local s1 = Scalar.new(127, "I1") 
+  local s2 = Scalar.new(-127, "I1")
+  local s3 = s2:abs()
+  assert(s1 == s3)
+ --==========
+  assert(Scalar.new(32767, "I2") == Scalar.new(-32767, "I2"):abs())
+  assert(Scalar.new(2147483647, "I4") == Scalar.new(-2147483647, "I4"):abs())
+  -- TODO Utpal 
+  -- Write tests for I8/F4/F8
+  s1 = Scalar.new(1.79769313486231470e+308, "F8")
+  s2 = Scalar.new(-1.79769313486231470e+308, "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+end
+
+tests.t11 = function()
+  s1 = Scalar.new("1.79769313486231470e+308", "F8")
+  s2 = Scalar.new("-1.79769313486231470e+308", "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+
+  s1 = Scalar.new("3.40282346638528860e+38", "F4")
+  s2 = Scalar.new("-3.40282346638528860e+38", "F4")
+  local s3 = s2:abs()
+  print("YY", s2)
+  print("YY", s3)
+  assert(s1 == s3)
+end
+
 return tests

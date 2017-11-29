@@ -38,6 +38,8 @@ typedef struct _reduce_min_<<qtype>>_args {
       if ( qtype == "F4" ) then subs.initial_val = "FLT_MAX" end
       if ( qtype == "F8" ) then subs.initial_val = "DBL_MAX" end
       assert(subs.initial_val)
+      subs.reducer   = "mcr_min"
+      subs.t_reducer = "mcr_min"
       --==============================
       -- Set c_mem using info from args
       local sz_c_mem = ffi.sizeof("REDUCE_min_" .. qtype .. "_ARGS")
@@ -47,8 +49,6 @@ typedef struct _reduce_min_<<qtype>>_args {
       c_mem.min_val  = qconsts.qtypes[qtype].max
       c_mem.num = 0
       subs.c_mem = bak_c_mem
-      --==============================
-      subs.reducer = "mcr_min"
     --==============================
       subs.getter = function (x) 
         local y = ffi.cast("REDUCE_min_" .. qtype .. "_ARGS *", c_mem)

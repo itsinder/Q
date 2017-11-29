@@ -5,7 +5,6 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 
 return function(func_name, A, b)
-  print("start: ", func_name, g_iter)
   -- TODO change positive_solver to to general_linear_solver
   assert( ( func_name == "positive_solver") or 
           ( func_name == "full_posdef_positive_solver") )
@@ -23,7 +22,7 @@ return function(func_name, A, b)
       "A["..i.."] should be a column of same type as b")
   end
 
-  local n, bptr, nn_bptr = b:chunk()
+  local n, bptr, nn_bptr = b:get_all()
   assert(n > 0)
   assert(nn_bptr == nil, "b should have no nil elements")
 
@@ -38,14 +37,13 @@ return function(func_name, A, b)
   -- "NOT CMEM" type, Line 329 of File vector.c
   local copy_xptr = ffi.cast(b_ctype .. " *", xptr)
   for i = 1, n do
-    local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:chunk()
+    local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:get_all()
     assert(Ai_len == n, "A["..i.."] should have same height as b")
     assert(nn_Ai_chunk == nil, "A["..i.."] should have no nil elements")
     Aptr[i-1] = Ai_chunk
   end
 
   assert(qc[func_name], "Symbol not found " .. func_name)
-  print("qc: ", func_name, g_iter)
   local status = qc[func_name](Aptr, copy_xptr, bptr, n)
   assert(status == 0, "solver failed")
   assert(qc["full_positive_solver_check"](Aptr, copy_xptr, bptr, n, 0),

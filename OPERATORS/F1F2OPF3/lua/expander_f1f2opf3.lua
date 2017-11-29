@@ -12,7 +12,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(f2)
   assert(type(f2) == "lVector", "f2 must be a lVector")
   if ( optargs ) then assert(type(optargs) == "table") end
-  local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype())
+  local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype(), optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
@@ -30,8 +30,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(f1_chunk_size == f2_chunk_size)
 
   local first_call = true
-
-  local f3_gen = function(chunk_idx)
+  local chunk_idx = 0
+  
+  local f3_gen = function()
     if ( first_call ) then 
       -- print("malloc for generator for f1f2opf3", a, g_iter)
       first_call = false
@@ -48,7 +49,11 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     assert(f1_len == f2_len)
     if f1_len > 0 then
       qc[func_name](f1_chunk, f2_chunk, f1_len, f3_buf)
+    else
+      f3_buf = nil
+      nn_f3_buf = nil
     end
+    chunk_idx = chunk_idx + 1
     return f1_len, f3_buf, nn_f3_buf
   end
   return lVector{gen=f3_gen, nn=false, qtype=f3_qtype, has_nulls=false}
