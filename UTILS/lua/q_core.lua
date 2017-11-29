@@ -64,6 +64,10 @@ local function q_add(doth, dotc, lib_name)
 end
 
 local function wrap(func, name)
+  if qconsts.qc_trace == false then
+    return func
+  end
+
   return function(...)
     local start_time, stop_time
     start_time = timer.clock_gettime(0)
