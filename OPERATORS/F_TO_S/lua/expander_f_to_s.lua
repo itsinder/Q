@@ -19,9 +19,11 @@ return function (a, x, y, optargs )
   assert(type(getter) == "function")
   --==================
   local is_early_exit = false
-  local lgen = function(chunk_index)
+  local chunk_index = 0
+  local lgen = function()
     local idx = chunk_index * qconsts.chunk_size
     local x_len, x_chunk, nn_x_chunk = x:chunk(chunk_index)
+    chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
       qc[func_name](x_chunk, x_len, reduce_struct, idx);
       if ( a == "is_next" ) then 
