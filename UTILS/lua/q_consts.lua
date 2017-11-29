@@ -1,6 +1,7 @@
 local qconsts = {}
 --===========================
   qconsts.debug = false -- set to TRUE only if you want debugging
+  qconsts.qc_trace = true -- set to FALSE if performance logging of qc is to be turned off
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
