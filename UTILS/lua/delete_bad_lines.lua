@@ -1,4 +1,4 @@
-require 'parser'
+local fns = require 'Q/UTILS/lua/parser'
 
 
 return function (
@@ -17,7 +17,7 @@ return function (
 
     local lno = 1
     for line in ifp:lines() do 
-      local entry = parse_csv_line(line, ',')
+      local entry = fns["parse_csv_line"](line, ',')
       local skip = false 
       if #entry ~= num_cols then
         skip = true
