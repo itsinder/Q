@@ -339,6 +339,8 @@ vec_free(
         printf("Unable to delete %s \n", ptr_vec->file_name); WHEREAMI;
       }
     }
+    /* NOTE Remove can fail because (1) file does not exist 
+      (2) permission to delete not there */
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }

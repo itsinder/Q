@@ -63,8 +63,6 @@ tests.t4 = function ()
 end
 
 --=======================================
-
-os.execute("rm _*.bin") 
 return tests
 
 
