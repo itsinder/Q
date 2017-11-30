@@ -58,25 +58,25 @@ end
 --======================================
 tests.t6 = function ()
   print("=======================================")
-  -- Set CHUNK_SIZE to 64
   -- Then below will be a case where more than chunk size values present in a and b
 
-  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 66} )
-  a:eval()
-  
+  --local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
+  --a:eval()
+  local a_input_table = {}
   local b_input_table = {}
-  for i=1, 66 do
+  for i=1, 65538 do
     b_input_table[i] = 0
+    a_input_table[i] = i
   end
   b_input_table[2] = 1
   b_input_table[4] = 1
-  b_input_table[66] = 1
+  b_input_table[65538] = 1
   local b = Q.mk_col(b_input_table, "B1")
-
-  local expected_out = {2, 4, 66}
+  local a = Q.mk_col(a_input_table, "I4")
+  local expected_out = {2, 4, 65538}
   
-  Q.print_csv(a, nil, "/tmp/a_out.txt")
-  Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(a, nil, "/tmp/a_out.txt")
+  --Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()
@@ -93,25 +93,24 @@ end
 
 tests.t7 = function ()
   print("=======================================")
-  -- Set CHUNK_SIZE to 64
   -- Then below will be a case where more than chunk size values present in a and b
 
-  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 66} )
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
   a:eval()
   
   -- First chunk contains all 1
   local b_input_table = {}
-  for i=1, 66 do
+  for i=1, 65538 do
     b_input_table[i] = 1
   end
-  b_input_table[65] = 0
+  b_input_table[65537] = 0
   local b = Q.mk_col(b_input_table, "B1")
 
   local expected_out = {}
-  for i = 1, 64 do
+  for i = 1, 65536 do
     expected_out[i] = i
   end
-  expected_out[65] = 66
+  expected_out[65537] = 65538
   
   Q.print_csv(a, nil, "/tmp/a_out.txt")
   Q.print_csv(b, nil, "/tmp/b_out.txt")
