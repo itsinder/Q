@@ -28,8 +28,8 @@ local run_tests = function(tests, name)
         local pass = {}
         local fail = {}
         for k,v in pairs(tests) do
-            local status = pcall(v)
-            if (status) then table.insert(pass, k) else table.insert(fail,k) end
+            local status, result = pcall(v)
+            if (status) then table.insert(pass, k) else table.insert(fail, k .. " = " .. tostring(result)) end
         end
         return pass, fail
     end
