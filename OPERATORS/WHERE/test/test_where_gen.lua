@@ -70,9 +70,9 @@ tests.t1 = function()
   -- call where operator
   local Q = require 'Q'
   local a = Q.mk_col(a_input_table, a_qtype)
-  Q.print_csv(a, nil, "/tmp/a_out.txt")
+  --Q.print_csv(a, nil, "/tmp/a_out.txt")
   local b = Q.mk_col(b_input_table, b_qtype)
-  Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(b, nil, "/tmp/b_out.txt")
   local c = Q.where(a, b)
   c:eval()
   --Q.print_csv(c, nil, "")
