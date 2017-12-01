@@ -98,6 +98,7 @@ handle_function["category2"] = handle_category2
 for i, v in ipairs(T) do
   -- testcase number which is entered in map file is an index into test_load table 
   -- which acts as an identifier for the test cases in this test suite.
+  assert(v.testcase_number,"Specify testcase_no in map file for '" .. v.name .. "' testcase")
   tests[v.testcase_number] = function()
     print("Running testcase " .. v.testcase_number ..": ".. v.name)
     local M = v.metadata
