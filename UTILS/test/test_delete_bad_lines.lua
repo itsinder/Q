@@ -2,7 +2,7 @@ local dbl = require 'Q/UTILS/lua/delete_bad_lines'
 local diff = require 'Q/UTILS/lua/diff'
 local tests = {}
 
---tests.t1 = function()
+tests.t1 = function()
   local regexs = {
     "[a-zA-Z]*",
     "[0-9]+"
@@ -15,6 +15,6 @@ local tests = {}
   assert(diff("dbl_out2.csv", "_dbl_out2.csv"), "Test failed")
   --===========================
   print("Test t1 succeeded")
---end
+end
 
---return tests
+return tests
