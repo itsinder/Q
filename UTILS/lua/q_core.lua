@@ -87,7 +87,7 @@ end
 local qc_mt = {
   __newindex = function(self, key, value)
     if qconsts.debug == true then
-      rawset(self,key, wrap(value , key + '_override'))
+      rawset(self,key, wrap(value , key .. '_override'))
     end
   end,
   __index = function(self, key)

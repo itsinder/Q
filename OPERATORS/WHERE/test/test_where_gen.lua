@@ -15,21 +15,21 @@ local b_qtype = "B1"
 local b_ctype = qconsts.qtypes[b_qtype].ctype
 
 local a_input_table = {}
-for i = 1, 66 do
+for i = 1, 65538 do
   a_input_table[i] = i
 end
 
 local b_input_table = {}
-for i = 1, 66 do
+for i = 1, 65538 do
   b_input_table[i] = 0
 end
 b_input_table[2] = 1
 b_input_table[4] = 1
-b_input_table[66] = 1
+b_input_table[65538] = 1
 
 -- generator validator function
 local function my_magic_function(a_chunk, b_chunk, aidx, a_len, out_buf, sz_out, n_out)
-  print("Validating Generator Function")
+  print("Validating Generator Function", a_len)
   
   local table_index = qconsts.chunk_size * itr_count
   
@@ -40,8 +40,8 @@ local function my_magic_function(a_chunk, b_chunk, aidx, a_len, out_buf, sz_out,
   for i = 1, a_len do
     -- validate a vector
     local a_value = a_chunk[i - 1]
-    print("a_value: ", a_value)
-    assert(a_value == a_input_table[table_index + i])
+    --print("a_value: ", a_value)
+    assert(a_value == a_input_table[table_index + i], "Mismatch, Expected: " .. tostring(a_input_table[table_index + i]) .. ", Actual: " .. tostring(a_value))
     
     -- validate b vector
     local char_idx = (i - 1) / 8
@@ -49,23 +49,24 @@ local function my_magic_function(a_chunk, b_chunk, aidx, a_len, out_buf, sz_out,
     local b_buf = b_chunk + char_idx
     local b_value = qc.get_bit(b_buf, bit_idx)
     if b_value ~= 0 then b_value = 1 end
-    print("b_value: ", b_value)
-    assert(b_value == b_input_table[table_index + i])
+    assert(b_value == b_input_table[table_index + i], "Mismatch, Expected: " .. tostring(b_input_table[table_index + i]) .. ", Actual: " .. tostring(b_value))
 
     -- initialize out_buf vector
     out_buf[i - 1] = 0
   end
-  n_out[0] = 2
+  n_out[0] = 65
+  aidx[0] = a_len
   itr_count = itr_count + 1
   return 0
 end
 
--- set custom validation function
-qc[fns_name] = my_magic_function
-
 local tests = {}
 
 tests.t1 = function()
+  local fns_value = qc[fns_name]
+  -- set custom validation function
+  qc[fns_name] = my_magic_function
+
   -- call where operator
   local Q = require 'Q'
   local a = Q.mk_col(a_input_table, a_qtype)
@@ -75,6 +76,8 @@ tests.t1 = function()
   local c = Q.where(a, b)
   c:eval()
   --Q.print_csv(c, nil, "")
+
+  qc[fns_name] = fns_value
 end
 --======================================
 --[[

@@ -9,22 +9,19 @@ local plfile = require 'pl.path'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
-local no_of_success = 0
-local no_of_failure = 0
-local failed_testcases = {}
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/UTILS/test"
 
 local T = dofile(script_dir .."/map_dictionary.lua")
 --_G["Q_DICTIONARIES"] = {}
 
+local tests = {}
 
-function increment_failed_load(index, v, str)
+local increment_failed_load = function (index, v, str)
   print("testcase name :"..v.name)
   print("Meta file: "..v.meta)
   
   print("reason for failure ::"..str)
-  no_of_failure = no_of_failure + 1
-  table.insert(failed_testcases,index)
 --[[  
   print("\n-----------------Meta Data File------------\n")
   os.execute("cat /home/pragati/Desktop/Q/UTILS/test/test_metadata/"..v.meta) 
@@ -35,9 +32,8 @@ end
 -- this function checks whether after passing valid metadata
 -- the return type of Dictionary is Dictionary or not
 
-function handle_category1(index, ret, metadata)
+local handle_category1 = function (index, ret, metadata)
   if type(ret) == "Dictionary" then
-    no_of_success = no_of_success + 1
     return true
   else
     increment_failed_load(index, metadata, "testcase failed : in category 1 : Return type not Dictionary")
@@ -50,7 +46,7 @@ end
 -- if null or empty string is passed to add dictionary function 
 -- it should give an error
 
-function handle_category2(index, ret, metadata)
+local handle_category2 = function (index, ret, metadata)
     local status, add_err = pcall(ret.add,metadata.input)
     local a, b, err = plstring.splitv(add_err,':')
     err = plstring.strip(err) 
@@ -59,7 +55,6 @@ function handle_category2(index, ret, metadata)
     local count = plstring.count(err, expected )
   
     if count > 0 then
-      no_of_success = no_of_success + 1
       return true
     else
       increment_failed_load(index, metadata, "testcase failed : in category 2 : Error message not matched with output_regex")
@@ -70,7 +65,7 @@ end
 -- this function checks whether valid string entries are added in dictionary 
 -- and checking if get_size gives a valid size of a dictionary
 
-function handle_category3(index, ret, metadata)
+local handle_category3 = function (index, ret, metadata)
   
   for i=1, #metadata.input do
     ret:add(metadata.input[i])
@@ -78,7 +73,6 @@ function handle_category3(index, ret, metadata)
 
   local dict_size = ret:get_size()
   if dict_size == metadata.dict_size then
-    no_of_success = no_of_success + 1
     return true
   else
     increment_failed_load(index, metadata, "testcase failed : in category 3 : Not added entries in dictionary properly")
@@ -89,7 +83,7 @@ end
 -- this function checks whether a correct index 
 -- of a valid string is returned from a dictionary
 
-function handle_category4(index, ret, metadata)
+local handle_category4 = function (index, ret, metadata)
   for i=1, #metadata.input do
     ret:add(metadata.input[i])
   end
@@ -101,14 +95,13 @@ function handle_category4(index, ret, metadata)
     end
   end
   
-  no_of_success = no_of_success + 1
   return true
 end
 
 -- this function checks whether a correct string 
 -- of a valid index is returned from a dictionary
 
-function handle_category5(index, ret, metadata)
+local handle_category5 = function (index, ret, metadata)
   for i=1, #metadata.input do
     ret:add(metadata.input[i])
   end
@@ -120,12 +113,11 @@ function handle_category5(index, ret, metadata)
     end
   end
   
-  no_of_success = no_of_success + 1
   return true
 end
 
 
-
+--[[
 function print_results()  
   local str
   
@@ -148,7 +140,7 @@ function print_results()
   assert(io.close(file), "Nighty build file close error")
   
 end
-
+]]
 local handle_function = {}
 -- to test whether return type is Dictionary
 handle_function["category1"] = handle_category1
@@ -162,45 +154,44 @@ handle_function["category4"] = handle_category4
 -- checking valid get string from a dictionary
 handle_function["category5"] = handle_category5
 
-
 local function calling_dictionary(i ,m)
-  -- print(i,"Testing : " .. m.name)
-  local M = dofile(script_dir .."/test_metadata/"..m.meta)
-  local result
-  local ret = assert(Dictionary(M.dict))
-  if handle_function[m.category] then
-    result = handle_function[m.category](i,ret, m)
-  else
-    fns["increment_failed_load"](i, m, "Handle function for "..m.category.." is not defined in handle_category.lua")
-    result = false
-  end
-   utils["testcase_results"](m, "Dictionary", "Unit Test", result, "")
+    local M = dofile(script_dir .."/metadata/"..m.meta)
+    local result
+    local ret = assert(Dictionary(M.dict))
+    
+    if handle_function[m.category] then
+      result = handle_function[m.category](i,ret, m)
+      -- call to preamble
+      utils["testcase_results"](m, "Dictionary", "Unit Test", result, "")
+      assert(result,"Handle category failed")
+    else
+      increment_failed_load(i, m, "Handle function for "..m.category.." is not defined in handle_category.lua")
+      assert(handle_function[m.category],"Handle function for "..m.category.." is not defined in handle_category.lua")
+    end 
 end
 
 
 
 for i, m in ipairs(T) do
-  if arg[1]~= nil and tonumber(arg[1])~=i then goto skip end
-  
-  -- for testcase 5 and 7 testcase 4 should be executed for the dictionary to in existence 
-  if arg[1]~= nil and tonumber(arg[1])==5 or tonumber(arg[1])==7 then
-    local no_of_tc = {}
-    if tonumber(arg[1])==5 then no_of_tc = { 4, 5 } end
-    if tonumber(arg[1])==7 then no_of_tc = { 4, 7 } end
-    for j=1,#no_of_tc do
-      i = no_of_tc[j]
-      m = T[i]
+  -- testcase number which is entered in map file is an index into test_load table 
+  -- which acts as an identifier for the test cases in this test suite.
+  assert(m.testcase_number,"Specify testcase_no in map file for '" .. m.name .. "' testcase")
+  tests[m.testcase_number] = function()
+    print("Running testcase " .. m.testcase_number ..": ".. m.name)
+    -- for testcase 5 and 7 testcase 4 should be executed for the dictionary to in existence 
+    if m.testcase_number == 5 or m.testcase_number == 7 then
+      local no_of_tc = {}
+      if m.testcase_number == 5 then no_of_tc = { 4, 5 } end
+      if m.testcase_number == 7 then no_of_tc = { 4, 7 } end
+      for j=1,#no_of_tc do
+        i = no_of_tc[j]
+        m = T[i]
+        calling_dictionary(i, m)
+      end
+    else
       calling_dictionary(i, m)
     end
-    goto skip
   end
-  -- normal calling of all the testcases
-  calling_dictionary(i, m)
-  
-  ::skip::
 end
 
-print_results()
-
-require('Q/UTILS/lua/cleanup')()
-os.exit()
+return tests

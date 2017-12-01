@@ -4,7 +4,7 @@ local plpath = require 'pl.path'
 local ignore_files = {}
 local ignore_dirs = {
    DEPRECATED = true,
-   experiment = true,
+   experimental = true,
    DOC = true,
    doc = true,
 }
