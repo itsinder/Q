@@ -116,7 +116,7 @@ libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _convert_files : convert_specialize.lua
-	luajit generator0_0.lua
+	luajit generator_conv.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua

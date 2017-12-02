@@ -38,7 +38,7 @@ ${fn}(
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
-#pragma omp parallel for 
+// TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) { 
 
     uint64_t widx = i >> 8; // word index
@@ -47,13 +47,14 @@ ${fn}(
     ${in_ctype} inv;
     ${in_fn}
     
-    if ( ! (  inv == 0 || inv == 1 ) ) {
-      // Use go_BYE(-1)
+    if ( ! ( (  inv == 0 ) || ( inv == 1 ) ) ) {
+      status = -1; 
       continue;
     }
     ${out_fn}
   } 
-  BYE:
+BYE:
+    if ( status < 0 ) { WHEREAMI; }
   return status;
 }
    ]]

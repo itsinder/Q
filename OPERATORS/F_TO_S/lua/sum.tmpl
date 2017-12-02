@@ -48,17 +48,17 @@ ${fn}(
   uint32_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 
   uint64_t block_size = mcr_max(1, nR / num_threads);
-// TODO PUT BACK #pragma omp parallel for schedule(static)
+// TODO #pragma omp parallel for schedule(static)
   for ( uint32_t t = 0; t < num_threads; t++ ) { 
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
     if ( t == (num_threads-1) ) { ub = nR; }
     ${reduce_ctype} lval = ${initial_val};
-#pragma omp simd reduction(+:lval)
+// TODO #pragma omp simd reduction(+:lval)
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       lval += ${macro}(in[i]);
     }
-#pragma omp critical (_${fn})
+// TODO #pragma omp critical (_${fn})
     {
     curr_val = ${t_reducer}(curr_val, lval);
     }
