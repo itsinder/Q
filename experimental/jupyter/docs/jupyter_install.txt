@@ -1,6 +1,6 @@
 Use below steps to install Jupyter
 
-prerequisite - python (3.3 or greater, or python 2.7)
+prerequisite - python (3.3 or greater, or python 2.7, Note - I tried with python 2.7)
 
 - Install python-dev and python-pip packages
 $ sudo apt-get update
