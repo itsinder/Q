@@ -23,6 +23,13 @@ return function (a, x, y, optargs )
   local lgen = function()
     local idx = chunk_index * qconsts.chunk_size
     local x_len, x_chunk, nn_x_chunk = x:chunk(chunk_index)
+    if ( x_len ) then 
+      assert(type(x_len) == "number")
+      if ( x_len > 0 ) then 
+        assert(x_chunk)
+        assert(type(x_chunk) == "CMEM") 
+      end
+    end 
     chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
       qc[func_name](x_chunk, x_len, reduce_struct, idx);

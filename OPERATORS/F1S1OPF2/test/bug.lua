@@ -4,6 +4,7 @@ require 'Q/UTILS/lua/strict'
 local Scalar = require 'libsclr'
 local tests = {} 
 
+tests.pre_post_eval = function() 
 local len = 1048576+17
 val = 127
 y_qtype = "I1"
@@ -16,6 +17,7 @@ sum2 = Q.sum(x):eval():to_num()
 print(sum2)
 assert(sum1 == sum2)
 assert(sum1 == val * len)
+end
 
 --=====================================
 t7_I1 = function()
@@ -25,8 +27,9 @@ t7_I1 = function()
   local new_qtype = "I1"
   local x = Q.const({ len = len, qtype = old_qtype, val = Scalar.new(val, old_qtype)})
   x:eval()
-  print("XX", Q.sum(x):eval():to_num(), len*val)
+  -- print("XX", Q.sum(x):eval():to_num(), len*val)
   local chksum = Q.sum(x):eval():to_num()
+  print(chksum,  len  * val)
   assert(chksum == len  * val)
   local y = Q.convert(x, new_qtype)
   local z = Q.convert(y, old_qtype)
