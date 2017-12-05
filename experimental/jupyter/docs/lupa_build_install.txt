@@ -19,6 +19,7 @@ $ cd LuaJIT-2.0.5/
 $ make CFLAGS="-fPIC"
 
 - Build & Install lupa
+$ cd ..
 $ sudo python setup.py install --with-cython
 
 - Test lupa installation
