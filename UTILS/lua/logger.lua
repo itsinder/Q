@@ -33,7 +33,7 @@ for i, x in ipairs(modes) do
       return false
     end
     local msg = table.concat({...}, " ")
-    local my_name = debug.getinfo(1, "Sl").short_src
+    local my_name = debug.getinfo(2, "Sl").short_src
     local idx = 2
     local info = debug.getinfo(idx, "Sl")
     -- generally idx 2 is fine but we dont want people to get confused as
