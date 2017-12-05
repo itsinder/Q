@@ -26,6 +26,6 @@ $ sudo python setup.py install --with-cython
 start python interpreter and try importing lupa
 $ cd /tmp
 $ python
-import lua
+import lupa
 
 above command should work
