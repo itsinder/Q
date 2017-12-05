@@ -19,9 +19,10 @@ extern int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
-    uint32_t field_size,
     uint32_t chunk_size,
-    bool is_memo
+    bool is_memo,
+    const char *const file_name,
+    int64_t num_elements
     );
 extern int
 vec_materialized(
@@ -116,4 +117,8 @@ extern int
 vec_clean_chunk(
     VEC_REC_TYPE *ptr_vec
     );
+extern char *
+vec_get_buf(
+  VEC_REC_TYPE *ptr_vec
+);
 #endif

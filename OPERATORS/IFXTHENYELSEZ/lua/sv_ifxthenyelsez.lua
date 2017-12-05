@@ -6,7 +6,7 @@ local function sv_ifxthenyelsez(x, y, z)
   local lVector = require 'Q/RUNTIME/lua/lVector'
 
   assert(type(x) == "lVector", "error")
-  assert(type(y) == "userdata", "error") -- TODO P2 Should be Scalar
+  assert(type(y) == "Scalar", "error") 
   assert(type(z) == "lVector", "error")
   print(x:fldtype())
   local spfn = require("Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez_specialize" )

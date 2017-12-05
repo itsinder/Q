@@ -15,7 +15,6 @@ local function strip_trailing_LL(temp)
 end
 
 local function chk_cols(column_list)
-
   local qconsts = require 'Q/UTILS/lua/q_consts'
   assert(column_list)
   assert(type(column_list) == "table")
@@ -185,7 +184,7 @@ local print_csv = function (column_list, filter, opfile)
     return table.concat(tbl_rslt)
   else
     if fp then io.close(fp) end
-    return true
+    -- return true
   end
 end
 

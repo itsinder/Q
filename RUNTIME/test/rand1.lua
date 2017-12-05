@@ -6,7 +6,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local rand_qtype = require 'rand_qtype'
 require 'Q/UTILS/lua/strict'
-local lVector = require 'lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 math.randomseed(os.time())
 
 local xtype = rand_qtype()
@@ -22,6 +22,7 @@ for i = 1, num_trials do
   local s1 = Scalar.new(i % 127, qtype)
   if ( qtype == xtype ) then counter = counter + 1 end
   pcall(x.put1, x, s1)
+  -- Note that it is okay for the pcall to fail
   -- x:put1(s1)
   assert(x:check())
 end

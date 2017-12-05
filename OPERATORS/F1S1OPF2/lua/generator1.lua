@@ -1,4 +1,5 @@
   local gen_code = require("Q/UTILS/lua/gen_code")
+  local Scalar = require 'libsclr'
   local plpath = require "pl.path"
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
@@ -18,7 +19,8 @@
         -- NOTE: Provide legit scalar_val for each scalar_type
         -- For 6 basic types, 1 is fine but will need to do better
         -- for B1, SC, ...
-        local status, subs, tmpl = pcall(sp_fn, fldtype, { value = 1, qtype = scalar_type })
+        local s = Scalar.new(1, scalar_type)
+        local status, subs, tmpl = pcall(sp_fn, fldtype, s)
         if ( status ) then 
           assert(type(subs) == "table")
           assert(type(tmpl) == "string")
@@ -28,6 +30,10 @@
           num_produced = num_produced + 1
         else
           print(subs)
+          print(operator)
+          print(fldtype)
+          print(scalar_type)
+          os.exit()
         end
       end
     end

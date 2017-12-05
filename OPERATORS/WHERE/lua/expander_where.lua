@@ -9,7 +9,9 @@ local function expander_where(op, a, b)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(b:qtype() == "B1", "b must be of type B1")
-  assert(a:length() == b:length(), "size of a and b is not same")
+  -- Condition is good but we do not know enough to evaluate it 
+  -- at this stage since vectors coyld be in nascent state
+  -- assert(a:length() == b:length(), "size of a and b is not same")
   local sp_fn_name = "Q/OPERATORS/WHERE/lua/where_specialize"
   local spfn = assert(require(sp_fn_name))
 
@@ -29,27 +31,50 @@ local function expander_where(op, a, b)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
   
-  -- allocate buffer for output
-  local out_buf_size = qconsts.chunk_size * qconsts.qtypes[a:qtype()].width
-  local out_buf = assert(ffi.malloc(out_buf_size))
+  local sz_out          = qconsts.chunk_size 
+  local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
+  local out_buf = nil
+  local first_call = true
+  local n_out = nil
+  local aidx  = nil
+  local a_chunk_idx = 0
   
-  local function where_gen(chunk_idx)
-    local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
-    local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
-    if a_len == 0 then
-      return 0, nil, nil
+  local function where_gen()
+    if ( first_call ) then 
+      -- allocate buffer for output
+      out_buf = assert(ffi.malloc(sz_out_in_bytes))
+
+      n_out = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      n_out = ffi.cast("uint64_t *", n_out)
+
+      aidx = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      aidx = ffi.cast("uint64_t *", aidx)
+      aidx[0] = 0
+      
+      first_call = false
     end
-    assert(a_len == b_len)
-    assert(a_nn_chunk == nil, "Null is not supported")
-    local out_len = assert(ffi.malloc(ffi.sizeof("uint64_t")))
-    out_len = ffi.cast("uint64_t *", out_len)
-    local status = qc[func_name](a_chunk, b_chunk, a_len, out_buf, out_len)
-    assert(status == 0, "C error in WHERE")
-    out_len = tonumber(out_len[0])
-    if out_len == 0 then
-      return 0, nil, nil
-    end
-    return out_len, out_buf, nil 
+    
+    -- Initialize to zero
+    n_out[0] = 0
+    
+    repeat
+      local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      local b_len, b_chunk, b_nn_chunk = b:chunk(a_chunk_idx)
+      if a_len == 0 then
+        return tonumber(n_out[0]), out_buf, nil 
+      end
+      assert(a_len == b_len)
+      assert(a_nn_chunk == nil, "Null is not supported")
+      assert(b_nn_chunk == nil, "Where vector cannot have nulls")
+      local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
+          sz_out, n_out)
+      assert(status == 0, "C error in WHERE")
+      if ( aidx[0] == a_len ) then
+        a_chunk_idx = a_chunk_idx + 1
+        aidx[0] = 0
+      end
+    until ( n_out[0] == sz_out )
+    return tonumber(n_out[0]), out_buf, nil 
   end
   return lVector( { gen = where_gen, has_nulls = false, qtype = a:qtype() } )
 end

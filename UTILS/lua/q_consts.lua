@@ -1,6 +1,7 @@
 local qconsts = {}
 --===========================
   qconsts.debug = false -- set to TRUE only if you want debugging
+  qconsts.qc_trace = true -- set to FALSE if performance logging of qc is to be turned off
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
@@ -8,7 +9,7 @@ local qconsts = {}
     qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
-    qconsts.sz_str_for_lua = 128 -- TODO Should be much bigger
+    qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
@@ -144,6 +145,8 @@ local qconsts = {}
     }
     qtypes.B1 = { 
       short_code = "B1",
+      min = 0,
+      max = 1,
       max_txt_width = 2,
       width = 1, -- This has to be handled as a special case
       ctype = "unsigned char",

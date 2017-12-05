@@ -13,6 +13,7 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libf1s1opf2.so _f1s1opf2.lua
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
+	abs_specialize.lua \
 	sqrt_specialize.lua \
 	log_specialize.lua exp_specialize.lua \
 	logit_specialize.lua logit2_specialize.lua 
@@ -60,7 +61,6 @@ clean :
 	rm -f sqrt_specialize.lua
 	rm -f logit_specialize.lua
 	rm -f logit2_specialize.lua
-	rm -f abs_specialize.lua
 #-------------
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
@@ -116,7 +116,7 @@ libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _convert_files : convert_specialize.lua
-	luajit generator0_0.lua
+	luajit generator_conv.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua

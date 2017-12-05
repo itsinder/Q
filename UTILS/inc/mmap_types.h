@@ -33,5 +33,6 @@ typedef struct _vec_rec_type {
   bool is_eov;
   int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
+  uint32_t chunk_sz;
 } VEC_REC_TYPE;
 #endif

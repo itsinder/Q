@@ -10,9 +10,10 @@ main(
     )
 {
   int status = 0;
-  int nA = 10;
+  int nA = 128; 
+// nA shoudl be multiple of 8 for exp_nC to be correct; also malloc
   int32_t *A = NULL;
-  int64_t *B = NULL;
+  uint64_t *B = NULL; 
   int32_t *C = NULL;
   uint64_t nC = 0;
   
@@ -24,37 +25,30 @@ main(
   }  
   
   //----------------------------
-  B = malloc(ceil( nA / 8 ));
+  B = malloc(nA/64 * sizeof(uint64_t));
   return_if_malloc_failed(B);
-  B[0] = 10;    // Only two set bits (1) in B
   
   //----------------------------
   C = malloc(nA * sizeof(int32_t));
   return_if_malloc_failed(C);
-  for ( int i = 0; i < nA; i++ ) {
-    C[i] = 0;
-  }
   
-  status = where_I4(A, B, nA, C, &nC); cBYE(status);
-
-  printf("Size of Output is %d\n", nC);
-  
-  if ( nC != 2 ) {
-    printf("Length Mismatch\n");
-    printf("C: ERROR\n");
-    status = -1;
-    cBYE(status);
-  }
-
-  for ( int i = 0; i < nC; i++ ) {
-    if ( C[i] != (i + 1) * 20 ) {
-      printf("Value Mismatch at index %d\n", i);
-      printf("C: ERROR\n");
-      status = -1;
-      cBYE(status);
+  for ( int j = 0; j < 8; j++ ) { 
+    uint8_t *Bptr = (uint8_t *)B;
+    for ( int i = 0; i < nA/8; i++ ) { 
+      Bptr[i] = j;
     }
-    printf("%d\n", C[i]);
-  }  
+
+    uint64_t aidx= 0;
+    nC = 0;
+    status = where_I4(A, B, &aidx, nA, C, nA, &nC); cBYE(status);
+    printf("Size of Output is %d\n", (int)nC);
+    int exp_nC = __builtin_popcountll((unsigned long long)j) * (nA / 8);
+
+    if ( nC != exp_nC ) { 
+      printf("Length Mismatch\n");
+      printf("C: ERROR\n"); go_BYE(-1); 
+    }
+  }
   printf("C: SUCCESS\n");
 BYE:
   free_if_non_null(A);

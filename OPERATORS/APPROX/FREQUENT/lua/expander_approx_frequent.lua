@@ -13,8 +13,10 @@ local function expander_approx_frequent(x, min_freq, err)
   local data = assert(ffi.malloc(ffi.sizeof(subs.data_ty)), "malloc failed")
   data = ffi.cast(subs.data_ty..'*', data)
   qc[subs.alloc_fn](x:length(), min_freq, err, x:chunk_size(), data)
-  local function out_gen(chunk_idx)
+  local chunk_idx = 0
+  local function out_gen()
     local len, chunk, nn_chunk = x:chunk(chunk_idx)
+    chunk_idx = chunk_idx + 1
     if len > 0 then
       qc[subs.chunk_fn](chunk, len, data)
       return data

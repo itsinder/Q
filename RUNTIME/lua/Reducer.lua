@@ -62,6 +62,16 @@ function Reducer:next()
   return self._gen ~= nil
 end
 
+function Reducer:get_name()
+  return self._name
+end
+
+function Reducer:set_name(value)
+  assert( (value == nil) or ( type(value) == "string") )
+  self._name = value
+  return self
+end
+
 function Reducer:value()
   -- We are allowing user to obtain partial values
   assert(self._value ~= nil, "The reducer has not been evaluated yet")

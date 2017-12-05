@@ -14,7 +14,6 @@
   for i, operator in ipairs(operators) do
     local sp_fn = assert(require(operator .. "_specialize"))
     for i, fldtype in ipairs(qtypes) do 
-      print(operator, fldtype)
       local status, subs, tmpl = pcall(sp_fn, fldtype)
       if ( status ) then 
         assert(type(subs) == "table")
@@ -23,7 +22,7 @@
         print("Produced ", subs.fn)
         num_produced = num_produced + 1
       else
-        print(subs)
+        assert(nil, subs)
       end
     end
   end

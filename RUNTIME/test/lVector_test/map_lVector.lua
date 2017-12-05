@@ -45,7 +45,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
-  
+  --[[
   -- creating nascent vector, generating values by cmem_buf, SC qtype
   { 
     test_type = "nascent_vector", 
@@ -56,7 +56,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "SC" }
   },
-  
+  ]]
   -- creating nascent vector, generating values by cmem_buf, put one element, check file size
   { 
     test_type = "nascent_vector", 
@@ -128,13 +128,32 @@ return {
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   ]]
-  -- try modifying nascent vector after eov with start_write(), should success
+ 
+  -- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+  -- if we read values, its the last_chunk and it will be served from buffer itself
+  -- so is_nascent remains T 
+  -- now trying start_write(), should success and after start_write() is_nascent is set to F
   {
     test_type = "nascent_vector",
-    assert_fns = "nascent_vector8_1",
-    name = "nascent_vector_try_start_write()_after_eov",
+    assert_fns = "nascent_vector8_1_1",
+    name = "nascent_vector_try_start_write()_after_eov_1_1",
     meta = "gm_create_nascent_vector2.lua",
-    num_elements = 10,
+    num_elements = 1025,
+    gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
+  -- reading values from previous chunk, (open mode is set to 0) 
+  -- as reading values from previous chunk( values are serverd from file) 
+  -- so is_nascent = F ( converted to materialized vector)
+  -- now trying start_write(), should fail
+  {
+    test_type = "nascent_vector",
+    assert_fns = "nascent_vector8_1_2",
+    name = "nascent_vector_try_start_write()_after_eov_1_2",
+    meta = "gm_create_nascent_vector2.lua",
+    num_elements = 65540,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
@@ -173,8 +192,9 @@ return {
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
-
+  -- Commenting out below testcase as this scenario is not supported - refer jira issue QQ-32
   -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
+  --[[
   {
     test_type = "nascent_vector",
     assert_fns = "nascent_vector9",
@@ -182,6 +202,53 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 65540,
     gen_method = "cmem_buf",
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  ]]
+  --=============================
+  -- with nulls
+  
+  -- creating nascent vector with nulls, generating values by scalar
+  { 
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "create_nascent_vector_with_nulls_scalar", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65540, 
+    gen_method = "scalar", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- creating nascent vector with nulls, generating values by cmem_buf
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector1",
+    name = "create_nascent_vector_with_nulls_cmem_buf", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65540, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+  
+  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put_chunk
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector6",
+    name = "nascent_vector_with_null_and_without_nn_data_in_put_chunk", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65, 
+    gen_method = "cmem_buf", 
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+  },
+
+  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put1
+  {
+    test_type = "nascent_vector", 
+    assert_fns = "nascent_vector7",
+    name = "nascent_vector_with_null_and_without_nn_data_in_put1", 
+    meta = "gm_create_nascent_vector5.lua",
+    num_elements = 65, 
+    gen_method = "scalar", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
@@ -233,56 +300,25 @@ return {
     name = "create_materialized_vector_file_not_present",
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },  
-  
-  --=============================
-  -- with nulls
-  
-  -- creating nascent vector with nulls, generating values by scalar
-  { 
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector1",
-    name = "create_nascent_vector_with_nulls_scalar", 
-    meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65540, 
-    gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I2", "I4", "I8", "F4", "F8" }
   },
-  
-  -- creating nascent vector with nulls, generating values by cmem_buf
+
+  --[[
+  -- create materialized vector where file is not present
+  -- .bin file is not present so get_file_size returns -1
+  -- at core_vec line 238 : if ( fsz <= 0 ) { go_BYE(-1); }
+  -- this condition does not error out
+  -- can we change the default value in get_file_size 
+  -- from int64_t file_size = -1; to 0
   {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector1",
-    name = "create_nascent_vector_with_nulls_cmem_buf", 
-    meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65540, 
-    gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    test_type = "materialized_vector",
+    assert_fns = "materialized_vector5",
+    name = "create_materialized_vector_file_not_present",
+    meta = "gm_create_materialized_vector3.lua",
+    num_elements = 65540,
+    qtype = { "I1" }
   },
-  
-  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put_chunk
-  {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector6",
-    name = "nascent_vector_with_null_and_without_nn_data_in_put_chunk", 
-    meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65, 
-    gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },
-  
-  -- nascent vector, vec._has_nulls is true but don't provide nn_data in put1
-  {
-    test_type = "nascent_vector", 
-    assert_fns = "nascent_vector7",
-    name = "nascent_vector_with_null_and_without_nn_data_in_put1", 
-    meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65, 
-    gen_method = "scalar", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
-  },
-  
+  ]]
   -- create materialized vector with has_nulls true
   { 
     test_type = "materialized_vector", 
@@ -335,5 +371,5 @@ return {
     num_elements = 5, 
     gen_method = "cmem_buf", 
     qtype = { "SV" }
-  },
+  }
 }

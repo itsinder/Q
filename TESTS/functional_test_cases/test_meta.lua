@@ -1,19 +1,19 @@
+-- Test to check the meta data through Q
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
-
-local M = dofile("meta_data.lua")
-x = Q.load_csv("data.csv", M, { is_hdr = true, use_accelerator = false})
-
---Q.print_csv(x, nil, "")
---io.output("meta_data.txt")
-for i = 1, #x do
-local T = x[i]:meta()
-for k,v in pairs(T.base) do print(k,v) end
-for k,v in pairs(T.aux) do print(k,v) end
+local tests = {}
+tests.t1 = function ()
+  local M = dofile(os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/meta_data.lua")
+  local x = Q.load_csv(os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/data.csv", M, { is_hdr = true, use_accelerator = false})
+  for i = 1, #x do
+    local T = x[i]:meta()
+    for k,v in pairs(T.base) do print(k,v) end
+    for k,v in pairs(T.aux) do print(k,v) end
+  end
+  print("Test t1 succeeded")
 end
 
-print("SUCCESS for ", arg[0])
-require('Q/UTILS/lua/cleanup')()
-os.execute("rm _*.bin") 
-os.exit()
+--======================================
+
+return tests

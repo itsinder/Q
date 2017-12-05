@@ -9,9 +9,12 @@
 
 static inline uint64_t RDTSC()
 {
-  unsigned int hi, lo;
-    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-      return ((uint64_t)hi << 32) | lo;
+  return (uint64_t) clock();
+  // TODO P2 We should go back to following. 
+  // We went to clock because of Raspberry PI
+  // unsigned int hi, lo;
+  //   __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  //     return ((uint64_t)hi << 32) | lo;
 }
 //START_FUNC_DECL
 int

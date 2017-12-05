@@ -46,12 +46,18 @@ end
 function lVector:cast(new_field_type)
   assert(new_field_type)
   assert(type(new_field_type) == "string")
-  assert ( ((is_base_qtype(new_field_type)) or (new_field_type == "B1")))
+  local new_field_width
+  if is_base_qtype(new_field_type) then 
+    new_field_width = qconsts.qtypes[new_field_type].width
+  elseif ( new_field_type == "B1" ) then
+    new_field_width = 0
+  else
+    assert(nil, "Cannot cast to ", new_field_type)
+  end
   if ( self._nn_vec ) then 
     assert(nil, "TO BE IMPLEMENTED")
   end
-  new_field_width = qconsts.qtypes[new_field_type].width
-  local status = Vector.cast(self._base_vec,new_field_type,new_field_width)
+  local status = Vector.cast(self._base_vec,new_field_type, new_field_width)
   assert(status)
   if ( qconsts.debug ) then self:check() end
   return self
@@ -154,6 +160,9 @@ function lVector.new(arg)
     vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
+  if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
+    Vector.set_name(vector._base_vec, arg.name)
+  end 
   return vector
 end
 
@@ -193,7 +202,7 @@ end
 function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
-  self:set_meta("num_nulls")
+  self:set_meta("has_nulls", false)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -206,7 +215,7 @@ function lVector:make_nulls(bvec)
   assert(bvec:num_elements() == self:num_elements())
   assert(bvec:has_nulls() == false)
   self._nn_vec = bvec._base_vec
-  self:set_meta("num_nulls")
+  self:set_meta("has_nulls", true)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -253,6 +262,9 @@ function lVector:num_elements()
 end
 
 function lVector:length()
+  if ( not self:is_eov() ) then 
+    return nil
+  end
   if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
@@ -312,7 +324,7 @@ end
 function lVector:set_generator(gen)
   assert(Vector.num_elements(self._base_vec) == 0, 
     "Cannot set generator once elements generated")
-  assert(Vector.is_nascent(self._base_vec), 
+  assert(not self:is_eov(), 
     "Cannot set generator for materialized vector")
   assert(type(gen) == "function")
   self._gen = gen
@@ -324,6 +336,11 @@ function lVector:eov()
   if self._nn_vec then 
     local status = Vector.eov(self._nn_vec)
     assert(status)
+  end
+-- destroy generator and therebuy release resources held by it 
+  self._gen = nil 
+  if ( Vector.num_elements(self._base_vec) == 0 ) then 
+    return nil
   end
   if ( qconsts.debug ) then self:check() end
   return true
@@ -344,14 +361,21 @@ function lVector:put1(s, nn_s)
   if ( qconsts.debug ) then self:check() end
 end
 
-function lVector:start_write()
+function lVector:start_write(is_read_only_nn)
+  if ( is_read_only_nn ) then 
+    assert(type(is_read_only_nn) == "boolean")
+  end
   local nn_X, nn_nX
   local X, nX = Vector.start_write(self._base_vec)
   assert(X)
   assert(type(nX) == "number")
   assert(nX > 0)
   if ( self._nn_vec ) then
-    nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    if ( is_read_only_nn ) then 
+      nn_X, nn_nX = assert(Vector.get(self._nn_vec, 0, 0))
+    else
+      nn_X, nn_nX = Vector.start_write(self._nn_vec)
+    end
     assert(nn_nX == nX)
     assert(nn_nX)
   end
@@ -393,7 +417,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
 end
 
 function lVector:eval()
-  if ( Vector.is_nascent(self._base_vec) ) then
+  if ( not self:is_eov() ) then
     local chunk_num = self:chunk_num() 
     local base_len, base_addr, nn_addr 
     repeat
@@ -434,8 +458,7 @@ function lVector:get_vec_buf()
 end
 
 function lVector:get_all()
-  -- TODO P2. This is the same as chunk() without parameters
-  -- Consider deprecating this in the near future
+  assert(self:is_eov())
   local nn_addr, nn_len
   local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
   assert(base_len > 0)
@@ -453,8 +476,8 @@ function lVector:get_one(idx)
   -- TODO More checks to make sure that this is only for 
   -- vectors in file mode. We may need to move vector from buffer 
   -- mode to file mode if we are at last chunk and is_eov == true
-  local nn_addr, nn_len
-  local base_scalar = assert(Vector.get(self._base_vec, idx, 1))
+  local nn_addr, nn_len, nn_scalar
+  local base_data, base_len, base_scalar = assert(Vector.get(self._base_vec, idx, 1))
   assert(type(base_scalar) == "Scalar")
   if ( self._nn_vec ) then
     nn_scalar = assert(Vector.get(self._nn_vec, 0, 0))
@@ -467,31 +490,20 @@ end
 
 function lVector:chunk(chunk_num)
   local status
-  local l_chunk_num = 0
   local base_addr, base_len
   local nn_addr,   nn_len  
-  local is_nascent = Vector.is_nascent(self._base_vec)  
-  if ( chunk_num ) then 
-    assert(type(chunk_num) == "number")
-    assert(chunk_num >= 0)
-    l_chunk_num = chunk_num
-  else
-    -- Note from Krushnakant: When I call chunk() method for nascent
-    -- vector without passing chunk number, what should be it's behavior?
-    -- As per my thinking, it should return me the current chunk,
-    if ( is_nascent ) then 
-      l_chunk_num = Vector.chunk_num(self._base_vec)
-    else
-      l_chunk_num = 0
-      -- NOT an error assert(nil, "Provide chunk_num for chunk() on materialized vector")
-    end
-  end
+  local is_nascent = Vector.is_nascent(self._base_vec)
+  local is_eov = self:is_eov()
+  assert(chunk_num, "chunk_num is a mandatory argument")
+  assert(type(chunk_num) == "number")
+  assert(chunk_num >= 0)
+  local l_chunk_num = chunk_num
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
-  local cond1 = not is_nascent
+  local cond1 = is_eov
   -- cond2 => Vector is nascent and you are asking for current chunk
   -- or previous chunk 
-  local cond2 = ( Vector.is_nascent(self._base_vec) ) and 
+  local cond2 = ( not is_eov ) and 
           ( ( ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
           ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
           ( ( l_chunk_num < Vector.chunk_num(self._base_vec) ) and 
@@ -513,16 +525,12 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
-    if ( buf_size == 0 ) then
-      self:eov()
-      if ( qconsts.debug ) then self:check() end
-      return 0
-    end
     if ( buf_size < qconsts.chunk_size ) then
       if ( base_data ) then
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
     else
       if ( base_data ) then 
         -- this is the simpler case where generator malloc's
@@ -557,7 +565,7 @@ end
 
 function lVector:reincarnate()
   if ( qconsts.debug ) then self:check() end
-  if ( Vector.is_nascent(self._base_vec) ) then
+  if ( not self:is_eov()) then
     return nil
   end
   
@@ -591,7 +599,8 @@ function lVector:set_meta(k, v)
   if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
-  assert(type(k) == "string")
+  -- NOT VALID CHECK assert(type(k) == "string")
+  -- value acn be number or boolean or string or Scalar
   self._meta[k] = v
 end
 

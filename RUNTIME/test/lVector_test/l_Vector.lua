@@ -7,6 +7,10 @@ return function( M )
   if not status then
     print(x)
     x = nil
+  else
+    --if x:meta().base.is_nascent == false then
+      --x:persist(true)
+    --end
   end
   return x
 end

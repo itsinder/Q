@@ -1,6 +1,7 @@
 local function idx_sort(idx, val, ordr)
   local Q       = require 'Q/q_export'
   local qc = require 'Q/UTILS/lua/q_core'
+  local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
   assert(type(idx) == "lVector", "error")
   local idx_qtype = idx:fldtype()
@@ -9,12 +10,12 @@ local function idx_sort(idx, val, ordr)
 
   assert(type(val) == "lVector", "error")
   local val_qtype = val:fldtype()
-  assert(is_base_qtype(val_type))
+  assert(is_base_qtype(val_qtype))
 
   assert(type(ordr) == "string")
   if ( ordr == "ascending"  ) then ordr = "asc" end 
   if ( ordr == "descending" ) then ordr = "dsc" end 
-  local spfn = require("Q/OPERATORS/SORT/lua/idx_sort_specialize" )
+  local spfn = require("Q/OPERATORS/IDX_SORT/lua/idx_sort_specialize" )
   local status, subs, tmpl = pcall(spfn, idx_qtype, val_qtype, ordr)
   assert(status, "error in call to idx_sort_specialize")
   assert(type(subs) == "table", "error in call to idx_sort_specialize")
