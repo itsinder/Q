@@ -9,21 +9,29 @@ local function cat(x, y)
   assert(x:has_nulls() == y:has_nulls(), "either both have nulls or neither has nulls, we will relax this assumption later")
   
   -- Create output vector
-  local z = lVector({qtype = x:fldtype(), gen = true, has_nulls = x:has_nulls()})
+  local qtype = x:fldtype()
+  local width = qconsts.qtypes[x:fldtype()].width
+  local chunk_size = qconsts.chunk_size
+  local z_buf_size = chunk_size * width
+  local z_buf = ffi.malloc(z_buf_size)
+  ffi.fill(z_buf, z_buf_size)
   local chunk_idx = 0
-  local z_buf = ffi.malloc(qconsts.chunk_size)
   
-  -- Process X Vector
+  -- Create z vector
+  local z = lVector({qtype = qtype, gen = true, has_nulls = x:has_nulls()})
+  
+  -- Process X vector
   repeat
     local len, base_data, nn_data = x:chunk(chunk_idx)
     if len > 0 then
-      ffi.copy(z_buf, base_data, qconsts.qtypes[x:fldtype()].width * len)
+      -- Can't use base_data directly for put_chunk is it is not of type CMEM
+      ffi.copy(z_buf, base_data, width * len)
       z:put_chunk(z_buf, nn_data, len)
-      ffi.fill(z_buf, qconsts.chunk_size)
+      ffi.fill(z_buf, z_buf_size)
     end
     chunk_idx = chunk_idx + 1
-  until(len ~= qconsts.chunk_size)
-  
+  until(len ~= chunk_size)
+ 
   -- Initialize chunk_idx to zero
   chunk_idx = 0
   
@@ -31,15 +39,14 @@ local function cat(x, y)
   repeat
     local len, base_data, nn_data = y:chunk(chunk_idx)
     if len > 0 then
-      ffi.copy(z_buf, base_data, qconsts.qtypes[x:fldtype()].width * len)
+      ffi.copy(z_buf, base_data, width * len)
       z:put_chunk(z_buf, nn_data, len)
-      ffi.fill(z_buf, qconsts.chunk_size)
+      ffi.fill(z_buf, z_buf_size)
     end
     chunk_idx = chunk_idx + 1
-  until(len ~= qconsts.chunk_size)  
+  until(len ~= chunk_size)  
   
   -- EOV the output vector 
-  -- TODO: shall we eov the vector?
   z:eov()
   
   -- nullify all meta data that might have been rendered invalid
