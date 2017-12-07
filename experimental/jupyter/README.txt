@@ -2,7 +2,7 @@ Following are the sequential steps to try the Q integration with Jupyter
 
 - Install Q
 $ cd Q
-$ bash q_install.sh
+$ sudo bash q_install.sh
 
 - Install Jupyter (Follow steps mentioned in "docs/jupyter_install.txt")
 
