@@ -3,6 +3,7 @@ local function cat(x, y)
   local base_qtype  = require 'Q/UTILS/lua/is_base_qtype'
   local qconsts     = require 'Q/UTILS/lua/q_consts'
   local ffi         = require 'Q/UTILS/lua/q_ffi'
+  
   assert(type(x) == "lVector", "x must be a vector")
   assert(type(y) == "lVector", "y must be a vector")
   assert(x:fldtype() == y:fldtype(), "both vectors must have same type")
@@ -19,27 +20,34 @@ local function cat(x, y)
   
   -- Create z vector
   local z = lVector({qtype = qtype, gen = true, has_nulls = x:has_nulls()})
-  
   -- Process X vector
   repeat
     local len, base_data, nn_data = x:chunk(chunk_idx)
     if len > 0 then
-      -- Can't use base_data directly for put_chunk is it is not of type CMEM
-      ffi.copy(z_buf, base_data, width * len)
+      -- Can't use base_data directly for put_chunk as it is not of type CMEM
+      if qtype == "B1" then
+        ffi.copy(z_buf, base_data, width * math.ceil(len / 8))
+      else
+        ffi.copy(z_buf, base_data, width * len)
+      end
       z:put_chunk(z_buf, nn_data, len)
       ffi.fill(z_buf, z_buf_size)
     end
     chunk_idx = chunk_idx + 1
   until(len ~= chunk_size)
- 
+  
   -- Initialize chunk_idx to zero
   chunk_idx = 0
   
-  -- Process Y Vector
+  -- Process Y vector
   repeat
     local len, base_data, nn_data = y:chunk(chunk_idx)
     if len > 0 then
-      ffi.copy(z_buf, base_data, width * len)
+      if qtype == "B1" then
+        ffi.copy(z_buf, base_data, width * math.ceil(len / 8))
+      else
+        ffi.copy(z_buf, base_data, width * len)
+      end
       z:put_chunk(z_buf, nn_data, len)
       ffi.fill(z_buf, z_buf_size)
     end

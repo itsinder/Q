@@ -204,4 +204,75 @@ tests.t7 = function()
   end    
 end
 
+tests.t8 = function()
+  -- Case8
+  -- x and y are of type B1  
+  local x_table = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1}
+  local y_table = {1, 0, 1, 1}
+  
+  local x = Q.mk_col(x_table, "B1")
+  local y = Q.mk_col(y_table, "B1")
+
+  local z = Q.cat(x, y)
+  
+  assert(z:length() == (x:length() + y:length()))
+  
+  local z_val, z_nn_val, val, nn_val
+  
+  for i = 1, x:length() do
+    z_val, z_nn_val = c_to_txt(z, i)
+    if not z_val then z_val = 0 end
+    val = x_table[i]
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+  
+  for i = 1, y:length() do
+    z_val, z_nn_val = c_to_txt(z, i + x:length())
+    if not z_val then z_val = 0 end
+    val = y_table[i]
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end 
+end
+
+tests.t9 = function()
+  -- Case9 -- B1
+  -- x > chunk_size and y < chunk_size
+  local x_length = 65535
+  local y_length = 4
+
+  local x_table = {}
+  for i = 1, x_length do
+    if i % 2 == 1 then
+      table.insert(x_table, 1)
+    else
+      table.insert(x_table, 0)
+    end
+  end
+  local y_table = {1, 1, 1, 1}
+  local x = Q.mk_col(x_table, "B1")
+  local y = Q.mk_col(y_table, "B1")
+
+  local z = Q.cat(x, y)
+  
+  assert(z:length() == (x:length() + y:length()), "Mismatch, Expected = " .. tostring(x:length() + y:length()) .. ", Actual = " .. tostring(z:length()))
+  
+  local z_val, z_nn_val, val, nn_val
+  
+  for i = 1, x:length() do
+    z_val, z_nn_val = c_to_txt(z, i)
+    if not z_val then z_val = 0 end
+    val = x_table[i]
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+  print("X validation is done")
+  for i = 1, y:length() do
+    z_val, z_nn_val = c_to_txt(z, i + x:length())
+    if not z_val then z_val = 0 end
+    print(z_val)
+    val = y_table[i]
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+end
+
+
 return tests
