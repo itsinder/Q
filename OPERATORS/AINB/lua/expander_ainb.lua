@@ -32,10 +32,11 @@ local expander_ainb = function(op, a, b)
 
 
   -- allocate buffer for output
-  local csz = qconsts.chunk_size -- over allocated but needed by C 
-  local cbuf = assert(ffi.malloc(csz), "malloc failed")
+  local csz = qconsts.chunk_size -- over allocated but needed by C
+  local cbuf = nil
   local chunk_idx = 0
   local function ainb_gen()
+    cbuf = cbuf or ffi.malloc(csz)
     local alen, aptr, nn_aptr = a:chunk(chunk_idx) 
     if ( ( not alen ) or ( alen == 0 ) ) then
       return 0, nil, nil
