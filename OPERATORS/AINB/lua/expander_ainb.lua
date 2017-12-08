@@ -18,18 +18,12 @@ local expander_ainb = function(op, a, b)
   assert(blen > 0)
   assert(bptr)
 
-  local b_sort_order
-  if ( blen > 31 ) then 
-    b_sort_order = assert(b:get_meta("sort_order"))
-    assert(b_sort_order == "asc")
-  end
+  local b_sort_order = b:get_meta("sort_order")
 
   local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype(), blen, b_sort_order)
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
-
-
 
   -- allocate buffer for output
   local csz = qconsts.chunk_size -- over allocated but needed by C
