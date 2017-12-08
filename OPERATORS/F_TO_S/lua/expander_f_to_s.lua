@@ -2,6 +2,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local Reducer = require 'Q/RUNTIME/lua/Reducer'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
+local chk_chunk      = require 'Q/UTILS/lua/chk_chunk'
 
 return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
@@ -23,13 +24,7 @@ return function (a, x, y, optargs )
   local lgen = function()
     local idx = chunk_index * qconsts.chunk_size
     local x_len, x_chunk, nn_x_chunk = x:chunk(chunk_index)
-    if ( x_len ) then 
-      assert(type(x_len) == "number")
-      if ( x_len > 0 ) then 
-        assert(x_chunk)
-        assert(type(x_chunk) == "CMEM") 
-      end
-    end 
+    assert(chk_chunk(x_len, x_chunk, nn_x_chunk))
     chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
       qc[func_name](x_chunk, x_len, reduce_struct, idx);
