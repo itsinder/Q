@@ -172,5 +172,5 @@ export LUA_PATH="/home/subramon/WORK/?.lua;;"
 # export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 # export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "
 alias ghub='cat /home/subramon/GitHubtoken.txt'
-alias netstart='sudo service network-manager restart'
+alias netstart='sudo ifdown --exclude=lo -a && sudo ifup --exclude=lo -a '
 source $HOME/WORK/Q/setup.sh
