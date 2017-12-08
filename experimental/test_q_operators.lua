@@ -8,6 +8,8 @@ Steps to modify chunk_size to 64
 -- For all tests, set chunk size to 64
 -- Weird behavior: if I uncomment Q.print_csv() statement from below tests then all tests works except t1
 
+-- Date 9/12/2017 - now not observing weird behavior because of fix in vector code
+
 local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
@@ -18,11 +20,11 @@ local tests = {}
 -- for second chunk it gives wrong values
 tests.t1 = function()
   local input_table = {}
-  for i=1, 64 do
+  for i=1, 65536 do
     input_table[i] = 1
   end
-  input_table[65] = 0
-  input_table[66] = 1
+  input_table[655537] = 0
+  input_table[65538] = 1
   local b = Q.mk_col(input_table, "B1")
   -- Q.print_csv(b, nil, "/tmp/b_out.txt")
   for i = 1, b:length() do
@@ -40,7 +42,7 @@ end
 -- When specifying len greater than chunk_size, the first value I am getting is zero instead of start value.
 -- But if I set len equal to chunk_size or less than that then getting proper values.
 tests.t2 = function()
-  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 70} )
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65540} )
   a:eval()
   -- Q.print_csv(a, nil, "/tmp/seq_out")
   val, nn_val = c_to_txt(a, 1)  
@@ -52,7 +54,7 @@ end
 -- Not getting proper result when using vector with length greater than chunk_size
 tests.t3 = function()
   local a_input_table = {}
-  for i=1, 66 do
+  for i=1, 65538 do
     a_input_table[i] = i
   end
   local a = Q.mk_col(a_input_table, "I4")
@@ -71,19 +73,19 @@ end
 -- Not getting correct result with Q.sum
 tests.t4 = function()
   local a_input_table = {}
-  for i=1, 66 do
+  for i=1, 65538 do
     a_input_table[i] = i
   end
   local a = Q.mk_col(a_input_table, "I4")  
   -- Q.print_csv(a, nil, "/tmp/a_out.txt")
   local res = Q.sum(a):eval():to_num()
-  assert(res == ( ( 66 * 67 ) / 2 ) )
+  assert(res == ( ( 65538 * 65539 ) / 2 ) )
   
-  local b = Q.seq({start = 1, by = 1, qtype = "I4", len = 66})
+  local b = Q.seq({start = 1, by = 1, qtype = "I4", len = 65538})
   b:eval()
   -- Q.print_csv(b, nil, "/tmp/b_out.txt")
   res = Q.sum(b):eval():to_num()
-  assert(res == ( ( 66 * 67 ) / 2 ) )
+  assert(res == ( ( 65538 * 65539 ) / 2 ) )
 end
 
 return tests
