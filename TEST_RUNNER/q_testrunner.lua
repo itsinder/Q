@@ -22,7 +22,12 @@ local run_tests = function(tests, name)
         local n = tonumber(name)
         if n then name = n end
         local test = tests[name]
-        if test then test() else print("Test " .. name .. " not found!") end
+        if test then 
+          test()
+        else 
+          print("Test " .. name .. " not found!")
+          return {}, {name .. " = Test Not Found"}
+        end
         return {name}, {} -- we're here means it passed :)
     else
         local pass = {}

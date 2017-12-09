@@ -39,6 +39,7 @@
           end
         end
       else
+        print(operator, intype)
         status, subs, tmpl = pcall(sp_fn, intype)
         if ( status ) then 
           assert(type(subs) == "table")

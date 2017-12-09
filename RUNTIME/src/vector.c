@@ -255,7 +255,7 @@ static int l_vec_get_chunk( lua_State *L)
     idx = chunk_num * chunk_size;
   }
   bool is_malloc = false; uint64_t sz = 0;
-  if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_nascent ) ) {
+  if ( ( chunk_num < ptr_vec->chunk_num ) && ( ! ptr_vec->is_eov ) ) {
     is_malloc = true;
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;

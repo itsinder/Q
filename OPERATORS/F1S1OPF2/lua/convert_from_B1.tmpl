@@ -1,0 +1,55 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include <unistd.h>
+#include <stdint.h>
+#include <math.h>
+
+extern int
+${fn}(  
+      const uint64_t * const restrict in,
+      uint64_t *nn_in,
+      uint64_t nR,
+      void *dummy,
+      ${out_ctype} * restrict out,  
+      uint64_t *nn_out
+      ) 
+;
+
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(  
+      const uint64_t * const in,
+      uint64_t *nn_in,
+      uint64_t nR,
+      void *dummy,
+      ${out_ctype} * restrict out,  
+      uint64_t *nn_out
+      )
+
+{
+  int status = 0;
+  if ( in == NULL ) { go_BYE(-1); }
+  if ( nR == 0 ) { go_BYE(-1); }
+
+// TODO #pragma omp parallel for 
+  for ( uint64_t i = 0; i < nR; i++ ) { 
+
+    uint64_t widx = i >> 6; // word index
+    uint64_t bidx = i & 0x3F; // bit index
+
+    uint64_t inv = ( in[widx] >> bidx )  & 0x1;
+    out[i] = inv;
+  } 
+BYE:
+    if ( status < 0 ) { WHEREAMI; }
+  return status;
+}
+   ]]
+}

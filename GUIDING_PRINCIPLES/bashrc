@@ -132,28 +132,6 @@ export ME='rameshsubramonian'
 # added by Anaconda2 4.2.0 installer
 export PATH="/home/subramon/anaconda2/bin:$PATH"
 
-SSH_ENV="$HOME/.ssh/environment"
-
-function start_agent {
-    echo "Initialising new SSH agent..."
-    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    echo succeeded
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
-    /usr/bin/ssh-add;
-}
-
-# Source SSH settings, if applicable
-
-if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    #ps ${SSH_AGENT_PID} doesn't work under cywgin
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-        start_agent;
-    }
-else
-    start_agent;
-fi
 # sudo iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 8000 -j ACCEPT
 alias pi='ssh -AY pi@192.168.1.68' #-- login to raspberry PI
 # Following to change prompt so that I know which branch I am on
@@ -172,5 +150,6 @@ export LUA_PATH="/home/subramon/WORK/?.lua;;"
 # export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
 # export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "
 alias ghub='cat /home/subramon/GitHubtoken.txt'
-alias netstart='sudo service network-manager restart'
+alias netstart='sudo ifdown --exclude=lo -a && sudo ifup --exclude=lo -a '
+>>>>>>> bd9c452665900ea84b75ba7b5acdfb57e84aaabb
 source $HOME/WORK/Q/setup.sh
