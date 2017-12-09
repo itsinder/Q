@@ -64,7 +64,6 @@ end
 
 --=======================================
 
-os.execute("rm _*.bin") 
 return tests
 
 
