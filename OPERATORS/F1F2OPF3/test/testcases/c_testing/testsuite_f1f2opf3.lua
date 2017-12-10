@@ -1,7 +1,8 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plpath = require 'pl.path'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/F1F2OPF3/test/testcases/c_testing"
 
 -- list of qtypes to be operated on
 local all_qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }

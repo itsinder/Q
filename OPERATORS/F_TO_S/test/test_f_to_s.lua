@@ -49,5 +49,25 @@ tests.t_sum_sqr = function ()
   print("t_sum_sqr succeeded")
 end
 
+tests.t_is_next = function ()
+  for j = 1, 2 do 
+    local optargs
+    if ( j == 2 ) then optargs = {mode = "fast"} end 
+    local z = Q.is_next(c1, "gt", optargs)
+    assert(type(z) == "Reducer")
+    local a, b = z:eval()
+    assert(type(a) == "boolean")
+    assert(type(b) == "number")
+    print(a)
+    assert(a == true)
+    if ( j == 1 ) then 
+      assert(b == c1:length())
+    end
+  end
+  print("t_is_next succeeded")
+end
+
+-- TODO UTPAL Write more tests on is_next 
+
 return tests
 

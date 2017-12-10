@@ -7,7 +7,8 @@ local validate_meta = require("Q/OPERATORS/LOAD_CSV/lua/validate_meta")
 
 local tests = {}
 
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test"
 local meta_data_file = script_dir .. "/good_meta_data.lua"
 local T = dofile(meta_data_file)
 

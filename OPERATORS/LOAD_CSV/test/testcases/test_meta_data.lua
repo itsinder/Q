@@ -8,7 +8,8 @@ local plstring = require 'pl.stringx'
 local validate_meta = require 'Q/OPERATORS/LOAD_CSV/lua/validate_meta'
 
 --_G["Q_META_DATA_DIR"] = "./metadata"
-local script_dir = plpath.dirname(plpath.abspath(arg[1]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/testcases"
 
 local tests = {}
 
@@ -20,7 +21,7 @@ for i, m in ipairs(T) do
   
   tests[m.testcase_no] = function()
     print("Testing " .. m.meta)
-    local M = dofile(script_dir .."/test_metadata/"..m.meta)
+    local M = dofile(script_dir .."/metadata/"..m.meta)
     local status, ret = pcall(validate_meta, M)
     --local status, ret = validate_meta(M)
     if ( not status ) then 

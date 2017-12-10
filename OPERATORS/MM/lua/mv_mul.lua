@@ -24,8 +24,9 @@ local mv_mul = function(X, y)
   local Xptr -- malloc space for pointers to chunks of X
   local first_call = true
   local y_len, yptr, nn_yptr 
-
-  local gen_fn = function(chunk_idx)
+  local chunk_idx = 0
+  
+  local gen_fn = function()
     if  ( first_call ) then 
       -- print("malloc'ing for generator of mv_mul")
       -- START: malloc
@@ -38,7 +39,7 @@ local mv_mul = function(X, y)
       -- STOP : malloc
 
       --all of y needs to be evaluated
-      y_len, yptr, nn_yptr = y:chunk()
+      y_len, yptr, nn_yptr = y:get_all()
       assert(nn_yptr == nil, "Don't support null values")
       assert(yptr)
       assert(y_len == #X, "Y must have same length as num cols of X")
@@ -58,6 +59,7 @@ local mv_mul = function(X, y)
       Xptr[xidx-1] = ffi.cast("double *", xptr)
     end
     -- STOP : assemble Xptr
+    chunk_idx = chunk_idx + 1
     --=================================
     if ( len > 0 ) then 
       -- mv_mul_simple_F4_F4_F4( double ** x, double * y, double * z, int m, int k); 
@@ -71,5 +73,3 @@ local mv_mul = function(X, y)
   return lVector( {gen = gen_fn, has_nulls = false, qtype = "F8"} )
 end
 return require('Q/q_export').export('mv_mul', mv_mul)
-
-

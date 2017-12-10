@@ -19,9 +19,10 @@ local function vs_ifxthenyelsez(x, y, z)
   local func_name = assert(subs.fn)
   -- allocate buffer for output
   local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
-  local wbuf = assert(ffi.malloc(wbufsz))
+  local wbuf = nil
   --
   local function vs_ifxthenyelsez_gen(chunk_idx)
+    wbuf = wbuf or ffi.malloc(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
     local ylen, yptr, nn_yptr = y:chunk(chunk_idx) 
     if ( ylen == 0 )  then

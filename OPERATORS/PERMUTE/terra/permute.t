@@ -52,10 +52,10 @@ return function(val_col, idx_col, idx_in_src)
   if ( idx_n > 2147483647 ) then assert(idx_qtype ~= "I4") end
   
   -- get one chunk with everything in it
-  local chk_val_n, val_vec, nn_val_vec = val_col:chunk()
+  local chk_val_n, val_vec, nn_val_vec = val_col:get_all()
   assert (chk_val_n == val_n, "Didn't get full input array in permute()")
 
-  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:chunk()
+  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:get_all()
   assert (chk_idx_n == idx_n, "Didn't get full input array in permute()")
 
   -- TODO setting size as (val_n - 1) also passes test-cases. WHY ??!!!

@@ -9,8 +9,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#define Q_CHUNK_SIZE 65536 //  TODO P1 
-// Above should not be needed. Should come from q_constants.h
+// #include "q_constants.h" // gets us Q_CHUNK_SIZE 
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
@@ -19,6 +18,28 @@
 // TODO Delete luaL_Buffer g_errbuf;
 extern luaL_Buffer g_errbuf;
 
+static int 
+get_chunk_size(
+  lua_State *L,
+  int32_t *ptr_chunk_size
+)
+{
+  int status = 0;
+  *ptr_chunk_size = 0;
+  static int32_t chunk_size = 0; 
+  if ( chunk_size == 0 ) { 
+    status = luaL_dostring(L, "return require('Q/UTILS/lua/q_consts').chunk_size");
+    if ( status != 0 ) {
+      fprintf(stderr, "Failed in getting chunk_size:  %s\n", lua_tostring(L, -1));
+      exit(1);
+    }
+    chunk_size = lua_tonumber(L, -1);
+    lua_pop(L, 1); 
+  }
+  *ptr_chunk_size = chunk_size;
+BYE:
+  return status;
+}
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
 
@@ -137,7 +158,8 @@ static int l_vec_eov( lua_State *L) {
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: vec_eov. ");
-  return 2;
+  lua_pushnumber(L, status);
+  return 3;
 }
 //----------------------------------------
 static int l_vec_release_vec_buf( lua_State *L) {
@@ -157,7 +179,6 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_get_vec_buf( lua_State *L) {
-  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   char *chunk = vec_get_buf(ptr_vec); 
   if ( chunk != NULL ) { 
@@ -168,7 +189,6 @@ static int l_vec_get_vec_buf( lua_State *L) {
     lua_setmetatable(L, -2);
     return 1;
   }
-BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: no chunk for materialized vector");
   return 2;
@@ -218,10 +238,12 @@ static int l_vec_get_chunk( lua_State *L)
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
   uint64_t idx = 0;
+  int32_t chunk_size;
+  status = get_chunk_size(L, &chunk_size); cBYE(status);
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
     if ( chunk_num < 0 ) { go_BYE(-1); }
-    idx = chunk_num * Q_CHUNK_SIZE;
+    idx = chunk_num * chunk_size;
   }
   else {
     if ( ptr_vec->is_nascent ) { 
@@ -230,10 +252,10 @@ static int l_vec_get_chunk( lua_State *L)
     else {
       chunk_num = 0;
     }
-    idx = chunk_num * Q_CHUNK_SIZE;
+    idx = chunk_num * chunk_size;
   }
   bool is_malloc = false; uint64_t sz = 0;
-  if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_nascent ) ) {
+  if ( ( chunk_num < ptr_vec->chunk_num ) && ( ! ptr_vec->is_eov ) ) {
     is_malloc = true;
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;
@@ -243,7 +265,7 @@ static int l_vec_get_chunk( lua_State *L)
     /* Set the metatable on the userdata. */
     lua_setmetatable(L, -2);
   }
-  status = vec_get(ptr_vec, idx, Q_CHUNK_SIZE, &ret_addr, &ret_len);
+  status = vec_get(ptr_vec, idx, chunk_size, &ret_addr, &ret_len);
   if ( status == -2 ) { goto BYE; } // asked for too far
   cBYE(status);
   if ( is_malloc ) { 
@@ -471,8 +493,12 @@ static int l_vec_new( lua_State *L)
   bool is_memo = true;
   const char *file_name = NULL;
   int64_t num_elements = -1;
-  int32_t chunk_size  = Q_CHUNK_SIZE; // TODO SYNC with q_consts.lua
+  int32_t chunk_size;
   const char * const qtype_sz  = luaL_checkstring(L, 1);
+  /* Note that I would have normally called it qtype 
+     instead of qtype_sz but in the case of SC we send 
+     SC:len where len is an integer */
+  status = get_chunk_size(L, &chunk_size); cBYE(status);
 
   if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
     file_name = luaL_checkstring(L, 2);

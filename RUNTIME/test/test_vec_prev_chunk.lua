@@ -17,11 +17,10 @@ tests.t1 = function()
   -- ret_len should be number of elements in chunk
   s = Scalar.new(123, "I4")
   orig_ret_addr = nil
-  num_iters = 1
-  if ( #arg == 1 ) then 
-    num_iters = assert(tonumber(arg[1]))
-    print("num_iters = ", num_iters)
-  end
+  num_iters = 1 -- default value 
+  
+  print("num_iters = ", num_iters)
+
   for j = 1, num_iters do
     local y = Vector.new('I4')
     for i = 1, chunk_size do 

@@ -48,7 +48,7 @@ local function package_betas(betas)
   local function append_1(x)
     -- TODO: this is awful
     local x_with_1 = {}
-    x_size, x_chunk = x:chunk()
+    x_size, x_chunk = x:get_all()
     for i = 1, x_size do
       x_with_1[i] = x_chunk[i-1]
     end
@@ -115,7 +115,7 @@ local function package_betas(betas)
     local len = 0
     for i = 1, #betas - 1 do
       val = Q.mv_mul(X, betas[i])
-      len, val, _ = val:chunk()
+      len, val, _ = val:get_all()
       val = ffi.cast('double*', val)
       vals[i] = val
     end

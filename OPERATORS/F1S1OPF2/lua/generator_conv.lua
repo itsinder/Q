@@ -5,7 +5,7 @@
   if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
   if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 
-  local qtypes = { 'I1', 'I2', 'I4', 'I8','F4', 'F8', 'B1' }
+  local qtypes = { 'B1', 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
   local num_produced = 0
   local sp_fn = assert(require("convert_specialize"))
@@ -28,13 +28,11 @@
     for _, out_qtype in ipairs(qtypes) do 
       if ( out_qtype ~= in_qtype ) then
         status = pcall(generate_files, in_qtype, out_qtype, { is_safe = true })
-        assert(status, "Failed to generate files for safe mode")
-        if ( ( in_qtype == "B1" ) or ( out_qtype == "B1" ) )  then 
-          print("TODO ")
-        else
-          status = pcall(generate_files, in_qtype, out_qtype, {is_safe = false})
-          assert(status, "Failed to generate files for unsafe mode")
-        end
+        assert(status, 
+         "Failed to generate files for safe mode" .. in_qtype .. out_qtype)
+        status = pcall(generate_files, in_qtype, out_qtype, {is_safe = false})
+        assert(status, 
+         "Failed to generate files for unsafe mode" .. in_qtype .. out_qtype)
       end
     end
   end

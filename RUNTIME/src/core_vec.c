@@ -339,6 +339,8 @@ vec_free(
         printf("Unable to delete %s \n", ptr_vec->file_name); WHEREAMI;
       }
     }
+    /* NOTE Remove can fail because (1) file does not exist 
+      (2) permission to delete not there */
     if ( file_exists(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
@@ -674,7 +676,12 @@ vec_get(
         offset = chunk_idx * ptr_vec->field_size;
       }
       ret_addr = ptr_vec->chunk + offset;
-      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));    
+      if ( len == 0 ) {
+        ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+      }
+      else {
+        ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+      }
       *ptr_ret_addr = ret_addr;
       *ptr_ret_len  = ret_len;
       // Nothing more to do. Get out of here

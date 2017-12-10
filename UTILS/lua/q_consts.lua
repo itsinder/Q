@@ -1,6 +1,7 @@
 local qconsts = {}
 --===========================
   qconsts.debug = false -- set to TRUE only if you want debugging
+  qconsts.qc_trace = true -- set to FALSE if performance logging of qc is to be turned off
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
@@ -148,7 +149,7 @@ local qconsts = {}
       max = 1,
       max_txt_width = 2,
       width = 1, -- This has to be handled as a special case
-      ctype = "unsigned char",
+      ctype = "unsigned char", -- TODO change this to uint64_t 
       txt_to_ctype = "",
       ctype_to_txt = "TBD" 
     }

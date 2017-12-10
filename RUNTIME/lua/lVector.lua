@@ -262,6 +262,9 @@ function lVector:num_elements()
 end
 
 function lVector:length()
+  if ( not self:is_eov() ) then 
+    return nil
+  end
   if ( qconsts.debug ) then self:check() end
   return Vector.num_elements(self._base_vec)
 end
@@ -455,8 +458,7 @@ function lVector:get_vec_buf()
 end
 
 function lVector:get_all()
-  -- TODO P2. This is the same as chunk() without parameters
-  -- Consider deprecating this in the near future
+  assert(self:is_eov())
   local nn_addr, nn_len
   local base_addr, base_len = assert(Vector.get(self._base_vec, 0, 0))
   assert(base_len > 0)
@@ -488,26 +490,14 @@ end
 
 function lVector:chunk(chunk_num)
   local status
-  local l_chunk_num = 0
   local base_addr, base_len
   local nn_addr,   nn_len  
   local is_nascent = Vector.is_nascent(self._base_vec)
-  local is_eov = self:is_eov() 
-  if ( chunk_num ) then 
-    assert(type(chunk_num) == "number")
-    assert(chunk_num >= 0)
-    l_chunk_num = chunk_num
-  else
-    -- Note from Krushnakant: When I call chunk() method for nascent
-    -- vector without passing chunk number, what should be it's behavior?
-    -- As per my thinking, it should return me the current chunk,
-    if ( is_nascent ) then 
-      l_chunk_num = Vector.chunk_num(self._base_vec)
-    else
-      l_chunk_num = 0
-      -- NOT an error assert(nil, "Provide chunk_num for chunk() on materialized vector")
-    end
-  end
+  local is_eov = self:is_eov()
+  assert(chunk_num, "chunk_num is a mandatory argument")
+  assert(type(chunk_num) == "number")
+  assert(chunk_num >= 0)
+  local l_chunk_num = chunk_num
   -- There are 2 conditions under which we do not need to compute
   -- cond1 => Vector has been materialized
   local cond1 = is_eov

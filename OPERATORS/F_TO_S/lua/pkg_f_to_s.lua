@@ -1,16 +1,13 @@
 
 local plfile = require 'pl.file'
 local s = [===[
-local function <<operator>>(x)
-  if type(x) == "lVector" then
-    local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_f_to_s')
-    -- y is a Scalar
-    local status, y = pcall(expander, "<<operator>>", x)
-    if ( not status ) then print(y) end
-    assert(status, "Could not execute <<operator>>")
-    return y
-  end
-  assert(nil, "input must be of type lVector")
+local function <<operator>>(x, y)
+  assert(type(x) == "lVector", "input must be of type lVector")
+  local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_f_to_s')
+  local status, z = pcall(expander, "<<operator>>", x, y)
+  if ( not status ) then print(z) end
+  assert(status, "Could not execute <<operator>>")
+  return z
 end
 T.<<operator>> = <<operator>>
 require('Q/q_export').export('<<operator>>', <<operator>>)

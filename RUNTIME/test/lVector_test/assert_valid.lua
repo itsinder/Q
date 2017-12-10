@@ -6,7 +6,6 @@ local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
 
 local fns = {}
 
@@ -290,7 +289,7 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   assert(plpath.getsize(md.base.file_name) == num_elements * md.base.field_size, "File size mismatch with expected value")
   
   -- Try to modify values of a read only vector
-  local len, base_data, nn_data = vec:chunk()
+  local len, base_data, nn_data = vec:get_all()
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
@@ -418,7 +417,7 @@ fns.assert_nascent_vector8_1_1 = function(vec, test_name, num_elements, gen_meth
   vec:end_write()
   
   -- Now chunk() should work as open_mode set to 0, validate modified value
-  len, base_data, nn_data = vec:chunk()
+  len, base_data, nn_data = vec:get_all()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   assert(iptr[0] == test_value, "Value mismatch with expected value")
@@ -491,7 +490,7 @@ fns.assert_nascent_vector8_2 = function(vec, test_name, num_elements, gen_method
   assert(status, "Metadata validation failed after vec:eov()")
   
   -- Now chunk() should work as open_mode set to 1
-  local len, base_data, nn_data = vec:chunk()
+  local len, base_data, nn_data = vec:get_all()
   assert(base_data)
   
   return true
@@ -546,7 +545,7 @@ fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
   assert(md.base.is_nascent == true, "Expected a nascent vector, but not a nascnet vector")  
 
   -- Try chunk() without passing chunk_num, it should return the current chunk
-  local len, base_data, nn_data = vec:chunk()
+  local len, base_data, nn_data = vec:get_all()
   assert(base_data)
   assert(len == md.base.num_in_chunk)
   
@@ -556,6 +555,9 @@ end
 
 -- create a materialized vector and validate values
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
+  print("##########################")
+  print(vec)
+  print("##########################")
   -- common checks for vectors
   assert(vec:check())
   
@@ -646,7 +648,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   vec:end_write()
   
   -- Now chunk() should work as open_mode set to 0, validate modified value
-  len, base_data, nn_data = vec:chunk()
+  len, base_data, nn_data = vec:get_all()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   assert(iptr[0] == test_value, "Value mismatch with expected value")
@@ -679,7 +681,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
  
    -- Try to modify value using start_write()
   assert(vec:start_write(), "Failed to open the mmaped file in write mode")
-  local len, base_data, nn_data = vec:chunk()
+  local len, base_data, nn_data = vec:get_all()
   -- Can't read as open_mode is set to 2, read operation requires it to be 0
   assert(base_data == nil)
   
@@ -687,7 +689,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   vec:end_write()
   
   -- Now chunk() should work as open_mode set to 0
-  len, base_data, nn_data = vec:chunk()
+  len, base_data, nn_data = vec:get_all()
   assert(base_data)
   -- local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   -- status = pcall(set_value, iptr, 0, 123)
@@ -696,7 +698,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   --[[
   -- Try setting value
   local test_value = 101
-  local len, base_data, nn_data = vec:chunk()
+  local len, base_data, nn_data = vec:get_all()
   assert(nn_data)
   local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
   status = pcall(set_value, iptr, 0, test_value)

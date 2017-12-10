@@ -2,7 +2,8 @@ local plpath  = require 'pl.path'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local utils = require 'Q/UTILS/lua/utils'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
 
 -- Negative testcase: materialized vector file not found
 -- should fail for all qtypes as the bin file is not present

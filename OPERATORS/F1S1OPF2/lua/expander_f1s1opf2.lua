@@ -33,6 +33,7 @@
     local f2_width = qconsts.qtypes[f2_qtype].width
     if f2_qtype == "B1" then f2_width = 1 end -- over count okay
     local buf_sz = qconsts.chunk_size * f2_width
+    print("buf_sz = ", buf_sz)
     local f2_buf    = nil
     local nn_f2_buf = nil
     local has_nulls  
@@ -41,20 +42,21 @@
     else
       has_nulls = false
     end
+    local chunk_idx = 0
     --============================================
-    local f2_gen = function(chunk_idx)
+    local f2_gen = function()
       f2_buf = f2_buf or ffi.malloc(buf_sz)
       assert(f2_buf)
-      if not nn_f2_buf then 
+      if not nn_f2_buf and has_nulls then 
         nn_f2_buf = ffi.malloc(qconsts.chunk_size)
         assert(nn_f2_buf)
         ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
       end
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
       if f1_len > 0 then
-
         qc[func_name](f1_chunk, nn_f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
       end
+      chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf
     end
     

@@ -8,7 +8,7 @@ local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local tests = {}
 tests.t1 = function() 
   local input = {1,0,0,0,1,1,0,1,0}
-  col  =  mk_col(input, "B1")
+  local col  =  mk_col(input, "B1")
   assert(col)
   assert(type(col) == "lVector", " Output of mk_col is not lVector")
   for i=1,col:length() do
@@ -21,11 +21,11 @@ tests.t1 = function()
 end
 tests.t2 = function() 
   local input = {true, false, true, false}
-  col  =  mk_col(input, "B1")
+  local col  =  mk_col(input, "B1")
   assert(col)
   assert(type(col) == "lVector", " Output of mk_col is not lVector")
   for i=1,col:length() do
-    x = col:get_one(i-1)
+    local x = col:get_one(i-1)
     assert(x)
     assert(type(x) == "Scalar")
     assert(x:to_str() == tostring(input[i]))

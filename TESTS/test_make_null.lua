@@ -12,7 +12,7 @@ tests.t1 = function ()
 	x:make_nulls(y)
 	assert(x:has_nulls() == true)
 	-- ptrs should reflect existence of nn vector
-	local len, xptr, nn_xptr = x:chunk()
+	local len, xptr, nn_xptr = x:get_all()
 	assert(len > 0)
 	assert(xptr)
 	assert(nn_xptr) -- must have null value now 

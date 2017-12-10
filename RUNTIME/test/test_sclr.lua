@@ -112,6 +112,7 @@ tests.t7 = function()
   local vals = { 127, -128 }
   local orig_qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" } 
   local qtypes = { "SC", "SV", "B1" } 
+  print("START: Deliberate error")
   for _, orig_qtype in pairs(orig_qtypes) do 
     for _, val in pairs(vals) do 
       for _, qtype in pairs(qtypes) do 
@@ -121,11 +122,13 @@ tests.t7 = function()
       end
     end
   end
+  print("STOP : Deliberate error")
   print("test 7 passed")
 end
 tests.t8 = function()
  -- just bad values 
   local status, err
+  print("START: Deliberate error")
   status, err = Scalar.new("128", "I1"); assert(not status)
   status, err = Scalar.new("-129", "I1"); assert(not status)
 
@@ -134,6 +137,7 @@ tests.t8 = function()
 
  -- TODO complete 
 
+  print("STOP : Deliberate error")
   print("test 8 passed")
 end
 tests.t9 = function()
@@ -222,6 +226,39 @@ tests.t10_I8 = function()
   local s1 = Scalar.new(9007199254740993, "F8")
   local s2 = assert(s1:conv("I8"))
   assert(s1 == s2)
+end
+tests.t11 = function()
+  local s1 = Scalar.new(127, "I1") 
+  local s2 = Scalar.new(-127, "I1")
+  local s3 = s2:abs()
+  assert(s1 == s3)
+ --==========
+  assert(Scalar.new(32767, "I2") == Scalar.new(-32767, "I2"):abs())
+  assert(Scalar.new(2147483647, "I4") == Scalar.new(-2147483647, "I4"):abs())
+  -- TODO Utpal 
+  -- Write tests for I8/F4/F8
+  s1 = Scalar.new(1.79769313486231470e+308, "F8")
+  s2 = Scalar.new(-1.79769313486231470e+308, "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+end
+
+tests.t11 = function()
+  s1 = Scalar.new("1.79769313486231470e+308", "F8")
+  s2 = Scalar.new("-1.79769313486231470e+308", "F8")
+  local s3 = s2:abs()
+  print("XX", s2)
+  print("XX", s3)
+  assert(s1 == s3)
+
+  s1 = Scalar.new("3.40282346638528860e+38", "F4")
+  s2 = Scalar.new("-3.40282346638528860e+38", "F4")
+  local s3 = s2:abs()
+  print("YY", s2)
+  print("YY", s3)
+  assert(s1 == s3)
 end
 
 return tests
