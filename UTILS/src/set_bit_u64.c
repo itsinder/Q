@@ -3,7 +3,7 @@
 //STOP_INCLUDES
 #include "_set_bit_u64.h"
 //START_FUNC_DECL
-int
+inline int
 set_bit_u64(
     uint64_t *X, 
     uint64_t i, 

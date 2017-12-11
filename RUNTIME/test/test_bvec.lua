@@ -1,4 +1,3 @@
-os.execute("rm -f _*.bin")
 require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 

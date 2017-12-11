@@ -34,8 +34,8 @@ buf_to_file(
   size_t nw = fwrite(addr, size, nmemb, fp);
   fclose(fp);
   if ( nw != nmemb ) { 
-    fprintf(stderr, "nw = %d, size = %d nmemb = %d file = %s \n", 
-        nw, size, nmemb, file_name);
+    fprintf(stderr, "nw = %lu, size = %lu nmemb = %lu file = %s \n", 
+        (long unsigned int)nw, (long unsigned int)size, (long unsigned int)nmemb, file_name);
     go_BYE(-1); 
   }
 BYE:

@@ -1,7 +1,7 @@
 #include "q_incs.h"
 #include "_get_bit_u64.h"
 //START_FUNC_DECL
-int
+inline int
 get_bit_u64(
     const uint64_t * const X,
     uint64_t i
