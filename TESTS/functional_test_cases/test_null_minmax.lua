@@ -2,13 +2,14 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
+local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/"
 local tests = {}
 tests.t1 = function ()
   -- TEST MIN MAX WITH SORT
   local meta = {
     { name = "cd", has_nulls = true, qtype = "I2", is_load = true }
   }
-  local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/"
+
   local x = Q.load_csv(datadir .. "I4_null.csv", meta)
   assert(type(x) == "table")
   for i, v in pairs(x) do

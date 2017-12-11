@@ -52,8 +52,14 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_get_bit.h :
 	lua ../lua/cli_extract_func_decl.lua get_bit.c ${INCDIR}
 
+../gen_inc/_get_bit_u64.h :
+	lua ../lua/cli_extract_func_decl.lua get_bit_u64.c ${INCDIR}
+
 ../gen_inc/_set_bit.h :
 	lua ../lua/cli_extract_func_decl.lua set_bit.c ${INCDIR}
+
+../gen_inc/_set_bit_u64.h :
+	lua ../lua/cli_extract_func_decl.lua set_bit_u64.c ${INCDIR}
 
 ../gen_inc/_is_valid_chars_for_num.h : 
 	lua ../lua/cli_extract_func_decl.lua is_valid_chars_for_num.c ${INCDIR}
@@ -95,7 +101,9 @@ hdr_files = \
 	../gen_inc/_mmap.h \
 	../gen_inc/_write_bits_to_file.h \
         ../gen_inc/_get_bit.h \
+        ../gen_inc/_get_bit_u64.h \
         ../gen_inc/_set_bit.h \
+        ../gen_inc/_set_bit_u64.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
 	../gen_inc/_bits_to_bytes.h   \
@@ -118,7 +126,9 @@ SRC_FILES=  \
 	bits_to_bytes.c \
 	write_bits_to_file.c  \
         get_bit.c  \
+        get_bit_u64.c  \
         set_bit.c  \
+        set_bit_u64.c  \
 	is_valid_chars_for_num.c \
 
 libutils.so : ${bin_search_files} ${hdr_files}

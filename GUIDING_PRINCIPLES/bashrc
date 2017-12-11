@@ -120,36 +120,23 @@ export PATH=$HOME/local/bin/:$PATH
 alias kpdf=evince
 export TEXINPUTS=$TEXINPUTS:$HOME/WORK/latex/styles/
 export LD_LIBRARY_PATH=$HOME/local/lib
-alias abdb='mysql -u root --database abdb'
-alias nwab='mysql -u root --database nwallet_ab'
 export GIT_EDITOR=vim
-alias stagemc='ssh ubuntu@54.67.123.25 -p 2220'
-alias bigfatmc='ssh ubuntu@52.8.239.34 -p 2220'
-export ME='rameshsubramonian'
-
-
-
-# added by Anaconda2 4.2.0 installer
-export PATH="/home/subramon/anaconda2/bin:$PATH"
 
 # sudo iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 8000 -j ACCEPT
 alias pi='ssh -AY pi@192.168.1.68' #-- login to raspberry PI
 # Following to change prompt so that I know which branch I am on
 . ~/git_prompt.sh
 PS1='\W:$(__git_ps1 "(%s)")\$ '
-export PATH="$HOME/LuaJIT-2.0.4/src:$PATH" # to use local LuaJIT
 alias clean='find . -name "_*" -print -exec rm -f {} \;'
 alias cleano='find . -name "*.o" -print -exec rm -f {} \;'
 alias cleanso='find . -name "*.so" -print -exec rm -f {} \;'
-export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-332a506/bin/
-# export Q_SRC_ROOT=$HOME/WORK/Q/
-# export Q_ROOT=$HOME/Q/
+# export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-332a506/bin/
 export LUA_PATH="/home/subramon/WORK/?.lua;;"
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Q_ROOT/lib
 # export LUA_INIT="@$HOME/WORK/Q/init.lua"
-# export QC_FLAGS=" -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic -fopenmp"
-# export Q_LINK_FLAGS=" -fPIC -shared -lgomp -lpthread -lm "
 alias ghub='cat /home/subramon/GitHubtoken.txt'
 alias netstart='sudo ifdown --exclude=lo -a && sudo ifup --exclude=lo -a '
->>>>>>> bd9c452665900ea84b75ba7b5acdfb57e84aaabb
 source $HOME/WORK/Q/setup.sh
+alias LJT=‘luajit  $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua’
+alias LJ="luajit -l Q/TEST_RUNNER/q_testrunner_auxsummary $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua"
+

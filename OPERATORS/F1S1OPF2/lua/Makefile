@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ 
+INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ -I../../../UTILS/gen_inc/
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG

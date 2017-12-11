@@ -8,22 +8,30 @@
 #include "_rand_file_name.h"
 #include "_buf_to_file.h"
 
-#define M 128
-#define N 65536
 int
 main()
 {
   int status = 0;
-  char X[32];
-  int Y[N];
-  for ( int i = 0; i  < N; i++ ) { 
+#define MAX_FILE_NAME 63
+  char fname[MAX_FILE_NAME+1];
+  memset(fname, '\0', MAX_FILE_NAME+1);
+
+#define BUFLEN 1048576
+  int *Y = NULL;
+  Y = malloc(BUFLEN * sizeof(int));
+  for ( int i = 0; i < BUFLEN; i++ ) { 
     Y[i] = i+1;
   }
-  for ( int i = 0; i < 65536; i++ ) { 
-    status = rand_file_name(X, 32); cBYE(status);
-    // fprintf(stderr, "i = %d, X = %s \n", i, X);
-    status = buf_to_file((const char *)Y, sizeof(int), N, X); cBYE(status);
+
+  int num_trials = 4;
+  for ( int i = 0; i < num_trials; i++ ) { 
+    status = rand_file_name(fname, MAX_FILE_NAME); cBYE(status);
+    fprintf(stderr, "i = %d, fname = %s \n", i, fname);
+    status = buf_to_file((const char * const)Y, sizeof(int), BUFLEN, fname); 
+    cBYE(status);
+    remove(fname);
   }
+
 BYE:
   return status;
 }
