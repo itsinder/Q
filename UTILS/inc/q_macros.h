@@ -44,7 +44,7 @@
 
 #define chk_range(xval, lb_incl, ub_excl) { if ( ( (xval) < (lb_incl) ) || ( (xval) >= (ub_excl ) ) ) { go_BYE(-1); } }
 
-#define get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))
+// TODO DELETE #define get_bit(x, i) ((x) & ((uint64_t) 1 << (i)))
 
 #define is_ith_bit_set(x, i) ((x) & ((uint64_t) 1 << (i))) == 0 ? false : true 
 
@@ -66,4 +66,12 @@
 #define SET_BIT(x,i)  (x)[(i) / 8] |= (1 << ((i) % 8))
 #define CLEAR_BIT(x,i) (x)[(i) / 8] &= ~(1 << ((i) % 8))
 #define GET_BIT(x,i) (((x)[(i) / 8] & (1 << ((i) % 8))) > 0)
+// following is GCC statement expression
+// #define FOO(A) ({int retval; retval = do_something(A); retval;})
+#define mcr_get_bit_u64(in, i) ( { \
+    uint64_t ii = (uint64_t) i; \
+    uint64_t widx = ii >> 6; \
+    uint64_t bidx = ii & 0x3F; \
+    uint64_t val = ( in[widx] >> bidx )  & 0x1; \
+    val; })
 #endif

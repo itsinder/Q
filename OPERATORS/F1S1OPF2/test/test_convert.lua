@@ -93,20 +93,22 @@ end
 --===========================
 tests.t6 = function()
   -- test for no-op when no conversion needed
-  local len = 16
+  local len = 32
   local qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
   for _, qtype in ipairs(qtypes) do 
     local incol = Q.period({start = 0, by = 1, period = 2, qtype = qtype, len = len })
     local outcol = Q.convert(incol, "B1")
     local outcol2 = Q.convert(outcol, qtype)
+    --[[
     incol:eval()
     outcol:eval()
     outcol2:eval()
-    print(">>>>>>>>>>>>>>>>>")
-    os.execute("sleep 30 ")
     Q.print_csv({incol, outcol, outcol2}, nil, "")
-    print("<<<<<<<<<<<<<<<<<")
-    print(Q.sum(Q.vvneq(incol, outcol2)):eval():to_num())
+    local chk_sum = Q.sum(Q.vvneq(incol, outcol2)):eval():to_num()
+    if ( chk_sum ~= 0 ) then 
+      print("ERR ", chk_sum, qtype) os.execute("sleep 60"); os.exit() 
+    end
+    --]]
     assert(Q.sum(Q.vvneq(incol, outcol2)):eval():to_num() == 0)
   end
   print("Successfully completed test t6")

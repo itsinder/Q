@@ -1,22 +1,33 @@
+-- FUNCTIONAL
 local qc  = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
-os.execute("rm -f _*")
+require 'Q/UTILS/lua/strict'
 
-local file_name = ffi.malloc(32)
-local nmemb = 65536*128
+local tests = {}
+tests.t1 = function()
+
+-- START: Create and initialize some memory 
+local nmemb = 65536
 local size = ffi.sizeof("int32_t")
 local addr = ffi.malloc(nmemb * size)
 addr = ffi.cast("int32_t *", addr)
-for i = 0, nmemb-1 do
-  addr[i] = i+1
+for i = 1, nmemb do
+  addr[i-1] = i
 end
-addr = ffi.cast("const char *", addr)
+--  addr = ffi.cast("char * ", addr)
+addr = ffi.cast("const char * const ", addr)
+-- STOP : Create and initialize some memory 
 
 for i = 1, 128 do
-  status = qc['rand_file_name'](file_name, 31)
+  local len = 48
+  local file_name = ffi.malloc(len)
+  ffi.fill(file_name, len)
+  local status = qc['rand_file_name'](file_name, len-1)
   assert(status == 0)
-  print(i, ffi.string(file_name))
+  print(i, addr, ffi.string(file_name))
   status = qc['buf_to_file'](addr, size, nmemb, file_name)
+  print(status)
   assert(status == 0)
 end
-os.execute("rm -f _*")
+end
+return tests

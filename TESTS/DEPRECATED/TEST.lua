@@ -165,7 +165,7 @@ end
 
 assert(plpath.isdir(q_root))
 assert(plpath.isdir(q_root .. "/data/"))
-os.execute("rm -r -f " .. q_root .. "/data/*")
+
 require('Q/UTILS/lua/cleanup')()
 local TOTAL, SUCCESS, FAIL, NOP = run_files(find_test_files("./", "*.lua"),
    "luajit %s",
