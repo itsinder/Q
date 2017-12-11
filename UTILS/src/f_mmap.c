@@ -22,7 +22,7 @@
 
 MMAP_REC_TYPE *
 f_mmap(
-   const char * const file_name,
+   char * const file_name,
    bool is_write
 )
 //STOP_FUNC_DECL

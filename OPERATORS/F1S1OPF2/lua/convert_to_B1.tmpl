@@ -3,6 +3,7 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "_set_bit_u64.h"
 #include <unistd.h>
 #include <stdint.h>
 #include <math.h>
@@ -40,19 +41,8 @@ ${fn}(
 
 // TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) { 
-
-    uint64_t widx = i >> 6; // word index
-    uint64_t bidx = i & 0x3F; // bit index
-
-    ${in_ctype} inv = in[i];
-    
-    if ( ! ( (  inv == 0 ) || ( inv == 1 ) ) ) {
-      status = -1; 
-      continue;
-    }
-    uint64_t x = inv;
-    x = x << bidx;
-    out[widx] |= x;
+    status = set_bit_u64(out, i, in[i]);
+    if ( status < 0 ) { continue; }
   } 
 BYE:
     if ( status < 0 ) { WHEREAMI; }

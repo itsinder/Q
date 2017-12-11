@@ -33,7 +33,6 @@
     local f2_width = qconsts.qtypes[f2_qtype].width
     if f2_qtype == "B1" then f2_width = 1 end -- over count okay
     local buf_sz = qconsts.chunk_size * f2_width
-    print("buf_sz = ", buf_sz)
     local f2_buf    = nil
     local nn_f2_buf = nil
     local has_nulls  
