@@ -8,7 +8,8 @@ tests.t1 = function ()
   local meta = {
    { name = "empid", has_nulls = true, qtype = "I4", is_load = true }
   }
-  local x = Q.load_csv("I4.csv", meta)
+  local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/"
+  local x = Q.load_csv(datadir .. "I4.csv", meta)
   assert(type(x) == "table")
   for i, v in pairs(x) do
     local y = x[i]
@@ -22,7 +23,6 @@ tests.t1 = function ()
     assert(type(p) == "lVector")
     assert(Q.sum(p):eval():to_num() == y:length())
   end
-  print("Test t1 succeeded")
 end
 
 --======================================
@@ -32,7 +32,8 @@ tests.t2 = function ()
   local meta = {
     { name = "empid", has_nulls = true, qtype = "I4", is_load = true }
   }
-  local x = Q.load_csv("I4.csv", meta)
+  local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/functional_test_cases/"
+  local x = Q.load_csv(datadir .. "I4.csv", meta)
   assert(type(x) == "table")
   for i, v in pairs(x) do
     local y = x[i]
@@ -46,7 +47,6 @@ tests.t2 = function ()
     assert(type(p) == "lVector")
     assert(Q.sum(p):eval():to_num() == y:length())
   end
-  print("Test t2 succeeded")
 end
 
 --=======================================
