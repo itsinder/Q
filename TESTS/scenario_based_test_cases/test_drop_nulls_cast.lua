@@ -2,7 +2,6 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local lVector = require 'Q/RUNTIME/lua/lVector'
-lVector = require 'Q/RUNTIME/lua/lVector'
 Scalar = require 'libsclr'
 
 local tests = {}
@@ -35,7 +34,6 @@ tests.t1 = function ()
   local c = Q.drop_nulls(a, Scalar.new(newval, "I4"))
   assert(Q.sum(c):eval():to_num() == 
     ((s2 * oldval) + ( (a:length() - s2) * newval)))
-  print("Succeeded in test drop nulls cast t1")
 end
   --=======================================
 return tests

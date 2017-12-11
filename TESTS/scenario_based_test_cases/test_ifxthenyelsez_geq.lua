@@ -20,8 +20,7 @@ tests.t1 = function ()
 	local z = Q.const( { val = 0, qtype = 'I4', len = 10} )
 	-- applying logic
 	local w = Q.ifxthenyelsez(x, y, z)
-	print("Number of elements in data set 'a' greater than in data set 'b' is", Q.sum(w):eval():to_num())
-  print("Succeeded in test ifxthenyelsez & geq t1")
+	--print("Number of elements in data set 'a' greater than in data set 'b' is", Q.sum(w):eval():to_num())
 end
   --=======================================
 return tests

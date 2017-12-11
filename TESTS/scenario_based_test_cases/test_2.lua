@@ -20,7 +20,6 @@ tests.t1 = function ()
   local s3 = Q.sum(c):eval():to_num()
   -- Comparing data sets
   assert(s1 == s2 + s3)
-  print("Succeeded in test sum of series t1")
 end
 
 --======================================

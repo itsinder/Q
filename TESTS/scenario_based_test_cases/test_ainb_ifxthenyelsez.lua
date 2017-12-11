@@ -27,9 +27,8 @@ tests.t1 = function ()
   local exp_r = Q.mk_col({50,50,50,50,100, 50, 100, 100, 50, 50 }, "I4")
   -- calculate expense as per the mapping
   local r = Q.ifxthenyelsez(x, y, z)
-  print("The expense on conducting the survey is $",Q.sum(r):eval():to_num())
+  --print("The expense on conducting the survey is $",Q.sum(r):eval():to_num())
   assert(Q.sum(Q.vveq(r, exp_r)):eval():to_num() == 10)
-  print("Succeeded in test scenario based test t1")
 end
 --======================================
 return tests
