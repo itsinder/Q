@@ -10,4 +10,5 @@ tests.t1 = function()
   assert(type(x) == "table")
   local w = assert(json.parse(y))
 end
+--======================================
 return tests

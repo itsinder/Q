@@ -49,10 +49,10 @@ starting %>%
 local tests = {}
 tests.t1 = function ()
   -- TODO Create some data for agct
-  agct = Q.load_csv("agct.csv")
+  local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/"
+  agct = Q.load_csv(datadir .."agct.csv")
   for k, v in pairs(agct) do 
-    print(k, Q.sum(Q.vseq(v, 1)):eval())
+    --print(k, Q.sum(Q.vseq(v, 1)):eval())
   end
-  print("Test t1 passed")
 end
 return tests

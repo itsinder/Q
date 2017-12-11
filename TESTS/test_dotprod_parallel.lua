@@ -43,7 +43,7 @@ tests.t1 = function ()
   bt[i] = Q.sum(Q.vvmul(X, ysubp))
   bt[i] = bt[i]:eval()
   if ( ( i % 100 ) == 1 ) then 
-    print(i)
+    --print(i)
   end
   collectgarbage()
 	end
@@ -59,30 +59,14 @@ tests.t1 = function ()
   	bt[i] = Q.sum(Q.vvmul(X, ysubp))
 	end
 	for i = 1,1000 do
-  	print(i)
   	bt[i] = bt[i]:eval()
   	collectgarbage()
 	end
---[[
-for i = 1, 1000 do
-  print("Iter ", i)
-  local status = true
-  while status do
-    status = bt[i]:next()
-    if not status then
-      bt[i] = bt[i]:value()
-    end
-  end
-end
---]]
-
 
 	for i = 1, 1000 do
-  	print("Iteration ", i)
   	assert(bt[i] == b, "original result: "..b..", different result: "..bt[i])
 	end
 
-  print("test t1 succeeded")
 end
 --=======================================
 return tests
