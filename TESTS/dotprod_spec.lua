@@ -33,7 +33,6 @@ tests.t1 = function ()
 	local b = Q.sum(Q.vvmul(X, ysubp)):eval():to_num()
 	for i = 1,1000 do
   	local btmp = Q.sum(Q.vvmul(X, ysubp)):eval():to_num()
-  	print("Iteration ", i)
   	assert(btmp == b, "original result: "..b..", different result: "..btmp)
 	end
 end

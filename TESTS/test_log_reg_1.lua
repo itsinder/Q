@@ -29,7 +29,6 @@ tests.t1 = function ()
     	end
   	end
 	end
-  print("test t1 succeeded")
 end
 --=======================================
 return tests

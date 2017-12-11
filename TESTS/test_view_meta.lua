@@ -1,6 +1,8 @@
 -- FUNCTIONAL
-require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
+
 local Scalar = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local json    = require 'Q/UTILS/lua/json'
@@ -30,4 +32,5 @@ tests.t1 = function()
   assert(tonumber(w.z.aux.min) == Q.min(c2):eval():to_num())
   assert(tonumber(w.z.aux.max) == Q.max(c2):eval():to_num())
 end
+--======================================
 return tests

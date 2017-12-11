@@ -42,7 +42,7 @@ tests.t1 = function ()
       assert(type(x) == "Scalar")
     end
   end
-  print("test t1 succeeded")
+
 end
 --=======================================
 return tests

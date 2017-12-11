@@ -31,9 +31,7 @@ tests.t1 = function ()
    	 	end
     	b[i]:eval()
   	end
-  	print("Iteration ", i)
 	end
-  print("test t1 succeeded")
 end
 --=======================================
 return tests
