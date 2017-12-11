@@ -1,4 +1,3 @@
--- luajit q_testrunner.lua $HOME/WORK/Q/TESTS/scenario_based_test_cases/test_absolute.lua
 -- SANITY TEST
 -- ## Problem: Verifying the sum of opposite vector and the change when abs operator comes into play.
 -- ## Using Q.seq & absolute function to solve a problem

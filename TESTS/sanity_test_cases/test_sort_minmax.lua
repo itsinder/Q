@@ -8,7 +8,8 @@ tests.t1 = function ()
 	local meta = {
 		{ name = "empid", has_nulls = true, qtype = "I4", is_load = true }
 	}
-	local result = Q.load_csv("I4.csv", meta)
+  local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/sanity_test_cases/"
+	local result = Q.load_csv(datadir .. "I4.csv", meta)
 	assert(type(result) == "table")
 	for i, v in pairs(result) do
   	local x = result[i]
@@ -26,16 +27,13 @@ tests.t1 = function ()
 		assert(z:value():to_num() == 50 )
 		assert(Q.max(x):eval():to_num() == 50)
 		local max = Q.max(x):eval():to_num()
---[[
+
 	-- Sort asc & find min & max
-	local meta = {
- 		{ name = "empid", has_nulls = true, qtype = "I4", is_load = true }
-	}
-	local result = Q.load_csv("I4.csv", meta)
+	local result = Q.load_csv(datadir .. "I4.csv", meta)
 	assert(type(result) == "table")
 	for i, v in pairs(result) do 
     local x = result[i]
-  	assert(type(x) == "lVector") ]]--
+  	assert(type(x) == "lVector") 
 		Q.sort(x, "asc")
 		local y1 = Q.min(x)
 		local status = true repeat status = y1:next() until not status
@@ -54,7 +52,6 @@ tests.t1 = function ()
 	assert(min == min_new, "Value mismatch in the case of minimum")
 	assert(max == max_new, "Value mismatch in the case of minimum")
   end
-  print("test t1 succeeded")
 end
 --=======================================
 return tests
