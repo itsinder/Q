@@ -21,8 +21,7 @@ tests.t1 = function ()
 	local z = Q.const( { val = 0, qtype = 'I4', len = 100} )
 	-- applying logic
 	local w = Q.ifxthenyelsez(x, y, z)
-  print("Number of credit cards searched whose interest rate percentage is less than 14.25 are", Q.sum(w):eval():to_num() )
-  print("Succeeded in test scenario based test t1")
+  --print("Number of credit cards searched whose interest rate percentage is less than 14.25 are", Q.sum(w):eval():to_num() )
 end
 --======================================
 return tests

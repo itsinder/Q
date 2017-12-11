@@ -13,7 +13,6 @@ tests.t1 = function ()
   local y = Q.vveq(x, c)
   assert(type(y) == "lVector")
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t1 succeeded")
 end
 
 --======================================
@@ -30,7 +29,6 @@ tests.t2 = function()
   assert(type(y) == "lVector")
   assert(y:fldtype() == "B1")
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t2 succeeded")
 end
 
 --======================================

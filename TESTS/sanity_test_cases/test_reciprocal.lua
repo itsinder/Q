@@ -5,6 +5,7 @@
 -- Library Calls
 local Q = require 'Q'
 local Scalar = require 'libsclr' -- TODO Remove this. Ask Indrajeet
+-- Removing the above line throws error: [ variable 'Scalar' is not declared" ]
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
@@ -19,7 +20,6 @@ tests.t1 = function ()
 	     Scalar.new(0.01, "F4")
            )
          )
-  print("Succeeded in test reciprocal t1")
 end
 tests.t2 = function ()
   local qtypes = { "F4", "F8" }
@@ -35,7 +35,6 @@ tests.t2 = function ()
              { mode = "ratio" }
            )
          )
-    print("Succeeded in test reciprocal t2")
   end
 end
 --======================================

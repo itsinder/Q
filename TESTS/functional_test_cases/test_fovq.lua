@@ -14,7 +14,6 @@ tests.t1 = function ()
   assert(type(y) == "lVector")
   local sum = 
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t1 succeeded")
 end
 
 --=======================================
@@ -29,7 +28,6 @@ tests.t2 = function ()
   local y = Q.vveq(x, c)
   assert(type(y) == "lVector")
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t2 succeeded")
 end
 
 --=======================================
@@ -44,7 +42,6 @@ tests.t3 = function()
   local y = Q.vveq(x, c)
   assert(type(y) == "lVector")
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t3 succeeded")
 end
 
 --=======================================
@@ -59,7 +56,6 @@ tests.t4 = function ()
   local y = Q.vveq(x, c)
   assert(type(y) == "lVector")
   assert(Q.sum(y):eval():to_num() == a:length())
-  print("Test t4 succeeded")
 end
 
 --=======================================
