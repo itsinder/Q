@@ -93,6 +93,12 @@ local function chk_cols(column_list)
   assert(#column_list > 0)
   for i = 1, #column_list do
     assert(type(column_list[i]) == "lVector")
+
+    -- Check the vector for eval(), if not then call eval()
+    if not column_list[i]:is_eov() then
+      column_list[i]:eval()
+    end
+
     assert(column_list[i]:length() > 0)    
   end
   
