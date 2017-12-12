@@ -26,6 +26,8 @@ tests.t1 = function()
   local s4 = Q.sum(c):eval()
   assert(Q.sum(c):eval():to_num() == 76)
   --assert(s4 = s2*scalar + s3)
-  print("Test t1 succeeded")
 end
+
+  --========================================
+
 return tests

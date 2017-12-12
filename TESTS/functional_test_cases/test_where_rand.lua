@@ -1,7 +1,6 @@
 -- Testing where operator
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 
 local tests = {}
 tests.t1 = function ()

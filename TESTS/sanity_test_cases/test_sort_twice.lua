@@ -24,7 +24,6 @@ tests.t1 = function ()
   local s2 = Q.vveq(x, z)
   assert(type(s2) == "lVector")
   assert(Q.sum(s2):eval():to_num() == z:length())
-  print("Succeeded in test sort twice t1")
 end
 
 --======================================

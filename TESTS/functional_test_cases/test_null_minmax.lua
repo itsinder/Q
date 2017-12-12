@@ -9,6 +9,7 @@ tests.t1 = function ()
   local meta = {
     { name = "cd", has_nulls = true, qtype = "I2", is_load = true }
   }
+
   local x = Q.load_csv(datadir .. "I4_null.csv", meta)
   assert(type(x) == "table")
   for i, v in pairs(x) do
@@ -29,7 +30,6 @@ tests.t1 = function ()
     local max = Q.max(y):eval():to_num()
     assert(min == max, "Value mismatch in the case of min & max of a null vector")
   end
-  print("Test t1 succeeded")
 end
 
 --======================================

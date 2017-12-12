@@ -1,7 +1,6 @@
 -- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
---Scalar = require 'libsclr' ; 
 
 local tests = {}
 tests.t1 = function ()
@@ -20,8 +19,8 @@ tests.t1 = function ()
 	-- cannot set null vector if one already set 
 	local status = pcall(x.make_nulls, y)
 	assert(status == false)
-  print("test t1 succeeded")
 end
+
 tests.t2 = function ()
 	-- try some "bad" values for bit vector
 	local x = Q.mk_col({1, 2, 3, 4, 5, 6, 7}, "I4")
@@ -45,7 +44,6 @@ tests.t2 = function ()
 	status, err = pcall(x.make_nulls, x, y)
 	assert(status == true)
 	assert(x:check())
-  print("test t2 succeeded")
 end
 --=======================================
 return tests

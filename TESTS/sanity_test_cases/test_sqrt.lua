@@ -19,7 +19,6 @@ tests.t1 = function ()
   --========================================
   local d = Q.vveq(a, c)
   assert(Q.sum(d):eval():to_num() == a:length())
-  print("Test t1 succeeded")
 end
 --=======================================
 tests.t2 = function ()
@@ -31,6 +30,5 @@ tests.t2 = function ()
     -- Q.print_csv({a, c}, nil, "")
     assert(Q.vvseq(a, c, 0.01, { mode = "ratio" } ))
   end
-  print("Test t2 succeeded")
 end
 return tests

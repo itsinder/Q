@@ -14,7 +14,7 @@ for i = 1,1000 do
   assert(val == 41, "WRONG, val = " .. val)
 end
 end
-
+--======================================
 tests.t2 = function ()
 
 for i = 1,1000 do
@@ -30,4 +30,5 @@ for i = 1,1000 do
 end
 
 end
+--======================================
 return tests

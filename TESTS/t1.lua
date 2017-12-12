@@ -1,4 +1,5 @@
-Q = require 'Q'
+local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
 
 local tests = {}
 tests.t1 = function ()
@@ -10,7 +11,6 @@ print(
     )
   ):eval()
 )
-print("========================")
 end
 --======================================
 tests.t2 = function ()

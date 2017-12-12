@@ -19,7 +19,6 @@ tests.t1 = function ()
 	--========================================
 	local result = Q.vveq(a, c)
 	assert(Q.sum(result):eval():to_num() == 10)
-  print("Succeeded in test square root t1")
   --=======================================
 end
   --=======================================

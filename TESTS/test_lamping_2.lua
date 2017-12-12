@@ -1,6 +1,7 @@
 -- FUNCTIONAL
-require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+require 'Q/UTILS/lua/strict'
+
 --[[
 
 This computes probabilities of getting various totals from rolling
