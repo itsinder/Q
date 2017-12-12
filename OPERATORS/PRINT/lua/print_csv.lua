@@ -24,13 +24,11 @@ local function get_B1_value(buffer, chunk_idx)
   local bit_idx = chunk_idx % 8
   local char_value = buffer + char_idx
   local bit_value = tonumber(qc.get_bit(char_value, bit_idx))
-  print("\nGetting B1\n")
   if bit_value == 0 then
      val = ffi.NULL
   else
      val = 1
   end
-  print(val)
   return val
 end
 
@@ -43,21 +41,16 @@ local function get_element(col, rowidx)
   local ctype =  qconsts.qtypes[qtype]["ctype"]
   
   if not chunk_buf_table[col] or chunk_idx == 0 then
-    print("\n Fetchin chunk \n")
     local len, base_data, nn_data = col:chunk(chunk_num)
     --TODO: check below condition if it is proper or not
     if len == nil or len == 0 then return 0 end
     if base_data then
-      print("\n Base Data is not nil \n")
       base_data = ffi.cast(ctype.." *", base_data)
       chunk_buf_table[col] = base_data
-      print("\n Base Data Casting Done \n")
     end
     if nn_data then
-      print("\n NN Data is not nil \n")
       nn_data = ffi.cast("unsigned char *", nn_data)
       chunk_nn_buf_table[col] = nn_data
-      print("\n NN Data Casting Done \n")
     end
   end
   
@@ -85,15 +78,12 @@ local function get_element(col, rowidx)
 
     -- Check for nn vector
     if nn_casted then
-      nn_val = get_B1_value(casted, chunk_idx)
+      nn_val = get_B1_value(nn_casted, chunk_idx)
       if not nn_val then
         val = ffi.NULL
       end
     end
   end
-  print("\n Returning \n")
-  print(val)
-  print(nn_val)
   return val, nn_val
 end
 
@@ -223,10 +213,6 @@ local print_csv = function (column_list, filter, opfile)
           result = col
         else
           status, result = pcall(get_element, col, rowidx)
-          print("\n\n RESULT IS \n\n")
-          print(result)
-          print(status)
-          print("\n\n")
           if status == false then
             --TODO: Handle this condition
           end
