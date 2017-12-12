@@ -22,23 +22,21 @@ tests.t1 = function ()
 		local status = true repeat status = y:next() until not status
 		assert(y:value():to_num() == 10 )
 		assert(Q.min(x):eval():to_num() == 10)
-		local min = Q.min(x):eval():to_num()
+		min = Q.min(x):eval():to_num()
 
 		local z = Q.max(x)
 		local status = true repeat status = z:next() until not status
 		assert(z:value():to_num() == 50 )
 		assert(Q.max(x):eval():to_num() == 50)
-		local max = Q.max(x):eval():to_num()
+		max = Q.max(x):eval():to_num()
 
  end
-  print(min)
-  print(max)
 	-- Sort asc & find min & max --]]
   local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/sanity_test_cases/"
 	local result = Q.load_csv(datadir .. "I4.csv", meta)
 	assert(type(result) == "table")
-local min_new
-local max_new
+  local min_new
+  local max_new
 	for i, v in pairs(result) do 
     local x = result[i]
   	assert(type(x) == "lVector")
@@ -47,13 +45,13 @@ local max_new
 		local status = true repeat status = y1:next() until not status
 		assert(y1:value():to_num() == 10 )
 		assert(Q.min(x):eval():to_num() == 10)
-		local min_new = Q.min(x):eval():to_num()
+		min_new = Q.min(x):eval():to_num()
 
 		local z1 = Q.max(x)
 		local status = true repeat status = z1:next() until not status
 		assert(z1:value():to_num() == 50 )
 		assert(Q.max(x):eval():to_num() == 50)
-		local max_new = Q.max(x):eval():to_num()
+		max_new = Q.max(x):eval():to_num()
   end
 
 	-- Verifying min max remains the same.
