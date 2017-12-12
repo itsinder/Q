@@ -4,6 +4,7 @@ local Vector  = require 'libvec'
 local Scalar  = require 'libsclr'  
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
+local fns = require 'Q/RUNTIME/test/generate_csv'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
@@ -16,15 +17,6 @@ local databuf
 local x
 local T
 local md -- meta data 
-
--- generating .bin files required for materialized vector
-local status
-status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-assert(status)
-status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
-assert(status)
-status = os.execute("cp _in1_I4.bin _in2_I4.bin")
-assert(status)
 
 local tests = {} 
 --===================
@@ -53,6 +45,18 @@ end
 --=========================
 --
 tests.t1 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in1_I4.csv")
+  --os.execute("rm -f in1_B1.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in1_I4.csv", "I4", 10)
+  fns.generate_csv("in1_B1.csv", "B1", 10)
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
+  assert(status)
+  status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
+  assert(status)
   x = lVector(
   { qtype = "I4", file_name = "_in1_I4.bin", nn_file_name = "_nn_in1.bin"})
   assert(x:check())
@@ -67,6 +71,14 @@ end
 --=========
 
 tests.t2 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in2_I4.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in2_I4.csv", "I4", 10)
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in2_I4.csv I4 _in2_I4.bin")
+  assert(status)
   x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
   assert(x:check())
   local n = x:num_elements()
@@ -265,6 +277,14 @@ tests.t10 = function()
 end
 --==============================================
 tests.t11 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in2_I4.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in2_I4.csv", "I4", 10)
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in2_I4.csv I4 _in2_I4.bin")
+  assert(status)
   -- testing setting and getting of meta data with a Scalar
   local x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
   local s = Scalar.new(1000, "I8")
