@@ -1,16 +1,18 @@
+local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH must be set")
+local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
+local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
+
+local compile = require 'Q/UTILS/lua/compiler'
+local incfile = Q_ROOT .. "/include/q_core.h"
+local inc_dir = Q_ROOT .. "/include/"
+local ffi = require 'Q/UTILS/lua/q_ffi'
+local gen_code = require 'Q/UTILS/lua/gen_code'
+local Logger = require 'Q/UTILS/lua/logger'
+local lib_dir = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$')) .. "/"
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local pldir = require 'pl.dir'
-local ffi = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
-local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
-local inc_dir = Q_ROOT .. "/include/"
-local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH must be set")
-local lib_dir = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$')) .. "/"
-local incfile = Q_ROOT .. "/include/q_core.h"
-local compile = require 'Q/UTILS/lua/compiler'
-local Logger = require 'Q/UTILS/lua/logger'
 local timer = require 'posix.time'
 
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
@@ -48,6 +50,12 @@ end
 
 local function q_add(doth, dotc, lib_name)
   -- the lib is absent or the doth is missing compile it
+  if type(doth) == "table" then -- means this is subs and tmpl
+    local subs, tmpl = doth, dotc
+    doth = gen_code.doth(subs, tmpl)
+    dotc = gen_code.dotc(subs, tmpl)
+  end
+
   if  function_lookup[lib_name] == nil and qt[lib_name] == nil then
     local h_path = inc_dir .. lib_name .. ".h"
     local so_path = lib_dir .. "lib" .. lib_name .. ".so"

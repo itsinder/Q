@@ -18,14 +18,10 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
   -- START: Dynamic compilation
-  -- if ( not qc[func_name] ) then qc.q_add(subs, tmpl, func_name) end 
-  if ( qc[func_name] == nil ) then
+  if ( not qc[func_name] ) then 
     print("Dynamic compilation kicking in... ")
-    local doth = gen_code.doth(subs, tmpl)
-    local dotc = gen_code.dotc(subs, tmpl)
-    qc.q_add(doth, dotc, func_name)
-  end
-  -- STOP : Dynamic compilation
+    qc.q_add(subs, tmpl, func_name) 
+  end 
   assert(qc[func_name], "Symbol not available" .. func_name)
   local f3_qtype = assert(subs.out_qtype)
   local f3_width = qconsts.qtypes[f3_qtype].width
