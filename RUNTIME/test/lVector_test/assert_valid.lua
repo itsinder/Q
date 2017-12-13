@@ -555,9 +555,6 @@ end
 
 -- create a materialized vector and validate values
 fns.assert_materialized_vector1 = function(vec, test_name, num_elements)
-  print("##########################")
-  print(vec)
-  print("##########################")
   -- common checks for vectors
   assert(vec:check())
   

@@ -14,7 +14,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
   assert(ret_len)
   
   if qtype == "B1" then
-    qtype = "I1"
+    --qtype = "I1"
     --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
     for i = 1 , ret_len do 
       local chunk_num = math.floor((i-1)/qconsts.chunk_size)
