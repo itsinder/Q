@@ -24,10 +24,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
       local ctype =  qconsts.qtypes[qtype]["ctype"]
       local casted = ffi.cast(ctype.." *", ret_addr)
       
-      local char_idx = math.floor((i-1) / 8)
-      local bit_idx = (i-1) % 8
-      local char_value = casted + char_idx
-      local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
+      local bit_value = tonumber( qc.get_bit_u64(casted, (i-1)) )
       if bit_value ~= 0 then bit_value = 1 end
       local expected
       if i % 2 == 0 then 

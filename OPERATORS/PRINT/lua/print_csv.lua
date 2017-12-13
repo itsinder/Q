@@ -20,10 +20,7 @@ end
 
 local function get_B1_value(buffer, chunk_idx)
   local val
-  local char_idx = chunk_idx / 8
-  local bit_idx = chunk_idx % 8
-  local char_value = buffer + char_idx
-  local bit_value = tonumber(qc.get_bit(char_value, bit_idx))
+  local bit_value = qc.get_bit_u64(buffer, chunk_idx)
   if bit_value == 0 then
      val = ffi.NULL
   else
@@ -49,7 +46,7 @@ local function get_element(col, rowidx)
       chunk_buf_table[col] = base_data
     end
     if nn_data then
-      nn_data = ffi.cast("unsigned char *", nn_data)
+      nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
       chunk_nn_buf_table[col] = nn_data
     end
   end
@@ -61,7 +58,8 @@ local function get_element(col, rowidx)
     val = ffi.NULL
   else
     if qtype == "B1" then
-      val = get_B1_value(casted, chunk_idx)
+      status, val = pcall(get_B1_value, casted, chunk_idx)
+      if not status then print("\n\n" .. tostring(val) .. "\n\n") end
     else
       val = casted[chunk_idx]
     end
@@ -78,7 +76,8 @@ local function get_element(col, rowidx)
 
     -- Check for nn vector
     if nn_casted then
-      nn_val = get_B1_value(nn_casted, chunk_idx)
+      status, nn_val = pcall(get_B1_value, nn_casted, chunk_idx)
+      if not status then print("\n\n ## " .. tostring(nn_val) .. " ## \n\n") end
       if not nn_val then
         val = ffi.NULL
       end
