@@ -49,8 +49,8 @@ tests.t1 = function()
   --os.execute("rm -f in1_I4.csv")
   --os.execute("rm -f in1_B1.csv")
   -- generating .csv files required for generating bin file
-  fns.generate_csv("in1_I4.csv", "I4", 10)
-  fns.generate_csv("in1_B1.csv", "B1", 10)
+  fns.generate_csv("in1_I4.csv", "I4", 10, "iter")
+  fns.generate_csv("in1_B1.csv", "B1", 10, "iter")
   -- generating .bin files required for materialized vector
   local status
   status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
@@ -74,7 +74,7 @@ tests.t2 = function()
   -- deleting previous .csv file if present
   --os.execute("rm -f in2_I4.csv")
   -- generating .csv files required for generating bin file
-  fns.generate_csv("in2_I4.csv", "I4", 10)
+  fns.generate_csv("in2_I4.csv", "I4", 10, "iter")
   -- generating .bin files required for materialized vector
   local status
   status = os.execute("../../UTILS/src/asc2bin in2_I4.csv I4 _in2_I4.bin")
@@ -264,7 +264,7 @@ tests.t10 = function()
   -- deleting previous .csv file if present
   --os.execute("rm -f in2_I4.csv")
   -- generating .csv files required for generating bin file
-  fns.generate_csv("in3_I4.csv", "I4", 10)
+  fns.generate_csv("in3_I4.csv", "I4", 10, "iter")
   -- generating .bin files required for materialized vector
   local status
   status = os.execute("../../UTILS/src/asc2bin in3_I4.csv I4 _in3_I4.bin")
@@ -288,7 +288,7 @@ tests.t11 = function()
   -- deleting previous .csv file if present
   --os.execute("rm -f in2_I4.csv")
   -- generating .csv files required for generating bin file
-  fns.generate_csv("in4_I4.csv", "I4", 10)
+  fns.generate_csv("in4_I4.csv", "I4", 10, "iter")
   -- generating .bin files required for materialized vector
   local status
   status = os.execute("../../UTILS/src/asc2bin in4_I4.csv I4 _in4_I4.bin")
