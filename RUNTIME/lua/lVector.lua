@@ -5,6 +5,7 @@ local register_type = require 'Q/UTILS/lua/q_types'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local plpath = require "pl.path"
 local Vector = require 'libvec'
+local chk_chunk_return = require 'Q/UTILS/lua/chk_chunk'
 --====================================
 local lVector = {}
 lVector.__index = lVector
@@ -520,6 +521,7 @@ function lVector:chunk(chunk_num)
       assert(base_len == nn_len)
     end
     if ( qconsts.debug ) then self:check() end
+    assert(chk_chunk_return(base_len, base_addr, nn_addr))
     return base_len, base_addr, nn_addr
   else
     assert(self._gen)
