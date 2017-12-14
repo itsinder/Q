@@ -30,9 +30,6 @@ tests.qc_compile = function()
   local Q_ROOT = os.getenv('Q_ROOT')
   os.execute(string.format("rm %s/include/boom.h", Q_ROOT))
   os.execute(string.format("rm %s/lib/libboom.so", Q_ROOT))
-  package.loaded['Q/UTILS/lua/q_core'] = nil
-  package.loaded['ffi'] = nil
-  local qc = require 'Q/UTILS/lua/q_core'
   local dotc = [[ #include "./boom.h"
   int boom(){
     printf("hello\n");
@@ -42,11 +39,13 @@ tests.qc_compile = function()
   local doth = [[ #include <stdio.h>
   extern int boom(void);
   ]]
-
+ 
+  assert(os.execute([[ luajit -e "
+  local qc = require 'Q/UTILS/lua/q_core'
   assert( qc.q_add(doth, dotc, 'boom') == true)
   assert( qc.q_add(doth, dotc, 'boom') == false)
-
   qc.boom()
+ "]]))
   return true
 end
 
@@ -55,8 +54,6 @@ tests.qc_lib_addition = function()
   local Q_ROOT = os.getenv('Q_ROOT')
   os.execute(string.format("rm %s/include/boom.h", Q_ROOT))
   os.execute(string.format("rm %s/lib/libboom.so", Q_ROOT))
- package.loaded['Q/UTILS/lua/q_core'] = nil
-  package.loaded['ffi'] = nil
  assert(os.execute(string.format(
   [[luajit -e 'require "Q/UTILS/test/test_dyn_comp".qc_compile()']], Q_SRC_ROOT)) == 0, "Compiling lib must pass")
   assert(os.execute([[luajit -e 'require "Q/UTILS/lua/q_core".boom()']]))
