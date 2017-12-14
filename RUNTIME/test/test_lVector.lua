@@ -67,6 +67,10 @@ tests.t1 = function()
   assert(nn_data)
   print(len)
   print("Successfully completed test t1")
+  plfile.delete(path_to_here .. "/in1_I4.csv")
+  plfile.delete(path_to_here .. "/in1_B1.csv")
+  plfile.delete(path_to_here .. "/_in1_I4.bin")
+  plfile.delete(path_to_here .. "/_nn_in1.bin")
 end
 --=========
 
@@ -96,6 +100,8 @@ tests.t2 = function()
   len, base_data, nn_data = x:chunk(100)
   assert(not base_data)
   assert(not nn_data)
+  plfile.delete(path_to_here .. "/in2_I4.csv")
+  plfile.delete(path_to_here .. "/_in2_I4.bin")
   --=========
 end
 
@@ -282,6 +288,8 @@ tests.t10 = function()
   compare("_meta_data.csv", "in2_meta_data.csv")
 
   print("Successfully completed test t10")
+  plfile.delete(path_to_here .. "/in3_I4.csv")
+  plfile.delete(path_to_here .. "/_in3_I4.bin")
 end
 --==============================================
 tests.t11 = function()
@@ -300,6 +308,8 @@ tests.t11 = function()
   v = x:get_meta("rand scalar key")
   assert(v == s)
   print("Successfully completed test t11")
+  plfile.delete(path_to_here .. "/in4_I4.csv")
+  plfile.delete(path_to_here .. "/_in4_I4.bin")
 end
 
 return tests
