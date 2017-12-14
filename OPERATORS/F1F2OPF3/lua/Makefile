@@ -10,7 +10,13 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
-all : libf1f2opf3.so _f1f2opf3.lua
+all : libf1f2opf3.so all_for_dc
+
+all_for_dc : \
+  	_f1f2opf3.lua \
+	arith_specializers  \
+	cmp_specializers  \
+	bop_specializers  \
 	
 arith_specializers: vvadd_specialize.lua vvsub_specialize.lua \
 	vvmul_specialize.lua vvdiv_specialize.lua 
@@ -97,3 +103,5 @@ _cmp_files : cmp_specializers
 
 _f1f2opf3.lua : 
 	lua pkg_f1f2opf3.lua
+	test -d   ${Q_TMPL_DIR}
+	cp *.tmpl ${Q_TMPL_DIR}

@@ -56,6 +56,7 @@ unset QC_FLAGS
 unset Q_DATA_DIR
 unset Q_METADATA_DIR
 unset Q_TRACE_DIR
+unset Q_TMPL_DIR
 unset Q_BUILD_DIR
 # TODO fix bug with ld library path
 unset LD_LIBRARY_PATH
@@ -81,9 +82,14 @@ echo "Q_DATA_DIR: $Q_DATA_DIR"
 mkdir -p $Q_ROOT/meta
 export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
 echo "Q_METADATA_DIR: $Q_METADATA_DIR"
+
 mkdir -p $Q_ROOT/trace
 export Q_TRACE_DIR="${Q_TRACE_DIR:=${Q_ROOT}/trace}"
 echo "Q_TRACE_DIR: $Q_TRACE_DIR"
+
+mkdir -p $Q_ROOT/tmpl
+export Q_TMPL_DIR="${Q_TMPL_DIR:=${Q_ROOT}/tmpl}"
+echo "Q_TMPL_DIR: $Q_TMPL_DIR"
 
 
 

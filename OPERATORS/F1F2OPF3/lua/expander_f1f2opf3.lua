@@ -1,4 +1,5 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
+local gen_code = require 'Q/UTILS/lua/gen_code'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
@@ -16,6 +17,11 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then 
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name) 
+  end 
   assert(qc[func_name], "Symbol not available" .. func_name)
   local f3_qtype = assert(subs.out_qtype)
   local f3_width = qconsts.qtypes[f3_qtype].width
