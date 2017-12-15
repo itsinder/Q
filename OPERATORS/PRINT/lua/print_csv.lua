@@ -53,7 +53,7 @@ local function get_element(col, rowidx)
   
   local casted = chunk_buf_table[col]
   local nn_casted = chunk_nn_buf_table[col]
-  
+  local status
   if not casted then
     val = ffi.NULL
   else
