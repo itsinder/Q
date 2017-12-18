@@ -258,8 +258,6 @@ static int l_vec_get_chunk( lua_State *L)
   bool is_malloc = false; uint64_t sz = 0;
   if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_eov == false ) ){
     if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
-    // TODO delete following line
-    fprintf(stderr, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
     is_malloc = true;
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;
