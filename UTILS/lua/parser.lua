@@ -6,7 +6,7 @@ require 'pl'
 local fns = {}
 
 fns.parse_csv_line = function (line, sep) 
-    res = {}
+    local res = {}
     local pos = 1
     sep = sep or ','
     while true do 

@@ -26,7 +26,7 @@ return function (
         for i, regex in pairs(regex_list) do
           -- skip regex checking for nil or empty string
           if regex ~= nil and regex ~= "" then 
-            start, stop = string.find(entry[i], regex) 
+            local start, stop = string.find(entry[i], regex) 
             if not ( ( start ) and ( start == 1 ) and 
               ( stop == string.len(entry[i]) ) ) then 
             -- if ( string.len(x) ~= string.len(entry[i]) ) then 
