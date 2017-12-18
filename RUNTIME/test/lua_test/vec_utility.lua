@@ -14,7 +14,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
   assert(ret_len)
   
   if qtype == "B1" then
-    qtype = "I1"
+    --qtype = "I1"
     --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", ret_addr)
     for i = 1 , ret_len do 
       local chunk_num = math.floor((i-1)/qconsts.chunk_size)
@@ -24,10 +24,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
       local ctype =  qconsts.qtypes[qtype]["ctype"]
       local casted = ffi.cast(ctype.." *", ret_addr)
       
-      local char_idx = math.floor((i-1) / 8)
-      local bit_idx = (i-1) % 8
-      local char_value = casted + char_idx
-      local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
+      local bit_value = tonumber( qc.get_bit_u64(casted, (i-1)) )
       if bit_value ~= 0 then bit_value = 1 end
       local expected
       if i % 2 == 0 then 

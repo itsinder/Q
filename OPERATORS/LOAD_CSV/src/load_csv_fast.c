@@ -287,10 +287,8 @@ load_csv_fast(
         {
           int8_t bit_idx = row_ctr % 64;
           uint8_t bit_val = 0;
-          if ( bit_idx == 63 ) {
-            fwrite(word_B1+col_ctr, 1, sizeof(uint64_t), ofps[col_ctr]);
-          }
-          if ( bit_idx == 64 ) { word_B1[col_ctr] = 0; }
+
+          //if ( bit_idx == 64 ) { word_B1[col_ctr] = 0; }
           if ( is_val_null ) { 
             bit_val = 0;
           }
@@ -299,7 +297,12 @@ load_csv_fast(
             if ( ( tempI1 < 0 ) || ( tempI1 > 1 ) )  { go_BYE(-1); }
             bit_val = (uint8_t)tempI1;
           }
-          word_B1[col_ctr] |= (bit_val << bit_idx);
+          word_B1[col_ctr] |= ((uint64_t)bit_val << bit_idx);
+          
+          if ( bit_idx == 63 ) {
+            fwrite(word_B1+col_ctr, 1, sizeof(uint64_t), ofps[col_ctr]);
+            word_B1[col_ctr] = 0;
+          }
         }
         break;
       case I1:

@@ -149,7 +149,7 @@ local qconsts = {}
       max = 1,
       max_txt_width = 2,
       width = 1, -- This has to be handled as a special case
-      ctype = "unsigned char", -- TODO change this to uint64_t 
+      ctype = "uint64_t",
       txt_to_ctype = "",
       ctype_to_txt = "TBD" 
     }

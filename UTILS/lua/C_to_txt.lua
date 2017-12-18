@@ -21,10 +21,7 @@ return function (col, rowidx)
     local ctype =  qconsts.qtypes[qtype]["ctype"]
     local casted = ffi.cast(ctype.." *", base_data)
     if qtype == "B1" then
-      local char_idx = chunk_idx / 8
-      local bit_idx = chunk_idx % 8
-      local char_value = casted + char_idx
-      local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
+      local bit_value = tonumber( qc.get_bit_u64(casted, chunk_idx) )
       if bit_value == 0 then
          val = ffi.NULL
       else
@@ -54,11 +51,8 @@ return function (col, rowidx)
 
     -- Check for nn vector
     if nn_data then
-      local nn_casted = ffi.cast("unsigned char *", nn_data)
-      local char_idx = chunk_idx / 8
-      local bit_idx = chunk_idx % 8
-      local char_value = nn_casted + char_idx
-      local bit_value = tonumber( qc.get_bit(char_value, bit_idx) )
+      local nn_casted = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      local bit_value = tonumber( qc.get_bit_u64(nn_casted, chunk_idx) )
       if bit_value == 0 then
          nn_val = ffi.NULL
          val = ffi.NULL

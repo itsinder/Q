@@ -44,10 +44,7 @@ local function my_magic_function(a_chunk, b_chunk, aidx, a_len, out_buf, sz_out,
     assert(a_value == a_input_table[table_index + i], "Mismatch, Expected: " .. tostring(a_input_table[table_index + i]) .. ", Actual: " .. tostring(a_value))
     
     -- validate b vector
-    local char_idx = (i - 1) / 8
-    local bit_idx = (i - 1) % 8 
-    local b_buf = b_chunk + char_idx
-    local b_value = qc.get_bit(b_buf, bit_idx)
+    local b_value = qc.get_bit_u64(b_chunk, (i - 1))
     if b_value ~= 0 then b_value = 1 end
     assert(b_value == b_input_table[table_index + i], "Mismatch, Expected: " .. tostring(b_input_table[table_index + i]) .. ", Actual: " .. tostring(b_value))
 
