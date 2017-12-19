@@ -13,9 +13,15 @@ local function cat(x, y)
   local qtype = x:fldtype()
   local width = qconsts.qtypes[x:fldtype()].width
   local chunk_size = qconsts.chunk_size
+
   local z_buf_size = chunk_size * width
   local z_buf = ffi.malloc(z_buf_size)
+
+  local z_nn_buf_size = chunk_size
+  local z_nn_buf = ffi.malloc(z_nn_buf_size)
+
   ffi.fill(z_buf, z_buf_size)
+  ffi.fill(z_nn_buf, z_nn_buf_size)
   local chunk_idx = 0
   
   -- Create z vector
@@ -29,9 +35,13 @@ local function cat(x, y)
         ffi.copy(z_buf, base_data, width * math.ceil(len / 8))
       else
         ffi.copy(z_buf, base_data, width * len)
+        if nn_data then
+          ffi.copy(z_nn_buf, nn_data, width * math.ceil(len / 8))
+        end
       end
-      z:put_chunk(z_buf, nn_data, len)
+      z:put_chunk(z_buf, z_nn_buf, len)
       ffi.fill(z_buf, z_buf_size)
+      ffi.fill(z_nn_buf, z_nn_buf_size)
     end
     chunk_idx = chunk_idx + 1
   until(len ~= chunk_size)
@@ -47,9 +57,13 @@ local function cat(x, y)
         ffi.copy(z_buf, base_data, width * math.ceil(len / 8))
       else
         ffi.copy(z_buf, base_data, width * len)
+        if nn_data then
+          ffi.copy(z_nn_buf, nn_data, width * math.ceil(len / 8))
+        end
       end
-      z:put_chunk(z_buf, nn_data, len)
+      z:put_chunk(z_buf, z_nn_buf, len)
       ffi.fill(z_buf, z_buf_size)
+      ffi.fill(z_nn_buf, z_nn_buf_size)
     end
     chunk_idx = chunk_idx + 1
   until(len ~= chunk_size)  
