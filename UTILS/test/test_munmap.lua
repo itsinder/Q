@@ -28,6 +28,7 @@ tests.t1 = function()
   assert(n == 0)
   local D = pldir.getfiles("./", "*.bin")
   print(D)
+  --TODO: We have removed the file deletion part from f_munmap.c, so is below assert valid?
   assert(#D == 0)
   -- os.execute("rm -f __*.bin")
 
