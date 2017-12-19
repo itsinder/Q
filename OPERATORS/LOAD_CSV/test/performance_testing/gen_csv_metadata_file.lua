@@ -33,6 +33,10 @@ random_func.random_float = function ()
   return math.random(100000,900000) / 10
 end
 
+random_func.random_uint64_t = function ()
+  return math.random(0,1)
+end
+
 local charset = {}
 -- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
 for i = 48,  57 do table.insert(charset, string.char(i))  end
