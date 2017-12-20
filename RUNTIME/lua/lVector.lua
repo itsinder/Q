@@ -509,8 +509,10 @@ function lVector:chunk(chunk_num)
           ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
           ( ( l_chunk_num < Vector.chunk_num(self._base_vec) ) and 
           ( Vector.is_memo(self._base_vec) == true ) ) )
-  if ( cond1 or cond2 ) then 
+  if ( cond1 or cond2 ) then
+    print("Inside lVector:chunk(), cond1 or cond2, l_chunk_num = " .. tostring(l_chunk_num)) 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
+    print("Length from Vector:get_chunk() = " .. tostring(base_len) )
     if ( not base_addr ) then
       if ( qconsts.debug ) then self:check() end
       return 0
@@ -524,6 +526,7 @@ function lVector:chunk(chunk_num)
     assert(chk_chunk_return(base_len, base_addr, nn_addr))
     return base_len, base_addr, nn_addr
   else
+    print("Inside Gen")
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
