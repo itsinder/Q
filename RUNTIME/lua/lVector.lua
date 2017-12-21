@@ -521,6 +521,10 @@ function lVector:chunk(chunk_num)
       assert(base_len == nn_len)
     end
     if ( qconsts.debug ) then self:check() end
+    if base_len < 1 then
+      base_addr = nil
+      nn_addr = nil
+    end
     assert(chk_chunk_return(base_len, base_addr, nn_addr))
     return base_len, base_addr, nn_addr
   else
@@ -528,7 +532,7 @@ function lVector:chunk(chunk_num)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(l_chunk_num, self)
     if ( buf_size < qconsts.chunk_size ) then
-      if ( base_data ) then
+      if ( buf_size > 0 ) then
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()

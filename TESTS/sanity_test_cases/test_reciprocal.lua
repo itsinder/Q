@@ -31,7 +31,7 @@ tests.t2 = function ()
                Q.reciprocal(x)
              ),
              x,
-	     Scalar.new(0.01, "F4"),
+	     Scalar.new(0.10, "F4"),
              { mode = "ratio" }
            )
          )

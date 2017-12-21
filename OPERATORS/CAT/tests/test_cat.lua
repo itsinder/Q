@@ -1,5 +1,8 @@
 local Q         = require 'Q'
 local c_to_txt  = require 'Q/UTILS/lua/C_to_txt'
+local lVector	= require 'Q/RUNTIME/lua/lVector'
+local ffi	= require 'Q/UTILS/lua/q_ffi'
+local qconsts	= require 'Q/UTILS/lua/q_consts'
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
@@ -264,7 +267,6 @@ tests.t9 = function()
     val = x_table[i]
     assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
   end
-  print("X validation is done")
   for i = 1, y:length() do
     z_val, z_nn_val = c_to_txt(z, i + x:length())
     if not z_val then z_val = 0 end
@@ -274,5 +276,62 @@ tests.t9 = function()
   end
 end
 
+tests.t10 = function()
+  -- Case10
+  -- x and y with null values
+  local x_length = 65536 + 5
+  local y_length = 8551
+  local nn_buf_sz = qconsts.chunk_size  -- over allocating
+
+  local x = lVector({qtype = "I4", gen = true, has_nulls = true})
+  local y = lVector({qtype = "I4", gen = true, has_nulls = true})
+  
+  -- Create required buffers
+  local x_buf = ffi.malloc(qconsts.qtypes.I4.width * x_length)
+  local x_buf_copy = ffi.cast(qconsts.qtypes.I4.ctype .. " *", x_buf)
+  local y_buf = ffi.malloc(qconsts.qtypes.I4.width * y_length)
+  local y_buf_copy = ffi.cast(qconsts.qtypes.I4.ctype .. " *", y_buf)
+  local nn_buf = ffi.malloc(nn_buf_sz)
+  local nn_buf_copy = ffi.cast("int8_t *", nn_buf)
+
+  -- Write values to buffer
+  for i = 1, x_length do
+    x_buf_copy[i-1] = i
+  end
+
+  for i = 1, y_length do
+    y_buf_copy[i-1] = i
+  end
+
+  for i = 1, nn_buf_sz do
+    -- 85 to binary = 01010101
+    nn_buf_copy[i-1] = 85
+  end
+
+  x:put_chunk(x_buf, nn_buf, x_length)
+  y:put_chunk(y_buf, nn_buf, y_length)
+
+  x:eov()
+  y:eov()
+
+  local z = Q.cat(x, y)
+
+  assert(z:length() == (x_length + y_length))
+
+  local z_val, z_nn_val, val, nn_val
+
+  for i = 1, x:length() do
+    z_val, z_nn_val = c_to_txt(z, i)
+    val, nn_val = c_to_txt(x, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+    assert(z_nn_val == nn_val, "nn value mismatch, Expected = " .. tostring(nn_val) .. ", Actual = " .. tostring(z_nn_val))
+  end
+  for i = 1, y:length() do
+    z_val, z_nn_val = c_to_txt(z, i + x:length())
+    val, nn_val = c_to_txt(y, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+    assert(z_nn_val == nn_val, "nn value mismatch, Expected = " .. tostring(nn_val) .. ", Actual = " .. tostring(z_nn_val))
+  end
+end
 
 return tests
