@@ -5,7 +5,10 @@ local Scalar  = require 'libsclr'
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local fns = require 'Q/RUNTIME/test/generate_csv'
+local genbin = require 'Q/RUNTIME/test/generate_bin'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local qconsts     = require 'Q/UTILS/lua/q_consts'
+local c_to_txt     = require 'Q/UTILS/lua/C_to_txt'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(path_to_here))
 require 'Q/UTILS/lua/strict'
@@ -47,18 +50,14 @@ end
 
 --====== Testing materialized vector
 tests.t1 = function()
-  -- deleting previous .csv file if present
-  --os.execute("rm -f in1_I4.csv")
-  --os.execute("rm -f in1_B1.csv")
-  -- generating .csv files required for generating bin file
-  fns.generate_csv("in1_I4.csv", "I4", 10, "iter")
-  fns.generate_csv("in1_B1.csv", "B1", 10, "iter")
+
+  local num_values = 10
+  local q_type = "I4"
   -- generating .bin files required for materialized vector
-  local status
-  status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-  assert(status)
-  status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
-  assert(status)
+  genbin.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "iter" )
+  q_type = "B1"
+  genbin.generate_bin(num_values, q_type, path_to_here .. "_nn_in1.bin")
+  
   x = lVector(
   { qtype = "I4", file_name = "_in1_I4.bin", nn_file_name = "_nn_in1.bin"})
   assert(x:check())
@@ -69,8 +68,7 @@ tests.t1 = function()
   assert(nn_data)
   print(len)
   print("Successfully completed test t1")
-  plfile.delete(path_to_here .. "/in1_I4.csv")
-  plfile.delete(path_to_here .. "/in1_B1.csv")
+
   plfile.delete(path_to_here .. "/_in1_I4.bin")
   plfile.delete(path_to_here .. "/_nn_in1.bin")
 end
@@ -78,21 +76,24 @@ end
 
 
 tests.t2 = function()
-  -- deleting previous .csv file if present
-  --os.execute("rm -f in2_I4.csv")
-  -- generating .csv files required for generating bin file
-  fns.generate_csv("in2_I4.csv", "I4", 10, "iter")
+
+  local num_values = 10
+  local q_type = "I4"
   -- generating .bin files required for materialized vector
-  local status
-  status = os.execute("../../UTILS/src/asc2bin in2_I4.csv I4 _in2_I4.bin")
-  assert(status)
+  genbin.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "iter" )
+  
   x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
   assert(x:check())
   local n = x:num_elements()
+  print(x:meta().base.file_name)
   assert(n == 10)
   --=========
   local len, base_data, nn_data = x:chunk(0)
   assert(base_data)
+  for i = 1, len do
+    local val = c_to_txt(x, i)
+    print("value:",val)
+  end
   local iptr = ffi.cast("int32_t *", base_data)
   for i = 1, len do
     assert(iptr[i-1] == (i*10))
@@ -127,14 +128,12 @@ tests.t3 = function()
 end
 
 tests.t4 = function()
-  -- deleting previous .csv file if present
-  --os.execute("rm -f in2_I4.csv")
-  -- generating .csv files required for generating bin file
-  fns.generate_csv("in3_I4.csv", "I4", 10, "iter")
+  
+  local num_values = 10
+  local q_type = "I4"
   -- generating .bin files required for materialized vector
-  local status
-  status = os.execute("../../UTILS/src/asc2bin in3_I4.csv I4 _in3_I4.bin")
-  assert(status)
+  genbin.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "iter" )
+  
   -- testing setting and getting of meta data 
   local x = lVector( { qtype = "I4", file_name = "_in3_I4.bin"})
   x:set_meta("rand key", "rand val")
@@ -154,14 +153,11 @@ end
 
 --==============================================
 tests.t5 = function()
-  -- deleting previous .csv file if present
-  --os.execute("rm -f in2_I4.csv")
-  -- generating .csv files required for generating bin file
-  fns.generate_csv("in4_I4.csv", "I4", 10, "iter")
+    local num_values = 10
+  local q_type = "I4"
   -- generating .bin files required for materialized vector
-  local status
-  status = os.execute("../../UTILS/src/asc2bin in4_I4.csv I4 _in4_I4.bin")
-  assert(status)
+  genbin.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "iter" )
+  
   -- testing setting and getting of meta data with a Scalar
   local x = lVector( { qtype = "I4", file_name = "_in4_I4.bin"})
   local s = Scalar.new(1000, "I8")
