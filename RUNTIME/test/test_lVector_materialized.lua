@@ -113,8 +113,8 @@ end
 --====== Testing materialized vector for SC
 tests.t3 = function()
   print("Testing materialized vector for SC")
-  os.execute(" cp SC1.bin _SC1.bin " )
-  x = lVector( { qtype = "SC", width = 8, file_name = '_SC1.bin' } )
+  -- os.execute(" cp SC1.bin _SC1.bin " )
+  x = lVector( { qtype = "SC", width = 8, file_name = 'SC1.bin' } )
   T = x:meta()
   -- local k, v
   for k, v in pairs(T.base)  do print(k,v) end 
