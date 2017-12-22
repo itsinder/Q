@@ -68,7 +68,6 @@ for i, v in ipairs(T) do
     utils["testcase_results"](v, "test_performance.lua", "Load_csv Performance Testing", "Performance Testing", result, "")
     
     -- delete respective csv file
-    print(csv_file_path)
     plfile.delete(csv_file_path) 
     
     print("Results written in performance_results/performance_measures file\n")
