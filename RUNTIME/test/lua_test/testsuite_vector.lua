@@ -17,7 +17,7 @@ local assert_valid = function(assert_fns, test_name, gen_method, num_elements)
     local function_name = "assert_" .. assert_fns
     local status, result = pcall(fns[function_name], x, test_name, num_elements, gen_method)
     if not status then
-      print(result)
+      return status, result
     end
     return status
   end
