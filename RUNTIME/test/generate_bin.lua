@@ -3,6 +3,13 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local plpath  = require 'pl.path'
 local fns = {}
 
+-- generate_ bin() function parameters are:
+-- num_values: desired num of values to be written in bin file
+-- q_type: desired Q type of values
+-- bin_filename: desired filename for .bin file
+-- gen_type: 
+--         (1) "random" : i*15 % qconsts.qtypes[q_type].max
+--         (2) "iter"   : index multiply by 10 
 fns.generate_bin = function (num_values, q_type, bin_filename, gen_type)
   local q_type_width = qconsts.qtypes[q_type].width
   if q_type == "B1" then

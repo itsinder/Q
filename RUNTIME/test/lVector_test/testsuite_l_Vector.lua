@@ -1,9 +1,8 @@
 local plpath  = require 'pl.path'
 local dir = require 'pl.dir'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-
 local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
-local gen_fns = require 'Q/RUNTIME/test/generate_csv'
+local genbin = require 'Q/RUNTIME/test/generate_bin'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
@@ -37,19 +36,15 @@ local create_tests = function()
         M = dofile(script_dir .."/meta_data/"..v.meta)
       end
       
+      local bin_file_name
       if v.test_type == "materialized_vector" then
-        --print(qtype ..".csv", qtype, v.num_elements)
-        local csv_file_name = "bin/".. qtype[j] .. ".csv"
-        local bin_file_name = "bin/in_".. qtype[j] .. ".bin"
-        --print(csv_file_name,bin_file_name, v.num_elements)
-        gen_fns.generate_csv(csv_file_name, qtype[j], v.num_elements, "random")
-        --print("../../../UTILS/src/asc2bin" .. csv_file_name .. qtype[j] .. bin_file_name)
-        local status = os.execute("../../../UTILS/src/asc2bin" .." ".. csv_file_name .. " " .. qtype[j] .. " " .. bin_file_name)
-        assert(status)
+        bin_file_name = script_dir.."/bin/in_".. i .. "_" .. qtype[j] .. ".bin"
+        -- generating .bin files required for materialized vector
+        genbin.generate_bin(v.num_elements, qtype[j], bin_file_name, "random" )
       end
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then 
-        M.file_name = string.gsub( M.file_name, "${q_type}", qtype[j] )
+        M.file_name = string.gsub( M.file_name, "${q_type}", i .."_" .. qtype[j] )
         M.file_name = script_dir .. "/" .. M.file_name
         if M.nn_file_name then
           M.nn_file_name = script_dir .. "/" .. M.nn_file_name
