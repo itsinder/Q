@@ -4,6 +4,7 @@ local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 
 local plpath = require 'pl.path'
+local plfile = require 'pl.file'
 local dir = require 'pl.dir'
 local fns = require 'Q/OPERATORS/LOAD_CSV/test/performance_testing/gen_csv_metadata_file'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
@@ -67,7 +68,8 @@ for i, v in ipairs(T) do
     utils["testcase_results"](v, "test_performance.lua", "Load_csv Performance Testing", "Performance Testing", result, "")
     
     -- delete respective csv file
-    os.remove(csv_file_path) 
+    print(csv_file_path)
+    plfile.delete(csv_file_path) 
     
     print("Results written in performance_results/performance_measures file\n")
     print("--------------------------------------------")
