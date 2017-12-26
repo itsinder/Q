@@ -1,6 +1,7 @@
 -- FUNCTIONAL
 local Q = require 'Q'
-require 'Q/UTILS/lua/strict'
+-- "TO VIEW META VECTORS ARE REQUIRED TO BE GLOBAL, HENCE STRICT CLAUSE CANNOT BE APPLIED"
+--require 'Q/UTILS/lua/strict' 
 
 
 local Scalar = require 'libsclr'
@@ -13,15 +14,14 @@ tests.t1 = function()
   c2 = Q.mk_col( {20,35,26,50,11,30,45,17}, "I4")
   z = Q.vvadd(c1, c2)
   print("START Deliberate error")
-  status = pcall(Q.sort, z, "asc")
+  local status = pcall(Q.sort, z, "asc")
   print("STOP  Deliberate error")
   assert(not status )
   z:eval()
   Q.sort(z, "asc")
   z:set_meta("max", Q.max(c2):eval())
   z:set_meta("min", Q.min(c2):eval())
-  -- Q.print_csv(z, nil, "")
-  x, y = view_meta()
+  local x, y = Q.view_meta()
   assert(type(x) == "table")
   local xctr = 0
   for k, v in pairs(x) do 
