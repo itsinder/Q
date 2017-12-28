@@ -50,7 +50,8 @@ local tests = {}
 tests.t1 = function ()
   -- TODO Create some data for agct
   local datadir = os.getenv("Q_SRC_ROOT") .. "/TESTS/"
-  agct = Q.load_csv(datadir .."agct.csv")
+  local M = dofile(datadir .. "meta_data_lamping.lua")
+  agct = Q.load_csv(datadir .."agct.csv", M, { is_hdr = true, use_accelerator = false})
   for k, v in pairs(agct) do 
     --print(k, Q.sum(Q.vseq(v, 1)):eval())
   end
