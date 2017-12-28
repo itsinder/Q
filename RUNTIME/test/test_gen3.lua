@@ -15,10 +15,8 @@ local tests = {}
 --====== Testing nascent vector with generator (gen3)
 
 tests.t1 = function()
-  -- generating required .bin file for B1 materialized vector
-  gen_bin["generate_bin"](10, "I4","_in1_I4.bin", "iter")
-  --local status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-  --assert(status)
+  -- generating required .bin file 
+  gen_bin.generate_bin(10, "I4","_in1_I4.bin", "iter")
   print("Creating nascent vector with generator gen3")
 
   local v1 = lVector( { qtype = "I4", file_name = "_in1_I4.bin"})

@@ -2,13 +2,14 @@ require 'Q/UTILS/lua/strict'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 
 local tests = {} 
 -- testing get_all function
 
 tests.t1 = function()
-  local status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-  assert(status)
+  -- generating required .bin file 
+  gen_bin.generate_bin(10, "I4", "_in1_I4.bin", "iter")
   local x = lVector(
                     { qtype = "I4", file_name = "_in1_I4.bin"}
                    )

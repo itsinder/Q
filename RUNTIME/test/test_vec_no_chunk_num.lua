@@ -4,13 +4,9 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 -- for k, v in pairs(vec) do print(k, v) end 
-
--- generating .bin files required for materialized vector
-local status
-status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-assert(status)
 
 local M
 local is_memo
@@ -21,6 +17,8 @@ local tests = {}
 
 tests.t1 = function()
   local infile = '_in1_I4.bin'
+  -- generating required .bin file 
+  gen_bin.generate_bin(10, "I4", infile, "iter")
   assert(plpath.isfile(infile), "Create the input files")
   local y = Vector.new('I4', infile, false)
   local filesize = plpath.getsize(infile)
@@ -50,12 +48,14 @@ end
 
 -- try to modify a vector created as read only. Should fail
 tests.t2 = function()
+  -- generating required .bin file 
+  gen_bin.generate_bin(10, "I4", "_in1_I4.bin", "iter")
   assert(plpath.isfile("_in1_I4.bin"))
   local y = Vector.new('I4', '_in1_I4.bin')
   y:persist(true)
   local s = Scalar.new(123, "I4")
   print("START: Deliberate error attempt")
-  status = y:set(s, 0)
+  local status = y:set(s, 0)
   assert(status == nil)
   print("STOP : Deliberate error attempt")
   --==============================================
@@ -78,13 +78,13 @@ tests.t3 = function()
   local y = Vector.new('I4')
   local s = Scalar.new(123, "I4")
   for i = 1, chunk_size do 
-    status = y:put1(s)
+    local status = y:put1(s)
     assert(status)
     if ( ( i % 2 ) == 0 ) then is_memo = true else is_memo = false end
     status = y:memo(is_memo)
     assert(status)
   end
-  status = y:put1(s)
+  local status = y:put1(s)
   assert(status)
   print("START: Deliberate error attempt")
   status = y:memo(is_memo)
@@ -100,13 +100,13 @@ tests.t4 = function()
   local s = Scalar.new(123, "I4")
   local chunk_size = 65536  
   for i = 1, chunk_size do 
-    status = y:put1(s)
+    local status = y:put1(s)
     assert(status)
     M = loadstring(y:meta())(); 
     assert(M.num_in_chunk == i)
     assert(M.chunk_num == 0)
   end
-  status = y:put1(s)
+  local status = y:put1(s)
   M = loadstring(y:meta())(); 
   assert(M.num_in_chunk == 1)
   assert(M.chunk_num == 1)
@@ -121,7 +121,7 @@ tests.t5 = function()
   local y = Vector.new('I4')
   local s = Scalar.new(123, "I4")
   for i = 1, chunk_size do 
-    status = y:put1(s)
+    local status = y:put1(s)
     assert(status)
     local ret_addr, ret_len = y:get_chunk(0);
     assert(ret_addr);
@@ -132,7 +132,7 @@ tests.t5 = function()
       assert(ret_addr == orig_ret_addr)
     end
   end
-  status = y:put1(s)
+  local status = y:put1(s)
   local ret_addr, ret_len = y:get_chunk(0);
   assert(ret_addr)
   -- TODO RAMESH assert(ret_len == chunk_size)
@@ -220,7 +220,7 @@ tests.t7 = function()
   for j = 1, M.num_elements do
     -- S[j] = Scalar.new(j*10, "I4")
     local s = Scalar.new(j*10, "I4")
-    status = y:set(s, j-1)
+    local status = y:set(s, j-1)
     assert(status)
     status = y:set(j*10, j-1)
     assert(status)
@@ -234,7 +234,7 @@ tests.t7 = function()
   -- should not be able to set after end of vector
   local j = 100000
   local s = Scalar.new(j*10, "I4")
-  status = y:set(s, M.num_elements)
+  local status = y:set(s, M.num_elements)
   assert(not status)
   assert(y:end_write())
   -- Can re-open file for writing after closing
@@ -261,7 +261,7 @@ tests.t8 = function()
   buf:seq(start, incr, chunk_size, "I4")
   local cum_size = 0
   for i = 1, 10001 do 
-    status = y:put_chunk(buf, i) -- use chunk size of i
+    local status = y:put_chunk(buf, i) -- use chunk size of i
     cum_size = cum_size + i
   end
   y:persist()

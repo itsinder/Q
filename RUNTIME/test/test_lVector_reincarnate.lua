@@ -1,13 +1,15 @@
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 
 -- generating .bin files required for materialized vector
-local status
-status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-assert(status)
-status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
-assert(status)
+local q_type = "I4"
+local num_values = 10
+-- generating .bin files required for materialized vector
+gen_bin.generate_bin(num_values, q_type, "_in1_I4.bin", "iter" )
+q_type = "B1"
+gen_bin.generate_bin(num_values, q_type, "_nn_in1.bin")
 
 local tests = {} 
 --
@@ -23,8 +25,8 @@ tests.t1 = function()
   x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   T = x:reincarnate()
   assert(T == nil)
-print("Successfully completed test t1")
+  print("Successfully completed test t1")
 end
--- =========
+---- =========
 
 return tests
