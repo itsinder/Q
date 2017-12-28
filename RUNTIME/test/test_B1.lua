@@ -7,7 +7,7 @@ local tests = {}
 
 tests.t1 = function()
   -- generating required .bin file for B1 materialized vector
-  gen_bin["generate_bin"](10, "B1","_nn_in2.bin" )
+  gen_bin.generate_bin(10, "B1","_nn_in2.bin" )
   
   local x = lVector( { qtype = "B1", file_name = "_nn_in2.bin", num_elements = 10} )
   assert(x:check())

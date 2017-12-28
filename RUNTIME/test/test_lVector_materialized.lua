@@ -69,8 +69,8 @@ tests.t1 = function()
   print(len)
   print("Successfully completed test t1")
 
-  plfile.delete(path_to_here .. "/_in1_I4.bin")
-  plfile.delete(path_to_here .. "/_nn_in1.bin")
+  --plfile.delete(path_to_here .. "/_in1_I4.bin")
+  --plfile.delete(path_to_here .. "/_nn_in1.bin")
 end
 --=========
 
@@ -105,8 +105,8 @@ tests.t2 = function()
   assert(not base_data)
   assert(not nn_data)
   print("Successfully completed test t2")
-  plfile.delete(path_to_here .. "/in2_I4.csv")
-  plfile.delete(path_to_here .. "/_in2_I4.bin")
+  --plfile.delete(path_to_here .. "/in2_I4.csv")
+  --plfile.delete(path_to_here .. "/_in2_I4.bin")
   --=========
 end
 
@@ -147,8 +147,8 @@ tests.t4 = function()
   compare("_t4_meta_data.csv", "in2_meta_data.csv")
 
   print("Successfully completed test t4")
-  plfile.delete(path_to_here .. "/in3_I4.csv")
-  plfile.delete(path_to_here .. "/_in3_I4.bin")
+  --plfile.delete(path_to_here .. "/in3_I4.csv")
+  --plfile.delete(path_to_here .. "/_in3_I4.bin")
 end
 
 --==============================================
@@ -165,8 +165,8 @@ tests.t5 = function()
   v = x:get_meta("rand scalar key")
   assert(v == s)
   print("Successfully completed test t5")
-  plfile.delete(path_to_here .. "/in4_I4.csv")
-  plfile.delete(path_to_here .. "/_in4_I4.bin")
+  --plfile.delete(path_to_here .. "/in4_I4.csv")
+  --plfile.delete(path_to_here .. "/_in4_I4.bin")
 end
 
 return tests

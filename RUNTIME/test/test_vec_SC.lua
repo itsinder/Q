@@ -1,4 +1,3 @@
-os.execute("rm -f _*.bin")
 local ffi    = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
@@ -30,13 +29,11 @@ tests.t1 = function()
   print(command)
   os.execute(command)
   s1 = plfile.read("_temp1.txt")
-  s2 = plfile.read("out_SC1.txt")
+  s2 = plfile.read("out_SC2.txt")
   assert(s1 == s2)
   --=========================
   print("Testing SC Vector from file")
-  local infile = 'SC1.bin'
-  os.execute("cp " .. infile .. " _SC1.bin ")
-  infile = "_" .. infile
+  local infile = 'SC2.bin'
   assert(plpath.isfile(infile), "Create the input files")
   y = assert(Vector.new('SC:8', infile, false))
   local ret_addr, ret_len = y:get_chunk(0);
