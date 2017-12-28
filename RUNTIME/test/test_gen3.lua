@@ -6,6 +6,7 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 local expander_gen3 = require 'Q/RUNTIME/test/expander_gen3'
 
@@ -14,8 +15,10 @@ local tests = {}
 --====== Testing nascent vector with generator (gen3)
 
 tests.t1 = function()
-  local status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-  assert(status)
+  -- generating required .bin file for B1 materialized vector
+  gen_bin["generate_bin"](10, "I4","_in1_I4.bin", "iter")
+  --local status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
+  --assert(status)
   print("Creating nascent vector with generator gen3")
 
   local v1 = lVector( { qtype = "I4", file_name = "_in1_I4.bin"})
