@@ -13,13 +13,10 @@ local function cat(x, y)
   local qtype = x:fldtype()
   local width = qconsts.qtypes[x:fldtype()].width
   local chunk_size = qconsts.chunk_size
-
   local z_buf_size = chunk_size * width
   local z_buf = ffi.malloc(z_buf_size)
-
   local z_nn_buf_size = chunk_size
   local z_nn_buf = ffi.malloc(z_nn_buf_size)
-
   ffi.fill(z_buf, z_buf_size)
   ffi.fill(z_nn_buf, z_nn_buf_size)
   local chunk_idx = 0
