@@ -1,10 +1,11 @@
 -- FUNCTIONAL
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-pca = require 'Q/OPERATORS/PCA/lua/pca'
+local pca = require 'Q/OPERATORS/PCA/lua/pca'
 assert(pca)
 local tests = {}
-  tests.t1 = function()
+
+tests.t1 = function()
   local x1 = Q.mk_col({7, 4, 6, 8, 8, 7, 5, 9, 7, 8}, "F4")
   local x2 = Q.mk_col({4, 1, 3, 6, 5, 2, 3, 5, 4, 2}, "F4")
   local x3 = Q.mk_col({3, 8, 5, 1, 7, 9, 3, 8, 5, 2}, "F4")
@@ -20,8 +21,8 @@ local tests = {}
     pca_info[i]:eval()
     --Q.print_csv(corrm[i], nil, "")
     --print("=====colbreak=======")
-  end
-  -- Q.print_csv(pca_info, nil, "")
+end
+-- Q.print_csv(pca_info, nil, "")
 print("Test t1 passed")
 end
 return tests
