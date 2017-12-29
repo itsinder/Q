@@ -5,7 +5,6 @@ require 'Q/UTILS/lua/strict'
 local tests = {}
 tests.t1 = function ()
 
-<<<<<<< HEAD
 	local T = {}
 	for i = 1,9 do
   	T[#T + 1] = 31
@@ -39,39 +38,6 @@ tests.t1 = function ()
   	X = Q.mk_col(T, 'F8')
   	X:eval()
 	ysubp = Q.const({ val = 0.5, len = #T, qtype = 'F8' })
-=======
-  local T = {}
-  for i = 1,9 do
-    T[#T + 1] = 31
-  end
-  for i = 1,333 do
-    T[#T + 1] = 32
-  end
-  for i = 1,55 do
-    T[#T + 1] = 33
-  end
-  for i = 1,64 do
-    T[#T + 1] = 34
-  end
-  for i = 1,35 do
-    T[#T + 1] = 35
-  end
-  for i = 1,85 do
-    T[#T + 1] = 36
-  end
-  for i = 1,22 do
-    T[#T + 1] = 37
-  end
-  for i = 1,32 do
-    T[#T + 1] = 38
-  end
-  local ysubp 
-  local X 
-  for i = 1, 20000 do 
-    local X = Q.mk_col(T, 'F8')
-    X:eval()
-  local ysubp = Q.const({ val = 0.5, len = #T, qtype = 'F8' })
->>>>>>> dev
   ysubp:eval()
 
   bt[i] = Q.sum(Q.vvmul(X, ysubp))
