@@ -68,7 +68,7 @@ function Logger.new(args)
   if args.level ~= nil then
     log.level =  assert(levels[args.level], "must be a valid level")
   end
-  log.level = args.level
+  log.level = levels[args.level]
   return log
 end
 

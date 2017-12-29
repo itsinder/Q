@@ -15,7 +15,9 @@ tests.t1 = function()
     for i = 1, 4 do 
       local filename = "./__junk__" .. tostring(i) .. ".bin"
       plfile.write(filename, tostring(i))
-      local mmap = ffi.gc(qc.f_mmap(filename, true), qc.f_munmap)
+      local c_fname = ffi.cast("char*", ffi.malloc(1000))
+      ffi.copy(c_fname, filename)
+      local mmap = ffi.gc(qc.f_mmap(c_fname, true), qc.f_munmap)
       assert(mmap.status == 0, "Mmap failed")
       X[i] = mmap
     end

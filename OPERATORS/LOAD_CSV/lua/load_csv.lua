@@ -270,10 +270,8 @@ local function load_csv(
             mk_out_buf(in_buf, M[col_idx], dicts[col_idx], temp_out_buf)
 
             -- Update nn_out_buf
-            local widx = math.floor(num_in_out_buf / 8)
-            local bidx = (num_in_out_buf % 8)
-            local temp_nn_out_buf = ffi.cast("char *", out_buf_nn_array[col_idx])
-            qc.set_bit(temp_nn_out_buf + widx, bidx)
+            local temp_nn_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", out_buf_nn_array[col_idx])
+            qc.set_bit_u64(temp_nn_out_buf, num_in_out_buf, 1)
 
           end
         end

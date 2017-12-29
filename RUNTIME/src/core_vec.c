@@ -400,6 +400,7 @@ vec_new(
   char qtype[4]; int field_size = 0;
   memset(qtype, '\0', 4);
   if ( strcmp(field_type, "B1") == 0 ) {
+    // What should be the field_size for B1?
     strcpy(qtype, field_type); field_size = 0; // SPECIAL CASE
   }
   else if ( strcmp(field_type, "I1") == 0 ) {
@@ -724,7 +725,12 @@ vec_get(
         // not clear this is an error even though it cannot be fulfilled
         status = -2; goto BYE;
       }
-      ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) {
+        ret_addr = ptr_vec->map_addr + ( idx / 8 );
+      }
+      else {
+        ret_addr = ptr_vec->map_addr + ( idx * ptr_vec->field_size);
+      }
       ret_len  = mcr_min(ptr_vec->num_elements - idx, len);            
     }
   }
@@ -861,6 +867,9 @@ vec_add_B1(
       }
       if ( chunk_bit_idx == 8 ) {
         chunk_word_idx++; chunk_bit_idx = 0;
+        if ( chunk_word_idx == ( ptr_vec->chunk_size / 8 ) ) {
+          chunk_word_idx = 0;
+        }
       }      
     }
   }

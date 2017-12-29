@@ -4,7 +4,7 @@ local Q = require 'Q'
 local tests = {}
 
 tests.t1 = function()
-  c1 = Q.mk_col({1, 2, 3, 4, 5}, "I4")
+  local c1 = Q.mk_col({1, 2, 3, 4, 5}, "I4")
   c1:set_name("first_vec")
   local meta_table, meta_json = Q.view_meta()
   assert(type(meta_table) == "table")

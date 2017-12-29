@@ -4,6 +4,7 @@ local Vector  = require 'libvec'
 local Scalar  = require 'libsclr'  
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
+local fns = require 'Q/RUNTIME/test/generate_csv'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
@@ -16,15 +17,6 @@ local databuf
 local x
 local T
 local md -- meta data 
-
--- generating .bin files required for materialized vector
-local status
-status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-assert(status)
-status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
-assert(status)
-status = os.execute("cp _in1_I4.bin _in2_I4.bin")
-assert(status)
 
 local tests = {} 
 --===================
@@ -53,6 +45,18 @@ end
 --=========================
 --
 tests.t1 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in1_I4.csv")
+  --os.execute("rm -f in1_B1.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in1_I4.csv", "I4", 10, "iter")
+  fns.generate_csv("in1_B1.csv", "B1", 10, "iter")
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
+  assert(status)
+  status = os.execute("../../UTILS/src/asc2bin in1_B1.csv B1 _nn_in1.bin")
+  assert(status)
   x = lVector(
   { qtype = "I4", file_name = "_in1_I4.bin", nn_file_name = "_nn_in1.bin"})
   assert(x:check())
@@ -63,10 +67,22 @@ tests.t1 = function()
   assert(nn_data)
   print(len)
   print("Successfully completed test t1")
+  plfile.delete(path_to_here .. "/in1_I4.csv")
+  plfile.delete(path_to_here .. "/in1_B1.csv")
+  plfile.delete(path_to_here .. "/_in1_I4.bin")
+  plfile.delete(path_to_here .. "/_nn_in1.bin")
 end
 --=========
 
 tests.t2 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in2_I4.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in2_I4.csv", "I4", 10, "iter")
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in2_I4.csv I4 _in2_I4.bin")
+  assert(status)
   x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
   assert(x:check())
   local n = x:num_elements()
@@ -84,6 +100,8 @@ tests.t2 = function()
   len, base_data, nn_data = x:chunk(100)
   assert(not base_data)
   assert(not nn_data)
+  plfile.delete(path_to_here .. "/in2_I4.csv")
+  plfile.delete(path_to_here .. "/_in2_I4.bin")
   --=========
 end
 
@@ -135,7 +153,7 @@ tests.t5 = function()
   local num_elements = 1024
   local field_size = 4
   local base_data = cmem.new(num_elements * field_size)
-  status = pcall(x.put_chunk, base_data, nil, num_elements)
+  local status = pcall(x.put_chunk, base_data, nil, num_elements)
   assert(not status)
   print("Successfully completed test t5")
 end
@@ -195,7 +213,7 @@ tests.t7 = function()
     x:check()
     print("XX: ", chunk_num, x_num_chunks)
   end
-  status = pcall(x.eov)
+  local status = pcall(x.eov)
   assert(not status)
   local T = x:meta()
   assert(plpath.getsize(T.base.file_name) == (num_chunks * chunk_size * 4))
@@ -217,7 +235,7 @@ tests.t8 = function()
     x:check()
   end
   assert(x:is_eov() == true)
-  status = pcall(x.eov)
+  local status = pcall(x.eov)
   assert(not status)
   local len, base_data, nn_data = x:chunk(0)
   assert(base_data)
@@ -249,8 +267,16 @@ tests.t9 = function()
 end
 
 tests.t10 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in2_I4.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in3_I4.csv", "I4", 10, "iter")
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in3_I4.csv I4 _in3_I4.bin")
+  assert(status)
   -- testing setting and getting of meta data 
-  local x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
+  local x = lVector( { qtype = "I4", file_name = "_in3_I4.bin"})
   x:set_meta("rand key", "rand val")
   v = x:get_meta("rand key")
   assert(v == "rand val")
@@ -262,16 +288,28 @@ tests.t10 = function()
   compare("_meta_data.csv", "in2_meta_data.csv")
 
   print("Successfully completed test t10")
+  plfile.delete(path_to_here .. "/in3_I4.csv")
+  plfile.delete(path_to_here .. "/_in3_I4.bin")
 end
 --==============================================
 tests.t11 = function()
+  -- deleting previous .csv file if present
+  --os.execute("rm -f in2_I4.csv")
+  -- generating .csv files required for generating bin file
+  fns.generate_csv("in4_I4.csv", "I4", 10, "iter")
+  -- generating .bin files required for materialized vector
+  local status
+  status = os.execute("../../UTILS/src/asc2bin in4_I4.csv I4 _in4_I4.bin")
+  assert(status)
   -- testing setting and getting of meta data with a Scalar
-  local x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
+  local x = lVector( { qtype = "I4", file_name = "_in4_I4.bin"})
   local s = Scalar.new(1000, "I8")
   x:set_meta("rand scalar key", s)
   v = x:get_meta("rand scalar key")
   assert(v == s)
   print("Successfully completed test t11")
+  plfile.delete(path_to_here .. "/in4_I4.csv")
+  plfile.delete(path_to_here .. "/_in4_I4.bin")
 end
 
 return tests

@@ -1,7 +1,12 @@
-local pldir = require 'pl.dir'
-local plpath = require 'pl.path'
+local pldir     = require 'pl.dir'
+local plpath    = require 'pl.path'
+local blacklist = require 'Q/TEST_RUNNER/blacklist'
 
 local ignore_files = {}
+for i, v in pairs(blacklist) do
+  ignore_files[v] = true
+end
+
 local ignore_dirs = {
    DEPRECATED = true,
    experimental = true,
@@ -10,13 +15,13 @@ local ignore_dirs = {
 }
 
 local function is_dir_exception(dir)
-   local sub_dir = string.match(dir, "[^/]*$")
-   return ignore_dirs[sub_dir] == true or ignore_dirs[dir] == true
+  local sub_dir = string.match(dir, "[^/]*$")
+  return ignore_dirs[sub_dir] == true or ignore_dirs[dir] == true
 end
 
 local function is_file_exception(file)
-   local sub_filename = string.match(file, "[^/]*$")
-   return ignore_files[sub_filename] == true or ignore_files[file] == true
+  local sub_filename = string.match(file, "[^/]*$")  
+  return ignore_files[sub_filename] == true or ignore_files[file] == true
 end
 
 local function exclude_non_test_files(files)

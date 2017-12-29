@@ -1,10 +1,13 @@
 local plpath  = require 'pl.path'
+local dir = require 'pl.dir'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
+local gen_fns = require 'Q/RUNTIME/test/generate_csv'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
+dir.makepath(script_dir .."/bin/")
 
 local all_qtype = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV' }
 
@@ -32,6 +35,17 @@ local create_tests = function()
       local M
       if v.meta then
         M = dofile(script_dir .."/meta_data/"..v.meta)
+      end
+      
+      if v.test_type == "materialized_vector" then
+        --print(qtype ..".csv", qtype, v.num_elements)
+        local csv_file_name = "bin/".. qtype[j] .. ".csv"
+        local bin_file_name = "bin/in_".. qtype[j] .. ".bin"
+        --print(csv_file_name,bin_file_name, v.num_elements)
+        gen_fns.generate_csv(csv_file_name, qtype[j], v.num_elements, "random")
+        --print("../../../UTILS/src/asc2bin" .. csv_file_name .. qtype[j] .. bin_file_name)
+        local status = os.execute("../../../UTILS/src/asc2bin" .." ".. csv_file_name .. " " .. qtype[j] .. " " .. bin_file_name)
+        assert(status)
       end
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then 
