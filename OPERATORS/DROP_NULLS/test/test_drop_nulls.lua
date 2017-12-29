@@ -12,7 +12,7 @@ tests.t1 = function()
   print("XXXXXXXXX TODO FAILING")
   local z = Q.drop_nulls(x, sval)
   print("YYYYYYYYY")
-  assert(Q.sum(z):eval() == 316)
+  assert(Q.sum(z):eval():to_num() == 316)
   print("Test t1 succeeded")
 end
 return tests
