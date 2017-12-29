@@ -17,13 +17,15 @@ tests.t1 = function ()
   	local chk = 0
   	local chk2 = 0
   	for i, X_i in ipairs(X) do
-    	assert( ( X_i:length() == x_len) or ( X_i:length() == 0 ) )
+    	assert( ( X_i:num_elements() == x_len) or ( X_i:num_elements() == 0 ) )
     	A[i] = {}
     	for j, X_j in ipairs(X) do
       	A[i][j] = Q.sum(Q.vvmul(X_i, X_j))
       	chk = A[i][j]:eval()
+				print(chk)
       	if ( i > 1 ) then 
         	chk2 = A[i][j]:eval()
+					print(chk2)
         	assert ( chk2 == chk )
       	end
     	end
