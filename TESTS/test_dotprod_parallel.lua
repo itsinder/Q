@@ -35,9 +35,9 @@ tests.t1 = function ()
 	local b
 	local bt = {}
 	for i = 1, 20000 do 
-  	local X = Q.mk_col(T, 'F8')
+  	X = Q.mk_col(T, 'F8')
   	X:eval()
-	local ysubp = Q.const({ val = 0.5, len = #T, qtype = 'F8' })
+	ysubp = Q.const({ val = 0.5, len = #T, qtype = 'F8' })
   ysubp:eval()
 
   bt[i] = Q.sum(Q.vvmul(X, ysubp))
@@ -48,10 +48,10 @@ tests.t1 = function ()
   collectgarbage()
 	end
 -- dbg()
-	X:eval()
-	ysubp:eval()
+	--X:eval()
+	--ysubp:eval()
 
-	local b = Q.sum(Q.vvmul(X, ysubp))
+	b = Q.sum(Q.vvmul(X, ysubp))
 	b = b:eval()
 
 	local bt = {}
@@ -61,10 +61,10 @@ tests.t1 = function ()
 	for i = 1,1000 do
   	bt[i] = bt[i]:eval()
   	collectgarbage()
-	end
+	end 
 
 	for i = 1, 1000 do
-  	assert(bt[i] == b, "original result: "..b..", different result: "..bt[i])
+  	assert(bt[i] == b, "original result: ".. b:to_num() ..", different result: ".. bt[i]:to_num())
 	end
 
 end

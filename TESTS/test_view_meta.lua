@@ -1,8 +1,5 @@
 -- FUNCTIONAL
 local Q = require 'Q'
--- "TO VIEW META VECTORS ARE REQUIRED TO BE GLOBAL, HENCE STRICT CLAUSE CANNOT BE APPLIED"
---require 'Q/UTILS/lua/strict' 
-
 
 local Scalar = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
