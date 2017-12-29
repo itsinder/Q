@@ -1,6 +1,7 @@
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local fns = {}
 
@@ -157,6 +158,64 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
   end
   return true
 end
+
+fns.handle_category2_1 = function (index, status, ret, v, qtype)
+  
+  ret[1]:eov()
+ 
+  local num_elements = ret[1]:num_elements()
+  local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
+  print("number of chunks are==========",no_of_chunks)
+  
+  for chunk_no = 0,no_of_chunks-1 do
+    local status, len, base_data, nn_data 
+    if not chunk_no then
+      assert(ret[1]:is_eov())
+      status, len, base_data, nn_data = pcall(ret[1].get_all, ret[1])
+    else
+      status, len, base_data, nn_data = pcall(ret[1].chunk, ret[1], chunk_no)
+    end
+    assert(status, "Failed to get the chunk from vector")
+    assert(base_data, "Received base data is nil")
+    assert(len, "Received length is not proper")
+  
+    
+    if qtype == "B1" then
+      for i = 1 , len do 
+        local bit_value = convert_c_to_txt(ret[1], i)
+        if bit_value == nil then bit_value = 0 end
+        local expected
+        if i % 2 == 0 then 
+          expected = 0
+        else 
+          expected = 1 
+        end
+        --print(i.."Actual value ",bit_value)
+        if expected ~= bit_value then
+          status = false
+          print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(bit_value))
+          return status
+        end
+      end
+    else
+    
+      --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+      for i = 1, len do
+        local expected = i*15 % qconsts.qtypes[qtype].max
+        local value = convert_c_to_txt(ret[1],i)
+        --print(expected, value)
+        if ( value ~= expected ) then
+          status = false
+          print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(value))
+          return status
+        end
+      end
+    end
+  end
+  return status
+end
+  
+
 
 -- this function handle testcases where table of columns are expected output 
 -- in this table, multiple columns are present

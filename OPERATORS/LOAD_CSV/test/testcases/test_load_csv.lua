@@ -6,6 +6,7 @@ local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local fns = require 'Q/OPERATORS/LOAD_CSV/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
+local gen_csv = require 'Q/RUNTIME/test/generate_csv'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/testcases"
@@ -32,6 +33,9 @@ for i, v in ipairs(T) do
     if v.category == "category1" then
       print("START: Deliberate error attempt")
     end
+    if v.category == "category2_1" then
+      gen_csv.generate_csv(test_input_dir .. D, M[1].qtype, v.num_elements, "random")
+    end
     
     local status, ret = pcall(load_csv,test_input_dir..D,  M, opt_args)
     if v.category == "category1" then
@@ -41,7 +45,7 @@ for i, v in ipairs(T) do
     
     local key = "handle_"..v.category
     if fns[key] then
-      result = fns[key](i, status, ret, v)
+      result = fns[key](i, status, ret, v, M[1].qtype)
       -- preamble
       utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
       assert(result,"handle " .. v.category .. " assertions failed")
