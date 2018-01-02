@@ -4,6 +4,12 @@ In this file, all the testcases are written in the format
 name = <testcase name>, input = <input values given in lua table>, qtype = <type of data e.g. I1, I4 etc>, category = <category_number>
 They are added as a row in the below LUA table.
 category1 - error code testcases
+category2 - positive testcases
+category2_1 - testcase for testing elements(rows) > chunk_size
+            - same as category2 testcases, just the input table is large in length
+            - this input table is generated using generate_input_table()
+            - the generate_input_table() function is in test_mk_col.lua file
+            - once this table is generated these testcases can be categorized into category2
 For all the error codes , refer to UTILS/lua/error_codes.lua
 In case, you want to add a test case with a new error code, add the error code in the UTILS/lua/error_codes.lua file.
 --]]
@@ -91,5 +97,10 @@ return {
   -- Overflow I4 values given to mk_col
   -- mk_col should validate inputs should be of B1 type ( 0 or 1 )
   { testcase_no = 23, name = "Invalid B1 values", input = { 2 }, qtype = "B1", category= "category1",
-    output_regex = g_err.INVALID_B1_VALUE }
+    output_regex = g_err.INVALID_B1_VALUE },
+  
+  -- testcase for testing elements(rows) > chunk_size
+  -- I4 qtype values
+  { testcase_no = 24, name= "elements more than chunksize-I4", category = "category2_1",
+    qtype= "I4", num_elements = 65540 },
 }

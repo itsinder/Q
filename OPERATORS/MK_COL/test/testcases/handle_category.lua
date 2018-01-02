@@ -88,7 +88,7 @@ fns.category2 = function (index, v, status, ret)
       result = result / precision
     end
     
-    print(result , v.input[i])
+    -- print(result , v.input[i])
     if result ~= v.input[i] then
       fns["increment_failed_mkcol"](index, v, "Mk_col input output mismatch input = "..v.input[i]..
         " output = "..result)
