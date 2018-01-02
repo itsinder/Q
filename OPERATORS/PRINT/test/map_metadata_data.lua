@@ -90,6 +90,11 @@ return {
     output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
   --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
+  
+  -- testcase for testing elements(rows) > chunk_size
+  -- I4 qtype values
+  { testcase_no = 26, meta = "gm_single_col.lua", data = "I4_more_than_chunksize.csv", csv_file = "print_more_than_chunksize.csv", 
+    category = "category1_1", name= "elements more than chunksize-I4", num_elements = 65540 },
 }
 
       

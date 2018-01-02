@@ -3,6 +3,8 @@ local Vector = require 'Q/RUNTIME/lua/lVector'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
@@ -89,6 +91,27 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
   -- original data -> load -> print -> Data A -> load -> print -> Data B. 
   -- In this function Data A is matched with Data B 
   return check_again(index, csv_file, v.meta, v)
+end
+
+fns.handle_category1_1 = function (index, v, csv_file, ret, status, qtype)
+  
+  if not status then
+    print(ret)
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is not success")
+    return false
+  end
+  
+  if type(ret) == "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is a string")
+    return false
+  end
+  
+  -- match input and output files
+  if file_match(script_dir .."/data/"..v.data, csv_file) == false then
+     fns["increment_failed"](index, v, "testcase failed: in category1_1, input and output csv file does not match")
+     return false
+  end
+  return true
 end
 
 -- in this category invalid filter input are given 
