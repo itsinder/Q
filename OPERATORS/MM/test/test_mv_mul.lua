@@ -2,6 +2,10 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local diff = require 'Q/UTILS/lua/diff'
+
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/MM/test/"
+
 local tests = {}
 tests.t1 = function()
   local num_trials = 2
@@ -15,9 +19,9 @@ tests.t1 = function()
   end
   assert(Z:num_elements() == x1:length())
   print("Completed mv_mul")
-  Q.print_csv(Z, nil, "_out1.txt")
-  assert(diff("out1.txt", "_out1.txt"))
-  os.execute("rm -f _out1.txt")
+  Q.print_csv(Z, nil, script_dir .. "_out1.txt")
+  assert(diff(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
+  os.execute("rm -f " .. script_dir .. "_out1.txt")
 end
 tests.t2 = function()
  --[[

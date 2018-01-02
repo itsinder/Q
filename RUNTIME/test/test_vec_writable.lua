@@ -4,12 +4,8 @@ local Scalar = require 'libsclr' ;
 local cmem    = require 'libcmem' ; 
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
-
--- generating .bin files required for materialized vector
-local status
-status = os.execute("../../UTILS/src/asc2bin in1_I4.csv I4 _in1_I4.bin")
-assert(status)
 
 local buf = cmem.new(4096)
 local M
@@ -20,6 +16,9 @@ local tests = {}
 
 tests.t1 = function()
   local infile = '_in1_I4.bin'
+  -- generating required .bin file 
+  gen_bin.generate_bin(10, "I4", infile, "iter")
+
   assert(plpath.isfile(infile), "Create the input files")
   local y = Vector.new('I4', infile, false)
   assert(y:start_write())
@@ -28,7 +27,7 @@ tests.t1 = function()
   assert(y:start_write() == nil)
   print("STOP : Deliberate error attempt")
   local s = Scalar.new(987654, "I4")
-  status = y:set(s, 0)
+  local status = y:set(s, 0)
   assert(status)
   assert(y:end_write())
   -- Second call to end_write should fail

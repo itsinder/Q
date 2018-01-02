@@ -15,18 +15,18 @@ tests.t1 = function()
   --==============================================
   -- Can get current chunk num but cannot get previous 
   -- ret_len should be number of elements in chunk
-  s = Scalar.new(123, "I4")
-  orig_ret_addr = nil
-  num_iters = 1 -- default value 
+  local s = Scalar.new(123, "I4")
+  local orig_ret_addr = nil
+  local num_iters = 1 -- default value 
   
   print("num_iters = ", num_iters)
 
   for j = 1, num_iters do
     local y = Vector.new('I4')
     for i = 1, chunk_size do 
-      status = y:put1(s)
+      local status = y:put1(s)
       assert(status)
-      ret_addr, ret_len = y:get_chunk(0);
+      local ret_addr, ret_len = y:get_chunk(0);
       assert(ret_addr);
       assert(ret_len == i)
       if ( i == 1 ) then 
@@ -35,9 +35,9 @@ tests.t1 = function()
         assert(ret_addr == orig_ret_addr)
       end
     end
-    status = y:put1(s)
+    local status = y:put1(s)
     assert(status)
-    ret_addr, ret_len = y:get_chunk(0);
+    local ret_addr, ret_len = y:get_chunk(0);
     assert(type(ret_addr) == "CMEM")
     assert(ret_addr)
     assert(ret_len == chunk_size) -- can get previous chunk

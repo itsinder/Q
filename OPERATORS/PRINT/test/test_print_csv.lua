@@ -5,6 +5,7 @@ local file = require 'pl.file'
 local dir = require 'pl.dir'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
+local gen_csv = require 'Q/RUNTIME/test/generate_csv'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
 
@@ -41,6 +42,11 @@ for i, v in ipairs(T) do
     local F = v.filter
     local csv_file = v.csv_file
     local result
+    
+    if v.category == "category1_1" then
+      gen_csv.generate_csv(test_input_dir .. D, M[1].qtype, v.num_elements, "random")
+    end
+    
     if v.category == "category6" then
       local key = "handle_"..v.category
       if fns[key] then
@@ -57,7 +63,7 @@ for i, v in ipairs(T) do
       goto skip
     end
     
-    local status, load_ret = pcall(load_csv,script_dir .."/data/"..D, M, {use_accelerator = false})
+    local status, load_ret = pcall(load_csv,test_input_dir .. D, M, {use_accelerator = false})
     if status then
       -- Persist vector or else input csv get deleted
       --for i=1, #load_ret do
@@ -72,11 +78,10 @@ for i, v in ipairs(T) do
       local file_path 
       if csv_file then file_path = print_out_dir .. csv_file end
       if csv_file == "" then file_path = "" end
-      
       local status, print_ret = pcall(print_csv, load_ret, F, file_path)
       key = "handle_"..v.category
       if fns[key] then
-        result = fns[key](i, v,  file_path, print_ret, status)
+        result = fns[key](i, v,  file_path, print_ret, status, M[1].qtype)
         -- preamble
         utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
         assert(result,"handle " .. v.category .. " assertions failed")

@@ -58,29 +58,31 @@ end
 --======================================
 tests.t6 = function ()
   print("=======================================")
-  -- Then below will be a case where more than chunk size values present in a and b
+  -- more than chunk size values present in a and b
 
-  --local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
   --a:eval()
-  local a_input_table = {}
+  local len = 65538
+  --local a_input_table = {}
   local b_input_table = {}
-  for i=1, 65538 do
+  for i=1, len do
     b_input_table[i] = 0
-    a_input_table[i] = i
+    --a_input_table[i] = i
   end
   b_input_table[2] = 1
   b_input_table[4] = 1
-  b_input_table[65538] = 1
+  b_input_table[len] = 1
   local b = Q.mk_col(b_input_table, "B1")
-  local a = Q.mk_col(a_input_table, "I4")
-  local expected_out = {2, 4, 65538}
+  --local a = Q.mk_col(a_input_table, "I4")
+  local expected_out = {2, 4, len}
   
   --Q.print_csv(a, nil, "/tmp/a_out.txt")
   --Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()
-  
+ 
+  --Q.print_csv(c, nil, "") 
   assert(c:length() == #expected_out, "Length Mismatch, Expected: " .. #expected_out .. " Actual: " .. c:length())
   --assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
 
@@ -93,7 +95,7 @@ end
 
 tests.t7 = function ()
   print("=======================================")
-  -- Then below will be a case where more than chunk size values present in a and b
+  -- more than chunk size values present in a and b
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
   a:eval()
@@ -112,8 +114,8 @@ tests.t7 = function ()
   end
   expected_out[65537] = 65538
   
-  Q.print_csv(a, nil, "/tmp/a_out.txt")
-  Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(a, nil, "/tmp/a_out.txt")
+  --Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()

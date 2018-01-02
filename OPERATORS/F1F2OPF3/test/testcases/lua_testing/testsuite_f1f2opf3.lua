@@ -39,8 +39,8 @@ local assert_valid = function(expected, precision)
         final_result = math.floor( final_result * mult + 0.5 ) / mult
       end
       if final_result ~= value then 
-        print("Value incorrect",final_result," expected is ",value)
-        return false
+        local failure_reason = "Actual value is " .. final_result .. " and expected is " .. value
+        return false, failure_reason
       end
     end
     return true

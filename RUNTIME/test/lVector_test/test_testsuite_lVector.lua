@@ -46,19 +46,24 @@ for k,test_num in pairs(tests_to_run) do
     print ("running test " .. test_num, test.name )
     --call_if_exists(test.setup)
     status, res = pcall(l_Vector, unpack(test.input))
-    local result
+    local result, reason
     
     if status then
-      result = test.check(res)
+      result, reason = test.check(res)
       -- preamble
       utils["testcase_results"](test, testsuite_lVector.test_for, testsuite_lVector.test_type, result, "")
-      assert(result,"testcase " .. test.name .. " assertions failed")
+      if reason ~= nil then
+        assert(result,"test name:" .. test.name .. ":: Reason: " .. reason)
+      end
+      assert(result,"test name:" .. test.name)
       -- myassert (result, test_num, test.name)
     else      
-      result = status
       -- preamble
-      utils["testcase_results"](test, testsuite_lVector.test_for, testsuite_lVector.test_type, result, "")
-      assert(result,"testcase " .. test.name .. " assertions failed")
+      utils["testcase_results"](test, testsuite_lVector.test_for, testsuite_lVector.test_type, status, "")
+      if res ~= nil then
+        assert(status,"test name:" .. test.name .. ":: Reason: " .. res)
+      end
+      assert(status,"test name:" .. test.name)
       -- myassert (result, test_num, test.name, res)
     end
     --call_if_exists(test.teardown)

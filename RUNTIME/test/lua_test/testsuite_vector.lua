@@ -1,9 +1,8 @@
 local plpath  = require 'pl.path'
 local dir = require 'pl.dir'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-
 local fns =  require 'Q/RUNTIME/test/lua_test/assert_valid'
-local gen_fns = require 'Q/RUNTIME/test/generate_csv'
+local genbin = require 'Q/RUNTIME/test/generate_bin'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lua_test"
@@ -18,7 +17,7 @@ local assert_valid = function(assert_fns, test_name, gen_method, num_elements)
     local function_name = "assert_" .. assert_fns
     local status, result = pcall(fns[function_name], x, test_name, num_elements, gen_method)
     if not status then
-      print(result)
+      return status, result
     end
     return status
   end
@@ -36,21 +35,16 @@ local create_tests = function()
       if v.meta then
         M = dofile(script_dir .."/meta_data/"..v.meta)
       end
-      local csv_file_name
+      
       local bin_file_name
       if v.test_type == "materialized_vector" then
-        --print(qtype ..".csv", qtype, v.num_elements)
-        csv_file_name = "bin/".. qtype .. ".csv"
-        bin_file_name = "bin/in_".. qtype .. ".bin"
-        --print(csv_file_name,bin_file_name, v.num_elements)
-        gen_fns.generate_csv(csv_file_name, qtype, v.num_elements, "random")
-        --print("../../../UTILS/src/asc2bin" .. csv_file_name .. qtype .. bin_file_name)
-        local status = os.execute("../../../UTILS/src/asc2bin" .." ".. csv_file_name .. " " .. qtype .. " " .. bin_file_name)
-        assert(status)
+        bin_file_name = script_dir.."/bin/in_".. i .. "_" .. qtype .. ".bin"
+        -- generating .bin files required for materialized vector
+        genbin.generate_bin(v.num_elements, qtype, bin_file_name, "random" )
       end
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then
-        M.file_name = string.gsub( M.file_name, "${q_type}", qtype )
+        M.file_name = string.gsub( M.file_name, "${q_type}", i .. "_" .. qtype )
         M.file_name = script_dir .. "/" .. M.file_name
         if M.nn_file_name then
           M.nn_file_name = script_dir .. "/" .. M.nn_file_name

@@ -181,6 +181,11 @@ return {
       output_regex = 1, name = "nil_data_file_deletion" 
     },
     
+    -- testcases for testing elements(rows) > chunk_size
+    
+    -- I4 qtype values
+    { testcase_no = 37, meta = "gm_valid_I4.lua", data = "I4_valid_more_than_chunksize.csv", 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-I4" }, 
         
 
     

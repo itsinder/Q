@@ -24,7 +24,10 @@ local assert_valid = function(expected, precision)
       local mult = 10^(precision or 0)
       local value = math.floor( final_result * mult + 0.5 ) / mult
       -- print ( ret[k], value, expected[k], precision)
-      if value ~= expected[k] then return false end
+      if value ~= expected[k] then 
+        local failure_reason = "Actual value is " .. value .. " and expected is " .. expected[k]
+        return false, failure_reason
+      end
     end
     return true
   end

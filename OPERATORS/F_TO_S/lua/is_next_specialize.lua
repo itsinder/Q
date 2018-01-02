@@ -68,7 +68,7 @@ return function (
         is_good = true
       end
       local n = y[0].num_seen
-      return is_good, n
+      return is_good, tonumber(n)
     end
     --==============================
     return subs, tmpl

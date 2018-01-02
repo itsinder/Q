@@ -45,7 +45,7 @@ local run_suite = function(suite_name, test_name)
     if (test_name) then print ("Running only test " .. test_name .. " in unsafe mode..." ) end
     local status, tests = pcall(dofile, suite_name)
     if not status then
-      return {}, { msg = "Failed to load suit" }
+      return {}, { msg = "Failed to load suit\n" .. tostring(tests) }
     end
 
     if (test_name) then

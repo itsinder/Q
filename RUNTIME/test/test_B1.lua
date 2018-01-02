@@ -1,11 +1,14 @@
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 
 local tests = {} 
 
 tests.t1 = function()
-  local status = os.execute("../../UTILS/src/asc2bin in2_B1.csv B1 _nn_in2.bin")
+  -- generating required .bin file for B1 materialized vector
+  gen_bin.generate_bin(10, "B1","_nn_in2.bin" )
+  
   local x = lVector( { qtype = "B1", file_name = "_nn_in2.bin", num_elements = 10} )
   assert(x:check())
   local len, base_data, nn_data = x:get_all()
