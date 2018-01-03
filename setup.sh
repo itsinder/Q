@@ -71,7 +71,7 @@ mkdir -p $Q_ROOT/include
 mkdir -p $Q_ROOT/lib
 # export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
 export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
-echo "Q_SRC_ROOT: $Q_SRC_ROOT"
+echo "Q_SRC_ROOT: ${Q_SRC_ROOT}"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wno-unused-parameter -pedantic -fopenmp'
 
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
@@ -102,7 +102,7 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # if [[ "$RET" -ne "0" ]]; then
 #     `lua| tail -1`
 # fi
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${Q_ROOT}/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 # export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
 export Q_LINK_FLAGS=" -llapacke -llapack -lblas -lm -shared "

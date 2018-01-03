@@ -43,6 +43,7 @@ local function is_g_exception(k,v)
     if string.match(k, "^g_") then return true end
     if k == "bit" then return true end
     if k == "arg" then return true end
+    if type(v) == "userdata" then return true end
     return false
 end
 
@@ -77,15 +78,17 @@ local function save(name, value, saved, file)
     if type(value) == "lVector" then
       save(name .. "._meta", value._meta, saved, file)
     end
-  elseif ( type(value) == "userdata" ) then 
+  -- elseif ( type(value) == "userdata" ) then 
     -- print("not saving a userdata")
   else
     error("cannot save a " .. type(value))
   end
 end
 
+local dbg = require 'Q/UTILS/lua/debugger'
+
 local function save_global(filename)
-    assert(filename ~= nil, "A valid filename has to be given")
+   assert(filename ~= nil, "A valid filename has to be given")
     local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
     local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
     file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
@@ -99,6 +102,7 @@ local function save_global(filename)
     for k,v in pairs(_G) do
         if not is_g_exception(k,v) then
           -- print("Saving ", k, v)
+          dbg() 
           save(k, v, saved, file)
         end
     end
