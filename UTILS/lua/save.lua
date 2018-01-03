@@ -85,8 +85,6 @@ local function save(name, value, saved, file)
   end
 end
 
-local dbg = require 'Q/UTILS/lua/debugger'
-
 local function save_global(filename)
    assert(filename ~= nil, "A valid filename has to be given")
     local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
@@ -102,7 +100,6 @@ local function save_global(filename)
     for k,v in pairs(_G) do
         if not is_g_exception(k,v) then
           -- print("Saving ", k, v)
-          dbg() 
           save(k, v, saved, file)
         end
     end
