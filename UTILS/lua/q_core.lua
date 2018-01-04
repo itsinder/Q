@@ -34,7 +34,7 @@ local function add_libs()
     local lib_name, subs = file:gsub("%.h$", "")
     assert(subs == 1, "Should be only one extension")
     local so_name = "lib" .. lib_name .. ".so"
-    if so_name ~= "libq_core.so" then
+    if so_name ~= "libq_core.so" and plpath.isfile(Q_ROOT .. "/lib/" .. so_name) then
       ffi.cdef(plfile.read(h_files[file_id]))
       local q_tmp = ffi.load(so_name)
       assert(function_lookup[lib_name] == nil,
