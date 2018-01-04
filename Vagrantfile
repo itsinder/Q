@@ -72,6 +72,10 @@ Vagrant.configure("2") do |config|
     chmod 1777 /tmp    
     ln -s /vagrant /Q
     echo 'source /Q/setup.sh' >> /home/vagrant/.bashrc
+    # Do stuff to customize your shell e.g.,
+    # TODO: Make sure permissions of file are not set to root
+    # cp /Q/GUIDING_PRINCIPLES/vimrc  /home/vagrant/.vimrc
+    # cp /Q/GUIDING_PRINCIPLES/bashrc /home/vagrant/.bashrc
     cd /Q/GUIDING_PRINCIPLES
     bash aio.sh
   SHELL
