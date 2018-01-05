@@ -3,6 +3,7 @@ local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
 local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
 
 local compile = require 'Q/UTILS/lua/compiler'
+-- local dbg = require 'Q/UTILS/lua/debugger'
 local incfile = Q_ROOT .. "/include/q_core.h"
 local inc_dir = Q_ROOT .. "/include/"
 local ffi = require 'Q/UTILS/lua/q_ffi'
@@ -16,7 +17,6 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local timer = require 'posix.time'
 
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
--- local dbg = require 'Q/UTILS/lua/debugger'
 assert(plpath.isfile(incfile), "File not found " .. incfile)
 ffi.cdef(plfile.read(incfile))
 qc = ffi.load('libq_core.so')
@@ -35,11 +35,17 @@ local function add_libs()
     assert(subs == 1, "Should be only one extension")
     local so_name = "lib" .. lib_name .. ".so"
     if so_name ~= "libq_core.so" then
-      ffi.cdef(plfile.read(h_files[file_id]))
-      local q_tmp = ffi.load(so_name)
-      assert(function_lookup[lib_name] == nil,
-      "Library name is already declared: " .. lib_name)
-      function_lookup[lib_name] = q_tmp[lib_name]
+      local status = pcall(ffi.cdef, plfile.read(h_files[file_id]))
+      if status then
+        local status, q_tmp = pcall(ffi.load, so_name)
+        if status then
+          assert(function_lookup[lib_name] == nil,
+          "Library name is already declared: " .. lib_name)
+          function_lookup[lib_name] = q_tmp[lib_name]
+        end
+      else
+        print("Unable to load lib " .. so_name)
+      end
     end
   end
 end
