@@ -48,7 +48,7 @@ return function (
       "specfiied outputtype not big enough")
       l_out_qtype = out_qtype
     end
-    local tmpl = 'base.tmpl'
+    local tmpl = 'f1f2opf3.tmpl'
     local subs = {}
     -- This includes is just as a demo. Not really needed
     subs.includes = "#include <math.h>\n"

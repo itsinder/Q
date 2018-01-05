@@ -6,8 +6,8 @@ local function ss_ifxthenyelsez(x, y, z)
   local lVector = require 'Q/RUNTIME/lua/lVector'
 
   assert(type(x) == "lVector", "error")
-  assert(type(y) == "userdata", "error") -- TODO Should be Scalar
-  assert(type(z) == "userdata", "error") -- TODO Should be Scalar
+  assert(type(y) == "Scalar", "error") 
+  assert(type(z) == "Scalar", "error") 
   local spfn = require("Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez_specialize" )
   assert(type(spfn) == "function")
   assert(x:fldtype() == "B1")
@@ -19,9 +19,10 @@ local function ss_ifxthenyelsez(x, y, z)
   local func_name = assert(subs.fn)
   -- allocate buffer for output
   local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
-  local wbuf = assert(ffi.malloc(wbufsz))
+  local wbuf = nil
   --
   local function ss_ifxthenyelsez_gen(chunk_idx)
+    wbuf = wbuf or ffi.malloc(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
     if ( xlen == 0 )  then
       return 0, nil, nil

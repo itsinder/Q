@@ -3,13 +3,12 @@ local Vector = require 'Q/RUNTIME/lua/lVector'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local file = require 'pl.file'
 local plpath = require 'pl.path'
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
-local number_of_testcases_passed = 0
-local number_of_testcases_failed = 0
-
-local failed_testcases = {}
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/OPERATORS/PRINT/test"
 
 local fns = {}
 
@@ -20,13 +19,11 @@ fns.increment_failed = function (index, v, str)
     print("csv file: "..v.data)
   end
   print("reason for failure "..str)
-  number_of_testcases_failed = number_of_testcases_failed + 1
-  table.insert(failed_testcases,index)
   --[[
   print("\n-----Meta Data File------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_metadata/"..v.meta)
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/metadata/"..v.meta)
   print("\n\n-----CSV File-------\n")
-  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/test_data/"..v.data)
+  os.execute("cat "..rootdir.."/OPERATORS/PRINT/test/data/"..v.data)
   print("\n--------------------\n")
   ]]--
 end
@@ -45,10 +42,10 @@ end
 
 -- original data -> load -> print -> Data A -> load -> print -> Data B. 
 -- In this function Data A is matched with Data B 
-local check_again = function (index, csv_file, meta)
-  local M = dofile(script_dir .."/test_metadata/"..meta)
+local check_again = function (index, csv_file, meta, v)
+  local M = dofile(script_dir .."/metadata/"..meta)
   -- print(csv_file)
-  local status_load, load_ret = pcall(load_csv,csv_file, M)
+  local status_load, load_ret = pcall(load_csv,csv_file, M, {use_accelerator = false})
   if status_load == false then
     fns["increment_failed"](index, v, "testcase failed: in category1, output of load_csv fail in second attempt")
     return false
@@ -65,7 +62,6 @@ local check_again = function (index, csv_file, meta)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -86,7 +82,7 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
   end
   
   -- match input and output files
-  if file_match(script_dir .."/test_data/"..v.data, csv_file) == false then
+  if file_match(script_dir .."/data/"..v.data, csv_file) == false then
      fns["increment_failed"](index, v, "testcase failed: in category1, input and output csv file does not match")
      return false
   end
@@ -94,7 +90,28 @@ fns.handle_category1 = function (index, v, csv_file,ret, status)
 
   -- original data -> load -> print -> Data A -> load -> print -> Data B. 
   -- In this function Data A is matched with Data B 
-  return check_again(index, csv_file, v.meta)
+  return check_again(index, csv_file, v.meta, v)
+end
+
+fns.handle_category1_1 = function (index, v, csv_file, ret, status, qtype)
+  
+  if not status then
+    print(ret)
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is not success")
+    return false
+  end
+  
+  if type(ret) == "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is a string")
+    return false
+  end
+  
+  -- match input and output files
+  if file_match(script_dir .."/data/"..v.data, csv_file) == false then
+     fns["increment_failed"](index, v, "testcase failed: in category1_1, input and output csv file does not match")
+     return false
+  end
+  return true
 end
 
 -- in this category invalid filter input are given 
@@ -121,7 +138,6 @@ fns.handle_category2 = function (index, v, csv_file, ret, status)
      fns["increment_failed"](index, v, "testcase failed: in category2, actual and expected error message does  not match")
      return false
   end
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -130,6 +146,7 @@ fns.handle_input_category4 = function ()
   local v1 = Vector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -138,6 +155,7 @@ fns.handle_input_category3 = function ()
   local v1 = Vector{qtype='B1', num_elements=4,
     file_name= script_dir .."/bin/B1.bin",  
   }
+  v1:persist(true)
   return { where = v1 }
 end
 
@@ -161,7 +179,6 @@ fns.handle_category4 = function (index, v, csv_file, ret, status)
      fns["increment_failed"](index, v, "testcase failed: in category 4, actual and expected error does  not match")
      return false
   end
-   number_of_testcases_passed = number_of_testcases_passed + 1
    return true
 end
 
@@ -185,7 +202,6 @@ fns.handle_category3 = function (index, v, csv_file, ret, status)
      return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -209,7 +225,6 @@ fns.handle_category5 = function (index, v, csv_file, ret, status)
      return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -220,13 +235,13 @@ fns.handle_category6 = function (index, v, M)
   local col = lVector{qtype='I4',
     file_name= script_dir .."/bin/I4.bin",  
   }
-  
+  col:persist(true) 
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
   local status, print_ret = pcall(print_csv, arr, nil, filename)
   if status then
-    local status, load_ret = pcall(load_csv, filename, M)
+    local status, load_ret = pcall(load_csv, filename, M, {use_accelerator = false})
     filename = load_ret[1]:meta().base.file_name
   end
   --print(M[1].name)
@@ -240,7 +255,6 @@ fns.handle_category6 = function (index, v, M)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -268,7 +282,6 @@ fns.handle_category7 = function (index, v, csv_file,ret, status)
     return false
   end
   
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
@@ -283,12 +296,10 @@ fns.handle_category8 = function (index, v, csv_file,ret, status)
     return false
   end
 
-  number_of_testcases_passed = number_of_testcases_passed + 1
   return true
 end
 
-
-
+--[[
 -- this function prints all the result
 fns.print_result = function ()
   local str
@@ -309,7 +320,6 @@ fns.print_result = function ()
   assert(io.output(file), "Nightly build file write error")
   assert(io.write(str), "Nightly build file write error")
   assert(io.close(file), "Nighty build file close error")
-  
 end
-
+]]
 return fns

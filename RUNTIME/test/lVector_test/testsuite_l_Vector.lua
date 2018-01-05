@@ -1,9 +1,12 @@
 local plpath  = require 'pl.path'
+local dir = require 'pl.dir'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-
 local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
+local genbin = require 'Q/RUNTIME/test/generate_bin'
 
-local script_dir = plpath.dirname(plpath.abspath(arg[0]))
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
+dir.makepath(script_dir .."/bin/")
 
 local all_qtype = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV' }
 
@@ -13,7 +16,7 @@ local assert_valid = function(assert_fns, test_name, gen_method, num_elements)
     local function_name = "assert_" .. assert_fns
     local status, result = pcall(fns[function_name], x, test_name, num_elements, gen_method)
     if not status then 
-      print(result)
+      return status, result
     end
     return status
   end
@@ -33,8 +36,15 @@ local create_tests = function()
         M = dofile(script_dir .."/meta_data/"..v.meta)
       end
       
+      local bin_file_name
+      if v.test_type == "materialized_vector" then
+        bin_file_name = script_dir.."/bin/in_".. i .. "_" .. qtype[j] .. ".bin"
+        -- generating .bin files required for materialized vector
+        genbin.generate_bin(v.num_elements, qtype[j], bin_file_name, "random" )
+      end
+      
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then 
-        M.file_name = string.gsub( M.file_name, "${q_type}", qtype[j] )
+        M.file_name = string.gsub( M.file_name, "${q_type}", i .."_" .. qtype[j] )
         M.file_name = script_dir .. "/" .. M.file_name
         if M.nn_file_name then
           M.nn_file_name = script_dir .. "/" .. M.nn_file_name

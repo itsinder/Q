@@ -55,6 +55,8 @@ unset LD_LIBRARY_PATH
 unset QC_FLAGS
 unset Q_DATA_DIR
 unset Q_METADATA_DIR
+unset Q_TRACE_DIR
+unset Q_TMPL_DIR
 unset Q_BUILD_DIR
 # TODO fix bug with ld library path
 unset LD_LIBRARY_PATH
@@ -69,7 +71,7 @@ mkdir -p $Q_ROOT/include
 mkdir -p $Q_ROOT/lib
 # export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
 export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
-echo "Q_SRC_ROOT: $Q_SRC_ROOT"
+echo "Q_SRC_ROOT: ${Q_SRC_ROOT}"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wno-unused-parameter -pedantic -fopenmp'
 
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
@@ -80,6 +82,17 @@ echo "Q_DATA_DIR: $Q_DATA_DIR"
 mkdir -p $Q_ROOT/meta
 export Q_METADATA_DIR="${Q_METADATA_DIR:=${Q_ROOT}/meta}"
 echo "Q_METADATA_DIR: $Q_METADATA_DIR"
+
+mkdir -p $Q_ROOT/trace
+export Q_TRACE_DIR="${Q_TRACE_DIR:=${Q_ROOT}/trace}"
+echo "Q_TRACE_DIR: $Q_TRACE_DIR"
+
+mkdir -p $Q_ROOT/tmpl
+export Q_TMPL_DIR="${Q_TMPL_DIR:=${Q_ROOT}/tmpl}"
+echo "Q_TMPL_DIR: $Q_TMPL_DIR"
+
+
+
 export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # Setting ld library path based on lua init
 #export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
@@ -89,7 +102,7 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # if [[ "$RET" -ne "0" ]]; then
 #     `lua| tail -1`
 # fi
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${Q_ROOT}/lib"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 # export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
 export Q_LINK_FLAGS=" -llapacke -llapack -lblas -lm -shared "

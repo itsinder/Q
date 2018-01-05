@@ -26,12 +26,16 @@ int fflush(FILE *stream);
 ffi.malloc = function(n, free_func)
    assert(n > 0, "Cannot malloc 0 or less bytes")
    local c_mem = nil
-   -- if free_func == nil then
-   --    c_mem = assert(ffi.gc(ffi.C.malloc(n), ffi.C.free))
-   -- else -- TODO Review with Indrajeet
-   --    c_mem = assert(ffi.gc(ffi.C.malloc(n), free_func))
-   -- end
-   c_mem = cmem.new(n)
+   local old = false -- TODO P0 Fix this the right way
+   if old then 
+     if free_func == nil then
+        c_mem = assert(ffi.gc(ffi.C.malloc(n), ffi.C.free))
+     else -- TODO Review with Indrajeet
+        c_mem = assert(ffi.gc(ffi.C.malloc(n), free_func))
+     end
+   else 
+     c_mem = cmem.new(n)
+    end
    return c_mem
 end
 

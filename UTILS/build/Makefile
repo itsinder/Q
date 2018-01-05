@@ -27,6 +27,8 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT  clean
 	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua clean
+	make -C ${BASE_PATH}/OPERATORS/WHERE/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -73,15 +75,18 @@ ifxthenyelsez:
 ainb:
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
 
+where:
+	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/
+
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
 
 print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
-
 f1f2opf3: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all
+# 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all_for_dc
 
 f1s1opf2: q_basic
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
@@ -125,6 +130,8 @@ q_operators: f1f2opf3 \
 	mv_mul \
 	approx_quantile \
 	approx_frequent \
-	corrm
+	corrm \
+	drop_nulls \
+	where
 	echo "all done for operators"
 

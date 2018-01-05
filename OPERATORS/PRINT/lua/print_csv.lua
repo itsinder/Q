@@ -3,7 +3,11 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
-local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+
+local buf_size = 1024
+
+local chunk_buf_table = {}
+local chunk_nn_buf_table = {}
 
 local function strip_trailing_LL(temp)
   local index1, index2 = string.find(temp,"LL")
@@ -14,17 +18,89 @@ local function strip_trailing_LL(temp)
   return temp
 end
 
-local function chk_cols(column_list)
+local function get_B1_value(buffer, chunk_idx)
+  local val
+  local bit_value = qc.get_bit_u64(buffer, chunk_idx)
+  if bit_value == 0 then
+     val = ffi.NULL
+  else
+     val = 1
+  end
+  return val
+end
 
-  local qconsts = require 'Q/UTILS/lua/q_consts'
+local function get_element(col, rowidx)
+  local val = nil
+  local nn_val = nil
+  local chunk_num = math.floor((rowidx - 1) / qconsts.chunk_size)
+  local chunk_idx = (rowidx - 1) % qconsts.chunk_size
+  local qtype = col:qtype()
+  local ctype =  qconsts.qtypes[qtype]["ctype"]
+  
+  if not chunk_buf_table[col] or chunk_idx == 0 then
+    local len, base_data, nn_data = col:chunk(chunk_num)
+    --TODO: check below condition if it is proper or not
+    if len == nil or len == 0 then return 0 end
+    if base_data then
+      base_data = ffi.cast(ctype.." *", base_data)
+      chunk_buf_table[col] = base_data
+    end
+    if nn_data then
+      nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      chunk_nn_buf_table[col] = nn_data
+    end
+  end
+  
+  local casted = chunk_buf_table[col]
+  local nn_casted = chunk_nn_buf_table[col]
+  local status
+  if not casted then
+    val = ffi.NULL
+  else
+    if qtype == "B1" then
+      status, val = pcall(get_B1_value, casted, chunk_idx)
+      if not status then print("\n\n" .. tostring(val) .. "\n\n") end
+    else
+      val = casted[chunk_idx]
+    end
+
+    if ( qtype == "I8" ) then
+      -- Remove LL appended at end of I8 number
+      val = tonumber(strip_trailing_LL(tostring(val)))
+    elseif ( qtype == "SC" ) then
+      val = ffi.string(casted + chunk_idx * col:field_width())
+    elseif ( qtype == "SV" ) then 
+      local dictionary = col:get_meta("dir")
+      val = dictionary:get_string_by_index(tonumber(val))
+    end
+
+    -- Check for nn vector
+    if nn_casted then
+      status, nn_val = pcall(get_B1_value, nn_casted, chunk_idx)
+      if not status then print("\n\n ## " .. tostring(nn_val) .. " ## \n\n") end
+      if not nn_val then
+        val = ffi.NULL
+      end
+    end
+  end
+  return val, nn_val
+end
+
+local function chk_cols(column_list)
   assert(column_list)
   assert(type(column_list) == "table")
   assert(#column_list > 0)
-  for i, v in ipairs(column_list) do 
+  for i = 1, #column_list do
     assert(type(column_list[i]) == "lVector")
-    assert(column_list[i]:length() > 0)
-  end
 
+    -- Check the vector for eval(), if not then call eval()
+    if not column_list[i]:is_eov() then
+      column_list[i]:eval()
+    end
+
+    assert(column_list[i]:length() > 0)    
+  end
+  
   local is_SC  = {}
   local is_SV  = {}
   local is_I8  = {}
@@ -45,23 +121,19 @@ local function chk_cols(column_list)
         assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
       end
       -- Take the maximum length of all columns
-      if  column_list[i]:length() > max_length then 
+      if column_list[i]:length() > max_length then 
         max_length = column_list[i]:length() 
       end
       is_B1[i] = qtype == "B1"
       is_SC[i] = qtype == "SC"    
-            -- if field type is SC , then pass field size, else nil
       is_SV[i] = qtype == "SV"    
-            -- if field type is SV , then get value from dictionary
       is_I8[i] = qtype == "I8" 
-            -- if field type is I8 , then remove LL appended at end
     end
     assert(max_length > 0, "Nothing to print")
   end
   return is_SC, is_SV, is_I8, is_col, is_B1, max_length
 end
 
---Sri 27/05/17 TODO WHY ISN'T this local?? making it for now, to see if something breaks
 local function process_filter(filter, max_length)
   local lb = 0; local ub = 0; local where = nil
   if filter then
@@ -71,7 +143,6 @@ local function process_filter(filter, max_length)
     where = filter.where
     if ( where ) then
       assert(type(where) == "lVector",err.FILTER_TYPE_ERROR)
-      -- What should be the type of above, lVector?  
       assert(where:qtype() == "B1",err.FILTER_INVALID_FIELD_TYPE)
     end
     if ( lb ) then
@@ -96,26 +167,24 @@ local function process_filter(filter, max_length)
   return where, lb, ub
 end
 
-local print_csv = function (column_list, filter, opfile)  
-  
+local print_csv = function (column_list, filter, opfile)    
   -- trimming whitespace if any
   if opfile ~= nil then
     opfile = plstring.strip(opfile)
   end
   
-  assert( ((type(column_list) == "table") or 
+  assert(((type(column_list) == "table") or 
           (type(column_list) == "lVector")), err.INPUT_NOT_TABLE)
   -- to do unit testing with columns of differet length
   if type(column_list) == "lVector" then
     column_list = {column_list}
   end
   
-  -- Initially, all columns had to be same length. That has been relaxed.
-
   local is_SC, is_SV, is_I8, is_col, is_B1, max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
+  
   -- TODO remove hardcoding of 1024
-  local buf = assert(ffi.malloc(1024))
+  local buf = assert(ffi.malloc(buf_size))
   local num_cols = #column_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
@@ -137,7 +206,7 @@ local print_csv = function (column_list, filter, opfile)
   for rowidx = lb, ub do
     local status, result = nil
     if ( where ~= nil ) then
-      status, result = pcall(convert_c_to_txt, where, rowidx)
+      status, result = pcall(get_element, where, rowidx)
     end
     if ( ( where == nil ) or 
          ( result ~= nil ) ) then
@@ -145,23 +214,22 @@ local print_csv = function (column_list, filter, opfile)
         local status, result = nil
         local col = column_list[col_idx]
         -- if input is scalar, assign scalar value
-        if not is_col[col_idx] then 
-          result = col 
+        if not is_col[col_idx] then
+          result = col
         else
-          status, result = pcall(convert_c_to_txt, col, rowidx)
+          status, result = pcall(get_element, col, rowidx)
           if status == false then
             --TODO: Handle this condition
-          end         
+          end
           if result == nil then
             if is_B1[col_idx] == true then result = 0 else result = "" end
           end
           if ( not ( is_SC[col_idx] or is_SV[col_idx] ) ) 
           and ( result ~= "" ) then
             result = tonumber(result)
-          end          
-          --print("Value is: "..tostring(result))                    
+          end                              
         end
-        if tbl_rslt then 
+        if tbl_rslt then
           table.insert(tbl_rslt, result) 
           if ( col_idx ~= num_cols ) then 
             table.insert(tbl_rslt, ",") 
@@ -185,7 +253,7 @@ local print_csv = function (column_list, filter, opfile)
     return table.concat(tbl_rslt)
   else
     if fp then io.close(fp) end
-    return true
+    -- return true
   end
 end
 

@@ -9,7 +9,7 @@ return function (
   --============================
   assert(type(args) == "table")
   local start = assert(args.start)
-  local p_len = assert(args.p_len)
+  local period = assert(args.period)
   local qtype = assert(args.qtype)
   local len   = assert(args.len)
   local by    = args.by
@@ -18,31 +18,36 @@ return function (
   assert(type(len) == "number")
   assert(len > 0, "vector length must be positive")
   assert(type(start) == "number")
-  assert(type(p_len) == "number")
-  assert(p_len > 0, "length of period must be positive") 
+  assert(type(period) == "number")
+  assert(period > 1, "length of period must be > 1") 
   assert(type(by) == "number")
 
-  local out_ctype = qconsts.qtypes[qtype].ctype
-  local sz_c_mem = ffi.sizeof('RANDOM_' .. qtype .. '_REC_TYPE');
+  local hdr = [[
+  typedef struct _period_<<qtype>>_rec_type {
+    <<ctype>> start;
+    <<ctype>> by;
+   int period;
+  } PERIOD_<<qtype>>_REC_TYPE;
+]]
 
+  hdr = string.gsub(hdr, "<<qtype>>", qtype)
+  hdr = string.gsub(hdr, "<<ctype>>", qconsts.qtypes[qtype].ctype)
+  pcall(ffi.cdef, hdr)
+
+  local out_ctype = qconsts.qtypes[qtype].ctype
+  local rec_type = 'PERIOD_' .. qtype .. '_REC_TYPE';
+  local sz_c_mem = ffi.sizeof(rec_type)
   local c_mem = assert(qc.malloc(sz_c_mem), "malloc failed")
-  if ( qconsts.iorf[qtype] == "fixed" ) then 
-    generator = "mrand48"
-    scaling_code = "ceil( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * range)"
-  elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
-    generator = "drand48"
-    scaling_code = "range * x"
-  else
-    assert(nil, "Unknown type " .. qtype)
-  end
-  -- local x = ffi.cast(out_ctype .. " *", c_mem); print(x[0])
-  local tmpl = 'rand.tmpl'
+  local x = ffi.cast(rec_type .. " *", c_mem); 
+  x.start  = args.start;
+  x.by     = args.by;
+  x.period = args.period;
+  local tmpl = 'period.tmpl'
   local subs = {};
-  subs.fn          = "rand_" .. qtype
+  subs.fn          = "period_" .. qtype
   subs.c_mem       = c_mem
   subs.out_ctype   = out_ctype
   subs.len         = len
-  subs.p_len       = p_len
   subs.out_qtype   = qtype
   return subs, tmpl
 end

@@ -19,8 +19,11 @@ typedef struct _vec_rec_type {
   uint32_t num_in_chunk;
   uint32_t chunk_num;   
 
+  // TODO Change 31 to  Q_MAX_LEN_INTERNAL_NAME
+  char name[31+1]; 
   // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
   char file_name[255+1];
+  uint64_t file_size; // valid only after eov()
   char *map_addr;
   size_t map_len;
 
@@ -30,5 +33,6 @@ typedef struct _vec_rec_type {
   bool is_eov;
   int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
+  uint32_t chunk_sz;
 } VEC_REC_TYPE;
 #endif

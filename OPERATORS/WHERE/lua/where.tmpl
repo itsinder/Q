@@ -1,0 +1,60 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+extern int
+${fn}(
+      const ${a_ctype} * restrict A,
+      const uint64_t * restrict B,
+      uint64_t *ptr_aidx,
+      uint64_t nA,
+      ${a_ctype} *C,
+      uint64_t nC,
+      uint64_t *ptr_num_in_C
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(
+      const ${a_ctype} * restrict A,
+      const uint64_t * restrict B,
+      uint64_t *ptr_aidx,
+      uint64_t nA,
+      ${a_ctype} *C,
+      uint64_t nC,
+      uint64_t *ptr_num_in_C
+      )
+{
+  int status = 0;
+  
+  if ( A == NULL ) { go_BYE(-1); }
+  if ( B == NULL ) { go_BYE(-1); }
+  if ( nA == 0 ) { go_BYE(-1); }
+  if ( ptr_num_in_C == NULL ) { go_BYE(-1); }
+  if ( ptr_aidx == NULL ) { go_BYE(-1); }
+
+  uint64_t num_in_C = *ptr_num_in_C;
+  uint64_t aidx = *ptr_aidx;
+  if ( num_in_C > nC ) { go_BYE(-1); }
+  
+  for ( ; aidx < nA; aidx++ ) { 
+    uint64_t widx = aidx >> 6; // word index
+    uint64_t bidx = aidx & 0x3F; // bit index
+    uint64_t b = B[widx];
+    b = ( b >> bidx ) & 0x1;
+    if ( b == 1 ) {
+      if ( num_in_C == nC ) { break; }
+      C[num_in_C++] = A[aidx];
+    }
+  }
+  *ptr_num_in_C = num_in_C;
+  *ptr_aidx     = aidx;
+BYE:
+  return status;
+}
+   ]]
+}

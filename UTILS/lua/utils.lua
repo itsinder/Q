@@ -52,7 +52,7 @@ fns.preprocess_bool_values = function (metadata_table, ...)
         elseif string.lower(metadata[col_name]) == "false" then
           metadata[col_name] = false
         else
-          error("Invalid value in metadata ".. i .. " for boolean field " .. col_name)
+          assert(string.lower(metadata[col_name]) == "true" or string.lower(metadata[col_name]) == "false","Invalid value in metadata for boolean field " .. col_name)
         end
        end
     end

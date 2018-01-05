@@ -7,8 +7,7 @@ local function vs_ifxthenyelsez(x, y, z)
 
   assert(type(x) == "lVector", "error")
   assert(type(y) == "lVector", "error")
-  assert(type(z) == "userdata", "error")
-  -- TODO Should compare with Scalar and not userdata
+  assert(type(z) == "Scalar", "error")
   local spfn = require("Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez_specialize" )
   assert(type(spfn) == "function")
   assert(x:fldtype() == "B1")
@@ -20,15 +19,11 @@ local function vs_ifxthenyelsez(x, y, z)
   local func_name = assert(subs.fn)
   -- allocate buffer for output
   local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
-  local wbuf = assert(ffi.malloc(wbufsz))
+  local wbuf = nil
   --
   local function vs_ifxthenyelsez_gen(chunk_idx)
-    print("XXX ", type(x))
-    print("XXX ", x:fldtype())
+    wbuf = wbuf or ffi.malloc(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
-    print("XXX ", type(y))
-    print("XXX ", y:fldtype())
-    print("XXX chunk_idx ", chunk_idx)
     local ylen, yptr, nn_yptr = y:chunk(chunk_idx) 
     if ( ylen == 0 )  then
       return 0, nil, nil

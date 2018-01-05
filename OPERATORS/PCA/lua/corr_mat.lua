@@ -43,7 +43,7 @@ local function corr_mat(X)
   local Xptr = ffi.cast(ctype .. " **", Xptr)
   c_Aptr[0][0] = 1
   for xidx = 1, m do
-    local x_len, xptr, nn_xptr = X[xidx]:chunk()
+    local x_len, xptr, nn_xptr = X[xidx]:get_all()
     assert(x_len > 0)
     assert(nn_xptr == nil, "Null vector should not exist")
     Xptr[xidx-1] = ffi.cast("float *", xptr)

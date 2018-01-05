@@ -50,7 +50,7 @@ ${fn}(
   if ( nR == 0 ) { go_BYE(-1); }
   if ( nn_out == NULL ) { go_BYE(-1); }
 
-#pragma omp parallel for 
+// TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) {
     uint64_t widx = i >> 8; // word index
     uint64_t bidx = i & 0xFF; // bit index

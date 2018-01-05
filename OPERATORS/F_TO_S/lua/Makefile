@@ -22,7 +22,7 @@ clean :
 
 libf_to_s.so : 
 	luajit generator.lua operators.lua
-	gcc ../src/*.c ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf_to_s.so
+	gcc ../src/*.c ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf_to_s.so 
 	test -d ${Q_BUILD_DIR}
 	cp ../src/*.c ${Q_BUILD_DIR}/src/
 	cp ../inc/*.h ${Q_BUILD_DIR}/include/

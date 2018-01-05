@@ -2,7 +2,6 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
-local dbg = require 'Q/UTILS/lua/debugger'
 local function expander_gen3(f1, f2)
   -- start: hard coding for this test case
   local counter = 1
@@ -16,7 +15,6 @@ local function expander_gen3(f1, f2)
    -- currently exapnds f1 with the number of times given in f2
    local state = {}
    local function gen3(chunk_idx, col)
-      -- dbg()
       local start_f1, f1_len, f1_chunk, f1_chunk_num
       local start_f2, f2_len, f2_chunk, f2_chunk_num
       local count, init_count
@@ -37,7 +35,6 @@ local function expander_gen3(f1, f2)
       repeat
          f1_len, f1_chunk = f1:chunk(f1_chunk_num)
          f2_len, f2_chunk = f2:chunk(f2_chunk_num)
-         -- dbg()
 	 if ( (f1_len == 0) or (f2_len == 0) or 
               (f1_len == nil) or (f2_len == nil) ) then
 	    return data_size, base_data, nil
@@ -52,7 +49,6 @@ local function expander_gen3(f1, f2)
 		  out_ptr[data_size] = f1_val
                   -- check if full
                   if data_size + 1 == chunk_size then
-                     -- dbg()
 		     local prev = {}
                      prev.start_f1 = f1_index
                      prev.start_f2 = f2_index

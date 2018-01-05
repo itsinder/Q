@@ -1,6 +1,7 @@
 local Q       = require 'Q'
 local qconsts = require 'Q/UTILS//lua/q_consts'
 local eigen   = require 'Q/OPERATORS/PCA/lua/eigen'
+local Scalar  = require 'libsclr'
 
 local function pca(X)
   assert(type(X) == "table", "input needs to be a table of lVector")
@@ -12,9 +13,9 @@ local function pca(X)
   local std_X = {}
   for i, X_i in ipairs(X) do
     assert(type(X_i) == "lVector", "need to pass in a table of column")
-    local mean = Q.sum(X_i):eval() / n
+    local mean = Q.sum(X_i):eval():to_num() / n
     local diff = Q.vssub(X_i, mean)
-    local sum_sqr = Q.sum_sqr(diff):eval()
+    local sum_sqr = Q.sum_sqr(diff):eval():to_num()
     local sigma = math.sqrt( sum_sqr / (n - 1) )
     std_X[i] = Q.vsdiv(diff, sigma):eval()
     print("eval'd x ")

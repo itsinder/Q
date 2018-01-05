@@ -10,6 +10,15 @@ all: libvec.so libcmem.so libsclr.so
 clean:
 	rm -f *.so *.o _*
 		
+../../UTILS/src/is_valid_chars_for_num.c :
+	make -C ../../UTILS/src/
+
+../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c :
+	make -C ../../OPERATORS/LOAD_CSV/lua/ 
+
+../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
+	make -C ../../OPERATORS/PRINT/lua/
+
 libvec.so:
 	gcc -g ${QC_FLAGS} $(INCS) \
 		vector.c \
@@ -53,7 +62,6 @@ libsclr.so: gen_cmp gen_arith libvec.so libcmem.so
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_F8.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
 		-shared -o libsclr.so
-	rm -f _*.c
 
 gen_cmp:
 	lua gen_cmp.lua

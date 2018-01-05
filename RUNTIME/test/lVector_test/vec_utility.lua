@@ -32,13 +32,16 @@ fns.validate_values = function(vec, qtype, chunk_number)
   -- if vec:num_elements() <= qconsts.chunk_size then
   --  chunk_number = 0
   -- end
-
-
-  local status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
+  local status, len, base_data, nn_data 
+  if not chunk_number then
+    assert(vec:is_eov())
+    status, len, base_data, nn_data = pcall(vec.get_all, vec)
+  else
+    status, len, base_data, nn_data = pcall(vec.chunk, vec, chunk_number)
+  end
   assert(status, "Failed to get the chunk from vector")
   assert(base_data, "Received base data is nil")
   assert(len, "Received length is not proper")
-  
   
   if qtype == "SV" or qtype == "SC" then
     local table_type 
@@ -78,17 +81,19 @@ fns.validate_values = function(vec, qtype, chunk_number)
   
 
   -- Temporary: no validation of vector values if has_nulls == true
-  if vec._has_nulls then
+  if vec:has_nulls() then
     assert(nn_data, "Received nn_data is nil")
     return true
   end
   
-  local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+  --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
   for i = 1, len do
     local expected = i*15 % qconsts.qtypes[qtype].max
-    if ( iptr[i - 1] ~= expected ) then
+    local value = c_to_txt(vec,i)
+    -- print(expected, value)
+    if ( value ~= expected ) then
       status = false
-      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(iptr[i - 1]))
+      print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(value))
       break
     end
   end
@@ -155,7 +160,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
       
       -- Check if vec has nulls
-      if vec._has_nulls then
+      if vec:has_nulls() then
         field_size = 8
         qtype = "I1"
         num_elements = math.ceil(num_elements / 8)
@@ -185,7 +190,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       else
         s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
       end
-      if vec._has_nulls then
+      if vec:has_nulls() then
         local bval
         if i % 2 == 0 then bval = true else bval = false end
         s1_nn = Scalar.new(bval, "B1")

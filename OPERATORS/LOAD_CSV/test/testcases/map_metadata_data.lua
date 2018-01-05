@@ -18,54 +18,54 @@ local g_err = require 'Q/UTILS/lua/error_code'
 return { 
   -- error messages test cases
   -- falls in category 1
-    
+  
     -- testing whether csv input file exists
     { testcase_no = 1, meta= "gm_input_file_not_found.lua",data= "dummy.csv", category= "category1", 
-      output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INPUT_FILE_NOT_FOUND, name = "input file not found", opt_args = { use_accelerator = false } },
     -- testing whether csv input file is not empty
     { testcase_no = 2, meta= "gm_input_file_not_found.lua",data= "file_empty.csv", category= "category1", 
-      output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INPUT_FILE_EMPTY, name = "input file empty", opt_args = { use_accelerator = false } },
     -- bad double quote mismatch, string not ending properly with double quotes
     { testcase_no = 3, meta= "gm_double_quotes_mismatch.lua",data= "bad_quote_mismatch.csv", category= "category1", 
-      output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "double_quotes_mistmatch", opt_args = { use_accelerator = false } },
     -- testing whether appropriate number of commas are given in the csv file
     { testcase_no = 4, meta= "gm_invalid_2D.lua",data= "invalid_2D.csv", category= "category1", 
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "invalid 2D data", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "invalid 2D data", opt_args = { use_accelerator = false } },
     -- column count in csv file are less than column count specified in metadata 
     { testcase_no = 5, meta= "gm_column_is_more.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more", opt_args = { use_accesslator = false }  },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_more", opt_args = { use_accelerator = false }  },
     -- column count in csv file are more than column count specified in metadata 
     { testcase_no = 6, meta= "gm_column_is_less.lua", data= "I2_I2_SV_3_4.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_less", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "columns_are_less", opt_args = { use_accelerator = false } },
     -- number of columns not same on each csv line
     { testcase_no = 7, meta="gm_column_not_same.lua",data= "bad_col_data_mismatch_each_line.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "column_not_same", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "column_not_same", opt_args = { use_accelerator = false } },
     -- null value in not null field column 1
     { testcase_no = 8, meta= "gm_nil_in_not_nil_field1.lua", data= "I4_2_null.csv", category= "category1",
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field1", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field1", opt_args = { use_accelerator = false } },
     -- null value in not null field column 2
     { testcase_no = 9, meta= "gm_nil_in_not_nil_field2.lua", data= "I4_2_4_null.csv", category= "category1", 
-      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field2", opt_args = { use_accesslator = false } },
+      output_regex= g_err.NULL_IN_NOT_NULL_FIELD, name = "nil_in_not_nil_field2", opt_args = { use_accelerator = false } },
     -- I1 qtype overflow test
     { testcase_no = 10, meta= "gm_I1_overflow.lua", data= "I1_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I1_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I1_overflow", opt_args = { use_accelerator = false } },
     -- I2 qtype overflow test
     { testcase_no = 11, meta= "gm_I2_overflow.lua", data= "I2_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I2_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I2_overflow", opt_args = { use_accelerator = false } },
     -- I4 qtype overflow test
     { testcase_no = 12, meta= "gm_I4_overflow.lua", data= "I4_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I4_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I4_overflow", opt_args = { use_accelerator = false } },
     -- I8 qtype overflow test
     { testcase_no = 13, meta= "gm_I8_overflow.lua", data= "I8_overflow.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "I8_overflow", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "I8_overflow", opt_args = { use_accelerator = false } },
     -- testing for invalid data ( i.e. string in I1 field )
     { testcase_no = 14, meta= "gm_bad_str_in_I1.lua", data= "bad_string_in_I1.csv", category= "category1",
-      output_regex= g_err.INVALID_DATA_ERROR, name = "bad_str_in_I1", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_DATA_ERROR, name = "bad_str_in_I1", opt_args = { use_accelerator = false } },
     -- escaping character in SV field is missing  
     { testcase_no = 15, meta = "gm_missing_escape_char.lua", data = "missing_escape_char.csv", category= "category1",
-      output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char", opt_args = { use_accesslator = false } },
+      output_regex= g_err.INVALID_INDEX_ERROR, name = "missing_escape_char", opt_args = { use_accelerator = false } },
     { testcase_no = 16, meta = "gm_invalid_SC_width.lua", data = "invalid_SC_width.csv", category= "category1",
-      output_regex= g_err.STRING_TOO_LONG, name = "SC width value is invalid", opt_args = { use_accesslator = false } },
+      output_regex= g_err.STRING_TOO_LONG, name = "SC width value is invalid", opt_args = { use_accelerator = false } },
     
     -- category 2 testcases contains only 1 Column
     -- No last line in CSV file
@@ -117,11 +117,15 @@ return {
     --{ meta = "gm_valid_SC_dict_exists_add_true.lua", data = "SV_valid.csv", category= "category2",
     --  output_regex =  {"Sample","String","For","Varchar"}, name = "valid_SC_dict_exists_add_true" 
     --},
-    
+    -- CSV file with valid B1 values
+    {
+      testcase_no = 29, meta = "gm_valid_B1.lua", data = "B1_valid.csv", category= "category2",
+      output_regex = {1, 0, 1, 0, 1, 0, 0, 1}, name = "valid B1"  
+    },
     
     -- category 3 testcases contains more than 1 Column.
     -- combination of I2, I2 and SV data type
-    { testcase_no = 29, meta = "gm_load_success.lua", data = "I2_I2_SV_3_4.csv", category= "category3", 
+    { testcase_no = 30, meta = "gm_load_success.lua", data = "I2_I2_SV_3_4.csv", category= "category3", 
       output_regex = {
                         {1001,1002,1003},
                         {2012,2013,2014},
@@ -131,39 +135,58 @@ return {
     },
     
     -- third row is null
-    { testcase_no = 30, meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv", category= "category3",
+    { testcase_no = 31, meta = "gm_whole_row_null.lua", data = "whole_row_nil.csv", category= "category3",
       output_regex = {
                         {"hello","hii","","hey"},
                         {92514.2,9459.1,"",987548.5}
                      },
       name = "whole_row_null" 
     },
-
+    --[[
     -- null present in I4 datatype in CSV file
-    { testcase_no = 31, meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
+    { testcase_no = 32, meta = "gm_nil_data_I4.lua", data = "I4_2_4_null.csv", category= "category3",
       output_regex = {
                         {111,111,333,"",444},
                         {222,222,"",123,444}
                      },
       name = "nil_data_I4" 
     },
-    
+    ]]
     -- null present in SV data type in CSV file
-    { testcase_no = 32, meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", category= "category3",
+    { testcase_no = 33, meta = "gm_nil_data_SV.lua", data = "nil_in_SV.csv", category= "category3",
       output_regex = {
                         {"hello","hii","","","hey"},
                         {92514,9459,925,987,987548}
                      },
       name = "nil_data_SV"
     },
-    
+    --[[
+    -- more than 1 column testing with B1 
+    -- cols are I4 and B1
+    { testcase_no = 34, meta = "gm_valid_I4_B1.lua", data = "I4_B1_valid.csv", category= "category3", 
+      output_regex = {
+                       {1001,1002,1003,1004,1005,1006},
+                       {1,1,1,1,1,0}
+                     },
+      name = "testing B1 with more than one cols" 
+    },
+    ]]
     -- check the size of output binary file is correct, 
-    { testcase_no = 33, meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
+    { testcase_no = 35, meta = "gm_valid_bin_file_size.lua", data = "I2_I2_SV_3_4.csv", category= "category4",
       output_regex= {12, 6, 12}, name = "valid_bin_file_size" 
     },
     
     -- if has_nulls = true, but no nulls present in CSV file, then null file should be deleted
-    { testcase_no = 34, meta = "gm_nil_data_file_deletion.lua", data = "I4_valid.csv", category= "category5",
+    { testcase_no = 36, meta = "gm_nil_data_file_deletion.lua", data = "I4_valid.csv", category= "category5",
       output_regex = 1, name = "nil_data_file_deletion" 
-    }
+    },
+    
+    -- testcases for testing elements(rows) > chunk_size
+    
+    -- I4 qtype values
+    { testcase_no = 37, meta = "gm_valid_I4.lua", data = "I4_valid_more_than_chunksize.csv", 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-I4" }, 
+        
+
+    
 }

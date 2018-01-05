@@ -1,7 +1,7 @@
 local expander_approx_frequent = require 'Q/OPERATORS/APPROX/FREQUENT/lua/expander_approx_frequent'
 
 local function approx_frequent(x, min_freq, err)
-  assert(type(x) == 'Column', 'x must be a Column')
+  assert(type(x) == 'lVector', 'x must be a lVector')
   assert(type(min_freq) == 'number' and min_freq > 0,
          'min_freq must be a positive number')
   assert(type(err) == 'number' and err > 0 and min_freq > err,

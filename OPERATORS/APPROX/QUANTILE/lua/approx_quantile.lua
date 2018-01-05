@@ -1,26 +1,26 @@
 local ffi     = require "Q/UTILS/lua/q_ffi"
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require "Q/UTILS/lua/q_core"
 
 
 local approx_quantile = function(x, args)
-  assert(type(x) == "Column")
+  assert(type(x) == "lVector")
   local qtype = x:fldtype()
   local func_name = "approx_quantile_" .. qtype 
 
   -- START: verify inputs
-  local siz = x:length()
+  local size = x:length()
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(qtype))
-  assert(type(siz) == "number")
-  assert( siz > 0, "vector length must be positive")
+  assert(type(size) == "number")
+  assert( size > 0, "vector length must be positive")
   
   assert(type(args) == "table")
   local num_quantiles = assert(args.num_quantiles, "num quantiles is a required argument")
   num_quantiles = assert(tonumber(num_quantiles), "num quantiles must be a number")
   assert(num_quantiles > 1, "num quantiles must be positive and greater than 1")
-  assert( num_quantiles < siz, "cannot have more quantiles than numbers")
+  assert( num_quantiles < size, "cannot have more quantiles than numbers")
   
   local err = args.err
   if ( err == nil ) then
@@ -32,7 +32,7 @@ local approx_quantile = function(x, args)
   
   local cfld = args.where
   if ( cfld ) then 
-    assert(type(cfld) == "Column")
+    assert(type(cfld) == "lVector")
     assert(cfld:fldtype() == "B1")
     assert(nil, "TODO NOT IMPLEMENTED") -- TODO FIX THIS
   end
@@ -44,11 +44,11 @@ local approx_quantile = function(x, args)
   local ctype = qconsts.qtypes[qtype].ctype
   local qptr = assert(ffi.malloc(num_quantiles*ffi.sizeof(ctype)), "malloc failed")
   
-  local x_len, xptr, nn_xptr = x:chunk(-1)
+  local x_len, xptr, nn_xptr = x:get_all()
   assert(nn_xptr == nil, "Not set up for null values")
 
   local status
-  status = qc[func_name](xptr, cfld, siz, num_quantiles, err, qptr, ptr_est_is_good)
+  status = qc[func_name](xptr, cfld, size, num_quantiles, err, qptr, ptr_est_is_good)
 --[[approx_quantile(
 		ctype * x,
 		char * cfld,
@@ -64,8 +64,8 @@ local approx_quantile = function(x, args)
           ( is_estimate_good == -1 ) or 
           ( is_estimate_good == -2 ) )
   
-  local qcol = Column({field_type = qtype, write_vector = true})
-  qcol:put_chunk(num_quantiles, qptr)
+  local qcol = lVector({qtype = qtype, gen = true, has_nulls = false})
+  qcol:put_chunk(qptr, nil, num_quantiles)
   qcol:eov()
   return qcol, is_estimate_good
 
