@@ -29,12 +29,13 @@ for i, v in ipairs(T) do
     local D = v.data
     local opt_args = v.opt_args
     local result
+    
+    if v.category == "category2_1" then
+    gen_csv.generate_csv(test_input_dir .. D, M[1].qtype, v.num_elements, "random")
+    end
     -- category1 are negative testcases ( error messages )
     if v.category == "category1" then
       print("START: Deliberate error attempt")
-    end
-    if v.category == "category2_1" then
-      gen_csv.generate_csv(test_input_dir .. D, M[1].qtype, v.num_elements, "random")
     end
     
     local status, ret = pcall(load_csv,test_input_dir..D,  M, opt_args)
