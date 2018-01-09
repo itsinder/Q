@@ -45,7 +45,15 @@ for k,test_num in pairs(tests_to_run) do
     test = testsuite_vector.tests[test_num]
     print ("running test " .. test_num, test.name )
     --call_if_exists(test.setup)
+    if test.category == "error_testcase_1" or test.category == "error_testcase_2" then 
+      print("START: Deliberate error attempt")
+    end
+    
     status, res = pcall(vector, unpack(test.input))
+    
+    if test.category == "error_testcase_2" then
+      print("STOP : Deliberate error attempt")
+    end
     local result, reason
     
     if status then
