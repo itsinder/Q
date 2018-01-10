@@ -100,14 +100,13 @@ local function run_longterm_tests(files, duration, log_path)
     else
       fail[#fail + 1] = {suite_name, test_name, msg}
     end
-  until (os.time() - start_time) >= duration
+  until (os.time() - start_time)/60 >= duration
   return pass, fail
 end
 
 local usage = function()
   print("USAGE:")
   print("luajit <option> q_testrunner.lua <root_dir>")
-  print("luajit <option> q_testrunner.lua <suite_file> [<test_case_id>]")
   print (" Valid options are \n\t l for long running tests amd requires a time param for the number of minutes the tests should run. Eg l 5\n\t i for isolated tests")
 end
 
@@ -121,7 +120,6 @@ require('Q/UTILS/lua/cleanup')()
 
 local test_type = arg[1]
 local path = arg[2]
-local test_name = arg[3]
 args = nil
 local test_res = {}
 local files = {}
