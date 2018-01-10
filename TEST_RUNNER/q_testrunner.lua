@@ -73,7 +73,7 @@ local function run_longterm_tests(files, duration, log_path)
       keyset[#keyset + 1] = k
     end
     local test_name = keyset[math.random(#keyset)]
-    print("Running test %s from suite %s", test_name, suite_name)
+    print(string.format("Running test %s from suite %s", test_name, suite_name))
     local status, msg = pcall(tests[test_name])
     if status then
       pass[#pass + 1] = {suite_name, test_name}
