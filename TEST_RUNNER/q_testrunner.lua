@@ -17,6 +17,37 @@ Update 16-Nov-2017:
 If q_testrunner find a global variable called "test_aux", it invokes test_aux as a function, passing it the results as a parameter. When running from command line, use -l to load any aux functions that can initialize a global test_aux variable. Example is q_test_runner_auxsummary.lua
 ]]
 
+
+local plpath = require 'pl.path'
+local plpretty = require "pl.pretty"
+local q_root = assert(os.getenv("Q_ROOT"))
+assert(plpath.isdir(q_root))
+assert(plpath.isdir(q_root .. "/data/"))
+os.execute("rm -r -f " .. q_root .. "/data/*")
+require('Q/UTILS/lua/cleanup')()
+
+local function summary(test_res)
+  local cnt = {
+    suites = {pass = 0, fail = 0},
+    tests = {pass = 0, fail = 0}
+  }
+  for _,t in pairs(test_res) do
+    cnt.tests.pass = cnt.tests.pass + #t.pass
+    cnt.tests.fail = cnt.tests.fail + #t.fail
+    if #t.fail == 0 then
+      cnt.suites.pass = cnt.suites.pass + 1
+    else
+      cnt.suites.fail = cnt.suites.fail + 1
+    end
+  end
+  local summary = plpretty.write(cnt, "")
+
+  if cnt.tests.fail == 0 then
+    print ("SUCCESS " .. summary) else print ("FAILURE " .. summary)
+  end
+
+end
+
 local function is_polluter(file_name)
   local line
   file = assert( io.open(file_name, "r"), file_name .. " must exist")
@@ -29,7 +60,7 @@ local function run_isolated_tests(suite_name, isolated)
   local base_str =  [[luajit -lluacov -e "require '%s'[%s]();os.exit(0)" &>/dev/null]]
   local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
   assert(subs == 1, suite_name .. " should end with .lua")
-  local status, tests = pcall(require, suite_name)
+  local status, tests = pcall(require, suite_name_mod)
   if not status then
     return {}, { msg = "Failed to load suit\n" .. tostring(tests) }
   end
@@ -69,12 +100,16 @@ local function run_longterm_tests(files, duration, log_path)
     assert(type(tests) == "table", "A table of tests needs to be returned by " .. suite_name)
     -- get all keys from table so that we can randomly select from them
     local keyset = {}
+    local valset = {}
     for k,v in ipairs(tests) do
       keyset[#keyset + 1] = k
+      valset[#valset + 1] = v
     end
-    local test_name = keyset[math.random(#keyset)]
+    local index = math.random(#keyset)
+    local test_name = keyset[index]
+    local test = valset[index]
     print(string.format("Running test %s from suite %s", test_name, suite_name))
-    local status, msg = pcall(tests[test_name])
+    local status, msg = pcall(test)
     if status then
       pass[#pass + 1] = {suite_name, test_name}
     else
@@ -89,14 +124,6 @@ local usage = function()
   print("luajit <option> q_testrunner.lua <root_dir>")
   print (" Valid options are \n\t l for long running tests amd requires a time param for the number of minutes the tests should run. Eg l 5\n\t i for isolated tests")
 end
-
-local plpath = require 'pl.path'
-local plpretty = require "pl.pretty"
-local q_root = assert(os.getenv("Q_ROOT"))
-assert(plpath.isdir(q_root))
-assert(plpath.isdir(q_root .. "/data/"))
-os.execute("rm -r -f " .. q_root .. "/data/*")
-require('Q/UTILS/lua/cleanup')()
 
 local test_type = arg[1]
 local path = arg[2]
@@ -133,6 +160,4 @@ elseif test_type:match("^l") ~= nil then
 end
 print(plpretty.write(test_res))
 
-for k,v in pairs(_G) do
-  if (k == 'test_aux') then test_aux(test_res) end
-end
+summary(test_res)
