@@ -101,21 +101,21 @@ local function run_longterm_tests(files, duration, log_path)
     -- get all keys from table so that we can randomly select from them
     local keyset = {}
     local valset = {}
-    for k,v in ipairs(tests) do
+    for k,v in pairs(tests) do
       keyset[#keyset + 1] = k
       valset[#valset + 1] = v
     end
     local index = math.random(#keyset)
     local test_name = keyset[index]
     local test = valset[index]
-    print(string.format("Running test %s from suite %s", test_name, suite_name))
+    print(string.format("Running test %s from suite %s", tostring(test_name), suite_name))
     local status, msg = pcall(test)
     if status then
       pass[#pass + 1] = {suite_name, test_name}
     else
       fail[#fail + 1] = {suite_name, test_name, msg}
     end
-  until (os.time() - start_time)/60 >= duration
+  until os.time() - start_time >= duration
   return pass, fail
 end
 
