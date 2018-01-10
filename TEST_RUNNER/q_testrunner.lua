@@ -25,7 +25,7 @@ local function is_polluter(file_name)
   return line:match("POLLUTER") ~= nil
 end
 
-local function run_isolated_tests(suite_name, test_name, isolated)
+local function run_isolated_tests(suite_name, isolated)
   local base_str =  [[luajit -lluacov -e "require '%s'[%s]();os.exit(0)" &>/dev/null]]
   local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
   assert(subs == 1, suite_name .. " should end with .lua")
@@ -36,26 +36,6 @@ local function run_isolated_tests(suite_name, test_name, isolated)
   if type(tests) ~= "table" then
     print("Test " .. suite_name .. "does not return a table of tests")
     return {}, {msg = suite_name .. " does not return a table"}
-  end
-  if (test_name) then
-    local test_str
-    if tonumber(test_name) == nil then
-      test_str = string.format(base_str, suite_name_mod, "'" .. test_name .. "'")
-    else
-      test_str = string.format(base_str, suite_name_mod, test_name)
-    end
-    print("cmd:", test_str)
-    local status = os.execute(test_str)
-    if status == 0 then
-      return {test_name}, {}
-    end
-    -- check if test exists or failed
-    if tests[test_name] == nil or type(tests[test_name]) ~= "function" then
-      print("Test " .. test_name .. " not found!")
-      return {}, {msg = test_name .. " = Test Not Found"}
-    end
-    -- test failed
-    return {}, {test_name}
   end
   local pass = {}
   local fail = {}
