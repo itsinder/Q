@@ -86,36 +86,34 @@ local function get_element(col, rowidx)
   return val, nn_val
 end
 
-local function chk_cols(column_list)
-  assert(column_list)
-  assert(type(column_list) == "table")
-  assert(#column_list > 0)
-  
-  local max_length = column_list[1]:length()
-  for i = 1, #column_list do
-    assert((type(column_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
+local function chk_cols(vector_list)
+  assert(vector_list)
+  assert(type(vector_list) == "table")
+  assert(#vector_list > 0)  
+  local vec_length = vector_list[1]:length()
+  for i = 1, #vector_list do
+    assert((type(vector_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
+    -- Added below assert after discussion with Ramesh
+    -- We are not supporting vectors with different length
+    -- All vectors should have same length
+    assert(vector_list[i]:length() == vec_length, "All vectors should have same length")
     -- Check the vector for eval(), if not then call eval()
-    if not column_list[i]:is_eov() then
-      column_list[i]:eval()
+    if not vector_list[i]:is_eov() then
+      vector_list[i]:eval()
     end
-    assert(column_list[i]:length() > 0)
+    assert(vector_list[i]:length() > 0)
 
-    local qtype = column_list[i]:qtype()
+    local qtype = vector_list[i]:qtype()
     assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
     -- dictionary cannot be null in get_meta for SV data type
     if qtype == "SV" then 
-      assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
+      assert(vector_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
     end
-    -- Take the maximum length of all columns
-    if column_list[i]:length() > max_length then 
-      max_length = column_list[i]:length() 
-    end
-    assert(max_length > 0, "Nothing to print")
   end
-  return max_length
+  return true
 end
 
-local function process_filter(filter, max_length)
+local function process_filter(filter, vec_length)
   local lb = 0; local ub = 0; local where = nil
   if filter then
     assert(type(filter) == "table", err.FILTER_NOT_TABLE_ERROR)
@@ -137,36 +135,33 @@ local function process_filter(filter, max_length)
       assert(type(ub) == "number", err.INVALID_UPPER_BOUND_TYPE )
       ub = assert(tonumber(ub))
       assert(ub > lb ,err.UB_GREATER_THAN_LB)
-      assert(ub <= max_length, err.INVALID_UPPER_BOUND)
+      assert(ub <= vec_length, err.INVALID_UPPER_BOUND)
     else
-      ub = max_length
+      ub = vec_length
     end
   else
     lb = 0
-    ub = max_length
+    ub = vec_length
   end
   return where, lb, ub
 end
 
-local print_csv = function (column_list, filter, opfile)    
+local print_csv = function (vector_list, filter, opfile)    
   -- trimming whitespace if any
   if opfile ~= nil then
     opfile = plstring.strip(opfile)
   end
-  
-  assert(((type(column_list) == "table") or 
-          (type(column_list) == "lVector")), err.INPUT_NOT_TABLE)
-  -- to do unit testing with columns of differet length
-  if type(column_list) == "lVector" then
-    column_list = {column_list}
+  assert(((type(vector_list) == "table") or 
+          (type(vector_list) == "lVector")), err.INPUT_NOT_TABLE)
+  if type(vector_list) == "lVector" then
+    vector_list = {vector_list}
   end
-  
-  local max_length = chk_cols(column_list)
-  local where, lb, ub = process_filter(filter, max_length)
-  
+  assert(chk_cols(vector_list), "Vectors verification failed")
+  local vec_length = vector_list[1]:length()
+  local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
   local buf = assert(ffi.malloc(buf_size))
-  local num_cols = #column_list
+  local num_cols = #vector_list
   local fp = nil -- file pointer
   local tbl_rslt = nil 
   -- When output requires as string, we will accumulate partials in tbl_rslt
@@ -193,7 +188,7 @@ local print_csv = function (column_list, filter, opfile)
          ( result ~= nil ) ) then
       for col_idx = 1, num_cols do
         local status, result = nil
-        local col = column_list[col_idx]
+        local col = vector_list[col_idx]
         status, result = pcall(get_element, col, rowidx)
         if status == false then
           --TODO: Handle this condition
