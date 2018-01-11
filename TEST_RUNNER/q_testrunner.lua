@@ -97,6 +97,9 @@ local function run_longterm_tests(files, duration, log_path)
     local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
     assert(subs == 1, suite_name .. " should end with .lua")
     local status, tests = pcall(require, suite_name_mod)
+    if status ~= true then
+      assert(status, tests .. " \nErrors while loading tests for " .. suite_name)
+    end
     assert(type(tests) == "table", "A table of tests needs to be returned by " .. suite_name)
     -- get all keys from table so that we can randomly select from them
     local keyset = {}
@@ -122,7 +125,7 @@ end
 local usage = function()
   print("USAGE:")
   print("luajit <option> q_testrunner.lua <root_dir>")
-  print (" Valid options are \n\t l for long running tests amd requires a time param for the number of minutes the tests should run. Eg l 5\n\t i for isolated tests")
+  print (" Valid options are \n\t l for long running tests amd requires a time param for the number of seconds the tests should run. Eg l 5\n\t i for isolated tests")
 end
 
 local test_type = arg[1]
