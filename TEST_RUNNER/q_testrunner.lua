@@ -57,7 +57,7 @@ local function is_polluter(file_name)
 end
 
 local function run_isolated_tests(suite_name, isolated)
-  local base_str =  [[luajit -lluacov -e "require '%s'[%s]();os.exit(0)" &>/dev/null]]
+  local base_str =  [[luajit -lluacov -e "require '%s'[%s]();os.exit(0)" >/dev/null 2>&1]]
   local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
   assert(subs == 1, suite_name .. " should end with .lua")
   local status, tests = pcall(require, suite_name_mod)
@@ -79,6 +79,7 @@ local function run_isolated_tests(suite_name, isolated)
     end
     print("cmd:", test_str)
     local status = os.execute(test_str)
+    -- print("Cmd status is " .. tostring(status))
     if status == 0 then
       table.insert(pass, k)
     else
