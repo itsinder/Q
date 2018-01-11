@@ -98,4 +98,3 @@ for k,v in pairs(_G) do
     if (k == 'test_aux') then test_aux(test_res) end
 end
 
-os.exit(0)
