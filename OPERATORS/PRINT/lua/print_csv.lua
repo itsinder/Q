@@ -91,34 +91,28 @@ local function chk_cols(column_list)
   assert(type(column_list) == "table")
   assert(#column_list > 0)
   
-  local is_col = {}
   local max_length = column_list[1]:length()
   for i = 1, #column_list do
-    assert(((type(column_list[i]) == "lVector") or
-             (type(column_list[i]) == "number")), err.INPUT_NOT_COLUMN_NUMBER)
-    
-    is_col[i] = type(column_list[i]) == "lVector" 
-    if is_col[i] then
-      -- Check the vector for eval(), if not then call eval()
-      if not column_list[i]:is_eov() then
-        column_list[i]:eval()
-      end
-      assert(column_list[i]:length() > 0)
+    assert((type(column_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
+    -- Check the vector for eval(), if not then call eval()
+    if not column_list[i]:is_eov() then
+      column_list[i]:eval()
+    end
+    assert(column_list[i]:length() > 0)
 
-      local qtype = column_list[i]:qtype()
-      assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
-      -- dictionary cannot be null in get_meta for SV data type
-      if qtype == "SV" then 
-        assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
-      end
-      -- Take the maximum length of all columns
-      if column_list[i]:length() > max_length then 
-        max_length = column_list[i]:length() 
-      end
+    local qtype = column_list[i]:qtype()
+    assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
+    -- dictionary cannot be null in get_meta for SV data type
+    if qtype == "SV" then 
+      assert(column_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
+    end
+    -- Take the maximum length of all columns
+    if column_list[i]:length() > max_length then 
+      max_length = column_list[i]:length() 
     end
     assert(max_length > 0, "Nothing to print")
   end
-  return is_col, max_length
+  return max_length
 end
 
 local function process_filter(filter, max_length)
@@ -167,7 +161,7 @@ local print_csv = function (column_list, filter, opfile)
     column_list = {column_list}
   end
   
-  local is_col, max_length = chk_cols(column_list)
+  local max_length = chk_cols(column_list)
   local where, lb, ub = process_filter(filter, max_length)
   
   -- TODO remove hardcoding of 1024
@@ -200,18 +194,13 @@ local print_csv = function (column_list, filter, opfile)
       for col_idx = 1, num_cols do
         local status, result = nil
         local col = column_list[col_idx]
-        -- if input is scalar, assign scalar value
-        if not is_col[col_idx] then
-          result = col
-        else
-          status, result = pcall(get_element, col, rowidx)
-          if status == false then
-            --TODO: Handle this condition
-          end
-          if result == nil then
-            if col:qtype() == "B1" then result = 0 else result = "" end
-          end                              
+        status, result = pcall(get_element, col, rowidx)
+        if status == false then
+          --TODO: Handle this condition
         end
+        if result == nil then
+          if col:qtype() == "B1" then result = 0 else result = "" end
+        end                              
         if tbl_rslt then
           table.insert(tbl_rslt, result) 
           if ( col_idx ~= num_cols ) then 
