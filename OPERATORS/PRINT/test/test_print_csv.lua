@@ -91,7 +91,7 @@ for i, v in ipairs(T) do
       
       key = "handle_"..v.category
       if fns[key] then
-        result = fns[key](i, v,  file_path, print_ret, status, M[1].qtype)
+        result = fns[key](i, v,  file_path, print_ret, status, load_ret)
         -- preamble
         utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
         assert(result,"handle " .. v.category .. " assertions failed")
