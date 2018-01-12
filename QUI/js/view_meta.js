@@ -1,10 +1,23 @@
 $(document).ready(function () {
+// Retrieve Session Variable
+var host = sessionStorage.getItem("host");
+var port = sessionStorage.getItem("port");
+
+// If session variables are not set or is null, force the user to enter data
+if((!sessionStorage.getItem("host")) || (sessionStorage.getItem("host") == "")){
+window.location.href="index.html";
+}
+if((!sessionStorage.getItem("port")) || (sessionStorage.getItem("port") == "")){
+window.location.href="index.html";
+}
+				
  	$.ajax({
 		type: "POST",
-    url: "meta_data.txt",
+    url: "http://" + host + ":" + port, //localhost:33939/",
     dataType: 'json',
-    success: function(data){
-    // For Debugiing: console.log(data);
+		data: "local Q = require 'Q' local meta_table, meta_json = Q.view_meta() return meta_json",
+    success: function(rd){
+    console.log(rd);
 
   // Make customised table
   $.makeTable = function (jsonData) {
@@ -21,9 +34,10 @@ $(document).ready(function () {
   	});
   	return ($(table));
 	};
-	var jsonData = eval(data);
+	var jsonData = eval(rd);
 	var table = $.makeTable(jsonData);
 	$(table).appendTo("#show-data");
 	}
 	});
 });
+
