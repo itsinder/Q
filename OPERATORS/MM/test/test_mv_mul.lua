@@ -39,4 +39,20 @@ tests.t2 = function()
   --]]
   print("TODO")
 end
+tests.t3 = function()
+  local num_trials = 2
+  local x1 = Q.seq({ len = 8, start = 1, by = 1, qtype = "F8"})
+  local x2 = Q.seq({ len = 8, start = 10, by = 10, qtype = "F8"})
+  local X = {x1, x2}
+  local Y = Q.seq({ len = 2, start = 100, by = 100, qtype = "F8"})
+  local Z
+  for i = 1, num_trials do
+    Z = Q.mv_mul(X, Y):eval()
+  end
+  assert(Z:num_elements() == x1:length())
+  print("Completed mv_mul")
+  Q.print_csv(Z, nil, script_dir .. "_out1.txt")
+  assert(diff(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
+  os.execute("rm -f " .. script_dir .. "_out1.txt")
+end
 return tests

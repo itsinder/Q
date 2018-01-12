@@ -3,6 +3,10 @@ local function sort(x, ordr)
   local qc = require 'Q/UTILS/lua/q_core'
 
   assert(type(x) == "lVector", "error")
+  -- Check the vector x for eval(), if not then call eval()
+  if not x:is_eov() then
+    x:eval()
+  end  
   assert(type(ordr) == "string")
   if ( ordr == "ascending" ) then ordr = "asc" end 
   if ( ordr == "descending" ) then ordr = "dsc" end 

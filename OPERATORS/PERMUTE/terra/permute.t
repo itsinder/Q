@@ -33,6 +33,10 @@ return function(val_col, idx_col, idx_in_src)
   assert(type(val_col) == "lVector", err.INPUT_NOT_COLUMN) 
   assert(not idx_col:has_nulls(), "Index column cannot have nulls")
   assert(not val_col:has_nulls(), "As of now, Value column cannot have nulls")
+  -- Check the vector val_col for eval(), if not then call eval()
+  if not val_col:is_eov() then
+    val_col:eval()
+  end  
 
   local val_qtype = assert(val_col:fldtype())
   -- TODO Any asserts  on c_qtype

@@ -4,11 +4,19 @@ local function idx_sort(idx, val, ordr)
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
   assert(type(idx) == "lVector", "error")
+  -- Check the vector idx for eval(), if not then call eval()
+  if not idx:is_eov() then
+    idx:eval()
+  end  
   local idx_qtype = idx:fldtype()
   assert( ( (idx_qtype == "I1" ) or (idx_qtype == "I2" ) or 
   (idx_qtype == "I4" ) or (idx_qtype == "I8" ) ), "bad index qtype")
 
   assert(type(val) == "lVector", "error")
+  -- Check the vector val for eval(), if not then call eval()
+  if not val:is_eov() then
+    val:eval()
+  end    
   local val_qtype = val:fldtype()
   assert(is_base_qtype(val_qtype))
 
