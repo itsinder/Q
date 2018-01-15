@@ -19,9 +19,10 @@ window.location.href="index.html";
     success: function(rd){
     console.log(rd);
 
+//class="table table-striped table-condensed"
   // Make customised table
   $.makeTable = function (jsonData) {
-  var table = $('<table id="MetaData" class="table table-striped table-condensed" style="word-wrap: break-word"><thead> <tr><th>vector</  th><th>field_type</th><th>chunk size</th> </tr></thead>');
+  var table = $('<table id="MetaData" class="display"  style="word-wrap: break-word"><thead> <tr><th>vector</  th><th>field_type</th><th>chunk size</th> </tr></thead><tfoot> <tr><th>vector</  th><th>field_type</th><th>chunk size</th> </tr></tfoot>');
 		for (var k in jsonData[0]) 
 			tblHeader += "<th>" + k[0] + "</th>";
 			$.each(jsonData, function (index, value) {
@@ -37,7 +38,11 @@ window.location.href="index.html";
 	var jsonData = eval(rd);
 	var table = $.makeTable(jsonData);
 	$(table).appendTo("#show-data");
+    $('#MetaData').DataTable( {
+        "order": [[ 0, "asc" ]]
+    } );
 	}
 	});
+
 });
 
