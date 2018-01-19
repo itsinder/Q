@@ -17,5 +17,9 @@ rs_munmap(
 	)
 //STOP_FUNC_DECL
 { 
-  mcr_rs_munmap(X, nX);
+   int status = 0;
+   mcr_rs_munmap(X, nX);
+   cBYE(status);  
+ BYE:
+   return(status);
 }
