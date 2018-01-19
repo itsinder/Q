@@ -9,15 +9,6 @@ local buf_size = 1024
 local chunk_buf_table = {}
 local chunk_nn_buf_table = {}
 
-local function strip_trailing_LL(temp)
-  local index1, index2 = string.find(temp,"LL")
-  local string_length = #temp
-  if index1 == string_length-1 and index2 == string_length then
-    temp = string.sub(temp, 1, -3) 
-  end
-  return temp
-end
-
 local function get_B1_value(buffer, chunk_idx)
   local val
   local bit_value = qc.get_bit_u64(buffer, chunk_idx)
@@ -64,14 +55,13 @@ local function get_element(col, rowidx)
       val = casted[chunk_idx]
     end
 
-    if ( qtype == "I8" ) then
-      -- Remove LL appended at end of I8 number
-      val = tonumber(strip_trailing_LL(tostring(val)))
-    elseif ( qtype == "SC" ) then
+    if ( qtype == "SC" ) then
       val = ffi.string(casted + chunk_idx * col:field_width())
     elseif ( qtype == "SV" ) then 
       local dictionary = col:get_meta("dir")
       val = dictionary:get_string_by_index(tonumber(val))
+    else
+      val = tonumber(val)
     end
 
     -- Check for nn vector
