@@ -456,7 +456,7 @@ BYE:
     }
   }
 
-  rs_munmap(mmap_file, file_size);
+  mcr_rs_munmap(mmap_file, file_size);
   free_if_non_null(ofps);
   free_if_non_null(qtypes);
   free_if_non_null(nn_ofps);

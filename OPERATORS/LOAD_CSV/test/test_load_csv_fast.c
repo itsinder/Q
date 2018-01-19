@@ -251,7 +251,7 @@ main(
               if ( nil_files[i] == NULL ) { go_BYE(-1); }
               status = rs_mmap(nil_files[i], &X, &nX, 0); cBYE(status);
               if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-              rs_munmap(X, nX);
+              mcr_rs_munmap(X, nX);
             }
             else {
               if ( nil_files[i] != NULL ) { go_BYE(-1); }
