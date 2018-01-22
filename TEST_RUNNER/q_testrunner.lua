@@ -17,7 +17,7 @@ Update 16-Nov-2017:
 If q_testrunner find a global variable called "test_aux", it invokes test_aux as a function, passing it the results as a parameter. When running from command line, use -l to load any aux functions that can initialize a global test_aux variable. Example is q_test_runner_auxsummary.lua
 ]]
 
-
+package.path = "/?.lua;" .. package.path
 local plpath = require 'pl.path'
 local plpretty = require "pl.pretty"
 local q_root = assert(os.getenv("Q_ROOT"))
