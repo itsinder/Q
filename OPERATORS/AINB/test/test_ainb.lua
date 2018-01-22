@@ -31,4 +31,16 @@ tests.t2 = function()
   assert(n == expected_n)
 end
 
+tests.t3 = function()
+  local vec_len = 65
+  local b = Q.seq({ len = vec_len, start = 1, by = 2, qtype = "I8"})
+  b:set_meta("sort_order", "asc") 
+  local a = Q.seq({ len = vec_len, start = 1, by = 1, qtype = "I8"}):set_name("a")
+  local c = Q.ainb(a, b):set_name("c")
+  local n = Q.sum(c):eval():to_num()
+  local expected_n = math.ceil(vec_len / 2)
+  print("n, expected_n, len", n, expected_n, vec_len)
+  assert(n == expected_n)
+end
+
 return tests

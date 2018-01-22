@@ -54,7 +54,8 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 100,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- nascent vector with is_memo false, try persist, this method should not work
@@ -65,7 +66,8 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 100,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- nascent vector with is_memo false, set is_memo explicitly to true then try vec:check(), 
@@ -91,7 +93,8 @@ return {
     meta = "gm_create_nascent_vector3.lua", 
     num_elements = 65540, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- try modifying memo after chunk is full, operation should fail
@@ -102,7 +105,8 @@ return {
     meta = "gm_create_nascent_vector1.lua", 
     num_elements = qconsts.chunk_size, 
     gen_method = "cmem_buf", 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
@@ -155,7 +159,8 @@ return {
     meta = "gm_create_nascent_vector5.lua",
     num_elements = 65540,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },  
 
   -- materialized vector
@@ -175,7 +180,8 @@ return {
     name = "materialized_vector_set_value_at_wrong_index", 
     meta = "gm_create_materialized_vector1.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },    
 
   -- materialized vector, try eov
@@ -196,7 +202,8 @@ return {
     name = "modify_read_only_materialized_vector", 
     meta = "gm_create_materialized_vector2.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },        
   
   -- create materialized vector where file is not present
@@ -206,7 +213,8 @@ return {
     name = "create_materialized_vector_file_not_present", 
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
-    qtype = { "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_2"
   },  
   
   --[[
@@ -245,7 +253,8 @@ return {
     name = "modify_materialized_vector_without_start_write()",
     meta = "gm_create_materialized_vector2.lua",
     num_elements = 65540,
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
 

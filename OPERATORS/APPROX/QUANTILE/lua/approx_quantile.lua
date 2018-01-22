@@ -10,6 +10,10 @@ local approx_quantile = function(x, args)
   local func_name = "approx_quantile_" .. qtype 
 
   -- START: verify inputs
+  -- Check the vector x for eval(), if not then call eval()
+  if not x:is_eov() then
+    x:eval()
+  end
   local size = x:length()
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
   assert(is_base_qtype(qtype))

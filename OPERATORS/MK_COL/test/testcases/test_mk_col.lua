@@ -60,7 +60,17 @@ for i, v in ipairs(T) do
     local qtype = v.qtype
     local result
     
+    -- category1 are negative testcases ( error messages )
+    if v.category == "category1" then
+      print("START: Deliberate error attempt")
+    end
+    
     local status, ret = pcall(mk_col,input,qtype)
+    if v.category == "category1" then
+      print(ret)
+      print("STOP : Deliberate error attempt")
+    end
+    
     if fns[v.category] then
       result = fns[v.category](i, v, status, ret)
       utils["testcase_results"](v, "Mk_col", "Unit Test", result, "")

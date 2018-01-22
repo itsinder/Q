@@ -11,6 +11,10 @@ local function corr_mat(X)
   local n = nil
   for k, v in ipairs(X) do
     assert(type(v) == "lVector", "Each element of X must be a lVector")
+    -- Check the vector v for eval(), if not then call eval()
+    if not v:is_eov() then
+      v:eval()
+    end    
     if (n == nil) then
       n = v:length()
       qtype = v:fldtype()

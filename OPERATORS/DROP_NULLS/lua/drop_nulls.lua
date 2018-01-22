@@ -8,6 +8,10 @@ local function drop_nulls(x, sval)
   if ( not x:has_nulls() ) then 
     return x
   end
+  -- Check the vector x for eval(), if not then call eval()
+  if not x:is_eov() then
+    x:eval()
+  end  
   assert(x:is_eov(), "Vector must be materialized before dropping nulls")
   assert(sval)
   assert(type(sval) == "Scalar") 

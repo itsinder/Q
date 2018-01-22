@@ -123,7 +123,7 @@ bin2asc(
     fprintf(ofp, "%s\n", buf);
   }
 BYE:
-  rs_munmap(X, nX);
+  mcr_rs_munmap(X, nX);
   if ( *outfile != '\0' ) { 
     fclose_if_non_null(ofp);
   }
