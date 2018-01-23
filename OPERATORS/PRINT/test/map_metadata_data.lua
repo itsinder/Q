@@ -86,11 +86,11 @@ return {
   { testcase_no = 23, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 3 }, category = "category5",
     csv_file = "single_col.csv", output_regex = "1002\n1003\n", name = "range filter test"},
   -- 
-  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category7",  
+  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "", category = "category7",  
     output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
     -- 
-  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "" , category = "category8",  
+  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category8",  
     output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
   --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},

@@ -52,7 +52,7 @@ local check_again = function (index, csv_file, meta, v)
     return false
   end
   
-  local status_print, print_ret = pcall(print_csv, load_ret, nil, csv_file..".output")
+  local status_print, print_ret = pcall(print_csv, load_ret, csv_file..".output", nil)
   if status_print == false then
     fns["increment_failed"](index, v, "testcase failed: in category1, output of print_csv fail in second attempt")
     return false
@@ -267,7 +267,7 @@ fns.handle_category6 = function (index, v, M)
   local arr = {col}
   --print_csv(arr,nil,"testcase_consumable.csv")
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
-  local status, print_ret = pcall(print_csv, arr, nil, filename)
+  local status, print_ret = pcall(print_csv, arr, filename, nil)
   if status then
     local status, load_ret = pcall(load_csv, filename, M, {use_accelerator = false})
     filename = load_ret[1]:meta().base.file_name

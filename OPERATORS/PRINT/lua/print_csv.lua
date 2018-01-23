@@ -6,6 +6,8 @@ local plstring = require 'pl.stringx'
 
 local buf_size = 1024
 
+-- Below tables contains the pointers to chunk
+-- Look for the memory constraints
 local chunk_buf_table = {}
 local chunk_nn_buf_table = {}
 
@@ -30,12 +32,10 @@ local function get_element(col, rowidx)
   
   if not chunk_buf_table[col] or chunk_idx == 0 then
     local len, base_data, nn_data = col:chunk(chunk_num)
-    --TODO: check below condition if it is proper or not
-    if len == nil or len == 0 then return 0 end
-    if base_data then
-      base_data = ffi.cast(ctype.." *", base_data)
-      chunk_buf_table[col] = base_data
-    end
+    assert(len > 0, "Chunk length not greater than zero")
+    assert(base_data, "Chunk should not be null")
+    base_data = ffi.cast(ctype.." *", base_data)
+    chunk_buf_table[col] = base_data
     if nn_data then
       nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
       chunk_nn_buf_table[col] = nn_data
@@ -54,7 +54,7 @@ local function get_element(col, rowidx)
     else
       val = casted[chunk_idx]
     end
-
+    
     if ( qtype == "SC" ) then
       val = ffi.string(casted + chunk_idx * col:field_width())
     elseif ( qtype == "SV" ) then 
@@ -80,21 +80,29 @@ local function chk_cols(vector_list)
   assert(vector_list)
   assert(type(vector_list) == "table")
   assert(#vector_list > 0)  
-  local vec_length = vector_list[1]:length()
+  local vec_length = nil
   for i = 1, #vector_list do
     assert((type(vector_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
-    -- Added below assert after discussion with Ramesh
-    -- We are not supporting vectors with different length
-    -- All vectors should have same length
-    assert(vector_list[i]:length() == vec_length, "All vectors should have same length")
+    
     -- Check the vector for eval(), if not then call eval()
     if not vector_list[i]:is_eov() then
       vector_list[i]:eval()
     end
+    
+    -- eval'ed the vector before calling lenght() 
+    -- as elements will populate only after eval()
+    if i == 1 then
+      vec_length = vector_list[i]:length()
+    end
+    
+    -- Added below assert after discussion with Ramesh
+    -- We are not supporting vectors with different length as this is a rare case
+    -- All vectors should have same length
+    assert(vector_list[i]:length() == vec_length, "All vectors should have same length")
     assert(vector_list[i]:length() > 0)
-
     local qtype = vector_list[i]:qtype()
     assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
+    
     -- dictionary cannot be null in get_meta for SV data type
     if qtype == "SV" then 
       assert(vector_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
@@ -116,14 +124,12 @@ local function process_filter(filter, vec_length)
     end
     if ( lb ) then
       assert(type(lb) == "number", err.INVALID_LOWER_BOUND_TYPE )
-      lb = assert(tonumber(lb))
       assert(lb >= 0,err.INVALID_LOWER_BOUND)
     else
       lb = 0;
     end
     if ( ub ) then
       assert(type(ub) == "number", err.INVALID_UPPER_BOUND_TYPE )
-      ub = assert(tonumber(ub))
       assert(ub > lb ,err.UB_GREATER_THAN_LB)
       assert(ub <= vec_length, err.INVALID_UPPER_BOUND)
     else
@@ -136,9 +142,14 @@ local function process_filter(filter, vec_length)
   return where, lb, ub
 end
 
-local print_csv = function (vector_list, filter, opfile)    
+local print_csv = function (vector_list, opfile, filter)
+  -- Convention
+  -- Q.print_csv(X) -- will print stdout
+  -- Q.print_csv(X, "file", <filter>) -- will print to file
+  -- Q.print_csv(X, "", <filter>) -- will return string
+  
   -- trimming whitespace if any
-  if opfile ~= nil then
+  if opfile then
     opfile = plstring.strip(opfile)
   end
   assert(((type(vector_list) == "table") or 
@@ -150,40 +161,39 @@ local print_csv = function (vector_list, filter, opfile)
   local vec_length = vector_list[1]:length()
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
-  local buf = assert(ffi.malloc(buf_size))
+  -- local buf = assert(ffi.malloc(buf_size))
   local num_cols = #vector_list
   local fp = nil -- file pointer
-  local tbl_rslt = nil 
+  local tbl_rslt = nil
+  
   -- When output requires as string, we will accumulate partials in tbl_rslt
   if not opfile then
-    tbl_rslt = {}
+    io.output(io.stdout)
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
       assert(fp ~= nil, g_err.INVALID_FILE_PATH)
       io.output(fp)
     else
-      io.output(io.stdout)
+      tbl_rslt = {}
     end
   end
   
   lb = lb + 1 -- for Lua style indexing
   -- recall that upper bounds are inclusive in Lua
   for rowidx = lb, ub do
-    local status, result = nil
-    if ( where ~= nil ) then
-      status, result = pcall(get_element, where, rowidx)
+    local status, result, is_filter = nil
+    if ( where ) then
+      status, is_filter = pcall(get_element, where, rowidx)
+      assert(status, "Failed to get filter value")
     end
-    if ( ( where == nil ) or
-         ( result ~= nil ) ) then
+    if ( ( not where ) or ( is_filter ) ) then
       for col_idx = 1, num_cols do
         local status, result = nil
         local col = vector_list[col_idx]
         status, result = pcall(get_element, col, rowidx)
-        if status == false then
-          --TODO: Handle this condition
-        end
-        if result == nil then
+        assert(status, "Failed to get value from vector")
+        if not result then
           if col:qtype() == "B1" then result = 0 else result = "" end
         end                              
         if tbl_rslt then
