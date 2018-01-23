@@ -35,16 +35,18 @@ local function add_libs()
     assert(subs == 1, "Should be only one extension")
     local so_name = "lib" .. lib_name .. ".so"
     if so_name ~= "libq_core.so" then
-      local status = pcall(ffi.cdef, plfile.read(h_files[file_id]))
+      local status, msg = pcall(ffi.cdef, plfile.read(h_files[file_id]))
       if status then
         local status, q_tmp = pcall(ffi.load, so_name)
         if status then
           assert(function_lookup[lib_name] == nil,
           "Library name is already declared: " .. lib_name)
           function_lookup[lib_name] = q_tmp[lib_name]
+        else
+          print("Unable to load lib " .. so_name, q_tmp)
         end
       else
-        print("Unable to load lib " .. so_name)
+        print("Unable to load lib " .. so_name, msg)
       end
     end
   end
