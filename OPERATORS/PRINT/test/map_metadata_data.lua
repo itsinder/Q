@@ -4,6 +4,10 @@ In this file, all the testcases are written in the format
 meta = <meta file>, data = <input csv_file to load>, csv_file = <output csv file of print> category = <category_number>
 They are added as a row in the below LUA table.
 category1 - match csv file in data field with csv file in csv_file field
+category1_1 - test-case for testing elements(rows) > chunk_size 
+            - These are test-cases with large csv files so generating it using generate_csv() function
+category1_2 - test-case for F4 and F8 qtype
+            - their actual and expected output comparison is done using vveq and sum operator
 category2 - invalid filter input to print_csv. output_regex is error code in these testcases
 category3 - bit vector is B1
 category4 - bit vector is I4. output error expected
@@ -82,11 +86,11 @@ return {
   { testcase_no = 23, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 3 }, category = "category5",
     csv_file = "single_col.csv", output_regex = "1002\n1003\n", name = "range filter test"},
   -- 
-  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category7",  
+  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "", category = "category7",  
     output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
     -- 
-  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "" , category = "category8",  
+  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category8",  
     output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
   
   --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
@@ -95,6 +99,13 @@ return {
   -- I4 qtype values
   { testcase_no = 26, meta = "gm_single_col.lua", data = "I4_more_than_chunksize.csv", csv_file = "print_more_than_chunksize.csv", 
     category = "category1_1", name= "elements more than chunksize-I4", num_elements = 65540 },
+  
+  { testcase_no = 27, meta = "gm_print_F4.lua", data ="sample_F4.csv", csv_file = "print_F4.csv", category = "category1_2",
+    name= "print F4 type" },
+  
+  { testcase_no = 28, meta = "gm_print_F8.lua", data ="sample_F8.csv", csv_file = "print_F8.csv", category = "category1_2",
+    name= "print F8 type" },
+  
 }
 
       

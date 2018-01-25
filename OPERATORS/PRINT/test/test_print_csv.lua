@@ -78,10 +78,20 @@ for i, v in ipairs(T) do
       local file_path 
       if csv_file then file_path = print_out_dir .. csv_file end
       if csv_file == "" then file_path = "" end
-      local status, print_ret = pcall(print_csv, load_ret, F, file_path)
+      -- category2 are negative testcases ( error messages )
+      if v.category == "category2" then
+        print("START: Deliberate error attempt")
+      end
+      
+      local status, print_ret = pcall(print_csv, load_ret, file_path, F)
+      if v.category == "category2" then
+        print(print_ret)
+        print("STOP : Deliberate error attempt")
+      end
+      
       key = "handle_"..v.category
       if fns[key] then
-        result = fns[key](i, v,  file_path, print_ret, status, M[1].qtype)
+        result = fns[key](i, v,  file_path, print_ret, status, load_ret)
         -- preamble
         utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
         assert(result,"handle " .. v.category .. " assertions failed")

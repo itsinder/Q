@@ -7,7 +7,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 -- num_elements: number of elements
 -- qtype: need to specify qtype if you want to run test for specific qtype
 -- gen_method: need to specify the generation method ('func', 'scalar', 'cmem_buf')
-
+-- test_category: need to specify this field if test-case is negative test-case
 
 return {
   --=============================
@@ -89,7 +89,8 @@ return {
     meta = "gm_create_nascent_vector3.lua",
     num_elements = 100,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- nascent vector with is_memo false, try persist, this method should not work
@@ -100,7 +101,8 @@ return {
     meta = "gm_create_nascent_vector3.lua",
     num_elements = 100,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },  
   
   -- nascent vector with is_memo false, set is_memo explicitly to true then try vec:check(), 
@@ -155,7 +157,8 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 65540,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   
   -- nascent -> materialized vec (after eov)
@@ -179,7 +182,8 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = 65540,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },  
 
   -- nascent vector, try modifying memo after chunk is full, operation should fail
@@ -190,7 +194,8 @@ return {
     meta = "gm_create_nascent_vector2.lua",
     num_elements = qconsts.chunk_size,
     gen_method = "cmem_buf",
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_1"
   },
   -- Commenting out below testcase as this scenario is not supported - refer jira issue QQ-32
   -- nascent vector, try get_chunk() without passing chunk_num, it should return the current chunk
@@ -300,7 +305,8 @@ return {
     name = "create_materialized_vector_file_not_present",
     meta = "gm_create_materialized_vector3.lua",
     num_elements = 65540,
-    qtype = { "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_2"
   },
 
   --[[
@@ -338,7 +344,8 @@ return {
     assert_fns = "materialized_vector5",
     meta = "gm_create_materialized_vector5.lua",
     num_elements = 65540, 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_2"
   },
   
   -- create materialized vector with has_nulls true but provide wrong value of nn_file_name
@@ -348,7 +355,8 @@ return {
     assert_fns = "materialized_vector5",
     meta = "gm_create_materialized_vector6.lua",
     num_elements = 65540, 
-    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
+    qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
+    test_category = "error_testcase_2"
   },
   --[[
   -- modify the materialized vector with has_nulls true without modifying respective nn vector

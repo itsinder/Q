@@ -15,6 +15,10 @@ local mv_mul = function(X, y)
   assert(qc[func_name], "Symbol not available" .. func_name)
  
   -- run time checks not made in compile time specializer
+  -- Check the vector y for eval(), if not then call eval()
+  if not y:is_eov() then
+    y:eval()
+  end  
   assert(y:is_eov(), "y must be fully evaluated")
 
   local z_buf = nil 
