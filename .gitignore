@@ -40,5 +40,15 @@ luac.out
 *.hex
 
 # Temporary files
-_*
 *.*~
+
+# generated files
+gen_inc
+gen_src
+_*.c
+_*.lua
+_*.h
+
+# binary files
+*.bin
+
