@@ -16,7 +16,7 @@ tests.t1 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -44,7 +44,7 @@ tests.t2 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -72,7 +72,7 @@ tests.t3 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -101,7 +101,7 @@ tests.t4 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -130,7 +130,7 @@ tests.t5 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -159,7 +159,7 @@ tests.t6 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -188,7 +188,7 @@ tests.t7 = function()
   local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
   local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x_length + y_length))
   
@@ -216,7 +216,7 @@ tests.t8 = function()
   local x = Q.mk_col(x_table, "B1")
   local y = Q.mk_col(y_table, "B1")
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x:length() + y:length()))
   
@@ -255,7 +255,7 @@ tests.t9 = function()
   local x = Q.mk_col(x_table, "B1")
   local y = Q.mk_col(y_table, "B1")
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
   
   assert(z:length() == (x:length() + y:length()), "Mismatch, Expected = " .. tostring(x:length() + y:length()) .. ", Actual = " .. tostring(z:length()))
   
@@ -314,7 +314,7 @@ tests.t10 = function()
   x:eov()
   y:eov()
 
-  local z = Q.cat(x, y)
+  local z = Q.cat({x, y})
 
   assert(z:length() == (x_length + y_length))
 
