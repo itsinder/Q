@@ -8,7 +8,7 @@
     <meta name="author" content="Nerdwallet QA Team">
     <link rel="icon" href="images/favicon.ico">
 
-     <title>Q: The Data Manager</title>
+     <title>Q: The Data Scientist</title>
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,7 +20,9 @@
     <!-- jQuery -->
     <script src="js/jquery-1.11.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-	
+    <script src="js/js-cookie.js"></script>
+		<script src="js/set_session.js"></script>
+
   </head>
 
   <body>
@@ -36,12 +38,9 @@
     <span class="icon-bar"></span>
     </button>
     <!-- Application Title -->
-    <a class="navbar-brand" href="index.php">Q: The Data Manager</a>
+    <a class="navbar-brand" id="modLink" href="index.html">Q: The Data Scientist</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
-    <ul class="nav navbar-nav navbar-right">
-      <li ><a href="view_meta.html" ><button type="button" class="btn btn-sm btn-primary">View Meta</button></a></li>
-  </ul>
   </div><!--/.nav-collapse -->
   </div>
   </nav>
@@ -51,21 +50,14 @@
 	        <div class="col-xs-12">
 		  <div class="panel panel-primary">
             <div class="panel-heading">
-              <h3 class="panel-title">About Q - An analytics Framework </h3>
+              <h3 class="panel-title">Please enter Q HTTP Server details </h3>
             </div>
             <div class="panel-body">
-Q is a vector language, designed for efficient implementation of counting, sorting and data transformations. It uses a
-single data structure — a table.<br/>
-In designing Q, we wanted it to be a data model as Codd defines one
-A data model is a combination of at least three components:
-<ul>
-<li>A collection of data structure types (the building blocks);</li>
-<li>A collection of operators or rules of inference, which can be applied to any
-valid instances of the data types listed in (1), to retrieve, derive, or modify
-data from any parts of those structures in any combinations desired;</li>
-<li>A collection of general integrity rules, which implicitly or explicitly define
-the set of consistent database states or changes of states or both.</li>
-</ul>
+Host:&nbsp;&nbsp;
+<input type="text" id="host" name="host" size="15" value="" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Port:&nbsp;&nbsp;
+<input type="text" id="port" name="port" size="15" value="" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" id="submit" value="Submit" />
     </div></div></div></div>
 
     </div> <!-- /container -->
