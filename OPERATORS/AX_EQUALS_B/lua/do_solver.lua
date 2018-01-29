@@ -15,9 +15,17 @@ return function(func_name, A, b)
 
   assert( (b_qtype == "F4") or (b_qtype == "F8"), 
   "b should be a column of doubles/floats")
+  -- Check the vector b for eval(), if not then call eval()
+  if not b:is_eov() then
+    b:eval()
+  end
 
   for i, a in ipairs(A) do
     assert(type(a) == "lVector", "A["..i.."] should be a column")
+    -- Check the vector a for eval(), if not then call eval()
+    if not a:is_eov() then
+      a:eval()
+    end    
     assert(a:fldtype() == b_qtype, 
       "A["..i.."] should be a column of same type as b")
   end
