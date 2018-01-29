@@ -1,13 +1,14 @@
-This is version 1.0 of the Q web app to view meta data
-It is semi automated at present.
-
-Target version 1.1 to be fully automated
+This is version 2.0 of the Q web app to view meta data
+It is automated but requires host & port as input.
+host and port passed is stored in local storage and remains in the same tab of the browser
 
 
 Steps to use the simple Q web app
 
 1) source Q_SRC_ROOT/setup.sh
-2) bash Q_SRC_ROOT/QUI/view_meta_demo.sh or view_meta.sh if global vectors are created by some other script
-3) Click on index.html to load the html script on a browser.
+2) start Q_HTTP server and note its host & port
+3) Point Q/QUI/index.html to trh browser
+4) Enter the host & the post parameters
 
-Any modifications with vector(s) will call for point 2 again + refreshing the browser.
+Note: The values of host & port will last wihin the domain of the table.
+
