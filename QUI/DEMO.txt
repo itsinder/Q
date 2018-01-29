@@ -23,6 +23,7 @@ Store Q HTTP server details in session variables in local storage which dies as 
 -> terminal
 c = Q.mk_col({2, 4}, "I4")
 local meta_table, meta_json = Q.view_meta() return meta_json
+
 a:set_meta("foo", "bar")
 
 opening view meta or view meta details or terminal in a new browser tab redirects to the login page for credentials
