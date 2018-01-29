@@ -140,3 +140,5 @@ source $HOME/WORK/Q/setup.sh
 alias LJT=‘luajit  $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua’
 alias LJ="luajit -l Q/TEST_RUNNER/q_testrunner_auxsummary $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua"
 
+alias pbcopy="xclip -sel clip"
+
