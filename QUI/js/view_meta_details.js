@@ -20,7 +20,7 @@ $(document).ready(function() {
     type: "POST",
     url: "http://" + host + ":" + port, //localhost:33939/",
     dataType: 'json',
-    data: "local Q = require 'Q' local meta_table, meta_json = Q.view_meta() return meta_json",
+    data: "local Q = require 'Q'; local meta_table, meta_json = Q.view_meta(); return meta_json",
     success: function(data) {
       // For Debugiing: 
       //console.log(data);
