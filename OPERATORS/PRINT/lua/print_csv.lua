@@ -32,7 +32,7 @@ local function get_element(col, rowidx)
   local qtype = col:qtype()
   local ctype =  qconsts.qtypes[qtype]["ctype"]
   
-  if chunk_idx == 0 then
+  if not chunk_buf_table[col] or chunk_idx == 0 then
     local len, base_data, nn_data = col:chunk(chunk_num)
     assert(len > 0, "Chunk length not greater than zero")
     assert(base_data, "Chunk should not be null")
