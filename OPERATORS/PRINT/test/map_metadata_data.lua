@@ -105,6 +105,12 @@ return {
   
   { testcase_no = 28, meta = "gm_print_F8.lua", data ="sample_F8.csv", csv_file = "print_F8.csv", category = "category1_2",
     name= "print F8 type" },
+
+  -- checking for valid SV column contents with special characters like double quote, backslash etc
+  { testcase_no = 29, meta = "gm_print_SV.lua", data ="sample_varchar_special_chars.csv", csv_file = "print_SV_special_char.csv", category = "category1_3", name= "print_SV_with_special_char", output_regex = "Sample\nString\n\"For\"\nVar\\char\n" },
+  -- checking for valid SC column contents with special characters like double quote, backslash etc
+  { testcase_no = 30, meta = "gm_print_SC.lua", data ="fix_size_string_special_chars.csv", csv_file = "print_SC_special_char.csv", category = "category1_3", name= "print_SC_with_special_char", output_regex = "Hiihello\nb\"y\"\\e\n" },
+
   
 }
 
