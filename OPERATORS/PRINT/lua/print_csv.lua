@@ -177,7 +177,7 @@ local print_csv = function (vector_list, opfile, filter)
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
-      assert(fp ~= nil, g_err.INVALID_FILE_PATH)
+      assert(fp ~= nil, err.INVALID_FILE_PATH)
       io.output(fp)
     else
       tbl_rslt = {}
