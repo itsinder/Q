@@ -17,7 +17,7 @@ test.t1 = function()
     --Q.print_csv(corrm[i], nil, "")
     --print("=====colbreak=======")
   end
-  Q.print_csv(corrm, nil, "")
+  Q.print_csv(corrm, "")
   print("SUCCESS")
 end
 
