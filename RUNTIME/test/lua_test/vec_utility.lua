@@ -78,7 +78,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
     local ctype =  qconsts.qtypes[qtype]["ctype"]
     local casted = ffi.cast(ctype.." *", ret_addr)
     
-    local expected = i*15 % qconsts.qtypes[qtype].max
+    local expected = i*10 % qconsts.qtypes[qtype].max
   
     local actual_val = casted[chunk_idx]
     if ( actual_val ~= expected ) then
@@ -122,7 +122,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         if is_B1 then 
           iptr[itr - 1] = 85
         else
-          iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+          iptr[itr - 1] = itr*10 % qconsts.qtypes[qtype].max
         end
       end
       --iptr[num_elements - 1] = qconsts.qtypes[qtype].max
@@ -141,7 +141,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         if i % 2 == 0 then bval = false else bval = true end
         s1 = Scalar.new(bval, qtype)
       else
-        s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
+        s1 = Scalar.new(i*10% qconsts.qtypes[qtype].max, qtype)
       end
       vec:put1(s1)
     end    
