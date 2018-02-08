@@ -4,6 +4,7 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 -- for k, v in pairs(vec) do print(k, v) end 
@@ -20,7 +21,7 @@ tests.t1 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  gen_bin.generate_bin(num_values, q_type, infile, "iter" )
+  qc.generate_bin(num_values, q_type, infile, "linear" )
  
   assert(plpath.isfile(infile), "Create the input files")
   local y = Vector.new('I4', infile, false)
@@ -62,7 +63,7 @@ tests.t2 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  gen_bin.generate_bin(num_values, q_type, "_in1_I4.bin", "iter" )
+  qc.generate_bin(num_values, q_type, "_in1_I4.bin", "linear" )
   assert(plpath.isfile("_in1_I4.bin"))
   local y = Vector.new('I4', '_in1_I4.bin')
   y:persist(true)

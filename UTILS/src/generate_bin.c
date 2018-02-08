@@ -39,8 +39,8 @@ generate_bin(
     if ( *fldtype == '\0' ) { go_BYE(-1); }
     if ( num_values < 1 ) { go_BYE(-1); }
     if ( ( strcmp( gen_type, "linear" ) == 0 ) || 
-    ( strcmp( gen_type, "linear" ) == 0 ) || 
-    ( strcmp( gen_type, "linear" ) == 0 )) {
+    ( strcmp( gen_type, "seq" ) == 0 ) || 
+    ( strcmp( gen_type, "const" ) == 0 )) {
         // Everything is ok
     }
     else {

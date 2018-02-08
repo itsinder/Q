@@ -8,6 +8,7 @@ local fns = require 'Q/RUNTIME/test/generate_csv'
 local genbin = require 'Q/RUNTIME/test/generate_bin'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts     = require 'Q/UTILS/lua/q_consts'
+local qc     = require 'Q/UTILS/lua/q_core'
 local c_to_txt     = require 'Q/UTILS/lua/C_to_txt'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(path_to_here))
@@ -54,7 +55,7 @@ tests.t1 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "iter" )
+  qc.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "linear" )
   q_type = "B1"
   genbin.generate_bin(num_values, q_type, path_to_here .. "_nn_in1.bin")
   
@@ -80,7 +81,7 @@ tests.t2 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "linear" )
   
   x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
   assert(x:check())
@@ -132,7 +133,7 @@ tests.t4 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "linear" )
   
   -- testing setting and getting of meta data 
   local x = lVector( { qtype = "I4", file_name = "_in3_I4.bin"})
@@ -156,7 +157,7 @@ tests.t5 = function()
     local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "linear" )
   
   -- testing setting and getting of meta data with a Scalar
   local x = lVector( { qtype = "I4", file_name = "_in4_I4.bin"})
