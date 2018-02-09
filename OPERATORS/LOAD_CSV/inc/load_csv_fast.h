@@ -4,7 +4,7 @@ load_csv_fast(
     const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char ** const fldtypes, /* [nC] */
+    const char ** fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
     bool * const is_load, /* [nC] */
     bool * const has_nulls, /* [nC] */

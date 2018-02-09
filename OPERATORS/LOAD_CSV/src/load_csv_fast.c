@@ -36,7 +36,7 @@ load_csv_fast(
     const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char ** const fldtypes, /* [nC] */
+    const char ** fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
     bool * const is_load, /* [nC] */
     bool * const has_nulls, /* [nC] */
@@ -62,13 +62,14 @@ load_csv_fast(
   char **nil_files = NULL;
   char *opdir = NULL; 
   uint64_t *word_B1 = NULL; // used for 64 bit integer buffer if col is B1
+  /*
   fprintf(stderr, "C: q_data_dir = %s, \n", q_data_dir);
   fprintf(stderr, "C: infile     = %s, \n", infile);
   fprintf(stderr, "C: sz_str_for_lua     = %d, \n", (int)sz_str_for_lua);
   fprintf(stderr, "C: n_str_for_lua     = %d, \n", *ptr_n_str_for_lua);
   fprintf(stderr, "C: is_hdr     = %d, \n", is_hdr);
   fprintf(stderr, "C: str_for_lua = %s, \n", str_for_lua);
-
+*/
   //---------------------------------
   *ptr_n_str_for_lua = 0;
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
@@ -87,7 +88,6 @@ load_csv_fast(
     opdir = strdup(q_data_dir);
     // FOR TESTING opdir = strdup("/home/subramon/local/Q/data");
   }
-  fprintf(stderr, "q_data_dir = %s, opdir = %s \n", q_data_dir, opdir);
 
   //---------------------------------
   // allocate space and initialize other resources
@@ -137,7 +137,7 @@ load_csv_fast(
       nil_files[i] = malloc(ddir_len * sizeof(char));
       sprintf(nil_files[i], "%s/_nn%s", opdir, buf);
     }
-    fprintf(stderr, "%s, %s \n", out_files[i], nil_files[i]);
+    // fprintf(stderr, "%s, %s \n", out_files[i], nil_files[i]);
   }
 
   *ptr_nR = 0;
@@ -172,7 +172,10 @@ load_csv_fast(
     else if ( strcasecmp(fldtypes[i], "B1") == 0 ) {
       qtypes[i] = B1; is_trim[i] = true;
     }
-    else { go_BYE(-1); }
+    else { 
+      fprintf(stderr, "Unknown fldtype [%s] \n", fldtypes[i]);
+      go_BYE(-1); 
+    }
   }
   if ( !some_load ) { go_BYE(-1); }
   // malloc output file pointers and nil output file pointers
@@ -484,7 +487,7 @@ BYE:
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
     *ptr_n_str_for_lua = strlen(str_for_lua);
   }
-  fprintf(stderr, "bak_status = %d \n", bak_status); WHEREAMI;
+  // fprintf(stderr, "bak_status = %d \n", bak_status); WHEREAMI;
   return bak_status;
 }
 
