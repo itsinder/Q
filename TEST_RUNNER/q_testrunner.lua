@@ -79,7 +79,7 @@ local function run_isolated_tests(suite_name, isolated)
     else
       test_str = string.format(base_str, suite_name_mod, k)
     end
-    print("cmd:", test_str)
+    --print("cmd:", test_str)
     local status = os.execute(test_str)
     -- print("Cmd status is " .. tostring(status))
     if status == 0 then
