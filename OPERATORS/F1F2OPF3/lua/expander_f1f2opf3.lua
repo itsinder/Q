@@ -38,7 +38,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   local first_call = true
   local chunk_idx = 0
   
-  local f3_gen = function()
+  local f3_gen = function(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- print("malloc for generator for f1f2opf3", a, g_iter)
       first_call = false

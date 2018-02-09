@@ -530,7 +530,7 @@ function lVector:chunk(chunk_num)
   else
     assert(self._gen)
     assert(type(self._gen) == "function")
-    local buf_size, base_data, nn_data = self._gen()
+    local buf_size, base_data, nn_data = self._gen(chunk_num, self)
     if ( buf_size < qconsts.chunk_size ) then
       if ( buf_size > 0 ) then
         self:put_chunk(base_data, nn_data, buf_size)

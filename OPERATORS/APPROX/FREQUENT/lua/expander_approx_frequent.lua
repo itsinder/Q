@@ -14,7 +14,9 @@ local function expander_approx_frequent(x, min_freq, err)
   data = ffi.cast(subs.data_ty..'*', data)
   qc[subs.alloc_fn](x:length(), min_freq, err, x:chunk_size(), data)
   local chunk_idx = 0
-  local function out_gen()
+  local function out_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     local len, chunk, nn_chunk = x:chunk(chunk_idx)
     chunk_idx = chunk_idx + 1
     if len > 0 then

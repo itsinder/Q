@@ -21,7 +21,9 @@ return function (a, x, y, optargs )
   --==================
   local is_early_exit = false
   local chunk_index = 0
-  local lgen = function()
+  local lgen = function(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     local idx = chunk_index * qconsts.chunk_size
     local x_len, x_chunk, nn_x_chunk = x:chunk(chunk_index)
     assert(chk_chunk(x_len, x_chunk, nn_x_chunk))
