@@ -1,21 +1,23 @@
 return require 'Q/UTILS/lua/code_gen' {
 
    declaration = [[
+
 #include "q_incs.h"
 ${includes}
 extern int
-${fn}(
-// Removed the 'restrict' keyworkd from below lines as nvcc compiler was recognising it
-      const ${in1_ctype} * in1,  
-      const ${in2_ctype} * in2,  
+${fn}(  
+      const ${in1_ctype} * restrict in1,  
+      const ${in2_ctype} * restrict in2,  
       uint64_t nR,  
-      ${out_ctype} *  out 
+      ${out_ctype} * restrict out 
       ) 
 ;
 
    ]],
    definition = [[
+
 #include "_${fn}.h"
+
 __global__
 static void
 __operation(
@@ -34,10 +36,10 @@ __operation(
 
 int
 ${fn}(  
-      const ${in1_ctype} * in1,  
-      const ${in2_ctype} * in2,  
+      const ${in1_ctype} * restrict in1,  
+      const ${in2_ctype} * restrict in2,  
       uint64_t nR,  
-      ${out_ctype} * out 
+      ${out_ctype} * restrict out 
       )
 
 { 
@@ -50,13 +52,13 @@ ${fn}(
   ${out_ctype} *d_out = 0;
 
   // Allocate memory for device arrays
-  cudaMalloc (&d_in1, nR * sizeof (${in1_ctype}));
-  cudaMalloc (&d_in2, nR * sizeof (${in2_ctype}));
-  cudaMalloc (&d_out, nR * sizeof (${out_ctype}));
+  cudaMalloc (&d_in1, nR * sizeof (int32_t));
+  cudaMalloc (&d_in2, nR * sizeof (int16_t));
+  cudaMalloc (&d_out, nR * sizeof (int32_t));
 
   // Copy input from host to device
-  cudaMemcpy (d_in1, in1, nR * sizeof(${in1_ctype}), cudaMemcpyHostToDevice);
-  cudaMemcpy (d_in2, in2, nR * sizeof(${in2_ctype}), cudaMemcpyHostToDevice);
+  cudaMemcopy (d_in1, in1, nR * sizeof(${in1_ctype}), cudaMemcpyHostToDevice);
+  cudaMemcopy (d_in2, in2, nR * sizeof(${in2_ctype}), cudaMemcpyHostToDevice);
 
   // Decide runtime configuration
   uint64_t blockSize = 256;

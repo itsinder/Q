@@ -22,13 +22,17 @@ end
 
 local _dotfile = function(subs, tmpl, opdir, ext)
   local T = do_replacements(tmpl, subs)
+  local orig_ext = ext
+  -- Did a little hack here, as I was not getting the file contents from T when provided the ext='cu'
+  -- So temporarily provided the ext as 'c' and retrieved the file contents 
+  if ext == "cu" then ext = "c" end
   local dotfile = T(section[ext])
 
   if ( ( not opdir ) or ( opdir == "" ) ) then
     return dotfile
   end
   assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
-  local fname = opdir .. "_" .. subs.fn .. "." .. ext, "w"
+  local fname = opdir .. "_" .. subs.fn .. "." .. orig_ext, "w"
   local f = assert(io.open(fname, "w"))
   f:write(dotfile)
   f:close()
@@ -37,8 +41,9 @@ end
 
 local fns = {}
 
-fns.dotc = function (subs, tmpl, opdir)
-  return _dotfile(subs, tmpl, opdir, 'c')
+fns.dotc = function (subs, tmpl, opdir, ext)
+  if not ext then ext = 'c' end
+  return _dotfile(subs, tmpl, opdir, ext)
 end
 
 fns.doth = function (subs, tmpl, opdir)

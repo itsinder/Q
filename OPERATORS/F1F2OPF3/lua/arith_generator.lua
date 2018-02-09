@@ -23,7 +23,8 @@
             -- for k, v in pairs(subs) do print(k, v) end
             -- print(tmpl)
             gen_code.doth(subs, tmpl, incdir)
-            gen_code.dotc(subs, tmpl, srcdir)
+            -- Passing the "cu" extension to create the cuda files
+            gen_code.dotc(subs, tmpl, srcdir, "cu")
             print("Produced ", subs.fn)
             num_produced = num_produced + 1
           end

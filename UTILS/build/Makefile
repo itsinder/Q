@@ -118,20 +118,6 @@ mv_mul: q_basic
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/
 
-q_operators: f1f2opf3 \
-	f1s1opf2 \
-	sort \
-	idx_sort \
-	s_to_f \
-	f_to_s \
-	ax_equals_b \
-	ainb \
-	ifxthenyelsez \
-	mv_mul \
-	approx_quantile \
-	approx_frequent \
-	corrm \
-	drop_nulls \
-	where
+q_operators: f1f2opf3
 	echo "all done for operators"
 

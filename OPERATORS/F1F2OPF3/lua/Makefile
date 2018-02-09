@@ -8,8 +8,8 @@ DBGFLAGS= -g -DDEBUG
 OPTFLAGS= -O4
 OPTFLAGS= 
 
-CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
-
+#CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
+CFLAGS = -g -DDEBUG -Xcompiler -fPIC
 all : libf1f2opf3.so all_for_dc
 
 all_for_dc : \
@@ -83,10 +83,10 @@ vvgt_specialize.lua  : cmp_specialize.tmpl
 vvlt_specialize.lua  : cmp_specialize.tmpl
 	lua gen_specializers.lua cmp
 
-libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
-	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
+libf1f2opf3.so : _arith_files
+	nvcc ../gen_src/*.cu ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 	test -d ${Q_BUILD_DIR}
-	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_src/*.cu ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 _concat_files : concat_specialize.lua
