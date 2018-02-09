@@ -8,7 +8,9 @@ rm -r -f  _test_files
 mkdir     _test_files
 make clean
 make
-valgrind ./test_load_csv_fast 1048576 1>_out 2>_err
+VG=" valgrind --leak-check=full "
+VG=""
+$VG ./test_load_csv_fast 1048576 1>_out 2>_err
 grep SUCCESS _out 1>/dev/null 2>&1
 grep "0 errors from 0 contexts" _err 1>/dev/null 2>&1
 rm -r -f mnist

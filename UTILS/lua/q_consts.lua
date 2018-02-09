@@ -9,8 +9,8 @@ local qconsts = {}
     qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
-    qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger
     qconsts.sz_str_for_lua = 2048 -- TODO Should be much bigger
+    qconsts.sz_str_for_lua = 1048576 
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
@@ -51,7 +51,8 @@ local qconsts = {}
     iorf["F8"] =  "floating_point";
     qconsts.iorf = iorf
     --===========================
-
+ -- width refers to number of bytes needed to store an element of qtype
+ -- max_txt_width refers to number of characters in ASCII representation
     local qtypes = {}
     qtypes.I1 = { 
       min = -128,
