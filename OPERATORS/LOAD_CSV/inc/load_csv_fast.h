@@ -13,5 +13,6 @@ load_csv_fast(
     char ***ptr_nil_files,
     /* Note we use nil_files and out_files only if below == NULL */
     char *output_str_for_lua,
-    size_t sz_output_for_lua 
+    size_t sz_output_for_lua,
+    int *ptr_n_output_for_lua
     );

@@ -45,7 +45,8 @@ load_csv_fast(
     char ***ptr_nil_files,
     /* Note we set nil_files and out_files only if below == NULL */
     char *str_for_lua,
-    size_t sz_str_for_lua 
+    size_t sz_str_for_lua,
+    int *ptr_n_str_for_lua 
     )
 //STOP_FUNC_DECL
 {
@@ -62,6 +63,7 @@ load_csv_fast(
   uint64_t *word_B1 = NULL; // used for 64 bit integer buffer if col is B1
 
   //---------------------------------
+  *ptr_n_str_for_lua = 0;
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
   if ( nC == 0 ) { go_BYE(-1); }
   if ( ptr_nR == NULL ) { go_BYE(-1); }
@@ -223,13 +225,14 @@ load_csv_fast(
     }
 
     xidx = get_cell(mmap_file, file_size, xidx, is_last_col, lbuf, BUFSZ);
-    if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty or some error
+    if ( xidx == 0 ) { 
+      go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
     status = trim(lbuf, buf, BUFSZ); cBYE(status);
 
-    //fprintf(stderr, "%llu, %u, %llu, %s \n", 
-     //   (unsigned long long)row_ctr, col_ctr, 
-     //   (unsigned long long)xidx, buf);
+    fprintf(stderr, "%llu, %u, %llu, %s \n", 
+       (unsigned long long)row_ctr, col_ctr, 
+       (unsigned long long)xidx, buf);
 
     // Deal with header line 
     //row_ctr == 0 means we are reading the first line which is the header
@@ -463,7 +466,9 @@ BYE:
   free_if_non_null(opdir);
   free_if_non_null(nn_buf);
   free_if_non_null(word_B1);
-
+  if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
+    *ptr_n_str_for_lua = strlen(str_for_lua);
+  }
   return bak_status;
 }
 

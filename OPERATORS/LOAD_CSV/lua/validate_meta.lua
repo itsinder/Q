@@ -19,39 +19,39 @@ return function (
     assert(fld_M.name,  col .. err.METADATA_NAME_NULL)
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
+    --====================================================
     if fld_M.has_nulls ~= nil then 
       assert((fld_M.has_nulls == true  or fld_M.has_nulls == false ), col .. err.INVALID_NN_BOOL_VALUE )
     else
       fld_M.has_nulls = false
     end
+    --====================================================
     if fld_M.is_load ~= nil then 
       assert((fld_M.is_load == true  or fld_M.is_load == false ), 
       col .. err.IS_LOAD_BOOL_ERROR )
     else
       fld_M.is_load = true
     end
+    --====================================================
     if ( fld_M.is_load ) then 
-      assert(not col_names[fld_M.name],
-      col .. err.DUPLICATE_COL_NAME) 
+      -- check not a duplicate name 
+      assert(not col_names[fld_M.name], col .. err.DUPLICATE_COL_NAME) 
       col_names[fld_M.name] = true 
       num_cols_to_load = num_cols_to_load + 1
     end
+    --====================================================
     if fld_M.qtype == "SC" then 
-      assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
-      assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC ) 
+      local width = assert(tonumber(fld_M.width),  err.MAX_WIDTH_NULL_ERROR)
+      -- recall that width includes nullc
+      assert( ((width >= 2 ) and ( width <= qconsts.qtypes.SC.max_width)), 
+      col .. err.INVALID_WIDTH_SC ) 
     end
+    --====================================================
     if fld_M.qtype == "SV" then
-      --print(fld_M.max)
-      assert(fld_M.max_width ~=nil , err.MAX_WIDTH_NULL_ERROR)
-      assert(((fld_M.max_width >= 2) and (fld_M.max_width <= qconsts.max_width["SV"])), col .. err.INVALID_WIDTH_SV )
-      
       assert(fld_M.dict, col .. err.DICTIONARY_NOT_PRESENT)
-
       assert(fld_M.is_dict ~= nil, col .. err.IS_DICT_NULL) 
-      
       assert(fld_M.is_dict == true or fld_M.is_dict == false, 
       col .. err.INVALID_IS_DICT_BOOL_VALUE)
-
       if fld_M.is_dict == true then 
         -- TODO Verify that dictionary exists
         assert(fld_M.add == true or fld_M.add == false, 
@@ -62,6 +62,7 @@ return function (
       -- TODO  everybodu can add to a dict or nobody can add to it 
       --
     end
+    --====================================================
   end
   assert(num_cols_to_load > 0, err.COLUMN_NOT_PRESENT)
   return true
