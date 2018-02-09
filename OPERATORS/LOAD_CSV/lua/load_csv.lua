@@ -111,9 +111,9 @@ local initialize_buffers = function(M)
         field_size = qconsts.qtypes[M[col_idx].qtype].width
       end
       -- Allocate memory for output buf and add to pool
-      out_buf_array[#out_buf_array + 1] = ffi.malloc(out_buf_size * field_size)
+      out_buf_array[col_idx] = ffi.malloc(out_buf_size * field_size)
       ffi.fill(out_buf_array[col_idx], out_buf_size * field_size, 0)
-      out_buf_nn_array[#out_buf_nn_array + 1] = ffi.malloc(nn_buf_size)
+      out_buf_nn_array[col_idx] = ffi.malloc(nn_buf_size)
       ffi.fill(out_buf_nn_array[col_idx], nn_buf_size, 0)
     end
   end
