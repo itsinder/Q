@@ -21,9 +21,6 @@ local function init_buffers(M)
   local dicts = {} -- dicts[i] is di ctionary used for column i
   local out_bufs = {}
   local nn_out_bufs = {}
-  --TODO Krushnakant I dont understand what this statement means
-  -- If chunk_size is not multiple of num_cols then
-  -- the total buffer size (sum of all column buffer size) will be larger than the chunk_size by margin
   -- This loop does following things
   -- (2) create lvector for each is_load column
   -- (3) create Dictionary for each is_load SV column
@@ -45,14 +42,15 @@ local function init_buffers(M)
       end
       -- Allocate memory for output buf and add to pool
       local x = qconsts.chunk_size * binary_width
-      out_bufs[col_idx] = ffi.malloc(x)
-      ffi.fill(out_bufs[col_idx], x)
-      x = qconsts.chunk_size / 8
-      nn_out_bufs[col_idx] = ffi.malloc(x)
-      ffi.fill(nn_out_bufs[col_idx], x)
-    end
-  end
-  assert(max_txt_width > 0)
+      out_bufs[col_idx] = ffi.gc(ffi.C.malloc(x), ffi.C.free)
+      ffi.fill(out_bufs[col_idx], x) -- extra cautious
+      if ( M[col_idx].has_nulls ) then 
+        x = qconsts.chunk_size / 8
+        nn_out_bufs[col_idx] = ffi.gc(ffi.C.malloc(x), ffi.C.free)
+        ffi.fill(nn_out_bufs[col_idx], x) -- extra cautious
+      end
+    end -- if is_load 
+  end -- for col_idx = ...
   return cols, dicts, out_bufs, nn_out_bufs
 end
 

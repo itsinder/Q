@@ -68,21 +68,15 @@ local function load_csv(
 
   validate_meta(M) -- Validate Metadata
   local use_accelerator, is_hdr = process_opt_args(opt_args)
-  print(use_accelerator, is_hdr)
   
   local cols_to_return -- this is what we return 
 
   -- use optimized C code if okay to do so 
   local l_is_accelerate = is_accelerate(M) 
-  print("XXXXXXXXXXX")
   if ( l_is_accelerate and use_accelerator )then
-    print("YYYYYYYYYYYYY")
     cols_to_return = load_csv_fast_C(M, infile, is_hdr)
     return cols_to_return
   end
-  print("YYYYYYYYY")
-  assert(false, "premature termination")
-  print("ZZZZZZZZZZZZZ")
   -- Initialize Buffers
   local cols, dicts, out_bufs, nn_out_bufs = init_buffers(M)
   -- Memory map the input file
@@ -95,7 +89,7 @@ local function load_csv(
   
   local x_idx = 0
   sz_in_buf = 2048 -- TODO Undo hard coding 
-  local in_buf  = assert(ffi.malloc(sz_in_buf))
+  local in_buf  = assert(ffi.gc(ffi.C.malloc(sz_in_buf)), ffi.C.free)
   local row_idx = 1
   local col_idx = 1
   local num_in_out_buf = 0
@@ -106,7 +100,7 @@ local function load_csv(
     if ( col_idx == num_cols ) then
       is_last_col = true;
     end
-    ffi.fill(in_buf, sz_in_buf, 0) -- always init to 0
+    ffi.fill(in_buf, sz_in_buf) -- always init to 0
     if ( ( is_hdr ) and ( row_idx == 1 ) ) then
       -- Process header line
       x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf, max_txt_width)

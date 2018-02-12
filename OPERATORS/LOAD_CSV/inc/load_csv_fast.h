@@ -6,8 +6,8 @@ load_csv_fast(
     uint64_t *ptr_nR,
     char ** fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
-    bool * const is_load, /* [nC] */
-    bool * const has_nulls, /* [nC] */
+    bool * is_load, /* [nC] */
+    bool * has_nulls, /* [nC] */
     uint64_t * num_nulls, /* [nC] */
     char ***ptr_out_files,
     char ***ptr_nil_files,
