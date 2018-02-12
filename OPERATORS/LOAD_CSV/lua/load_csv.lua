@@ -307,7 +307,7 @@ local function load_csv(
     if ( num_in_out_buf > 0 ) then
       print("Flushing values to all columns.."..tostring(num_in_out_buf))
       for i = 1, num_cols do
-        if cols{i} then
+        if cols[i] then
           cols[i]:put_chunk(out_buf_array[i], out_buf_nn_array[i], num_in_out_buf)
         end
       end
