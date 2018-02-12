@@ -2,22 +2,8 @@ local ffi = require "ffi"
 ffi.cdef([[
 void *memset(void *s, int c, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
-size_t strlen(const char *str);
-typedef struct {
-   char *fpos;
-   void *base;
-   unsigned short handle;
-   short flags;
-   short unget;
-   unsigned long alloc;
-   unsigned short buffincrement;
-} FILE;
 void * malloc(size_t size);
 void free(void *ptr);
-FILE *fopen(const char *path, const char *mode);
-int fclose(FILE *stream);
-int fwrite(void *Buffer,int Size,int Count,FILE *ptr);
-int fflush(FILE *stream);
 int
 load_csv_fast(
     const char * const q_data_dir,
@@ -102,12 +88,19 @@ local function load_csv_fast_C()
   local status = x.load_csv_fast(data_dir, infile, nC, nR, fldtypes,
   is_hdr, is_load, has_nulls, num_nulls, out_files, nil_files,
   str_for_lua, sz_str_for_lua, n_str_for_lua);
-  print(status)
 
 end
 
-niter = 10000
+niter = 1000000
+datadir = "/home/subramon/local/Q/data/"  -- FIX TODO 
+command = "rm -f " .. datadir .. "/_*"
+os.execute(command)
 for i = 1, niter do
   load_csv_fast_C()
-  print("iter = ", i)
+  if ( ( i % 1000 ) == 0 ) then
+    print("iter = ", i)
+    os.execute(command)
+    collectgarbage()
+  end
 end
+os.execute(command)
