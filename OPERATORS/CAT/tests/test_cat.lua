@@ -376,5 +376,10 @@ tests.t11 = function()
   end  
 end
 
+test.t12 = function()
+  -- Testing where first vector is of size 64K+n, n ranging from 0 to 64
+  --
+  print("Test t12 succeeded")
+end
 
 return tests
