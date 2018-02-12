@@ -12,11 +12,11 @@ INCS= -I../inc \
 	-I../../../UTILS/inc \
 	-I../../../UTILS/gen_inc
 
-all : test_load_csv_fast  load_csv_fast.so
+all : test_load_csv_fast 
 %.o: %.c $(DEPS)
 	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
 
-CSRCS = ../src/load_csv_fast.c \
+SRCS = ../src/load_csv_fast.c \
        test_load_csv_fast.c  \
        ../../../UTILS/src/rand_file_name.c \
        ../../../UTILS/src/get_file_size.c \
@@ -32,16 +32,8 @@ CSRCS = ../src/load_csv_fast.c \
        ../gen_src/_txt_to_F4.c \
        ../gen_src/_txt_to_F8.c \
 
-fil3   := test_load_csv_fast.c 
-CSRCS3 := $(filter-out $(fil3), $(CSRCS))
-COBJS3 = $(CSRCS3:.c=.o)
-
 test_load_csv_fast : test_load_csv_fast.c ../src/load_csv_fast.c
-	$(CC) $(CSRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
-
-load_csv_fast.so : ../src/load_csv_fast.c
-	$(CC) $(CSRCS3) $(INCS) $(FLAGS) -o load_csv_fast.so $(LINK_FLAGS)
-	  	
+	$(CC) $(SRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
 	  	
 	  	
 

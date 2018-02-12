@@ -10,7 +10,7 @@
 
 #define MAX_NUM_COLS 2048
 // _f1024 is 6 chars and then one space for null char
-#define MAX_LEN_FILE_NAME 256
+#define MAX_LEN_FILE_NAME 32
 int
 main(
   int argc,
@@ -18,12 +18,11 @@ main(
     ) 
 {
   int status = 0;
-  char infile[MAX_LEN_FILE_NAME];
+  char infile[256];
   char *fldtypes[MAX_NUM_COLS];
   char **out_files = NULL;
   char **nil_files = NULL;
   int sz_str_for_lua = 0;
-  int n_str_for_lua = 0;
   char *str_for_lua = NULL;
   uint32_t nC;
   uint64_t nR = 0;
@@ -194,7 +193,7 @@ main(
     }
     status = load_csv_fast("/tmp/", infile, nC, &nR, fldtypes, 
         is_hdr, is_load, has_nulls, num_nulls, &out_files, &nil_files,
-        str_for_lua, sz_str_for_lua, &n_str_for_lua);
+        str_for_lua, sz_str_for_lua);
     cBYE(status);
     // POST CHECKS : TODO Do more testing in all cases below
     // I have done a few checks

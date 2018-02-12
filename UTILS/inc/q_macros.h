@@ -24,7 +24,7 @@
   if ( ( X == NULL ) && ( nX != 0 ) ) {  WHEREAMI; return(-1); } \
   if ( ( X != NULL ) && ( nX == 0 ) )  { WHEREAMI; return(-1); } \
   if ( X != NULL ) { \
-  	int m_status = munmap(X, nX); if ( m_status != 0 ) { WHEREAMI; return(-1); } \
+  	int status = munmap(X, nX); if ( status != 0 ) { WHEREAMI; return(-1); } \
    	X = NULL; nX = 0;  \
   } \
 }

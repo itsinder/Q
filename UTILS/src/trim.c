@@ -1,3 +1,6 @@
+// #include <stdio.h>
+// #include <ctype.h>
+// #include <string.h>
 #include "q_incs.h"
 #include "_trim.h"
 // assumption that inbuf and outbuf have been malloc'd with n bytes
@@ -22,27 +25,13 @@ trim(
   for ( start_idx = 0; start_idx < n; start_idx++ ) { 
     if ( !isspace(inbuf[start_idx]) ) { break; }
   }
-  if ( start_idx >= (n-1) ) { 
-    // No valid character in inbuf. outbuf has been set to nullc
-    return status; 
-  }
-  // TODO: Following is NOT correct. Needs to be fixed
-  int idx = start_idx; stop_idx = -1;
-  for ( ; idx < n; idx++ ) { 
-    if ( inbuf[idx] == '\0' ) { 
-      if ( stop_idx < 0 ) { stop_idx = idx; }
-      break; 
-    }
-
-    if ( isspace(inbuf[idx]) ) {
-      if ( stop_idx < 1 ) { stop_idx = idx; }
-    }
-    else {
-      stop_idx = -1;
+  for ( stop_idx = n-1; stop_idx >= 0; stop_idx-- ) { 
+    if ( !( ( inbuf[stop_idx] == '\0' ) || ( isspace(inbuf[stop_idx]) ) ) ) {
+      break;
     }
   }
   int k = 0;
-  for ( int j = start_idx; j < stop_idx; j++, k++ ) { 
+  for ( int j = start_idx; j <= stop_idx; j++, k++ ) { /* note the <= */
     outbuf[k] = inbuf[j];
   }
 BYE:
