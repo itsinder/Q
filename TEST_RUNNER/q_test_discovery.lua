@@ -72,6 +72,10 @@ end
 
 local function find_test_files(directory, pattern)
    local iter_list, next_iter_list = {}, {}
+   local stress_test_run = false
+   if pattern and pattern == "stress_test*.lua" then
+     stress_test_run = true
+   end
    pattern = pattern or "*.lua"
    iter_list[1] = directory
    local list = {}
@@ -85,7 +89,10 @@ local function find_test_files(directory, pattern)
          end
          if ( not exclude ) then 
            local files = pldir.getfiles(dir, pattern)
-           local xfiles = exclude_non_test_files(files)
+           local xfiles = files
+           if not stress_test_run then
+             xfiles = exclude_non_test_files(files)
+           end
            local dirs = pldir.getdirectories(dir)
            next_iter_list = append_dirs(next_iter_list, dirs)
            for j=1,#xfiles do

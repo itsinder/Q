@@ -79,7 +79,7 @@ local function run_isolated_tests(suite_name, isolated)
     else
       test_str = string.format(base_str, suite_name_mod, k)
     end
-    --print("cmd:", test_str)
+    print("cmd:", test_str)
     local status = os.execute(test_str)
     -- print("Cmd status is " .. tostring(status))
     if status == 0 then
@@ -131,23 +131,37 @@ local usage = function()
   print (" Valid options are \n\t l for long running tests amd requires a time param for the number of seconds the tests should run. Eg l 5\n\t i for isolated tests")
 end
 
+local function get_files(path, pattern)
+  local files = {}
+  if (path and plpath.isfile(path)) then
+    files[#files + 1] = path
+    return files
+  else
+    -- run all tests in a DIR, either custom or default Q_SRC_ROOT
+    if not (path and plpath.isdir(path)) then
+      usage()
+      os.exit()
+    end
+    return (require "Q/TEST_RUNNER/q_test_discovery")(path, pattern)
+  end
+end
+
+
 local test_type = arg[1]
 local path = arg[2]
 args = nil
 local test_res = {}
 local files = {}
-if (path and plpath.isfile(path)) then
-  files[#files + 1] = path
-else
-  -- run all tests in a DIR, either custom or default Q_SRC_ROOT
-  if not (path and plpath.isdir(path)) then
-    usage()
-    os.exit()
-  end
-  files = (require "Q/TEST_RUNNER/q_test_discovery")(path)
 
+local pattern = nil
+
+if test_type == "s" then
+  pattern = "stress_test*.lua"
 end
-if test_type == "i" then
+
+files = get_files(path, pattern)
+
+if test_type == "i" or test_type == "s" then
   for _,f in pairs(files) do
     test_res[f] = {}
     test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
@@ -163,6 +177,9 @@ elseif test_type:match("^l") ~= nil then
   end
   test_res.all = {}
   test_res.all.pass, test_res.all.fail = run_longterm_tests(long_files, duration, nil)
+else
+  usage()
+  os.exit()
 end
 print(plpretty.write(test_res))
 
