@@ -26,14 +26,14 @@ local function pca(X)
 
   -- Step 2: compute the variance covariance matrix
 
-  Q.print_csv(std_X, nil, "")
+  Q.print_csv(std_X)
   local CM = Q.corr_mat(std_X)
   print("corr mat complete")
   
   for i=1,p do
     CM[i]:eval()
     print("Printing CM ", i)
-    Q.print_csv(CM[i], nil, "")
+    Q.print_csv(CM[i])
   end
 
   -- Step 3: find the eigenvectors of the variance covariance matrix
