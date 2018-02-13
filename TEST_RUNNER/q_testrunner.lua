@@ -22,6 +22,7 @@ local pldir = require 'pl.dir'
 local plpath = require 'pl.path'
 local plpretty = require "pl.pretty"
 local q_root = assert(os.getenv("Q_ROOT"))
+local find_all_files = require 'Q/TEST_RUNNER/q_test_discovery'
 assert(plpath.isdir(q_root))
 assert(plpath.isdir(q_root .. "/data/"))
 os.execute("rm -r -f " .. q_root .. "/data/*")
@@ -146,7 +147,7 @@ local function get_files(path, pattern)
 			usage()
 			os.exit()
 		end
-    return pldir.getallfiles(path, pattern)
+    return find_all_files(path, pattern)
 	end
 
 end
@@ -158,13 +159,13 @@ args = nil
 local test_res = {}
 local files = {}
 if test_type == "i" then
-	files = get_files(path,"*/test_*.lua")
+	files = get_files(path,"test_") -- only the prefix is needed 
 	for _,f in pairs(files) do
 		test_res[f] = {}
 		test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
 	end
 elseif test_type == "s" then
-	files = get_files(path, "*/stress_test_*.lua")
+	files = get_files(path, "stress_test_") -- only the prefix is needed 
 	for _,f in pairs(files) do
 		test_res[f] = {}
 		test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
