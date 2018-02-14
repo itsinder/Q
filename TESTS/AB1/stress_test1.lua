@@ -4,7 +4,7 @@ require 'Q/UTILS/lua/strict'
 
 local M = dofile './meta_eee.lua'
 local datadir = "./data/"
-local niters = 1 -- TODO FIX 
+local niters = 1000000
 
 os.execute("rm -f /home/subramon/local/Q/data/_*.bin") -- TODO FIX
 local tests = {}
@@ -31,7 +31,6 @@ tests.t1 = function ()
           buf  = Q.print_csv(uuid, "", { lb = 0, ub = 10 })
         end
         assert(buf == Q.print_csv(uuid, "", { lb = 0, ub = 10 }))
-        Q.print_csv(T_eee[2], nil, { lb = 0, ub = 10 })
       end
     end
     print("STOP  Loaded with ", v)
