@@ -6,10 +6,6 @@ local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local plpath        = require 'pl.path'
 
-ffi.cdef([[
-       char *strncpy(char *dest, const char *src, size_t n);
-       ]]
-       )
 
 local function load_csv_fast_C(M, infile, is_hdr)
   local nR = ffi.gc(ffi.cast("uint64_t *", ffi.C.malloc(1*ffi.sizeof("uint64_t"))), ffi.C.free)
@@ -34,10 +30,6 @@ local function load_csv_fast_C(M, infile, is_hdr)
   for i = 1, nC do
     fldtypes[i-1]  = ffi.gc(
       ffi.C.malloc(fld_name_width * ffi.sizeof("char")), ffi.C.free)
-    --[[
-    fldtypes[i-1]  = ffi.cast("char *", fldtypes[i-1])
-    ffi.C.strncpy(fldtypes[i-1], M[i].qtype, ffi.C.strlen(M[i].qtype))
-    --]]
     ffi.copy(fldtypes[i-1], M[i].qtype)
     is_load[i-1]   = M[i].is_load
     has_nulls[i-1] = M[i].has_nulls
