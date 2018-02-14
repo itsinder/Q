@@ -16,7 +16,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   local status, subs, tmpl = pcall(spfn, f1:fldtype(), f2:fldtype(), optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
-  local func_name = assert(subs.fn)
+  -- Retrieving the updated name as libq_core.so has modified name
+  local func_name = assert(qconsts.f1f2opf3_symbols[subs.fn])
+  assert(qc[func_name])
   -- START: Dynamic compilation
   if ( not qc[func_name] ) then 
     print("Dynamic compilation kicking in... ")
