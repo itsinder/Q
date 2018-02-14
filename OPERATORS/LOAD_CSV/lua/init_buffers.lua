@@ -60,12 +60,9 @@ local function init_buffers(M)
         cols[col_idx]:set_meta("dir", dicts[col_idx])
       end
       -- Allocate memory for output buf and add to pool
-      -- TODO THINK out_bufs[col_idx] = ffi.gc(ffi.C.malloc(n_buf), ffi.C.free)
-      out_bufs[col_idx] = ffi.malloc(n_buf)
+      out_bufs[col_idx] = ffi.malloc(n_buf * binary_width)
       ffi.fill(out_bufs[col_idx], n_buf) -- extra cautious
       if ( M[col_idx].has_nulls ) then 
-        -- nn_out_bufs[col_idx] = ffi.gc(ffi.C.malloc(n_buf/8), ffi.C.free)
-        -- -- TODO THINK ABOVE
         nn_out_bufs[col_idx] = ffi.malloc(n_buf/8)
         ffi.fill(nn_out_bufs[col_idx], n_buf/8) -- extra cautious
       end

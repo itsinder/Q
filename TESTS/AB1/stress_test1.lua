@@ -5,10 +5,11 @@ require 'Q/UTILS/lua/strict'
 local M = dofile './meta_eee.lua'
 local datadir = "./data/"
 local niters = 1000000
+local lua_niters = 10000
 
-os.execute("rm -f /home/subramon/local/Q/data/_*.bin") -- TODO FIX
 local tests = {}
 tests.t1 = function ()
+  os.execute("rm -f /home/subramon/local/Q/data/_*.bin") -- TODO FIX
   local buf, buf2
   local optargs
   local modes = {"C", "Lua"}
@@ -21,7 +22,7 @@ tests.t1 = function ()
     else
       assert(nil)
     end
-    for i = 1, niters do 
+    for i = 1, lua_niters do 
       local T_eee = Q.load_csv(datadir .. "eee_1.csv", M, optargs)
       local uuid = T_eee[1]
       assert(type(uuid) == "lVector")
@@ -35,5 +36,6 @@ tests.t1 = function ()
     end
     print("STOP  Loaded with ", v)
   end
+  os.execute("rm -f /home/subramon/local/Q/data/_*.bin") -- TODO FIX
 end
 return tests

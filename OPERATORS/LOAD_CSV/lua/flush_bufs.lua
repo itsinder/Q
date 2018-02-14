@@ -9,7 +9,7 @@ local function flush_buffers(
   nn_out_bufs, 
   n_buf
   )
-  -- print("Intermediate Flush ..")
+  print("Intermediate Flush ..")
   for i = 1, #M do
     if ( M[i].is_load ) then 
       -- write to column

@@ -34,7 +34,16 @@ local function load_csv(
   -- use optimized C code if okay to do so 
   local l_is_accelerate = is_accelerate(M) 
   if ( l_is_accelerate and use_accelerator )then
-    cols_to_return = load_csv_fast_C(M, infile, is_hdr)
+    local tt  = load_csv_fast_C(M, infile, is_hdr)
+    -- START: Change indexes from 1, 2, 3 to names of columns
+    local ttidx = 1
+    local cols_to_return = {}
+    for i = 1, #M do 
+      if ( M[i].is_load ) then 
+        cols_to_return[M[i].name] = tt[ttidx]
+        ttidx = ttidx + 1
+      end
+    end
     return cols_to_return
   end
   -- Initialize Buffers
@@ -114,7 +123,6 @@ local function load_csv(
   --======================================
   --print("Preparing return columns")
   cols_to_return = {}
-  local rc_idx = 1
   for i = 1, #M do
     if ( M[i].is_load ) then
       cols[i]:eov()
@@ -124,9 +132,8 @@ local function load_csv(
         cols[i]:drop_nulls()
         -- assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
       end
-      cols_to_return[rc_idx] = cols[i]
-      cols_to_return[rc_idx]:set_meta("num_nulls", M[i].num_nulls)
-      rc_idx = rc_idx + 1
+      cols[i]:set_meta("num_nulls", M[i].num_nulls)
+      cols_to_return[M[i].name] = cols[i]
     end
   end
   return cols_to_return
