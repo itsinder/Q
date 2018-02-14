@@ -118,6 +118,7 @@ mv_mul: q_basic
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/
 
+# CUDA: Currently focus is on vvadd (f1f2opf3)
 q_operators: f1f2opf3
 	echo "all done for operators"
 

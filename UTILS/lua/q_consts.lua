@@ -13,6 +13,8 @@ local qconsts = {}
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
+    -- CUDA: added the symbol mapping for f1f2opf3 vvadd, 
+    -- CUDA: below symbols appears in libq_core.so when we do compilation using nvcc
     local f1f2opf3_symbols = {}
     f1f2opf3_symbols["vvadd_I8_I8_I8"] = "_Z14vvadd_I8_I8_I8PKlS0_mPl"
     f1f2opf3_symbols["vvadd_I8_I4_I8"] = "_Z14vvadd_I8_I4_I8PKlPKimPl"

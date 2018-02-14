@@ -13,7 +13,7 @@ function recursive_copy( file_pattern, dir_pattern, currdir, destdir )
   end
   local D = pldir.getdirectories(currdir)
   for index, v in ipairs(D) do
-    -- Added below condition to copy the files with ".cu" extention to destdir for F1F2OPF3
+    -- CUDA: Added below condition to copy the files with ".cu" extention to destdir for F1F2OPF3
     if v == "/home/krushna/WORK/Q/OPERATORS/F1F2OPF3/gen_src" then
       file_pattern = "*.cu"
     end

@@ -23,8 +23,8 @@ end
 local _dotfile = function(subs, tmpl, opdir, ext)
   local T = do_replacements(tmpl, subs)
   local orig_ext = ext
-  -- Did a little hack here, as I was not getting the file contents from T when provided the ext='cu'
-  -- So temporarily provided the ext as 'c' and retrieved the file contents 
+  -- CUDA: Did a little hack here, as I was not getting the file contents from T when provided the ext='cu'
+  -- CUDA: So temporarily provided the ext as 'c' and retrieved the file contents 
   if ext == "cu" then ext = "c" end
   local dotfile = T(section[ext])
 

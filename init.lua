@@ -2,6 +2,7 @@
 -- local stdlib = require("posix.stdlib")
 
 -- require all the root operator files
+-- CUDA: Current focus is on f1f2opf3
 require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"

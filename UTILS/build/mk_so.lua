@@ -67,7 +67,7 @@ print("Copied " .. tgt_h .. " to " .. final_h)
 
 ----------Create q_core.so
 local QC_FLAGS = assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
--- Overridden QC_FLAGS to remove options which prints warning on console
+-- CUDA: Overridden QC_FLAGS to remove options which prints warning on console
 local QC_FLAGS = "-g -Xcompiler -fPIC -Xcompiler -fopenmp "
 local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
 assert(QC_FLAGS ~= "", "QC_FLAGS not provided")
@@ -78,7 +78,8 @@ local q_cu_files = pldir.getfiles(cdir, "*.cu")
 local q_c = table.concat(q_c_files, " ")
 local q_cu = table.concat(q_cu_files, " ")
 --  "gcc %s %s -I %s %s -lgomp -pthread -shared -o %s", 
--- Changed the compiler to nvcc instead of gcc because now we do have cuda files for compilation
+-- CUDA: Changed the compiler to nvcc instead of gcc because now we do have cuda files for compilation
+-- CUDA: Also included c and cu files at the time of compilation
 local q_cmd = string.format("nvcc %s %s -I %s %s -o %s", 
   QC_FLAGS, q_c .. " " .. q_cu, hdir, Q_LINK_FLAGS, tgt_so)
 q_cmd = "cd " .. cdir .. "; " .. q_cmd

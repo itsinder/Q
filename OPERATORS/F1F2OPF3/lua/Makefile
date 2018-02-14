@@ -8,6 +8,7 @@ DBGFLAGS= -g -DDEBUG
 OPTFLAGS= -O4
 OPTFLAGS= 
 
+# CUDA: filtering the CFLAGS as it pops warnings on console
 #CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 CFLAGS = -g -DDEBUG -Xcompiler -fPIC
 all : libf1f2opf3.so all_for_dc
@@ -83,6 +84,7 @@ vvgt_specialize.lua  : cmp_specialize.tmpl
 vvlt_specialize.lua  : cmp_specialize.tmpl
 	lua gen_specializers.lua cmp
 
+# CUDA: currently focus is on vvadd so using _arith_files only, also using nvcc compiler instead of gcc
 libf1f2opf3.so : _arith_files
 	nvcc ../gen_src/*.cu ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 	test -d ${Q_BUILD_DIR}
