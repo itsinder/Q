@@ -1,4 +1,5 @@
   local gen_code = require 'Q/UTILS/lua/gen_code'
+  local qconsts  = require 'Q/UTILS/lua/q_consts'
   local plpath   = require "pl.path"
   local srcdir = "../gen_src/"
   local incdir = "../gen_inc/"
@@ -23,7 +24,13 @@
             -- for k, v in pairs(subs) do print(k, v) end
             -- print(tmpl)
             gen_code.doth(subs, tmpl, incdir)
-            -- Passing the "cu" extension to create the cuda files
+            -- CUDA: Generating header files with updated symbol name
+            func_name = subs.fn
+            subs.fn = qconsts.f1f2opf3_symbols[func_name]
+            gen_code.doth(subs, tmpl, incdir)
+            -- CUDA: Setting back the original func_name while generating c files
+            subs.fn = func_name
+            -- CUDA: Passing the "cu" extension to create the cuda files
             gen_code.dotc(subs, tmpl, srcdir, "cu")
             print("Produced ", subs.fn)
             num_produced = num_produced + 1
