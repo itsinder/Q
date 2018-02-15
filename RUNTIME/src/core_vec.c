@@ -382,6 +382,43 @@ BYE:
 }
 
 int 
+vec_clone(
+    VEC_REC_TYPE *ptr_old_vec,
+    VEC_REC_TYPE *ptr_new_vec
+    )
+{
+  int status = 0;
+  if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
+  // quit if opened for writing
+  if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
+  memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
+  // fix following fields
+  // char file_name[255+1];
+  // char *map_addr;
+  // size_t map_len;
+  // int open_mode;
+  // char *chunk;
+  // uint32_t chunk_sz;
+  ptr_new_vec->open_mode = 0; // unopened
+  if ( ptr_old_vec->chunk != NULL ) { 
+    ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz); 
+    return_if_malloc_failed(ptr_new_vec->chunk); 
+    memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
+  }
+  ptr_new_vec->map_addr = NULL; // unopened
+  ptr_new_vec->map_len  = 0;    // unopened
+  if ( *ptr_old_vec->file_name != '\0' ) { 
+    status = rand_file_name(ptr_new_vec->file_name, 64); // TODO FIX 
+    cBYE(status);
+    if ( file_exists(ptr_old_vec->file_name) ) {
+      // copy old to new
+    }
+  }
+BYE:
+  return status;
+}
+
+int 
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,

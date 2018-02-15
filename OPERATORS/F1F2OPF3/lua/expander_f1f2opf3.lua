@@ -25,7 +25,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   assert(qc[func_name], "Symbol not available" .. func_name)
   local f3_qtype = assert(subs.out_qtype)
   local f3_width = qconsts.qtypes[f3_qtype].width
-  if ( f3_width < 1 ) then f3_width = 1 end
+  f3_width = f3_width or 1 -- to account for B1 and such types
 
   local buf_sz = qconsts.chunk_size * f3_width
   local f3_buf = nil

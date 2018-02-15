@@ -530,6 +530,31 @@ BYE:
   lua_pushstring(L, "ERROR: Could not create vector\n");
   return 2;
 }
+static int l_vec_clone( lua_State *L) 
+{
+  int status = 0;
+  VEC_REC_TYPE *ptr_new_vec = NULL;
+  luaL_buffinit(L, &g_errbuf);
+
+  VEC_REC_TYPE *ptr_old_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+
+  ptr_new_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
+  memset(ptr_new_vec, '\0', sizeof(VEC_REC_TYPE));
+
+  status = vec_clone(ptr_old_vec, ptr_new_vec);
+  cBYE(status);
+
+  /* Add the metatable to the stack. */
+  luaL_getmetatable(L, "Vector");
+  /* Set the metatable on the userdata. */
+  lua_setmetatable(L, -2);
+  luaL_pushresult(&g_errbuf);
+  return 2;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: Could not clone vector\n");
+  return 2;
+}
 //-----------------------
 static const struct luaL_Reg vector_methods[] = {
     { "__gc",    l_vec_free   },
@@ -562,6 +587,7 @@ static const struct luaL_Reg vector_methods[] = {
  
 static const struct luaL_Reg vector_functions[] = {
     { "new", l_vec_new },
+    { "clone", l_vec_clone },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },

@@ -417,6 +417,12 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   if ( qconsts.debug ) then self:check() end
 end
 
+function lVector:clone()
+  assert(self:is_eov(), "can clone vector only if is EOV")
+  assert(nil, "TODO")
+  -- return Vector.clone(self._nn_vec, nn_addr, len)
+end
+
 function lVector:eval()
   if ( not self:is_eov() ) then
     local chunk_num = self:chunk_num() 

@@ -121,4 +121,9 @@ extern char *
 vec_get_buf(
   VEC_REC_TYPE *ptr_vec
 );
+extern int 
+vec_clone(
+    VEC_REC_TYPE *ptr_old_vec,
+    VEC_REC_TYPE *ptr_new_vec
+    );
 #endif
