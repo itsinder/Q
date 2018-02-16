@@ -418,9 +418,17 @@ function lVector:put_chunk(base_addr, nn_addr, len)
 end
 
 function lVector:clone()
+  assert(self._base_vec)
   assert(self:is_eov(), "can clone vector only if is EOV")
-  assert(nil, "TODO")
-  -- return Vector.clone(self._nn_vec, nn_addr, len)
+  local vector = setmetatable({}, lVector)
+  vector._base_vec = Vector.clone(self._base_vec)
+  assert(vector._base_vec)
+  -- Check for nulls
+  if ( self:has_nulls() ) then
+    vector._nn_vec = Vector.clone(self._nn_vec)
+    assert(vector._nn_vec) 
+  end
+  return vector
 end
 
 function lVector:eval()
