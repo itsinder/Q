@@ -20,8 +20,11 @@ local function ss_ifxthenyelsez(x, y, z)
   -- allocate buffer for output
   local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
   local wbuf = nil
+  local chunk_idx = 0
   --
-  local function ss_ifxthenyelsez_gen(chunk_idx)
+  local function ss_ifxthenyelsez_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     wbuf = wbuf or ffi.malloc(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
     if ( xlen == 0 )  then
@@ -32,6 +35,7 @@ local function ss_ifxthenyelsez(x, y, z)
     local zptr = z:cdata()
     local status = qc[func_name](xptr, yptr, zptr, wbuf, xlen)
     assert(status == 0, "C error in ifxthenyelsez") 
+    chunk_idx = chunk_idx + 1
     return xlen, wbuf, nil
   end
   return lVector( {gen=ss_ifxthenyelsez_gen, has_nulls=false, 

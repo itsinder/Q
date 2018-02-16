@@ -4,6 +4,7 @@ local Scalar = require 'libsclr' ;
 local cmem    = require 'libcmem' ; 
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 
@@ -17,7 +18,7 @@ local tests = {}
 tests.t1 = function()
   local infile = '_in1_I4.bin'
   -- generating required .bin file 
-  gen_bin.generate_bin(10, "I4", infile, "iter")
+  qc.generate_bin(10, "I4", infile, "linear")
 
   assert(plpath.isfile(infile), "Create the input files")
   local y = Vector.new('I4', infile, false)

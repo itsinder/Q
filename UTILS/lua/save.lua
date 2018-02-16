@@ -106,4 +106,5 @@ local function save_global(filename)
     file:close()
     print("Saved to " .. filepath)
 end
-return save_global
+return require('Q/q_export').export('save', save_global)
+--return save_global

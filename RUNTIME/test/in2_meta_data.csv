@@ -12,5 +12,5 @@ base_is_eov = "true",
 base_is_nascent = "false",
 base_name = "",
 base_is_memo = "true",
-aux_rand key = "some other rand val",
+aux_rand_key = "some other rand val",
  } 

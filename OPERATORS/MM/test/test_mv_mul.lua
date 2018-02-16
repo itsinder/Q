@@ -19,7 +19,7 @@ tests.t1 = function()
   end
   assert(Z:num_elements() == x1:length())
   print("Completed mv_mul")
-  Q.print_csv(Z, nil, script_dir .. "_out1.txt")
+  Q.print_csv(Z, script_dir .. "_out1.txt")
   assert(diff(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
   os.execute("rm -f " .. script_dir .. "_out1.txt")
 end
@@ -51,7 +51,7 @@ tests.t3 = function()
   end
   assert(Z:num_elements() == x1:length())
   print("Completed mv_mul")
-  Q.print_csv(Z, nil, script_dir .. "_out1.txt")
+  Q.print_csv(Z, script_dir .. "_out1.txt")
   assert(diff(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
   os.execute("rm -f " .. script_dir .. "_out1.txt")
 end

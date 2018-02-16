@@ -84,6 +84,7 @@ for i, v in ipairs(T) do
       end
       
       local status, print_ret = pcall(print_csv, load_ret, file_path, F)
+      if not status then print(print_ret) end
       if v.category == "category2" then
         print(print_ret)
         print("STOP : Deliberate error attempt")

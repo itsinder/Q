@@ -1,6 +1,7 @@
 local plpath  = require 'pl.path'
 local dir = require 'pl.dir'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
 local fns =  require 'Q/RUNTIME/test/lua_test/assert_valid'
 local genbin = require 'Q/RUNTIME/test/generate_bin'
 
@@ -43,7 +44,7 @@ local create_tests = function()
       if v.test_type == "materialized_vector" then
         bin_file_name = script_dir.."/bin/in_".. i .. "_" .. qtype .. ".bin"
         -- generating .bin files required for materialized vector
-        genbin.generate_bin(v.num_elements, qtype, bin_file_name, "random" )
+        qc.generate_bin(v.num_elements, qtype, bin_file_name, "seq" )
       end
       
       if v.test_type == "materialized_vector" and string.match( M.file_name,"${q_type}" ) then

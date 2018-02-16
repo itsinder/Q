@@ -88,7 +88,7 @@ fns.validate_values = function(vec, qtype, chunk_number)
   
   --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
   for i = 1, len do
-    local expected = i*15 % qconsts.qtypes[qtype].max
+    local expected = i*10 % qconsts.qtypes[qtype].max
     local value = c_to_txt(vec,i)
     -- print(expected, value)
     if ( value ~= expected ) then
@@ -153,7 +153,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         if is_B1 then 
           iptr[itr - 1] = 85
         else
-          iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+          iptr[itr - 1] = itr*10 % qconsts.qtypes[qtype].max
         end
       end
 
@@ -168,7 +168,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         nn_data = cmem.new(num_elements * field_size)
         local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", nn_data)
         for itr = 1, num_elements do
-          nn_iptr[itr - 1] = itr*15 % qconsts.qtypes[qtype].max
+          nn_iptr[itr - 1] = itr*10 % qconsts.qtypes[qtype].max
         end      
       end
       
@@ -188,7 +188,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         if i % 2 == 0 then bval = false else bval = true end
         s1 = Scalar.new(bval, qtype)
       else
-        s1 = Scalar.new(i*15% qconsts.qtypes[qtype].max, qtype)
+        s1 = Scalar.new(i*10% qconsts.qtypes[qtype].max, qtype)
       end
       if vec:has_nulls() then
         local bval

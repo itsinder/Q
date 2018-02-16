@@ -39,7 +39,9 @@ local function expander_where(op, a, b)
   local aidx  = nil
   local a_chunk_idx = 0
   
-  local function where_gen()
+  local function where_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == a_chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(ffi.malloc(sz_out_in_bytes))

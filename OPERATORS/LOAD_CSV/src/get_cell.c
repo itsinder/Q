@@ -68,9 +68,7 @@ get_cell(
       buf[bufidx++] = X[xidx++];
       continue;
     }
-    if ( bufidx >= bufsz ) { 
-      go_BYE(-1); 
-    }
+    if ( bufidx >= bufsz ) { go_BYE(-1); }
     buf[bufidx++] = X[xidx++];
   }
 BYE:

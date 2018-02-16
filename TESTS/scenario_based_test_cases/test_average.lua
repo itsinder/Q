@@ -19,7 +19,7 @@ tests.t1 = function ()
   local a = Q.mk_col({2, 2, 2, 2}, "I4")
   local b = Q.vvdiv(y, a)
   x[#x + 1] = b:eval()
-  Q.print_csv(x, nil, "average.csv")
+  Q.print_csv(x, "average.csv")
 end
 --======================================
 return tests

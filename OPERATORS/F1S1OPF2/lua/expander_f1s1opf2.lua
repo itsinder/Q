@@ -43,7 +43,9 @@
     end
     local chunk_idx = 0
     --============================================
-    local f2_gen = function()
+    local f2_gen = function(chunk_num)
+      -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+      assert(chunk_num == chunk_idx)
       f2_buf = f2_buf or ffi.malloc(buf_sz)
       assert(f2_buf)
       if not nn_f2_buf and has_nulls then 

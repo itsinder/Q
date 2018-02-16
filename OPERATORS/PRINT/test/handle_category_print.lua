@@ -31,8 +31,8 @@ end
 
 -- match file1 and file2, return true if success
 local file_match = function (file1, file2)
-  local actual_file_content = file.read(file1)
-  local expected_file_content = file.read(file2)
+  local expected_file_content = file.read(file1)
+  local actual_file_content = file.read(file2)
   -- print(actual_file_content)
   -- print(expected_file_content)
   if actual_file_content ~= expected_file_content then
@@ -139,6 +139,29 @@ fns.handle_category1_2 = function (index, v, csv_file, ret, status, exp_load_ret
   local eq = Q.vveq(actual_load_ret[1], exp_load_ret[1])
   -- checking results by using sum operator (as sum must be equal to  num_elements
   assert(Q.sum(eq):eval():to_num() == exp_load_ret[1]:num_elements(), "Actual and expected element not matching")
+  return true
+end
+
+fns.handle_category1_3 = function (index, v, csv_file, ret, status)
+
+  if not status then
+    print(ret)
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is not success")
+    return false
+  end
+
+  if type(ret) == "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1_1, output of print_csv is a string")
+    return false
+  end
+
+  -- match input and output contents
+  local expected_content = v.output_regex
+  local actual_content = file.read(csv_file)
+  if actual_content ~= expected_content then
+     fns["increment_failed"](index, v, "testcase failed: in category1_1, input and output csv file does not match")
+     return false
+  end
   return true
 end
 

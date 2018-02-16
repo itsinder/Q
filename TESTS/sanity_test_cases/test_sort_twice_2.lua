@@ -5,9 +5,10 @@ local tests = {}
 tests.t1 = function() 
   local x = Q.seq({start = -1000000, by = 1, qtype = "I4", len = 2000000} )
   assert(type(x) == "lVector")
- -- sort needs eov nad will fail if x is not eval'd
+  -- With recent changes, sort doesn't required vector to be eval'ed
+  -- it does eval internally if vector is not eval'ed already
   local status = pcall(Q.sort, x, "asc")
-  assert(not status)
+  --assert(not status)
   x:eval()
   Q.sort(x, "dsc")
   Q.sort(x, "asc")

@@ -1,5 +1,6 @@
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 
@@ -7,7 +8,7 @@ local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 local q_type = "I4"
 local num_values = 10
 -- generating .bin files required for materialized vector
-gen_bin.generate_bin(num_values, q_type, "_in1_I4.bin", "iter" )
+qc.generate_bin(num_values, q_type, "_in1_I4.bin", "linear" )
 q_type = "B1"
 gen_bin.generate_bin(num_values, q_type, "_nn_in1.bin")
 
