@@ -3,6 +3,7 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "_get_bit_u64.h"
 extern int
 ${fn}(
       const ${a_ctype} * restrict A,
@@ -42,14 +43,12 @@ ${fn}(
   if ( num_in_C > nC ) { go_BYE(-1); }
   
   for ( ; aidx < nA; aidx++ ) { 
-    uint64_t widx = aidx >> 6; // word index
-    uint64_t bidx = aidx & 0x3F; // bit index
-    uint64_t b = B[widx];
-    b = ( b >> bidx ) & 0x1;
+    int b = get_bit_u64(B, aidx);
     if ( b == 1 ) {
       if ( num_in_C == nC ) { break; }
       C[num_in_C++] = A[aidx];
     }
+    // TODO if ( b > 1 ) { ERROR } 
   }
   *ptr_num_in_C = num_in_C;
   *ptr_aidx     = aidx;

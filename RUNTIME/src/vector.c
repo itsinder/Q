@@ -401,8 +401,16 @@ static int l_vec_put_chunk( lua_State *L) {
   int status = 0;
   void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  int x =  lua_type (L, 2);
+  const char *y = lua_typename(L, x);
   if ( luaL_testudata (L, 2, "CMEM") ) { 
     addr = luaL_checkudata(L, 2, "CMEM");
+  } // TODO UNDO ALL FOLLOWINF HACKERY
+  else if ( luaL_testudata (L, 2, "userdata") ) { 
+    addr = luaL_checkudata(L, 2, "userdata");
+  }
+  else if ( luaL_testudata (L, 2, "cdata") ) { 
+    addr = luaL_checkudata(L, 2, "cdata");
   }
   else {
     fprintf(stderr, "NOT  CMEM\n");

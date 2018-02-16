@@ -406,7 +406,14 @@ function lVector:put_chunk(base_addr, nn_addr, len)
     end
   else
     assert(base_addr)
-    status = Vector.put_chunk(self._base_vec, base_addr, len)
+    local junk 
+    if ( type(base_addr) == "cdata" ) then 
+      junk = ffi.malloc(1048576)
+      ffi.copy(junk, base_addr, len)
+      status = Vector.put_chunk(self._base_vec, junk, len)
+    else
+      status = Vector.put_chunk(self._base_vec, base_addr, len)
+    end
     assert(status)
     if ( self._nn_vec ) then
       assert(nn_addr)
@@ -621,6 +628,7 @@ function lVector:set_meta(k, v)
   -- assert(v): do not do this since it is used to set meta of key to nil
   -- NOT VALID CHECK assert(type(k) == "string")
   -- value acn be number or boolean or string or Scalar
+  if ( not self._meta ) then self._meta = {} end 
   self._meta[k] = v
 end
 

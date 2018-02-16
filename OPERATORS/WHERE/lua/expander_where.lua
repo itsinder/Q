@@ -2,6 +2,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local dbg      = require 'Q/UTILS/lua/debugger'
 
 local function expander_where(op, a, b)
   -- Verification
@@ -40,14 +41,15 @@ local function expander_where(op, a, b)
   local a_chunk_idx = 0
   
   local function where_gen()
+    dbg()
     if ( first_call ) then 
       -- allocate buffer for output
-      out_buf = assert(ffi.malloc(sz_out_in_bytes))
+      out_buf = assert(ffi.C.malloc(sz_out_in_bytes))
 
-      n_out = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      n_out = assert(ffi.C.malloc(ffi.sizeof("uint64_t")))
       n_out = ffi.cast("uint64_t *", n_out)
 
-      aidx = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      aidx = assert(ffi.C.malloc(ffi.sizeof("uint64_t")))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
       
@@ -58,20 +60,33 @@ local function expander_where(op, a, b)
     n_out[0] = 0
     
     repeat
+      print("UU ", aidx[0], n_out[0])
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      print("VV ", aidx[0], n_out[0])
       local b_len, b_chunk, b_nn_chunk = b:chunk(a_chunk_idx)
+      print("TT ", aidx[0], n_out[0])
       if a_len == 0 then
         return tonumber(n_out[0]), out_buf, nil 
       end
+      print("WW ", aidx[0], n_out[0])
+      print(a_len)
+      print(b_len)
+
       assert(a_len == b_len)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Where vector cannot have nulls")
+
+      print("YY ", aidx[0], n_out[0])
       local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
           sz_out, n_out)
+      print("XX ", aidx[0], n_out[0])
       assert(status == 0, "C error in WHERE")
       if ( aidx[0] == a_len ) then
+        print("Incrementing a_chunk_idx")
+        print("ZZ1", aidx[0], n_out[0])
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
+        print("ZZ2", aidx[0], n_out[0])
       end
     until ( n_out[0] == sz_out )
     return tonumber(n_out[0]), out_buf, nil 

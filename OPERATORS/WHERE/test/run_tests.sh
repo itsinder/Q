@@ -9,6 +9,7 @@ gcc -g -std=gnu99 \
   -I../../../UTILS/inc \
   -I../../../UTILS/gen_inc \
   ../gen_src/_where_I4.c \
+  ../../../UTILS/src/get_bit_u64.c \
   -o a.out -lm
 VG=" "
 VG=" valgrind "
