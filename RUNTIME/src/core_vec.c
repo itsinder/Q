@@ -381,6 +381,83 @@ BYE:
   return status;
 }
 
+int
+copy_file_contents(
+    char *src_file,
+    char *dst_file
+    )
+{
+  int status = 0;
+  FILE *src_fp;
+ 
+  src_fp = fopen(src_file, "rb");
+  return_if_fopen_failed(src_fp, *src_file, "rb");
+
+  int64_t buf_size = 1024; // Remove this hard-coding, size of intermediate buffer
+  char *buffer = malloc(buf_size);
+
+  while(fread(buffer, 1, buf_size, src_fp)) {
+    status = buf_to_file(buffer, 1, buf_size, dst_file);
+    cBYE(status);
+  }
+
+  // Close src_fp
+  fclose_if_non_null(src_fp); 
+
+  // Free intermediate buffer
+  free_if_non_null(buffer);
+BYE:
+  return status;
+}
+
+int 
+vec_clone(
+    VEC_REC_TYPE *ptr_old_vec,
+    VEC_REC_TYPE *ptr_new_vec
+    )
+{
+  int status = 0;
+  if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
+  // quit if opened for writing
+  if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
+  // Do we require below step?
+  memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
+
+  ptr_new_vec->open_mode = 0; // unopened
+  ptr_new_vec->field_size = ptr_old_vec->field_size;
+  ptr_new_vec->chunk_size = ptr_old_vec->chunk_size;
+  ptr_new_vec->is_memo = ptr_old_vec->is_memo;
+  strcpy(ptr_new_vec->field_type, ptr_old_vec->field_type);
+  ptr_new_vec->num_elements = ptr_old_vec->num_elements;
+  ptr_new_vec->is_nascent = ptr_old_vec->is_nascent;
+  // Set is_eov to true
+  ptr_new_vec->is_eov = true;
+  ptr_new_vec->chunk_sz = ptr_old_vec->chunk_sz;
+  // TODO: What should we do with persist flag?
+
+  if ( ptr_old_vec->chunk != NULL ) { 
+    ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
+    return_if_malloc_failed(ptr_new_vec->chunk); 
+    memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
+    // Update num_in_chunk and chunk_num
+    ptr_new_vec->chunk_num = ptr_old_vec->chunk_num;
+    ptr_new_vec->num_in_chunk = ptr_old_vec->num_in_chunk;
+  }
+  ptr_new_vec->map_addr = NULL; // unopened
+  ptr_new_vec->map_len  = 0;    // unopened
+  if ( *ptr_old_vec->file_name != '\0' && file_exists(ptr_old_vec->file_name) ) { 
+    status = rand_file_name(ptr_new_vec->file_name, 64); // TODO FIX 
+    cBYE(status);
+    // copy old to new
+    status = copy_file_contents(ptr_old_vec->file_name, ptr_new_vec->file_name);
+    cBYE(status);
+    // Update file size
+    ptr_new_vec->file_size = ptr_old_vec->file_size;
+  }
+BYE:
+  return status;
+}
+
 int 
 vec_new(
     VEC_REC_TYPE *ptr_vec,

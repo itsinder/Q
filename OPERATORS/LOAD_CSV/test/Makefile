@@ -12,7 +12,14 @@ INCS= -I../inc \
 	-I../../../UTILS/inc \
 	-I../../../UTILS/gen_inc
 
+<<<<<<< HEAD
 all : test_load_csv_fast 
+=======
+all : test_load_csv_fast  \
+	load_csv_fast.so \
+	stress_test_load_csv_fast 
+
+>>>>>>> dev
 %.o: %.c $(DEPS)
 	$(CC) $(INCS) $(FLAGS) -c -o $@ $< -I
 
@@ -33,7 +40,18 @@ SRCS = ../src/load_csv_fast.c \
        ../gen_src/_txt_to_F8.c \
 
 test_load_csv_fast : test_load_csv_fast.c ../src/load_csv_fast.c
+<<<<<<< HEAD
 	$(CC) $(SRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
+=======
+	$(CC) $(CSRCS) $(INCS) $(FLAGS) -o test_load_csv_fast
+
+stress_test_load_csv_fast : stress_test_load_csv_fast.c ../src/load_csv_fast.c
+	$(CC) stress_test_load_csv_fast.c $(CSRCS3) $(INCS) $(FLAGS) -o stress_test_load_csv_fast
+
+load_csv_fast.so : ../src/load_csv_fast.c
+	$(CC) $(CSRCS3) $(INCS) $(FLAGS) -o load_csv_fast.so $(LINK_FLAGS)
+	  	
+>>>>>>> dev
 	  	
 	  	
 

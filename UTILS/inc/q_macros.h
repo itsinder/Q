@@ -15,6 +15,7 @@
 #define mcr_nop(X)  ((X))
 #define mcr_sqr(X)  ((X) * (X))
 #define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
+#define mcr_add(X, Y)  ((X) + (Y) )
 #define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define mcr_sum(X, Y)  ((X) + (Y))
 #define mcr_sum_sqr(X, Y)  ((X) + (Y)*(Y))

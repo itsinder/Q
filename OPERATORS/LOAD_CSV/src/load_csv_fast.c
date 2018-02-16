@@ -36,11 +36,11 @@ load_csv_fast(
     const char * const infile,
     uint32_t nC,
     uint64_t *ptr_nR,
-    char ** const fldtypes, /* [nC] */
+    char ** fldtypes, /* [nC] */
     bool is_hdr, /* [nC] */
-    bool * const is_load, /* [nC] */
-    bool * const has_nulls, /* [nC] */
-    uint64_t * const num_nulls, /* [nC] */
+    bool * is_load, /* [nC] */
+    bool * has_nulls, /* [nC] */
+    uint64_t * num_nulls, /* [nC] */
     char ***ptr_out_files,
     char ***ptr_nil_files,
     /* Note we set nil_files and out_files only if below == NULL */
@@ -77,7 +77,6 @@ load_csv_fast(
   else {
     opdir = strdup(q_data_dir);
   }
-
   //---------------------------------
   // allocate space and initialize other resources
 
@@ -258,6 +257,7 @@ load_csv_fast(
       is_val_null = true;
       if ( !has_nulls[col_ctr] ) { 
         // got null value when user said no null values
+        fprintf(stderr, " got null value when user said no null values row_ctr = %" PRIu64 ", col_ctr = %d \n", row_ctr, col_ctr);
         go_BYE(-1);
       }
     }
@@ -403,10 +403,10 @@ load_csv_fast(
     for ( uint32_t i = 0; i < nC; i++ ) {
       if ( !is_load[i] ) { continue; }
       if ( num_nulls[i] == 0 ) {  
-        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", num_elements = %d});\n", xcol_ctr, fldtypes[i], out_files[i],row_ctr);
+        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", num_elements = %" PRIu64 "});\n", xcol_ctr, fldtypes[i], out_files[i],row_ctr);
       }
       else {
-        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nn_file_name = \"%s\", num_elements = %d});\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i],row_ctr);
+        sprintf(xbuf, "T[%d] = lVector({ qtype = \"%s\", file_name = \"%s\", nn_file_name = \"%s\", num_elements = %" PRIu64 "});\n", xcol_ctr, fldtypes[i], out_files[i], nil_files[i],row_ctr);
       }
       // TODO: Check for buffer overflow 
       strcat(str_for_lua, xbuf);
@@ -423,8 +423,12 @@ BYE:
   bak_status = status;
   // Close open files 
   for ( uint32_t i = 0; i < nC; i++ ) {
-    fclose_if_non_null(ofps[i]);
-    fclose_if_non_null(nn_ofps[i]);
+    if ( ofps != NULL ) { 
+      fclose_if_non_null(ofps[i]);
+    }
+    if ( nn_ofps != NULL ) { 
+      fclose_if_non_null(nn_ofps[i]);
+    }
   }
 
   // delete nil_files with no nil elements
@@ -437,7 +441,7 @@ BYE:
       status = remove(nil_files[i]); 
       if ( status < 0 ) { WHEREAMI; return -1; }
       free_if_non_null(nil_files[i]); 
-      printf("%s: removing file for Column %d\n", infile, i);
+      // printf("%s: removing file for Column %d\n", infile, i);
     }
   }
   if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) ) {
@@ -456,14 +460,19 @@ BYE:
     }
   }
 
-  mcr_rs_munmap(mmap_file, file_size);
   free_if_non_null(ofps);
   free_if_non_null(qtypes);
   free_if_non_null(nn_ofps);
+  mcr_rs_munmap(mmap_file, file_size);
   free_if_non_null(opdir);
   free_if_non_null(nn_buf);
   free_if_non_null(word_B1);
-
+  free_if_non_null(is_trim);
+  if ( ( str_for_lua != NULL ) && ( sz_str_for_lua > 0 ) && 
+       ( ptr_n_str_for_lua != NULL ) ) {
+    *ptr_n_str_for_lua = strlen(str_for_lua);
+  }
+  // fprintf(stderr, "bak_status = %d \n", bak_status); WHEREAMI;
   return bak_status;
 }
 

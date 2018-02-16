@@ -211,6 +211,7 @@ static int l_vec_get( lua_State *L) {
     num_to_return++;
     SCLR_REC_TYPE *ptr_sclr = 
       (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
+    return_if_malloc_failed(ptr_sclr);
     strcpy(ptr_sclr->field_type, ptr_vec->field_type);
     ptr_sclr->field_size = ptr_vec->field_size;
     if ( strcmp(ptr_sclr->field_type, "B1") == 0 ) { 
@@ -262,6 +263,7 @@ static int l_vec_get_chunk( lua_State *L)
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;
     ret_addr = lua_newuserdata(L, sz); 
+    return_if_malloc_failed(ret_addr);
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");
     /* Set the metatable on the userdata. */
@@ -514,6 +516,7 @@ static int l_vec_new( lua_State *L)
   }
 
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
+  return_if_malloc_failed(ptr_vec);
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
 
   status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
@@ -528,6 +531,32 @@ static int l_vec_new( lua_State *L)
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: Could not create vector\n");
+  return 2;
+}
+static int l_vec_clone( lua_State *L) 
+{
+  int status = 0;
+  VEC_REC_TYPE *ptr_new_vec = NULL;
+  luaL_buffinit(L, &g_errbuf);
+
+  VEC_REC_TYPE *ptr_old_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+
+  ptr_new_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
+  return_if_malloc_failed(ptr_new_vec);
+  memset(ptr_new_vec, '\0', sizeof(VEC_REC_TYPE));
+
+  status = vec_clone(ptr_old_vec, ptr_new_vec);
+  cBYE(status);
+
+  /* Add the metatable to the stack. */
+  luaL_getmetatable(L, "Vector");
+  /* Set the metatable on the userdata. */
+  lua_setmetatable(L, -2);
+  luaL_pushresult(&g_errbuf);
+  return 2;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: Could not clone vector\n");
   return 2;
 }
 //-----------------------
@@ -562,6 +591,7 @@ static const struct luaL_Reg vector_methods[] = {
  
 static const struct luaL_Reg vector_functions[] = {
     { "new", l_vec_new },
+    { "clone", l_vec_clone },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
