@@ -5,6 +5,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
 
 local buf_size = 1024
+local buf = ffi.malloc(buf_size)
+local buf_copy = ffi.cast("char *", buf)
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -45,34 +47,37 @@ local function get_element(col, rowidx)
   local casted = chunk_buf_table[col]
   local nn_casted = chunk_nn_buf_table[col]
   local status
-  if not casted then
-    val = ffi.NULL
-  else
-    if qtype == "B1" then
-      status, val = pcall(get_B1_value, casted, chunk_idx)
-      if not status then print("\n\n" .. tostring(val) .. "\n\n") end
-    else
-      val = casted[chunk_idx]
-    end
-    
-    if ( qtype == "SC" ) then
-      val = ffi.string(casted + chunk_idx * col:field_width())
-    elseif ( qtype == "SV" ) then 
-      local dictionary = col:get_meta("dir")
-      val = dictionary:get_string_by_index(tonumber(val))
-    else
-      val = tonumber(val)
-    end
 
-    -- Check for nn vector
-    if nn_casted then
-      status, nn_val = pcall(get_B1_value, nn_casted, chunk_idx)
-      if not status then print("\n\n ## " .. tostring(nn_val) .. " ## \n\n") end
-      if not nn_val then
-        val = ffi.NULL
-      end
+  -- Check for nn vector
+  if nn_casted then
+    status, nn_val = pcall(get_B1_value, nn_casted, chunk_idx)
+    assert(status, "Failed to get value for nn vec, Error: " .. tostring(nn_val))
+    if not nn_val then
+      -- Both val and nn_val are null
+      return nil, nil
     end
   end
+
+  if qtype == "B1" then
+    status, val = pcall(get_B1_value, casted, chunk_idx)
+    assert(status, "Failed to get value for B1 vec, Error " .. tostring(val))
+  elseif qtype == "SC" then
+    val = ffi.string(casted + chunk_idx * col:field_width())
+  else
+    -- Initialize output buf to zero
+    ffi.fill(buf_copy, buf_size)
+    
+    -- Call respective q_to_txt function
+    local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
+    status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf, buf_size)
+    
+    -- Extract value
+    val = ffi.string(buf)    
+    if qtype == "SV" then
+      val = col:get_meta("dir"):get_string_by_index(tonumber(val))
+    end
+  end
+  
   return val, nn_val
 end
 
@@ -172,7 +177,7 @@ local print_csv = function (vector_list, opfile, filter)
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
-      assert(fp ~= nil, g_err.INVALID_FILE_PATH)
+      assert(fp ~= nil, err.INVALID_FILE_PATH)
       io.output(fp)
     else
       tbl_rslt = {}
@@ -185,14 +190,14 @@ local print_csv = function (vector_list, opfile, filter)
     local status, result, is_filter = nil
     if ( where ) then
       status, is_filter = pcall(get_element, where, rowidx)
-      assert(status, "Failed to get filter value")
+      assert(status, "Failed to get filter value, Error: " .. tostring(is_filter))
     end
     if ( ( not where ) or ( is_filter ) ) then
       for col_idx = 1, num_cols do
         local status, result = nil
         local col = vector_list[col_idx]
         status, result = pcall(get_element, col, rowidx)
-        assert(status, "Failed to get value from vector")
+        assert(status, "Failed to get value from vector, Error: " .. tostring(result))
         if not result then
           if col:qtype() == "B1" then result = 0 else result = "" end
         end                              

@@ -8,6 +8,7 @@ local fns = require 'Q/RUNTIME/test/generate_csv'
 local genbin = require 'Q/RUNTIME/test/generate_bin'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts     = require 'Q/UTILS/lua/q_consts'
+local qc     = require 'Q/UTILS/lua/q_core'
 local c_to_txt     = require 'Q/UTILS/lua/C_to_txt'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(path_to_here))
@@ -42,9 +43,15 @@ local function pr_meta(x, file_name)
 end
 --=========================
 local function compare(f1, f2)
-  local s1 = plfile.read(f1)
-  local s2 = plfile.read(f2)
-  assert(s1 == s2, "mismatch in " .. f1 .. " and " .. f2)
+  -- Changed the string comparison logic as "nn_file_name" and "base_file_name" were having absolute path in result file 
+  -- where as in src_comparison file we were having base name
+  local s1 = dofile(f1)
+  local s2 = dofile(f2)
+  for i, _ in pairs(s1) do
+    if i ~= "nn_file_name" and i ~= "base_file_name" then
+      assert(s1[i] == s2[i], s1[i] .. " " .. s2[i])
+    end
+  end
 end
 --=========================
 
@@ -54,15 +61,15 @@ tests.t1 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "iter" )
+  qc.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "linear" )
   q_type = "B1"
   genbin.generate_bin(num_values, q_type, path_to_here .. "_nn_in1.bin")
   
   x = lVector(
-  { qtype = "I4", file_name = "_in1_I4.bin", nn_file_name = "_nn_in1.bin"})
+  { qtype = "I4", file_name = path_to_here .. "_in1_I4.bin", nn_file_name = path_to_here .. "_nn_in1.bin"})
   assert(x:check())
-  pr_meta(x, "_t1_meta_data.csv")
-  compare("_t1_meta_data.csv", "in1_meta_data.csv")
+  pr_meta(x, path_to_here .. "_t1_meta_data.csv")
+  compare(path_to_here .. "_t1_meta_data.csv", path_to_here .. "in1_meta_data.csv")
   local len, base_data, nn_data = x:chunk(0)
   assert(base_data)
   assert(nn_data)
@@ -74,15 +81,14 @@ tests.t1 = function()
 end
 --=========
 
-
 tests.t2 = function()
 
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "linear" )
   
-  x = lVector( { qtype = "I4", file_name = "_in2_I4.bin"})
+  x = lVector( { qtype = "I4", file_name = path_to_here .. "_in2_I4.bin"})
   assert(x:check())
   local n = x:num_elements()
   print(x:meta().base.file_name)
@@ -114,7 +120,7 @@ end
 tests.t3 = function()
   print("Testing materialized vector for SC")
   -- os.execute(" cp SC1.bin _SC1.bin " )
-  x = lVector( { qtype = "SC", width = 8, file_name = 'SC1.bin' } )
+  x = lVector( { qtype = "SC", width = 8, file_name = path_to_here .. 'SC1.bin' } )
   T = x:meta()
   -- local k, v
   for k, v in pairs(T.base)  do print(k,v) end 
@@ -132,19 +138,19 @@ tests.t4 = function()
   local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "linear" )
   
   -- testing setting and getting of meta data 
-  local x = lVector( { qtype = "I4", file_name = "_in3_I4.bin"})
-  x:set_meta("rand key", "rand val")
-  v = x:get_meta("rand key")
+  local x = lVector( { qtype = "I4", file_name = path_to_here .. "_in3_I4.bin"})
+  x:set_meta("rand_key", "rand val")
+  v = x:get_meta("rand_key")
   assert(v == "rand val")
-  x:set_meta("rand key", "some other rand val")
-  v = x:get_meta("rand key")
+  x:set_meta("rand_key", "some other rand val")
+  v = x:get_meta("rand_key")
   assert(v == "some other rand val")
-  plfile.delete("./_meta_data.csv")
-  pr_meta(x, "_t4_meta_data.csv")
-  compare("_t4_meta_data.csv", "in2_meta_data.csv")
+  --plfile.delete("./_meta_data.csv")
+  pr_meta(x, path_to_here .. "_t4_meta_data.csv")
+  compare(path_to_here .. "_t4_meta_data.csv", path_to_here .. "in2_meta_data.csv")
 
   print("Successfully completed test t4")
   --plfile.delete(path_to_here .. "/in3_I4.csv")
@@ -156,10 +162,10 @@ tests.t5 = function()
     local num_values = 10
   local q_type = "I4"
   -- generating .bin files required for materialized vector
-  genbin.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "iter" )
+  qc.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "linear" )
   
   -- testing setting and getting of meta data with a Scalar
-  local x = lVector( { qtype = "I4", file_name = "_in4_I4.bin"})
+  local x = lVector( { qtype = "I4", file_name = path_to_here .. "_in4_I4.bin"})
   local s = Scalar.new(1000, "I8")
   x:set_meta("rand scalar key", s)
   v = x:get_meta("rand scalar key")
@@ -168,5 +174,4 @@ tests.t5 = function()
   --plfile.delete(path_to_here .. "/in4_I4.csv")
   --plfile.delete(path_to_here .. "/_in4_I4.bin")
 end
-
 return tests

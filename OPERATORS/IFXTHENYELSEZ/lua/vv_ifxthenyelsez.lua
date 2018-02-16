@@ -22,7 +22,9 @@ local function vv_ifxthenyelsez(x, y, z)
   local wbuf = nil
   local chunk_idx = 0
   --
-  local function vv_ifxthenyelsez_gen()
+  local function vv_ifxthenyelsez_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     wbuf = wbuf or ffi.malloc(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
     local ylen, yptr, nn_yptr = y:chunk(chunk_idx) 

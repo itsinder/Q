@@ -18,7 +18,7 @@ main()
   }
   for ( int i = 2+26; i < n-1; i++ ) { 
     // Note the -1 above. That is because it needs to be null terminated
-    inbuf[i] = '\t';
+    inbuf[i] = ' ';
   }
   status = trim(inbuf, outbuf, n); cBYE(status);
   if ( strcmp(outbuf, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0 ) { 

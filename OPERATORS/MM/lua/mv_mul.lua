@@ -30,7 +30,9 @@ local mv_mul = function(X, y)
   local y_len, yptr, nn_yptr 
   local chunk_idx = 0
   
-  local gen_fn = function()
+  local gen_fn = function(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     if  ( first_call ) then 
       -- print("malloc'ing for generator of mv_mul")
       -- START: malloc

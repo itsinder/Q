@@ -1,4 +1,4 @@
-g_err = {}
+local g_err = {}
 -- this function will be used whenever dynamic error codes will be required
 --function g_err.GET_CELL_ERROR(row_idx, col_idx)
 --  return "get_cell error in row " .. row_idx .. " column " .. col_idx

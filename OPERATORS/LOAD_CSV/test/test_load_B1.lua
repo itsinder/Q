@@ -26,7 +26,7 @@ tests.t1 = function ()
   assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ")
   assert(ret[1]:num_elements()==65540, "Incorrect number of elements in vector")
   
-  Q.print_csv(ret[1], nil, script_dir .. "/output_file_B1.csv")
+  Q.print_csv(ret[1], script_dir .. "/output_file_B1.csv")
 
   local diff_status = diff(script_dir .. "/input_file_B1.csv", script_dir .. "/output_file_B1.csv")
   assert(diff_status, "Input and Output csv file not matched")

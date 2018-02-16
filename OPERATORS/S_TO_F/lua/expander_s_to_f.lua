@@ -23,7 +23,9 @@ return function (a, args)
   local buff =  nil
   local chunk_idx = 0
   
-  local gen1 = function()
+  local gen1 = function(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     buff = buff or ffi.malloc(bufsz)
     assert(buff, "malloc failed")
     local lb = chunk_size * chunk_idx

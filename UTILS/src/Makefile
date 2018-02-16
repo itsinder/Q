@@ -67,6 +67,8 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_is_valid_chars_for_num.h : 
 	lua ../lua/cli_extract_func_decl.lua is_valid_chars_for_num.c ${INCDIR}
 
+../gen_inc/_generate_bin.h :
+	lua ../lua/cli_extract_func_decl.lua generate_bin.c ${INCDIR}
 
 ../gen_src/_bin_search_I1.c : bin_search.tmpl bin_search_generator.lua
 	lua bin_search_generator.lua I1
@@ -108,6 +110,7 @@ hdr_files = \
         ../gen_inc/_get_bit_u64.h \
         ../gen_inc/_set_bit.h \
         ../gen_inc/_set_bit_u64.h \
+        ../gen_inc/_generate_bin.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
 	../gen_inc/_bits_to_bytes.h   \
@@ -134,6 +137,7 @@ SRC_FILES=  \
         get_bit_u64.c  \
         set_bit.c  \
         set_bit_u64.c  \
+        generate_bin.c  \
 	is_valid_chars_for_num.c \
 
 libutils.so : ${bin_search_files} ${hdr_files}

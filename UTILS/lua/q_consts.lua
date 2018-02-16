@@ -10,8 +10,7 @@ local qconsts = {}
     qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
-    qconsts.sz_str_for_lua = 2048 -- TODO Should be much bigger
-    qconsts.sz_str_for_lua = 1048576 
+    qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger
    --===================================
     qconsts.chunk_size = 64 * 1024
     --===========================
@@ -52,35 +51,37 @@ local qconsts = {}
     iorf["F8"] =  "floating_point";
     qconsts.iorf = iorf
     --===========================
- -- width refers to number of bytes needed to store an element of qtype
- -- max_txt_width refers to number of characters in ASCII representation
+
     local qtypes = {}
     qtypes.I1 = { 
       min = -128,
       max =  127,
-      max_txt_width  = 8,
+      max_txt_width  = 32,
       width = 1,
       ctype = "int8_t",
       txt_to_ctype = "txt_to_I1",
       ctype_to_txt = "I1_to_txt",
+      max_length="6"
     }
     qtypes.I2 = { 
       min = -32768,
       max =  32767,
-      max_txt_width  = 16,
+      max_txt_width  = 32,
       width = 2,
       ctype = "int16_t",
       txt_to_ctype = "txt_to_I2",
       ctype_to_txt = "I2_to_txt",
+      max_length="8" 
     }
     qtypes.I4 = { 
       min = -2147483648,
       max =  2147483647,
-      max_txt_width = 16,
+      max_txt_width = 32,
       width = 4,
       ctype = "int32_t",
       txt_to_ctype = "txt_to_I4",
       ctype_to_txt = "I4_to_txt",
+      max_length="13" 
     }
     qtypes.I8 = { 
       min = -9223372036854775808,
@@ -90,6 +91,7 @@ local qconsts = {}
       ctype = "int64_t",
       txt_to_ctype = "txt_to_I8",
       ctype_to_txt = "I8_to_txt",
+      max_length="22" 
     }
     qtypes.F4 = { 
       min = -3.4 * math.pow(10,38),
@@ -99,6 +101,7 @@ local qconsts = {}
       ctype = "float",
       txt_to_ctype = "txt_to_F4",
       ctype_to_txt = "F4_to_txt",
+      max_length="33" 
     }
     qtypes.F8 = { 
       min = -1.7 * math.pow(10,308),
@@ -108,24 +111,25 @@ local qconsts = {}
       ctype = "double",
       txt_to_ctype = "txt_to_F8",
       ctype_to_txt = "F8_to_txt",
+      max_length="65" 
     }
     qtypes.SV = { 
       min = 0, -- 0 is undefined, 1 onwards are actual values
       max = 1048576, -- cannot have more than 1M unique strings in column
-      max_txt_width = 2*1024,
+      max_txt_width = 8,
       width = 4, -- SV is treated as I4
       ctype = "int32_t", -- SV is treated as I4
+      txt_to_ctype = "txt_to_I4",
+      ctype_to_txt = "I4_to_txt",
+      max_length="13"
     }
     qtypes.SC = { 
-      -- width not specified since it is not same for all fields
-      max_width = 1024,
+      width = 8,
       ctype = "char",
-      max_txt_width = 2*1024, -- should be twice max_width
       txt_to_ctype = "txt_to_SC",
       ctype_to_txt = "SC_to_txt" 
     }
     qtypes.TM = { 
-      -- width = sizeof(struct tm) TODO 
       max_txt_width = 64,
       ctype = "struct tm",
       txt_to_ctype = "txt_to_TM",
@@ -135,8 +139,10 @@ local qconsts = {}
       min = 0,
       max = 1,
       max_txt_width = 2,
-      -- width has to be handled as a special case
+      width = 1, -- This has to be handled as a special case
       ctype = "uint64_t",
+      txt_to_ctype = "",
+      ctype_to_txt = "TBD" 
     }
 
    qconsts.qtypes = qtypes

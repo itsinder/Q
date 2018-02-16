@@ -4,6 +4,7 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
 -- for k, v in pairs(vec) do print(k, v) end 
@@ -18,7 +19,7 @@ local tests = {}
 tests.t1 = function()
   local infile = '_in1_I4.bin'
   -- generating required .bin file 
-  gen_bin.generate_bin(10, "I4", infile, "iter")
+  qc.generate_bin(10, "I4", infile, "linear")
   assert(plpath.isfile(infile), "Create the input files")
   local y = Vector.new('I4', infile, false)
   local filesize = plpath.getsize(infile)
@@ -49,7 +50,7 @@ end
 -- try to modify a vector created as read only. Should fail
 tests.t2 = function()
   -- generating required .bin file 
-  gen_bin.generate_bin(10, "I4", "_in1_I4.bin", "iter")
+  qc.generate_bin(10, "I4", "_in1_I4.bin", "linear")
   assert(plpath.isfile("_in1_I4.bin"))
   local y = Vector.new('I4', '_in1_I4.bin')
   y:persist(true)

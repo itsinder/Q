@@ -36,7 +36,7 @@ local mk_col = function (input, qtype, nn_input)
     assert(qconsts.qtypes[qtype].min, "min value of qtype nil " .. err.INVALID_COLUMN_TYPE)
   end
 
-  local ctype =  assert(qconsts.qtypes[qtype].ctype, g_err.NULL_CTYPE_ERROR)
+  local ctype =  assert(qconsts.qtypes[qtype].ctype, err.NULL_CTYPE_ERROR)
   local table_length = table.getn(input)
   local length_in_bytes = nil
   local chunk = nil

@@ -152,12 +152,60 @@ local function get_files(path, pattern)
 
 end
 
+<<<<<<< HEAD
+local function get_files(path, pattern)
+  local files = {}
+  if (path and plpath.isfile(path)) then
+    files[#files + 1] = path
+    return files
+  else
+    -- run all tests in a DIR, either custom or default Q_SRC_ROOT
+    if not (path and plpath.isdir(path)) then
+      usage()
+      os.exit()
+    end
+    return (require "Q/TEST_RUNNER/q_test_discovery")(path, pattern)
+  end
+end
+
+=======
+>>>>>>> dev
 
 local test_type = arg[1]
 local path = arg[2]
 args = nil
 local test_res = {}
 local files = {}
+<<<<<<< HEAD
+
+local pattern = nil
+
+if test_type == "s" then
+  pattern = "stress_test*.lua"
+end
+
+files = get_files(path, pattern)
+
+if test_type == "i" or test_type == "s" then
+  for _,f in pairs(files) do
+    test_res[f] = {}
+    test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
+  end
+elseif test_type:match("^l") ~= nil then
+  local duration = tonumber(test_type:match("^l([0-9]+)$"))
+  assert(duration ~= nil, "Must have a valid duration for the long term run")
+  local long_files = {}
+  for k,v in ipairs(files) do
+    if is_polluter(v) == false then
+      long_files[#long_files + 1] = v
+    end
+  end
+  test_res.all = {}
+  test_res.all.pass, test_res.all.fail = run_longterm_tests(long_files, duration, nil)
+else
+  usage()
+  os.exit()
+=======
 if test_type == "i" then
 	files = get_files(path,"test_") -- only the prefix is needed 
 	for _,f in pairs(files) do
@@ -181,6 +229,7 @@ elseif test_type:match("^l") ~= nil then
 	end
 	test_res.all = {}
 	test_res.all.pass, test_res.all.fail = run_longterm_tests(long_files, duration, nil)
+>>>>>>> dev
 end
 print(plpretty.write(test_res))
 

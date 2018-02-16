@@ -36,7 +36,7 @@ local gather_test_meta_data = function(map_value, qtype)
     if string.match( M.file_name,"${q_type}" ) then
       bin_file_name = script_dir.."/bin/in_" .. qtype .. ".bin"
       -- generating .bin files required for materialized vector
-      genbin.generate_bin(map_value.num_elements, qtype, bin_file_name, "random" )
+      qc.generate_bin(map_value.num_elements, qtype, bin_file_name, "seq" )
       -- for .bin file
       M.file_name = bin_file_name
       -- for .nn bin file

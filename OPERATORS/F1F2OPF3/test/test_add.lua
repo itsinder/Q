@@ -10,7 +10,7 @@ tests.t1 = function()
   c1 = 10
   local c2 = Q.mk_col( {80,70,60,50,40,30,20,10}, "I8")
   local z = Q.vvadd(c3, c2)
-  Q.print_csv(z:eval(), { lb = 1, ub = 4} , "_out1.txt")
+  Q.print_csv(z, "_out1.txt", { lb = 1, ub = 4})
   os.execute("diff _out1.txt out1.txt");
   assert(Q.sum(Q.vvneq(z, Q.mk_col({81,72,63,54,45,36,27,18}, "I4"))):eval():to_num() == 0 )
   print("Test t1 succeeded")

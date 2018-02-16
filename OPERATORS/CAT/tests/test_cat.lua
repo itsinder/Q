@@ -335,9 +335,46 @@ tests.t10 = function()
 end
 
 tests.t11 = function()
-  -- Testing where first vector is of size 64K+n, n ranging from 0 to 64
-  --
-  print("Test t11 succeeded")
+  -- Case11
+  -- Try cat with multiple vectors
+
+  local a_length = 65599
+  local b_length = 85
+  local c_length = 675
+  local d_length = 65536
+
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = a_length} )
+  local b = Q.seq( {start = 1, by = 1, qtype = "I4", len = b_length} )
+  local c = Q.seq( {start = 1, by = 1, qtype = "I4", len = c_length} )
+  local d = Q.seq( {start = 1, by = 1, qtype = "I4", len = d_length} )
+
+  local z = Q.cat({a, b, c, d})
+  
+  assert(z:length() == (a_length + b_length + c_length + d_length))
+  
+  local z_val, z_nn_val, val, nn_val
+  
+  for i = 1, a:length() do
+    z_val, z_nn_val = c_to_txt(z, i)
+    val, nn_val = c_to_txt(a, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+  for i = 1, b:length() do
+    z_val, z_nn_val = c_to_txt(z, i + a:length())
+    val, nn_val = c_to_txt(b, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+  for i = 1, c:length() do
+    z_val, z_nn_val = c_to_txt(z, i + a:length() + b:length())
+    val, nn_val = c_to_txt(c, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end
+  for i = 1, d:length() do
+    z_val, z_nn_val = c_to_txt(z, i + a:length() + b:length() + c:length())
+    val, nn_val = c_to_txt(d, i)
+    assert(val == z_val, "Mismatch, Expected = " .. tostring(val) .. ", Actual = " .. tostring(z_val))
+  end  
 end
+
 
 return tests

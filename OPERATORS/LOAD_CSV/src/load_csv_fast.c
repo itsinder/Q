@@ -45,8 +45,7 @@ load_csv_fast(
     char ***ptr_nil_files,
     /* Note we set nil_files and out_files only if below == NULL */
     char *str_for_lua,
-    size_t sz_str_for_lua,
-    int *ptr_n_str_for_lua 
+    size_t sz_str_for_lua 
     )
 //STOP_FUNC_DECL
 {
@@ -56,22 +55,13 @@ load_csv_fast(
   FILE **ofps = NULL; /* Output File PointerS */
   FILE **nn_ofps = NULL; /* NN Output File PointerS */
   qtype_type *qtypes = NULL;
-  bool *is_trim = NULL; // whether to trim or not */
   uint64_t *nn_buf = NULL;
   char **out_files = NULL;
   char **nil_files = NULL;
   char *opdir = NULL; 
   uint64_t *word_B1 = NULL; // used for 64 bit integer buffer if col is B1
-  /*
-  fprintf(stderr, "C: q_data_dir = %s, \n", q_data_dir);
-  fprintf(stderr, "C: infile     = %s, \n", infile);
-  fprintf(stderr, "C: sz_str_for_lua     = %d, \n", (int)sz_str_for_lua);
-  fprintf(stderr, "C: n_str_for_lua     = %d, \n", *ptr_n_str_for_lua);
-  fprintf(stderr, "C: is_hdr     = %d, \n", is_hdr);
-  fprintf(stderr, "C: str_for_lua = %s, \n", str_for_lua);
-*/
+
   //---------------------------------
-  *ptr_n_str_for_lua = 0;
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
   if ( nC == 0 ) { go_BYE(-1); }
   if ( ptr_nR == NULL ) { go_BYE(-1); }
@@ -86,7 +76,6 @@ load_csv_fast(
   }
   else {
     opdir = strdup(q_data_dir);
-    // FOR TESTING opdir = strdup("/home/subramon/local/Q/data");
   }
   //---------------------------------
   // allocate space and initialize other resources
@@ -102,10 +91,6 @@ load_csv_fast(
   for ( uint32_t i = 0; i < nC; i++ ) {
     num_nulls[i] = 0;
   }
-
-  is_trim = malloc(nC * sizeof(bool));
-  return_if_malloc_failed(is_trim);
-  for ( uint32_t i = 0; i < nC; i++ ) { is_trim[i] = false; }
 
   nn_buf = malloc(nC * sizeof(uint64_t));
   return_if_malloc_failed(nn_buf);
@@ -130,13 +115,15 @@ load_csv_fast(
     memset(buf, '\0', LEN_BASE_FILE_NAME+1);
     status = rand_file_name(buf, LEN_BASE_FILE_NAME);
     out_files[i] = malloc(ddir_len * sizeof(char));
-    sprintf(out_files[i], "%s/%s", opdir, buf);
+    sprintf(out_files[i], "%s/", opdir);
+    strcat(out_files[i], buf);
 
     if ( has_nulls[i] ) {
       nil_files[i] = malloc(ddir_len * sizeof(char));
-      sprintf(nil_files[i], "%s/_nn%s", opdir, buf);
+      sprintf(nil_files[i], "%s/_nn", opdir);
+      strcat(nil_files[i], buf);
     }
-    // fprintf(stderr, "%s, %s \n", out_files[i], nil_files[i]);
+
   }
 
   *ptr_nR = 0;
@@ -151,30 +138,27 @@ load_csv_fast(
     }
     some_load = true;
     if ( strcasecmp(fldtypes[i], "I1") == 0 ) {
-      qtypes[i] = I1; is_trim[i] = true;
+      qtypes[i] = I1;
     }
     else if ( strcasecmp(fldtypes[i], "I2") == 0 ) {
-      qtypes[i] = I2; is_trim[i] = true;
+      qtypes[i] = I2;
     }
     else if ( strcasecmp(fldtypes[i], "I4") == 0 ) {
-      qtypes[i] = I4; is_trim[i] = true;
+      qtypes[i] = I4;
     }
     else if ( strcasecmp(fldtypes[i], "I8") == 0 ) {
-      qtypes[i] = I8; is_trim[i] = true;
+      qtypes[i] = I8;
     }
     else if ( strcasecmp(fldtypes[i], "F4") == 0 ) {
-      qtypes[i] = F4; is_trim[i] = true;
+      qtypes[i] = F4;
     }
     else if ( strcasecmp(fldtypes[i], "F8") == 0 ) {
-      qtypes[i] = F8; is_trim[i] = true;
+      qtypes[i] = F8;
     }
     else if ( strcasecmp(fldtypes[i], "B1") == 0 ) {
-      qtypes[i] = B1; is_trim[i] = true;
+      qtypes[i] = B1;
     }
-    else { 
-      fprintf(stderr, "Unknown fldtype [%s] \n", fldtypes[i]);
-      go_BYE(-1); 
-    }
+    else { go_BYE(-1); }
   }
   if ( !some_load ) { go_BYE(-1); }
   // malloc output file pointers and nil output file pointers
@@ -220,8 +204,7 @@ load_csv_fast(
   bool is_last_col;
   char null_val[8];
   memset(null_val, '\0', 8); // we write 0 when value is null
-#define BUFSZ 2047 
-  // TODO BUFSZ should come from max of qconsts.qtypes[*].max_txt_width
+#define BUFSZ 31
   char lbuf[BUFSZ+1];
   char buf[BUFSZ+1];
   bool is_val_null;
@@ -239,17 +222,14 @@ load_csv_fast(
     }
 
     xidx = get_cell(mmap_file, file_size, xidx, is_last_col, lbuf, BUFSZ);
-    if ( xidx == 0 ) { 
-      go_BYE(-1); } //means the file is empty or some error
+    if ( xidx == 0 ) { go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
-    if ( is_trim[col_ctr] ) { 
-      status = trim(lbuf, buf, BUFSZ); cBYE(status);
-    }
-/*
-    fprintf(stderr, "%llu, %u, %llu, %s \n", 
-       (unsigned long long)row_ctr, col_ctr, 
-       (unsigned long long)xidx, buf);
-*/
+    status = trim(lbuf, buf, BUFSZ); cBYE(status);
+
+    //fprintf(stderr, "%llu, %u, %llu, %s \n", 
+     //   (unsigned long long)row_ctr, col_ctr, 
+     //   (unsigned long long)xidx, buf);
+
     // Deal with header line 
     //row_ctr == 0 means we are reading the first line which is the header
     if ( is_hdr ) { 
@@ -276,6 +256,7 @@ load_csv_fast(
     if ( buf[0] == '\0' ) { // got back null value
       is_val_null = true;
       if ( !has_nulls[col_ctr] ) { 
+        // got null value when user said no null values
         fprintf(stderr, " got null value when user said no null values row_ctr = %" PRIu64 ", col_ctr = %d \n", row_ctr, col_ctr);
         go_BYE(-1);
       }

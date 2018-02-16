@@ -33,7 +33,9 @@ local expander_ainb = function(op, a, b)
   local csz = qconsts.chunk_size -- over allocated but needed by C
   local cbuf = nil
   local chunk_idx = 0
-  local function ainb_gen()
+  local function ainb_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     cbuf = cbuf or ffi.malloc(csz)
     local alen, aptr, nn_aptr = a:chunk(chunk_idx) 
     if ( ( not alen ) or ( alen == 0 ) ) then
