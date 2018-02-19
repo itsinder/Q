@@ -71,41 +71,6 @@ local function append_dirs(dest, src)
   return dest
 end
 
-<<<<<<< HEAD
-local function find_test_files(directory, pattern)
-   local iter_list, next_iter_list = {}, {}
-   local stress_test_run = false
-   if pattern and pattern == "stress_test*.lua" then
-     stress_test_run = true
-   end
-   pattern = pattern or "*.lua"
-   iter_list[1] = directory
-   local list = {}
-   repeat
-      for i=1,#iter_list do
-         local dir = iter_list[i]
-         local exclude = false
-         if ( ( string.find(dir, ".git") ) or 
-              ( string.find(dir, "DEPRECATED") ) ) then 
-           exclude = true
-         end
-         if ( not exclude ) then 
-           local files = pldir.getfiles(dir, pattern)
-           local xfiles = files
-           if not stress_test_run then
-             xfiles = exclude_non_test_files(files)
-           end
-           local dirs = pldir.getdirectories(dir)
-           next_iter_list = append_dirs(next_iter_list, dirs)
-           for j=1,#xfiles do
-             local xfile = xfiles[j]
-             if not is_file_exception(xfile) then
-               -- print("SCHEDULED ",file)
-               list[#list + 1] = tostring(xfile)
-             end
-           end
-         end
-=======
 local function find_test_files(directory,  tests_pattern)
   local iter_list, next_iter_list = {}, {}
   local pattern = "*.lua" -- removed as args as *.lua is embedded in other parts of the code
@@ -118,7 +83,6 @@ local function find_test_files(directory,  tests_pattern)
       if ( ( string.find(dir, ".git") ) or
         ( string.find(dir, "DEPRECATED") ) ) then
         exclude = true
->>>>>>> dev
       end
       if ( not exclude ) then
         local files = pldir.getfiles(dir, pattern)

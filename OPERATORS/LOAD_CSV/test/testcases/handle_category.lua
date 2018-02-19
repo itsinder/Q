@@ -2,6 +2,7 @@ local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
 local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local utils_fns = require 'Q/UTILS/lua/utils'
 
 local fns = {}
 
@@ -48,7 +49,7 @@ local handle_output_regex = function  (index, status, v, flag, category)
   -- in category 1 , status = status , flag = true . if status is true, testcase should fail
   -- in category 2,  status = not status, flag = false, if status is false, testcase should fail
   if status then
-    print("status is ",status) 
+    print("status is ",status)
     fns["increment_failed_load"](index, v, "testcase failed : in "..category.." , incorrect status value")
     return nil
   end
@@ -97,7 +98,6 @@ end
 fns.handle_category2 = function (index, status, ret, v, output_category3, v_category3)
   -- print(ret)
   local output
-
   if v then
     -- print(v.name)
     if type(ret) ~= "table" then
@@ -105,7 +105,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
       return false
     end
     output = handle_output_regex(index, status, v, false, "category2")
-    ret = ret[1]
+    ret = ret[v.col_names[1].name]
   else
     v = v_category3
     output = output_category3
@@ -131,9 +131,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
   end
 
   for i=1,ret:length() do
-   
     local status, result = pcall(convert_c_to_txt, ret, i)
-    
     if status == false then
       fns["increment_failed_load"](index, v, "testcase failed: in category2 "..result)
       return false
@@ -149,7 +147,7 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
     if ( ( not is_string ) and ( result ~= "" ) ) then 
       result = tonumber(result)
     end
-    --print(result, output[i])
+
     -- if result is nil, then set to empty string
     if result ~= output[i] then 
       fns["increment_failed_load"](index, v, "testcase category2 failed , \nresult="..result.." \noutput["..i.."]="..output[i].."\n")
@@ -160,20 +158,20 @@ fns.handle_category2 = function (index, status, ret, v, output_category3, v_cate
 end
 
 fns.handle_category2_1 = function (index, status, ret, v, qtype)
-  
-  ret[1]:eov()
+  local col_name = v.col_names[1].name
+  ret[col_name]:eov()
  
-  local num_elements = ret[1]:num_elements()
+  local num_elements = ret[col_name]:num_elements()
   local no_of_chunks = math.ceil( num_elements / qconsts.chunk_size )
   print("number of chunks are==========",no_of_chunks)
   
   for chunk_no = 0,no_of_chunks-1 do
     local status, len, base_data, nn_data 
     if not chunk_no then
-      assert(ret[1]:is_eov())
-      status, len, base_data, nn_data = pcall(ret[1].get_all, ret[1])
+      assert(ret[col_name]:is_eov())
+      status, len, base_data, nn_data = pcall(ret[col_name].get_all, ret[col_name])
     else
-      status, len, base_data, nn_data = pcall(ret[1].chunk, ret[1], chunk_no)
+      status, len, base_data, nn_data = pcall(ret[col_name].chunk, ret[col_name], chunk_no)
     end
     assert(status, "Failed to get the chunk from vector")
     assert(base_data, "Received base data is nil")
@@ -182,7 +180,7 @@ fns.handle_category2_1 = function (index, status, ret, v, qtype)
     
     if qtype == "B1" then
       for i = 1 , len do 
-        local bit_value = convert_c_to_txt(ret[1], i)
+        local bit_value = convert_c_to_txt(ret[col_name], i)
         if bit_value == nil then bit_value = 0 end
         local expected
         if i % 2 == 0 then 
@@ -202,7 +200,7 @@ fns.handle_category2_1 = function (index, status, ret, v, qtype)
       --local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
       for i = 1, len do
         local expected = i*15 % qconsts.qtypes[qtype].max
-        local value = convert_c_to_txt(ret[1],i)
+        local value = convert_c_to_txt(ret[col_name],i)
         --print(expected, value)
         if ( value ~= expected ) then
           status = false
@@ -223,6 +221,7 @@ end
 -- it is called in loop for every column
 fns.handle_category3 = function (index, status, ret, v)
   -- print(ret)
+  local no_of_cols = utils_fns.table_length(ret)
   -- print(v.name)
   local output = handle_output_regex(index, status, v, false, "category3")
   if output == nil then return false end
@@ -231,15 +230,15 @@ fns.handle_category3 = function (index, status, ret, v)
     fns["increment_failed_load"](index, v, "testcase failed: in category3 , output regex and output of load is not a table")
     return false
   end
-  
-  if #output ~= #ret then
+
+  if #output ~= no_of_cols then
     fns["increment_failed_load"](index, v, "testcase failed: in category3 , output regex length is not equal to  output of load ")
     return false
   end
   
   for i=1,#output do
     --print(type(ret[i]))
-    local ret = fns.handle_category2(index, status, ret[i], nil, output[i], v)
+    local ret = fns.handle_category2(index, status, ret[v.col_names[i].name], nil, output[i], v)
     if not ret then return nil end
   end
   return true

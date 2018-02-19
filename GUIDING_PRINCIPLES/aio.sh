@@ -90,6 +90,7 @@ if [[ $RES -ne 0 ]] ; then
    sudo luarocks install luacov
    sudo luarocks install cluacov
    sudo luarocks install http      # for QLI
+   sudo luarocks install linenoise # for QLI
 else
    my_print "luarocks is already installed"
 fi

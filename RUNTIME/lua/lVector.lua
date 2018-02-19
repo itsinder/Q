@@ -430,10 +430,19 @@ function lVector:clone()
   local vector = setmetatable({}, lVector)
   vector._base_vec = Vector.clone(self._base_vec)
   assert(vector._base_vec)
+
+  -- for meta data stored in vector
+  vector._meta = {}
+
   -- Check for nulls
   if ( self:has_nulls() ) then
     vector._nn_vec = Vector.clone(self._nn_vec)
     assert(vector._nn_vec) 
+  end
+
+  -- copy aux metadata if any
+  for i, v in pairs(self._meta) do
+    vector._meta[i] = v
   end
   return vector
 end
