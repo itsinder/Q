@@ -1,6 +1,7 @@
 local lVector	= require 'Q/RUNTIME/lua/lVector'
 local cmem	= require 'libcmem'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
+local c_to_txt	= require 'Q/UTILS/lua/C_to_txt'
 
 local tests = {}
 --====== Testing vector cloning
@@ -16,21 +17,43 @@ tests.t1 = function()
   end
   x:put_chunk(base_data, nil, num_elements)
   x:eov()
+  x:persist(true)
+  
+  -- set metadata
+  x:set_meta("key1", "val1")
 
   print("Cloning vector")
   local x_clone = x:clone()
   assert(x_clone:num_elements() == num_elements)
+
   x_meta = x:meta()
   x_clone_meta = x_clone:meta()
 
+  -- persist flag should be false
+  assert(x_clone_meta.base.is_persist == false)
+
+  -- OPEN_MODE should be zero
+  assert(x_clone_meta.base.open_mode == "NOT_OPEN")
+
   -- compare base metadata
   for i, v in pairs(x_meta.base) do
-    if i ~= "file_name" then
+    if not ( i == "file_name" or i == "open_mode" or i == "is_persist" ) then
       assert(v == x_clone_meta.base[i])
-    else
-      assert(v ~= x_clone_meta.base[i])
     end
   end
+
+  -- compare aux metadata
+  for i, v in pairs(x_meta.aux) do
+    print(i, v)
+    assert(v == x_clone_meta.aux[i])
+  end
+
+  -- compare vector elements
+  for i = 1, x_clone:num_elements() do
+    val, nn_val = c_to_txt(x_clone, i)
+    assert(val == i*10)
+  end
+
   print("Successfully completed test t1")
 end
 

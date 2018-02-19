@@ -8,6 +8,7 @@
 #include "_buf_to_file.h"
 #include "_file_exists.h"
 #include "_txt_to_I4.h"
+#include "_copy_file.h"
 
 // #define Q_MAX_LEN_FILE_NAME  255
 // #define Q_MAX_LEN_INTERNAL_NAME  31
@@ -381,35 +382,6 @@ BYE:
   return status;
 }
 
-int
-copy_file_contents(
-    char *src_file,
-    char *dst_file
-    )
-{
-  int status = 0;
-  FILE *src_fp;
- 
-  src_fp = fopen(src_file, "rb");
-  return_if_fopen_failed(src_fp, *src_file, "rb");
-
-  int64_t buf_size = 1024; // Remove this hard-coding, size of intermediate buffer
-  char *buffer = malloc(buf_size);
-
-  while(fread(buffer, 1, buf_size, src_fp)) {
-    status = buf_to_file(buffer, 1, buf_size, dst_file);
-    cBYE(status);
-  }
-
-  // Close src_fp
-  fclose_if_non_null(src_fp); 
-
-  // Free intermediate buffer
-  free_if_non_null(buffer);
-BYE:
-  return status;
-}
-
 int 
 vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
@@ -420,8 +392,9 @@ vec_clone(
   if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
   // quit if opened for writing
   if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
-  // Do we require below step?
-  memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
+  // TODO:Do we require below step?
+  // Commenting memcpy as we are setting fields explicitly
+  // memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
 
   ptr_new_vec->open_mode = 0; // unopened
   ptr_new_vec->field_size = ptr_old_vec->field_size;
@@ -433,7 +406,8 @@ vec_clone(
   // Set is_eov to true
   ptr_new_vec->is_eov = true;
   ptr_new_vec->chunk_sz = ptr_old_vec->chunk_sz;
-  // TODO: What should we do with persist flag?
+  // Set is_persist to false, if required, user will set it to true
+  ptr_new_vec->is_persist = false;
 
   if ( ptr_old_vec->chunk != NULL ) { 
     ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
@@ -443,16 +417,23 @@ vec_clone(
     ptr_new_vec->chunk_num = ptr_old_vec->chunk_num;
     ptr_new_vec->num_in_chunk = ptr_old_vec->num_in_chunk;
   }
+  else {
+    ptr_new_vec->chunk_num = 0;
+    ptr_new_vec->num_in_chunk = 0;
+  }
   ptr_new_vec->map_addr = NULL; // unopened
   ptr_new_vec->map_len  = 0;    // unopened
   if ( *ptr_old_vec->file_name != '\0' && file_exists(ptr_old_vec->file_name) ) { 
     status = rand_file_name(ptr_new_vec->file_name, 64); // TODO FIX 
     cBYE(status);
     // copy old to new
-    status = copy_file_contents(ptr_old_vec->file_name, ptr_new_vec->file_name);
+    status = copy_file(ptr_old_vec->file_name, ptr_new_vec->file_name);
     cBYE(status);
     // Update file size
     ptr_new_vec->file_size = ptr_old_vec->file_size;
+  }
+  else {
+    ptr_new_vec->file_size = 0;
   }
 BYE:
   return status;
