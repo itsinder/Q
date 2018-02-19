@@ -96,4 +96,14 @@ fns.testcase_results = function (v, test_for, test_type, result, spare)
   -- print("__Q_TEST__"..date_time.." ; "..req_path.." ; LOAD_CSV ; "..v.name.." ; UNIT TEST ; SUCCESS \n")
 end
 
+fns.table_length= function(tbl)
+
+  local count = 0
+  for i in pairs(tbl) do 
+    count = count + 1 
+  end
+  return count 
+
+end
+
 return fns

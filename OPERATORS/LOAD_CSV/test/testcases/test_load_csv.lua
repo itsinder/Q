@@ -29,6 +29,7 @@ for i, v in ipairs(T) do
     local D = v.data
     local opt_args = v.opt_args
     local result
+    v.col_names = M
     
     if v.category == "category2_1" then
     gen_csv.generate_csv(test_input_dir .. D, M[1].qtype, v.num_elements, "random")
