@@ -6,14 +6,13 @@ extern "C" {
 }
 
 //START_FUNC_DECL
-int 
+void *
 cuda_malloc(
-    int64_t N,
-    void *ptr
+    int64_t N
     )
 //STOP_FUNC_DECL 
 {
-  int status = 0;
+  static void *ptr;
   cudaMallocManaged(&ptr, N);
-  return status;
+  return ptr;
 }
