@@ -329,7 +329,7 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
-    free(ptr_vec->chunk);
+    cudaFree(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
   if ( !ptr_vec->is_persist ) {
