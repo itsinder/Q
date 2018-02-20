@@ -19,11 +19,12 @@ clean:
 ../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
 	make -C ../../OPERATORS/PRINT/lua/
 
+# Using nvcc compiler because of core_vec.cu
 libvec.so:
-	gcc -g ${QC_FLAGS} $(INCS) \
+	nvcc -g -DDEBUG -Xcompiler -fPIC $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \
-		core_vec.c \
+		core_vec.cu \
 		../../UTILS/src/mmap.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
