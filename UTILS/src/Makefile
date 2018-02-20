@@ -146,7 +146,7 @@ SRC_FILES=  \
 	is_valid_chars_for_num.c \
 
 libutils.so : ${bin_search_files} ${hdr_files}
-	nvcc -g -x c -DDEBUG -Xcompiler -fPIC ${Q_LINK_FLAGS} ${INCS} ${SRC_FILES} ../gen_src/*.c -o libutils.so
+	nvcc -g -DDEBUG -Xcompiler -fPIC ${Q_LINK_FLAGS} ${INCS} ${SRC_FILES} ../gen_src/*.c -o libutils.so
 	mkdir -p ${Q_BUILD_DIR}/include/
 	mkdir -p ${Q_BUILD_DIR}/src/
 	cp ${INCDIR}/*.h         ${Q_BUILD_DIR}/include/
