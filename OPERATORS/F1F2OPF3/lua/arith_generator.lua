@@ -21,15 +21,8 @@
           if ( status ) then 
             assert(type(subs) == "table")
             assert(type(tmpl) == "string")
-            -- for k, v in pairs(subs) do print(k, v) end
             -- print(tmpl)
             gen_code.doth(subs, tmpl, incdir)
-            -- CUDA: Generating header files with updated symbol name
-            func_name = subs.fn
-            subs.fn = qconsts.f1f2opf3_symbols[func_name]
-            gen_code.doth(subs, tmpl, incdir)
-            -- CUDA: Setting back the original func_name while generating c files
-            subs.fn = func_name
             -- CUDA: Passing the "cu" extension to create the cuda files
             gen_code.dotc(subs, tmpl, srcdir, "cu")
             print("Produced ", subs.fn)

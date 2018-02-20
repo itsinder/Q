@@ -17,7 +17,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   -- CUDA: Retrieving the updated func_name as libq_core.so has modified symbol names due to nvcc compilation
-  local func_name = assert(qconsts.f1f2opf3_symbols[subs.fn])
+  local func_name = assert(subs.fn)
   -- START: Dynamic compilation
   if ( not qc[func_name] ) then 
     print("Dynamic compilation kicking in... ")
