@@ -105,7 +105,7 @@ tests.t5 = function()
 end
 
 tests.t6 = function()
-  -- test meta fucntionalirt
+  -- test meta fucntionality
   local size = 1024
   local qtype = "I8"
   local name = "some bogus name"
@@ -115,6 +115,26 @@ tests.t6 = function()
   assert(c1:name() == name)
   assert(c1:is_foreign() == false)
   print("test t6 passed")
+end
+
+tests.t7 = function()
+  -- test SC
+  local gval = {}
+  gval[0] = "1234567";
+  gval[1] = "123.567";
+  gval[2] = ""
+  gval[3] = " abcd "
+  local size = 8
+  local qtype = "SC"
+  local name = "some bogus name"
+  for k, v in ipairs(gval) do 
+  local c1 = assert(cmem.new(size, qtype, name))
+    c1:set(v)
+    y = c1:to_str("I4")
+    print(y)
+    assert(y == v)
+  end
+  print("test t7 passed")
 end
   
 return tests

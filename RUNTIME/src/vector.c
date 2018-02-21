@@ -296,7 +296,8 @@ static int l_vec_put1( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
   if ( strcmp(ptr_vec->field_type, "SC") == 0 ) { 
-    addr = luaL_checkudata(L, 2, "CMEM");
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    addr = ptr_cmem->data;
   }
   else {
     SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
@@ -349,8 +350,8 @@ static int l_vec_set( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
-    void *X = luaL_checkudata(L, 2, "CMEM");
-    addr = X;
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    addr = ptr_cmem->data;
     len = luaL_checknumber(L, 4);
   }
   else if (  luaL_testudata(L, 2, "Scalar") ) { 
@@ -409,13 +410,7 @@ static int l_vec_put_chunk( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( luaL_testudata (L, 2, "CMEM") ) { 
     addr = luaL_checkudata(L, 2, "CMEM");
-  } // TODO UNDO ALL FOLLOWINF HACKERY
-  else if ( luaL_testudata (L, 2, "userdata") ) { 
-    addr = luaL_checkudata(L, 2, "userdata");
-  }
-  else if ( luaL_testudata (L, 2, "cdata") ) { 
-    addr = luaL_checkudata(L, 2, "cdata");
-  }
+  } 
   else {
     fprintf(stderr, "NOT  CMEM\n");
     go_BYE(-1);

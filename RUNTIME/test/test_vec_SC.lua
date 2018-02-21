@@ -5,7 +5,6 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem   = require 'libcmem' ; 
 require 'Q/UTILS/lua/strict'
-local buf = cmem.new(4096)
 
 local tests = {} 
 
@@ -14,6 +13,7 @@ tests.t1 = function()
   local M
   local num_elements 
   local s1, s2
+  local buf = cmem.new(4096, "SC", "string buffer")
   ffi.copy(buf, "ABCD123")
   -- create a nascent vector
   y = assert(Vector.new('SC:8'))

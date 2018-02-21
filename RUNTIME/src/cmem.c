@@ -251,9 +251,24 @@ BYE:
 }
 // Following only for debugging and hence has limited usage 
 static int l_cmem_set( lua_State *L) {
-  
+
   CMEM_REC_TYPE *ptr_cmem  = luaL_checkudata( L, 1, "CMEM");
-  lua_Number val    = luaL_checknumber(L, 2);
+  lua_Number val;
+  char *str_val = NULL;
+  // NOTE: Do NOT change order of if. Lua will claim it as string 
+  // even if it is a number
+  if ( strcmp(ptr_cmem->field_type, "SC") == 0 ) { 
+    if ( lua_isstring(L, 2) ) {
+      str_val = (char *)luaL_checkstring(L, 2);
+    }
+    else { WHEREAMI; goto BYE; }
+  }
+  else {
+    if ( lua_isnumber(L, 2) ) { 
+      val    = luaL_checknumber(L, 2);
+    }
+    else { WHEREAMI; goto BYE; }
+  }
   void *X = ptr_cmem->data;
   char *field_type = ptr_cmem->field_type;
   if ( lua_gettop(L) >= 3 ) { 
@@ -284,6 +299,12 @@ static int l_cmem_set( lua_State *L) {
   }
   else if ( strcmp(field_type, "F8") == 0 ) { 
     double *ptr = (double *)X; ptr[0] = val;
+  }
+  else if ( strcmp(field_type, "SC") == 0 ) { 
+    if ( str_val == NULL ) { WHEREAMI; goto BYE; }
+    memset(ptr_cmem->data, '\0', ptr_cmem->size);
+    if ( strlen(str_val) >= ptr_cmem->size ) { WHEREAMI; goto BYE; }
+    strcpy(ptr_cmem->data, str_val);
   }
   else {
     WHEREAMI; goto BYE;
