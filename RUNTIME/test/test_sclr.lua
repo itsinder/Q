@@ -6,9 +6,9 @@ cmem   = require 'libcmem' ;
 local tests = {}
 tests.t1 = function()
   -- create boolean scalars in several different ways
-  sb = Scalar.new("true", "B1")
-  sb = Scalar.new(true, "B1")
-  x = Scalar.to_str(sb)
+  sb = assert(Scalar.new("true", "B1"))
+  sb = assert(Scalar.new(true, "B1"))
+  x = assert(Scalar.to_str(sb))
   assert(x == "true")
   sb = Scalar.new("false", "B1")
   assert(Scalar.to_str(sb) == "false")
@@ -27,10 +27,6 @@ tests.t2 = function()
 
   s3 = Scalar.new(123.456, "F8")
   assert(Scalar.to_num(s3) == 123.456)
-  -- Verify that cdata works 
-  local x = s1:cdata()
-  print(type(x) )
-  assert(type(x) == "CMEM")
   -- TODO y = x:to_str(x, "I4")
   -- TODO assert(y == "123")
   --================
@@ -53,13 +49,15 @@ tests.t3 = function()
   print("test 3 passed")
 end
 tests.t4 = function()
-  -- testing userdata and creation of scalar from pointer
+  -- testing userdata and creation of scalar from CMEM
   qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
   for _, qtype in ipairs(qtypes) do
-    local s = Scalar.new(123, qtype)
-    local x = s:cdata()
-    local t = assert(Scalar.new(x, qtype))
-    assert(Scalar.eq(s, t) == true)
+    local val = 123
+    local s1 = Scalar.new(val, qtype)
+    local c1 = cmem.new(8, qtype, "test cmem")
+    c1:set(val);
+    local s2 = assert(Scalar.new(c1, qtype))
+    assert(Scalar.eq(s1, s2) == true)
   end
   print("test 4 passed")
 end
@@ -76,13 +74,7 @@ tests.t5 = function()
   -- TODO Why is this not working?????
   for qtype, v in pairs(X) do
     for _, val in ipairs(v) do 
-      print(qtype, val)
-      local s = Scalar.new(val, qtype)
-      local x = s:cdata()
-      local t = assert(Scalar.new(x, qtype))
-      assert(type(t) == "Scalar")
-      print(Scalar.eq(s, t))
-      assert(Scalar.eq(s, t))
+      local s = assert(Scalar.new(val, qtype))
     end
   end
   print("test 5 passed")

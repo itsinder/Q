@@ -13,6 +13,7 @@
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
+#include "cmem.h"
 #include "_txt_to_I4.h"
 
 // TODO Delete luaL_Buffer g_errbuf;
@@ -180,16 +181,19 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_get_vec_buf( lua_State *L) {
+  int status = 0;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  char *chunk = vec_get_buf(ptr_vec); 
-  if ( chunk != NULL ) { 
-    lua_pushlightuserdata(L, chunk);
-    /* Add the metatable to the stack. */
-    luaL_getmetatable(L, "CMEM");
-    /* Set the metatable on the userdata. */
-    lua_setmetatable(L, -2);
-    return 1;
-  }
+
+  CMEM_REC_TYPE *ptr_cmem = 
+    (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  return_if_malloc_failed(ptr_cmem);
+  cmem_dupe(ptr_cmem, ptr_vec->chunk, ptr_vec->chunk_sz, ptr_vec->field_type, "");
+  /* Add the metatable to the stack. */
+  luaL_getmetatable(L, "CMEM");
+  /* Set the metatable on the userdata. */
+  lua_setmetatable(L, -2);
+  return 1;
+BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: no chunk for materialized vector");
   return 2;
@@ -262,8 +266,10 @@ static int l_vec_get_chunk( lua_State *L)
     is_malloc = true;
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;
-    ret_addr = lua_newuserdata(L, sz); 
-    return_if_malloc_failed(ret_addr);
+    CMEM_REC_TYPE *ptr_cmem = 
+      (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+    return_if_malloc_failed(ptr_cmem);
+    cmem_malloc(ptr_cmem, sz, ptr_vec->field_type, "");
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");
     /* Set the metatable on the userdata. */
@@ -401,8 +407,6 @@ static int l_vec_put_chunk( lua_State *L) {
   int status = 0;
   void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  int x =  lua_type (L, 2);
-  const char *y = lua_typename(L, x);
   if ( luaL_testudata (L, 2, "CMEM") ) { 
     addr = luaL_checkudata(L, 2, "CMEM");
   } // TODO UNDO ALL FOLLOWINF HACKERY

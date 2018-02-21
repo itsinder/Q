@@ -24,6 +24,7 @@ libvec.so:
 		vector.c \
 		../../UTILS/src/err.c \
 		core_vec.c \
+		cmem.c \
 		../../UTILS/src/mmap.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
@@ -32,6 +33,13 @@ libvec.so:
 		../../UTILS/src/buf_to_file.c \
                 ../../UTILS/src/copy_file.c \
 		../../UTILS/src/file_exists.c \
+		../../OPERATORS/PRINT/src/B1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I8_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
 		-shared -o libvec.so
 
 libcmem.so:
