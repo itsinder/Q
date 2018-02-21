@@ -389,10 +389,12 @@ vec_clone(
     )
 {
   int status = 0;
-  if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
-  // quit if opened for writing
-  if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
-  // TODO:Do we require below step?
+  // supporting clone operation for non_eov vectors, so commenting below condition
+  // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
+  if ( ptr_old_vec->is_eov == true ) {
+    // quit if opened for writing
+    if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
+  }
   // Commenting memcpy as we are setting fields explicitly
   // memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
 
@@ -403,11 +405,12 @@ vec_clone(
   strcpy(ptr_new_vec->field_type, ptr_old_vec->field_type);
   ptr_new_vec->num_elements = ptr_old_vec->num_elements;
   ptr_new_vec->is_nascent = ptr_old_vec->is_nascent;
-  // Set is_eov to true
-  ptr_new_vec->is_eov = true;
+  ptr_new_vec->is_eov = ptr_old_vec->is_eov;
   ptr_new_vec->chunk_sz = ptr_old_vec->chunk_sz;
   // Set is_persist to false, if required, user will set it to true
   ptr_new_vec->is_persist = false;
+  // Set name to null
+  memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
     ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);

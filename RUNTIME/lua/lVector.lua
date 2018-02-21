@@ -426,13 +426,14 @@ end
 
 function lVector:clone()
   assert(self._base_vec)
-  assert(self:is_eov(), "can clone vector only if is EOV")
+  -- Now we are supporting clone for non_eov vector as well, so commenting below condition
+  -- assert(self:is_eov(), "can clone vector only if is EOV")
   local vector = setmetatable({}, lVector)
-  vector._base_vec = Vector.clone(self._base_vec)
-  assert(vector._base_vec)
-
   -- for meta data stored in vector
   vector._meta = {}
+
+  vector._base_vec = Vector.clone(self._base_vec)
+  assert(vector._base_vec)
 
   -- Check for nulls
   if ( self:has_nulls() ) then
