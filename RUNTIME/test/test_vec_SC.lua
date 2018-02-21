@@ -1,4 +1,3 @@
-local ffi    = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local Vector = require 'libvec' ; 
@@ -14,7 +13,9 @@ tests.t1 = function()
   local num_elements 
   local s1, s2
   local buf = cmem.new(4096, "SC", "string buffer")
-  ffi.copy(buf, "ABCD123")
+  local dir = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
+  assert(plpath.isdir(dir))
+  buf:set("ABCD123")
   -- create a nascent vector
   y = assert(Vector.new('SC:8'))
   num_elements = 10
@@ -25,16 +26,19 @@ tests.t1 = function()
   y:persist()
   assert(y:check())
   M = loadstring(y:meta())(); 
-  local command = "od -c -v " .. M.file_name .. " > _temp1.txt"
-  print(command)
+  local command = "od -c -v " .. M.file_name .. " > /tmp/_temp1.txt"
   os.execute(command)
-  s1 = plfile.read("_temp1.txt")
-  s2 = plfile.read("out_SC2.txt")
+  s1 = plfile.read("/tmp/_temp1.txt")
+  local goodfile = dir .. "out_SC1.txt"
+  assert(plpath.isfile(goodfile))
+  s2 = plfile.read(goodfile)
   assert(s1 == s2)
   --=========================
-  print("Testing SC Vector from file")
-  local infile = 'SC2.bin'
-  assert(plpath.isfile(infile), "Create the input files")
+  -- print("Testing SC Vector from file")
+  local original_infile = dir .. 'SC2.bin'
+  assert(plpath.isfile(original_infile), "ERROR: Create the input files")
+  local infile = "/tmp/_SC2.bin"
+  plfile.copy(original_infile, infile)
   y = assert(Vector.new('SC:8', infile, false))
   local ret_addr, ret_len = y:get_chunk(0);
   assert(ret_addr)

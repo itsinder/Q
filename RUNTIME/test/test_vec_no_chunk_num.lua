@@ -7,6 +7,20 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
+local ffi = require 'ffi'
+-- TODO How to prevent hard coding below?
+ffi.cdef([[
+extern char *strcpy(char *dest, const char *src);
+extern char *strncpy(char *dest, const char *src, size_t n);
+
+typedef struct _cmem_rec_type {
+  void *data;
+  int64_t size;
+  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
+  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
+} CMEM_REC_TYPE;
+]]
+)
 -- for k, v in pairs(vec) do print(k, v) end 
 
 local M
@@ -124,12 +138,16 @@ tests.t5 = function()
   for i = 1, chunk_size do 
     local status = y:put1(s)
     assert(status)
-    local ret_addr, ret_len = y:get_chunk(0);
-    assert(ret_addr);
+    local ret_cmem, ret_len = y:get_chunk(0);
+    assert(ret_cmem);
+    assert(type(ret_cmem) == "CMEM")
     assert(ret_len == i)
     if ( i == 1 ) then 
-      orig_ret_addr = ret_addr
+      local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
+      orig_ret_addr = ffi.cast("int *", cbuf[0].data)
     else
+      local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
+      local ret_addr = ffi.cast("int *", cbuf[0].data)
       assert(ret_addr == orig_ret_addr)
     end
   end
@@ -183,7 +201,7 @@ end
 tests.t7 = function()
   local y = Vector.new('I4')
   assert(y:persist()) -- can persist when nascent
-  local buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4", "buffer")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")

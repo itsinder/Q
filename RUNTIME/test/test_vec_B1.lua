@@ -8,8 +8,7 @@ local tests = {}
 tests.t1 = function()
   local vec_len = 65535
   local b1_virtual_len = math.ceil(vec_len / 8)
-  local buf = ffi.malloc(b1_virtual_len)
-  local buf_copy = ffi.cast("int8_t *", buf)
+  local buf = cmem:new(b1_virtual_len, "I1", "buffer")
 
   for i = 1, b1_virtual_len do
     buf_copy[i-1] = 85

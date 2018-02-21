@@ -269,7 +269,9 @@ static int l_vec_get_chunk( lua_State *L)
     CMEM_REC_TYPE *ptr_cmem = 
       (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
     return_if_malloc_failed(ptr_cmem);
-    cmem_malloc(ptr_cmem, sz, ptr_vec->field_type, "");
+    status = cmem_malloc(ptr_cmem, sz, ptr_vec->field_type, "");
+    cBYE(status);
+    ret_addr = ptr_cmem->data;
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");
     /* Set the metatable on the userdata. */
@@ -282,7 +284,16 @@ static int l_vec_get_chunk( lua_State *L)
     // already taken care of 
   }
   else {
-    lua_pushlightuserdata(L, ret_addr);
+    CMEM_REC_TYPE *ptr_cmem = 
+      (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+    return_if_malloc_failed(ptr_cmem);
+    status = cmem_dupe(ptr_cmem, ret_addr, ret_len * ptr_vec->field_size, 
+        ptr_vec->field_type, "");
+    cBYE(status);
+    /* Add the metatable to the stack. */
+    luaL_getmetatable(L, "CMEM");
+    /* Set the metatable on the userdata. */
+    lua_setmetatable(L, -2);
   }
   lua_pushinteger(L, ret_len);
   return 2;
@@ -409,7 +420,9 @@ static int l_vec_put_chunk( lua_State *L) {
   void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( luaL_testudata (L, 2, "CMEM") ) { 
-    addr = luaL_checkudata(L, 2, "CMEM");
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    if ( ptr_cmem == NULL ) { go_BYE(-1); }
+    addr = ptr_cmem->data;
   } 
   else {
     fprintf(stderr, "NOT  CMEM\n");
