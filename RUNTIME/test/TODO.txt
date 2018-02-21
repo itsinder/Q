@@ -3,7 +3,7 @@ x test_vec_clone.lua
 x test_lVector_materialized.lua -- t1 
 
 x test_lVector_reincarnate.lua --> seg fault 
-x test_lVector_nascent.lua -- "t6", "t5", "t1"
+x test_lVector_nascent.lua -- "t6", "t5"
 
 y test_get_chunk_one.lua
 y test_vec_prev_chunk.lua
