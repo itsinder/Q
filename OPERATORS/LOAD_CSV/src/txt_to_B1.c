@@ -16,8 +16,11 @@ txt_to_B1(
   if ( ( strcmp(X, "true") == 0 ) || ( strcmp(X, "1") == 0 ) ) { 
     *ptr_val = true;
   }
-  else {
+  else if ( ( strcmp(X, "false") == 0 ) || ( strcmp(X, "0") == 0 ) ) { 
     *ptr_val = false;
+  }
+  else {
+    go_BYE(-1);
   }
 BYE:
   return status;

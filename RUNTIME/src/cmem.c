@@ -21,6 +21,7 @@
 
 #include "cmem.h"
 
+#define BUFLEN 2047 // TODO: Should not be hard coded. See max txt length
 int luaopen_libcmem (lua_State *L);
 
 int cmem_dupe( // INTERNAL NOT VISIBLE TO LUA 
@@ -206,7 +207,6 @@ BYE:
 }
 // Following only for debugging 
 static int l_cmem_seq( lua_State *L) {
-#define BUFLEN 31
   char buf[BUFLEN+1]; 
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata( L, 1, "CMEM");
   lua_Number start  = luaL_checknumber(L, 2);
@@ -303,7 +303,7 @@ static int l_cmem_set( lua_State *L) {
   else if ( strcmp(field_type, "SC") == 0 ) { 
     if ( str_val == NULL ) { WHEREAMI; goto BYE; }
     memset(ptr_cmem->data, '\0', ptr_cmem->size);
-    if ( strlen(str_val) >= ptr_cmem->size ) { WHEREAMI; goto BYE; }
+    if ( strlen(str_val) >= (uint64_t)ptr_cmem->size ) { WHEREAMI; goto BYE; }
     strcpy(ptr_cmem->data, str_val);
   }
   else {
@@ -319,7 +319,6 @@ BYE:
 // Following only for debugging 
 static int l_cmem_to_str( lua_State *L) {
   int status = 0;
-#define BUFLEN 31
   char buf[BUFLEN+1]; 
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata( L, 1, "CMEM");
   const char *qtype = luaL_checkstring(L, 2);
@@ -345,6 +344,13 @@ static int l_cmem_to_str( lua_State *L) {
   }
   else if ( strcmp(qtype, "F8") == 0 ) { 
     status = F8_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "F8") == 0 ) { 
+    status = F8_to_txt(X, "", buf, BUFLEN); cBYE(status);
+  }
+  else if ( strcmp(qtype, "SC") == 0 ) { 
+    int len = mcr_min(ptr_cmem->size, BUFLEN);
+    strncpy(buf, X, len);
   }
   else {
     go_BYE(-1);

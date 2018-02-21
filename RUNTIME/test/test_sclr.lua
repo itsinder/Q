@@ -219,6 +219,7 @@ tests.t10_I8 = function()
   local s2 = assert(s1:conv("I8"))
   assert(s1 == s2)
 end
+
 tests.t11 = function()
   local s1 = Scalar.new(127, "I1") 
   local s2 = Scalar.new(-127, "I1")
@@ -232,25 +233,29 @@ tests.t11 = function()
   s1 = Scalar.new(1.79769313486231470e+308, "F8")
   s2 = Scalar.new(-1.79769313486231470e+308, "F8")
   local s3 = s2:abs()
-  print("XX", s2)
-  print("XX", s3)
   assert(s1 == s3)
 end
 
-tests.t11 = function()
-  s1 = Scalar.new("1.79769313486231470e+308", "F8")
-  s2 = Scalar.new("-1.79769313486231470e+308", "F8")
-  local s3 = s2:abs()
-  print("XX", s2)
-  print("XX", s3)
-  assert(s1 == s3)
+tests.t12 = function()
+  -- negative cases for boolean scalars in several different ways
+  bval = {}
+  bval[#bval+1] = "truex"
+  bval[#bval+1] = "True"
+  bval[#bval+1] = "TRUE"
+  bval[#bval+1] = "falsey"
+  bval[#bval+1] = "False"
+  bval[#bval+1] = "FALSE"
+  bval[#bval+1] = " true "
 
-  s1 = Scalar.new("3.40282346638528860e+38", "F4")
-  s2 = Scalar.new("-3.40282346638528860e+38", "F4")
-  local s3 = s2:abs()
-  print("YY", s2)
-  print("YY", s3)
-  assert(s1 == s3)
+
+  for k, v in ipairs(bval) do 
+    print("START: Deliberate error")
+    local s1 = Scalar.new(bval, "B1")
+    print("STOP: Deliberate error")
+    assert(s1 == nil)
+  end
+  print("test 12 passed")
 end
 
+--================
 return tests

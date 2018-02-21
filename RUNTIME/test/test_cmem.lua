@@ -118,23 +118,40 @@ tests.t6 = function()
 end
 
 tests.t7 = function()
-  -- test SC
+  -- test SC with good values 
   local gval = {}
-  gval[0] = "1234567";
-  gval[1] = "123.567";
-  gval[2] = ""
-  gval[3] = " abcd "
+  gval[1] = "1234567";
+  gval[2] = "123.567";
+  gval[3] = ""
+  gval[4] = " abcd "
   local size = 8
   local qtype = "SC"
   local name = "some bogus name"
   for k, v in ipairs(gval) do 
   local c1 = assert(cmem.new(size, qtype, name))
     c1:set(v)
-    y = c1:to_str("I4")
+    y = c1:to_str("SC")
     print(y)
     assert(y == v)
   end
   print("test t7 passed")
+end
+  
+tests.t8 = function()
+  -- test SC with bad values 
+  local bval = {}
+  bval[1] = "1234567890123456";
+  local size = 16
+  local qtype = "SC"
+  local name = "some bogus name"
+  for k, v in ipairs(bval) do 
+    local c1 = assert(cmem.new(size, qtype, name))
+    print("START: Deliberate error")
+    local x = c1:set(v)
+    print("STOP: Deliberate error")
+    assert(x == nil)
+  end
+  print("test t8 passed")
 end
   
 return tests
