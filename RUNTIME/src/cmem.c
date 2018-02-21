@@ -35,6 +35,9 @@ int cmem_dupe( // INTERNAL NOT VISIBLE TO LUA
   int status = 0;
   if ( data == NULL ) { go_BYE(-1); }
   if ( size < 1 ) { go_BYE(-1); }
+  if ( (uint64_t)data == 1 ) {
+    printf("hello world\n");
+  }
   ptr_cmem->data = data;
   ptr_cmem->size = size;
   if ( ( field_type != NULL ) && ( *field_type != '\0' ) ) { 

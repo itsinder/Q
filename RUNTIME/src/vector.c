@@ -241,6 +241,7 @@ static int l_vec_get_chunk( lua_State *L)
   int status = 0;
   char *ret_addr = NULL;
   uint64_t ret_len = 0;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t chunk_num = -1;
   uint64_t idx = 0;
@@ -266,8 +267,7 @@ static int l_vec_get_chunk( lua_State *L)
     is_malloc = true;
     // allocate memory in advance 
     sz = ptr_vec->chunk_size * ptr_vec->field_size;
-    CMEM_REC_TYPE *ptr_cmem = 
-      (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+    ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
     return_if_malloc_failed(ptr_cmem);
     status = cmem_malloc(ptr_cmem, sz, ptr_vec->field_type, "");
     cBYE(status);
@@ -284,11 +284,15 @@ static int l_vec_get_chunk( lua_State *L)
     // already taken care of 
   }
   else {
-    CMEM_REC_TYPE *ptr_cmem = 
-      (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+    ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
     return_if_malloc_failed(ptr_cmem);
-    status = cmem_dupe(ptr_cmem, ret_addr, ret_len * ptr_vec->field_size, 
-        ptr_vec->field_type, "");
+    // TODO This is special case for return of mmap pointer
+    // THINK THROUGH IT MORE CAREFULLY P1
+    int64_t csz = ptr_vec->chunk_sz;
+    if ( csz == 0 ) { 
+      csz = ptr_vec->map_len;
+    }
+    status = cmem_dupe(ptr_cmem, ret_addr, csz, ptr_vec->field_type, "");
     cBYE(status);
     /* Add the metatable to the stack. */
     luaL_getmetatable(L, "CMEM");

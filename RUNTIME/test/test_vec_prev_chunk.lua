@@ -3,6 +3,20 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local ffi = require 'ffi'
+-- TODO How to prevent hard coding below?
+ffi.cdef([[
+extern char *strcpy(char *dest, const char *src);
+extern char *strncpy(char *dest, const char *src, size_t n);
+
+typedef struct _cmem_rec_type {
+  void *data;
+  int64_t size;
+  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
+  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
+} CMEM_REC_TYPE;
+]]
+)
 
 local tests = {}
 tests.t1 = function() 
@@ -26,20 +40,25 @@ tests.t1 = function()
     for i = 1, chunk_size do 
       local status = y:put1(s)
       assert(status)
-      local ret_addr, ret_len = y:get_chunk(0);
-      assert(ret_addr);
+      local ret_cmem, ret_len = y:get_chunk(0);
+      assert(ret_cmem);
+      assert(type(ret_cmem) == "CMEM")
       assert(ret_len == i)
       if ( i == 1 ) then 
-        orig_ret_addr = ret_addr
+        local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
+        orig_ret_addr = ffi.cast("int *", cbuf[0].data)
       else
+        local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
+        local ret_addr = ffi.cast("int *", cbuf[0].data)
         assert(ret_addr == orig_ret_addr)
       end
     end
+    print("XXXXXXXXXXXX j = ", j)
     local status = y:put1(s)
     assert(status)
     local ret_addr, ret_len = y:get_chunk(0);
-    assert(type(ret_addr) == "CMEM")
     assert(ret_addr)
+    assert(type(ret_addr) == "CMEM")
     assert(ret_len == chunk_size) -- can get previous chunk
     ret_addr, ret_len = y:get_chunk(1);
     assert(ret_len == 1)

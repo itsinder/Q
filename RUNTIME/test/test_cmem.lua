@@ -1,4 +1,4 @@
-cmem = require 'libcmem' ; 
+local cmem = require 'libcmem' ; 
 local ffi = require 'ffi'
 -- TODO How to prevent hard coding below?
 ffi.cdef([[
