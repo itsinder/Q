@@ -83,13 +83,15 @@ local function load_csv(
         if is_null then
           assert(M[col_idx].has_nulls, err.NULL_IN_NOT_NULL_FIELD)
           M[col_idx].num_nulls = M[col_idx].num_nulls + 1
-          -- Update nn_out_buf
-          local temp_nn_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_out_bufs[col_idx])
-          qc.set_bit_u64(temp_nn_out_buf, num_in_out_buf, 1)
-          -- update_nn_out_buf(nn_out_bufs[col_idx], num_in_out_buf, n_buf)
+        else
+          if M[col_idx].has_nulls then
+            -- Update nn_out_buf
+            local temp_nn_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_out_bufs[col_idx])
+            qc.set_bit_u64(temp_nn_out_buf, num_in_out_buf, 1)
+          end
+          update_out_buf(in_buf, M[col_idx], dicts[col_idx],
+            out_bufs[col_idx], num_in_out_buf, n_buf)
         end
-        update_out_buf(in_buf, M[col_idx], dicts[col_idx], 
-          out_bufs[col_idx], num_in_out_buf, n_buf)
       end
       --=======================================
     else
