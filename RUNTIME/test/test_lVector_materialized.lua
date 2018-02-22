@@ -59,22 +59,31 @@ end
 tests.t1 = function()
 
   local num_values = 10
-  local q_type = "I4"
+  local qtype = "I4"
   -- generating .bin files required for materialized vector
-  qc.generate_bin(num_values, q_type, path_to_here .. "_in1_I4.bin", "linear" )
-  q_type = "B1"
-  genbin.generate_bin(num_values, q_type, path_to_here .. "_nn_in1.bin")
+  qc.generate_bin(num_values, qtype, path_to_here .. "_in1_I4.bin", "linear" )
+  qtype = "B1"
+  genbin.generate_bin(num_values, qtype, path_to_here .. "_nn_in1.bin")
   
   x = lVector(
   { qtype = "I4", file_name = path_to_here .. "_in1_I4.bin", nn_file_name = path_to_here .. "_nn_in1.bin"})
   assert(x:check())
+  assert(x:has_nulls())
+  assert(x:fldtype() == "I4")
   pr_meta(x, path_to_here .. "_t1_meta_data.csv")
   compare(path_to_here .. "_t1_meta_data.csv", path_to_here .. "in1_meta_data.csv")
   local len, base_data, nn_data = x:chunk(0)
-  assert(base_data)
-  assert(nn_data)
-  print(len)
+  assert(type(base_data) == "CMEM")
+  assert(base_data:is_foreign() == true)
+  assert(base_data:fldtype() == "I4")
+
+  assert(len == 10)
+
+  assert(type(nn_data) == "CMEM")
+  assert(nn_data:is_foreign() == true)
+  assert(nn_data:fldtype() == "B1")
   print("Successfully completed test t1")
+  collectgarbage() -- causes a seg fault in cmem_free()
 
   --plfile.delete(path_to_here .. "/_in1_I4.bin")
   --plfile.delete(path_to_here .. "/_nn_in1.bin")
@@ -84,9 +93,9 @@ end
 tests.t2 = function()
 
   local num_values = 10
-  local q_type = "I4"
+  local qtype = "I4"
   -- generating .bin files required for materialized vector
-  qc.generate_bin(num_values,q_type, path_to_here .. "_in2_I4.bin", "linear" )
+  qc.generate_bin(num_values,qtype, path_to_here .. "_in2_I4.bin", "linear" )
   
   x = lVector( { qtype = "I4", file_name = path_to_here .. "_in2_I4.bin"})
   assert(x:check())
@@ -95,14 +104,15 @@ tests.t2 = function()
   assert(n == 10)
   --=========
   local len, base_data, nn_data = x:chunk(0)
+  assert(type(len) == "number")
+  assert(len == 10)
   assert(base_data)
+  assert(type(base_data) == "CMEM")
+  assert(nn_data == nil)
+
   for i = 1, len do
-    local val = c_to_txt(x, i)
-    print("value:",val)
-  end
-  local iptr = ffi.cast("int32_t *", base_data)
-  for i = 1, len do
-    assert(iptr[i-1] == (i*10))
+    local sval = x:get_one(i-1)
+    assert(sval == Scalar.new(i*10, "I4"))
   end
   assert(not nn_data)
   assert(len == 10)
@@ -136,9 +146,9 @@ end
 tests.t4 = function()
   
   local num_values = 10
-  local q_type = "I4"
+  local qtype = "I4"
   -- generating .bin files required for materialized vector
-  qc.generate_bin(num_values,q_type, path_to_here .. "_in3_I4.bin", "linear" )
+  qc.generate_bin(num_values,qtype, path_to_here .. "_in3_I4.bin", "linear" )
   
   -- testing setting and getting of meta data 
   local x = lVector( { qtype = "I4", file_name = path_to_here .. "_in3_I4.bin"})
@@ -160,9 +170,9 @@ end
 --==============================================
 tests.t5 = function()
     local num_values = 10
-  local q_type = "I4"
+  local qtype = "I4"
   -- generating .bin files required for materialized vector
-  qc.generate_bin(num_values,q_type, path_to_here .. "_in4_I4.bin", "linear" )
+  qc.generate_bin(num_values,qtype, path_to_here .. "_in4_I4.bin", "linear" )
   
   -- testing setting and getting of meta data with a Scalar
   local x = lVector( { qtype = "I4", file_name = path_to_here .. "_in4_I4.bin"})

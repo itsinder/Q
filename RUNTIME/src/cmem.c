@@ -136,6 +136,8 @@ static int l_cmem_new( lua_State *L)
   ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
   return_if_malloc_failed(ptr_cmem);
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
   if ( lua_gettop(L) > 2 ) { 
     if ( lua_isstring(L, 2) ) {
@@ -147,14 +149,8 @@ static int l_cmem_new( lua_State *L)
       cell_name = (char *)luaL_checkstring(L, 3);
     }
   }
-
   status = cmem_malloc(ptr_cmem, size, field_type, cell_name);
   cBYE(status);
-
-  /* Add the metatable to the stack. */
-  luaL_getmetatable(L, "CMEM");
-  /* Set the metatable on the userdata. */
-  lua_setmetatable(L, -2);
   return 1;
 BYE:
   lua_pushnil(L);
@@ -197,7 +193,13 @@ static int l_cmem_free( lua_State *L)
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
   if ( ptr_cmem->size <= 0 ) { WHEREAMI; goto BYE; }
   if ( !ptr_cmem->is_foreign ) { 
+    // FOLLOWING: This is a ticking time bomb
+    // Basically none of these checks should ever be violated
+    // Put this in because of some strange stuff happening in 
+    // garbage collection of Lua
     if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
+    if ( ptr_cmem->size == 0    ) { WHEREAMI; goto BYE; }
+    if ( *ptr_cmem->field_type == '\0'    ) { WHEREAMI; goto BYE; }
     free(ptr_cmem->data);
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
@@ -205,7 +207,7 @@ static int l_cmem_free( lua_State *L)
   return 1;
 BYE:
   lua_pushnil(L);
-  lua_pushstring(L, "ERROR: malloc failed. ");
+  lua_pushstring(L, "ERROR: free failed. ");
   return 2;
 }
 // Following only for debugging 

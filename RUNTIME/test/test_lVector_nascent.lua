@@ -150,7 +150,7 @@ end
 tests.t5 = function()
   print("Creating nascent vector with generator")
   local gen1 = require 'Q/RUNTIME/test/gen1'
-  x = lVector( { qtype = "I4", gen = gen1, has_nulls = false} )
+  x = lVector( { qtype = "I4", gen = gen1, has_nulls = false, name = "x"} )
   x:persist(true)
 
   local x_num_chunks = 10
@@ -159,6 +159,9 @@ tests.t5 = function()
   for chunk_num = 1, x_num_chunks do 
     print("XX: ", chunk_num, x_num_chunks)
     local a, b, c = x:chunk(chunk_num-1)
+    assert(a)
+    if ( b ) then assert(type(b) == "CMEM") end
+    assert(c == nil)
     if ( a < chunk_size ) then 
       print("Breaking on chunk", chunk_num); 
       assert(x:is_eov() == true)
@@ -178,14 +181,16 @@ end
 --===========================================
 
 --====== Testing nascent vector with generator and Vector's buffer
-tests.t6 = function()
+-- NOTE NOTE NOTE We are NOT using this function until we think 
+-- through the get_vec_buf and release_vec_buf completely
+t6 = function()
   print("Creating nascent vector with generator using Vector buffer")
   local gen2 = require 'Q/RUNTIME/test/gen2'
   x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
 
   local num_chunks = 2
   local chunk_size = qconsts.chunk_size
-  print("===================")
+  print("====  t6  =========")
   for chunk_num = 1, num_chunks do 
     local a, b, c = x:chunk(chunk_num-1)
     x:check()

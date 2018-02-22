@@ -1,3 +1,4 @@
+local Scalar	= require 'libsclr'
 local lVector	= require 'Q/RUNTIME/lua/lVector'
 local cmem	= require 'libcmem'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
@@ -65,8 +66,10 @@ tests.t1 = function()
 
   -- compare vector elements
   for i = 1, x_clone:num_elements() do
-    val, nn_val = c_to_txt(x_clone, i)
-    assert(val == i*10)
+    val, nn_val = x_clone:get_one(i-1)
+    assert(val)
+    assert(type(val) == "Scalar")
+    assert(val == Scalar.new(i*10, "I4"))
   end
 
   print("Successfully completed test t1")

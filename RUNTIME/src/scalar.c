@@ -391,6 +391,8 @@ static int l_sclr_new( lua_State *L) {
   const char *qtype   = luaL_checkstring(L, 2);
   SCLR_REC_TYPE *ptr_sclr = NULL;
   ptr_sclr = (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
+  return_if_malloc_failed(ptr_sclr);
+  memset(ptr_sclr, '\0', sizeof(SCLR_REC_TYPE));
   dst = (char *)&(ptr_sclr->cdata);
 
   if ( ptr_cmem != NULL ) {
@@ -496,10 +498,8 @@ static int l_sclr_new( lua_State *L) {
     fprintf(stderr, "Unknown qtype [%s] \n", qtype);
     go_BYE(-1);
   }
-  /* Add the metatable to the stack. */
-  luaL_getmetatable(L, "Scalar");
-  /* Set the metatable on the userdata. */
-  lua_setmetatable(L, -2);
+  luaL_getmetatable(L, "Scalar"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   return 1;
 BYE:
   lua_pushnil(L);

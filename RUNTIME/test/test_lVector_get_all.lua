@@ -17,6 +17,7 @@ tests.t1 = function()
   local len, base_addr, nn_addr = x:get_all()
   assert(len == 10)
   assert(base_addr)
+  assert(nn_addr == nil)
   local X = ffi.cast("int32_t *", base_addr)
   for i = 1, 10 do
     -- print(X[i-1])

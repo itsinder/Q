@@ -42,6 +42,7 @@ tests.t1 = function()
   y = assert(Vector.new('SC:8', infile, false))
   local ret_addr, ret_len = y:get_chunk(0);
   assert(ret_addr)
+  assert(type(ret_addr) == "CMEM")
   assert(ret_len == 10)
   print("Successfully completed test t1")
 end

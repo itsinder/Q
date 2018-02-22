@@ -24,9 +24,9 @@ my_print "Stating the all in one script"
 
 ###Install lua , luajit and luarocks
 ### Install lua ####
-which lua &> /dev/null
-RES=$?
-if [[ $RES -ne 0 ]] ; then
+# which lua &> /dev/null
+# RES=$?
+# if [[ $RES -ne 0 ]] ; then
    my_print "Installing lua from apt-get"
    sudo apt-get install make cmake -y
    sudo apt-get install lua5.1 -y
@@ -42,14 +42,14 @@ if [[ $RES -ne 0 ]] ; then
    sudo make install
    cd ../
    rm -rf lua-5.1.5 lua-5.1.5.tar.gz
-else
-   my_print "Lua is already installed"
-fi
+# else
+#    my_print "Lua is already installed"
+# fi
 # ######## Lua JIT #########
 
-which luajit &> /dev/null
-RES=$?
-if [[ $RES -ne 0 ]] ; then
+# which luajit &> /dev/null
+# RES=$?
+# if [[ $RES -ne 0 ]] ; then
    my_print "Installing luajit from source"
    #wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
    wget http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
@@ -61,7 +61,7 @@ if [[ $RES -ne 0 ]] ; then
    make TARGET_FLAGS=-pthread
    sudo make install
    cd /usr/local/bin
-   sudo ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
+   sudo ln -sf luajit-2.1.0-beta3 usr/local/bin/luajit
    cd -
    cd ../
    rm -rf LuaJIT-2.1.0-beta3
@@ -69,9 +69,9 @@ if [[ $RES -ne 0 ]] ; then
    # rm -rf LuaJIT-2.0.4
    echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
    echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
-else
-   my_print "luajit is already installed"
-fi
+# else
+#    my_print "luajit is already installed"
+# fi
 # ######## Luarocks #########
 which luarocks &> /dev/null
 RES=$?

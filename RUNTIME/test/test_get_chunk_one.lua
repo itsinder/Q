@@ -44,6 +44,7 @@ tests.t1 = function()
 
   local len, base, nn = x:get_all()
   assert(base)
+  assert(type(base) == "userdata") -- TODO FIX FIX 
   assert(len == 1024)
 
   local T = x:meta()
