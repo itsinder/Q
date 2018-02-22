@@ -12,11 +12,8 @@ local function restore_global(filename)
   -- checking for file existence
   assert(pl_path.exists(filename), "Give a valid filename")
   
-  print("Filename for restoring",filename)
-  local status = pcall(dofile, filename)
-  
-  -- assert(status,"Restored failed")
-  return status
+  local status, reason = pcall(dofile, filename)
+  assert(status, reason)
 end
 return require('Q/q_export').export('restore', restore_global)
 -- returning status(true or false)
