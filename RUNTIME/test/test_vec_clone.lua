@@ -3,8 +3,9 @@ local cmem	= require 'libcmem'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local c_to_txt	= require 'Q/UTILS/lua/C_to_txt'
 local Scalar	= require 'libsclr'
-local plpath  = require 'pl.path'
-local genbin = require 'Q/RUNTIME/test/generate_bin'
+local plpath  	= require 'pl.path'
+local genbin 	= require 'Q/RUNTIME/test/generate_bin'
+local Q		= require 'Q'
 
 local script_dir = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(script_dir))
@@ -186,6 +187,18 @@ tests.t3 = function()
   end
 
   print("Successfully completed test t3")
+end
+
+tests.t4 = function()
+  -- Test name field after clone
+  local x = Q.mk_col({1, 2, 3, 4}, "I4")
+  x:set_name("my-vec")
+
+  local x_clone = x:clone({name = "clone-vec"})
+
+  assert(x:get_name() == "my-vec")
+  assert(x_clone:get_name() == "clone-vec")
+  print("Successfully completed test t4")
 end
 
 return tests
