@@ -34,7 +34,9 @@ local function update_out_buf(
   elseif m.qtype == "SC" then
     local in_buf_len = ffi.C.strlen(in_buf)
     assert(in_buf_len <= m.width, err.STRING_TOO_LONG)
-    out_buf = ffi.cast(qconsts.qtypes.SC.ctype .. " *", out_buf) + num_in_out_buf * m.width
+    local ctype = assert(qconsts.qtypes[m.qtype]["ctype"])
+    out_buf = ffi.cast(ctype .. " *", out_buf)
+    out_buf = out_buf + num_in_out_buf * m.width
     ffi.copy(out_buf, in_buf, in_buf_len)
     --=================================================
   elseif is_base_qtype(m.qtype) then
