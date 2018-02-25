@@ -4,6 +4,7 @@ local log    = require 'Q/UTILS/lua/log'
 local register_type = require 'Q/UTILS/lua/q_types'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local plpath = require "pl.path"
+local cmem   = require 'libcmem'
 local Scalar = require 'libsclr'
 local Vector = require 'libvec'
 local chk_chunk_return = require 'Q/UTILS/lua/chk_chunk'

@@ -10,7 +10,6 @@ local function expander_gen3(f1, f2)
   local qtype = "I4"
   -- stop : hard coding for this test case
   local field_size = qconsts.qtypes[qtype].width
-  --local base_data = ffi.cast("int*", assert(ffi.C.malloc(chunk_size * field_size)))
   local base_data = cmem.new(chunk_size * field_size)
   local out_ptr = get_ptr(base_data, qtype)
    -- currently exapnds f1 with the number of times given in f2

@@ -7,7 +7,7 @@ local counter = 1
 local qtype = "I4"
 local chunk_size = qconsts.chunk_size
 local width = qconsts.qtypes[qtype].width
-local base_data = cmem.new(chunk_size * width)
+local base_data = cmem.new(chunk_size * width, qtype, "data for gen4")
 
 local function gen4(chunk_idx, col)
   if ( chunk_idx == 3 ) then

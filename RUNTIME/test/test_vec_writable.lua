@@ -17,7 +17,6 @@ typedef struct _cmem_rec_type {
 ]]
 )
 
-local buf = cmem.new(4096)
 local M
 local chunk_size = qconsts.chunk_size
 local rslt

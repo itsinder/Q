@@ -3,7 +3,6 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
-local buf = cmem.new(4096)
 -- for k, v in pairs(vec) do print(k, v) end 
 
 local tests = {} 
@@ -38,6 +37,7 @@ end
 
 -- Test bufferred puts, when multiple of 8
 tests.t2 = function()
+  local buf = cmem.new(8*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
   y = Vector.new('B1')
   local num_elements = 9
@@ -71,6 +71,7 @@ end
 -- Test bufferred puts, when sizes = 1, 2, 3, ... 32, 1, 2, ...
 -- First test when < 64 
 tests.t4 = function()
+  local buf = cmem.new(9*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
   y = Vector.new('B1')
   local num_elements = 9
@@ -94,6 +95,7 @@ end
 
 -- Second test when > 64 
 tests.t5 = function()
+  local buf = cmem.new(17*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
   y = Vector.new('B1')
   local num_elements = 17

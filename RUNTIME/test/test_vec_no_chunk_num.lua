@@ -2,21 +2,10 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
-local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
-local ffi = require 'ffi'
--- TODO How to prevent hard coding below?
-ffi.cdef([[
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
-]]
-)
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
 
 local M
@@ -139,11 +128,9 @@ tests.t5 = function()
     assert(type(ret_cmem) == "CMEM")
     assert(ret_len == i)
     if ( i == 1 ) then 
-      local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
-      orig_ret_addr = ffi.cast("int *", cbuf[0].data)
+      orig_ret_addr = get_ptr(ret_cmem, "I4")
     else
-      local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
-      local ret_addr = ffi.cast("int *", cbuf[0].data)
+      local ret_addr = get_ptr(ret_cmem, "I4")
       assert(ret_addr == orig_ret_addr)
     end
   end
@@ -270,7 +257,7 @@ end
 --======= do put of a range of lengths and make sure that it works
 tests.t8 = function()
   local y = Vector.new('I4')
-  buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4", "buffer")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")
