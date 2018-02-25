@@ -1,5 +1,6 @@
 local cmem = require 'libcmem' ; 
 local ffi = require 'ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 -- TODO How to prevent hard coding below?
 ffi.cdef([[
 extern char *strcpy(char *dest, const char *src);
@@ -47,8 +48,7 @@ tests.t2 = function()
   x = buf:to_str("I4")
   assert(start == tonumber(x))
   -- check using FFI
-  cbuf = ffi.cast("CMEM_REC_TYPE *", buf)
-  iptr = ffi.cast("int *", cbuf[0].data)
+  iptr = assert(get_ptr(buf, "I4"))
   for i = 1, num_elements do
     assert(iptr[i-1] == start + (i-1) * incr)
   end
@@ -62,7 +62,7 @@ tests.t3 = function()
   cbuf = ffi.cast("CMEM_REC_TYPE *", buf)
   ffi.C.strncpy(cbuf[0].field_type, "I4", 2)
   ffi.C.strncpy(cbuf[0].cell_name, "some bogus name", 15)
-  iptr = ffi.cast("int *", cbuf[0].data)
+  iptr = assert(get_ptr(buf, "I4"))
   iptr[0] = 123456789;
   assert(type(buf) == "CMEM")
   y = buf:to_str("I4")

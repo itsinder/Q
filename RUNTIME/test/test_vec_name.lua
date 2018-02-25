@@ -45,6 +45,7 @@ tests.t5 = function()
   x = Vector.new('I4')
   vname = "def"
   x = lVector( { qtype = "I4", gen = true, name = vname} )
+  print(x:get_name())
   assert(x:get_name() == vname)
 end
 --=========================

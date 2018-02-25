@@ -2,6 +2,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local function expander_gen3(f1, f2)
   -- start: hard coding for this test case
   local counter = 1
@@ -11,7 +12,7 @@ local function expander_gen3(f1, f2)
   local field_size = qconsts.qtypes[qtype].width
   --local base_data = ffi.cast("int*", assert(ffi.C.malloc(chunk_size * field_size)))
   local base_data = cmem.new(chunk_size * field_size)
-  local out_ptr = ffi.cast("int32_t *", base_data)
+  local out_ptr = get_ptr(base_data, qtype)
    -- currently exapnds f1 with the number of times given in f2
    local state = {}
    local function gen3(chunk_idx, col)

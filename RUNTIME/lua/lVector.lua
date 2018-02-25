@@ -165,7 +165,7 @@ function lVector.new(arg)
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
     Vector.set_name(vector._base_vec, arg.name)
     if ( vector._nn_vec ) then 
-      Vector.set_name(vector._base_vec, "nn_" .. arg.name)
+      Vector.set_name(vector._nn_vec, "nn_" .. arg.name)
     end
   end 
   return vector

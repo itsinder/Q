@@ -6,13 +6,9 @@ local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
-require 'Q/UTILS/lua/strict'
 local ffi = require 'ffi'
 -- TODO How to prevent hard coding below?
 ffi.cdef([[
-extern char *strcpy(char *dest, const char *src);
-extern char *strncpy(char *dest, const char *src, size_t n);
-
 typedef struct _cmem_rec_type {
   void *data;
   int64_t size;
@@ -21,7 +17,7 @@ typedef struct _cmem_rec_type {
 } CMEM_REC_TYPE;
 ]]
 )
--- for k, v in pairs(vec) do print(k, v) end 
+require 'Q/UTILS/lua/strict'
 
 local M
 local is_memo

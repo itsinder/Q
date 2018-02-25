@@ -7,6 +7,15 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 require 'Q/UTILS/lua/strict'
+ffi.cdef([[
+typedef struct _cmem_rec_type {
+  void *data;
+  int64_t size;
+  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
+  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
+} CMEM_REC_TYPE;
+]]
+)
 
 local buf = cmem.new(4096)
 local M
@@ -36,9 +45,10 @@ tests.t1 = function()
   assert(y:end_write() == nil)
   print("STOP: Deliberate error attempt")
   -- Verify that write of 987654 took
-  local ret_addr, ret_len = y:get_chunk(0)
-  ret_addr = ffi.cast("int32_t *", ret_addr)
-  assert(ret_addr[0] == 987654)
+  local ret_cmem, ret_len = y:get_chunk(0)
+  local temp = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
+  local iptr = ffi.cast("int32_t *", temp[0].data)
+  assert(iptr[0] == 987654)
   -- Now try to write without opening for write. Should fail
   print("START: Deliberate error attempt")
   status = y:set(s, 0)

@@ -4,16 +4,16 @@ local cmem    = require 'libcmem'
 
 local counter = 1
 local chunk_size = qconsts.chunk_size
-local field_size = ffi.sizeof("int32_t")
-local bytes_to_alloc = field_size * chunk_size
-local b1 = cmem.new(bytes_to_alloc, "I4", "gen1_buffer")
+local qtype = "I4"
+local width = qconsts[qtype].width
+local bytes_to_alloc = width * chunk_size
+local b1 = cmem.new(bytes_to_alloc, qtype, "gen1_buffer")
 
 local function gen1(chunk_idx, col)
   if ( chunk_idx == 8 ) then 
     return 0, nil, nil 
   end
-  local b2 = ffi.cast("CMEM_REC_TYPE *", b1)
-  local iptr = ffi.cast("int32_t *", b2[0].data)
+  local iptr = assert(get_ptr(b1, qtype))
   for i = 1, chunk_size do
     iptr[i-1] = counter
     counter = counter + 1
