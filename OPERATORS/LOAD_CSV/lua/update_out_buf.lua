@@ -48,14 +48,12 @@ local function update_out_buf(
     status = qc[converter](in_buf, out_buf)
     --=================================================
   elseif m.qtype == "B1" then  -- IMPROVE THIS CODE
-    local casted = ffi.cast("uint8_t *", out_buf)
-    if ( ffi.string(in_buf) == "1" ) then
-      casted[0] = 255
-    elseif ( ffi.string(in_buf) == "0" ) then
-      casted[0] = 0
-    else
-      status = 1
-    end
+
+    -- Update out_buf for B1
+    local temp_B1_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", out_buf)
+    local in_val = tonumber(ffi.string(in_buf))
+    assert(in_val ~= 0 or in_val ~= 1, "Not a proper B1 value " .. ffi.string(in_buf))
+    qc.set_bit_u64(temp_B1_out_buf, num_in_out_buf, in_val)
   else
     assert(nil, "Unknown type " .. m.qtype)
   end
