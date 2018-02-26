@@ -130,7 +130,9 @@ end
 tests.t3 = function()
   print("Testing materialized vector for SC")
   -- os.execute(" cp SC1.bin _SC1.bin " )
-  x = lVector( { qtype = "SC", width = 8, file_name = path_to_here .. 'SC1.bin' } )
+  local full_file = path_to_here .. "/SC1.bin"
+  assert(plpath.isfile(full_file), "file not found")
+  x = lVector( { qtype = "SC", width = 8, file_name = full_file})
   T = x:meta()
   -- local k, v
   for k, v in pairs(T.base)  do print(k,v) end 
