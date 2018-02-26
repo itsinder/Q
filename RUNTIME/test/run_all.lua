@@ -7,7 +7,7 @@ tests = {
 "test_gen4",
 "test_get_chunk_one",
 "test_lVector_get_all",
--- "test_lVector_materialized",
+"test_lVector_materialized",
 "test_lVector_nascent",
 "test_lVector_reincarnate",
 "test_read_write",

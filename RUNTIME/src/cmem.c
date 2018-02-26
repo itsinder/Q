@@ -43,9 +43,6 @@ int cmem_dupe( // INTERNAL NOT VISIBLE TO LUA
   int status = 0;
   if ( data == NULL ) { go_BYE(-1); }
   if ( size < 1 ) { go_BYE(-1); }
-  if ( (uint64_t)data == 1 ) {
-    printf("hello world\n");
-  }
   ptr_cmem->data = data;
   ptr_cmem->size = size;
   if ( ( field_type != NULL ) && ( *field_type != '\0' ) ) { 
@@ -144,7 +141,7 @@ static int l_cmem_new( lua_State *L)
   ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
   return_if_malloc_failed(ptr_cmem);
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
-  printf("cmem new  to %x \n", ptr_cmem);
+  // printf("cmem new  to %x \n", ptr_cmem);
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
@@ -226,7 +223,7 @@ static int l_cmem_free( lua_State *L)
     }
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
-  printf("Freeing %x \n", ptr_cmem);
+  // printf("Freeing %x \n", ptr_cmem);
   ptr_cmem = NULL; // Suggested by Indrajeet
   lua_pushboolean(L, true);
   return 1;
