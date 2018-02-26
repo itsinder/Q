@@ -12,12 +12,18 @@ typedef struct _cmem_rec_type {
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local function get_ptr( x, qtype
 )
+  local ret_ptr 
   assert(type(x) == "CMEM")
-  assert(type(qtype) == "string")
-  assert(qconsts.qtypes[qtype])
-  local ctype = assert(qconsts.qtypes[qtype].ctype)
   local y = ffi.cast("CMEM_REC_TYPE *", x)
-  local z = ffi.cast(ctype .. " *", y[0].data)
-  return z
+
+  assert(type(qtype) == "string")
+  if ( qtype == "uint8_t" ) then 
+    ret_ptr = ffi.cast(qtype .. " *", y[0].data)
+  else
+    assert(qconsts.qtypes[qtype])
+    local ctype = assert(qconsts.qtypes[qtype].ctype)
+    ret_ptr = ffi.cast(ctype .. " *", y[0].data)
   end
+  return ret_ptr
+end
 return get_ptr

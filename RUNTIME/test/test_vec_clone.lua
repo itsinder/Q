@@ -2,21 +2,7 @@ local Scalar	= require 'libsclr'
 local lVector	= require 'Q/RUNTIME/lua/lVector'
 local cmem	= require 'libcmem'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
-local c_to_txt	= require 'Q/UTILS/lua/C_to_txt'
-local ffi = require 'ffi'
--- TODO How to prevent hard coding below?
-ffi.cdef([[
-extern char *strcpy(char *dest, const char *src);
-extern char *strncpy(char *dest, const char *src, size_t n);
-
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
-]]
-)
+local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 
 local tests = {}
 --====== Testing vector cloning
@@ -27,7 +13,7 @@ tests.t1 = function()
   local field_size = 4
   local c = cmem.new(num_elements * field_size, "I4")
   local c2 = ffi.cast("CMEM_REC_TYPE *", c)
-  local iptr = ffi.cast("int32_t *", c2[0].data)
+  local iptr = assert(get_ptr(c, "I4"))
   for i = 1, num_elements do
     iptr[i-1] = i*10
   end

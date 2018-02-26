@@ -1,20 +1,12 @@
 local cmem = require 'libcmem' ; 
 local ffi = require 'ffi'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
--- TODO How to prevent hard coding below?
-ffi.cdef([[
-extern char *strcpy(char *dest, const char *src);
-extern char *strncpy(char *dest, const char *src, size_t n);
+local tests = {}
 
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
+ffi.cdef([[
+char *strncpy(char *dest, const char *src, size_t n);
 ]]
 )
-local tests = {}
 
 tests.t1 = function()
   -- basic test 
@@ -28,7 +20,7 @@ tests.t1 = function()
 end
 
 tests.t2 = function()
-  local buf = cmem.new(128)
+  local buf = cmem.new(128, "I4")
   local num_trials = 10 -- 1024*1048576
   local sz = 65537
   for j = 1, num_trials do 
@@ -41,7 +33,7 @@ tests.t2 = function()
     buf = nil
   end
   local num_elements = 1024
-  local buf = cmem.new(num_elements * 4)
+  local buf = cmem.new(num_elements * 4, "I4")
   local start = 123
   local incr  = 1
   buf:seq(start, incr, num_elements, "I4")
@@ -58,7 +50,7 @@ end
 
 tests.t3 = function()
   -- setting data using ffi and verifying using to_str()
-  local buf = cmem.new(ffi.sizeof("int"))
+  local buf = cmem.new(ffi.sizeof("int32_t"), "I4")
   cbuf = ffi.cast("CMEM_REC_TYPE *", buf)
   ffi.C.strncpy(cbuf[0].field_type, "I4", 2)
   ffi.C.strncpy(cbuf[0].cell_name, "some bogus name", 15)

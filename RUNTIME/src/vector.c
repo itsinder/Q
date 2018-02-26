@@ -311,7 +311,7 @@ static int l_vec_get_chunk( lua_State *L)
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
-  fprintf(stderr, "address cmem = %x \n", ptr_cmem);
+  // fprintf(stderr, "address cmem = %x \n", ptr_cmem);
 
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);

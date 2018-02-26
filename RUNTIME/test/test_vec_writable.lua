@@ -6,16 +6,6 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
-require 'Q/UTILS/lua/strict'
-ffi.cdef([[
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
-]]
-)
 
 local M
 local chunk_size = qconsts.chunk_size
@@ -24,6 +14,7 @@ local rslt
 local tests = {} 
 
 tests.t1 = function()
+  print("XXXXXXXXXXXX")
   local infile = '_in1_I4.bin'
   -- generating required .bin file 
   qc.generate_bin(10, "I4", infile, "linear")

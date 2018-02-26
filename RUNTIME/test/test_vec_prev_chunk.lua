@@ -3,24 +3,11 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local ffi = require 'ffi'
--- TODO How to prevent hard coding below?
-ffi.cdef([[
-extern char *strcpy(char *dest, const char *src);
-extern char *strncpy(char *dest, const char *src, size_t n);
-
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
-]]
-)
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {}
 tests.t1 = function() 
-  local buf = cmem.new(4096)
+  local buf = cmem.new(4096, "I4", "t1 buf")
   local M
   local is_memo
   local chunk_size = qconsts.chunk_size
@@ -45,15 +32,12 @@ tests.t1 = function()
       assert(type(ret_cmem) == "CMEM")
       assert(ret_len == i)
       if ( i == 1 ) then 
-        local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
-        orig_ret_addr = ffi.cast("int *", cbuf[0].data)
+        orig_ret_addr = get_ptr(ret_cmem, "I4")
       else
-        local cbuf = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
-        local ret_addr = ffi.cast("int *", cbuf[0].data)
+        local ret_addr = get_ptr(ret_cmem, "I4")
         assert(ret_addr == orig_ret_addr)
       end
     end
-    print("XXXXXXXXXXXX j = ", j)
     local status = y:put1(s)
     assert(status)
     local ret_addr, ret_len = y:get_chunk(0);

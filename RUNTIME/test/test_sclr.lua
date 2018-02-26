@@ -109,7 +109,7 @@ tests.t7 = function()
     for _, val in pairs(vals) do 
       for _, qtype in pairs(qtypes) do 
         s1 = Scalar.new(val, orig_qtype)
-        status = s1:conv(qtype)
+        local status = s1:conv(qtype)
         assert(not status)
       end
     end

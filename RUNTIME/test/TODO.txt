@@ -1,4 +1,8 @@
-Use get_ptr and remove the use of ffi.cast
+test_lVector_nascent, 194:t3, t5
+test_read_write, t1
+test_vec, t8
+test_vec_no_chunk_num, t7
+test_vec_writable, t1
 
 
 -- The main problem I have is that we are getting memory corruption

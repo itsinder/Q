@@ -196,7 +196,7 @@ end
 tests.t8 = function()
   local y = Vector.new('I4')
   assert(y:persist()) -- can persist when nascent
-  local buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")
@@ -269,7 +269,7 @@ end
 --======= do put of a range of lengths and make sure that it works
 tests.t9 = function()
   local y = Vector.new('I4')
-  local buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")
