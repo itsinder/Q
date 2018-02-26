@@ -129,8 +129,8 @@ end
 --====== Testing materialized vector for SC
 tests.t3 = function()
   print("Testing materialized vector for SC")
-  -- os.execute(" cp SC1.bin _SC1.bin " )
-  local full_file = path_to_here .. "/SC1.bin"
+  plfile.copy("SC1.bin", "_SC1.bin")
+  local full_file = path_to_here .. "/_SC1.bin"
   assert(plpath.isfile(full_file), "file not found")
   x = lVector( { qtype = "SC", width = 8, file_name = full_file})
   T = x:meta()

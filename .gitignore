@@ -50,5 +50,5 @@ _*.lua
 _*.h
 
 # binary files
-*.bin
+_*.bin
 
