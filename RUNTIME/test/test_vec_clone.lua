@@ -1,7 +1,6 @@
 local Scalar	= require 'libsclr'
 local lVector	= require 'Q/RUNTIME/lua/lVector'
 local cmem	= require 'libcmem'
-local ffi	= require 'Q/UTILS/lua/q_ffi'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 
 local tests = {}
@@ -12,7 +11,6 @@ tests.t1 = function()
   local num_elements = 1024
   local field_size = 4
   local c = cmem.new(num_elements * field_size, "I4")
-  local c2 = ffi.cast("CMEM_REC_TYPE *", c)
   local iptr = assert(get_ptr(c, "I4"))
   for i = 1, num_elements do
     iptr[i-1] = i*10

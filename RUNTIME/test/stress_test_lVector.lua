@@ -5,30 +5,20 @@ local Scalar  = require 'libsclr'
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local ffi = require 'ffi'
--- TODO How to prevent hard coding below?
-ffi.cdef([[
-typedef struct _cmem_rec_type {
-  void *data;
-  int64_t size;
-  char field_type[4]; // MAX_LEN_FIELD_TYPE TODO Fix hard coding
-  char cell_name[16]; // 15 chaarcters + 1 for nullc, mainly for debugging
-} CMEM_REC_TYPE;
-]]
-)
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
 local tests = {} 
+local num_chunks = 16
+local num_iters = 65536
 -- 
 tests.t1 = function()
-  local num_iters = 1024
   for i = 1, num_iters do
-    local x = lVector( { qtype = "I4", gen = true, name = "x"})
-    local num_elements = 1048576+3
-    local field_size = 4
-    local num_bytes = num_elements * field_size
+    local qtype = "I4"
+    local x = lVector( { qtype = qtype, gen = true, name = "x"})
+    local num_elements = (num_chunks * qconsts.chunk_size) + 3
+    local width = qconsts.qtypes[qtype].width
+    local num_bytes = num_elements * width
     local base_data = cmem.new(num_bytes, "I4", "base")
-    local b2 = ffi.cast("CMEM_REC_TYPE *", base_data)
-    local iptr = ffi.cast("int32_t *", b2)
     local chunk_num = 0
     local chunk_idx = 1
     for i = 1, num_elements do
@@ -69,9 +59,37 @@ tests.t1 = function()
     x:eov()
     local T = x:meta()
     assert(plpath.isfile(T.base.file_name))
-    print("Iter = ", i)
   end
   print("Successfully completed test t1")
+end
+tests.t2 = function()
+  for i = 1, num_iters do
+    local qtype = "I8"
+    local x = lVector( { qtype = qtype, gen = true, name = "x"})
+    local num_elements = num_chunks * qconsts.chunk_size
+    local width = qconsts.qtypes[qtype].width
+    local num_bytes = num_elements * width
+    local base_data = cmem.new(num_bytes, qtype, "base")
+    for i = 1, num_elements do
+      local s1 = Scalar.new(i*11, qtype)
+      local s2 
+      if ( ( i % 2 ) == 0 ) then
+        s2 = Scalar.new(true, "B1")
+      else
+        s2 = Scalar.new(false, "B1")
+      end
+      x:put1(s1, s2)
+    end
+    for j = 1, num_iters do
+      for cidx = 1, num_chunks do
+        local a, b, c, d = x:chunk(cidx-1)
+        assert(type(a) == "number")
+        assert(type(b) == "CMEM")
+        assert(type(c) == "CMEM") 
+      end
+    end
+  end
+  print("Successfully completed test t2")
 end
 
 return tests

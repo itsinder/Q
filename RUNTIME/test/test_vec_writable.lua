@@ -1,10 +1,10 @@
-local plpath = require 'pl.path'
-local Vector = require 'libvec' ; 
-local Scalar = require 'libsclr' ; 
+local plpath  = require 'pl.path'
+local Vector  = require 'libvec' ; 
+local Scalar  = require 'libsclr' ; 
 local cmem    = require 'libcmem' ; 
-local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local qc = require 'Q/UTILS/lua/q_core'
+local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 
 local M
@@ -36,8 +36,7 @@ tests.t1 = function()
   print("STOP: Deliberate error attempt")
   -- Verify that write of 987654 took
   local ret_cmem, ret_len = y:get_chunk(0)
-  local temp = ffi.cast("CMEM_REC_TYPE *", ret_cmem)
-  local iptr = ffi.cast("int32_t *", temp[0].data)
+  local iptr = get_ptr(ret_cmem, "I4")
   assert(iptr[0] == 987654)
   -- Now try to write without opening for write. Should fail
   print("START: Deliberate error attempt")
