@@ -154,6 +154,7 @@ tests.t5 = function()
     assert(a == chunk_size)
     x:check()
   end
+    collectgarbage()
   local status = pcall(x.eov)
   assert(not status)
   local T = x:meta()

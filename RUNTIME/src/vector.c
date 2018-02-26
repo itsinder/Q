@@ -227,6 +227,7 @@ static int l_vec_get_vec_buf( lua_State *L) {
 
   ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
   return_if_malloc_failed(ptr_cmem);
+  printf("cmem dupe to %x \n", ptr_cmem);
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
@@ -260,6 +261,7 @@ static int l_vec_get( lua_State *L) {
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  printf("cmem dupe to %x \n", ptr_cmem);
 
   // TODO: Should we be using ret_len below?
   status = cmem_dupe(ptr_cmem, ret_addr, ret_len, ptr_vec->field_type, "");
@@ -353,6 +355,7 @@ static int l_vec_get_chunk( lua_State *L)
     }
     status = cmem_dupe(ptr_cmem, ret_addr, csz, ptr_vec->field_type, "");
     cBYE(status);
+    printf("cmem dupe to %x \n", ptr_cmem);
   }
   lua_pushinteger(L, ret_len);
   return 2;

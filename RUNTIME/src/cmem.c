@@ -136,6 +136,7 @@ static int l_cmem_new( lua_State *L)
   ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
   return_if_malloc_failed(ptr_cmem);
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  printf("cmem new  to %x \n", ptr_cmem);
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
@@ -191,7 +192,10 @@ static int l_cmem_is_foreign( lua_State *L) {
 static int l_cmem_free( lua_State *L) 
 {
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
-  if ( ptr_cmem->size <= 0 ) { WHEREAMI; goto BYE; }
+  if ( ptr_cmem->size <= 0 ) { 
+    // Control should never come here
+    WHEREAMI; goto BYE; 
+  }
   if ( !ptr_cmem->is_foreign ) { 
     // FOLLOWING: This is a ticking time bomb
     // Basically none of these checks should ever be violated
@@ -203,6 +207,8 @@ static int l_cmem_free( lua_State *L)
     free(ptr_cmem->data);
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  printf("Freeing %x \n", ptr_cmem);
+  ptr_cmem = NULL; // Suggested by Indrajeet
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -440,7 +446,7 @@ int luaopen_libcmem (lua_State *L) {
   // Registering with Q
   status = luaL_dostring(L, "return require('Q/q_export').export");
   if (status != 0 ) {
-    printf("Running Q registeration require failed:  %s\n", lua_tostring(L, -1));
+    printf("Running Q registration require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
   }
   lua_pushstring(L, "CMEM");
