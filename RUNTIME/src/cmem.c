@@ -205,7 +205,7 @@ static int l_cmem_free( lua_State *L)
       /* okay */
     }
     else {
-      printf("cmem strange %x \n", ptr_cmem);
+      // printf("cmem strange %x \n", ptr_cmem);
       WHEREAMI; goto BYE; 
     }
   }

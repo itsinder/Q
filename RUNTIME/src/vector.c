@@ -21,6 +21,8 @@
 extern luaL_Buffer g_errbuf;
 
 
+#undef USE_STACK_DUMP
+#ifdef USE_STACK_DUMP
 static void stackDump (lua_State *L) {
   int i;
   int top = lua_gettop(L);
@@ -51,6 +53,7 @@ static void stackDump (lua_State *L) {
   fflush(stdout);
   WHEREAMI;
 }
+#endif
 
 static int 
 get_chunk_size(
@@ -72,7 +75,6 @@ get_chunk_size(
     // fprintf(stderr, "C code chunk_size = %d \n", chunk_size);
   }
   *ptr_chunk_size = chunk_size;
-BYE:
   return status;
 }
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
@@ -240,7 +242,7 @@ BYE:
   lua_pushstring(L, "ERROR: no chunk for materialized vector");
   return 2;
 }
-#endif USE_VEC_BUF
+#endif 
 //----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;

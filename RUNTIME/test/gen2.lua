@@ -1,6 +1,7 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local cmem    = require 'libcmem'  
+local get_ptr = require 'Q/UTILS/lua/get_ptr'  
 
 local l_chunk_num = 1  -- no connection to Vector's chunk num
 local counter = 1
@@ -10,8 +11,7 @@ local function gen2(chunk_idx, col)
   local base_cmem, nn_cmem = col:get_vec_buf()
   assert(base_cmem)
   assert(type(base_cmem) == "CMEM")
-  local b2 = ffi.cast("CMEM_REC_TYPE *", base_cmem)
-  local iptr = ffi.cast("int32_t *", b2[0].data)
+  local iptr = get_ptr(base_cmem, "I4")
   local buf_size = qconsts.chunk_size
   if ( l_chunk_num == 2 ) then 
     buf_size = 100000 - qconsts.chunk_size
