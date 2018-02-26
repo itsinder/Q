@@ -24,6 +24,14 @@
 #define BUFLEN 2047 // TODO: Should not be hard coded. See max txt length
 int luaopen_libcmem (lua_State *L);
 
+void cmem_undef( // USED FOR DEBUGGING
+    CMEM_REC_TYPE *ptr_cmem
+    )
+{
+  ptr_cmem->size = -1;
+  strcpy(ptr_cmem->field_type, "XXX");
+  strcpy(ptr_cmem->cell_name, "Uninitialized");
+}
 int cmem_dupe( // INTERNAL NOT VISIBLE TO LUA 
     CMEM_REC_TYPE *ptr_cmem,
     void *data,
@@ -193,18 +201,29 @@ static int l_cmem_free( lua_State *L)
 {
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
   if ( ptr_cmem->size <= 0 ) { 
-    // Control should never come here
-    WHEREAMI; goto BYE; 
+    // Control should never come here except as nelow
+    if ( ( ptr_cmem->size == -1 ) && 
+         ( strcmp(ptr_cmem->field_type, "XXX") == 0 ) && 
+         ( strcmp(ptr_cmem->cell_name, "Uninitialized") == 0 ) ) {
+      /* okay */
+    }
+    else {
+      printf("cmem strange %x \n", ptr_cmem);
+      WHEREAMI; goto BYE; 
+    }
   }
   if ( !ptr_cmem->is_foreign ) { 
-    // FOLLOWING: This is a ticking time bomb
-    // Basically none of these checks should ever be violated
-    // Put this in because of some strange stuff happening in 
     // garbage collection of Lua
-    if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
-    if ( ptr_cmem->size == 0    ) { WHEREAMI; goto BYE; }
-    if ( *ptr_cmem->field_type == '\0'    ) { WHEREAMI; goto BYE; }
-    free(ptr_cmem->data);
+    if ( ( ptr_cmem->size == -1 ) && 
+         ( strcmp(ptr_cmem->field_type, "XXX") == 0 ) && 
+         ( strcmp(ptr_cmem->cell_name, "Uninitialized") == 0 ) ) {
+      /* nothing to do */
+    }
+    else {
+      // CONTROL SHOULD NEVER COME HERE
+      if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
+      free(ptr_cmem->data);
+    }
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   printf("Freeing %x \n", ptr_cmem);

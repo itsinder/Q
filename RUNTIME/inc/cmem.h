@@ -22,4 +22,7 @@ extern int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
     const char *field_type,
     const char *cell_name
     );
+extern void cmem_undef( // USED FOR DEBUGGING
+    CMEM_REC_TYPE *ptr_cmem
+    );
 #endif

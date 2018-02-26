@@ -275,6 +275,7 @@ static int l_vec_get( lua_State *L) {
     memset(ptr_sclr, '\0', sizeof(SCLR_REC_TYPE));
     luaL_getmetatable(L, "Scalar");/* Add the metatable to the stack. */
     lua_setmetatable(L, -2);/* Set the metatable on the userdata. */
+    printf("sclr new to %x \n", ptr_sclr);
 
     num_to_return++;
     strcpy(ptr_sclr->field_type, ptr_vec->field_type);
@@ -313,7 +314,7 @@ static int l_vec_get_chunk( lua_State *L)
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
-  // fprintf(stderr, "address cmem = %x \n", ptr_cmem);
+  cmem_undef(ptr_cmem);
 
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
@@ -611,6 +612,7 @@ static int l_vec_new( lua_State *L)
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  printf("vect new to %x \n", ptr_vec);
 
   status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
