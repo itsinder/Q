@@ -1,8 +1,9 @@
-local err     = require 'Q/UTILS/lua/error_code'
-local qc      = require 'Q/UTILS/lua/q_core'
-local ffi     = require 'Q/UTILS/lua/q_ffi'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local plstring = require 'pl.stringx'
+local err	= require 'Q/UTILS/lua/error_code'
+local qc	= require 'Q/UTILS/lua/q_core'
+local ffi	= require 'Q/UTILS/lua/q_ffi'
+local qconsts	= require 'Q/UTILS/lua/q_consts'
+local plstring	= require 'pl.stringx'
+local utils	= require 'Q/UTILS/lua/utils'
 
 local buf_size = 1024
 local buf = ffi.malloc(buf_size)
@@ -84,33 +85,35 @@ end
 local function chk_cols(vector_list)
   assert(vector_list)
   assert(type(vector_list) == "table")
-  assert(#vector_list > 0)  
+  assert(utils.table_length(vector_list) > 0)  
   local vec_length = nil
-  for i = 1, #vector_list do
-    assert((type(vector_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
-    
+  local is_first = true
+  for i, v in pairs(vector_list) do
+    assert((type(v) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
+
     -- Check the vector for eval(), if not then call eval()
-    if not vector_list[i]:is_eov() then
-      vector_list[i]:eval()
+    if not v:is_eov() then
+      v:eval()
     end
-    
-    -- eval'ed the vector before calling lenght() 
+
+    -- eval'ed the vector before calling lenght()
     -- as elements will populate only after eval()
-    if i == 1 then
-      vec_length = vector_list[i]:length()
+    if is_first then
+      vec_length = v:length()
+      is_first = false
     end
-    
+
     -- Added below assert after discussion with Ramesh
     -- We are not supporting vectors with different length as this is a rare case
     -- All vectors should have same length
-    assert(vector_list[i]:length() == vec_length, "All vectors should have same length")
-    assert(vector_list[i]:length() > 0)
-    local qtype = vector_list[i]:qtype()
+    assert(v:length() == vec_length, "All vectors should have same length")
+    assert(v:length() > 0)
+    local qtype = v:qtype()
     assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
-    
+
     -- dictionary cannot be null in get_meta for SV data type
-    if qtype == "SV" then 
-      assert(vector_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
+    if qtype == "SV" then
+      assert(v:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
     end
   end
   return true
@@ -163,11 +166,15 @@ local print_csv = function (vector_list, opfile, filter)
     vector_list = {vector_list}
   end
   assert(chk_cols(vector_list), "Vectors verification failed")
-  local vec_length = vector_list[1]:length()
+  local vec_length
+  for i, v in pairs(vector_list) do
+    vec_length = v:length()
+    break
+  end
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
   -- local buf = assert(ffi.malloc(buf_size))
-  local num_cols = #vector_list
+  local num_cols = utils.table_length(vector_list)
   local fp = nil -- file pointer
   local tbl_rslt = nil
   
@@ -193,9 +200,11 @@ local print_csv = function (vector_list, opfile, filter)
       assert(status, "Failed to get filter value, Error: " .. tostring(is_filter))
     end
     if ( ( not where ) or ( is_filter ) ) then
-      for col_idx = 1, num_cols do
+      -- Using below modified for loop because if we pass load_csv output to this, it doesn't work
+      -- load_csv output doesn't contain integer indices rather it contains column names as indices
+      local col_idx = 1
+      for _, col in pairs(vector_list) do
         local status, result = nil
-        local col = vector_list[col_idx]
         status, result = pcall(get_element, col, rowidx)
         assert(status, "Failed to get value from vector, Error: " .. tostring(result))
         if not result then
@@ -216,6 +225,7 @@ local print_csv = function (vector_list, opfile, filter)
             assert(io.write("\n"), "Write failed") 
           end
         end
+        col_idx = col_idx + 1
       end
     else
       -- Filter says to skip this row 
