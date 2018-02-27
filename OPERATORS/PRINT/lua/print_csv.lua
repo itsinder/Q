@@ -202,6 +202,7 @@ local print_csv = function (vector_list, opfile, filter)
     if ( ( not where ) or ( is_filter ) ) then
       -- Using below modified for loop because if we pass load_csv output to this, it doesn't work
       -- load_csv output doesn't contain integer indices rather it contains column names as indices
+      -- TODO: currently insertion order is not guaranteed if indices are not integers
       local col_idx = 1
       for _, col in pairs(vector_list) do
         local status, result = nil
