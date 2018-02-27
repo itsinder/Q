@@ -131,7 +131,7 @@ fns.handle_category1_2 = function (index, v, csv_file, ret, status, exp_load_ret
   -- checking load_csv returned table for type
   assert(type(exp_load_ret) == "table", "load_ret is not of type table")
   for _, col in pairs(exp_load_ret) do
-    assert(type(type(col) == "lVector"), "must be of type lVector")
+    assert(type(col) == "lVector", "must be of type lVector")
   end
   -- loading csv file outputed by print_csv
   local metadata = dofile(script_dir .. "/metadata/" .. v.meta)
