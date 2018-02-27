@@ -1,5 +1,7 @@
 --==== From https://www.lua.org/pil/12.1.2.html
 -- local -- dbg = require 'Q/UTILS/lua/debugger'
+local pl_path = require 'pl.path'
+
 local function basicSerialize (o)
     if type(o) == "number" or type(o) == "boolean" then
         return tostring(o)
@@ -86,25 +88,30 @@ local function save(name, value, saved, file)
 end
 
 local function save_global(filename)
-   assert(filename ~= nil, "A valid filename has to be given")
-    local filepath = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
-    local file = assert(io.open(filepath, "w+"), "Unable to open file for writing")
-    file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
-    -- file:write("local Vector = require 'libvector'\n")
-    -- file:write("local Dictionary = require 'Dictionary'\n")
+  assert(filename ~= nil, "A valid filename has to be given")
+  
+  -- check does the (abs) valid filepath exists
+  if not pl_path.isabs(filename) then
+    -- append Q_METADATA_DIR if filename/ relative path is provided 
+    filename = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
+  end
+   
+  -- TODO: what if file already exists, for now it overrides (w+) the file 
+  local file = assert(io.open(filename, "w+"), "Unable to open file for writing")
+  file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
+  -- file:write("local Vector = require 'libvector'\n")
+  -- file:write("local Dictionary = require 'Dictionary'\n")
 
-
-
-    local saved = {}
-    -- TODO get requires in place to be added in v2 like require "Vector"
-    for k,v in pairs(_G) do
-        if not is_g_exception(k,v) then
-          -- print("Saving ", k, v)
-          save(k, v, saved, file)
-        end
-    end
-    file:close()
-    print("Saved to " .. filepath)
+  local saved = {}
+  -- TODO get requires in place to be added in v2 like require "Vector"
+  for k,v in pairs(_G) do
+      if not is_g_exception(k,v) then
+        -- print("Saving ", k, v)
+        save(k, v, saved, file)
+      end
+  end
+  file:close()
+  print("Saved to " .. filename)
 end
 return require('Q/q_export').export('save', save_global)
 --return save_global

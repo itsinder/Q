@@ -1,5 +1,5 @@
 local T = {} 
-local function clone(x)
+local function clone(x, optargs)
   local Q   = require 'Q/q_export'
   local qc  = require 'Q/UTILS/lua/q_core'
   local ffi = require 'Q/UTILS/lua/q_ffi'
@@ -10,7 +10,7 @@ local function clone(x)
   -- any changes in source vector after cloning will not reflect in cloned vector and vice-versa
   -- Now removing below condition
   -- assert(x:is_eov(), "Vector must be materialized before cloning")
-  return x:clone()
+  return x:clone(optargs)
   --================================================
 end
 T.clone = clone

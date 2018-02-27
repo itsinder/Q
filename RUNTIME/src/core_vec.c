@@ -391,10 +391,8 @@ vec_clone(
   int status = 0;
   // supporting clone operation for non_eov vectors, so commenting below condition
   // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
-  if ( ptr_old_vec->is_eov == true ) {
-    // quit if opened for writing
-    if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
-  }
+  // quit if opened for writing
+  if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
   // Commenting memcpy as we are setting fields explicitly
   // memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
 

@@ -424,7 +424,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   if ( qconsts.debug ) then self:check() end
 end
 
-function lVector:clone()
+function lVector:clone(optargs)
   assert(self._base_vec)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
   -- assert(self:is_eov(), "can clone vector only if is EOV")
@@ -444,6 +444,17 @@ function lVector:clone()
   -- copy aux metadata if any
   for i, v in pairs(self._meta) do
     vector._meta[i] = v
+  end
+
+  -- check for the optargs
+  if optargs then
+    assert(type(optargs) == "table")
+    for i, v in pairs(optargs) do
+      -- currently entertaining just "name" field, in future there might be many other fields
+      if i == "name" then
+        Vector.set_name(vector._base_vec, v)
+      end
+    end
   end
   return vector
 end
