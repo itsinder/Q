@@ -3,10 +3,12 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local plstring = require 'pl.stringx'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
+-- TODO: move this buffer allocation inside print_csv function
 local buf_size = 1024
-local buf = ffi.malloc(buf_size)
-local buf_copy = ffi.cast("char *", buf)
+local buf = get_ptr(cmem.new(buf_size))
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -36,7 +38,7 @@ local function get_element(col, rowidx)
     local len, base_data, nn_data = col:chunk(chunk_num)
     assert(len > 0, "Chunk length not greater than zero")
     assert(base_data, "Chunk should not be null")
-    base_data = ffi.cast(ctype.." *", base_data)
+    base_data = get_ptr(base_data, qtype)
     chunk_buf_table[col] = base_data
     if nn_data then
       nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
@@ -65,7 +67,7 @@ local function get_element(col, rowidx)
     val = ffi.string(casted + chunk_idx * col:field_width())
   else
     -- Initialize output buf to zero
-    ffi.fill(buf_copy, buf_size)
+    ffi.fill(buf, buf_size)
     
     -- Call respective q_to_txt function
     local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
