@@ -15,14 +15,18 @@ local function get_ptr( x, qtype
   local ret_ptr 
   assert(type(x) == "CMEM")
   local y = ffi.cast("CMEM_REC_TYPE *", x)
-
-  assert(type(qtype) == "string")
-  if ( qtype == "uint8_t" ) then 
-    ret_ptr = ffi.cast(qtype .. " *", y[0].data)
+  
+  -- Made qtype optional
+  if qtype then
+    if ( qtype == "uint8_t" ) then 
+      ret_ptr = ffi.cast(qtype .. " *", y[0].data)
+    else
+      assert(qconsts.qtypes[qtype])
+      local ctype = assert(qconsts.qtypes[qtype].ctype)
+      ret_ptr = ffi.cast(ctype .. " *", y[0].data)
+    end
   else
-    assert(qconsts.qtypes[qtype])
-    local ctype = assert(qconsts.qtypes[qtype].ctype)
-    ret_ptr = ffi.cast(ctype .. " *", y[0].data)
+    ret_ptr = y[0].data
   end
   return ret_ptr
 end
