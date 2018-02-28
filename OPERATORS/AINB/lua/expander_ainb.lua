@@ -3,6 +3,8 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local expander_ainb = function(op, a, b)
   -- START: verify inputs
@@ -36,13 +38,13 @@ local expander_ainb = function(op, a, b)
   local function ainb_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
-    cbuf = cbuf or ffi.malloc(csz)
+    cbuf = cbuf or cmem.new(csz)
     local alen, aptr, nn_aptr = a:chunk(chunk_idx) 
     if ( ( not alen ) or ( alen == 0 ) ) then
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
-    local status = qc[func_name](aptr, alen, bptr, blen, cbuf)
+    local status = qc[func_name](get_ptr(aptr), alen, get_ptr(bptr), blen, get_ptr(cbuf))
     assert(status == 0, "C error in ainb")
     chunk_idx = chunk_idx + 1
     return alen, cbuf, nil
