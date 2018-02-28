@@ -45,9 +45,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     if ( first_call ) then 
       -- print("malloc for generator for f1f2opf3", a, g_iter)
       first_call = false
-      f3_buf = ffi.malloc(buf_sz)
+      f3_buf = ffi.cuda_malloc(buf_sz)
       if f1:has_nulls() or f2:has_nulls() then
-        nn_f3_buf = nn_f3_buf or ffi.malloc(qconsts.chunk_size)
+        nn_f3_buf = nn_f3_buf or ffi.cuda_malloc(qconsts.chunk_size)
       end
     end
     assert(f3_buf)
@@ -62,6 +62,14 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
       f3_buf = nil
       nn_f3_buf = nil
     end
+    -- CUDA TODO: delete below lines, kept for debugging purpose
+    --[[
+    local f3_buf_copy = ffi.cast("int32_t *", f3_buf)
+    for i = 1, f1_len do
+      print("#############################", func_name)
+      print(f3_buf_copy[i-1])
+    end
+    ]]
     chunk_idx = chunk_idx + 1
     return f1_len, f3_buf, nn_f3_buf
   end

@@ -39,6 +39,17 @@ ffi.malloc = function(n, free_func)
    return c_mem
 end
 
+ffi.cuda_malloc = function(n, free_func)
+   local ptr = nil
+   assert(n > 0, "Cannot malloc 0 or less bytes")
+   if free_func == nil then
+     ptr = assert(ffi.gc(qc.cuda_malloc(n), qc.cuda_free))
+   else
+     ptr = assert(ffi.gc(qc.cuda_malloc(n), free_func))
+   end
+   return ptr
+end
+
 ffi.memset = function(buffer, value, size)
    assert( buffer ~= nil, "Buffer cannot be nil")
    assert(size > 0, "Cannot memset 0 or less bytes")

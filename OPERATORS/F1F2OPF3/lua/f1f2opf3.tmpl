@@ -47,22 +47,13 @@ ${fn}(
   int status = 0;
 // TODO #pragma omp parallel for schedule(static, Q_MIN_CHUNK_SIZE_OPENMP)
 
-  // Declare pointers to device array
-  ${out_ctype} *d_out = 0;
-
-  // Allocate memory for device arrays
-  cudaMalloc (&d_out, nR * sizeof (${out_ctype}));
-
   // Decide runtime configuration
   uint64_t blockSize = 256;
   uint64_t numBlocks = (nR + 256 - 1) / blockSize;
 
   // Launch Kernel
-  __operation<<<numBlocks, blockSize>>>(in1, in2, d_out, nR);
+  __operation<<<numBlocks, blockSize>>>(in1, in2, out, nR);
 
-  // Copy result from device to host
-  cudaMemcpy (out, d_out, nR * sizeof(${out_ctype}), cudaMemcpyDeviceToHost);
-  
   return status;
 }
 

@@ -8,4 +8,4 @@ local z = Q.vvadd(x, y)
 Q.print_csv(z)
 
 -- Added os.exit() to avoid the luajit error, refer email with subj "Luajit problem when running vvadd with CUDA"
-os.exit()
+--os.exit()

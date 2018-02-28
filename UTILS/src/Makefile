@@ -49,6 +49,9 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_cuda_malloc.h :
 	lua ../lua/cli_extract_func_decl.lua cuda_malloc.cu ${INCDIR}
 
+../gen_inc/_cuda_free.h :
+	lua ../lua/cli_extract_func_decl.lua cuda_free.cu ${INCDIR}
+
 ../gen_inc/_bits_to_bytes.h : 
 	lua ../lua/cli_extract_func_decl.lua bits_to_bytes.c ${INCDIR}
 
@@ -117,6 +120,7 @@ hdr_files = \
 	../gen_inc/_is_valid_chars_for_num.h  \
 	../gen_inc/_bytes_to_bits.h   \
         ../gen_inc/_cuda_malloc.h \
+        ../gen_inc/_cuda_free.h \
 	../gen_inc/_bits_to_bytes.h   \
 
 #--------
@@ -143,6 +147,7 @@ SRC_FILES=  \
         set_bit_u64.c  \
         generate_bin.c  \
         cuda_malloc.cu  \
+        cuda_free.cu  \
 	is_valid_chars_for_num.c \
 
 libutils.so : ${bin_search_files} ${hdr_files}
