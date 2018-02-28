@@ -4,6 +4,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 local lVector = require 'Q/RUNTIME/lua/lVector'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local function expander_f1f2opf3(a, f1 , f2, optargs )
   local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. a .. "_specialize"
@@ -44,9 +46,9 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     if ( first_call ) then 
       -- print("malloc for generator for f1f2opf3", a, g_iter)
       first_call = false
-      f3_buf = ffi.malloc(buf_sz)
+      f3_buf = cmem.new(buf_sz, f3_qtype)
       if f1:has_nulls() or f2:has_nulls() then
-        nn_f3_buf = nn_f3_buf or ffi.malloc(qconsts.chunk_size)
+        nn_f3_buf = nn_f3_buf or cmem.new(qconsts.chunk_size)
       end
     end
     assert(f3_buf)
@@ -56,7 +58,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     f2_len, f2_chunk, nn_f2_chunk = f2:chunk(chunk_idx)
     assert(f1_len == f2_len)
     if f1_len > 0 then
-      qc[func_name](f1_chunk, f2_chunk, f1_len, f3_buf)
+      qc[func_name](get_ptr(f1_chunk), get_ptr(f2_chunk), f1_len, get_ptr(f3_buf))
     else
       f3_buf = nil
       nn_f3_buf = nil
