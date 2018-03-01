@@ -44,6 +44,7 @@ local expander_ainb = function(op, a, b)
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
+    -- Using get_prt() for aptr and bptr as lVector:chunk() returns CMEM structure
     local status = qc[func_name](get_ptr(aptr), alen, get_ptr(bptr), blen, get_ptr(cbuf))
     assert(status == 0, "C error in ainb")
     chunk_idx = chunk_idx + 1
