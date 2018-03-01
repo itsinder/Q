@@ -18,7 +18,7 @@ local function flush_buffers(
       local qtype = assert(M[i].qtype)
       local width = 0
       if ( qtype == "SC" ) then 
-        width = assert(M.width)
+        width = assert(M[i].width)
       else
         width = assert(qconsts.qtypes[qtype].width)
       end

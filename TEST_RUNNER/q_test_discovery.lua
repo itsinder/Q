@@ -72,6 +72,8 @@ local function append_dirs(dest, src)
 end
 
 local function find_test_files(directory,  tests_pattern)
+  -- convert 'directory' path to absolute path so that blacklisting feature will work
+  directory = plpath.abspath(directory)
   local iter_list, next_iter_list = {}, {}
   local pattern = "*.lua" -- removed as args as *.lua is embedded in other parts of the code
   iter_list[1] = directory
@@ -80,7 +82,7 @@ local function find_test_files(directory,  tests_pattern)
     for i=1,#iter_list do
       local dir = iter_list[i]
       local exclude = false
-      if ( ( string.find(dir, ".git") ) or
+      if ( ( string.find(dir, "[.]git") ) or
         ( string.find(dir, "DEPRECATED") ) ) then
         exclude = true
       end
