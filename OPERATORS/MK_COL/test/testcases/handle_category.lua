@@ -1,6 +1,8 @@
+local Q = require 'Q'
 local plstring = require 'pl.stringx'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 
 local fns = {}
 
@@ -100,4 +102,32 @@ fns.category2 = function (index, v, status, ret)
   return true
 end
 
+fns.category3 = function (index, v, status, ret)
+  --print(ret)
+  
+  if status ~= true then
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return status = true")
+    return false
+  end
+  
+  if type(ret) ~= 'lVector' then
+    fns["increment_failed_mkcol"](index, v, "Mk_col function does not return lVector")
+    return false
+  end
+  
+  local status, expected_str = pcall(print_csv, ret, "")
+  assert(status,"Reason of failure" .. expected_str )
+  -- converting table to string
+  local actual_str = table.concat(v.input, "\n")
+  actual_str = actual_str .. "\n"
+  
+  print(actual_str,expected_str)
+  if actual_str ~= expected_str then
+    fns["increment_failed_mkcol"](index, v, "Mk_col input output mismatch input = ".. actual_str ..
+      " output = "..expected_str)
+    return false
+  end
+  
+  return true
+end
 return fns
