@@ -130,15 +130,19 @@ fns.handle_category1_2 = function (index, v, csv_file, ret, status, exp_load_ret
   
   -- checking load_csv returned table for type
   assert(type(exp_load_ret) == "table", "load_ret is not of type table")
-  assert(type(exp_load_ret[1] == "lVector"), "must be of type lVector")
-  
+  for _, col in pairs(exp_load_ret) do
+    assert(type(col) == "lVector", "must be of type lVector")
+  end
   -- loading csv file outputed by print_csv
   local metadata = dofile(script_dir .. "/metadata/" .. v.meta)
   local load_status, actual_load_ret = pcall(load_csv, csv_file, metadata, {use_accelerator = false})
   -- checking actual and expected vector elements using vveq operator
-  local eq = Q.vveq(actual_load_ret[1], exp_load_ret[1])
-  -- checking results by using sum operator (as sum must be equal to  num_elements
-  assert(Q.sum(eq):eval():to_num() == exp_load_ret[1]:num_elements(), "Actual and expected element not matching")
+  for idx in pairs(exp_load_ret) do
+    local eq = Q.vveq(actual_load_ret[idx], exp_load_ret[idx])
+    -- checking results by using sum operator (as sum must be equal to  num_elements
+    assert(Q.sum(eq):eval():to_num() == exp_load_ret[idx]:num_elements(), "Actual and expected element not matching")
+  end
+  
   return true
 end
 
@@ -293,7 +297,7 @@ fns.handle_category6 = function (index, v, M)
   local status, print_ret = pcall(print_csv, arr, filename, nil)
   if status then
     local status, load_ret = pcall(load_csv, filename, M, {use_accelerator = false})
-    filename = load_ret[1]:meta().base.file_name
+    filename = load_ret[M[1].name]:meta().base.file_name
   end
   --print(M[1].name)
   -- local filename = _G["Q_DATA_DIR"].."_"..M[1].name
