@@ -1,5 +1,5 @@
-local Scalar = require 'libsclr'
-local to_scalar = require 'Q/UTILS/lua/to_scalar'
+local cmem      = require 'libcmem'
+local get_ptr   = require 'Q/UTILS/lua/get_ptr'
 return function (
   args
   )
@@ -36,9 +36,10 @@ return function (
   local ub   = assert(args.ub)
   local len   = assert(args.len)
   local seed   = args.seed
+  local ctype = qconsts.qtypes[qtype].ctype
 
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
-  hdr = string.gsub(hdr,"<<ctype>>",  qconsts.qtypes[qtype].ctype)
+  hdr = string.gsub(hdr,"<<ctype>>",  ctype)
   pcall(ffi.cdef, hdr)
 
   if ( seed ) then 
@@ -48,20 +49,21 @@ return function (
   end
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
-  lb = assert(to_scalar(lb, qtype))
-  ub = assert(to_scalar(ub, qtype))
   assert(ub > lb, "upper bound should be strictly greater than lower bound")
   assert(type(len) == "number")
   assert(len > 0)
 
+  local lb_ptr = get_ptr(cmem.new(ffi.sizeof(ctype)), qtype)
+  lb_ptr[0] = lb
+  local ub_ptr = get_ptr(cmem.new(ffi.sizeof(ctype)), qtype)
+  ub_ptr[0] = ub
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
-  local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+  local c_mem = assert(get_ptr(cmem.new(sz_c_mem)), "malloc failed")
   c_mem = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", c_mem)
-  local ctype = qconsts.qtypes[qtype].ctype
-  c_mem.lb = ffi.cast(ctype .. " *", lb:cdata())[0]
-  c_mem.ub = ffi.cast(ctype .. " *", ub:cdata())[0]
+  c_mem.lb = ffi.cast(ctype .. " *", lb_ptr)[0]
+  c_mem.ub = ffi.cast(ctype .. " *", ub_ptr)[0]
   c_mem.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 

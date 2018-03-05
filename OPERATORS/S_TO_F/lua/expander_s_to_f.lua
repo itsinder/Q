@@ -4,6 +4,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local multiple_of_8 = require 'Q/UTILS/lua/multiple_of_8'
 -- local dbg = require 'debugger'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 return function (a, args)
     -- Get name of specializer function. By convention
@@ -26,7 +28,7 @@ return function (a, args)
   local gen1 = function(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
-    buff = buff or ffi.malloc(bufsz)
+    buff = buff or cmem.new(bufsz)
     assert(buff, "malloc failed")
     local lb = chunk_size * chunk_idx
     local ub = lb + chunk_size
@@ -38,7 +40,7 @@ return function (a, args)
     if ( chunk_size <= 0 ) then
       return 0
     else
-      qc[func_name](buff, chunk_size, subs.c_mem, lb)
+      qc[func_name](get_ptr(buff), chunk_size, subs.c_mem, lb)
       return chunk_size, buff
     end
   end

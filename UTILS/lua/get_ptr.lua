@@ -12,6 +12,7 @@ typedef struct _cmem_rec_type {
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local function get_ptr( x, qtype
 )
+  if not x then return nil end
   local ret_ptr 
   assert(type(x) == "CMEM")
   local y = ffi.cast("CMEM_REC_TYPE *", x)
