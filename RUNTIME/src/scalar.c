@@ -25,6 +25,60 @@ int luaopen_libvec (lua_State *L);
 
 extern int luaopen_libsclr (lua_State *L);
 
+static int l_sclr_to_cmem( lua_State *L) 
+{
+  SCLR_REC_TYPE *ptr_sclr = NULL;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
+  // Note that we return a copy of the data, not the original data
+  bool is_foreign = false;
+
+  if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
+  ptr_sclr = (SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  if ( ptr_sclr == NULL ) { WHEREAMI; goto BYE; }
+/*
+  if ( lua_isstring(L, 2) ) {
+    const char *x = luaL_checkstring(L, 2);
+    if ( strcmp(x, "is_foreign") == 0 ) {
+      is_foreign = false;
+    }
+    if ( strcmp(x, "not_is_foreign") == 0 ) {
+      is_foreign = false;
+    }
+    else {
+      WHEREAMI; goto BYE;
+    }
+  }
+  else {
+    is_foreign = false;
+  }
+  */
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  if ( ptr_cmem == NULL ) { WHEREAMI; goto BYE; }
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  int status = 0;
+  if ( ! is_foreign ) {
+    status = cmem_malloc(ptr_cmem,  ptr_sclr->field_size, 
+        ptr_sclr->field_type, "");
+    memcpy(ptr_cmem->data, &(ptr_sclr->cdata), ptr_sclr->field_size);
+  }
+  else { 
+    // Control should not come here, not just yet
+    WHEREAMI; goto BYE;
+    status = cmem_dupe(ptr_cmem,  &(ptr_sclr->cdata), ptr_sclr->field_size,
+        ptr_sclr->field_type, "");
+  }
+  if ( status < 0 ) { WHEREAMI; goto BYE; }
+  strncpy(ptr_cmem->field_type, ptr_sclr->field_type, 4-1);
+  ptr_cmem->size = ptr_sclr->field_size;
+
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_to_cmem. ");
+  return 2;
+}
 
 static int l_sclr_to_num( lua_State *L) {
 
@@ -648,6 +702,7 @@ BYE:
 static const struct luaL_Reg sclr_methods[] = {
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "abs", l_sclr_abs },
     { "fldtype", l_fldtype },
@@ -659,6 +714,7 @@ static const struct luaL_Reg sclr_functions[] = {
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },
     { "neq", l_sclr_neq },

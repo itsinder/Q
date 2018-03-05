@@ -78,4 +78,12 @@
     uint64_t bidx = ii & 0x3F; \
     uint64_t val = ( in[widx] >> bidx )  & 0x1; \
     val; })
+
+// following to make print easier to templatize
+#define PRI1 PRIi8
+#define PRI2 PRIi16
+#define PRI4 PRIi32
+#define PRI8 PRIi64
+#define PRF4 "lf"
+#define PRF8 "llf"
 #endif

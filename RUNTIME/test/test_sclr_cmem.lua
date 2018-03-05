@@ -11,6 +11,8 @@ tests.t1 = function()
     assert(type(c1) == "CMEM")
     local ptr = get_ptr(c1, "I4")
     assert(ptr[0] == i)
+    ptr[0] = i+1
+    assert(ptr[0] == i+1)
   end
   print("test 1 passed")
 end
