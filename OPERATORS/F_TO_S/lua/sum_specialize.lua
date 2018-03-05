@@ -2,6 +2,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
 local Scalar  = require 'libsclr'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 return function (
   qtype
   )
@@ -45,14 +47,15 @@ return function (
     hdr = string.gsub(hdr,"<<reduce_ctype>>",  subs.reduce_ctype)
     pcall(ffi.cdef, hdr)
     local sz_c_mem = ffi.sizeof("REDUCE_sum_" .. qtype .. "_ARGS")
-    local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+    --local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+    local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
     local bak_c_mem = c_mem
-    c_mem = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", c_mem)
+    c_mem = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", get_ptr(c_mem))
     c_mem.sum_val  = 0
     c_mem.num = 0
     subs.c_mem = bak_c_mem
     --==============================
-    subs.getter = function (x) 
+    subs.getter = function (x)
       local y = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", c_mem)
       local z = ffi.cast("void *", y[0].num);
       -- TODO P2 I do not like the fact that I cannot send

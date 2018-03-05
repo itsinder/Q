@@ -2,7 +2,8 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local Scalar  = require 'libsclr'
 local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
-
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local cmem    = require 'libcmem'
 return function (
   qtype
   )
@@ -39,9 +40,10 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     --==============================
     -- Set c_mem using info from args
     local sz_c_mem = ffi.sizeof("REDUCE_sum_sqr_" .. qtype .. "_ARGS")
-    local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+    --local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
+    local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
     local bak_c_mem = c_mem
-    c_mem = ffi.cast("REDUCE_sum_sqr_" .. qtype .. "_ARGS *", c_mem)
+    c_mem = ffi.cast("REDUCE_sum_sqr_" .. qtype .. "_ARGS *", get_ptr(c_mem))
     c_mem.sum_sqr_val  = 0
     c_mem.num = 0
     subs.c_mem = bak_c_mem
