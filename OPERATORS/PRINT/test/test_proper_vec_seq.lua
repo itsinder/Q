@@ -16,8 +16,11 @@ tests.t1 = function()
 
   local col = Q.load_csv(script_dir .. "multi_col_data_file.csv", M)
 
-  local print_str = Q.print_csv(col, "")
-  print(print_str)
+  local opt_args = {
+                      opfile = "",
+                      print_order = { "empid", "yoj" }
+                    }
+  local print_str = Q.print_csv(col, opt_args)
   
   local expected_str = "1001,2015\n1002,2011\n1003,2013\n1004,2017\n"
   assert(print_str == expected_str, "Mismatch in columns order")

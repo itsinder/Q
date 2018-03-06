@@ -96,6 +96,7 @@ fns.testcase_results = function (v, test_for, test_type, result, spare)
   -- print("__Q_TEST__"..date_time.." ; "..req_path.." ; LOAD_CSV ; "..v.name.." ; UNIT TEST ; SUCCESS \n")
 end
 
+-- function to get table length
 fns.table_length= function(tbl)
 
   local count = 0
@@ -104,6 +105,28 @@ fns.table_length= function(tbl)
   end
   return count 
 
+end
+
+-- function to sort 'string indexed' table into 'integer index' table in a given sort_order 
+-- cols  : table of columns with string index
+-- order : table of strings (name of string index)
+fns.sort_table = function(cols, sort_order)
+  assert(type(cols), "cols must be of type table")
+  assert(type(sort_order), "sort_order must be of type table")
+  -- sort_order table length cannot be 0
+  assert(#sort_order > 0, "sort_order table length cannot be 0" )
+  -- cols length must be >= sort_order 
+  assert(fns.table_length(cols) >= #sort_order, "sort_order table length is greater than cols")
+
+  local sorted_cols = {}
+  for i,v in pairs(sort_order) do
+    -- order table string name should match cols table string index  
+    assert(cols[v]~= nil, "Incorrect column name in sort_order table")
+    sorted_cols[#sorted_cols + 1] = cols[v]
+  end
+  
+  return sorted_cols
+  
 end
 
 return fns

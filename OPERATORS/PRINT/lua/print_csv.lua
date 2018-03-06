@@ -4,6 +4,7 @@ local ffi	= require 'Q/UTILS/lua/q_ffi'
 local qconsts	= require 'Q/UTILS/lua/q_consts'
 local plstring	= require 'pl.stringx'
 local utils	= require 'Q/UTILS/lua/utils'
+local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
 
 local buf_size = 1024
 local buf = ffi.malloc(buf_size)
@@ -150,11 +151,20 @@ local function process_filter(filter, vec_length)
   return where, lb, ub
 end
 
-local print_csv = function (vector_list, opfile, filter)
-  -- Convention
-  -- Q.print_csv(X) -- will print stdout
-  -- Q.print_csv(X, "file", <filter>) -- will print to file
-  -- Q.print_csv(X, "", <filter>) -- will return string
+local print_csv = function (vec_list, opt_args)
+  -- Convention: Q.print_csv({T}, opt_args)
+  -- opt_args: table of 3 arguments { opfile, <filter>, print_order }
+  -- 1) opfile: where to print the columns
+             -- "file_name" : will print to file
+             -- ""     : will return a string
+             -- nil    : will print to stdout
+  -- 2) <filter> 
+  -- 3) print_order: order/required column names
+                  -- nil : takes the complete vec_list as it is
+                  -- table of strings (column names)
+
+  -- processing opt_args of print_csv
+  local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
   
   -- trimming whitespace if any
   if opfile then
