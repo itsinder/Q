@@ -5,6 +5,9 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem   = require 'libcmem' ; 
 require 'Q/UTILS/lua/strict'
+local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
+assert(plpath.isdir(path_to_here))
+
 local buf = cmem.new(4096)
 
 local tests = {} 
@@ -29,11 +32,11 @@ tests.t1 = function()
   print(command)
   os.execute(command)
   s1 = plfile.read("_temp1.txt")
-  s2 = plfile.read("out_SC2.txt")
+  s2 = plfile.read(path_to_here .. "out_SC1.txt")
   assert(s1 == s2)
   --=========================
   print("Testing SC Vector from file")
-  local infile = 'SC2.bin'
+  local infile = path_to_here .. 'SC2.bin'
   assert(plpath.isfile(infile), "Create the input files")
   y = assert(Vector.new('SC:8', infile, false))
   local ret_addr, ret_len = y:get_chunk(0);

@@ -1,7 +1,7 @@
 require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
 local Q = require 'Q'
-local load_data = require 'load_data'
+local load_data = require 'Q/ML/LOGISTIC_REGRESSION/test/load_data'
 local log_reg   = require 'Q/ML/LOGISTIC_REGRESSION/lua/logistic_regression'
 
 local test = {} 
