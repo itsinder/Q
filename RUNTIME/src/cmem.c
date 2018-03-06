@@ -67,7 +67,7 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
   void *data = NULL;
   if ( size <= 0 ) { go_BYE(-1); }
   if ( ( ( size / 16 ) * 16 ) != size ) { 
-    size = ( size / 16 ) + 16;
+    size = ( size / 16 ) * 16 + 16;
   }
   data = malloc(size);
   return_if_malloc_failed(data);
