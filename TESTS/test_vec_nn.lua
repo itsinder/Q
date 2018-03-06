@@ -13,7 +13,7 @@ tests.t1 = function()
   local x = lVector({qtype = "I4", gen = true, has_nulls = true})
 
   local x_length = 10
-  local nn_buf_sz = 2 --qconsts.chunk_size  -- over allocating
+  local nn_buf_sz = qconsts.chunk_size  -- over allocating
 
 
   local x_buf = cmem.new(qconsts.qtypes.I4.width * x_length)
