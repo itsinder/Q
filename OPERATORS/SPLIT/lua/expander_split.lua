@@ -46,9 +46,7 @@ local function expander_split(a, f1)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
-      -- print("malloc for generator for f1f2opf3", a, g_iter)
       first_call = false
-
       o1_buf = cmem.new(o1_bufsz, o1_qtype)
       o2_buf = cmem.new(o2_bufsz, o2_qtype)
     end
@@ -59,8 +57,8 @@ local function expander_split(a, f1)
     v1:put_chunk(f1_chunk, nn_f1_chunk, f1_len)
     v2:put_chunk(f1_chunk, nn_f1_chunk, f1_len)
   end
-  v1 = lVector({gen=o1o2_gen, nn=false, qtype=o1_qtype, has_nulls=false}),
-  v2 = lVector({gen=o1o2_gen, nn=false, qtype=o2_qtype, has_nulls=false}),
+  v1 = lVector({gen=o1o2_gen, gen_returns_chunk=false, nn=false, qtype=o1_qtype, has_nulls=false}),
+  v2 = lVector({gen=o1o2_gen, gen_returns_chunk=false, nn=false, qtype=o2_qtype, has_nulls=false}),
   return { v1, v2 }
 end
 
