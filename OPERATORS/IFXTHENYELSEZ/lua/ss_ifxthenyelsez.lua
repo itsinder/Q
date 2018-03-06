@@ -4,6 +4,8 @@ local function ss_ifxthenyelsez(x, y, z)
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local ffi     = require 'Q/UTILS/lua/q_ffi'
   local lVector = require 'Q/RUNTIME/lua/lVector'
+  local cmem    = require 'libcmem'
+  local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
   assert(type(x) == "lVector", "error")
   assert(type(y) == "Scalar", "error") 
@@ -25,15 +27,15 @@ local function ss_ifxthenyelsez(x, y, z)
   local function ss_ifxthenyelsez_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
-    wbuf = wbuf or ffi.malloc(wbufsz)
+    wbuf = wbuf or cmem.new(wbufsz)
     local xlen, xptr, nn_xptr = x:chunk(chunk_idx) 
     if ( xlen == 0 )  then
       return 0, nil, nil
     end
     assert(nn_xptr == nil, "Not prepared for null values in x")
-    local yptr = y:cdata()
-    local zptr = z:cdata()
-    local status = qc[func_name](xptr, yptr, zptr, wbuf, xlen)
+    local yptr = y:to_cmem()
+    local zptr = z:to_cmem()
+    local status = qc[func_name](get_ptr(xptr), get_ptr(yptr), get_ptr(zptr), get_ptr(wbuf), xlen)
     assert(status == 0, "C error in ifxthenyelsez") 
     chunk_idx = chunk_idx + 1
     return xlen, wbuf, nil
