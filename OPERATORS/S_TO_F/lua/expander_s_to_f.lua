@@ -40,7 +40,7 @@ return function (a, args)
     if ( chunk_size <= 0 ) then
       return 0
     else
-      qc[func_name](get_ptr(buff), chunk_size, subs.c_mem, lb)
+      qc[func_name](get_ptr(buff), chunk_size, get_ptr(subs.c_mem), lb)
       return chunk_size, buff
     end
   end
