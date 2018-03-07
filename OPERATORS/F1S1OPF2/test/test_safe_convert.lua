@@ -33,7 +33,8 @@ tests.t1 = function()
   assert(n:eval():to_num() == len, "Converted column not matching with expected result")
 
   -- Check the compare result
-  -- Q.print_csv(converted_col, "")
+  -- local opt_args = { opfile = ""  }
+  -- Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t1")
 end
 --===========================
@@ -67,7 +68,8 @@ tests.t2 = function()
   assert(n:eval():to_num() == len, "Converted column not matching with expected result")
 
   -- Check the compare result
-  Q.print_csv(converted_col, "")
+  local opt_args = { opfile = "" }
+  Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t2")
 end
 --===========================
