@@ -61,7 +61,6 @@ tests.t6 = function ()
   -- more than chunk size values present in a and b
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
-  a:eval()
   local len = 65538
   local b_input_table = {}
   for i=1, len do
