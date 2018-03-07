@@ -168,7 +168,6 @@ local print_csv = function (vector_list, opfile, filter)
   local vec_length = vector_list[1]:length()
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
-  -- local buf = assert(ffi.malloc(buf_size))
   local num_cols = #vector_list
   local fp = nil -- file pointer
   local tbl_rslt = nil
