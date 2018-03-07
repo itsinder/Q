@@ -2,6 +2,8 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local function expander_where(op, a, b)
   -- Verification
@@ -44,12 +46,12 @@ local function expander_where(op, a, b)
     assert(chunk_num == a_chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
-      out_buf = assert(ffi.malloc(sz_out_in_bytes))
+      out_buf = assert(cmem.new(sz_out_in_bytes))
 
-      n_out = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      n_out = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       n_out = ffi.cast("uint64_t *", n_out)
 
-      aidx = assert(ffi.malloc(ffi.sizeof("uint64_t")))
+      aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
       
@@ -68,7 +70,7 @@ local function expander_where(op, a, b)
       assert(a_len == b_len)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Where vector cannot have nulls")
-      local status = qc[func_name](a_chunk, b_chunk, aidx, a_len, out_buf, 
+      local status = qc[func_name](get_ptr(a_chunk), get_ptr(b_chunk), aidx, a_len, get_ptr(out_buf), 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
       if ( aidx[0] == a_len ) then

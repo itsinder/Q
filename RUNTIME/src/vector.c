@@ -1,4 +1,5 @@
 #define LUA_LIB
+#undef USE_VEC_BUF // Advanced feature which we have not thought through 
 
 #include <stdlib.h>
 #include <math.h>
@@ -13,10 +14,46 @@
 #include "q_incs.h"
 #include "core_vec.h"
 #include "scalar.h"
+#include "cmem.h"
 #include "_txt_to_I4.h"
 
 // TODO Delete luaL_Buffer g_errbuf;
 extern luaL_Buffer g_errbuf;
+
+
+#undef USE_STACK_DUMP
+#ifdef USE_STACK_DUMP
+static void stackDump (lua_State *L) {
+  int i;
+  int top = lua_gettop(L);
+  for (i = 1; i <= top; i++) {  /* repeat for each level */
+    int t = lua_type(L, i);
+    switch (t) {
+
+      case LUA_TSTRING:  /* strings */
+        printf("`%s'\n", lua_tostring(L, i));
+        break;
+
+      case LUA_TBOOLEAN:  /* booleans */
+        printf(lua_toboolean(L, i) ? "true" : "false");
+        break;
+
+      case LUA_TNUMBER:  /* numbers */
+        printf("NUMBER:%g\n", lua_tonumber(L, i));
+        break;
+
+      default:  /* other values */
+        printf("%s\n", lua_typename(L, t));
+        break;
+
+    }
+    printf(" \n ");  /* put a separator */
+  }
+  printf("\n");  /* end the listing */
+  fflush(stdout);
+  WHEREAMI;
+}
+#endif
 
 static int 
 get_chunk_size(
@@ -38,7 +75,6 @@ get_chunk_size(
     // fprintf(stderr, "C code chunk_size = %d \n", chunk_size);
   }
   *ptr_chunk_size = chunk_size;
-BYE:
   return status;
 }
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
@@ -163,6 +199,7 @@ BYE:
   return 3;
 }
 //----------------------------------------
+#ifdef USE_VEC_BUF
 static int l_vec_release_vec_buf( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int32_t num_in_chunk  = luaL_checknumber(L, 2);
@@ -180,38 +217,69 @@ BYE:
 }
 //----------------------------------------
 static int l_vec_get_vec_buf( lua_State *L) {
+  int status = 0;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  char *chunk = vec_get_buf(ptr_vec); 
-  if ( chunk != NULL ) { 
-    lua_pushlightuserdata(L, chunk);
-    /* Add the metatable to the stack. */
-    luaL_getmetatable(L, "CMEM");
-    /* Set the metatable on the userdata. */
-    lua_setmetatable(L, -2);
-    return 1;
+  // malloc vector's buffer if necessary
+  // TODO Discuss with Krushnakant
+  if ( ptr_vec->chunk == NULL ) { 
+    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    return_if_malloc_failed(ptr_vec->chunk);
   }
+
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  return_if_malloc_failed(ptr_cmem);
+  // printf("cmem dupe to %x \n", ptr_cmem);
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+
+  cmem_dupe(ptr_cmem, ptr_vec->chunk, ptr_vec->chunk_sz, ptr_vec->field_type, "");
+  return 1;
+BYE:
+  free_if_non_null(ptr_cmem);
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: no chunk for materialized vector");
   return 2;
 }
+#endif 
 //----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;
   char *ret_addr = NULL;
   uint64_t ret_len = 0;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
+  SCLR_REC_TYPE *ptr_sclr = NULL;
+
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   int64_t idx = luaL_checknumber(L, 2);
   int32_t len = luaL_checknumber(L, 3);
   status = vec_get(ptr_vec, idx, len, &ret_addr, &ret_len);
   cBYE(status);
   int num_to_return = 2;
-  lua_pushlightuserdata(L, ret_addr);
+
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  return_if_malloc_failed(ptr_cmem);
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  // printf("cmem dupe to %x \n", ptr_cmem);
+
+  // TODO: Should we be using ret_len below?
+  status = cmem_dupe(ptr_cmem, ret_addr, ret_len, ptr_vec->field_type, "");
+  cBYE(status);
   lua_pushinteger(L, ret_len);
+
   if ( len == 1 ) {  // this is for debugging help and for get_one()
-    num_to_return++;
-    SCLR_REC_TYPE *ptr_sclr = 
-      (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
+
+    ptr_sclr = (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
     return_if_malloc_failed(ptr_sclr);
+    memset(ptr_sclr, '\0', sizeof(SCLR_REC_TYPE));
+    luaL_getmetatable(L, "Scalar");/* Add the metatable to the stack. */
+    lua_setmetatable(L, -2);/* Set the metatable on the userdata. */
+    // printf("sclr new to %x \n", ptr_sclr);
+
+    num_to_return++;
     strcpy(ptr_sclr->field_type, ptr_vec->field_type);
     ptr_sclr->field_size = ptr_vec->field_size;
     if ( strcmp(ptr_sclr->field_type, "B1") == 0 ) { 
@@ -222,8 +290,6 @@ static int l_vec_get( lua_State *L) {
     else {
       memcpy(&(ptr_sclr->cdata), ret_addr, ptr_vec->field_size);
     }
-    luaL_getmetatable(L, "Scalar");
-    lua_setmetatable(L, -2);
   }
   return num_to_return;
 BYE:
@@ -237,11 +303,21 @@ static int l_vec_get_chunk( lua_State *L)
   int status = 0;
   char *ret_addr = NULL;
   uint64_t ret_len = 0;
-  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  CMEM_REC_TYPE *ptr_cmem = NULL;
   int64_t chunk_num = -1;
   uint64_t idx = 0;
   int32_t chunk_size;
+
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   status = get_chunk_size(L, &chunk_size); cBYE(status);
+
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  return_if_malloc_failed(ptr_cmem);
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  cmem_undef(ptr_cmem);
+
   if  ( lua_isnumber(L, 2) ) { 
     chunk_num = luaL_checknumber(L, 2);
     if ( chunk_num < 0 ) { go_BYE(-1); }
@@ -256,18 +332,16 @@ static int l_vec_get_chunk( lua_State *L)
     }
     idx = chunk_num * chunk_size;
   }
-  bool is_malloc = false; uint64_t sz = 0;
+  if ( chunk_num < 0 ) { go_BYE(-1); }
+  bool is_malloc = false; 
   if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_eov == false ) ){
     if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
     is_malloc = true;
-    // allocate memory in advance 
-    sz = ptr_vec->chunk_size * ptr_vec->field_size;
-    ret_addr = lua_newuserdata(L, sz); 
-    return_if_malloc_failed(ret_addr);
-    /* Add the metatable to the stack. */
-    luaL_getmetatable(L, "CMEM");
-    /* Set the metatable on the userdata. */
-    lua_setmetatable(L, -2);
+    // allocate memory since you cannot send back address of Vector's chunk
+    status = cmem_malloc(ptr_cmem, ptr_vec->chunk_sz, 
+        ptr_vec->field_type, "");
+    cBYE(status);
+    ret_addr = ptr_cmem->data;
   }
   status = vec_get(ptr_vec, idx, chunk_size, &ret_addr, &ret_len);
   if ( status == -2 ) { goto BYE; } // asked for too far
@@ -276,7 +350,15 @@ static int l_vec_get_chunk( lua_State *L)
     // already taken care of 
   }
   else {
-    lua_pushlightuserdata(L, ret_addr);
+    // TODO This is special case for return of mmap pointer
+    // THINK THROUGH IT MORE CAREFULLY P1
+    int64_t csz = ptr_vec->chunk_sz;
+    if ( csz == 0 ) { 
+      csz = ptr_vec->map_len;
+    }
+    status = cmem_dupe(ptr_cmem, ret_addr, csz, ptr_vec->field_type, "");
+    cBYE(status);
+    // printf("cmem dupe to %x \n", ptr_cmem);
   }
   lua_pushinteger(L, ret_len);
   return 2;
@@ -290,7 +372,8 @@ static int l_vec_put1( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
   if ( strcmp(ptr_vec->field_type, "SC") == 0 ) { 
-    addr = luaL_checkudata(L, 2, "CMEM");
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    addr = ptr_cmem->data;
   }
   else {
     SCLR_REC_TYPE *ptr_sclr = luaL_checkudata(L, 2, "Scalar");
@@ -310,9 +393,18 @@ BYE:
 //----------------------------------------
 static int l_vec_start_write( lua_State *L) {
   int status = 0;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   status = vec_start_write(ptr_vec); cBYE(status);
-  lua_pushlightuserdata(L, ptr_vec->map_addr);
+
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  return_if_malloc_failed(ptr_cmem);
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  cmem_dupe(ptr_cmem, ptr_vec->map_addr, ptr_vec->map_len, 
+      ptr_vec->field_type, ptr_vec->name);
+
   lua_pushinteger(L, ptr_vec->num_elements);
   return 2;
 BYE:
@@ -343,8 +435,8 @@ static int l_vec_set( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   idx = luaL_checknumber(L, 3);
   if (  luaL_testudata(L, 2, "CMEM") ) { 
-    void *X = luaL_checkudata(L, 2, "CMEM");
-    addr = X;
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    addr = ptr_cmem->data;
     len = luaL_checknumber(L, 4);
   }
   else if (  luaL_testudata(L, 2, "Scalar") ) { 
@@ -401,17 +493,11 @@ static int l_vec_put_chunk( lua_State *L) {
   int status = 0;
   void *addr = NULL;
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  int x =  lua_type (L, 2);
-  const char *y = lua_typename(L, x);
   if ( luaL_testudata (L, 2, "CMEM") ) { 
-    addr = luaL_checkudata(L, 2, "CMEM");
-  } // TODO UNDO ALL FOLLOWINF HACKERY
-  else if ( luaL_testudata (L, 2, "userdata") ) { 
-    addr = luaL_checkudata(L, 2, "userdata");
-  }
-  else if ( luaL_testudata (L, 2, "cdata") ) { 
-    addr = luaL_checkudata(L, 2, "cdata");
-  }
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 2, "CMEM");
+    if ( ptr_cmem == NULL ) { go_BYE(-1); }
+    addr = ptr_cmem->data;
+  } 
   else {
     fprintf(stderr, "NOT  CMEM\n");
     go_BYE(-1);
@@ -526,14 +612,13 @@ static int l_vec_new( lua_State *L)
   ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   return_if_malloc_failed(ptr_vec);
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
+  luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+  // printf("vect new to %x \n", ptr_vec);
 
   status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
 
-  /* Add the metatable to the stack. */
-  luaL_getmetatable(L, "Vector");
-  /* Set the metatable on the userdata. */
-  lua_setmetatable(L, -2);
   luaL_pushresult(&g_errbuf);
   return 2;
 BYE:
@@ -552,14 +637,12 @@ static int l_vec_clone( lua_State *L)
   ptr_new_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   return_if_malloc_failed(ptr_new_vec);
   memset(ptr_new_vec, '\0', sizeof(VEC_REC_TYPE));
+  luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
   status = vec_clone(ptr_old_vec, ptr_new_vec);
   cBYE(status);
 
-  /* Add the metatable to the stack. */
-  luaL_getmetatable(L, "Vector");
-  /* Set the metatable on the userdata. */
-  lua_setmetatable(L, -2);
   luaL_pushresult(&g_errbuf);
   return 2;
 BYE:
@@ -581,8 +664,10 @@ static const struct luaL_Reg vector_methods[] = {
     { "chunk_size", l_vec_chunk_size },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
+#ifdef USE_VEC_BUF 
     { "get_vec_buf", l_vec_get_vec_buf },
     { "release_vec_buf", l_vec_release_vec_buf },
+#endif
     { "is_memo", l_vec_is_memo },
     { "is_eov", l_vec_is_eov },
     { "cast", l_vec_cast },
@@ -604,8 +689,10 @@ static const struct luaL_Reg vector_functions[] = {
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
     { "num_in_chunk", l_vec_num_in_chunk },
+#ifdef USE_VEC_BUF 
     { "release_vec_buf", l_vec_release_vec_buf },
     { "get_vec_buf", l_vec_get_vec_buf },
+#endif
     { "put1", l_vec_put1 },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },

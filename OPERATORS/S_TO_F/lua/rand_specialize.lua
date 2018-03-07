@@ -1,5 +1,8 @@
+local cmem      = require 'libcmem'
+local get_ptr   = require 'Q/UTILS/lua/get_ptr'
 local Scalar = require 'libsclr'
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
+
 return function (
   args
   )
@@ -36,9 +39,10 @@ return function (
   local ub   = assert(args.ub)
   local len   = assert(args.len)
   local seed   = args.seed
+  local ctype = qconsts.qtypes[qtype].ctype
 
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
-  hdr = string.gsub(hdr,"<<ctype>>",  qconsts.qtypes[qtype].ctype)
+  hdr = string.gsub(hdr,"<<ctype>>",  ctype)
   pcall(ffi.cdef, hdr)
 
   if ( seed ) then 
@@ -57,12 +61,11 @@ return function (
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
-  local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
-  c_mem = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", c_mem)
-  local ctype = qconsts.qtypes[qtype].ctype
-  c_mem.lb = ffi.cast(ctype .. " *", lb:cdata())[0]
-  c_mem.ub = ffi.cast(ctype .. " *", ub:cdata())[0]
-  c_mem.seed = seed
+  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
+  local c_mem_ptr = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", get_ptr(c_mem))
+  c_mem_ptr.lb = ffi.cast(ctype .. " *", get_ptr(lb:to_cmem()))[0]
+  c_mem_ptr.ub = ffi.cast(ctype .. " *", get_ptr(ub:to_cmem()))[0]
+  c_mem_ptr.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 
     subs.generator = "mrand48"

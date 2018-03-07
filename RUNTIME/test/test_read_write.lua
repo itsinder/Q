@@ -2,8 +2,10 @@ require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
 local Vector = require 'libvec' 
 local Scalar = require 'libsclr' 
+local cmem   = require 'libcmem' 
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {} 
 
@@ -11,8 +13,8 @@ tests.t1 = function()
   local qtypes = { "I4", "I8",  "F8" }
   local num_elements = 64*64*1024
   local iter = 1
-  local buf = ffi.malloc(16)
   for _, qtype in ipairs(qtypes) do   
+    local buf = cmem.new(16, qtype)
     local ctype = assert(qconsts.qtypes[qtype].ctype)
     for i=1, iter do
       print("QType/Iteration: ", qtype, i)
@@ -32,9 +34,9 @@ tests.t1 = function()
       assert(y:end_write())
   
       for j= 1, y:num_elements() do
-        local ret_addr, ret_len, ret_val  = y:get(j-1, 1)
-        local z = ffi.cast(ctype .. " *", ret_addr)
-        assert(z[0] == j*9)
+        local ret_cmem, ret_len, ret_val  = y:get(j-1, 1)
+        local ret_ptr = get_ptr(ret_cmem, qtype)
+        assert(ret_ptr[0] == j*9)
       end
   
     -- Explicit call to garbage collection

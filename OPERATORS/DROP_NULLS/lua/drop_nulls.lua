@@ -3,6 +3,8 @@ local function drop_nulls(x, sval)
   local Q   = require 'Q/q_export'
   local qc  = require 'Q/UTILS/lua/q_core'
   local ffi = require 'Q/UTILS/lua/q_ffi'
+  local get_ptr = require 'Q/UTILS/lua/get_ptr'
+
   assert(x)
   assert(type(x) == "lVector")
   if ( not x:has_nulls() ) then 
@@ -30,10 +32,10 @@ local function drop_nulls(x, sval)
   assert(xlen > 0, "Cannot have null vector")
   assert(xptr)
   assert(nn_xptr, "Must have nulls in order to drop them")
-  xptr    = ffi.cast(subs.ctype .. " *", xptr)
-  nn_xptr = ffi.cast("uint64_t *", nn_xptr)
+  --xptr    = ffi.cast(subs.ctype .. " *", xptr)
+  --nn_xptr = ffi.cast("uint64_t *", nn_xptr)
   assert(qc[func_name], "Unknown function " .. func_name)
-  qc[func_name](xptr, nn_xptr, sval:cdata(), xlen)
+  qc[func_name](get_ptr(xptr), get_ptr(nn_xptr), get_ptr(sval:to_cmem()), xlen)
   x:drop_nulls()
   x:end_write()
   return x

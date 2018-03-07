@@ -13,10 +13,11 @@ local is_accelerate = require "Q/OPERATORS/LOAD_CSV/lua/is_accelerate"
 local process_opt_args = require "Q/OPERATORS/LOAD_CSV/lua/process_opt_args"
 local init_buffers  = require "Q/OPERATORS/LOAD_CSV/lua/init_buffers"
 local load_csv_fast_C  = require "Q/OPERATORS/LOAD_CSV/lua/load_csv_fast_C"
-local update_out_buf  = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
-local flush_bufs  = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
-local plfile     = require 'pl.file'
-
+local update_out_buf   = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
+local flush_bufs    = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
+local plfile        = require 'pl.file'
+local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
+local cmem          = require 'libcmem'
  --======================================
 local function load_csv(
   infile,   -- input file to read (string)
@@ -58,7 +59,7 @@ local function load_csv(
   
   local x_idx = 0
   local sz_in_buf = 2048 -- TODO Undo hard coding 
-  local in_buf  = assert(ffi.gc(ffi.C.malloc(sz_in_buf), ffi.C.free))
+  local in_buf  = assert(get_ptr(cmem.new(sz_in_buf)))
   local row_idx = 1
   local col_idx = 1
   local num_in_out_buf = 0
@@ -86,11 +87,11 @@ local function load_csv(
         else
           if M[col_idx].has_nulls then
             -- Update nn_out_buf
-            local temp_nn_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_out_bufs[col_idx])
+            local temp_nn_out_buf = ffi.cast(qconsts.qtypes.B1.ctype .. " *", get_ptr(nn_out_bufs[col_idx]))
             qc.set_bit_u64(temp_nn_out_buf, num_in_out_buf, 1)
           end
           update_out_buf(in_buf, M[col_idx], dicts[col_idx],
-          out_bufs[col_idx], num_in_out_buf, n_buf)
+          get_ptr(out_bufs[col_idx]), num_in_out_buf, n_buf)
         end
       end
       --=======================================

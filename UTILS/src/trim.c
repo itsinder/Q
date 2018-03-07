@@ -25,6 +25,8 @@ trim(
   for ( start_idx = 0; start_idx < n; start_idx++ ) { 
     if ( !isspace(inbuf[start_idx]) ) { break; }
   }
+  // TODO Do not start at max and work downwards
+  // Start from where you left off and keep going 
   for ( stop_idx = n-1; stop_idx >= 0; stop_idx-- ) { 
     if ( !( ( inbuf[stop_idx] == '\0' ) || ( isspace(inbuf[stop_idx]) ) ) ) {
       break;

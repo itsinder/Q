@@ -3,6 +3,7 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {} 
 -- testing get_all function
@@ -14,10 +15,11 @@ tests.t1 = function()
                     { qtype = "I4", file_name = "_in1_I4.bin"}
                    )
   assert(x:check())
-  local len, base_addr, nn_addr = x:get_all()
+  local len, base_cmem, nn_cmem = x:get_all()
   assert(len == 10)
-  assert(base_addr)
-  local X = ffi.cast("int32_t *", base_addr)
+  assert(base_cmem)
+  assert(nn_cmem == nil)
+  local X = get_ptr(base_cmem, "I4")
   for i = 1, 10 do
     -- print(X[i-1])
     assert(X[i-1] == i*10)

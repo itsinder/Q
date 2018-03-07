@@ -2,6 +2,9 @@ local Q		= require 'Q'
 local qc	= require 'Q/UTILS/lua/q_core'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local qconsts	= require 'Q/UTILS/lua/q_consts'
+local cmem	= require 'libcmem'
+local get_ptr	= require 'Q/UTILS/lua/get_ptr'
+
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
@@ -11,7 +14,7 @@ tests.t1 = function()
   local len = 10
 
   -- Prepare input buffer
-  local X = ffi.malloc(len * ffi.sizeof("int32_t"))
+  local X = get_ptr(cmem.new(len * ffi.sizeof("int32_t")))
   X = ffi.cast("int32_t *", X)
   for i = 0, len - 1 do
     X[i] = 10 * (i + 1)
@@ -25,7 +28,7 @@ tests.t1 = function()
   print("################################\n")
 
   -- Prepare output buf
-  local buf = ffi.malloc(BUFLEN)
+  local buf = get_ptr(cmem.new(BUFLEN))
   local buf_copy = ffi.cast("char *", buf)
   ffi.fill(buf_copy, BUFLEN)
 

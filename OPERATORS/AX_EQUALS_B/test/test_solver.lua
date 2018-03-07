@@ -2,6 +2,7 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local linear_solver = require 'Q/OPERATORS/AX_EQUALS_B/lua/linear_solver'
 
 local mk_cols = function(A)
@@ -29,7 +30,7 @@ tests.t1 = function()
   local b_new = Q.mv_mul(A, x)
   b_new:eval()
   local _, b_new_chunk, _ = b_new:get_all()
-  b_new_chunk = ffi.cast("double*", b_new_chunk)
+  b_new_chunk = ffi.cast("double*", get_ptr(b_new_chunk))
   for i, bi in ipairs(b_bare) do
     assert(math.abs(bi - b_new_chunk[i - 1]) < 0.001, "Ax ~= b")
   end

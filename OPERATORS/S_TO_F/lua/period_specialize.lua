@@ -1,5 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local cmem = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 return function (
   args
   )
@@ -37,11 +39,11 @@ return function (
   local out_ctype = qconsts.qtypes[qtype].ctype
   local rec_type = 'PERIOD_' .. qtype .. '_REC_TYPE';
   local sz_c_mem = ffi.sizeof(rec_type)
-  local c_mem = assert(qc.malloc(sz_c_mem), "malloc failed")
-  local x = ffi.cast(rec_type .. " *", c_mem); 
-  x.start  = args.start;
-  x.by     = args.by;
-  x.period = args.period;
+  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
+  local c_mem_ptr = ffi.cast(rec_type .. " *", get_ptr(c_mem)); 
+  c_mem_ptr.start  = args.start;
+  c_mem_ptr.by     = args.by;
+  c_mem_ptr.period = args.period;
   local tmpl = 'period.tmpl'
   local subs = {};
   subs.fn          = "period_" .. qtype

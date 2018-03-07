@@ -3,6 +3,8 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 -- This is matrix vector multiply, done chunks at a time 
 local mv_mul = function(X, y)
@@ -36,11 +38,11 @@ local mv_mul = function(X, y)
     if  ( first_call ) then 
       -- print("malloc'ing for generator of mv_mul")
       -- START: malloc
-      Xptr = ffi.malloc(ffi.sizeof("double *") * #X)
+      Xptr = get_ptr(cmem.new(ffi.sizeof("double *") * #X))
       assert(Xptr, "malloc failed")
       Xptr = ffi.cast("double **", Xptr)
 
-      z_buf = ffi.malloc(z_sz)
+      z_buf = cmem.new(z_sz)
       assert(z_buf, "malloc failed")
       -- STOP : malloc
 
@@ -62,14 +64,14 @@ local mv_mul = function(X, y)
       else 
         assert(x_len == len)
       end
-      Xptr[xidx-1] = ffi.cast("double *", xptr)
+      Xptr[xidx-1] = ffi.cast("double *", get_ptr(xptr))
     end
     -- STOP : assemble Xptr
     chunk_idx = chunk_idx + 1
     --=================================
     if ( len > 0 ) then 
       -- mv_mul_simple_F4_F4_F4( double ** x, double * y, double * z, int m, int k); 
-      local status = qc[func_name](Xptr, yptr, z_buf, len, #X)
+      local status = qc[func_name](Xptr, get_ptr(yptr), get_ptr(z_buf), len, #X)
       assert(status == 0, "C error in ", func_name)
       return len, z_buf, nn_z_buf
     else

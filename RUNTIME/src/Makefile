@@ -19,11 +19,12 @@ clean:
 ../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
 	make -C ../../OPERATORS/PRINT/lua/
 
-libvec.so:
+libvec.so: libvec.so libcmem.so
 	gcc -g ${QC_FLAGS} $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \
 		core_vec.c \
+		cmem.c \
 		../../UTILS/src/mmap.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I4.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
@@ -32,6 +33,13 @@ libvec.so:
 		../../UTILS/src/buf_to_file.c \
                 ../../UTILS/src/copy_file.c \
 		../../UTILS/src/file_exists.c \
+		../../OPERATORS/PRINT/src/B1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I8_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
 		-shared -o libvec.so
 
 libcmem.so:
@@ -47,12 +55,13 @@ libcmem.so:
 		../../UTILS/src/err.c \
 		-shared -o libcmem.so
 
-libsclr.so: gen_cmp gen_arith libvec.so libcmem.so
+libsclr.so: gen_cmp gen_arith libcmem.so
 	rm -f _*.c
 	lua gen_cmp.lua
 	lua gen_arith.lua
 	gcc -g ${QC_FLAGS} ${INCS} \
 		scalar.c \
+		cmem.c \
 		../../UTILS/src/err.c \
 		../../OPERATORS/LOAD_CSV/src/txt_to_B1.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I1.c \
@@ -61,6 +70,13 @@ libsclr.so: gen_cmp gen_arith libvec.so libcmem.so
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_I8.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_F4.c \
 		../../OPERATORS/LOAD_CSV/gen_src/_txt_to_F8.c \
+		../../OPERATORS/PRINT/src/B1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_I8_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F4_to_txt.c \
+		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
 		../../UTILS/src/is_valid_chars_for_num.c \
 		-shared -o libsclr.so
 

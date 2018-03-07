@@ -1,15 +1,15 @@
+local Scalar	= require 'libsclr'
 local lVector	= require 'Q/RUNTIME/lua/lVector'
 local cmem	= require 'libcmem'
+local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local c_to_txt	= require 'Q/UTILS/lua/C_to_txt'
-local Scalar	= require 'libsclr'
 local plpath  	= require 'pl.path'
 local genbin 	= require 'Q/RUNTIME/test/generate_bin'
 local Q		= require 'Q'
 
 local script_dir = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(script_dir))
-
 
 local tests = {}
 --====== Testing vector cloning
@@ -18,12 +18,12 @@ tests.t1 = function()
   local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
-  local iptr = ffi.cast("int32_t *", base_data)
+  local c = cmem.new(num_elements * field_size, "I4")
+  local iptr = assert(get_ptr(c, "I4"))
   for i = 1, num_elements do
     iptr[i-1] = i*10
   end
-  x:put_chunk(base_data, nil, num_elements)
+  x:put_chunk(c, nil, num_elements)
   x:eov()
   x:persist(true)
   
@@ -58,8 +58,10 @@ tests.t1 = function()
   -- compare vector elements
   local val, nn_val
   for i = 1, x_clone:num_elements() do
-    val, nn_val = c_to_txt(x_clone, i)
-    assert(val == i*10)
+    val, nn_val = x_clone:get_one(i-1)
+    assert(val)
+    assert(type(val) == "Scalar")
+    assert(val == Scalar.new(i*10, "I4"))
   end
 
   print("Successfully completed test t1")

@@ -3,6 +3,8 @@ local Dictionary    = require 'Q/UTILS/lua/dictionary'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
+local cmem          = require 'libcmem'
+local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
 local function get_binary_width(field)
   local w
@@ -60,11 +62,11 @@ local function init_buffers(M)
         cols[col_idx]:set_meta("dir", dicts[col_idx])
       end
       -- Allocate memory for output buf and add to pool
-      out_bufs[col_idx] = ffi.malloc(n_buf * binary_width)
-      ffi.fill(out_bufs[col_idx], n_buf) -- extra cautious
+      out_bufs[col_idx] = cmem.new(n_buf * binary_width)
+      ffi.fill(get_ptr(out_bufs[col_idx]), n_buf) -- extra cautious
       if ( M[col_idx].has_nulls ) then 
-        nn_out_bufs[col_idx] = ffi.malloc(n_buf/8)
-        ffi.fill(nn_out_bufs[col_idx], n_buf/8) -- extra cautious
+        nn_out_bufs[col_idx] = cmem.new(n_buf/8)
+        ffi.fill(get_ptr(nn_out_bufs[col_idx]), n_buf/8) -- extra cautious
       end
     end -- if is_load 
   end -- for col_idx = ...

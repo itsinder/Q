@@ -19,23 +19,64 @@
 #include "_txt_to_F4.h"
 #include "_txt_to_F8.h"
 
+#include "cmem.h"
 #include "scalar.h"
+int luaopen_libvec (lua_State *L);
 
 extern int luaopen_libsclr (lua_State *L);
 
-static int l_sclr_to_cdata( lua_State *L) {
+static int l_sclr_to_cmem( lua_State *L) 
+{
   SCLR_REC_TYPE *ptr_sclr = NULL;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
+  // Note that we return a copy of the data, not the original data
+  bool is_foreign = false;
 
   if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
-  ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  ptr_sclr = (SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   if ( ptr_sclr == NULL ) { WHEREAMI; goto BYE; }
-  lua_pushlightuserdata(L, &(ptr_sclr->cdata));
-  luaL_getmetatable(L, "CMEM");
-  lua_setmetatable(L, -2);
+/*
+  if ( lua_isstring(L, 2) ) {
+    const char *x = luaL_checkstring(L, 2);
+    if ( strcmp(x, "is_foreign") == 0 ) {
+      is_foreign = false;
+    }
+    if ( strcmp(x, "not_is_foreign") == 0 ) {
+      is_foreign = false;
+    }
+    else {
+      WHEREAMI; goto BYE;
+    }
+  }
+  else {
+    is_foreign = false;
+  }
+  */
+  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
+  if ( ptr_cmem == NULL ) { WHEREAMI; goto BYE; }
+  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
+  int status = 0;
+  if ( ! is_foreign ) {
+    status = cmem_malloc(ptr_cmem,  ptr_sclr->field_size, 
+        ptr_sclr->field_type, "");
+    memcpy(ptr_cmem->data, &(ptr_sclr->cdata), ptr_sclr->field_size);
+  }
+  else { 
+    // Control should not come here, not just yet
+    WHEREAMI; goto BYE;
+    status = cmem_dupe(ptr_cmem,  &(ptr_sclr->cdata), ptr_sclr->field_size,
+        ptr_sclr->field_type, "");
+  }
+  if ( status < 0 ) { WHEREAMI; goto BYE; }
+  strncpy(ptr_cmem->field_type, ptr_sclr->field_type, 4-1);
+  ptr_cmem->size = ptr_sclr->field_size;
+
+  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   return 1;
 BYE:
   lua_pushnil(L);
-  lua_pushstring(L, "ERROR: sclr_to_cdata. ");
+  lua_pushstring(L, "ERROR: sclr_to_cmem. ");
   return 2;
 }
 
@@ -371,23 +412,22 @@ static int l_sclr_new( lua_State *L) {
   float   tempF4;
   double  tempF8;
   const char *str_val = NULL;
+  char *dst = NULL;
+  char *src = NULL;
   lua_Number  in_val;
-  void *in_cmem = NULL;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
 
   // TESTING GC problems lua_gc(L, LUA_GCCOLLECT, 0);  
 
+  bool found = false;
   if ( lua_gettop(L) < 2 ) { go_BYE(-1); }
   if ( lua_isstring(L, 1) ) { 
     str_val = luaL_checkstring(L, 1);
+    found = true;
   }
-  else if ( lua_islightuserdata(L, 1) ) { 
-    // TODO P3
-    // go_BYE(-1);
-    in_cmem = lua_touserdata(L, 1);
-  }
-  else if ( lua_isuserdata(L, 1) ) { 
-    // in_cmem = luaL_checkudata(L, 1, "CMEM");
-    in_cmem = lua_touserdata(L, 1);
+  else if (  lua_isuserdata(L, 1) ) { 
+    ptr_cmem = luaL_checkudata(L, 1, "CMEM");
+    found = true;
   }
   else if ( lua_isnumber(L, 1) ) {
     // No matter how I invoke it, Lua sends value as string
@@ -397,6 +437,7 @@ static int l_sclr_new( lua_State *L) {
   else if ( lua_isboolean(L, 1) ) {
     // However, if I invoke as true, then it comes here
     in_val = lua_toboolean(L, 1);
+    found = true;
   }
   else {
     go_BYE(-1);
@@ -404,13 +445,25 @@ static int l_sclr_new( lua_State *L) {
   const char *qtype   = luaL_checkstring(L, 2);
   SCLR_REC_TYPE *ptr_sclr = NULL;
   ptr_sclr = (SCLR_REC_TYPE *)lua_newuserdata(L, sizeof(SCLR_REC_TYPE));
-  char *dst = (char *)&(ptr_sclr->cdata);
+  return_if_malloc_failed(ptr_sclr);
+  memset(ptr_sclr, '\0', sizeof(SCLR_REC_TYPE));
+  dst = (char *)&(ptr_sclr->cdata);
+
+  if ( ptr_cmem != NULL ) {
+    src = (char*)ptr_cmem->data;
+    if ( ( ptr_cmem->field_type != NULL ) && 
+        ( *(ptr_cmem->field_type) != '\0' ) ) {
+      if ( strcmp(qtype, ptr_cmem->field_type) != 0 ) { go_BYE(-1); }
+    }
+  }
+  if ( !found ) { go_BYE(-1); }
+  if ( ( str_val != NULL ) && ( ptr_cmem != NULL ) ) { go_BYE(-1); }
 
   if ( qtype == NULL ) { /* TODO P4 Infer qtype go_BYE(-1); */ }
 
   if ( strcmp(qtype, "B1" ) == 0 ) {
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 1);
+    if ( src != NULL ) { 
+      memcpy(dst, src, 1);
     }
     else {
       if ( str_val == NULL ) { 
@@ -425,8 +478,8 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = sizeof(bool);
   }
   else if ( strcmp(qtype, "I1" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 1);
+    if ( src != NULL ) { 
+      memcpy(dst, src, 1);
     }
     else {
       status = txt_to_I1(str_val, &tempI1); cBYE(status);
@@ -436,8 +489,9 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 1;
   }
   else if ( strcmp(qtype, "I2" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 2);
+    if ( src != NULL ) { 
+      memcpy(dst, src, 2);
+      if ( ptr_cmem->size < 2 ) { go_BYE(-1); }
     }
     else {
       status = txt_to_I2(str_val, &tempI2); cBYE(status);
@@ -447,8 +501,9 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 2;
   }
   else if ( strcmp(qtype, "I4" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 4);
+    if ( src != NULL ) { 
+      if ( ptr_cmem->size < 4 ) { go_BYE(-1); }
+      memcpy(dst, src, 4);
     }
     else {
       status = txt_to_I4(str_val, &tempI4); cBYE(status);
@@ -458,8 +513,9 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "I8" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 8);
+    if ( src != NULL ) { 
+      if ( ptr_cmem->size < 8 ) { go_BYE(-1); }
+      memcpy(dst, src, 8);
     }
     else {
       status = txt_to_I8(str_val, &tempI8); cBYE(status);
@@ -469,8 +525,9 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 8;
   }
   else if ( strcmp(qtype, "F4" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 4);
+    if ( src != NULL ) { 
+      if ( ptr_cmem->size < 4 ) { go_BYE(-1); }
+      memcpy(dst, src, 4);
     }
     else {
       status = txt_to_F4(str_val, &tempF4); cBYE(status);
@@ -480,8 +537,9 @@ static int l_sclr_new( lua_State *L) {
     ptr_sclr->field_size = 4;
   }
   else if ( strcmp(qtype, "F8" ) == 0 ) { 
-    if ( in_cmem != NULL ) { 
-      memcpy(dst, in_cmem, 8);
+    if ( src != NULL ) { 
+      if ( ptr_cmem->size < 8 ) { go_BYE(-1); }
+      memcpy(dst, src, 8);
     }
     else {
       status = txt_to_F8(str_val, &tempF8); cBYE(status);
@@ -494,10 +552,8 @@ static int l_sclr_new( lua_State *L) {
     fprintf(stderr, "Unknown qtype [%s] \n", qtype);
     go_BYE(-1);
   }
-  /* Add the metatable to the stack. */
-  luaL_getmetatable(L, "Scalar");
-  /* Set the metatable on the userdata. */
-  lua_setmetatable(L, -2);
+  luaL_getmetatable(L, "Scalar"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   return 1;
 BYE:
   lua_pushnil(L);
@@ -644,9 +700,9 @@ BYE:
 #include "_outer_eval_arith.c"
 //-----------------------
 static const struct luaL_Reg sclr_methods[] = {
-    { "cdata", l_sclr_to_cdata },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "abs", l_sclr_abs },
     { "fldtype", l_fldtype },
@@ -655,10 +711,10 @@ static const struct luaL_Reg sclr_methods[] = {
  
 static const struct luaL_Reg sclr_functions[] = {
     { "new", l_sclr_new },
-    { "cdata", l_sclr_to_cdata },
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },
     { "neq", l_sclr_neq },

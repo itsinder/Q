@@ -61,35 +61,44 @@ tests.t6 = function ()
   -- more than chunk size values present in a and b
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = 65538} )
-  --a:eval()
+  a:eval()
   local len = 65538
-  --local a_input_table = {}
   local b_input_table = {}
   for i=1, len do
     b_input_table[i] = 0
-    --a_input_table[i] = i
   end
-  b_input_table[2] = 1
-  b_input_table[4] = 1
+  b_input_table[2]   = 1
+  b_input_table[4]   = 1
+  b_input_table[6]   = 1
   b_input_table[len] = 1
   local b = Q.mk_col(b_input_table, "B1")
   --local a = Q.mk_col(a_input_table, "I4")
-  local expected_out = {2, 4, len}
+  local exp_c = Q.mk_col({2, 4, 6, len}, "I4")
+  local n_expected = exp_c:length()
   
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
   
   local c = Q.where(a, b)
   c:eval()
- 
+  --Q.print_csv(a, nil, "/tmp/a_out.txt")
   --Q.print_csv(c, nil, "") 
-  assert(c:length() == #expected_out, "Length Mismatch, Expected: " .. #expected_out .. " Actual: " .. c:length())
+  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  assert(c:length() == exp_c:length(), 
+  "ERROR: Expected: " .. exp_c:length() .. " Actual: " .. c:length())
   --assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
+  print("cmax", Q.max(c):eval())
+  print("cmin", Q.min(c):eval())
+  print("csum", Q.sum(c):eval())
 
+  -- Q.print_csv(c) -- causes seg fault
   for i = 1, c:length() do
-    local value = c_to_txt(c, i)
-    assert(value == expected_out[i], "Value Mismatch, Expected: " .. expected_out[i] .. " Actual: " .. value)
+    local actual_value = c:get_one(i-1):to_num()
+    local exp_value = exp_c:get_one(i-1):to_num()
+    print("actual   = ", actual_value)
+    print("expected = ", exp_value)
+    assert(actual_value == exp_value, 
+      "ERROR: Position: " .. i .. " Expected: " .. exp_value .. " Got " .. actual_value)
   end
+  print("Test t6 succeeded")
 end
 --======================================
 
@@ -127,6 +136,7 @@ tests.t7 = function ()
     local value = c_to_txt(c, i)
     assert(value == expected_out[i], "Value Mismatch, Expected: " .. expected_out[i] .. " Actual: " .. value)
   end
+  print("Test t7 succeeded")
 end
 --=========================================
 return tests

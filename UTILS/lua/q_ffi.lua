@@ -24,6 +24,7 @@ int fflush(FILE *stream);
 -- TODO: Put this back later ffi.new = nil
 local t_ffi = {}
 t_ffi.malloc = function(n, free_func)
+   assert(nil, "Not supported, please use libcmem")
    assert(n > 0, "Cannot malloc 0 or less bytes")
    local c_mem = nil
    local old = false -- TODO P0 Fix this the right way

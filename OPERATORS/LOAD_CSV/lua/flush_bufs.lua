@@ -1,6 +1,7 @@
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
+local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
 local function flush_buffers(
   cols, 
@@ -23,9 +24,9 @@ local function flush_buffers(
         width = assert(qconsts.qtypes[qtype].width)
       end
       assert(width > 0)
-      ffi.fill(out_bufs[i], n_buf * width)
+      ffi.fill(get_ptr(out_bufs[i]), n_buf * width)
       if ( M[i].has_nulls ) then 
-        ffi.fill(nn_out_bufs[i], n_buf / 8)
+        ffi.fill(get_ptr(nn_out_bufs[i]), n_buf / 8)
       end
     end
   end

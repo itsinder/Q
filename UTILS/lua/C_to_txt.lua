@@ -1,6 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require "Q/UTILS/lua/q_ffi"
 local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 return function (col, rowidx)
   --TODO: Handle B1 case
@@ -18,8 +19,7 @@ return function (col, rowidx)
     val = ffi.NULL
   else
     local qtype = col:qtype()
-    local ctype =  qconsts.qtypes[qtype]["ctype"]
-    local casted = ffi.cast(ctype.." *", base_data)
+    local casted = get_ptr(base_data, qtype)
     if qtype == "B1" then
       local bit_value = tonumber( qc.get_bit_u64(casted, chunk_idx) )
       if bit_value == 0 then
@@ -51,7 +51,7 @@ return function (col, rowidx)
 
     -- Check for nn vector
     if nn_data then
-      local nn_casted = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      local nn_casted = get_ptr(nn_data, "B1")
       local bit_value = tonumber( qc.get_bit_u64(nn_casted, chunk_idx) )
       if bit_value == 0 then
          nn_val = ffi.NULL

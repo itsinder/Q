@@ -2,12 +2,11 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
-local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
--- for k, v in pairs(vec) do print(k, v) end 
 
 local M
 local is_memo
@@ -17,6 +16,8 @@ local rslt
 local tests = {} 
 --
 tests.t1 = function()
+  print("Starting test t1")
+  local buf = cmem.new(4096, "I4", "t1 buffer")
   local infile = '_in1_I4.bin'
   local num_values = 10
   local q_type = "I4"
@@ -35,13 +36,13 @@ tests.t1 = function()
   local a, b = y:eov()
   assert(a) -- unnecessary eov is not an erro
   local z = y:meta()
-  print(z)
+  -- print(z)
   M = loadstring(z)
-  print(M)
+  -- print(M)
   local X = M()
-  print(X)
+  -- print(X)
   M = loadstring(y:meta())()
-  print(M)
+  -- print(M)
   for k, v in pairs(M) do 
     if ( k == "is_memo") then assert(v == true) end
     if ( k == "field_type") then assert(v == "I4") end
@@ -136,12 +137,13 @@ tests.t6 = function()
   for i = 1, chunk_size do 
     local status = y:put1(s)
     assert(status)
-    local ret_addr, ret_len = y:get_chunk(0);
-    assert(ret_addr);
+    local ret_cmem, ret_len = y:get_chunk(0);
+    assert(ret_cmem);
     assert(ret_len == i)
     if ( i == 1 ) then 
-      orig_ret_addr = ret_addr
+      orig_ret_addr = get_ptr(ret_cmem, "I4")
     else
+      local ret_addr = get_ptr(ret_cmem, "I4")
       assert(ret_addr == orig_ret_addr)
     end
   end
@@ -194,7 +196,7 @@ end
 tests.t8 = function()
   local y = Vector.new('I4')
   assert(y:persist()) -- can persist when nascent
-  local buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")
@@ -267,7 +269,7 @@ end
 --======= do put of a range of lengths and make sure that it works
 tests.t9 = function()
   local y = Vector.new('I4')
-  buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")

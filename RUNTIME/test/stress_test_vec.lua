@@ -3,12 +3,12 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
 require 'Q/UTILS/lua/strict'
-local buf = cmem.new(4096)
 -- for k, v in pairs(vec) do print(k, v) end 
 local tests = {} 
 
 tests.t1 = function()
   local num_trials = 1000000
+  local buf = cmem.new(4096, "I4")
   for i = 1, num_trials do 
     -- create a nascent vector many times
     local y = Vector.new('I4')

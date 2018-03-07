@@ -1,4 +1,5 @@
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
+
 return function (
   in_qtype,
   scalar
@@ -15,8 +16,6 @@ return function (
     subs.in_ctype = qconsts.qtypes[in_qtype].ctype
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
-    -- local ffi     = require 'Q/UTILS/lua/q_ffi'
-    -- subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar} )
-    subs.c_mem = scalar:cdata()
+    subs.c_mem = scalar:to_cmem()
     return subs, tmpl
 end
