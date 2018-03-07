@@ -51,7 +51,7 @@ return function (col, rowidx)
 
     -- Check for nn vector
     if nn_data then
-      local nn_casted = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      local nn_casted = get_ptr(nn_data, "B1")
       local bit_value = tonumber( qc.get_bit_u64(nn_casted, chunk_idx) )
       if bit_value == 0 then
          nn_val = ffi.NULL
