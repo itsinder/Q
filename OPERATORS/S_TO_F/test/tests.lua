@@ -22,7 +22,8 @@ tests.test_period = function()
   local actual = Q.sum(y):eval()
   local expected = (n * (1+3+5))
   assert (actual:to_num() == expected ) 
-  -- TODO Krushnakant: Q.print_csv(y, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- TODO Krushnakant: Q.print_csv(y, opt_args)
   require('Q/UTILS/lua/cleanup')()
 end
 --========================================
