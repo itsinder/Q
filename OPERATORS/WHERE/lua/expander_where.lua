@@ -73,7 +73,6 @@ local function expander_where(op, a, b)
       local status = qc[func_name](get_ptr(a_chunk), get_ptr(b_chunk), aidx, a_len, get_ptr(out_buf), 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
-      local temp = get_ptr(out_buf, "I4")
       if ( aidx[0] == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0

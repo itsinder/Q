@@ -411,14 +411,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
     end
   else
     assert(base_addr)
-    local junk 
-    if ( type(base_addr) == "cdata" ) then 
-      junk = ffi.malloc(1048576)
-      ffi.copy(junk, base_addr, len)
-      status = Vector.put_chunk(self._base_vec, junk, len)
-    else
-      status = Vector.put_chunk(self._base_vec, base_addr, len)
-    end
+    status = Vector.put_chunk(self._base_vec, base_addr, len)
     assert(status)
     if ( self._nn_vec ) then
       assert(nn_addr)

@@ -5,31 +5,29 @@ local lVector       = require 'Q/RUNTIME/lua/lVector'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local plpath        = require 'pl.path'
-
+local cmem          = require 'libcmem'
+local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
 local function load_csv_fast_C(M, infile, is_hdr)
-  local nR = ffi.gc(ffi.cast("uint64_t *", ffi.C.malloc(1*ffi.sizeof("uint64_t"))), ffi.C.free)
+  local nR = ffi.cast("uint64_t *", get_ptr(cmem.new(1*ffi.sizeof("uint64_t"))))
   nR[0] = 0
   local nC = #M
 
-  local fldtypes = ffi.gc(
-    ffi.C.malloc(nC * ffi.sizeof("char *")), 
-    ffi.C.free)
+  local fldtypes = get_ptr(cmem.new(nC * ffi.sizeof("char *")))
   fldtypes = ffi.cast("char **", fldtypes)
   
-  local is_load = ffi.gc(ffi.C.malloc(nC * ffi.sizeof("bool")), ffi.C.free)
+  local is_load = get_ptr(cmem.new(nC * ffi.sizeof("bool")))
   is_load = ffi.cast("bool *", is_load)
 
-  local has_nulls = ffi.gc(ffi.C.malloc(nC * ffi.sizeof("bool")), ffi.C.free)
+  local has_nulls = get_ptr(cmem.new(nC * ffi.sizeof("bool")))
   has_nulls = ffi.cast("bool *", has_nulls)  
   
-  local num_nulls = ffi.gc(ffi.C.malloc(nC * ffi.sizeof("uint64_t")), ffi.C.free)
+  local num_nulls = get_ptr(cmem.new(nC * ffi.sizeof("uint64_t")))
   num_nulls = ffi.cast("uint64_t *", num_nulls)
 
   local fld_name_width = 4 -- TODO Undo this hard coiding
   for i = 1, nC do
-    fldtypes[i-1]  = ffi.gc(
-      ffi.C.malloc(fld_name_width * ffi.sizeof("char")), ffi.C.free)
+    fldtypes[i-1]  = get_ptr(cmem.new(fld_name_width * ffi.sizeof("char")))
     ffi.copy(fldtypes[i-1], M[i].qtype)
     is_load[i-1]   = M[i].is_load
     has_nulls[i-1] = M[i].has_nulls
@@ -40,11 +38,11 @@ local function load_csv_fast_C(M, infile, is_hdr)
 
   local sz_str_for_lua = qconsts.sz_str_for_lua
 
-  local str_for_lua = ffi.gc(ffi.C.malloc(sz_str_for_lua * ffi.sizeof("char")), ffi.C.free)
+  local str_for_lua = get_ptr(cmem.new(sz_str_for_lua * ffi.sizeof("char")))
   str_for_lua = ffi.cast("char *", str_for_lua)
   ffi.fill(str_for_lua, sz_str_for_lua)
 
-  local n_str_for_lua = ffi.gc(ffi.C.malloc(1 * ffi.sizeof("int32_t")), ffi.C.free)
+  local n_str_for_lua = get_ptr(cmem.new(1 * ffi.sizeof("int32_t")))
   n_str_for_lua = ffi.cast("int *", n_str_for_lua)
   n_str_for_lua[0] = 0
 

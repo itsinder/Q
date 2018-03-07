@@ -1,7 +1,4 @@
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
-local get_ptr = require 'Q/UTILS/lua/get_ptr'
-local cmem = require 'libcmem'
-local ffi = require 'Q/UTILS/lua/q_ffi'
 
 return function (
   in_qtype,
@@ -11,15 +8,14 @@ return function (
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
     assert(is_base_qtype(in_qtype))
+    local scalar = assert(to_scalar(scalar, in_qtype))
+
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 
     subs.fn = "<<operator>>_" .. in_qtype 
     subs.in_ctype = qconsts.qtypes[in_qtype].ctype
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
-    -- subs.c_mem = ffi.new(subs.in_ctype .. "[?]", 1, { scalar} )
-    local c_mem = cmem.new(ffi.sizeof(subs.in_ctype))
-    get_ptr(c_mem, in_qtype)[0] = scalar
-    subs.c_mem = c_mem
+    subs.c_mem = scalar:to_cmem()
     return subs, tmpl
 end

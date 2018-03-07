@@ -41,16 +41,14 @@ typedef struct _reduce_max_<<qtype>>_args {
       --==============================
       -- Set c_mem using info from args
       local sz_c_mem = ffi.sizeof("REDUCE_max_" .. qtype .. "_ARGS")
-      --local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
       local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
-      local bak_c_mem = c_mem
-      c_mem = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
-      c_mem.max_val  = qconsts.qtypes[qtype].min
-      c_mem.num = 0
-      subs.c_mem = bak_c_mem
+      local c_mem_ptr = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
+      c_mem_ptr.max_val  = qconsts.qtypes[qtype].min
+      c_mem_ptr.num = 0
+      subs.c_mem = c_mem
     --==============================
       subs.getter = function (x) 
-      local y = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", c_mem)
+      local y = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
         return Scalar.new(x, subs.reduce_qtype), 
            Scalar.new(tonumber(y[0].num), "I8")
       end

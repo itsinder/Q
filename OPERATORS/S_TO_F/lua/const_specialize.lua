@@ -1,5 +1,4 @@
-local cmem	= require 'libcmem'
-local get_ptr	= require 'Q/UTILS/lua/get_ptr'
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
 return function (
   args
@@ -16,15 +15,13 @@ return function (
   local out_ctype = qconsts.qtypes[qtype].ctype
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
-  local data_ptr = get_ptr(cmem.new(ffi.sizeof(out_ctype)), qtype)
-  data_ptr[0] = val
-
+  val = assert(to_scalar(val, qtype))
 
   --=======================
   local tmpl = 'const.tmpl'
   local subs = {};
   subs.fn = "const_" .. qtype
-  subs.c_mem = data_ptr
+  subs.c_mem = val:to_cmem()
   subs.out_ctype = out_ctype
   subs.len = len
   if ( ( qtype == "F4" ) or ( subs.qtype == "F8" ) )  then 

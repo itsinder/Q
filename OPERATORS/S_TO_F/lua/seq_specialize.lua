@@ -1,5 +1,8 @@
 local cmem	= require 'libcmem'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
+local Scalar = require 'libsclr'
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
+
 return function (
   args
   )
@@ -25,15 +28,13 @@ return function (
   hdr = string.gsub(hdr, "<<ctype>>", ctype)
   pcall(ffi.cdef, hdr)
 
-  local by_ptr = get_ptr(cmem.new(ffi.sizeof(ctype)), qtype)
   assert(is_base_qtype(qtype))
   if ( by ) then
-    by_ptr[0] = by
+    by = assert(to_scalar(by, qtype))
   else
-    by_ptr[0] = 1
+    by = Scalar.new(1, qtype)
   end
-  local start_ptr = get_ptr(cmem.new(ffi.sizeof(ctype)), qtype)
-  start_ptr[0] = start
+  start = assert(to_scalar(start, qtype) )
   --==================================
   assert(type(len) == "number")
   assert(len > 0, "vector length must be positive")
@@ -41,10 +42,10 @@ return function (
   --========================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("SEQ_" .. qtype .. "_REC_TYPE")
-  local c_mem = assert(get_ptr(cmem.new(sz_c_mem)), "malloc failed")
-  c_mem = ffi.cast("SEQ_" .. qtype .. "_REC_TYPE *", c_mem)
-  c_mem.by    = ffi.cast(ctype .. " *", by_ptr)[0]
-  c_mem.start = ffi.cast(ctype .. " *", start_ptr)[0]
+  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
+  local c_mem_ptr = ffi.cast("SEQ_" .. qtype .. "_REC_TYPE *", get_ptr(c_mem))
+  c_mem_ptr.by    = ffi.cast(ctype .. " *", get_ptr(by:to_cmem()))[0]
+  c_mem_ptr.start = ffi.cast(ctype .. " *", get_ptr(start:to_cmem()))[0]
 
   local tmpl = 'seq.tmpl'
   local subs = {};
