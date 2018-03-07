@@ -8,9 +8,9 @@ tests.t1 = function()
   -- print(type(x))
   -- print(x:length())
   Q.sort(x, "dsc")
-  -- Q.print_csv(x, nil, "") 
+  --Q.print_csv(x) 
   local val = Q.max(x):eval()
-  for i = 1, x:length() do 
+  for i = 1, x:length() do
     assert(x:get_one(i-1) == val)
     val = val - Scalar.new(10, "I4")
   end

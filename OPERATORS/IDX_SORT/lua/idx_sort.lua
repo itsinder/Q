@@ -2,6 +2,7 @@ local function idx_sort(idx, val, ordr)
   local Q       = require 'Q/q_export'
   local qc = require 'Q/UTILS/lua/q_core'
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+  local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
   assert(type(idx) == "lVector", "error")
   -- Check the vector idx for eval(), if not then call eval()
@@ -39,7 +40,7 @@ local function idx_sort(idx, val, ordr)
 
   assert(qc[func_name], "Unknown function " .. func_name)
 
-  qc[func_name](yptr, xptr, xlen)
+  qc[func_name](get_ptr(yptr), get_ptr(xptr), xlen)
   val:end_write()
   idx:end_write()
   val:set_meta("sort_order", ordr)
