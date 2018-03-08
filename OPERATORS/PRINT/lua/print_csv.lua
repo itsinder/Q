@@ -43,7 +43,7 @@ local function get_element(col, rowidx)
     base_data = get_ptr(base_data, qtype)
     chunk_buf_table[col] = base_data
     if nn_data then
-      nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      nn_data = get_ptr(nn_data, "B1")
       chunk_nn_buf_table[col] = nn_data
     end
   end
