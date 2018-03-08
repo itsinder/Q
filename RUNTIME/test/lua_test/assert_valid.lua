@@ -6,6 +6,7 @@ local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
+local get_ptr = require "Q/UTILS/lua/get_ptr"
 
 local fns = {}
 
@@ -367,7 +368,7 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   local map_addr, num_len = vec:start_write()
   assert(map_addr, "Failed to open the mmaped file in write mode")
   assert(num_len, "Failed to open the mmaped file in write mode")
-  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", map_addr)
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(map_addr))
   
   -- Set value at index 0
   local test_value = 121
@@ -379,7 +380,7 @@ fns.assert_nascent_vector8_1 = function(vec, test_name, num_elements, gen_method
   -- Now get_chunk() should work as open_mode set to 0, validate modified value
   local addr, len = vec:get_chunk()
   assert(addr)
-  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(addr))
   assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   return true
@@ -467,7 +468,7 @@ fns.assert_nascent_vector9 = function(vec, test_name, num_elements, gen_method)
   
   -- Try to modify values of a read only vector
   local addr, len = vec:get_chunk()
-  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(addr))
   status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
   
@@ -582,7 +583,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   local map_addr, num_len = vec:start_write()
   assert(map_addr, "Failed to open the mmaped file in write mode")
   assert(num_len, "Failed to open the mmaped file in write mode")
-  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", map_addr)
+  local iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(map_addr))
   
   -- Set value at index 0
   local test_value = 121
@@ -594,7 +595,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   -- Now get_chunk() should work as open_mode set to 0, validate modified value
   local addr, len = vec:get_chunk()
   assert(addr)
-  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", addr)
+  iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(addr))
   assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   assert(vec:check())

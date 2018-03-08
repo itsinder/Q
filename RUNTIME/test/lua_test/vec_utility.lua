@@ -3,6 +3,7 @@ local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local Scalar  = require 'libsclr'
 local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require "Q/UTILS/lua/get_ptr"
 
 local fns = {}
 
@@ -22,7 +23,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
       
       local ret_addr, ret_len = vec:get_chunk(chunk_num)
       local ctype =  qconsts.qtypes[qtype]["ctype"]
-      local casted = ffi.cast(ctype.." *", ret_addr)
+      local casted = ffi.cast(ctype.." *", get_ptr(ret_addr))
       
       local bit_value = tonumber( qc.get_bit_u64(casted, (i-1)) )
       if bit_value ~= 0 then bit_value = 1 end
@@ -50,7 +51,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
       
       local ret_addr, ret_len = vec:get_chunk(chunk_num)
       local ctype =  qconsts.qtypes[qtype]["ctype"]
-      local casted = ffi.cast(ctype.." *", ret_addr)
+      local casted = ffi.cast(ctype.." *", get_ptr(ret_addr))
       
       local chunk_idx = (itr-1) % qconsts.chunk_size
       local actual_str = ffi.string(casted + chunk_idx * field_size)
@@ -76,7 +77,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
     
     local ret_addr, ret_len = vec:get_chunk(chunk_num)
     local ctype =  qconsts.qtypes[qtype]["ctype"]
-    local casted = ffi.cast(ctype.." *", ret_addr)
+    local casted = ffi.cast(ctype.." *", get_ptr(ret_addr))
     
     local expected = i*10 % qconsts.qtypes[qtype].max
   
@@ -116,7 +117,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         num_elements = math.ceil(num_elements / 8)
       end
       local base_data = cmem.new(num_elements * field_size)
-      local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+      local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", get_ptr(base_data))
       --iptr[0] = qconsts.qtypes[qtype].min
       for itr = 1, num_elements do
         if is_B1 then 
