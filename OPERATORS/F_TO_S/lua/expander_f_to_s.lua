@@ -3,6 +3,7 @@ local Reducer = require 'Q/RUNTIME/lua/Reducer'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 local chk_chunk      = require 'Q/UTILS/lua/chk_chunk'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
@@ -29,7 +30,7 @@ return function (a, x, y, optargs )
     assert(chk_chunk(x_len, x_chunk, nn_x_chunk))
     chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
-      qc[func_name](x_chunk, x_len, reduce_struct, idx);
+      qc[func_name](get_ptr(x_chunk), x_len, get_ptr(reduce_struct), idx);
       if ( a == "is_next" ) then 
         local X = ffi.cast(subs.rec_name .. ' *', reduce_struct)
         if ( tonumber(X[0].is_violation) == 1 ) then 

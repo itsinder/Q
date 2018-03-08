@@ -4,6 +4,8 @@ local log    = require 'Q/UTILS/lua/log'
 local register_type = require 'Q/UTILS/lua/q_types'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local plpath = require "pl.path"
+local cmem   = require 'libcmem'
+local Scalar = require 'libsclr'
 local Vector = require 'libvec'
 local chk_chunk_return = require 'Q/UTILS/lua/chk_chunk'
 --====================================
@@ -163,6 +165,9 @@ function lVector.new(arg)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
     Vector.set_name(vector._base_vec, arg.name)
+    if ( vector._nn_vec ) then 
+      Vector.set_name(vector._nn_vec, "nn_" .. arg.name)
+    end
   end 
   return vector
 end
@@ -406,14 +411,7 @@ function lVector:put_chunk(base_addr, nn_addr, len)
     end
   else
     assert(base_addr)
-    local junk 
-    if ( type(base_addr) == "cdata" ) then 
-      junk = ffi.malloc(1048576)
-      ffi.copy(junk, base_addr, len)
-      status = Vector.put_chunk(self._base_vec, junk, len)
-    else
-      status = Vector.put_chunk(self._base_vec, base_addr, len)
-    end
+    status = Vector.put_chunk(self._base_vec, base_addr, len)
     assert(status)
     if ( self._nn_vec ) then
       assert(nn_addr)
@@ -519,11 +517,14 @@ function lVector:get_one(idx)
   -- TODO More checks to make sure that this is only for 
   -- vectors in file mode. We may need to move vector from buffer 
   -- mode to file mode if we are at last chunk and is_eov == true
-  local nn_addr, nn_len, nn_scalar
+  local nn_data, nn_len, nn_scalar
   local base_data, base_len, base_scalar = assert(Vector.get(self._base_vec, idx, 1))
+  assert(base_data)
+  assert(type(base_data) == "CMEM")
+  assert(type(base_len) == "number")
   assert(type(base_scalar) == "Scalar")
   if ( self._nn_vec ) then
-    nn_scalar = assert(Vector.get(self._nn_vec, 0, 0))
+    nn_data, nn_len, nn_scalar = assert(Vector.get(self._nn_vec, idx, 1))
     assert(type(nn_scalar) == "Scalar")
   end
   if ( qconsts.debug ) then self:check() end

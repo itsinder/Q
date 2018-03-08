@@ -1,6 +1,3 @@
-local ffi = require 'Q/UTILS/lua/q_ffi'
-local Scalar = require 'libsclr'
-local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   in_qtype,
   scalar
@@ -8,6 +5,7 @@ return function (
   local qconsts       = require "Q/UTILS/lua/q_consts"
   local qc            = require "Q/UTILS/lua/q_core"
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+  local Scalar        = require 'libsclr'
 
   assert(is_base_qtype(in_qtype))
   if ( ( type(scalar) == "number" ) or ( type(scalar) == "string" ) ) then
@@ -23,7 +21,7 @@ return function (
   subs.fn = "<<operator>>_" .. in_qtype .. "_" .. in_qtype
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype
   subs.c_code_for_operator = "<<c_code>>;"
-  subs.c_mem        = scalar:cdata()
+  subs.c_mem        = scalar:to_cmem()
   subs.out_qtype    = in_qtype
   subs.out_ctype    = qconsts.qtypes[subs.out_qtype].ctype
   subs.scalar_ctype = subs.out_ctype 

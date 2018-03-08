@@ -1,6 +1,7 @@
 local function sort(x, ordr)
   local Q       = require 'Q/q_export'
   local qc = require 'Q/UTILS/lua/q_core'
+  local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
   assert(type(x) == "lVector", "error")
   -- Check the vector x for eval(), if not then call eval()
@@ -21,7 +22,7 @@ local function sort(x, ordr)
   assert(x_len > 0, "Cannot sort null vector")
   assert(not nn_x_chunk, "Cannot sort with null values")
   assert(qc[func_name], "Unknown function " .. func_name)
-  qc[func_name](x_chunk, x_len)
+  qc[func_name](get_ptr(x_chunk), x_len)
   x:end_write()
   x:set_meta("sort_order", ordr)
   return x

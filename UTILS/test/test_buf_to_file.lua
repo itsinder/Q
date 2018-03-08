@@ -1,6 +1,9 @@
 -- FUNCTIONAL
 local qc  = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
+local cmem = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
@@ -9,7 +12,7 @@ tests.t1 = function()
 -- START: Create and initialize some memory 
 local nmemb = 65536
 local size = ffi.sizeof("int32_t")
-local addr = ffi.malloc(nmemb * size)
+local addr = get_ptr(cmem.new(nmemb * size))
 addr = ffi.cast("int32_t *", addr)
 for i = 1, nmemb do
   addr[i-1] = i
@@ -20,7 +23,7 @@ addr = ffi.cast("const char * const ", addr)
 
 for i = 1, 128 do
   local len = 48
-  local file_name = ffi.malloc(len)
+  local file_name = get_ptr(cmem.new(len))
   ffi.fill(file_name, len)
   local status = qc['rand_file_name'](file_name, len-1)
   assert(status == 0)

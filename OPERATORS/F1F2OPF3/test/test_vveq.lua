@@ -3,6 +3,8 @@ require 'Q/UTILS/lua/strict'
 local plpath = require "pl.path"
 local ffi = require("Q/UTILS/lua/q_ffi")
 local Q = require 'Q'
+local cmem = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local tests = {}
 -- Helper function to calculate file size.
 local function filesize (fd)
@@ -18,7 +20,7 @@ local function get_file_bytes(filename)
 
    -- Get size of file and allocate a buffer for the whole file.
    local size = filesize(fd)
-   local buffer = ffi.cast("uint8_t*", ffi.malloc(ffi.sizeof("uint8_t") * size))
+   local buffer = ffi.cast("uint8_t*", get_ptr(cmem.new(ffi.sizeof("uint8_t") * size)))
 
    -- Read whole file and store it as a C buffer.
    ffi.copy(buffer, fd:read(size), size)

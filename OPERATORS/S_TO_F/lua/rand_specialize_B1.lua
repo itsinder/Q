@@ -1,3 +1,5 @@
+local cmem      = require 'libcmem'
+local get_ptr   = require 'Q/UTILS/lua/get_ptr'
 return function (
   args
   )
@@ -35,10 +37,10 @@ return function (
   --==============================
   -- Set c_mem using info from args
   local sz_c_mem = ffi.sizeof("RAND_B1_REC_TYPE")
-  local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
-  c_mem = ffi.cast("RAND_B1_REC_TYPE *", c_mem)
-  c_mem.seed = seed
-  c_mem.probability = probability
+  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
+  local c_mem_ptr = ffi.cast("RAND_B1_REC_TYPE *", get_ptr(c_mem))
+  c_mem_ptr.seed = seed
+  c_mem_ptr.probability = probability
   --==============================
   subs.fn = "rand_B1"
   subs.c_mem = c_mem

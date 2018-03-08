@@ -7,7 +7,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local Scalar = require 'libsclr' ; 
 local cmem    = require 'libcmem';
-
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local tests = {}
 
 tests.t1 = function()
@@ -20,7 +20,7 @@ tests.t1 = function()
   -- providing value for vector
   local x_width = qconsts.qtypes[x_qtype].width
   local base_data = cmem.new(x_length * x_width)
-  local iptr = ffi.cast(qconsts.qtypes[x_qtype].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[x_qtype].ctype .. " *", get_ptr(base_data))
   for itr = 1, x_length do
     iptr[itr - 1] = itr * 10
   end
@@ -31,7 +31,7 @@ tests.t1 = function()
   local num_elements = math.ceil(x_length / 8)
 
   local nn_data = cmem.new(num_elements * field_size)
-  local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", nn_data)
+  local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", get_ptr(nn_data))
   for itr = 1, num_elements do
     nn_iptr[itr - 1] = 85
   end 

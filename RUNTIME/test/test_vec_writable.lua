@@ -1,14 +1,12 @@
-local plpath = require 'pl.path'
-local Vector = require 'libvec' ; 
-local Scalar = require 'libsclr' ; 
+local plpath  = require 'pl.path'
+local Vector  = require 'libvec' ; 
+local Scalar  = require 'libsclr' ; 
 local cmem    = require 'libcmem' ; 
-local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local qc = require 'Q/UTILS/lua/q_core'
+local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
-require 'Q/UTILS/lua/strict'
 
-local buf = cmem.new(4096)
 local M
 local chunk_size = qconsts.chunk_size
 local rslt
@@ -16,6 +14,7 @@ local rslt
 local tests = {} 
 
 tests.t1 = function()
+  print("XXXXXXXXXXXX")
   local infile = '_in1_I4.bin'
   -- generating required .bin file 
   qc.generate_bin(10, "I4", infile, "linear")
@@ -36,9 +35,9 @@ tests.t1 = function()
   assert(y:end_write() == nil)
   print("STOP: Deliberate error attempt")
   -- Verify that write of 987654 took
-  local ret_addr, ret_len = y:get_chunk(0)
-  ret_addr = ffi.cast("int32_t *", ret_addr)
-  assert(ret_addr[0] == 987654)
+  local ret_cmem, ret_len = y:get_chunk(0)
+  local iptr = get_ptr(ret_cmem, "I4")
+  assert(iptr[0] == 987654)
   -- Now try to write without opening for write. Should fail
   print("START: Deliberate error attempt")
   status = y:set(s, 0)
