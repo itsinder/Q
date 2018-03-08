@@ -4,6 +4,7 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {} 
 
@@ -12,10 +13,10 @@ tests.t1 = function()
   local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
-  local iptr = ffi.cast("int32_t *", base_data)
+  local base_data = cmem.new(num_elements * field_size, "I4", "base")
+  local b3 = get_ptr(base_data, "I4")
   for i = 1, num_elements do
-    iptr[i-1] = i*10
+    b3[i-1] = i*10
   end
   x:put_chunk(base_data, nil, num_elements)
   assert(x:check())
@@ -29,6 +30,7 @@ tests.t1 = function()
 
   local len, base, nn = x:get_all()
   assert(base)
+  assert(type(base) == "CMEM") 
   assert(len == 1024)
 
   local T = x:meta()

@@ -6,6 +6,7 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(path_to_here))
 require 'Q/UTILS/lua/strict'
@@ -52,10 +53,10 @@ tests.t1 = function()
   x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
-  local iptr = ffi.cast("int32_t *", base_data)
+  local base_data = cmem.new(num_elements * field_size, "I4", "base")
+  local b3 = get_ptr(base_data, "I4")
   for i = 1, num_elements do
-    iptr[i-1] = i*10
+    b3[i-1] = i*10
   end
   x:put_chunk(base_data, nil, num_elements)
   assert(x:check())
@@ -70,8 +71,7 @@ tests.t2 = function()
   x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
-  local iptr = ffi.cast("int32_t *", base_data)
+  local base_data = cmem.new(num_elements * field_size, "I4", "t2 base")
   for i = 1, num_elements do
     local s1 = Scalar.new(i*11, "I4")
     x:put1(s1)
@@ -93,7 +93,7 @@ tests.t3 = function()
   x = lVector( { qtype = "I4", gen = true})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
+  local base_data = cmem.new(num_elements * field_size, "I4", "t3 base")
   local status = pcall(x.put_chunk, base_data, nil, num_elements)
   assert(not status)
   print("Successfully completed test t3")
@@ -104,9 +104,8 @@ tests.t4 = function()
   x = lVector( { qtype = "I4", gen = true})
   local num_elements = 1024
   local field_size = 4
-  local base_data = cmem.new(num_elements * field_size)
-  print("----------------------_XXX----------")
-  local iptr = ffi.cast("int32_t *", base_data)
+  local base_data = cmem.new(num_elements * field_size, "I4", "t4 base")
+  -- TO DELETE local iptr = ffi.cast("int32_t *", base_data)
   for i = 1, num_elements do
     local s1 = Scalar.new(i*11, "I4")
     local s2
@@ -133,17 +132,19 @@ end
 
 --====== Testing nascent vector with generator
 tests.t5 = function()
-  print("Creating nascent vector with generator")
+  -- print("Creating nascent vector with generator")
   local gen1 = require 'Q/RUNTIME/test/gen1'
-  x = lVector( { qtype = "I4", gen = gen1, has_nulls = false} )
+  x = lVector( { qtype = "I4", gen = gen1, has_nulls = false, name = "x"} )
   x:persist(true)
 
   local x_num_chunks = 10
   local num_chunks = 0
   local chunk_size = qconsts.chunk_size
   for chunk_num = 1, x_num_chunks do 
-    print("XX: ", chunk_num, x_num_chunks)
     local a, b, c = x:chunk(chunk_num-1)
+    assert(a)
+    if ( b ) then assert(type(b) == "CMEM") end
+    assert(c == nil)
     if ( a < chunk_size ) then 
       print("Breaking on chunk", chunk_num); 
       assert(x:is_eov() == true)
@@ -152,8 +153,8 @@ tests.t5 = function()
     num_chunks = num_chunks + 1
     assert(a == chunk_size)
     x:check()
-    print("XX: ", chunk_num, x_num_chunks)
   end
+    collectgarbage()
   local status = pcall(x.eov)
   assert(not status)
   local T = x:meta()
@@ -163,14 +164,15 @@ end
 --===========================================
 
 --====== Testing nascent vector with generator and Vector's buffer
-tests.t6 = function()
-  print("Creating nascent vector with generator using Vector buffer")
+-- NOTE NOTE NOTE We are NOT using this function until we think 
+-- through the get_vec_buf and release_vec_buf completely
+t6 = function()
+  -- print("Creating nascent vector with generator using Vector buffer")
   local gen2 = require 'Q/RUNTIME/test/gen2'
   x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
 
   local num_chunks = 2
   local chunk_size = qconsts.chunk_size
-  print("===================")
   for chunk_num = 1, num_chunks do 
     local a, b, c = x:chunk(chunk_num-1)
     x:check()

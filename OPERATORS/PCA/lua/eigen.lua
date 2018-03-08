@@ -2,6 +2,8 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local cmem    = require 'libcmem'
 
 local function eigen(X, stand_alone_test)
   local stand_alone = stand_alone_test or false
@@ -45,19 +47,19 @@ local function eigen(X, stand_alone_test)
   -- END: verify inputs
 
   -- malloc space for eigenvalues (w) and eigenvectors (A)
-  local wptr = assert(ffi.malloc(fldsz * m), "malloc failed")
-  local wptr_copy = ffi.cast(ctype .. " *", wptr)
+  local wptr = assert(cmem.new(fldsz * m), "malloc failed")
+  local wptr_copy = ffi.cast(ctype .. " *", get_ptr(wptr))
 
-  local Aptr = assert(ffi.malloc(fldsz * m * m), "malloc failed")
-  local Aptr_copy = ffi.cast(ctype .. " *", Aptr)
+  local Aptr = assert(cmem.new(fldsz * m * m), "malloc failed")
+  local Aptr_copy = ffi.cast(ctype .. " *", get_ptr(Aptr))
 
-  local Xptr = assert(ffi.malloc(ffi.sizeof(ctype .. " *") * m), 
+  local Xptr = assert(get_ptr(cmem.new(ffi.sizeof(ctype .. " *") * m)), 
     "malloc failed")
   Xptr = ffi.cast(ctype .. " **", Xptr)
   for xidx = 1, m do
     local x_len, xptr, nn_xptr = X[xidx]:get_all()
     assert(nn_xptr == nil, "Values cannot be nil")
-    Xptr[xidx-1] = ffi.cast(ctype .. " *",  xptr)
+    Xptr[xidx-1] = ffi.cast(ctype .. " *",  get_ptr(xptr))
   end
   local cfn = nil
   if ( stand_alone_test ) then

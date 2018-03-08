@@ -3,6 +3,8 @@
   local qc      = require 'Q/UTILS/lua/q_core'
   local lVector = require 'Q/RUNTIME/lua/lVector'
   local is_in   = require 'Q/UTILS/lua/is_in'
+  local cmem	= require 'libcmem'
+  local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
   local function expander_f1s1opf2(a, f1, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
@@ -46,16 +48,16 @@
     local f2_gen = function(chunk_num)
       -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
       assert(chunk_num == chunk_idx)
-      f2_buf = f2_buf or ffi.malloc(buf_sz)
+      f2_buf = f2_buf or cmem.new(buf_sz)
       assert(f2_buf)
       if not nn_f2_buf and has_nulls then 
-        nn_f2_buf = ffi.malloc(qconsts.chunk_size)
+        nn_f2_buf = cmem.new(qconsts.chunk_size)
         assert(nn_f2_buf)
-        ffi.memset(nn_f2_buf, 0, qconsts.chunk_size)
+        ffi.memset(get_ptr(nn_f2_buf), 0, qconsts.chunk_size)
       end
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
       if f1_len > 0 then
-        qc[func_name](f1_chunk, nn_f1_chunk, f1_len, subs.c_mem, f2_buf, nn_f2_buf)
+        qc[func_name](get_ptr(f1_chunk), get_ptr(nn_f1_chunk), f1_len, get_ptr(subs.c_mem), get_ptr(f2_buf), get_ptr(nn_f2_buf))
       end
       chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf

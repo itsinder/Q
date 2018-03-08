@@ -2,6 +2,8 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local g_err = require 'Q/UTILS/lua/error_code'
 local qc = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local cmem = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 -- allocate chunk and prepare convertor function for calling C apis 
  local get_chunk = function(qtype_input1, qtype_input2, operation, qtype_fn, input1)
@@ -12,8 +14,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
     local qtype = qtype_fn(qtype_input1, qtype_input2)
 
     local length_in_bytes = qconsts.qtypes[qtype].width * length
-    chunk = assert(ffi.malloc(length_in_bytes), g_err.FFI_MALLOC_ERROR)
-    chunk = ffi.cast(qconsts.qtypes[qtype].ctype.. "*", chunk)
+    chunk = assert(get_ptr(cmem.new(length_in_bytes), qtype), g_err.FFI_MALLOC_ERROR)
 
     --chunk = assert(ffi.new(qconsts.qtypes[qtype].ctype .. "[?]", length), g_err.FFI_NEW_ERROR)
     convertor = operation .. "_" .. qtype_input1 .. "_" .. qtype_input2 .. "_" .. qtype
@@ -23,7 +24,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
     --print("length = " ,length)
 
     local length_in_bytes = 8 * length
-    chunk = assert(ffi.malloc(length_in_bytes), g_err.FFI_MALLOC_ERROR)
+    chunk = assert(get_ptr(cmem.new(length_in_bytes)), g_err.FFI_MALLOC_ERROR)
     chunk = ffi.cast("uint64_t*", chunk)
 
     --chunk = assert(ffi.new("uint64_t[?]", length), g_err.FFI_NEW_ERROR)
@@ -45,13 +46,13 @@ end
 
 
 return function(operation, qtype_input1, qtype_input2, input1, input2, qtype_fn)
-  local chunk1 = assert(ffi.malloc(qconsts.qtypes[qtype_input1].width * #input1), g_err.FFI_MALLOC_ERROR)
+  local chunk1 = assert(get_ptr(cmem.new(qconsts.qtypes[qtype_input1].width * #input1)), g_err.FFI_MALLOC_ERROR)
   chunk1 = ffi.cast(qconsts.qtypes[qtype_input1].ctype.. "*", chunk1)
   for i=0, #input1 - 1 do
     chunk1[i] = input1[i+1]
   end
 
-  local chunk2 = assert(ffi.malloc(qconsts.qtypes[qtype_input2].width * #input2), g_err.FFI_MALLOC_ERROR)
+  local chunk2 = assert(get_ptr(cmem.new(qconsts.qtypes[qtype_input2].width * #input2)), g_err.FFI_MALLOC_ERROR)
   chunk2 = ffi.cast(qconsts.qtypes[qtype_input2].ctype.. "*", chunk2)
   for i=0, #input2 - 1 do
     chunk2[i] = input2[i+1]

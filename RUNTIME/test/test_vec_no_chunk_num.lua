@@ -2,12 +2,11 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
-local buf = cmem.new(4096)
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
--- for k, v in pairs(vec) do print(k, v) end 
 
 local M
 local is_memo
@@ -124,12 +123,14 @@ tests.t5 = function()
   for i = 1, chunk_size do 
     local status = y:put1(s)
     assert(status)
-    local ret_addr, ret_len = y:get_chunk(0);
-    assert(ret_addr);
+    local ret_cmem, ret_len = y:get_chunk(0);
+    assert(ret_cmem);
+    assert(type(ret_cmem) == "CMEM")
     assert(ret_len == i)
     if ( i == 1 ) then 
-      orig_ret_addr = ret_addr
+      orig_ret_addr = get_ptr(ret_cmem, "I4")
     else
+      local ret_addr = get_ptr(ret_cmem, "I4")
       assert(ret_addr == orig_ret_addr)
     end
   end
@@ -183,7 +184,7 @@ end
 tests.t7 = function()
   local y = Vector.new('I4')
   assert(y:persist()) -- can persist when nascent
-  local buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4", "buffer")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")
@@ -256,7 +257,7 @@ end
 --======= do put of a range of lengths and make sure that it works
 tests.t8 = function()
   local y = Vector.new('I4')
-  buf = cmem.new(chunk_size * 4)
+  local buf = cmem.new(chunk_size * 4, "I4", "buffer")
   local start = 1
   local incr  = 1
   buf:seq(start, incr, chunk_size, "I4")

@@ -6,9 +6,9 @@ cmem   = require 'libcmem' ;
 local tests = {}
 tests.t1 = function()
   -- create boolean scalars in several different ways
-  sb = Scalar.new("true", "B1")
-  sb = Scalar.new(true, "B1")
-  x = Scalar.to_str(sb)
+  sb = assert(Scalar.new("true", "B1"))
+  sb = assert(Scalar.new(true, "B1"))
+  x = assert(Scalar.to_str(sb))
   assert(x == "true")
   sb = Scalar.new("false", "B1")
   assert(Scalar.to_str(sb) == "false")
@@ -27,10 +27,6 @@ tests.t2 = function()
 
   s3 = Scalar.new(123.456, "F8")
   assert(Scalar.to_num(s3) == 123.456)
-  -- Verify that cdata works 
-  local x = s1:cdata()
-  print(type(x) )
-  assert(type(x) == "CMEM")
   -- TODO y = x:to_str(x, "I4")
   -- TODO assert(y == "123")
   --================
@@ -53,13 +49,15 @@ tests.t3 = function()
   print("test 3 passed")
 end
 tests.t4 = function()
-  -- testing userdata and creation of scalar from pointer
+  -- testing userdata and creation of scalar from CMEM
   qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
   for _, qtype in ipairs(qtypes) do
-    local s = Scalar.new(123, qtype)
-    local x = s:cdata()
-    local t = assert(Scalar.new(x, qtype))
-    assert(Scalar.eq(s, t) == true)
+    local val = 123
+    local s1 = Scalar.new(val, qtype)
+    local c1 = cmem.new(8, qtype, "test cmem")
+    c1:set(val);
+    local s2 = assert(Scalar.new(c1, qtype))
+    assert(Scalar.eq(s1, s2) == true)
   end
   print("test 4 passed")
 end
@@ -76,13 +74,7 @@ tests.t5 = function()
   -- TODO Why is this not working?????
   for qtype, v in pairs(X) do
     for _, val in ipairs(v) do 
-      print(qtype, val)
-      local s = Scalar.new(val, qtype)
-      local x = s:cdata()
-      local t = assert(Scalar.new(x, qtype))
-      assert(type(t) == "Scalar")
-      print(Scalar.eq(s, t))
-      assert(Scalar.eq(s, t))
+      local s = assert(Scalar.new(val, qtype))
     end
   end
   print("test 5 passed")
@@ -117,7 +109,7 @@ tests.t7 = function()
     for _, val in pairs(vals) do 
       for _, qtype in pairs(qtypes) do 
         s1 = Scalar.new(val, orig_qtype)
-        status = s1:conv(qtype)
+        local status = s1:conv(qtype)
         assert(not status)
       end
     end
@@ -227,6 +219,7 @@ tests.t10_I8 = function()
   local s2 = assert(s1:conv("I8"))
   assert(s1 == s2)
 end
+
 tests.t11 = function()
   local s1 = Scalar.new(127, "I1") 
   local s2 = Scalar.new(-127, "I1")
@@ -240,25 +233,29 @@ tests.t11 = function()
   s1 = Scalar.new(1.79769313486231470e+308, "F8")
   s2 = Scalar.new(-1.79769313486231470e+308, "F8")
   local s3 = s2:abs()
-  print("XX", s2)
-  print("XX", s3)
   assert(s1 == s3)
 end
 
-tests.t11 = function()
-  s1 = Scalar.new("1.79769313486231470e+308", "F8")
-  s2 = Scalar.new("-1.79769313486231470e+308", "F8")
-  local s3 = s2:abs()
-  print("XX", s2)
-  print("XX", s3)
-  assert(s1 == s3)
+tests.t12 = function()
+  -- negative cases for boolean scalars in several different ways
+  bval = {}
+  bval[#bval+1] = "truex"
+  bval[#bval+1] = "True"
+  bval[#bval+1] = "TRUE"
+  bval[#bval+1] = "falsey"
+  bval[#bval+1] = "False"
+  bval[#bval+1] = "FALSE"
+  bval[#bval+1] = " true "
 
-  s1 = Scalar.new("3.40282346638528860e+38", "F4")
-  s2 = Scalar.new("-3.40282346638528860e+38", "F4")
-  local s3 = s2:abs()
-  print("YY", s2)
-  print("YY", s3)
-  assert(s1 == s3)
+
+  for k, v in ipairs(bval) do 
+    print("START: Deliberate error")
+    local s1 = Scalar.new(bval, "B1")
+    print("STOP: Deliberate error")
+    assert(s1 == nil)
+  end
+  print("test 12 passed")
 end
 
+--================
 return tests

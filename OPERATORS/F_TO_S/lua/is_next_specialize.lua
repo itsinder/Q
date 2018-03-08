@@ -3,6 +3,8 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
 local plfile = require 'pl.file'
 local Scalar  = require 'libsclr'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local cmem    = require 'libcmem'
 return function (
   qtype,
   comparison,
@@ -45,13 +47,12 @@ return function (
     } %s]], rec_name, subs.ctype, rec_name)
     pcall(ffi.cdef, hdr)
     local sz_c_mem = ffi.sizeof(rec_name)
-    local c_mem = assert(ffi.malloc(sz_c_mem), "malloc failed")
-    local bak_c_mem = c_mem
-    c_mem = ffi.cast(rec_name .. " *", c_mem)
-    c_mem.prev_val     = 0
-    c_mem.is_violation = 0
-    c_mem.num_seen = 0
-    subs.c_mem = bak_c_mem
+    local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
+    local c_mem_ptr = ffi.cast(rec_name .. " *", get_ptr(c_mem))
+    c_mem_ptr.prev_val     = 0
+    c_mem_ptr.is_violation = 0
+    c_mem_ptr.num_seen = 0
+    subs.c_mem = c_mem
     subs.rec_name = rec_name
     if ( fast ) then 
       subs.fn = "par_is_next_" .. comparison .. "_" .. qtype
@@ -60,7 +61,7 @@ return function (
     end
     --==============================
     subs.getter = function (x) 
-      local y = ffi.cast(rec_name .. " *", c_mem)
+      local y = ffi.cast(rec_name .. " *", get_ptr(c_mem))
       local is_good
       if ( y[0].is_violation == 1 ) then 
         is_good = false

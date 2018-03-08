@@ -1,5 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local cmem    = require 'libcmem'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local plpath  = require 'pl.path'
 local fns = {}
 
@@ -16,8 +18,9 @@ fns.generate_bin = function (num_values, q_type, bin_filename, gen_type)
     num_values = math.ceil( num_values / 64 )
     q_type_width = 8
   end
-  local buf = ffi.malloc(num_values * ffi.sizeof(qconsts.qtypes[q_type].ctype))
-  buf = ffi.cast((qconsts.qtypes[q_type].ctype).." *", buf)
+  local bufsz = num_values * ffi.sizeof(qconsts.qtypes[q_type].ctype)
+  local buf = cmem.new(bufsz, q_type, "buffer for gen bin")
+  local bufptr = get_ptr(buf, q_type)
 
   for i = 1,num_values do
     local value 
@@ -30,12 +33,12 @@ fns.generate_bin = function (num_values, q_type, bin_filename, gen_type)
         value = i * 10
       end
     end
-    buf[i-1] = value
+    bufptr[i-1] = value
   end
 
   local fp = ffi.C.fopen(bin_filename, "w")
   -- print("L: Opened file")
-  local nw = ffi.C.fwrite(buf, q_type_width, num_values , fp)
+  local nw = ffi.C.fwrite(bufptr, q_type_width, num_values , fp)
   -- print("L: Wrote to file")
   -- assert(nw > 0 )
   ffi.C.fclose(fp)

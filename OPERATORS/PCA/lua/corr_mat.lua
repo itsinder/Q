@@ -2,6 +2,8 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local cmem    = require 'libcmem'
 
 local function corr_mat(X)
   -- X is an n by m matrix (table of lVectors)
@@ -33,16 +35,16 @@ local function corr_mat(X)
   -- END: verify inputs
 
   -- malloc space for the variance covariance matrix A 
-  local c_Aptr = assert(ffi.malloc(ffi.sizeof("double *") * m), 
+  local c_Aptr = assert(get_ptr(cmem.new(ffi.sizeof("double *") * m)), 
     "malloc failed")
   c_Aptr = ffi.cast("double **", c_Aptr)
   local q_Aptr = {}
   for i = 1, m do
-    q_Aptr[i-1] = ffi.malloc(ffi.sizeof("double") * m)
-    c_Aptr[i-1] = ffi.cast("double *", q_Aptr[i-1])
+    q_Aptr[i-1] = cmem.new(ffi.sizeof("double") * m)
+    c_Aptr[i-1] = ffi.cast("double *", get_ptr(q_Aptr[i-1]))
   end
 
-  local Xptr = assert(ffi.malloc(ffi.sizeof(ctype .. " *") * m), 
+  local Xptr = assert(get_ptr(cmem.new(ffi.sizeof(ctype .. " *") * m)), 
     "malloc failed")
   local Xptr = ffi.cast(ctype .. " **", Xptr)
   c_Aptr[0][0] = 1
@@ -50,7 +52,7 @@ local function corr_mat(X)
     local x_len, xptr, nn_xptr = X[xidx]:get_all()
     assert(x_len > 0)
     assert(nn_xptr == nil, "Null vector should not exist")
-    Xptr[xidx-1] = ffi.cast("float *", xptr)
+    Xptr[xidx-1] = ffi.cast("float *", get_ptr(xptr))
   end
   
   assert(qc["corr_mat"], "Symbol not found corr_mat")
