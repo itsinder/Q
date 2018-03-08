@@ -12,12 +12,13 @@ test.t1 = function()
   assert(type(corrm) == "table")
   assert(#corrm == 3)
   print("Completed corrm")
+  local opt_args = { opfile = "" }
   for i=1,3 do
     assert(corrm[i]:length() == 3)
-    --Q.print_csv(corrm[i], nil, "")
+    --Q.print_csv(corrm[i], opt_args)
     --print("=====colbreak=======")
   end
-  Q.print_csv(corrm, "")
+  Q.print_csv(corrm, opt_args)
   print("SUCCESS")
 end
 

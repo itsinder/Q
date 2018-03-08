@@ -34,7 +34,8 @@ tests.t1 = function()
 
   -- reset to original function
   qc[fns_name] = fns_value
-  --Q.print_csv(c, nil, "")
+  local opt_args = { opfile = "" }
+  --Q.print_csv(c, opt_args)
 end
 
 return tests

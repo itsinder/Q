@@ -20,8 +20,9 @@ local X = {x1, x2, x3}
 local eigen_info = eigen(X, stand_alone)
 assert(type(eigen_info) == "table")
 print("Completed eigen")
-Q.print_csv(eigen_info["eigenvalues"],  nil, "")
-Q.print_csv(eigen_info.eigenvectors, nil, "")
+local opt_args = { opfile = "" }
+Q.print_csv(eigen_info["eigenvalues"], opt_args)
+Q.print_csv(eigen_info.eigenvectors, opt_args)
 print("SUCCESS for ", arg[0])
 require('Q/UTILS/lua/cleanup')()
 os.exit()

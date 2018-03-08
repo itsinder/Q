@@ -21,7 +21,10 @@ tests.t2 = function ()
  local input_table = {1, 2, 3}
   local col = Q.mk_col(input_table, "I4")
   -- PRINT TEST
-  Q.print_csv(col, nil, "")
+  local opt_args = {  
+                      opfile = ""
+                   }
+  Q.print_csv(col, opt_args)
   print("test t2 succeeded: PRINT Test DONE !!")
   print("------------------------------------------")
 end
@@ -36,9 +39,12 @@ tests.t3 = function ()
   local result = Q.load_csv(os.getenv("Q_SRC_ROOT") .. "/TESTS/sample_load_mk-col_print_test/test.csv", meta, { is_hdr = true, use_accelerator = false})	
   --local result = Q.load_csv("test.csv", meta)
   assert(type(result) == "table")
+  local opt_args = {  
+                      opfile = ""
+                   }
   for i, v in pairs(result) do
     assert(type(result[i]) == "lVector")
-    Q.print_csv(result[i], nil, "")
+    Q.print_csv(result[i],opt_args)
     print("##########")
   end
   print("test t3 succeeded: LOAD CSV Test DONE !!")

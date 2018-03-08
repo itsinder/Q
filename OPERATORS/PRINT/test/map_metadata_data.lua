@@ -20,97 +20,116 @@ local g_err = require 'Q/UTILS/lua/error_code'
 
 return { 
   -- testcase for printing single column content
-  { testcase_no = 1, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", category = "category1", name= "single_col", output_regex = "1001\n1002\n1003\n1004\n" },
+  { testcase_no = 1, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category1", name= "single_col", output_regex = "1001\n1002\n1003\n1004\n", opt_args = { opfile = "single_col.csv" } },
   -- testcase for printing multiple column contents
-  { testcase_no = 2, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", csv_file = "multi_col.csv", category = "category1", name= "multiple_col", output_regex = "1001,1\n1002,2\n1003,3\n1004,4\n" },
+  { testcase_no = 2, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category1", name= "multiple_col", output_regex = "1001,1\n1002,2\n1003,3\n1004,4\n",  opt_args = { opfile = "multi_col.csv", print_order = {"empid", "yoj"} } },
   -- checking for valid I1 column contents
-  { testcase_no = 3, meta = "gm_print_I1.lua", data ="sample_I1.csv", csv_file = "print_I1.csv", category = "category1", name= "print_I1_type", output_regex = "12\n123\n50\n111\n" },
+  { testcase_no = 3, meta = "gm_print_I1.lua", data ="sample_I1.csv", category = "category1", name= "print_I1_type", output_regex = "12\n123\n50\n111\n", opt_args = { opfile = "print_I1.csv"} },
   -- checking for valid I2 column contents
-  { testcase_no = 4, meta = "gm_print_I2.lua", data ="sample_I2.csv", csv_file = "print_I2.csv", category = "category1", name= "print_I2_type", output_regex = "1002\n123\n2312\n2131\n" },
+  { testcase_no = 4, meta = "gm_print_I2.lua", data ="sample_I2.csv", category = "category1", name= "print_I2_type", output_regex = "1002\n123\n2312\n2131\n", opt_args = { opfile = "print_I2.csv" }},
   -- checking for valid I4 column contents
-  { testcase_no = 5, meta = "gm_print_I4.lua", data ="sample_I4.csv", csv_file = "print_I4.csv", category = "category1", name= "print_I4_type", output_regex = "1002\n123\n2312\n2131\n" },
+  { testcase_no = 5, meta = "gm_print_I4.lua", data ="sample_I4.csv", category = "category1", name= "print_I4_type", output_regex = "1002\n123\n2312\n2131\n", opt_args = { opfile = "print_I4.csv" }},
   -- checking for valid I8 column contents
-  { testcase_no = 6, meta = "gm_print_I8.lua", data ="sample_I8.csv", csv_file = "print_I8.csv", category = "category1", name= "print_I8_type", output_regex = "1002\n123\n2312\n2131\n" },
+  { testcase_no = 6, meta = "gm_print_I8.lua", data ="sample_I8.csv", category = "category1", name= "print_I8_type", output_regex = "1002\n123\n2312\n2131\n", opt_args = { opfile = "print_I8.csv" }},
   -- checking for valid SV column contents
-  { testcase_no = 7, meta = "gm_print_SV.lua", data ="sample_varchar.csv", csv_file = "print_SV.csv", category = "category1", name= "print_SV_type", output_regex = "Sample\nString\nFor\nVarchar\n" },
+  { testcase_no = 7, meta = "gm_print_SV.lua", data ="sample_varchar.csv", category = "category1", name= "print_SV_type", output_regex = "Sample\nString\nFor\nVarchar\n", opt_args = { opfile = "print_SV.csv" } },
   -- checking for valid SC column contents
-  { testcase_no = 8, meta = "gm_print_SC.lua", data ="fix_size_string.csv", csv_file = "print_SC.csv", category = "category1", name= "print_SC_type", output_regex = "Hiihello\nbye\n" },
+  { testcase_no = 8, meta = "gm_print_SC.lua", data ="fix_size_string.csv", category = "category1", name= "print_SC_type", output_regex = "Hiihello\nbye\n", opt_args = { opfile = "print_SC.csv" } },
   -- checking for nulls in valid allowed null column
-  { testcase_no = 9, meta = "gm_print_null_I4.lua", data ="sample_null_I4.csv", csv_file = "print_null_I4.csv", category = "category1",
-    name= "print_I4_null", output_regex = "1002\n\n2312\n2131\n" },
+  { testcase_no = 9, meta = "gm_print_null_I4.lua", data ="sample_null_I4.csv", category = "category1",
+    name= "print_I4_null", output_regex = "1002\n\n2312\n2131\n", opt_args = { opfile = "print_null_I4.csv" } },
+  
   -- testing whether filter is a table
-  { testcase_no = 10, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = "test", category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.FILTER_NOT_TABLE_ERROR, name="Filter_type_not_table" },
+  { testcase_no = 10, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.FILTER_NOT_TABLE_ERROR, name = "Filter_type_not_table",
+    opt_args = { filter = "test", opfile = "single_col.csv" },
+  },
   -- testing whether lower bound value of filter is valid
-  { testcase_no = 11, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = -1, ub = 4 }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.INVALID_LOWER_BOUND, name="Invalid LB" },
+  { testcase_no = 11, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.INVALID_LOWER_BOUND, name = "Invalid LB",
+    opt_args = { opfile = "single_col.csv", filter = { lb = -1, ub = 4 } } },
   -- lb passed is passed as string should return an error
-  { testcase_no = 12, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = "1" }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.INVALID_LOWER_BOUND_TYPE, name="Invalid LB type" },
+  { testcase_no = 12, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.INVALID_LOWER_BOUND_TYPE, name = "Invalid LB type",
+    opt_args = { opfile = "single_col.csv", filter = { lb = "1" } } },
   -- ub passed is passed as string should return an error
-  { testcase_no = 13, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { ub = "1" }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.INVALID_UPPER_BOUND_TYPE, name="Invalid UB type" },
+  { testcase_no = 13, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.INVALID_UPPER_BOUND_TYPE, name = "Invalid UB type",
+    opt_args = { opfile = "single_col.csv", filter = { ub = "1" } } },
   -- testing whether upper bound value of filter is greater than lower bound value
-  { testcase_no = 14, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 5, ub = 4 }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.UB_GREATER_THAN_LB, name="UB greater than LB"},
+  { testcase_no = 14, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.UB_GREATER_THAN_LB, name = "UB greater than LB",
+    opt_args = { opfile = "single_col.csv", filter = { lb = 5, ub = 4 } } },
   -- testing whether upper bound value of filter is valid
-  { testcase_no = 15, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 5 }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.INVALID_UPPER_BOUND, name="Invalid UB" },
+  { testcase_no = 15, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.INVALID_UPPER_BOUND, name = "Invalid UB",
+    opt_args = { opfile = "single_col.csv", filter = { lb = 1, ub = 5 } } },
   -- testing type of the filter is valid
-  { testcase_no = 16, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = "test" }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, name="Filter type string" },
+  { testcase_no = 16, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.FILTER_TYPE_ERROR, name = "Filter type string",
+    opt_args = { opfile = "single_col.csv", filter = { where = "test" } } },
   -- testing type of the filter is valid
-  { testcase_no = 17, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = 1 }, category = "category2",
-    csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, name="Filter type number" },
+  { testcase_no = 17, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
+    output_regex = g_err.FILTER_TYPE_ERROR, name = "Filter type number",
+    opt_args = { opfile = "single_col.csv", filter = { where = 1 } } },
   -- where field in filter is table and not bit vector
-  { testcase_no = 18, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { where = { 1 } }, 
-    category = "category2", csv_file = "single_col.csv", output_regex = g_err.FILTER_TYPE_ERROR, 
-    name="Filter type table"},
+  { testcase_no = 18, meta = "gm_single_col.lua", data ="single_col_file.csv", 
+    category = "category2", output_regex = g_err.FILTER_TYPE_ERROR, 
+    name = "Filter type table", opt_args = { opfile = "single_col.csv", filter = { where = { 1 } } }
+  },
   -- csv file path provided to print_csv is invalid
   { testcase_no = 19, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category2",
-    csv_file = "dummy/single_col.csv", output_regex = g_err.INVALID_FILE_PATH, name="Invalid file path"},
+    output_regex = g_err.INVALID_FILE_PATH, name = "Invalid file path",
+    opt_args = { opfile = "dummy/single_col.csv" } },
   
   -- this testcase, bit filter passed is of type I4
-  { testcase_no = 20, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
-    category = "category4", name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE, name= "bit_filter_type_I4" },
+  { testcase_no = 20, meta = "gm_single_col.lua", data ="single_col_file.csv",  
+    category = "category4", name="bit filter I4", output_regex = g_err.FILTER_INVALID_FIELD_TYPE, name= "bit_filter_type_I4",
+    opt_args = { opfile = "single_col.csv" }},
   
   -- this testcase, bit filter passed is of type B1
-  { testcase_no = 21, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "single_col.csv", 
-    category = "category3", name="bit filter B1", output_regex = "1001\n1002\n1003\n"},
+  { testcase_no = 21, meta = "gm_single_col.lua", data ="single_col_file.csv", 
+    category = "category3", name="bit filter B1", output_regex = "1001\n1002\n1003\n",
+    opt_args = { opfile = "single_col.csv" } },
   
   -- output csv file from print_csv should be consumable to load_csv
-  { testcase_no = 22, meta = "gm_csv_consumable.lua", csv_file = "print_out_cons.csv", category = "category6",
-    name = "csv consumable testcase"}, 
+  { testcase_no = 22, meta = "gm_csv_consumable.lua", category = "category6",
+    name = "csv consumable testcase", opt_args = { opfile = "print_out_cons.csv"} }, 
   
   -- testing whether range filter outputs correct values
-  { testcase_no = 23, meta = "gm_single_col.lua", data ="single_col_file.csv", filter = { lb = 1, ub = 3 }, category = "category5",
-    csv_file = "single_col.csv", output_regex = "1002\n1003\n", name = "range filter test"},
+  { testcase_no = 23, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category5",
+    output_regex = "1002\n1003\n", name = "range filter test",
+    opt_args = {  opfile = "single_col.csv", filter = { lb = 1, ub = 3 } } },
   -- 
-  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = "", category = "category7",  
-    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
+  { testcase_no = 24, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category7",  
+    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null",
+    opt_args = { opfile = "" } },
   
     -- 
-  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", csv_file = nil, category = "category8",  
-    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null" },
+  { testcase_no = 25, meta = "gm_single_col.lua", data ="single_col_file.csv", category = "category8",  
+    output_regex = "1001\n1002\n1003\n1004\n", name = "input csv file null",
+    opt_args = { opfile = nil } },
   
   --{ meta = "gm_print_stdout.lua", data ="std_out_file.csv", csv_file = "stdout.csv"},
   
   -- testcase for testing elements(rows) > chunk_size
   -- I4 qtype values
-  { testcase_no = 26, meta = "gm_single_col.lua", data = "I4_more_than_chunksize.csv", csv_file = "print_more_than_chunksize.csv", 
-    category = "category1_1", name= "elements more than chunksize-I4", num_elements = 65540 },
+  { testcase_no = 26, meta = "gm_single_col.lua", data = "I4_more_than_chunksize.csv",
+    category = "category1_1", name= "elements more than chunksize-I4", num_elements = 65540,
+    opt_args = { opfile = "print_more_than_chunksize.csv" } },
   
-  { testcase_no = 27, meta = "gm_print_F4.lua", data ="sample_F4.csv", csv_file = "print_F4.csv", category = "category1_2",
-    name= "print F4 type" },
+  { testcase_no = 27, meta = "gm_print_F4.lua", data ="sample_F4.csv", category = "category1_2",
+    name= "print F4 type", opt_args = { opfile = "print_F4.csv" } },
   
-  { testcase_no = 28, meta = "gm_print_F8.lua", data ="sample_F8.csv", csv_file = "print_F8.csv", category = "category1_2",
-    name= "print F8 type" },
+  { testcase_no = 28, meta = "gm_print_F8.lua", data ="sample_F8.csv", category = "category1_2",
+    name= "print F8 type", opt_args = { opfile = "print_F8.csv" } },
 
   -- checking for valid SV column contents with special characters like double quote, backslash etc
-  { testcase_no = 29, meta = "gm_print_SV.lua", data ="sample_varchar_special_chars.csv", csv_file = "print_SV_special_char.csv", category = "category1_3", name= "print_SV_with_special_char", output_regex = "Sample\nString\n\"For\"\nVar\\char\n" },
+  { testcase_no = 29, meta = "gm_print_SV.lua", data ="sample_varchar_special_chars.csv", category = "category1_3",
+    name = "print_SV_with_special_char", output_regex = "Sample\nString\n\"For\"\nVar\\char\n", 
+    opt_args = { opfile = "print_SV_special_char.csv" } },
   -- checking for valid SC column contents with special characters like double quote, backslash etc
-  { testcase_no = 30, meta = "gm_print_SC.lua", data ="fix_size_string_special_chars.csv", csv_file = "print_SC_special_char.csv", category = "category1_3", name= "print_SC_with_special_char", output_regex = "Hiihello\nb\"y\"\\e\n" },
-
+  { testcase_no = 30, meta = "gm_print_SC.lua", data ="fix_size_string_special_chars.csv", category = "category1_3", name= "print_SC_with_special_char", output_regex = "Hiihello\nb\"y\"\\e\n", opt_args = { opfile = "print_SC_special_char.csv" } },
   
 }
 

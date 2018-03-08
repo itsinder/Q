@@ -15,14 +15,16 @@ tests.t1 = function()
   assert(type(pca_info) == "table")
   assert(#pca_info == 3)
   print("Completed pca")
+  local opt_args = { opfile = "" }
   for i=1,3 do
     print(pca_info[i]:length())
     assert(pca_info[i]:length() == 3)
     pca_info[i]:eval()
-    --Q.print_csv(corrm[i], nil, "")
+    --Q.print_csv(corrm[i], opt_args)
     --print("=====colbreak=======")
 end
--- Q.print_csv(pca_info, nil, "")
+-- local opt_args = { opfile = "" }
+-- Q.print_csv(pca_info, opt_args)
 print("Test t1 passed")
 end
 return tests
