@@ -4,6 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local Scalar  = require 'libsclr'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 local Dictionary = require 'Q/UTILS/lua/dictionary'
+local get_ptr = require "Q/UTILS/lua/get_ptr"
 
 local fns = {}
 
@@ -115,7 +116,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       vec:set_meta("dir", dict_obj)
       
       local base_data = cmem.new(field_size * num_elements)
-      local iptr = ffi.cast(qconsts.qtypes.I4.ctype .. " *", base_data)
+      local iptr = ffi.cast(qconsts.qtypes.I4.ctype .. " *", get_ptr(base_data))
       
       local stridx = 0
       for itr = 1, num_elements do
@@ -132,8 +133,8 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       for itr = 1, num_elements do
         local index = math.random(1, sc_table_len)
         local str = SC_strings[index]
-        ffi.copy(base_data, str)
-        vec:put1(base_data)
+        ffi.copy(get_ptr(base_data), str)
+        vec:put_chunk(base_data, nil, 1)
       end
     else
       local buf_length = num_elements
@@ -146,7 +147,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         num_elements = math.ceil(num_elements / 8)
       end
       base_data = cmem.new(num_elements * field_size)
-      local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", base_data)
+      local iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", get_ptr(base_data))
       --iptr[0] = qconsts.qtypes[qtype].min
       
       for itr = 1, num_elements do
@@ -166,7 +167,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
         num_elements = math.ceil(num_elements / 8)
         
         nn_data = cmem.new(num_elements * field_size)
-        local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", nn_data)
+        local nn_iptr = ffi.cast(qconsts.qtypes[qtype].ctype .. " *", get_ptr(nn_data))
         for itr = 1, num_elements do
           nn_iptr[itr - 1] = itr*10 % qconsts.qtypes[qtype].max
         end      

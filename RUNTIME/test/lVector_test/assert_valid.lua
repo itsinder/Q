@@ -6,6 +6,7 @@ local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local cmem    = require 'libcmem'
+local get_ptr = require "Q/UTILS/lua/get_ptr"
 
 local fns = {}
 
@@ -290,7 +291,7 @@ fns.assert_nascent_vector4 = function(vec, test_name, num_elements, gen_method)
   
   -- Try to modify values of a read only vector
   local len, base_data, nn_data = vec:get_all()
-  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   status = pcall(set_value, iptr, 0, 123)
   assert(status == false, "Able to modify read only vector")
   
@@ -347,7 +348,7 @@ fns.assert_nascent_vector6 = function(vec, test_name, num_elements, gen_method)
   
   -- create base buffer
   local base_data = cmem.new(md.base.field_size)
-  local iptr = ffi.cast(qconsts.qtypes[md.base.field_type].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[md.base.field_type].ctype .. " *", get_ptr(base_data))
   iptr[0] = 121
   
   -- try put chunk
@@ -407,7 +408,7 @@ fns.assert_nascent_vector8_1_1 = function(vec, test_name, num_elements, gen_meth
   local len, base_data, nn_data = vec:start_write()
   assert(base_data, "Failed to open the mmaped file in write mode")
   assert(len, "Failed to open the mmaped file in write mode")
-  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   
   -- Set value at index 0
   local test_value = 121
@@ -419,7 +420,7 @@ fns.assert_nascent_vector8_1_1 = function(vec, test_name, num_elements, gen_meth
   -- Now chunk() should work as open_mode set to 0, validate modified value
   len, base_data, nn_data = vec:get_all()
   assert(base_data)
-  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   return true
@@ -587,7 +588,7 @@ fns.assert_materialized_vector2 = function(vec, test_name, num_elements)
   local len, base_data, nn_data = vec:start_write()
   assert(base_data, "Failed to open the mmaped file in write mode")
   assert(len, "Failed to open the mmaped file in write mode")
-  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   
   -- Set value at index 0
   local test_value = 121
@@ -635,7 +636,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   local len, base_data, nn_data = vec:start_write()
   assert(base_data, "Failed to open the mmaped file in write mode")
   assert(len, "Failed to open the mmaped file in write mode")
-  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  local iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   
   -- Set value at index 0
   local test_value = 121
@@ -647,7 +648,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   -- Now chunk() should work as open_mode set to 0, validate modified value
   len, base_data, nn_data = vec:get_all()
   assert(base_data)
-  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", base_data)
+  iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
   assert(iptr[0] == test_value, "Value mismatch with expected value")
   
   assert(vec:check())

@@ -13,7 +13,7 @@ tests.t1 = function()
   local s2 = Scalar.new("-9223372036854775808", "I8")
   local x = Q.mk_col({s1, s2}, "I8")
 
-  local string = Q.print_csv(x, "")
+  local string = Q.print_csv(x, {opfile = ""})
   assert(string)
   assert(string == expected)
   print("Test t1 succeeded")

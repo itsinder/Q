@@ -114,8 +114,8 @@ fns.category3 = function (index, v, status, ret)
     fns["increment_failed_mkcol"](index, v, "Mk_col function does not return lVector")
     return false
   end
-  
-  local status, expected_str = pcall(print_csv, ret, "")
+  local opt_args = { opfile = "" }
+  local status, expected_str = pcall(print_csv, ret, opt_args)
   assert(status,"Reason of failure" .. expected_str )
   -- converting table to string
   local actual_str = table.concat(v.input, "\n")
