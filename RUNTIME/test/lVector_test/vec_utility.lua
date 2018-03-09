@@ -133,8 +133,8 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       for itr = 1, num_elements do
         local index = math.random(1, sc_table_len)
         local str = SC_strings[index]
-        ffi.copy(base_data, str)
-        vec:put1(base_data)
+        ffi.copy(get_ptr(base_data), str)
+        vec:put_chunk(base_data, nil, 1)
       end
     else
       local buf_length = num_elements

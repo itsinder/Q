@@ -45,7 +45,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
-  --[[
+  
   -- creating nascent vector, generating values by cmem_buf, SC qtype
   { 
     test_type = "nascent_vector", 
@@ -56,7 +56,7 @@ return {
     gen_method = "cmem_buf", 
     qtype = { "SC" }
   },
-  ]]
+  
   -- creating nascent vector, generating values by cmem_buf, put one element, check file size
   { 
     test_type = "nascent_vector", 
