@@ -10,7 +10,7 @@ local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
 
 -- TODO: move this buffer allocation inside print_csv function
 local buf_size = 1024
-local buf = get_ptr(cmem.new(buf_size))
+--local buf = get_ptr(cmem.new(buf_size))
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -29,13 +29,13 @@ local function get_B1_value(buffer, chunk_idx)
 end
 
 local function get_element(col, rowidx)
+  local buf = get_ptr(cmem.new(buf_size))
   local val = nil
   local nn_val = nil
   local chunk_num = math.floor((rowidx - 1) / qconsts.chunk_size)
   local chunk_idx = (rowidx - 1) % qconsts.chunk_size
   local qtype = col:qtype()
   local ctype =  qconsts.qtypes[qtype]["ctype"]
-  
   if not chunk_buf_table[col] or chunk_idx == 0 then
     local len, base_data, nn_data = col:chunk(chunk_num)
     assert(len > 0, "Chunk length not greater than zero")
@@ -70,11 +70,9 @@ local function get_element(col, rowidx)
   else
     -- Initialize output buf to zero
     ffi.fill(buf, buf_size)
-    
     -- Call respective q_to_txt function
     local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
     status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf, buf_size)
-    
     -- Extract value
     val = ffi.string(buf)    
     if qtype == "SV" then
@@ -167,7 +165,6 @@ local print_csv = function (vec_list, opt_args)
 
   -- processing opt_args of print_csv
   local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
-  
   -- trimming whitespace if any
   if opfile then
     opfile = plstring.strip(opfile)
