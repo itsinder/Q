@@ -1,7 +1,11 @@
 -- FUNCTIONAL
 local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local diff = require 'Q/UTILS/lua/diff'
 require 'Q/UTILS/lua/strict'
+local plpath  = require 'pl.path'
+local path_to_here = os.getenv("Q_SRC_ROOT") .. "/OPERATORS/F1F2OPF3/test/"
+assert(plpath.isdir(path_to_here))
 
 local tests = {}
 tests.t1 = function()
@@ -10,8 +14,10 @@ tests.t1 = function()
   c1 = 10
   local c2 = Q.mk_col( {80,70,60,50,40,30,20,10}, "I8")
   local z = Q.vvadd(c3, c2)
-  Q.print_csv(z, "_out1.txt", { lb = 1, ub = 4})
-  os.execute("diff _out1.txt out1.txt");
+  local opt_args = { opfile = path_to_here .. "_out1.txt", filter = { lb = 1, ub = 4} }
+  Q.print_csv(z, opt_args)
+  local diff_status = diff(path_to_here .. "_out1.txt", path_to_here .. "out1.txt")
+  assert(diff_status, "Input and Output csv file not matched")
   assert(Q.sum(Q.vvneq(z, Q.mk_col({81,72,63,54,45,36,27,18}, "I4"))):eval():to_num() == 0 )
   print("Test t1 succeeded")
 end
