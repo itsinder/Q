@@ -28,7 +28,8 @@ tests.t1 = function()
   assert(b == len)
   -- assert(Q.is_next(val, "geq"):eval() == true)
   print("Test t1 succeeded")
-  -- Q.print_csv({val, idx}, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv({val, idx}, opt_args)
 
 end
 --=========================================
@@ -57,7 +58,8 @@ tests.t2 = function()
   assert(b == len)
   -- assert(Q.is_next(val, "geq"):eval() == true)
   print("Test t2 succeeded")
-  -- Q.print_csv({val, idx}, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv({val, idx}, opt_args )
 
 end
 return tests

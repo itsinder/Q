@@ -294,7 +294,7 @@ fns.handle_category6 = function (index, v, M)
   }
   col:persist(true) 
   local arr = {col}
-  --print_csv(arr,nil,"testcase_consumable.csv")
+  --print_csv(arr, { opfile = script_dir .. "testcase_consumable.csv"} )
   local filename = require('Q/q_export').Q_DATA_DIR .. "/_" .. M[1].name
   local status, print_ret = pcall(print_csv, arr, v.opt_args )
   if status then

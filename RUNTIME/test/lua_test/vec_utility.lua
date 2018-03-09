@@ -104,7 +104,7 @@ fns.generate_values = function( vec, gen_method, num_elements, field_size, qtype
       for itr = 1, num_elements do
         local str
         if itr%2 == 0 then str = "temp" else str = "dummy" end
-        ffi.copy(base_data, str)
+        ffi.copy(get_ptr(base_data), str)
         vec:put1(base_data)
       end
     else
