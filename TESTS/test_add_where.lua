@@ -17,6 +17,7 @@ tests.t1 = function ()
   local correct_answer =   (len/2)*(len/2+1)
   assert(x:to_num() == correct_answer, "expected " .. correct_answer)
   assert(y:to_num() == len/2)
-  --Q.print_csv({c1, c2, c3}, nil, "")
+  local opt_args = { opfile = "" }
+  --Q.print_csv({c1, c2, c3}, opt_args)
 end
 return tests

@@ -67,12 +67,12 @@ tests.t1 = function()
   -- call where operator
   local Q = require 'Q'
   local a = Q.mk_col(a_input_table, a_qtype)
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
+  --Q.print_csv(a, { opfile = "/tmp/a_out.txt"})
   local b = Q.mk_col(b_input_table, b_qtype)
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(b, { opfile = "/tmp/b_out.txt"})
   local c = Q.where(a, b)
   c:eval()
-  --Q.print_csv(c, nil, "")
+  --Q.print_csv(c, { opfile = "" })
 
   qc[fns_name] = fns_value
 end
@@ -87,7 +87,7 @@ b:eval()
 
 local b_B1 = Q.convert(b, {qtype = "B1"})
 b_B1:eval()
-Q.print_csv(b_B1, nil, "")
+Q.print_csv(b_B1, { opfile = "" })
 
 --print(Q.sum(b_B1):eval())
 
@@ -95,7 +95,7 @@ local c = Q.where(a, b_B1)
 c:eval()
 
 print(c:length())
--- Q.print_csv(c, nil, "")
+-- Q.print_csv(c, { opfile = "" })
 ]]
 --======================================
 

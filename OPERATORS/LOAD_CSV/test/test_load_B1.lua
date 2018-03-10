@@ -25,8 +25,8 @@ tests.t1 = function ()
   local status, ret = pcall(load_csv, csv_file_path, M )
   assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ")
   assert(ret['empid']:num_elements()==65540, "Incorrect number of elements in vector")
-  
-  Q.print_csv(ret['empid'], script_dir .. "/output_file_B1.csv")
+  local opt_args = {opfile = script_dir .. "/output_file_B1.csv"}
+  Q.print_csv(ret['empid'], opt_args)
 
   local diff_status = diff(script_dir .. "/input_file_B1.csv", script_dir .. "/output_file_B1.csv")
   assert(diff_status, "Input and Output csv file not matched")

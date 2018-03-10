@@ -39,8 +39,7 @@ for i, v in ipairs(T) do
     print("Running testcase " .. v.testcase_no ..": " .. v.name)
     local M = dofile(script_dir .."/metadata/" .. v.meta)
     local D = v.data
-    local F = v.filter
-    local csv_file = v.csv_file
+   
     local result
     
     if v.category == "category1_1" then
@@ -73,17 +72,19 @@ for i, v in ipairs(T) do
       -- in other cases , filter object is taken from metadata
       local key = "handle_input_"..v.category
       if fns[key] then
-        F = fns[key]()
+        v.opt_args["filter"] = fns[key]()
       end
-      local file_path 
-      if csv_file then file_path = print_out_dir .. csv_file end
-      if csv_file == "" then file_path = "" end
+      if v.opt_args["opfile"] == "" then 
+        v.opt_args["opfile"] = "" 
+      elseif v.opt_args["opfile"] then 
+        v.opt_args["opfile"] = print_out_dir .. v.opt_args["opfile"] 
+      end
+      
       -- category2 are negative testcases ( error messages )
       if v.category == "category2" then
         print("START: Deliberate error attempt")
       end
-      
-      local status, print_ret = pcall(print_csv, load_ret, file_path, F)
+      local status, print_ret = pcall(print_csv, load_ret, v.opt_args)
       if not status then print(print_ret) end
       if v.category == "category2" then
         print(print_ret)
@@ -92,7 +93,7 @@ for i, v in ipairs(T) do
       
       key = "handle_"..v.category
       if fns[key] then
-        result = fns[key](i, v,  file_path, print_ret, status, load_ret)
+        result = fns[key](i, v, print_ret, status, load_ret)
         -- preamble
         utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
         assert(result,"handle " .. v.category .. " assertions failed")

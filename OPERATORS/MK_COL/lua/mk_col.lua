@@ -48,9 +48,7 @@ local mk_col = function (input, qtype, nn_input)
     local v_nn = nil
     if ( type(v) == "Scalar" ) then 
       -- all is well. Nothing more to do 
-    elseif ( type(v) == "number" )  then
-      v = assert(Scalar.new(v, qtype))
-    elseif ( type(v) == "boolean" )  then
+    elseif ( type(v) == "number" ) or ( type(v) == "boolean" ) or ( type(v) == "string" ) then
       v = assert(Scalar.new(v, qtype))
     else 
       assert(nil, "Error in index " .. k .. " - " .. err.INVALID_DATA_ERROR)

@@ -12,8 +12,9 @@ tests.t1 = function ()
   assert(type(t1) == "lVector")
   assert(Q.sum(Q.vvneq(Q.vvmax(x, y), z)):eval():to_num() == 0 )
   -- t1:eval()
-  -- Q.print_csv(t1, nil, "")
-  -- Q.print_csv(Q.vvmax(x,y):eval(), nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(t1, opt_args)
+  -- Q.print_csv(Q.vvmax(x,y):eval(), opt_args)
   print("Test t1 succeeded")
 end
 --=======================================

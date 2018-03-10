@@ -15,11 +15,14 @@ tests.t1 = function ()
   local M = dofile(metafilename)
   assert(type(M) == "table")
   local x = Q.load_csv(datafilename, M, {use_accelerator = false})
-  local y = Q.vvadd(x[1], x[2])
+  local y = Q.vvadd(x["eng"], x["phy"])
   local a = Q.mk_col({2, 2, 2, 2}, "I4")
   local b = Q.vvdiv(y, a)
   x[#x + 1] = b:eval()
-  Q.print_csv(x, "average.csv")
+  local opt_args = {
+                     opfile = "average.csv"
+	           }
+  Q.print_csv(x, opt_args)
 end
 --======================================
 return tests

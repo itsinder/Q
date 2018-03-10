@@ -1,14 +1,16 @@
-local err     = require 'Q/UTILS/lua/error_code'
-local qc      = require 'Q/UTILS/lua/q_core'
-local ffi     = require 'Q/UTILS/lua/q_ffi'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local plstring = require 'pl.stringx'
-local cmem    = require 'libcmem'
-local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local err	= require 'Q/UTILS/lua/error_code'
+local qc	= require 'Q/UTILS/lua/q_core'
+local ffi	= require 'Q/UTILS/lua/q_ffi'
+local qconsts	= require 'Q/UTILS/lua/q_consts'
+local plstring	= require 'pl.stringx'
+local utils	= require 'Q/UTILS/lua/utils'
+local cmem	= require 'libcmem'
+local get_ptr	= require 'Q/UTILS/lua/get_ptr'
+local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
 
 -- TODO: move this buffer allocation inside print_csv function
 local buf_size = 1024
-local buf = get_ptr(cmem.new(buf_size))
+--local buf = get_ptr(cmem.new(buf_size))
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -27,13 +29,13 @@ local function get_B1_value(buffer, chunk_idx)
 end
 
 local function get_element(col, rowidx)
+  local buf = get_ptr(cmem.new(buf_size))
   local val = nil
   local nn_val = nil
   local chunk_num = math.floor((rowidx - 1) / qconsts.chunk_size)
   local chunk_idx = (rowidx - 1) % qconsts.chunk_size
   local qtype = col:qtype()
   local ctype =  qconsts.qtypes[qtype]["ctype"]
-  
   if not chunk_buf_table[col] or chunk_idx == 0 then
     local len, base_data, nn_data = col:chunk(chunk_num)
     assert(len > 0, "Chunk length not greater than zero")
@@ -41,7 +43,7 @@ local function get_element(col, rowidx)
     base_data = get_ptr(base_data, qtype)
     chunk_buf_table[col] = base_data
     if nn_data then
-      nn_data = ffi.cast(qconsts.qtypes.B1.ctype .. " *", nn_data)
+      nn_data = get_ptr(nn_data, "B1")
       chunk_nn_buf_table[col] = nn_data
     end
   end
@@ -68,11 +70,9 @@ local function get_element(col, rowidx)
   else
     -- Initialize output buf to zero
     ffi.fill(buf, buf_size)
-    
     -- Call respective q_to_txt function
     local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
     status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf, buf_size)
-    
     -- Extract value
     val = ffi.string(buf)    
     if qtype == "SV" then
@@ -86,33 +86,35 @@ end
 local function chk_cols(vector_list)
   assert(vector_list)
   assert(type(vector_list) == "table")
-  assert(#vector_list > 0)  
+  assert(utils.table_length(vector_list) > 0)  
   local vec_length = nil
-  for i = 1, #vector_list do
-    assert((type(vector_list[i]) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
-    
+  local is_first = true
+  for i, v in pairs(vector_list) do
+    assert((type(v) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
+
     -- Check the vector for eval(), if not then call eval()
-    if not vector_list[i]:is_eov() then
-      vector_list[i]:eval()
+    if not v:is_eov() then
+      v:eval()
     end
-    
-    -- eval'ed the vector before calling lenght() 
+
+    -- eval'ed the vector before calling lenght()
     -- as elements will populate only after eval()
-    if i == 1 then
-      vec_length = vector_list[i]:length()
+    if is_first then
+      vec_length = v:length()
+      is_first = false
     end
-    
+
     -- Added below assert after discussion with Ramesh
     -- We are not supporting vectors with different length as this is a rare case
     -- All vectors should have same length
-    assert(vector_list[i]:length() == vec_length, "All vectors should have same length")
-    assert(vector_list[i]:length() > 0)
-    local qtype = vector_list[i]:qtype()
+    assert(v:length() == vec_length, "All vectors should have same length")
+    assert(v:length() > 0)
+    local qtype = v:qtype()
     assert(qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
-    
+
     -- dictionary cannot be null in get_meta for SV data type
-    if qtype == "SV" then 
-      assert(vector_list[i]:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
+    if qtype == "SV" then
+      assert(v:get_meta("dir"), err.NULL_DICTIONARY_ERROR)
     end
   end
   return true
@@ -149,12 +151,20 @@ local function process_filter(filter, vec_length)
   return where, lb, ub
 end
 
-local print_csv = function (vector_list, opfile, filter)
-  -- Convention
-  -- Q.print_csv(X) -- will print stdout
-  -- Q.print_csv(X, "file", <filter>) -- will print to file
-  -- Q.print_csv(X, "", <filter>) -- will return string
-  
+local print_csv = function (vec_list, opt_args)
+  -- Convention: Q.print_csv({T}, opt_args)
+  -- opt_args: table of 3 arguments { opfile, <filter>, print_order }
+  -- 1) opfile: where to print the columns
+             -- "file_name" : will print to file
+             -- ""     : will return a string
+             -- nil    : will print to stdout
+  -- 2) <filter> 
+  -- 3) print_order: order/required column names
+                  -- nil : takes the complete vec_list as it is
+                  -- table of strings (column names)
+
+  -- processing opt_args of print_csv
+  local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
   -- trimming whitespace if any
   if opfile then
     opfile = plstring.strip(opfile)
@@ -165,10 +175,14 @@ local print_csv = function (vector_list, opfile, filter)
     vector_list = {vector_list}
   end
   assert(chk_cols(vector_list), "Vectors verification failed")
-  local vec_length = vector_list[1]:length()
+  local vec_length
+  for i, v in pairs(vector_list) do
+    vec_length = v:length()
+    break
+  end
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
-  local num_cols = #vector_list
+  local num_cols = utils.table_length(vector_list)
   local fp = nil -- file pointer
   local tbl_rslt = nil
   
@@ -194,9 +208,12 @@ local print_csv = function (vector_list, opfile, filter)
       assert(status, "Failed to get filter value, Error: " .. tostring(is_filter))
     end
     if ( ( not where ) or ( is_filter ) ) then
-      for col_idx = 1, num_cols do
+      -- Using below modified for loop because if we pass load_csv output to this, it doesn't work
+      -- load_csv output doesn't contain integer indices rather it contains column names as indices
+      -- TODO: currently insertion order is not guaranteed if indices are not integers
+      local col_idx = 1
+      for _, col in pairs(vector_list) do
         local status, result = nil
-        local col = vector_list[col_idx]
         status, result = pcall(get_element, col, rowidx)
         assert(status, "Failed to get value from vector, Error: " .. tostring(result))
         if not result then
@@ -217,6 +234,7 @@ local print_csv = function (vector_list, opfile, filter)
             assert(io.write("\n"), "Write failed") 
           end
         end
+        col_idx = col_idx + 1
       end
     else
       -- Filter says to skip this row 

@@ -20,7 +20,8 @@ tests.t7_I1 = function()
        local outcol = Q.convert(incol, "I1")
        local alt_incol = Q.convert(outcol, qtype)
        -- alt_incol:eval()
-       -- Q.print_csv({incol, alt_incol}, nil, "_xxx_" .. val)
+       -- local opt_args = { opfile = "_xxx_" .. val }
+       -- Q.print_csv({incol, alt_incol}, opt_args)
        -- print(Q.sum(Q.vvneq(incol, alt_incol)):eval():to_num())
        assert(Q.sum(Q.vvneq(incol, alt_incol)):eval():to_num() == 0)
     end
@@ -37,7 +38,8 @@ tests.t1 = function()
   assert(type(n) == "Reducer")
   local len = input_col:length()
   assert(n:eval():to_num() == len)
-  -- Q.print_csv(converted_col, nil, "")
+  -- local opt_args = { opfile = ""}
+  -- Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t1")
 end
 --===========================
@@ -50,7 +52,8 @@ tests.t2 = function()
   assert(type(n) == "Reducer")
   local len = input_col:length()
   assert(n:eval():to_num() == len)
-  -- Q.print_csv(converted_col, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t2")
 end
 --===========================
@@ -64,7 +67,8 @@ tests.t3 = function()
     local val = c_to_txt(converted_col, i)
     assert(val == v, "Value mismatch")
   end
- --  Q.print_csv(converted_col, nil, "")
+  -- local opt_args = {opfile = "" }
+  --  Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t3")
 end
 
@@ -79,7 +83,8 @@ tests.t4 = function()
     if not val then val = 0 end
     assert(val == v, "Value mismatch")
   end
-  -- Q.print_csv(converted_col, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(converted_col, opt_args)
   print("Successfully completed test t4")
 end
 --===========================
@@ -103,7 +108,8 @@ tests.t6 = function()
     incol:eval()
     outcol:eval()
     outcol2:eval()
-    Q.print_csv({incol, outcol, outcol2}, nil, "")
+    local opt_args = { opfile = "" } 
+    Q.print_csv({incol, outcol, outcol2}, opt_args)
     local chk_sum = Q.sum(Q.vvneq(incol, outcol2)):eval():to_num()
     if ( chk_sum ~= 0 ) then 
       print("ERR ", chk_sum, qtype) os.execute("sleep 60"); os.exit() 
