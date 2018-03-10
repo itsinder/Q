@@ -217,6 +217,7 @@ flush_buffer(
   int status = 0;
   if ( ptr_vec->is_memo ) {
     if ( !is_regular_file(ptr_vec->file_name) ) {
+      // create randomly generated file name and append to ptr_vec->file_name field
       status = update_file_name(ptr_vec); cBYE(status);
     }
     /*
@@ -248,6 +249,7 @@ int flush_buffer_B1(
   if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
     if ( ptr_vec->is_memo ) {
       if ( !is_regular_file(ptr_vec->file_name) ) {
+        // create randomly generated file name and append to ptr_vec->file_name field
         status = update_file_name(ptr_vec); cBYE(status);
       }
       /*  
@@ -431,7 +433,8 @@ BYE:
 int 
 vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
-    VEC_REC_TYPE *ptr_new_vec
+    VEC_REC_TYPE *ptr_new_vec,
+    const char *const q_data_dir
     )
 {
   int status = 0;
@@ -470,8 +473,12 @@ vec_clone(
   }
   ptr_new_vec->map_addr = NULL; // unopened
   ptr_new_vec->map_len  = 0;    // unopened
-  if ( is_regular_file(ptr_old_vec->file_name) ) { 
-    status = rand_file_name(ptr_new_vec->file_name, 64); // TODO FIX 
+  if ( is_regular_file(ptr_old_vec->file_name) ) {
+    // copying q_data_dir to file_name field, will append the randomly generated file_name to it
+    strcpy(ptr_new_vec->file_name, q_data_dir);
+    strcat(ptr_new_vec->file_name, "/");
+    // create randomly generated file name and append to ptr_new_vec->file_name field
+    status = update_file_name(ptr_new_vec);
     cBYE(status);
     // copy old to new
     status = copy_file(ptr_old_vec->file_name, ptr_new_vec->file_name);
@@ -1199,6 +1206,7 @@ vec_eov(
   // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
   if ( !is_regular_file(ptr_vec->file_name) ) {
+    // create randomly generated file name and append to ptr_vec->file_name field
     status = update_file_name(ptr_vec); cBYE(status);
   }
   /*

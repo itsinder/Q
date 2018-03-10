@@ -96,6 +96,7 @@ function lVector.new(arg)
   local is_nascent
   local is_memo = true -- default to true
   -- Using env variable Q_DATA_DIR
+  -- Passing q_data_dir to create the new vector's bin file in q_data_dir
   local q_data_dir = os.getenv("Q_DATA_DIR")
   assert(q_data_dir)
 
@@ -430,16 +431,20 @@ function lVector:clone(optargs)
   assert(self._base_vec)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
   -- assert(self:is_eov(), "can clone vector only if is EOV")
+  
+  -- Passing q_data_dir to create the cloned vector's bin file in q_data_dir
+  local q_data_dir = os.getenv("Q_DATA_DIR")
+  assert(q_data_dir)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
   vector._meta = {}
 
-  vector._base_vec = Vector.clone(self._base_vec)
+  vector._base_vec = Vector.clone(self._base_vec, q_data_dir)
   assert(vector._base_vec)
 
   -- Check for nulls
   if ( self:has_nulls() ) then
-    vector._nn_vec = Vector.clone(self._nn_vec)
+    vector._nn_vec = Vector.clone(self._nn_vec, q_data_dir)
     assert(vector._nn_vec) 
   end
 

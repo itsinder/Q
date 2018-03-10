@@ -125,6 +125,7 @@ vec_get_buf(
 extern int 
 vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
-    VEC_REC_TYPE *ptr_new_vec
+    VEC_REC_TYPE *ptr_new_vec,
+    const char *const q_data_dir
     );
 #endif
