@@ -7,6 +7,7 @@ local qc = require 'Q/UTILS/lua/q_core'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
+local q_data_dir = os.getenv("Q_DATA_DIR")
 
 local M
 local is_memo
@@ -25,7 +26,7 @@ tests.t1 = function()
   qc.generate_bin(num_values, q_type, infile, "linear" )
  
   assert(plpath.isfile(infile), "Create the input files")
-  local y = Vector.new('I4', infile, false)
+  local y = Vector.new('I4', q_data_dir, infile, false)
   local filesize = plpath.getsize(infile)
   y:persist(true)
   local ylen = Vector.num_elements(y)
@@ -66,7 +67,7 @@ tests.t2 = function()
   -- generating .bin files required for materialized vector
   qc.generate_bin(num_values, q_type, "_in1_I4.bin", "linear" )
   assert(plpath.isfile("_in1_I4.bin"))
-  local y = Vector.new('I4', '_in1_I4.bin')
+  local y = Vector.new('I4', q_data_dir, '_in1_I4.bin')
   y:persist(true)
   local s = Scalar.new(123, "I4")
   local status = y:set(s, 0)
@@ -77,7 +78,7 @@ end
 
 -- try to modify a vector created as read only by eov. Should fail
 tests.t3 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   local s = Scalar.new(123, "I4")
   local status = y:put1(s)
   assert(status)
@@ -91,7 +92,7 @@ end
 
 -- can memo a vector until it hits chunk size. then must fail
 tests.t4 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   local s = Scalar.new(123, "I4")
   for i = 1, chunk_size do 
     local status = y:put1(s)
@@ -110,7 +111,7 @@ end
 
 -- num_in_chunk should increase steadily and then reset after chunk_size
 tests.t5 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   local s = Scalar.new(123, "I4")
   local chunk_size = 65536  
   for i = 1, chunk_size do 
@@ -133,7 +134,7 @@ end
 tests.t6 = function()
   local orig_ret_addr = nil
   local s = Scalar.new(123, "I4")
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   for i = 1, chunk_size do 
     local status = y:put1(s)
     assert(status)
@@ -160,7 +161,7 @@ end
 
 -- create a nascent vector
 tests.t7 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   local num_elements = 10000
   for j = 1, num_elements do 
     local s1 = Scalar.new(j, "I4")
@@ -194,7 +195,7 @@ end
 --================================
 ---- test put_chunk
 tests.t8 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   assert(y:persist()) -- can persist when nascent
   local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
@@ -213,7 +214,7 @@ tests.t8 = function()
   print(" od -i " .. file_name .. " # to verify all is good")
 
 --================================
-  local y = Vector.new('I4', file_name)
+  local y = Vector.new('I4', q_data_dir, file_name)
   print("checking meta data of new vector from old file name ")
   M = loadstring(y:meta())(); 
   for k, v in pairs(M) do 
@@ -268,7 +269,7 @@ end
 
 --======= do put of a range of lengths and make sure that it works
 tests.t9 = function()
-  local y = Vector.new('I4')
+  local y = Vector.new('I4', q_data_dir)
   local buf = cmem.new(chunk_size * 4, "I4")
   local start = 1
   local incr  = 1
