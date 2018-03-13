@@ -137,46 +137,46 @@ return {
 
   -- opt_args is passed as string, should return an error 
   { testcase_no = 31, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
-    output_regex = "opt_args must be of type table" , name = "opt_args passed as type string",
+    output_regex = g_err.INVALID_OPT_ARGS_TYPE , name = "opt_args passed as type string",
     opt_args = "string" },
   
   -- opt_args is passed as integer, should return an error
   { testcase_no = 32, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
-    output_regex = "opt_args must be of type table" , name = "opt_args passed as type integer",
+    output_regex = g_err.INVALID_OPT_ARGS_TYPE , name = "opt_args passed as type integer",
     opt_args = 1 },
   
   -- opt_args--> print_order is passed as string, should return an error 
   { testcase_no = 33, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
-    output_regex = "type of print_order is not table" , name = "print_order passed as type string",
+    output_regex = g_err.INVALID_PRINT_ORDER_TYPE , name = "print_order passed as type string",
     opt_args = { print_order = "string" } },
 
   -- opt_args--> print_order is passed as integer, should return an error
   { testcase_no = 34, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
-    output_regex = "type of print_order is not table" , name = "print_order passed as type integer",
+    output_regex = g_err.INVALID_PRINT_ORDER_TYPE , name = "print_order passed as type integer",
     opt_args = { print_order = 1 } },
   --[[
   -- opt_args--> print_order values are of type integer, should return an error
   { testcase_no = 34, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
-    output_regex = "type of print_order is not table" , name = "print_order values passed as integer",
+    output_regex ="sort_order table value is not string type" , name = "print_order values passed as integer",
     opt_args = { print_order = { 1 } } },
   ]]
  -- length of opt_args--> print_order attempted to be zero, should return an error 
   { testcase_no = 35, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
     name= "length of print_order is zero", 
-    output_regex = "sort_order table length cannot be 0",  
+    output_regex = g_err.SORT_ORDER_LENGTH_ZERO,  
     opt_args = { opfile = "multi_col.csv", print_order = { } } },
  
  -- length of opt_args--> print_order attempted >(greater than) expected columns,
  -- should return an error
  { testcase_no = 36, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
     name= "length of print_order greater than expected columns", 
-    output_regex = "sort_order table length is greater than cols",  
+    output_regex = g_err.SORT_ORDER_LENGTH_GT_COLS,  
     opt_args = { opfile = "multi_col.csv", print_order = { "empid", "yoj", "empname" } } },
  
  -- print_order string should match column index name
   { testcase_no = 37, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
     name= "length of print_order greater than expected columns", 
-    output_regex = "Incorrect column name in sort_order table",  
+    output_regex = g_err.INCORRECT_COLUMN_NAME_IN_SORT_ORDER,  
     opt_args = { opfile = "multi_col.csv", print_order = { "empid", "doj" } } },
   
  -- opt_args positive testcase: load_csv(empid, sal, yoj) print_order (empid, yoj, sal)
