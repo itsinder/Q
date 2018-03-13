@@ -1,6 +1,6 @@
 local Vector = require 'libvec'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-
+local q_data_dir = os.getenv("Q_DATA_DIR")
 -- input args are in the order below
 -- M - metadata containing qtype, file_name, is_read_only, is_memo, num_elements depending on vector type (nascent / materialized)
 return function( M )
@@ -17,7 +17,7 @@ return function( M )
   end
   
   -- Create Vector
-  local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_memo, M.num_elements, field_size )
+  local status, x = pcall(Vector.new, M.qtype, q_data_dir, M.file_name, M.is_memo, M.num_elements)
   if not status then
     print(x)
     x = nil

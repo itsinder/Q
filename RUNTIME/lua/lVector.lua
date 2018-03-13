@@ -95,6 +95,11 @@ function lVector.new(arg)
   local has_nulls
   local is_nascent
   local is_memo = true -- default to true
+  -- Using env variable Q_DATA_DIR
+  -- Passing q_data_dir to create the new vector's bin file in q_data_dir
+  local q_data_dir = os.getenv("Q_DATA_DIR")
+  assert(q_data_dir)
+
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
@@ -152,7 +157,7 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, file_name, is_memo, 
+  vector._base_vec = Vector.new(qtype, q_data_dir, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
@@ -160,7 +165,7 @@ function lVector.new(arg)
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
-    vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
+    vector._nn_vec = Vector.new("B1", q_data_dir, nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
@@ -426,16 +431,20 @@ function lVector:clone(optargs)
   assert(self._base_vec)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
   -- assert(self:is_eov(), "can clone vector only if is EOV")
+  
+  -- Passing q_data_dir to create the cloned vector's bin file in q_data_dir
+  local q_data_dir = os.getenv("Q_DATA_DIR")
+  assert(q_data_dir)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
   vector._meta = {}
 
-  vector._base_vec = Vector.clone(self._base_vec)
+  vector._base_vec = Vector.clone(self._base_vec, q_data_dir)
   assert(vector._base_vec)
 
   -- Check for nulls
   if ( self:has_nulls() ) then
-    vector._nn_vec = Vector.clone(self._nn_vec)
+    vector._nn_vec = Vector.clone(self._nn_vec, q_data_dir)
     assert(vector._nn_vec) 
   end
 

@@ -33,6 +33,7 @@ libvec.so: libvec.so libcmem.so
 		../../UTILS/src/buf_to_file.c \
                 ../../UTILS/src/copy_file.c \
 		../../UTILS/src/file_exists.c \
+                ../../UTILS/src/is_regular_file.c \
 		../../OPERATORS/PRINT/src/B1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \

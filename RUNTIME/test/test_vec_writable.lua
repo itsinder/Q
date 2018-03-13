@@ -6,6 +6,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
+local q_data_dir = os.getenv("Q_DATA_DIR")
 
 local M
 local chunk_size = qconsts.chunk_size
@@ -20,7 +21,7 @@ tests.t1 = function()
   qc.generate_bin(10, "I4", infile, "linear")
 
   assert(plpath.isfile(infile), "Create the input files")
-  local y = Vector.new('I4', infile, false)
+  local y = Vector.new('I4', q_data_dir, infile, false)
   assert(y:start_write())
   -- Second call to start_write should fail
   print("START: Deliberate error attempt")

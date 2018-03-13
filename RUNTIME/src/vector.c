@@ -590,6 +590,7 @@ static int l_vec_new( lua_State *L)
 
   bool is_memo = true;
   const char *file_name = NULL;
+  const char *q_data_dir = NULL;
   int64_t num_elements = -1;
   int32_t chunk_size;
   const char * const qtype_sz  = luaL_checkstring(L, 1);
@@ -598,14 +599,17 @@ static int l_vec_new( lua_State *L)
      SC:len where len is an integer */
   status = get_chunk_size(L, &chunk_size); cBYE(status);
 
-  if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
-    file_name = luaL_checkstring(L, 2);
+  // q_data_dir to create file_path
+  q_data_dir = luaL_checkstring(L, 2);
+  if ( q_data_dir == NULL ) { go_BYE(-1); }
+  if ( lua_isstring(L, 3) ) { // filename provided for materialized vec
+    file_name = luaL_checkstring(L, 3);
   }
-  if ( lua_isboolean(L, 3) ) { // is_memo specified
-    is_memo = lua_toboolean(L, 3);
+  if ( lua_isboolean(L, 4) ) { // is_memo specified
+    is_memo = lua_toboolean(L, 4);
   }
   if ( file_name != NULL && strcmp(qtype_sz, "B1") == 0 ) { // num_elements provided for materialized B1 vec
-    num_elements = luaL_checknumber(L, 4);
+    num_elements = luaL_checknumber(L, 5);
     if ( num_elements <= 0 ) { go_BYE(-1); }
   }
 
@@ -616,7 +620,7 @@ static int l_vec_new( lua_State *L)
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   // printf("vect new to %x \n", ptr_vec);
 
-  status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
+  status = vec_new(ptr_vec, qtype_sz, q_data_dir, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
 
   luaL_pushresult(&g_errbuf);
@@ -626,13 +630,18 @@ BYE:
   lua_pushstring(L, "ERROR: Could not create vector\n");
   return 2;
 }
+//----------------------------------------
 static int l_vec_clone( lua_State *L) 
 {
   int status = 0;
   VEC_REC_TYPE *ptr_new_vec = NULL;
+  const char *q_data_dir = NULL;
   luaL_buffinit(L, &g_errbuf);
 
   VEC_REC_TYPE *ptr_old_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  // q_data_dir to create file_path
+  q_data_dir = luaL_checkstring(L, 2);
+  if ( q_data_dir == NULL ) { go_BYE(-1); }
 
   ptr_new_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   return_if_malloc_failed(ptr_new_vec);
@@ -640,7 +649,7 @@ static int l_vec_clone( lua_State *L)
   luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = vec_clone(ptr_old_vec, ptr_new_vec);
+  status = vec_clone(ptr_old_vec, ptr_new_vec, q_data_dir);
   cBYE(status);
 
   luaL_pushresult(&g_errbuf);

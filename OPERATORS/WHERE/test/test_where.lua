@@ -16,7 +16,8 @@ tests.t1 = function ()
     local value = c_to_txt(c, i)
     assert(value == out_table[i])
   end
-  -- Q.print_csv(c, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
   print("Test t1 succeeded")
 end
 --======================================
@@ -37,7 +38,8 @@ tests.t3 = function ()
     local value = c_to_txt(c, i)
     assert(value == out_table[i])
   end
-  -- Q.print_csv(c, nil, "")
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
 end
 --======================================
 tests.t4 = function ()
@@ -78,9 +80,9 @@ tests.t6 = function ()
   
   local c = Q.where(a, b)
   c:eval()
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
-  --Q.print_csv(c, nil, "") 
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(a, { opfile = "/tmp/a_out.txt"} )
+  --Q.print_csv(c, { opfile =  ""} ) 
+  --Q.print_csv(b, { opfile =  "/tmp/b_out.txt"} )
   assert(c:length() == exp_c:length(), 
   "ERROR: Expected: " .. exp_c:length() .. " Actual: " .. c:length())
   --assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
@@ -122,8 +124,8 @@ tests.t7 = function ()
   end
   expected_out[65537] = 65538
   
-  --Q.print_csv(a, nil, "/tmp/a_out.txt")
-  --Q.print_csv(b, nil, "/tmp/b_out.txt")
+  --Q.print_csv(a, { opfile = "/tmp/a_out.txt"} )
+  --Q.print_csv(b, { opfile = "/tmp/b_out.txt"} )
   
   local c = Q.where(a, b)
   c:eval()

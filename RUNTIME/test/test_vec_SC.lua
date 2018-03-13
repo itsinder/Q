@@ -4,6 +4,7 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem   = require 'libcmem' ; 
 require 'Q/UTILS/lua/strict'
+local q_data_dir = os.getenv("Q_DATA_DIR")
 
 local tests = {} 
 
@@ -17,7 +18,7 @@ tests.t1 = function()
   assert(plpath.isdir(dir))
   buf:set("ABCD123")
   -- create a nascent vector
-  y = assert(Vector.new('SC:8'))
+  y = assert(Vector.new('SC:8', q_data_dir))
   num_elements = 10
   for j = 1, num_elements do 
     assert(y:put1(buf))
@@ -39,7 +40,7 @@ tests.t1 = function()
   assert(plpath.isfile(original_infile), "ERROR: Create the input files")
   local infile = "/tmp/_SC2.bin"
   plfile.copy(original_infile, infile)
-  y = assert(Vector.new('SC:8', infile, false))
+  y = assert(Vector.new('SC:8', q_data_dir, infile, false))
   local ret_addr, ret_len = y:get_chunk(0);
   assert(ret_addr)
   assert(type(ret_addr) == "CMEM")
