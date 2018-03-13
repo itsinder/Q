@@ -120,7 +120,8 @@ fns.sort_table = function(cols, sort_order)
 
   local sorted_cols = {}
   for i,v in pairs(sort_order) do
-    -- order table string name should match cols table string index  
+    -- order table string name should match cols table string index 
+    -- assert(type(v) == "string", "sort_order table value is not of type string") 
     assert(cols[v]~= nil, "Incorrect column name in sort_order table")
     sorted_cols[#sorted_cols + 1] = cols[v]
   end

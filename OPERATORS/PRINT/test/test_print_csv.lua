@@ -74,12 +74,13 @@ for i, v in ipairs(T) do
       if fns[key] then
         v.opt_args["filter"] = fns[key]()
       end
-      if v.opt_args["opfile"] == "" then 
-        v.opt_args["opfile"] = "" 
-      elseif v.opt_args["opfile"] then 
-        v.opt_args["opfile"] = print_out_dir .. v.opt_args["opfile"] 
-      end
-      
+      if type(v.opt_args) == "table" then
+        if v.opt_args["opfile"] == "" then 
+          v.opt_args["opfile"] = "" 
+        elseif v.opt_args["opfile"] then 
+          v.opt_args["opfile"] = print_out_dir .. v.opt_args["opfile"] 
+        end
+       end 
       -- category2 are negative testcases ( error messages )
       if v.category == "category2" then
         print("START: Deliberate error attempt")

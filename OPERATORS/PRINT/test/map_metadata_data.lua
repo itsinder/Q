@@ -8,6 +8,8 @@ category1_1 - test-case for testing elements(rows) > chunk_size
             - These are test-cases with large csv files so generating it using generate_csv() function
 category1_2 - test-case for F4 and F8 qtype
             - their actual and expected output comparison is done using vveq and sum operator
+category1_4 - positive testcase of multiple columns
+            - matches output_regex(expected_value) with print_csv opfile contents  
 category2 - invalid filter input to print_csv. output_regex is error code in these testcases
 category3 - bit vector is B1
 category4 - bit vector is I4. output error expected
@@ -130,6 +132,59 @@ return {
     opt_args = { opfile = "print_SV_special_char.csv" } },
   -- checking for valid SC column contents with special characters like double quote, backslash etc
   { testcase_no = 30, meta = "gm_print_SC.lua", data ="fix_size_string_special_chars.csv", category = "category1_3", name= "print_SC_with_special_char", output_regex = "Hiihello\nb\"y\"\\e\n", opt_args = { opfile = "print_SC_special_char.csv" } },
+  
+  -- opt_args negative test cases
+
+  -- opt_args is passed as string, should return an error 
+  { testcase_no = 31, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
+    output_regex = "opt_args must be of type table" , name = "opt_args passed as type string",
+    opt_args = "string" },
+  
+  -- opt_args is passed as integer, should return an error
+  { testcase_no = 32, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
+    output_regex = "opt_args must be of type table" , name = "opt_args passed as type integer",
+    opt_args = 1 },
+  
+  -- opt_args--> print_order is passed as string, should return an error 
+  { testcase_no = 33, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
+    output_regex = "type of print_order is not table" , name = "print_order passed as type string",
+    opt_args = { print_order = "string" } },
+
+  -- opt_args--> print_order is passed as integer, should return an error
+  { testcase_no = 34, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
+    output_regex = "type of print_order is not table" , name = "print_order passed as type integer",
+    opt_args = { print_order = 1 } },
+  --[[
+  -- opt_args--> print_order values are of type integer, should return an error
+  { testcase_no = 34, meta = "gm_single_col.lua", data = "single_col_file.csv", category = "category2",
+    output_regex = "type of print_order is not table" , name = "print_order values passed as integer",
+    opt_args = { print_order = { 1 } } },
+  ]]
+ -- length of opt_args--> print_order attempted to be zero, should return an error 
+  { testcase_no = 35, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
+    name= "length of print_order is zero", 
+    output_regex = "sort_order table length cannot be 0",  
+    opt_args = { opfile = "multi_col.csv", print_order = { } } },
+ 
+ -- length of opt_args--> print_order attempted >(greater than) expected columns,
+ -- should return an error
+ { testcase_no = 36, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
+    name= "length of print_order greater than expected columns", 
+    output_regex = "sort_order table length is greater than cols",  
+    opt_args = { opfile = "multi_col.csv", print_order = { "empid", "yoj", "empname" } } },
+ 
+ -- print_order string should match column index name
+  { testcase_no = 37, meta = "gm_multi_col.lua",  data ="multi_col_file.csv", category = "category2", 
+    name= "length of print_order greater than expected columns", 
+    output_regex = "Incorrect column name in sort_order table",  
+    opt_args = { opfile = "multi_col.csv", print_order = { "empid", "doj" } } },
+  
+ -- opt_args positive testcase: load_csv(empid, sal, yoj) print_order (empid, yoj, sal)
+ -- testcase for printing multiple column contents as per valid print_order
+  { testcase_no = 38, meta = "gm_valid_print_order.lua",  data = "valid_print_order.csv", 
+    category = "category1_4", name = "multiple_col", 
+    output_regex = "1001,2015,30000\n1002,2016,35000\n1003,2017,40000\n1004,2018,45000\n",  
+    opt_args = { opfile = "multi_col.csv", print_order = {"empid", "yoj", "sal"} } },  
   
 }
 
