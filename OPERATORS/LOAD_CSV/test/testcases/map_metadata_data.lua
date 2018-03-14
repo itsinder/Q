@@ -199,13 +199,14 @@ return {
     -- use_accelerator by default set to true, testing load_csv C code 
     { testcase_no = 39, meta = "gm_valid_B1.lua", data = "B1_valid_more_than_chunksize.csv", 
       category= "category2_1", num_elements = 65540, name = "elements more than chunksize-B1_U_A_T" },    
-       
+     
+    --[[ 
     -- B1 qtype values
     -- use_accelerator is set to false, testing load_csv lua code 
     { testcase_no = 40, meta = "gm_valid_B1.lua", data = "B1_valid_more_than_chunksize.csv", 
       category= "category2_1", num_elements = 65540, name = "elements more than chunksize-B1_U_A_F",
       opt_args = { use_accelerator = false } },    
-       
+    -- ]]
        
     -- opt_args negative test cases
     
