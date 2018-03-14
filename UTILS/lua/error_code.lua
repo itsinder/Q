@@ -70,6 +70,15 @@ g_err.INVALID_FILE_PATH = "standard file is closed"
 g_err.INVALID_UPPER_BOUND_TYPE = "type of upper is not a number"
 g_err.INVALID_LOWER_BOUND_TYPE = "type of lower is not a number"
 g_err.INVALID_B1_VALUE = "Invalid B1 Value"
+g_err.INVALID_OPT_ARGS_TYPE = "opt_args must be of type table"
+g_err.INVALID_PRINT_ORDER_TYPE = "print_order must be of type table"
+
+-- utils errors
+g_err.INVALID_SORT_ORDER_TYPE = "sort_order must be of type table"
+g_err.SORT_ORDER_LENGTH_ZERO = "sort_order table length cannot be 0"
+g_err.SORT_ORDER_LENGTH_GT_COLS = "sort_order table length is greater than cols"
+g_err.INCORRECT_COLUMN_NAME_IN_SORT_ORDER = "Incorrect column name in sort_order table"
+
 -- ffi error
 g_err.FFI_NEW_ERROR = "ffi new api failed"
 g_err.FFI_MALLOC_ERROR = "ffi malloc api failed"

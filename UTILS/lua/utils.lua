@@ -1,5 +1,7 @@
 local plpath = require 'pl.path'
 local timer = require 'posix.time'
+local g_err	= require 'Q/UTILS/lua/error_code'
+
 local fns = {}
 
 fns.clone = function(t) -- deep-copy a table
@@ -112,16 +114,17 @@ end
 -- order : table of strings (name of string index)
 fns.sort_table = function(cols, sort_order)
   assert(type(cols), "cols must be of type table")
-  assert(type(sort_order), "sort_order must be of type table")
+  assert(type(sort_order), g_err.INVALID_SORT_ORDER_TYPE)
   -- sort_order table length cannot be 0
-  assert(#sort_order > 0, "sort_order table length cannot be 0" )
+  assert(#sort_order > 0, g_err.SORT_ORDER_LENGTH_ZERO )
   -- cols length must be >= sort_order 
-  assert(fns.table_length(cols) >= #sort_order, "sort_order table length is greater than cols")
+  assert(fns.table_length(cols) >= #sort_order, g_err.SORT_ORDER_LENGTH_GT_COLS)
 
   local sorted_cols = {}
   for i,v in pairs(sort_order) do
-    -- order table string name should match cols table string index  
-    assert(cols[v]~= nil, "Incorrect column name in sort_order table")
+    -- order table string name should match cols table string index 
+    -- assert(type(v) == "string", "sort_order table value is not of type string") 
+    assert(cols[v]~= nil, g_err.INCORRECT_COLUMN_NAME_IN_SORT_ORDER)
     sorted_cols[#sorted_cols + 1] = cols[v]
   end
   

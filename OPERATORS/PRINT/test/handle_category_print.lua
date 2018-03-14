@@ -171,6 +171,34 @@ fns.handle_category1_3 = function (index, v, ret, status)
   return true
 end
 
+-- this category matches output_regex(expected_value) with print_csv opfile contents  
+fns.handle_category1_4 = function (index, v, ret, status)
+  --print(v.name)
+  --print(status)
+  -- if status returned is false then this testcase has failed
+  if not status then
+    print(ret)
+    fns["increment_failed"](index, v, "testcase failed: in category1_4, output of print_csv is not success")
+    return false
+  end
+  
+  if type(ret) == "string" then
+    fns["increment_failed"](index, v, "testcase failed: in category1_4, output of print_csv is a string")
+    return false
+  end
+  
+  local expected_output_regex = v.output_regex
+  local actual_file_content = file.read(v.opt_args['opfile'])
+  
+  if actual_file_content ~= expected_output_regex then
+    fns["increment_failed"](index, v, "testcase failed: in category1_4, Mismatch in columns order")
+    return false
+  end
+  
+  return true
+end
+
+
 -- in this category invalid filter input are given 
 -- output expected are error codes as mentioned in UTILS/error_code.lua file
 fns.handle_category2 = function (index, v, ret, status)
