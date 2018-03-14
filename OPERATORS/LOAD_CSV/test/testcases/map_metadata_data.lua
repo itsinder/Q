@@ -184,10 +184,59 @@ return {
     
     -- testcases for testing elements(rows) > chunk_size
     
-    -- I4 qtype values
+    -- I4 qtype values 
+    -- use_accelerator by default set to true, testing load_csv C code 
     { testcase_no = 37, meta = "gm_valid_I4.lua", data = "I4_valid_more_than_chunksize.csv", 
-      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-I4" }, 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-I4_U_A_T" }, 
         
+    -- I4 qtype values
+    -- use_accelerator is set to false, testing load_csv lua code 
+    { testcase_no = 38, meta = "gm_valid_I4.lua", data = "I4_valid_more_than_chunksize.csv", 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-I4_U_A_F",
+      opt_args = { use_accelerator = false } },   
+       
+    -- B1 qtype values; 
+    -- use_accelerator by default set to true, testing load_csv C code 
+    { testcase_no = 39, meta = "gm_valid_B1.lua", data = "B1_valid_more_than_chunksize.csv", 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-B1_U_A_T" },    
+       
+    -- B1 qtype values
+    -- use_accelerator is set to false, testing load_csv lua code 
+    { testcase_no = 40, meta = "gm_valid_B1.lua", data = "B1_valid_more_than_chunksize.csv", 
+      category= "category2_1", num_elements = 65540, name = "elements more than chunksize-B1_U_A_F",
+      opt_args = { use_accelerator = false } },    
+       
+       
+    -- opt_args negative test cases
+    
+    -- opt_args is passed as string, should return an error
+    { testcase_no = 41, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "opt_args must be of type table" , name = "opt_args passed as type string", 
+      opt_args = "string" },
+    
+    -- opt_args is passed as integer, should return an error
+    { testcase_no = 42, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "opt_args must be of type table" , name = "opt_args passed as type integer", 
+      opt_args = 1 },
+    
+    -- opt_args--> use_accelerator is passed as string, should return an error
+    { testcase_no = 43, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "type of use_accelerator is not boolean" , name = "use_accelerator passed as type string", 
+      opt_args = { use_accelerator = "string" } },
+    
+    -- opt_args--> use_accelerator is passed as integer, should return an error
+    { testcase_no = 44, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "type of use_accelerator is not boolean" , name = "use_accelerator passed as type integer", 
+      opt_args = { use_accelerator = 1 }  },
 
+    -- opt_args--> is_hdr is passed as string, should return an error
+    { testcase_no = 45, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "type of is_hdr is not boolean" , name = "is_hdr passed as type string", 
+      opt_args = { is_hdr = "string" } },
+    
+    -- opt_args--> is_hdr is passed as integer, should return an error
+    { testcase_no = 46, meta = "gm_valid_I1.lua", data = "I1_valid.csv", category= "category1",
+      output_regex = "type of is_hdr is not boolean" , name = "is_hdr passed as type integer", 
+      opt_args = { is_hdr = 1 }  },
     
 }
