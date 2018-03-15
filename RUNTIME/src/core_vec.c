@@ -9,10 +9,8 @@
 #include "_file_exists.h"
 #include "_txt_to_I4.h"
 #include "_copy_file.h"
-#include "_is_regular_file.h"
-
-// #define Q_MAX_LEN_FILE_NAME  255
-// #define Q_MAX_LEN_INTERNAL_NAME  31
+#include "_isfile.h"
+#include "_isdir.h"
 
 #include "lauxlib.h"
 
@@ -145,7 +143,7 @@ vec_cast(
   //--- START ERROR CHECKING
   status = chk_field_type(new_field_type, new_field_size); cBYE(status);
   if ( !ptr_vec->is_eov ) { go_BYE(-1); }
-  if ( !is_regular_file(ptr_vec->file_name) ) { go_BYE(-1); }
+  if ( !isfile(ptr_vec->file_name) ) { go_BYE(-1); }
   if ( strcmp(new_field_type, "B1") == 0 ) {
     if ( ( ( ptr_vec->file_size / 8 )  * 8 ) != ptr_vec->file_size ) {
       go_BYE(-1);
@@ -175,33 +173,21 @@ BYE:
 
 int
 update_file_name(VEC_REC_TYPE *ptr_vec) {
-  /*
-  Create temp_buf
-  Create temp_buf1 to for random file name
-  In a loop, perform below steps
-  1. clean temp_buf & copy q_data_dir to temp_buf
-  2. create random file name
-  3. append it to temp_buf (which contains q_data_dir)
-  4. check for the file existance
-  5. if exist then goto 1
-  6. append file_name to ptr_vec->file_name
-  7. return status
-  */
   int status = 0;
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   char *temp_buf_path = NULL;
   char *temp_buf_file = NULL;
   temp_buf_path = malloc(Q_MAX_LEN_FILE_NAME);
-  temp_buf_file = malloc(Q_MAX_LEN_FILE_NAME);
+  temp_buf_file = malloc(Q_MAX_LEN_BASE_FILE);
   do {
     memset(temp_buf_path, '\0', Q_MAX_LEN_FILE_NAME);
-    memset(temp_buf_file, '\0', Q_MAX_LEN_FILE_NAME);
-    strcpy(temp_buf_path, ptr_vec->file_name);
-    status = rand_file_name(temp_buf_file, Q_MAX_LEN_FILE_NAME);
+    memset(temp_buf_file, '\0', Q_MAX_LEN_BASE_FILE);
+    strncpy(temp_buf_path, ptr_vec->file_name, Q_MAX_LEN_DIR);
+    status = rand_file_name(temp_buf_file, Q_MAX_LEN_BASE_FILE);
     cBYE(status);
-    strcat(temp_buf_path, temp_buf_file);
-  } while ( is_regular_file(temp_buf_path) );
-  strcat(ptr_vec->file_name, temp_buf_file);
+    strncat(temp_buf_path, temp_buf_file, Q_MAX_LEN_BASE_FILE);
+  } while ( isfile(temp_buf_path) );
+  strncat(ptr_vec->file_name, temp_buf_file, Q_MAX_LEN_BASE_FILE);
 BYE:
   free_if_non_null(temp_buf_path);
   free_if_non_null(temp_buf_file);
@@ -216,18 +202,10 @@ flush_buffer(
 {
   int status = 0;
   if ( ptr_vec->is_memo ) {
-    if ( !is_regular_file(ptr_vec->file_name) ) {
+    if ( !isfile(ptr_vec->file_name) ) {
       // create randomly generated file name and append to ptr_vec->file_name field
       status = update_file_name(ptr_vec); cBYE(status);
     }
-    /*
-    if ( ptr_vec->file_name[0] == '\0' ) {
-      do { 
-        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-        cBYE(status);
-      } while ( file_exists(ptr_vec->file_name));
-    }
-    */
     status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
         ptr_vec->num_in_chunk, ptr_vec->file_name);
     cBYE(status);
@@ -248,16 +226,10 @@ int flush_buffer_B1(
   int status = 0;
   if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
     if ( ptr_vec->is_memo ) {
-      if ( !is_regular_file(ptr_vec->file_name) ) {
+      if ( !isfile(ptr_vec->file_name) ) {
         // create randomly generated file name and append to ptr_vec->file_name field
         status = update_file_name(ptr_vec); cBYE(status);
       }
-      /*  
-      if ( ptr_vec->file_name[0] == '\0' ) {
-        status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-        cBYE(status);
-      }
-      */
       status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
           ptr_vec->num_in_chunk, ptr_vec->file_name);
       cBYE(status);
@@ -322,7 +294,7 @@ vec_meta(
   char  buf[1024];
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
   strcpy(opbuf, "return { ");
-  if ( is_regular_file(ptr_vec->file_name) ) {
+  if ( isfile(ptr_vec->file_name) ) {
     sprintf(buf, "file_name = \"%s\", ", ptr_vec->file_name);
     strcat(opbuf, buf);
     int64_t file_size = get_file_size(ptr_vec->file_name);
@@ -381,7 +353,7 @@ vec_free(
     ptr_vec->chunk = NULL;
   }
   if ( !ptr_vec->is_persist ) {
-    if ( is_regular_file(ptr_vec->file_name) ) {
+    if ( isfile(ptr_vec->file_name) ) {
       // printf("Deleting %s \n", ptr_vec->file_name); 
       status = remove(ptr_vec->file_name); 
       if ( status != 0 ) { 
@@ -390,7 +362,7 @@ vec_free(
     }
     /* NOTE Remove can fail because (1) file does not exist 
       (2) permission to delete not there */
-    if ( is_regular_file(ptr_vec->file_name) ) { go_BYE(-1); }
+    if ( isfile(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
   else {
@@ -473,7 +445,7 @@ vec_clone(
   }
   ptr_new_vec->map_addr = NULL; // unopened
   ptr_new_vec->map_len  = 0;    // unopened
-  if ( is_regular_file(ptr_old_vec->file_name) ) {
+  if ( isfile(ptr_old_vec->file_name) ) {
     // copying q_data_dir to file_name field, will append the randomly generated file_name to it
     strcpy(ptr_new_vec->file_name, q_data_dir);
     strcat(ptr_new_vec->file_name, "/");
@@ -507,6 +479,9 @@ vec_new(
   int status = 0;
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
+  if ( q_data_dir == NULL ) { go_BYE(-1); }
+  if ( !isdir(q_data_dir) ) { go_BYE(-1); }
+  if ( strlen(q_data_dir) > Q_MAX_LEN_DIR ) {go_BYE(-1); }
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
@@ -564,8 +539,7 @@ vec_new(
     status = vec_nascent(ptr_vec); cBYE(status);
     // For nascent vector, file_name = q_data_dir + randomly generated file name
     // copying q_data_dir to file_name field, will append the randomly generated file_name later
-    strcpy(ptr_vec->file_name, q_data_dir);
-    strcat(ptr_vec->file_name, "/");
+    strncpy(ptr_vec->file_name, q_data_dir, Q_MAX_LEN_DIR);
   }
 
 BYE:
@@ -669,7 +643,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       }
     }
     else {
-      if ( is_regular_file(ptr_vec->file_name) ) { go_BYE(-1); }
+      if ( isfile(ptr_vec->file_name) ) { go_BYE(-1); }
     }
     if ( ptr_vec->num_elements != 
         ( ( ptr_vec->chunk_num * ptr_vec->chunk_size) + 
@@ -1205,18 +1179,10 @@ vec_eov(
   if ( ptr_vec->is_memo == false ) { goto BYE; }
   // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
-  if ( !is_regular_file(ptr_vec->file_name) ) {
+  if ( !isfile(ptr_vec->file_name) ) {
     // create randomly generated file name and append to ptr_vec->file_name field
     status = update_file_name(ptr_vec); cBYE(status);
   }
-  /*
-  if ( ptr_vec->file_name[0] == '\0' ) {
-    do { 
-      status = rand_file_name(ptr_vec->file_name, Q_MAX_LEN_FILE_NAME);
-      cBYE(status);
-    } while ( file_exists(ptr_vec->file_name));
-  }
-  */
   status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
       ptr_vec->num_in_chunk, ptr_vec->file_name);
   cBYE(status);

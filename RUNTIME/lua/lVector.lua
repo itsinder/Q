@@ -1,13 +1,14 @@
-local ffi    = require 'Q/UTILS/lua/q_ffi'
-local qconsts= require 'Q/UTILS/lua/q_consts'
-local log    = require 'Q/UTILS/lua/log'
-local register_type = require 'Q/UTILS/lua/q_types'
-local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
-local plpath = require "pl.path"
-local cmem   = require 'libcmem'
-local Scalar = require 'libsclr'
-local Vector = require 'libvec'
-local chk_chunk_return = require 'Q/UTILS/lua/chk_chunk'
+local ffi		= require 'Q/UTILS/lua/q_ffi'
+local qconsts		= require 'Q/UTILS/lua/q_consts'
+local log		= require 'Q/UTILS/lua/log'
+local plpath		= require "pl.path"
+local cmem		= require 'libcmem'
+local Scalar		= require 'libsclr'
+local Vector		= require 'libvec'
+local plstring		= require 'pl.stringx'
+local register_type	= require 'Q/UTILS/lua/q_types'
+local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
+local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
 --====================================
 local lVector = {}
 lVector.__index = lVector
@@ -99,7 +100,13 @@ function lVector.new(arg)
   -- Passing q_data_dir to create the new vector's bin file in q_data_dir
   local q_data_dir = os.getenv("Q_DATA_DIR")
   assert(q_data_dir)
-
+  assert(plpath.isdir(q_data_dir))
+  
+  -- Check if q_data_dir path ends with '/', if not append it
+  if not plstring.endswith(q_data_dir, "/") then
+    q_data_dir = q_data_dir .. "/"
+  end
+ 
   assert(type(arg) == "table", "lVector construction requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
