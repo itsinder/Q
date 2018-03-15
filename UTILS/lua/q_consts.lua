@@ -7,7 +7,9 @@ local qconsts = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
 
-    qconsts.max_len_file_name = 255 -- TODO keep in sync with C
+    -- Commenting 'max_len_file_name' field as it is not required on lua side
+    -- On C side, it is present in q_constants.h
+    -- qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
     qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger
