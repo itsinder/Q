@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "_is_regular_file.h"
+#include "_isdir.h"
 
 int main(int argc, char** argv) {
   int status = 0;
@@ -7,13 +7,13 @@ int main(int argc, char** argv) {
   path = argv[1];
   printf("Input path = %s\n", path);
   
-  status = is_regular_file.h(path);
+  status = isdir(path);
   if ( status ) {
-    printf("%s is a regular file\n", path);
+    printf("%s is a directory\n", path);
     return 0;
   }
   else {
-    printf("%s is not a regular file\n", path);
+    printf("%s is not a directory\n", path);
     return -1;
   }
 }
