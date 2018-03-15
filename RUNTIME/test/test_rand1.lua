@@ -3,7 +3,7 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local rand_qtype = require 'rand_qtype'
+local rand_qtype = require 'Q/RUNTIME/test/rand_qtype'
 require 'Q/UTILS/lua/strict'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 math.randomseed(os.time())
