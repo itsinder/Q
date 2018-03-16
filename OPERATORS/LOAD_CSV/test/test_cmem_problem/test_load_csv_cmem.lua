@@ -9,6 +9,8 @@ local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/test_cmem_problem/"
 
 local tests = {}
 
+local date = os.date("%d.%m.%Y")
+
 tests[1] = function ()
   local csv_file_path = script_dir .. "_csv_1mr_256c.csv"
   print("Loading file", csv_file_path)
