@@ -442,6 +442,13 @@ function lVector:clone(optargs)
   -- Passing q_data_dir to create the cloned vector's bin file in q_data_dir
   local q_data_dir = os.getenv("Q_DATA_DIR")
   assert(q_data_dir)
+  assert(plpath.isdir(q_data_dir))
+
+  -- Check if q_data_dir path ends with '/', if not append it
+  if not plstring.endswith(q_data_dir, "/") then
+    q_data_dir = q_data_dir .. "/"
+  end
+
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
   vector._meta = {}
