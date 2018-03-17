@@ -1,4 +1,5 @@
 local utils	= require 'Q/UTILS/lua/utils'
+local g_err	= require 'Q/UTILS/lua/error_code'
 
 local function process_opt_args(vec_list, opt_args)
   local opfile
@@ -7,7 +8,7 @@ local function process_opt_args(vec_list, opt_args)
   local status, vector_list
   
   if opt_args then
-    assert(type(opt_args) == "table", "opt_args must be of type table")
+    assert(type(opt_args) == "table", g_err.INVALID_OPT_ARGS_TYPE)
     if opt_args["opfile"] ~= nil then
       opfile = opt_args["opfile"]
     end
@@ -15,8 +16,7 @@ local function process_opt_args(vec_list, opt_args)
       filter = opt_args["filter"]
     end
     if opt_args["print_order"] ~= nil then
-      assert(type(opt_args["print_order"]) == "table", 
-      "type of print_order is not table")
+      assert(type(opt_args["print_order"]) == "table", g_err.INVALID_PRINT_ORDER_TYPE)
       print_order = opt_args["print_order"]
       -- sort vec_list according to given print_order
       vector_list = utils.sort_table(vec_list, print_order)

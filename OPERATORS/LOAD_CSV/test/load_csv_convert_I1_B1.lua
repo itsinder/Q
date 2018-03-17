@@ -30,7 +30,7 @@ test_convert.t1 = function()
   print("After convert(I1 to B1)")
   print("num_elements:",converted_col:num_elements()," qtype:", converted_col:qtype())
   print("Printing values after CONVERT I1 to B1")
-  -- Q.print_csv(converted_col, nil, "")
+  -- Q.print_csv(converted_col, { opfile =  "" })
   -- Compare converted column with expected column
   for i, v in pairs(expected_res) do
     local val = c_to_txt(converted_col, i)

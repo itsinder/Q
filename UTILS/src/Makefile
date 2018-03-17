@@ -7,8 +7,11 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_file_exists.h : 
 	lua ../lua/cli_extract_func_decl.lua file_exists.c ${INCDIR}
 
-../gen_inc/_is_regular_file.h :
-	lua ../lua/cli_extract_func_decl.lua is_regular_file.c ${INCDIR}
+../gen_inc/_isfile.h :
+	lua ../lua/cli_extract_func_decl.lua isfile.c ${INCDIR}
+
+../gen_inc/_isdir.h :
+	lua ../lua/cli_extract_func_decl.lua isdir.c ${INCDIR}
 
 ../gen_inc/_trim.h : 
 	lua ../lua/cli_extract_func_decl.lua trim.c ${INCDIR}
@@ -102,7 +105,8 @@ hdr_files = \
 	../gen_inc/_mix_UI8.h  \
 	../gen_inc/_rand_file_name.h  \
 	../gen_inc/_file_exists.h  \
-        ../gen_inc/_is_regular_file.h  \
+        ../gen_inc/_isfile.h  \
+        ../gen_inc/_isdir.h  \
 	../gen_inc/_trim.h  \
 	../gen_inc/_c_copy.h  \
 	../gen_inc/_c_free.h  \
@@ -129,7 +133,8 @@ SRC_FILES=  \
 	mix_UI8.c \
 	rand_file_name.c \
 	file_exists.c \
-        is_regular_file.c \
+        isfile.c \
+        isdir.c \
 	trim.c \
 	c_copy.c \
 	c_free.c \

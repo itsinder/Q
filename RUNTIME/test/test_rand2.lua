@@ -4,8 +4,8 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local rand_qtype = require 'rand_qtype'
-local rand_boolean = require 'rand_boolean'
+local rand_qtype = require 'Q/RUNTIME/test/rand_qtype'
+local rand_boolean = require 'Q/RUNTIME/test/rand_boolean'
 require 'Q/UTILS/lua/strict'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 math.randomseed(os.time())

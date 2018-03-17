@@ -2,12 +2,15 @@ local qconsts = {}
 --===========================  
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.debug = false -- set to TRUE only if you want debugging
+  qconsts.meta_file_name = "saved.meta"
   qconsts.qc_trace = true -- set to FALSE if performance logging of qc is to be turned off
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc
 
-    qconsts.max_len_file_name = 255 -- TODO keep in sync with C
+    -- Commenting 'max_len_file_name' field as it is not required on lua side
+    -- On C side, it is present in q_constants.h
+    -- qconsts.max_len_file_name = 255 -- TODO keep in sync with C
     qconsts.max_width = max_width
    --===========================
     qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger

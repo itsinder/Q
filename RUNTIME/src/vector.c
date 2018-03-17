@@ -599,7 +599,7 @@ static int l_vec_new( lua_State *L)
      SC:len where len is an integer */
   status = get_chunk_size(L, &chunk_size); cBYE(status);
 
-  // q_data_dir to create file_path
+  // q_data_dir to create file path
   q_data_dir = luaL_checkstring(L, 2);
   if ( q_data_dir == NULL ) { go_BYE(-1); }
   if ( lua_isstring(L, 3) ) { // filename provided for materialized vec
