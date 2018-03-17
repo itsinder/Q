@@ -85,5 +85,5 @@
 #define PRI4 PRIi32
 #define PRI8 PRIi64
 #define PRF4 "lf"
-#define PRF8 "llf"
+#define PRF8 "e"
 #endif
