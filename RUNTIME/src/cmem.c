@@ -412,6 +412,57 @@ BYE:
   lua_pushstring(L, "ERROR: tostring. ");
   return 2;
 }
+// Following only for debugging 
+static int l_cmem_prbuf( lua_State *L) {
+  CMEM_REC_TYPE *ptr_cmem = luaL_checkudata( L, 1, "CMEM");
+  void  *X          = ptr_cmem->data;
+  const char *qtype = ptr_cmem->field_type;
+  int num_bytes     = ptr_cmem->size;
+  int num_to_pr = 1; // default 
+  if ( lua_isnumber(L, 2) ) { 
+    num_to_pr  = luaL_checknumber(L, 2);
+    if ( num_to_pr <= 0 ) { WHEREAMI goto BYE; }
+  }
+  if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
+  if ( ptr_cmem->size <= 0 ) { WHEREAMI; goto BYE; }
+  if ( strcmp(qtype, "I1") == 0 ) { 
+    int8_t *Y = (int8_t *)X; int fldsz = sizeof(int8_t);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRI1 ":", Y[i]); }
+  }
+  else if ( strcmp(qtype, "I2") == 0 ) { 
+    int16_t *Y = (int16_t *)X; int fldsz = sizeof(int16_t);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRI2 ":", Y[i]); }
+  }
+  else if ( strcmp(qtype, "I4") == 0 ) { 
+    int32_t *Y = (int32_t *)X; int fldsz = sizeof(int32_t);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRI4 ":", Y[i]); }
+  }
+  else if ( strcmp(qtype, "I8") == 0 ) { 
+    int64_t *Y = (int64_t *)X; int fldsz = sizeof(int64_t);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRI8 ":", Y[i]); }
+  }
+  else if ( strcmp(qtype, "F4") == 0 ) { 
+    float *Y = (float *)X; int fldsz = sizeof(float);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRF4 ":", Y[i]); }
+  }
+  else if ( strcmp(qtype, "F8") == 0 ) { 
+    double *Y = (double *)X; int fldsz = sizeof(double);
+    if ( num_bytes < (num_to_pr * fldsz) ) { WHEREAMI; goto BYE; }
+    for ( int i = 0; i < num_to_pr; i++ ) { printf("%" PRF8 ":", Y[i]); }
+  }
+  else {
+    WHEREAMI; goto BYE; 
+  }
+  fprintf(stdout, "\n");
+  lua_pushboolean(L, true); return 1;
+BYE:
+  lua_pushboolean(L, false); return 1;
+}
 //----------------------------------------
 static const struct luaL_Reg cmem_methods[] = {
     { "__gc",          l_cmem_free               },
@@ -419,6 +470,7 @@ static const struct luaL_Reg cmem_methods[] = {
     { "seq",          l_cmem_seq               },
     { "zero",        l_cmem_zero },
     { "to_str",        l_cmem_to_str },
+    { "prbuf",        l_cmem_prbuf },
     { "fldtype",     l_cmem_fldtype },
     { "data",     l_cmem_data },
     { "size",     l_cmem_size },
@@ -431,6 +483,7 @@ static const struct luaL_Reg cmem_methods[] = {
 static const struct luaL_Reg cmem_functions[] = {
     { "new", l_cmem_new },
     { "to_str",        l_cmem_to_str },
+    { "prbuf",        l_cmem_prbuf },
     { "zero",        l_cmem_zero },
     { "fldtype",     l_cmem_fldtype },
     { "data",     l_cmem_data },
