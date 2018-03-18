@@ -169,6 +169,29 @@ static int l_cmem_name( lua_State *L) {
   lua_pushstring(L, ptr_cmem->cell_name);
   return 1;
 }
+static int cmem_zero( 
+    CMEM_REC_TYPE *ptr_cmem
+    )
+{
+  if ( ptr_cmem == NULL ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->size <= 0 ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->data == NULL ) { WHEREAMI; return -1; }
+  memset(ptr_cmem->data, '\0', ptr_cmem->size);
+  return 0;
+}
+
+static int l_cmem_zero( lua_State *L) {
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
+  int status = cmem_zero(ptr_cmem);
+  if ( status < 0 ) { 
+    lua_pushboolean(L, true);
+  }
+  else {
+    lua_pushboolean(L, false);
+  }
+  return 1;
+}
+
 
 static int l_cmem_fldtype( lua_State *L) {
   CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
@@ -394,6 +417,7 @@ static const struct luaL_Reg cmem_methods[] = {
     { "__gc",          l_cmem_free               },
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
+    { "zero",        l_cmem_zero },
     { "to_str",        l_cmem_to_str },
     { "fldtype",     l_cmem_fldtype },
     { "data",     l_cmem_data },
@@ -407,6 +431,7 @@ static const struct luaL_Reg cmem_methods[] = {
 static const struct luaL_Reg cmem_functions[] = {
     { "new", l_cmem_new },
     { "to_str",        l_cmem_to_str },
+    { "zero",        l_cmem_zero },
     { "fldtype",     l_cmem_fldtype },
     { "data",     l_cmem_data },
     { "size",     l_cmem_size },

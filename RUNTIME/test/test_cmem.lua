@@ -8,6 +8,16 @@ char *strncpy(char *dest, const char *src, size_t n);
 ]]
 )
 
+tests.t0 = function()
+  -- basic test 
+  local buf = cmem.new(128, "I4")
+  assert(type(buf) == "CMEM")
+  buf:zero()
+  y = buf:to_str("I4")
+  print(y)
+  assert(y == "0")
+  print("test 0 passed")
+end
 tests.t1 = function()
   -- basic test 
   local buf = cmem.new(128, "I4")
