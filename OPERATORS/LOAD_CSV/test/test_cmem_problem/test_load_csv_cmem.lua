@@ -12,7 +12,7 @@ local tests = {}
 local date = os.date("%d.%m.%Y")
 
 tests[1] = function ()
-  local csv_file_path = script_dir .. "_csv_1mr_256c.csv"
+  local csv_file_path = script_dir .. "csv_1mr_256c.csv"
   print("Loading file", csv_file_path)
   local M = dofile(script_dir .. "meta_info_1mr_256c.lua")
   -- generate metadata table which is to be passed to load csv
