@@ -55,7 +55,7 @@ for i, v in ipairs(T) do
     
     --checking execution time required for load_csv function
     local start_time = os.time()
-    local ret = load_csv(csv_file_path, metadata_table)
+    local ret = load_csv(csv_file_path, metadata_table, v.opt_args)
     local end_time = os.time()
     local date = (os.date ("%r")) 
     
