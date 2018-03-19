@@ -34,7 +34,7 @@ local function exclude_non_test_files(files, tests_pattern)
     for _, full_name in ipairs(files) do
       local is_excl = false
       local reason
-      local base_name = string.gsub(full_name, ".*/" .. tests_pattern, tests_pattern)
+      local base_name = plpath.basename(full_name)
       start, stop = string.find(base_name, tests_pattern)
       -- print(base_name, start, stop)
       if ( ( start == nil ) or ( start ~= 1 ) ) then
