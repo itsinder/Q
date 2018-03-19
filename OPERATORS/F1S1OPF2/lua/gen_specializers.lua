@@ -104,12 +104,12 @@ plfile.write("exp_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "reciprocal")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = 1 / a; ")
-y = string.gsub(y, "<<out_qtype>>", '"F8"')
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
 plfile.write("reciprocal_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "sqrt")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = sqrt((double)a);")
-y = string.gsub(y, "<<out_qtype>>", '"F8"')
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
 plfile.write("sqrt_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "log")
