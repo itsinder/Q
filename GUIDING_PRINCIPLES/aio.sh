@@ -116,8 +116,17 @@ do
       make
       EX_PATH=`echo $LUA_CPATH | awk -F'/' 'BEGIN{OFS=FS} {$NF=""; print $0}'`;
       cp ffi.so $EX_PATH
-      # TODO pending compile from source and with -g flag
+      wget https://www.lua.org/ftp/lua-5.1.5.tar.gz
+      tar -xvzf ./lua-5.1.5.tar.gz
+      cd lua-5.1.5/
+      # sed -i '17s/MYCFLAGS=/MYCFLAGS= -g/' src/Makefile
+      # sed -i '99s/MYFLAGS=/MYFLAGS=-g /' src/Makefile
+      sed -i '11s/CFLAGS=/CFLAGS= -g/' src/Makefile
+      make linux
+      sudo make install
       sudo ln -sf /usr/local/bin/lua /usr/local/bin/luajit
+      cd ../
+      sudo rm -rf lua-5.1.5
       sudo rm -rf luaffi
   esac
 done
