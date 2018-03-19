@@ -73,7 +73,6 @@ local function load_csv(
     if ( col_idx == num_cols ) then
       is_last_col = true;
     end
-    -- ffi.fill(in_buf, sz_in_buf) -- always init to 0
     in_buf:zero();
     x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, sz_in_buf)
     assert(x_idx > 0 , err.INVALID_INDEX_ERROR)

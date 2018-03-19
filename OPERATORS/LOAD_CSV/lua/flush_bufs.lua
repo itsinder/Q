@@ -24,9 +24,9 @@ local function flush_buffers(
         width = assert(qconsts.qtypes[qtype].width)
       end
       assert(width > 0)
-      ffi.fill(get_ptr(out_bufs[i]), n_buf * width)
+      out_bufs[i]:zero()
       if ( M[i].has_nulls ) then 
-        ffi.fill(get_ptr(nn_out_bufs[i]), n_buf / 8)
+        nn_out_bufs[i]:zero()
       end
     end
   end
