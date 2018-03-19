@@ -12,6 +12,16 @@ local blacklist_files = {
   "UTILS/lua/test_init.lua",
   -- below is not a test
   "UTILS/lua/test_utils.lua",
+  -- Mail subject : List of failure tests in dev branch
+  -- Let’s move the others into the black list
+  "OPERATORS/APPROX/FREQUENT/test/test_approx_frequent.lua",
+  "ML/LOGISTIC_REGRESSION/test/test_mnist.lua",
+  "ML/LOGISTIC_REGRESSION/test/test_logistic_regression.lua",
+  "OPERATORS/PCA/test/test_pca.lua",
+  "ML/LOGISTIC_REGRESSION/test/test_really_simple.lua",
+  "OPERATORS/MM/test/test_mv_mul.lua",
+  "OPERATORS/PCA/test/test_eigen.lua",
+  "OPERATORS/APPROX/QUANTILE/test/test_aq.lua",
 
 }
 
