@@ -28,6 +28,7 @@ my_print "Stating the all in one script"
 # RES=$?
 # if [[ $RES -ne 0 ]] ; then
    my_print "Installing lua from apt-get"
+   sudo apt-get update
    sudo apt-get install make cmake -y
    sudo apt-get install lua5.1 -y
    sudo apt-get install liblua5.1-dev -y

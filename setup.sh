@@ -102,7 +102,7 @@ export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # if [[ "$RET" -ne "0" ]]; then
 #     `lua| tail -1`
 # fi
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${Q_ROOT}/lib"
+export LD_LIBRARY_PATH="${Q_ROOT}/lib:/usr/local/lib64:${LD_LIBRARY_PATH}"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 # export Q_LINK_FLAGS=" -shared -lpthread -lm -lgomp "
 export Q_LINK_FLAGS=" -llapacke -llapack -lblas -lm -shared "
