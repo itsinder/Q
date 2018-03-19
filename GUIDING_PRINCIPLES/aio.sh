@@ -102,6 +102,26 @@ sudo apt-get install liblapacke-dev liblapack-dev -y
 #  ######## Build Q #########
 my_print "Building Q"
 source ../setup.sh
+while getopts 'hd' opt;
+do
+  case $opt in
+    h)
+      exit 0
+      ;;
+    d)
+      export QC_FLAGS="$QC_FLAGS -g"
+      export USE_LUA=1
+      git clone https://github.com/jmckaskill/luaffi.git
+      cd luaffi
+      make
+      EX_PATH=`echo $LUA_CPATH | awk -F'/' 'BEGIN{OFS=FS} {$NF=""; print $0}'`;
+      cp ffi.so $EX_PATH
+      # TODO pending compile from source and with -g flag
+      sudo ln -sf /usr/local/bin/lua /usr/local/bin/luajit
+      sudo rm -rf luaffi
+  esac
+done
+
 cleanup ../ #cleaning up all files
 
 #build files

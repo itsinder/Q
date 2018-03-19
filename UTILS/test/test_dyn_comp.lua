@@ -3,11 +3,11 @@ local tests = {}
 tests.compile = function()
   -- require 'strict'
   package.loaded['Q/UTILS/lua/q_core'] = nil
-  package.loaded['ffi'] = nil
+  -- package.loaded['ffi'] = nil
   local ffi = require 'ffi'
   local plfile = require 'pl.file'
   local x = require 'Q/UTILS/lua/compiler'
-  local dotc = [[ #include "./boom.h"
+  local dotc = [[ #include "_boom.h"
   int boom(void){
     printf("hello\n");
     return 0;
