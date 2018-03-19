@@ -63,10 +63,10 @@ local function init_buffers(M)
       end
       -- Allocate memory for output buf and add to pool
       out_bufs[col_idx] = cmem.new(n_buf * binary_width)
-      ffi.fill(get_ptr(out_bufs[col_idx]), n_buf) -- extra cautious
+      out_bufs[col_idx]:zero() -- extra cautious
       if ( M[col_idx].has_nulls ) then 
         nn_out_bufs[col_idx] = cmem.new(n_buf/8)
-        ffi.fill(get_ptr(nn_out_bufs[col_idx]), n_buf/8) -- extra cautious
+        nn_out_bufs[col_idx]:zero() -- extra cautious
       end
     end -- if is_load 
   end -- for col_idx = ...

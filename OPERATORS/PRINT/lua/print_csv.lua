@@ -8,9 +8,8 @@ local cmem	= require 'libcmem'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
 
--- TODO: move this buffer allocation inside print_csv function
 local buf_size = 1024
---local buf = get_ptr(cmem.new(buf_size))
+local buf = nil
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -29,7 +28,6 @@ local function get_B1_value(buffer, chunk_idx)
 end
 
 local function get_element(col, rowidx)
-  local buf = get_ptr(cmem.new(buf_size))
   local val = nil
   local nn_val = nil
   local chunk_num = math.floor((rowidx - 1) / qconsts.chunk_size)
@@ -68,13 +66,15 @@ local function get_element(col, rowidx)
   elseif qtype == "SC" then
     val = ffi.string(casted + chunk_idx * col:field_width())
   else
-    -- Initialize output buf to zero
-    ffi.fill(buf, buf_size)
+    -- Allocate space for output buf and initialize to zero
+    buf = buf or cmem.new(buf_size)
+    buf:zero()
+    local buf_ptr = get_ptr(buf)
     -- Call respective q_to_txt function
     local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
-    status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf, buf_size)
+    status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf_ptr, buf_size)
     -- Extract value
-    val = ffi.string(buf)    
+    val = ffi.string(buf_ptr)
     if qtype == "SV" then
       val = col:get_meta("dir"):get_string_by_index(tonumber(val))
     end

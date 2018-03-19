@@ -28,15 +28,15 @@ tests.t1 = function()
   print("################################\n")
 
   -- Prepare output buf
-  local buf = get_ptr(cmem.new(BUFLEN))
-  local buf_copy = ffi.cast("char *", buf)
-  ffi.fill(buf_copy, BUFLEN)
+  local buf = cmem.new(BUFLEN)
+  local buf_copy = ffi.cast("char *", get_ptr(buf))
+  buf:zero()
 
   -- Call I4_to_txt
   local status = 0
   print("Converted values are")
   for i = 0, len - 1 do
-    ffi.fill(buf_copy, BUFLEN)
+    buf:zero()
     status = qc.I4_to_txt(X + i, nil, buf_copy, BUFLEN-1);
     if status == 0 then
       print(ffi.string(buf))

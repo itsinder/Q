@@ -38,9 +38,9 @@ local function load_csv_fast_C(M, infile, is_hdr)
 
   local sz_str_for_lua = qconsts.sz_str_for_lua
 
-  local str_for_lua = get_ptr(cmem.new(sz_str_for_lua * ffi.sizeof("char")))
-  str_for_lua = ffi.cast("char *", str_for_lua)
-  ffi.fill(str_for_lua, sz_str_for_lua)
+  local str_for_lua = cmem.new(sz_str_for_lua * ffi.sizeof("char"))
+  str_for_lua:zero()
+  str_for_lua = ffi.cast("char *", get_ptr(str_for_lua))
 
   local n_str_for_lua = get_ptr(cmem.new(1 * ffi.sizeof("int32_t")))
   n_str_for_lua = ffi.cast("int *", n_str_for_lua)
