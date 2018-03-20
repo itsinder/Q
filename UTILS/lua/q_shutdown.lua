@@ -1,7 +1,7 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
-local Q = require 'Q'
 
 local function q_shutdown()
+  local Q = require 'Q'
   -- Call the save() functionality depending upon Q_METADATA_FILE env variable
   local meta_file = os.getenv("Q_METADATA_FILE")
   if meta_file then
