@@ -60,7 +60,9 @@ install_luajit_from_source() {
   make TARGET_FLAGS=-pthread
   sudo make install
   cd /usr/local/bin
-  sudo ln -sf luajit-2.1.0-beta3 usr/local/bin/luajit
+  sudo ln -sf luajit-2.1.0-beta3 /usr/local/bin/L
+  sudo ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
+
   cd -
   cd ../
   rm -rf LuaJIT-2.1.0-beta3
@@ -113,7 +115,7 @@ install_debug_lua_from_source(){
   sed -i '11s/CFLAGS=/CFLAGS= -g/' src/Makefile
   make linux
   sudo make install
-  sudo ln -sf /usr/local/bin/lua /usr/local/bin/luajit
+  sudo ln -sf /usr/local/bin/lua /usr/local/bin/L
   sudo cp ./etc/lua.pc /usr/lib/pkgconfig/
   cd ../
   sudo rm -rf lua-5.1.5

@@ -61,7 +61,7 @@ end
 local function run_isolated_tests(suite_name, isolated)
 	local base_str =  [[
 	export LUA_PATH="/?.lua;$LUA_PATH";
-	luajit -lluacov -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
+	L -lluacov -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
 	local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
 	assert(subs == 1, suite_name .. " should end with .lua")
 	local status, tests = pcall(require, suite_name_mod)
@@ -129,7 +129,7 @@ end
 
 local usage = function()
 	print("USAGE:")
-	print("luajit <option> q_testrunner.lua <root_dir>")
+	print("l <option> q_testrunner.lua <root_dir>")
 	print(" Valid options are")
   print("\t l for long running tests amd requires a time param for the number of seconds the tests should run. Eg l 5")
   print("\t i for isolated tests")
