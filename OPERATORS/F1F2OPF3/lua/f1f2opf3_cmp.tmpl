@@ -3,6 +3,8 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "_set_bit_u64.h"
+
 ${includes}
 extern int
 ${fn}(  
@@ -62,7 +64,7 @@ relational operators except for their lower precedence
       ${in2type} inv2 = in2[iidx]; 
       int rslt = (inv1 ${comparator} inv2);
       /* TODO: Avoid the if condition */
-      if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
+      if ( rslt == 1 ) { set_bit_u64(&oval, bit_idx, 1); }
       bit_idx++;
       if ( bit_idx == 64 ) {
         bit_idx = 0;

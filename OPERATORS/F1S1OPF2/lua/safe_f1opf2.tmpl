@@ -6,6 +6,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <unistd.h>
 #include <stdint.h>
 #include <math.h>
+#include "_set_bit_u64.h"
 
 extern int
 ${fn}(  
@@ -52,8 +53,6 @@ ${fn}(
 
 // TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < nR; i++ ) {
-    uint64_t widx = i >> 8; // word index
-    uint64_t bidx = i & 0xFF; // bit index
     uint8_t nn_out_i = 1;
     ${in_ctype} inv;
     ${out_ctype} outv;
@@ -68,7 +67,7 @@ ${fn}(
       out[i] = 0;
     }
     if ( nn_out_i ) {
-      mcr_set_bit(nn_out[widx], bidx);
+      set_bit_u64(nn_out, i, 1);
     }
   }
   BYE:

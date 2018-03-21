@@ -6,7 +6,8 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <unistd.h>
 #include <stdint.h>
 #include <math.h>
-
+#include "_set_bit_u64.h"
+#include "_get_bit_u64.h"
 extern int
 ${fn}(  
       const ${in_ctype} * restrict in,  
@@ -55,10 +56,8 @@ ${fn}(
   ${scalar_ctype} sval = *ptr_sval;
 
   for ( uint64_t i = 0; i < nR; i++ ) { 
-    uint64_t widx = i >> 8; // word index
-    uint64_t bidx = i & 0xFF; // bit index
     if ( nn_in ) { 
-      uint8_t nn_in_i = mcr_get_bit(nn_in[widx], bidx);
+      uint8_t nn_in_i = get_bit_u64(nn_in, i);
     }
     uint8_t nn_out_i = 1;
     if ( ( nn_in == NULL ) || ( nn_in_i == 1 ) ) {
@@ -74,7 +73,7 @@ ${fn}(
       num_null++;
     }
     if ( nn_out_i ) {
-      mcr_set_bit(nn_out[widx], bidx);
+      set_bit_u64(nn_out, i 1);
     }
   } 
   *ptr_num_null += num_null;
