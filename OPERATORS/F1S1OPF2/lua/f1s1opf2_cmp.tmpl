@@ -3,6 +3,7 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "_set_bit_u64.h"
 extern int
 ${fn}(  
       const ${in_ctype} * restrict in,  
@@ -53,7 +54,7 @@ ${fn}(
       ${in_ctype} inval = in[iidx]; 
       int rslt = (inval ${comparison} sval);
       /* TODO: Avoid the if condition */
-      if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
+      if ( rslt == 1 ) { set_bit_u64(&oval, bit_idx, 1); }
       bit_idx++;
       if ( bit_idx == 64 ) {
         bit_idx = 0;
