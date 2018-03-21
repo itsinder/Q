@@ -74,15 +74,12 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "lVector" ) then 
     -- TODO Indrajeet to check
-    local x = value:reincarnate()
     local persist_str = value:reincarnate()
     file:write(persist_str)
     file:write("\n")
-    if type(value) == "lVector" then
-      save(name .. "._meta", value._meta, saved, file)
-    end
-  -- elseif ( type(value) == "userdata" ) then 
-    -- print("not saving a userdata")
+    save(name .. "._meta", value._meta, saved, file)
+    file:write(name .. ":persist(true)")
+    file:write("\n")
   else
     error("cannot save a " .. type(value))
   end
