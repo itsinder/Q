@@ -3,6 +3,7 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "_set_bit_u64.h"
 #include "_bin_search_${b_qtype}.h"
 extern int
 ${fn}(  
@@ -31,12 +32,10 @@ ${fn}(
   memset(C, 0, nA); // Note that C must have nA bytes
 // TODO #pragma omp parallel for schedule(static, 256)
   for ( uint64_t i = 0; i < nA; i++ ) { 
-    uint64_t widx = i >> 6; // word index
-    uint64_t bidx = i & 0x3F; // bit index
     int64_t pos;
     status = bin_search_${b_qtype}(B, nB, ((${b_ctype})(A[i])), NULL, &pos);
-    if ( pos >= 0 ) { 
-      mcr_set_bit(C[widx], bidx);
+    if ( pos >= 0 ) {
+      set_bit_u64(C, i, 1);
     }
   }
 BYE:
