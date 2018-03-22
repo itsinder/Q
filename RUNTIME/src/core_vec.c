@@ -687,7 +687,7 @@ vec_memo(
     )
 {
   int status = 0;
-  if ( ptr_vec->is_nascent ) {
+  if ( ptr_vec->is_eov == false ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     ptr_vec->is_memo = is_memo;
   }
