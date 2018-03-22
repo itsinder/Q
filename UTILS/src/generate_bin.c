@@ -18,6 +18,7 @@ If gen_type = "linear" then generated_values = 10, 20, 30 ... num_values * 10
 
 if gen_type = "seq" then generated_values = ( i * 10 ) % max_value_of_qtype
 
+Currently not supported:
 if gen_type = "const" then generated_values = const value
 
 */
@@ -38,14 +39,19 @@ generate_bin(
     if ( *outfile == '\0' ) { go_BYE(-1); }
     if ( *fldtype == '\0' ) { go_BYE(-1); }
     if ( num_values < 1 ) { go_BYE(-1); }
-    if ( ( strcmp( gen_type, "linear" ) == 0 ) || 
-    ( strcmp( gen_type, "seq" ) == 0 ) || 
-    ( strcmp( gen_type, "const" ) == 0 )) {
-        // Everything is ok
+    if ( strcmp( fldtype, "B1" ) != 0){ 
+        if ( ( strcmp( gen_type, "linear" ) == 0 ) || 
+        ( strcmp( gen_type, "seq" ) == 0 ) || 
+        ( strcmp( gen_type, "const" ) == 0 )) {
+	    // Everything is ok
+        }
+        else {
+	     printf("Please provide proper gen_type, available values : { 'seq', 'linear', 'const' }\n");
+	     go_BYE(-1);
+        }
     }
     else {
-        printf("Please provide proper gen_type, available values : { 'seq', 'linear', 'const' }\n");
-        go_BYE(-1);
+    // currently for B1 gen_type is not supported
     }
 
     qtype_type qtype = undef_qtype;
@@ -83,11 +89,27 @@ generate_bin(
     int64_t tempI8;
     float tempF4;
     double tempF8;
+    uint64_t temp_B1 = 0;
+    int8_t bit_idx;
+    uint8_t bit_val = 0;
     for ( uint64_t i = 1; i <= num_values; i++ ) {
         uint64_t val = i * 10;
         switch ( qtype ) {
             case B1 :
-                // Not Implemented
+		bit_idx = i % 64;
+		if ((i % 2) == 0) {
+		    bit_val = 0;
+		} 
+		else {
+		    bit_val = 1;
+		}
+		//temp_B1 |= ((uint64_t)bit_val << bit_idx);
+		set_bit_u64(&temp_B1, bit_idx, bit_val);
+          	
+          	if ( bit_idx == 0 ) {
+         	    fwrite(&temp_B1, 1, sizeof(uint64_t), ofp);
+        	    temp_B1 = 0;		
+		}	
                 break;
             case I1 :
                 if ( strcmp( gen_type, "seq" ) == 0 ) {
@@ -136,6 +158,12 @@ generate_bin(
                 break;
         }
     }
+//flushing remaining values if any of B1 qtype into the bin file
+if ( qtype == B1 ) {
+   if ((num_values % 64) != 0) {
+       fwrite(&temp_B1, 1, sizeof(uint64_t), ofp);
+   } 
+}
 BYE:
   if ( *outfile != '\0' ) {
     fclose_if_non_null(ofp);
