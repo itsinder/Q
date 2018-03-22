@@ -28,6 +28,7 @@ typedef struct _reduce_min_<<qtype>>_args {
       subs.qtype = qtype
       subs.reduce_ctype = subs.ctype
       subs.reduce_qtype = qtype
+      subs.reducer_struct_type = "REDUCE_min_" .. qtype .. "_ARGS"
 
       hdr = string.gsub(hdr,"<<qtype>>", qtype)
       hdr = string.gsub(hdr,"<<reduce_ctype>>",  subs.reduce_ctype)
@@ -50,6 +51,7 @@ typedef struct _reduce_min_<<qtype>>_args {
       c_mem_ptr.min_val  = qconsts.qtypes[qtype].max
       c_mem_ptr.num = 0
       subs.c_mem = c_mem
+      subs.c_mem_type = "REDUCE_min_" .. qtype .. "_ARGS *"
     --==============================
       subs.getter = function (x) 
         local y = ffi.cast("REDUCE_min_" .. qtype .. "_ARGS *", get_ptr(c_mem))
