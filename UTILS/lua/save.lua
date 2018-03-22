@@ -95,7 +95,7 @@ local function save_global(filename)
   - if Q_METADATA_FILE variable is set then uses this path or else uses default path present in q_consts.lua ($HOME/local/Q/meta/saved.meta)
   ]]
   
-  local default_file_name = string.gsub(qconsts.default_meta_file, '$HOME', os.getenv('HOME'))
+  local default_file_name = qconsts.default_meta_file
   if not filename then
     local metadata_file = os.getenv("Q_METADATA_FILE")
     if metadata_file then
