@@ -152,7 +152,7 @@ run_q_tests(){
   print(type(x))
   print(x:length())
   print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
-  print_csv(x, nil, '')
+  print_csv(x)
   "
 
   # performance test stretch goal - add

@@ -1,6 +1,7 @@
 --==== From https://www.lua.org/pil/12.1.2.html
 -- local -- dbg = require 'Q/UTILS/lua/debugger'
-local pl_path = require 'pl.path'
+local plpath = require 'pl.path'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local function basicSerialize (o)
     if type(o) == "number" or type(o) == "boolean" then
@@ -73,27 +74,41 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "lVector" ) then 
     -- TODO Indrajeet to check
-    local x = value:reincarnate()
     local persist_str = value:reincarnate()
     file:write(persist_str)
     file:write("\n")
-    if type(value) == "lVector" then
-      save(name .. "._meta", value._meta, saved, file)
-    end
-  -- elseif ( type(value) == "userdata" ) then 
-    -- print("not saving a userdata")
+    save(name .. "._meta", value._meta, saved, file)
+    file:write(name .. ":persist(true)")
+    file:write("\n")
   else
     error("cannot save a " .. type(value))
   end
 end
 
 local function save_global(filename)
-  assert(filename ~= nil, "A valid filename has to be given")
+  --[[
+  Q.save() works as below
+  - if filename arg is provided and
+      - if it's a absolute path then continues using provided filename
+      - if not a absolute path then prepends $HOME/local/Q/meta to filepath
+  - if filename arg is not provided then checks for the Q_METADATA_FILE env variable,
+  - if Q_METADATA_FILE variable is set then uses this path or else uses default path present in q_consts.lua ($HOME/local/Q/meta/saved.meta)
+  ]]
   
+  local default_file_name = qconsts.default_meta_file
+  if not filename then
+    local metadata_file = os.getenv("Q_METADATA_FILE")
+    if metadata_file then
+      filename = metadata_file
+    else
+      filename = default_file_name
+    end
+  end
   -- check does the (abs) valid filepath exists
-  if not pl_path.isabs(filename) then
-    -- append Q_METADATA_DIR if filename/ relative path is provided 
-    filename = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
+  if not plpath.isabs(filename) then
+    -- prepend '$HOME/local/Q/meta' path to file name, 
+    -- we are not going to use Q_METADATA_DIR env variable in Q
+    filename = string.format("%s/%s", plpath.dirname(qconsts.default_meta_file), filename)
   end
    
   -- TODO: what if file already exists, for now it overrides (w+) the file 
@@ -112,6 +127,7 @@ local function save_global(filename)
   end
   file:close()
   print("Saved to " .. filename)
+  return filename
 end
 return require('Q/q_export').export('save', save_global)
 --return save_global
