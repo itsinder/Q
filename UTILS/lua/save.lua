@@ -108,7 +108,7 @@ local function save_global(filename)
   if not plpath.isabs(filename) then
     -- prepend '$HOME/local/Q/meta' path to file name, 
     -- we are not going to use Q_METADATA_DIR env variable in Q
-    filename = string.format("%s/%s", plpath.dirname(qconsts.meta_file_name), filename)
+    filename = string.format("%s/%s", plpath.dirname(qconsts.default_meta_file), filename)
   end
    
   -- TODO: what if file already exists, for now it overrides (w+) the file 
