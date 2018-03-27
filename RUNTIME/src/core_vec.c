@@ -11,9 +11,10 @@
 #include "_copy_file.h"
 #include "_isfile.h"
 #include "_isdir.h"
+#include "_cuda_malloc.h"
+#include "_cuda_free.h"
 
 #include "lauxlib.h"
-
 extern luaL_Buffer g_errbuf;
 
 static bool 
@@ -115,7 +116,8 @@ vec_get_buf(
   char *chunk = NULL;
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+      // CUDA: using cudaMallocManaged
+      ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
       memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
@@ -177,8 +179,9 @@ update_file_name(VEC_REC_TYPE *ptr_vec) {
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   char *temp_buf_path = NULL;
   char *temp_buf_file = NULL;
-  temp_buf_path = malloc(Q_MAX_LEN_FILE_NAME);
-  temp_buf_file = malloc(Q_MAX_LEN_BASE_FILE);
+  // CUDA: using cudaMallocManaged
+  temp_buf_path = (char *)cuda_malloc(Q_MAX_LEN_FILE_NAME);
+  temp_buf_file = (char *)cuda_malloc(Q_MAX_LEN_BASE_FILE);
   do {
     memset(temp_buf_path, '\0', Q_MAX_LEN_FILE_NAME);
     memset(temp_buf_file, '\0', Q_MAX_LEN_BASE_FILE);
@@ -189,8 +192,8 @@ update_file_name(VEC_REC_TYPE *ptr_vec) {
   } while ( isfile(temp_buf_path) );
   strncat(ptr_vec->file_name, temp_buf_file, Q_MAX_LEN_BASE_FILE);
 BYE:
-  free_if_non_null(temp_buf_path);
-  free_if_non_null(temp_buf_file);
+  cuda_free(temp_buf_path);
+  cuda_free(temp_buf_file);
   return status;
 }
 
@@ -349,7 +352,8 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
-    free(ptr_vec->chunk);
+    // CUDA: using cudaFree 
+    cuda_free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
   if ( !ptr_vec->is_persist ) {
@@ -432,7 +436,8 @@ vec_clone(
   memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
-    ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
+    // CUDA: using cudaMallocManaged
+    ptr_new_vec->chunk = (char *)cuda_malloc(ptr_new_vec->chunk_sz);
     return_if_malloc_failed(ptr_new_vec->chunk); 
     memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
@@ -708,7 +713,7 @@ vec_clean_chunk(
   if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
     // Clean the chunk and chunk metadata
-    free_if_non_null(ptr_vec->chunk);
+    cuda_free(ptr_vec->chunk);
     ptr_vec->chunk_num    = 0;
     ptr_vec->num_in_chunk = 0;          
     ptr_vec->is_nascent   = false;          
@@ -901,7 +906,8 @@ vec_add_B1(
 {
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    // CUDA: using cudaMallocManaged
+    ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
     memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -987,7 +993,8 @@ vec_add(
   }
 
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    // CUDA: using cudaMallocManaged
+    ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
     memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }

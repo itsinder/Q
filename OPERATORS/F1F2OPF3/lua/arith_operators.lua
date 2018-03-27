@@ -1,7 +1,4 @@
-return { 
- "vvadd",
- "vvsub",
- "vvmul",
- "vvdiv",
- "vvrem",
+return {
+  -- CUDA: Currently focus is on vvadd
+  "vvadd",
 }

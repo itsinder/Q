@@ -67,17 +67,24 @@ print("Copied " .. tgt_h .. " to " .. final_h)
 
 ----------Create q_core.so
 local QC_FLAGS = assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
+-- CUDA: Overridden QC_FLAGS to remove options which prints warning on console
+local QC_FLAGS = "-g -Xcompiler -fPIC -Xcompiler -fopenmp "
 local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
 assert(QC_FLAGS ~= "", "QC_FLAGS not provided")
 assert(Q_LINK_FLAGS ~= "", "Q_LINK_FLAGS not provided")
 local q_c_files = pldir.getfiles(cdir, "*.c")
 local q_c = table.concat(q_c_files, " ")
---  "gcc %s %s -I %s %s -lgomp -pthread -shared -o %s", 
-local q_cmd = string.format("gcc %s %s -I %s %s -o %s", 
-  QC_FLAGS, q_c, hdir, Q_LINK_FLAGS, tgt_so)
+
+local q_cu_files = pldir.getfiles(cdir, "*.cu")
+local q_cu = table.concat(q_cu_files, " ")
+--  "gcc %s %s -I %s %s -lgomp -pthread -shared -o %s",
+-- CUDA: Changed the compiler to nvcc instead of gcc because now we do have cuda files for compilation
+-- CUDA: Also included c and cu files at the time of compilation
+local q_cmd = string.format("nvcc %s %s -I %s %s -o %s", 
+  QC_FLAGS, q_c .. " " .. q_cu, hdir, Q_LINK_FLAGS, tgt_so)
 q_cmd = "cd " .. cdir .. "; " .. q_cmd
 local status = os.execute(q_cmd)
-assert(status, "gcc failed")
+assert(status, "nvcc failed")
 assert(plpath.isfile(tgt_so), "Target " .. tgt_so .. " not created")
 print("Successfully created " .. tgt_so)
 pldir.copyfile(tgt_so, final_so)

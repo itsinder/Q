@@ -7,6 +7,10 @@ chk_field_type(
     uint32_t field_size
     );
 extern int
+update_file_name(
+    VEC_REC_TYPE *ptr_vec
+    );
+extern int
 vec_meta(
     VEC_REC_TYPE *ptr_vec,
     char *opbuf

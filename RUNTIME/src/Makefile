@@ -19,8 +19,9 @@ clean:
 ../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
 	make -C ../../OPERATORS/PRINT/lua/
 
+# CUDA: Using nvcc compiler, also updated QC_FLAGS
 libvec.so: libvec.so libcmem.so
-	gcc -g ${QC_FLAGS} $(INCS) \
+	nvcc -g -DDEBUG -Xcompiler -fPIC $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \
 		core_vec.c \
@@ -35,6 +36,8 @@ libvec.so: libvec.so libcmem.so
 		../../UTILS/src/file_exists.c \
                 ../../UTILS/src/isfile.c \
                 ../../UTILS/src/isdir.c \
+                ../../UTILS/src/cuda_malloc.cu \
+                ../../UTILS/src/cuda_free.cu \
 		../../OPERATORS/PRINT/src/B1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \
@@ -44,8 +47,9 @@ libvec.so: libvec.so libcmem.so
 		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
 		-shared -o libvec.so
 
+# CUDA: Using nvcc compiler, also updated QC_FLAGS
 libcmem.so:
-	gcc -g ${QC_FLAGS} ${INCS} \
+	nvcc -g -DDEBUG -Xcompiler -fPIC ${INCS} \
 		cmem.c \
 		../../OPERATORS/PRINT/src/B1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
@@ -54,6 +58,8 @@ libcmem.so:
 		../../OPERATORS/PRINT/gen_src/_I8_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_F4_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
+                ../../UTILS/src/cuda_malloc.cu \
+                ../../UTILS/src/cuda_free.cu \
 		../../UTILS/src/err.c \
 		-shared -o libcmem.so
 
@@ -61,7 +67,7 @@ libsclr.so: gen_cmp gen_arith libcmem.so
 	rm -f _*.c
 	lua gen_cmp.lua
 	lua gen_arith.lua
-	gcc -g ${QC_FLAGS} ${INCS} \
+	nvcc -g -DDEBUG -Xcompiler -fPIC ${INCS} \
 		scalar.c \
 		cmem.c \
 		../../UTILS/src/err.c \
@@ -79,6 +85,8 @@ libsclr.so: gen_cmp gen_arith libcmem.so
 		../../OPERATORS/PRINT/gen_src/_I8_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_F4_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_F8_to_txt.c \
+		../../UTILS/src/cuda_malloc.cu \
+		../../UTILS/src/cuda_free.cu \
 		../../UTILS/src/is_valid_chars_for_num.c \
 		-shared -o libsclr.so
 

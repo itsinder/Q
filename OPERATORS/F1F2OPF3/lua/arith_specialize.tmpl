@@ -13,6 +13,7 @@ return function (
   subs.in2_ctype = qconsts.qtypes[f2type].ctype
   subs.out_qtype = out_qtype
   subs.out_ctype = qconsts.qtypes[out_qtype].ctype
-  subs.c_code_for_operator = "c = a <<mathsymbol>> b; "
+  -- CUDA: below change is according to updated template with cuda changes
+  subs.c_code_for_operator = "d_c[i] = d_a[i] <<mathsymbol>> d_b[i]; "
   return subs, tmpl
 end

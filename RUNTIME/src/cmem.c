@@ -18,6 +18,8 @@
 #include "_I8_to_txt.h"
 #include "_F4_to_txt.h"
 #include "_F8_to_txt.h"
+#include "_cuda_malloc.h"
+#include "_cuda_free.h"
 
 #include "cmem.h"
 
@@ -69,7 +71,8 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
   if ( ( ( size / 16 ) * 16 ) != size ) { 
     size = ( size / 16 ) * 16 + 16;
   }
-  data = malloc(size);
+  // CUDA: using cudaMallocManaged
+  data = cuda_malloc(size);
   return_if_malloc_failed(data);
   ptr_cmem->data = data;
   ptr_cmem->size = size;
@@ -242,7 +245,8 @@ static int l_cmem_free( lua_State *L)
     else {
       // CONTROL SHOULD NEVER COME HERE
       if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
-      free(ptr_cmem->data);
+      // CUDA: using cudaFree
+      cuda_free(ptr_cmem->data);
     }
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));

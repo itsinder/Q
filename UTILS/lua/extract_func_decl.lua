@@ -22,7 +22,8 @@ z = string.gsub(z, "//STOP_FUNC_DECL", "")
 z = plstr.strip(z)
 --=========================================
 fn = string.gsub(infile, "^.*/", "")
-fn = string.gsub(fn, ".c$", "")
+-- CUDA: updated regex, below regex replaces everything after last dot i.e "."
+fn = string.gsub(fn, "\.[^.]*$", "")
 if ( opdir ~= "" ) then 
   local basefile = string.gsub(infile, "^.*/", "") 
   opfile = opdir .. "/_" .. fn .. ".h"
