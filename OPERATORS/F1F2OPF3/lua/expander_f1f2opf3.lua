@@ -58,7 +58,11 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
     f2_len, f2_chunk, nn_f2_chunk = f2:chunk(chunk_idx)
     assert(f1_len == f2_len)
     if f1_len > 0 then
-      qc[func_name](get_ptr(f1_chunk), get_ptr(f2_chunk), f1_len, get_ptr(f3_buf))
+      local chunk1 = ffi.cast( qconsts.qtypes[f1:fldtype()].ctype .. "*",  get_ptr(f1_chunk))
+      local chunk2 = ffi.cast( qconsts.qtypes[f2:fldtype()].ctype .. "*",  get_ptr(f2_chunk))
+      local chunk3 = ffi.cast( qconsts.qtypes[f3_qtype].ctype .. "*",  get_ptr(f3_buf))
+
+      qc[func_name](chunk1, chunk2, f1_len, chunk3)
     else
       f3_buf = nil
       nn_f3_buf = nil

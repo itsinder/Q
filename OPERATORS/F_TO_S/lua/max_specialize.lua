@@ -46,6 +46,7 @@ typedef struct _reduce_max_<<qtype>>_args {
       c_mem_ptr.max_val  = qconsts.qtypes[qtype].min
       c_mem_ptr.num = 0
       subs.c_mem = c_mem
+      subs.c_mem_type = "REDUCE_max_" .. qtype .. "_ARGS *"
     --==============================
       subs.getter = function (x) 
       local y = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
