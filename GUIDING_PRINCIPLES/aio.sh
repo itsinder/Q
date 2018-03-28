@@ -27,7 +27,7 @@ install_apt_get_dependencies(){
   sudo apt-get install libncurses5-dev -y # for lua-5.1.5
   sudo apt-get install libssl-dev -y # for QLI
   sudo apt-get install m4 -y         # for QLI
-  sudo apt-get install libreadline-dev 
+  sudo apt-get install libreadline-dev -y 
 }
 
 install_lua_from_apt_get(){
