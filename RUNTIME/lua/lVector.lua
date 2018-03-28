@@ -626,10 +626,10 @@ function lVector:chunk(chunk_num)
 end
 
 function lVector:meta()
-  local base_meta = load(Vector.meta(self._base_vec))()
+  local base_meta = loadstring(Vector.meta(self._base_vec))()
   local nn_meta = nil
   if ( self._nn_vec ) then 
-    nn_meta = load(Vector.meta(self._nn_vec))()
+    nn_meta = loadstring(Vector.meta(self._nn_vec))()
   end
   if ( qconsts.debug ) then self:check() end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
