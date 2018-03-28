@@ -2,8 +2,8 @@ local qconsts = {}
 --===========================  
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.debug = false -- set to TRUE only if you want debugging
+  qconsts.qc_trace = false -- set to FALSE if performance logging of qc is to be turned off
   qconsts.default_meta_file = os.getenv("HOME") .. "/local/Q/meta/saved.meta"
-  qconsts.qc_trace = true -- set to FALSE if performance logging of qc is to be turned off
     local max_width = {}
     max_width["SC"] = 1024 -- 1 char reserved for nullc
     max_width["SV"] = 1024 -- 1 char reserved for nullc

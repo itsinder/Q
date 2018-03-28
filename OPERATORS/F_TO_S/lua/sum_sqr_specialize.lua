@@ -45,6 +45,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
     c_mem_ptr.sum_sqr_val  = 0
     c_mem_ptr.num = 0
     subs.c_mem = c_mem
+    subs.c_mem_type = "REDUCE_sum_sqr_" .. qtype .. "_ARGS *"
     --==============================
     subs.getter = function (x) 
       local y = ffi.cast("REDUCE_sum_" .. qtype .. "_ARGS *", get_ptr(c_mem))
