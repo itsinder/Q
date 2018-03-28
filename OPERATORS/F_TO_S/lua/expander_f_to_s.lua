@@ -34,8 +34,8 @@ return function (a, x, y, optargs )
       local casted_x_chunk = ffi.cast( qconsts.qtypes[x:fldtype()].ctype .. "*",  get_ptr(x_chunk))
       local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
       qc[func_name](casted_x_chunk, x_len, casted_struct, idx);
-      if ( a == "is_next" ) then 
-        local X = ffi.cast(subs.rec_name .. ' *', reduce_struct)
+      if ( a == "is_next" ) then
+        local X = ffi.cast(subs.c_mem_type, reduce_struct)
         if ( tonumber(X[0].is_violation) == 1 ) then 
           is_early_exit = true 
         end
