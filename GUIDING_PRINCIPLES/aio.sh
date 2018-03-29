@@ -123,6 +123,13 @@ install_debug_lua_from_source(){
 
 }
 
+clean_q(){
+  my_print "Cleaning Q"
+  cd ../UTILS/build
+  make clean
+  cd -
+}
+
 build_q(){
   my_print "Building Q"
   cd ../UTILS/build
@@ -229,6 +236,7 @@ sudo apt-get install liblapacke-dev liblapack-dev -y
 #  ######## Build Q #########
 my_print "Building Q"
 cleanup ../ #cleaning up all files
+clean_q
 if [ $LUA_DEBUG -eq 1 ]
 then
   install_luaffi
