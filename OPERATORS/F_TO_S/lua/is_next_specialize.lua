@@ -53,6 +53,7 @@ return function (
     c_mem_ptr.is_violation = 0
     c_mem_ptr.num_seen = 0
     subs.c_mem = c_mem
+    subs.rec_name = rec_name
     subs.c_mem_type = rec_name .. " *"
     if ( fast ) then 
       subs.fn = "par_is_next_" .. comparison .. "_" .. qtype

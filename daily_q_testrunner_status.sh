@@ -5,8 +5,8 @@ export Q_SRC_ROOT="$HOME/WORK/Q"
 cd $Q_SRC_ROOT
 
 #cleaning up files in git repo
-#git checkout .
-#git clean -fd
+git checkout .
+git clean -fd
 #pulling recent changes in git repo
 git pull
 
