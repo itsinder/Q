@@ -465,6 +465,99 @@ BYE:
   return status;
 }
 
+int
+get_qtype_and_field_size(
+    const char * const field_type,
+    char * res_qtype,
+    int * res_field_size
+    )
+{
+  int status = 0;
+
+  if ( res_field_size == NULL ) { go_BYE(-1); }
+  if ( res_qtype == NULL ) { go_BYE(-1); }
+  if ( field_type == NULL ) { go_BYE(-1); }
+
+  char qtype[4]; int field_size = 0;
+  memset(qtype, '\0', 4);
+  if ( strcmp(field_type, "B1") == 0 ) {
+    // What should be the field_size for B1?
+    strcpy(qtype, field_type); field_size = 1; // SPECIAL CASE
+  }
+  else if ( strcmp(field_type, "I1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 1;
+  }
+  else if ( strcmp(field_type, "I2") == 0 ) {
+    strcpy(qtype, field_type); field_size = 2;
+  }
+  else if ( strcmp(field_type, "I4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "I8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strcmp(field_type, "F4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "F8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strncmp(field_type, "SC:", 3) == 0 ) {
+    char *cptr = (char *)field_type + 3;
+    status = txt_to_I4(cptr, &field_size); cBYE(status);
+    if ( field_size < 2 ) { go_BYE(-1); }
+    strcpy(qtype, "SC");
+  }
+  else if ( strcmp(field_type, "SV") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
+  }
+  else {
+    go_BYE(-1);
+  }
+
+  res_qtype = qtype;
+  *res_field_size = field_size;
+BYE:
+  return status;
+}
+
+int
+vec_new_virtual(
+    VEC_REC_TYPE *ptr_vec,
+    char *map_addr,
+    size_t map_len,
+    const char * const field_type,
+    uint32_t chunk_size,
+    int64_t num_elements
+    )
+{
+  int status = 0;
+
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
+  if ( chunk_size == 0 ) { go_BYE(-1); }
+  if ( num_elements <= 0 ) { go_BYE(-1); }
+  if ( map_addr == NULL ) { go_BYE(-1); }
+  if ( field_type == NULL ) { go_BYE(-1); }
+
+  char qtype[4]; int field_size = 0;
+  
+  status = get_qtype_and_field_size(field_type, qtype, &field_size); cBYE(status);
+  status = chk_field_type(qtype, field_size); cBYE(status);
+  strcpy(ptr_vec->field_type, qtype);
+  ptr_vec->field_size = field_size;
+  ptr_vec->chunk_size = chunk_size;
+  ptr_vec->num_elements = (uint64_t) num_elements;
+  ptr_vec->is_nascent = false;
+  ptr_vec->is_eov = true;
+  ptr_vec->open_mode = 0;
+  ptr_vec->map_addr = map_addr;
+  ptr_vec->map_len = map_len;
+BYE:
+  return status;
+}
+
+
 int 
 vec_new(
     VEC_REC_TYPE *ptr_vec,
