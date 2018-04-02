@@ -117,7 +117,7 @@ vec_get_buf(
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
       // CUDA: using cudaMallocManaged
-      ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
+      status = cuda_malloc((void **) &ptr_vec->chunk, ptr_vec->chunk_sz); cBYE(status);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
       memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
@@ -180,8 +180,8 @@ update_file_name(VEC_REC_TYPE *ptr_vec) {
   char *temp_buf_path = NULL;
   char *temp_buf_file = NULL;
   // CUDA: using cudaMallocManaged
-  temp_buf_path = (char *)cuda_malloc(Q_MAX_LEN_FILE_NAME);
-  temp_buf_file = (char *)cuda_malloc(Q_MAX_LEN_BASE_FILE);
+  status = cuda_malloc((void **) &temp_buf_path, Q_MAX_LEN_FILE_NAME); cBYE(status);
+  status = cuda_malloc((void **) &temp_buf_file, Q_MAX_LEN_BASE_FILE); cBYE(status);
   do {
     memset(temp_buf_path, '\0', Q_MAX_LEN_FILE_NAME);
     memset(temp_buf_file, '\0', Q_MAX_LEN_BASE_FILE);
@@ -437,7 +437,7 @@ vec_clone(
 
   if ( ptr_old_vec->chunk != NULL ) { 
     // CUDA: using cudaMallocManaged
-    ptr_new_vec->chunk = (char *)cuda_malloc(ptr_new_vec->chunk_sz);
+    status = cuda_malloc((void **) &ptr_new_vec->chunk, ptr_new_vec->chunk_sz); cBYE(status);
     return_if_malloc_failed(ptr_new_vec->chunk); 
     memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
@@ -907,7 +907,7 @@ vec_add_B1(
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
     // CUDA: using cudaMallocManaged
-    ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
+    status = cuda_malloc((void **) &ptr_vec->chunk, ptr_vec->chunk_sz); cBYE(status);
     return_if_malloc_failed(ptr_vec->chunk);
     memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -994,7 +994,7 @@ vec_add(
 
   if ( ptr_vec->chunk == NULL ) { 
     // CUDA: using cudaMallocManaged
-    ptr_vec->chunk = (char *)cuda_malloc(ptr_vec->chunk_sz);
+    status = cuda_malloc((void **) &ptr_vec->chunk, ptr_vec->chunk_sz); cBYE(status);
     return_if_malloc_failed(ptr_vec->chunk);
     memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }

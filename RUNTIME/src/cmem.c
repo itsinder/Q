@@ -72,7 +72,7 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
     size = ( size / 16 ) * 16 + 16;
   }
   // CUDA: using cudaMallocManaged
-  data = cuda_malloc(size);
+  status = cuda_malloc((void **) &data, size); cBYE(status);
   return_if_malloc_failed(data);
   ptr_cmem->data = data;
   ptr_cmem->size = size;
