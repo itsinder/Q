@@ -52,10 +52,12 @@ ${fn}(
   uint64_t numBlocks = (nR + 256 - 1) / blockSize;
   
   // Launch Kernel
+  /*
   if ( ( numBlocks * blockSize ) > nR ) {
     numBlocks = 1;
     blockSize = nR;
   }
+  */
   __operation<<<numBlocks, blockSize>>>(in1, in2, out, nR);
   cudaDeviceSynchronize();
   return status;
