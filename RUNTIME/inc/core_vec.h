@@ -16,6 +16,16 @@ vec_nascent(
     VEC_REC_TYPE *ptr_vec
     );
 extern int
+update_file_name(
+    VEC_REC_TYPE *ptr_vec
+    );
+extern int
+get_qtype_and_field_size(
+    const char * const field_type,
+    char * res_qtype,
+    int * res_field_size
+    );
+extern int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
