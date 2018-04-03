@@ -524,8 +524,7 @@ BYE:
 int
 vec_new_virtual(
     VEC_REC_TYPE *ptr_vec,
-    char *map_addr,
-    size_t map_len,
+    char * map_addr,
     const char * const field_type,
     uint32_t chunk_size,
     int64_t num_elements
@@ -552,7 +551,7 @@ vec_new_virtual(
   ptr_vec->is_eov = true;
   ptr_vec->open_mode = 0;
   ptr_vec->map_addr = map_addr;
-  ptr_vec->map_len = map_len;
+  ptr_vec->map_len = (ptr_vec->num_elements * ptr_vec->field_size);
 BYE:
   return status;
 }

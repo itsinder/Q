@@ -26,6 +26,14 @@ vec_new(
     int64_t num_elements
     );
 extern int
+vec_new_virtual(
+    VEC_REC_TYPE *ptr_vec,
+    char * map_addr,
+    const char * const field_type,
+    uint32_t chunk_size,
+    int64_t num_elements
+    );
+extern int
 vec_materialized(
     VEC_REC_TYPE *ptr_vec,
     const char *const file_name
