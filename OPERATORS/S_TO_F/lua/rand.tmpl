@@ -9,6 +9,8 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
 #include <stdbool.h>
 
 typedef struct _rand_${out_qtype}_rec_type {
@@ -30,12 +32,29 @@ rand_${out_qtype}(
 
 #include "_rand_${out_qtype}.h"
 
+#ifdef RASPBERRY_PI
+static inline uint64_t RDTSC()
+{
+  struct timeval Tps;
+  struct timezone Tpf;
+  unsigned long long t = 0, t_sec = 0, t_usec = 0;
+
+  gettimeofday (&Tps, &Tpf);
+  t_sec  = (uint64_t )Tps.tv_sec;
+  t_usec = (uint64_t )Tps.tv_usec;
+  t = t_sec * 1000000 + t_usec;
+  return t;
+  
+  }
+
+#else
 static inline uint64_t RDTSC()
 {
   unsigned int hi, lo;
     __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
       return ((uint64_t)hi << 32) | lo;
 }
+#endif
 
 //START_FUNC_DECL
 int
