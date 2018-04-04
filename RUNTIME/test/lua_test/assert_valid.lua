@@ -596,7 +596,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   local addr, len = vec:get_chunk()
   assert(addr)
   iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(addr))
-  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  assert(tonumber(iptr[0]) == test_value, "Value mismatch with expected value")
   
   assert(vec:check())
 

@@ -37,7 +37,7 @@ tests.t1 = function()
       for j= 1, y:num_elements() do
         local ret_cmem, ret_len, ret_val  = y:get(j-1, 1)
         local ret_ptr = get_ptr(ret_cmem, qtype)
-        assert(ret_ptr[0] == j*9)
+        assert(tonumber(ret_ptr[0]) == j*9)
       end
   
     -- Explicit call to garbage collection
