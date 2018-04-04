@@ -514,8 +514,7 @@ get_qtype_and_field_size(
   else {
     go_BYE(-1);
   }
-
-  res_qtype = qtype;
+  strcpy(res_qtype, qtype);
   *res_field_size = field_size;
 BYE:
   return status;
@@ -538,7 +537,7 @@ vec_new_virtual(
   if ( num_elements <= 0 ) { go_BYE(-1); }
   if ( map_addr == NULL ) { go_BYE(-1); }
   if ( field_type == NULL ) { go_BYE(-1); }
-
+  
   char qtype[4]; int field_size = 0;
   
   status = get_qtype_and_field_size(field_type, qtype, &field_size); cBYE(status);

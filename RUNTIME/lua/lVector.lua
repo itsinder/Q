@@ -97,7 +97,7 @@ function lVector.virtual_new(arg)
   num_elements = assert(arg.num_elements, "virtual vector needs num_elements to be specified")
   map_addr = assert(arg.map_addr, "virtual vector needs mmap address to be specified")
 
-  vector._base_vec = Vector.new(map_addr, qtype, num_elements)
+  vector._base_vec = Vector.virtual(map_addr, qtype, num_elements)
   assert(vector._base_vec)
 
   return vector
