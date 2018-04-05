@@ -591,7 +591,9 @@ static int l_vec_new_virtual( lua_State *L)
 
   //TODO: Check how to get mmap pointer from stack, stack_location = 1
   if ( luaL_testudata (L, 1, "CMEM") ) {
-    map_addr = luaL_checkudata(L, 1, "CMEM");
+    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
+    if ( ptr_cmem == NULL ) { go_BYE(-1); }
+    map_addr = ptr_cmem->data;
   }
   else {
     fprintf(stderr, "NOT  CMEM\n");

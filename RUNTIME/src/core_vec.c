@@ -343,6 +343,13 @@ vec_free(
 {
   int status = 0;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
+  if ( ptr_vec->is_virtual ) {
+    // No need to perform any garbage collection as vector is virtual
+    // parent vector will perform the garbage collection
+    // Here, it's Q programmer's responsibility to properly use the virtual vectors so as parent shouldn't get garbage collected before virtual vectors 
+    // i.e when virtual vectors are in use, parent's scope should be alive 
+    return status;
+  }
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);
     ptr_vec->map_addr = NULL;
@@ -538,23 +545,22 @@ vec_new_virtual(
   if ( map_addr == NULL ) { go_BYE(-1); }
   if ( field_type == NULL ) { go_BYE(-1); }
   
-  char qtype[4]; int field_size = 0;
+  int field_size = 0;
   
-  status = get_qtype_and_field_size(field_type, qtype, &field_size); cBYE(status);
-  status = chk_field_type(qtype, field_size); cBYE(status);
-  strcpy(ptr_vec->field_type, qtype);
+  status = get_qtype_and_field_size(field_type, ptr_vec->field_type, &field_size); cBYE(status);
+  status = chk_field_type(ptr_vec->field_type, field_size); cBYE(status);
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size;
-  ptr_vec->num_elements = (uint64_t) num_elements;
+  ptr_vec->num_elements = num_elements;
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov = true;
   ptr_vec->open_mode = 0;
   ptr_vec->map_addr = map_addr;
   ptr_vec->map_len = (ptr_vec->num_elements * ptr_vec->field_size);
+  ptr_vec->is_virtual = true;
 BYE:
   return status;
 }
-
 
 int 
 vec_new(
@@ -879,11 +885,13 @@ vec_get(
   }
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
-      case 0 : 
-        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
-        cBYE(status);
-        ptr_vec->map_addr = X;
-        ptr_vec->map_len  = nX;
+      case 0 :
+        if ( ! ptr_vec->is_virtual ) {
+          status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+          cBYE(status);
+          ptr_vec->map_addr = X;
+          ptr_vec->map_len  = nX;
+        }
         ptr_vec->open_mode = 1; // indicating read */
         break;
       case 1 : /* opened in read mode */
@@ -1131,10 +1139,12 @@ vec_start_write(
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
   bool is_write = true;
-  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  ptr_vec->map_addr  = X;
-  ptr_vec->map_len   = nX;
+  if ( ! ptr_vec->is_virtual ) {
+    status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
+    if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+    ptr_vec->map_addr  = X;
+    ptr_vec->map_len   = nX;
+  }
   ptr_vec->open_mode = 2; // for write
 BYE:
   return status;
