@@ -75,6 +75,12 @@ echo "Q_SRC_ROOT: ${Q_SRC_ROOT}"
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wno-unused-parameter -pedantic -fopenmp'
 
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
+lscpu | grep "Architecture" | grep "arm"
+IS_ARM="`echo $?`"
+if [ ${IS_ARM} -eq 0 ]; then 
+  export QC_FLAGS=" $QC_FLAGS -DRASPBERRY_PI"
+fi
+
 echo "QC_FLAGS: $QC_FLAGS"
 mkdir -p $Q_ROOT/data
 export Q_DATA_DIR="${Q_DATA_DIR:=${Q_ROOT}/data}"
@@ -90,8 +96,6 @@ echo "Q_TRACE_DIR: $Q_TRACE_DIR"
 mkdir -p $Q_ROOT/tmpl
 export Q_TMPL_DIR="${Q_TMPL_DIR:=${Q_ROOT}/tmpl}"
 echo "Q_TMPL_DIR: $Q_TMPL_DIR"
-
-
 
 export Q_BUILD_DIR="/tmp/q" # will figure out a better location later
 # Setting ld library path based on lua init
