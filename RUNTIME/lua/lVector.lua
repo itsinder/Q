@@ -1,13 +1,14 @@
-local ffi    = require 'Q/UTILS/lua/q_ffi'
-local qconsts= require 'Q/UTILS/lua/q_consts'
-local log    = require 'Q/UTILS/lua/log'
-local register_type = require 'Q/UTILS/lua/q_types'
-local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
-local plpath = require "pl.path"
-local cmem   = require 'libcmem'
-local Scalar = require 'libsclr'
-local Vector = require 'libvec'
-local chk_chunk_return = require 'Q/UTILS/lua/chk_chunk'
+local ffi		= require 'Q/UTILS/lua/q_ffi'
+local qconsts		= require 'Q/UTILS/lua/q_consts'
+local log		= require 'Q/UTILS/lua/log'
+local plpath		= require "pl.path"
+local cmem		= require 'libcmem'
+local Scalar		= require 'libsclr'
+local Vector		= require 'libvec'
+local plstring		= require 'pl.stringx'
+local register_type	= require 'Q/UTILS/lua/q_types'
+local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
+local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
 --====================================
 local lVector = {}
 lVector.__index = lVector
@@ -76,10 +77,30 @@ function lVector:file_size()
   return Vector.file_size(self._base_vec)
 end
 
-
 function lVector:is_eov()
   if ( qconsts.debug ) then self:check() end
   return Vector.is_eov(self._base_vec)
+end
+
+function lVector.virtual_new(arg)
+  local vector = setmetatable({}, lVector)
+  -- for meta data stored in vector
+  vector._meta = {}
+
+  local qtype
+  local num_elements
+  local map_addr
+
+  assert(type(arg) == "table", "lVector construction requires table as arg")
+
+  qtype = assert(arg.qtype, "virtual vector needs qtype to be specified")
+  num_elements = assert(arg.num_elements, "virtual vector needs num_elements to be specified")
+  map_addr = assert(arg.map_addr, "virtual vector needs mmap address to be specified")
+
+  vector._base_vec = Vector.virtual(map_addr, qtype, num_elements)
+  assert(vector._base_vec)
+
+  return vector
 end
 
 function lVector.new(arg)
@@ -95,32 +116,11 @@ function lVector.new(arg)
   local has_nulls
   local is_nascent
   local is_memo = true -- default to true
-  assert(type(arg) == "table", "lVector construction requires table as arg")
-
-  if ( arg.is_memo ~= nil ) then 
-    assert(type(arg.is_memo) == "boolean")
-    is_memo = arg.is_memo
-  end
-  -- Validity of qtype will be checked for by vector
-  qtype = assert(arg.qtype, "lVector needs qtype to be specified")
-   --=============================
-  field_width = nil
-  assert(qconsts.qtypes[qtype], "Invalid qtype provided")
-  if qtype == "SC" then
-    field_width = assert(arg.width, "Constant length strings need a length to be specified")
-    assert(type(field_width) == "number", "field width must be a number")
-    assertmfield_width >= 2)
-  else
-    assert(arg.width == nil, "do not provide width except for SC")
-    field_width = qconsts.qtypes[qtype].width
-  end
-   --=============================
-
-  if arg.gen then 
-    is_nascent = true
-    if ( arg.has_nulls == nil ) then
-      has_nulls = true
-    else
+  -- Using env variable Q_DATA_DIR
+  -- Passing q_data_dir to create the new vector's bin file in q_data_dir
+  local q_data_dir = os.getenv("Q_DATA_DIR")
+  assert(q_data_dir)
+  assert(plpath.isdir(q_data_dir))
   
   -- Check if q_data_dir path ends with '/', if not append it
   if not plstring.endswith(q_data_dir, "/") then
@@ -616,6 +616,42 @@ function lVector:chunk(chunk_num)
   else
     assert(self._gen)
     assert(type(self._gen) == "function")
+    local buf_size, base_data, nn_data = self._gen(chunk_num, self)
+    if ( buf_size < qconsts.chunk_size ) then
+      if ( buf_size > 0 ) then
+        self:put_chunk(base_data, nn_data, buf_size)
+      end
+      self:eov()
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+    else
+      if ( base_data ) then 
+        -- this is the simpler case where generator malloc's
+        self:put_chunk(base_data, nn_data, buf_size)
+      else
+        -- this is the advanced case of using the Vector's buffer.
+        local chk =  self:chunk_num()
+        assert(chk == l_chunk_num)
+      end
+    end
+    if ( qconsts.debug ) then self:check() end
+    return self:chunk(l_chunk_num)
+    -- NOTE: Could also do return chunk_size, base_data, nn_data
+    --[[
+    status = self._gen(chunk_num, self)
+    assert(status)
+    return self:chunk(chunk_num)
+    --]]
+  end
+  -- NOTE: Indrajeet suggests: return self:chunk(chunk_num)
+end
+
+function lVector:meta()
+  local base_meta = load(Vector.meta(self._base_vec))()
+  local nn_meta = nil
+  if ( self._nn_vec ) then 
+    nn_meta = load(Vector.meta(self._nn_vec))()
+  end
+  if ( qconsts.debug ) then self:check() end
   return { base = base_meta, nn = nn_meta, aux = self._meta}
 end
 
