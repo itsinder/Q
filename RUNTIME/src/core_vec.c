@@ -685,9 +685,11 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   // Open mode == 0 IFF map_addr == \bot
   // Open mode == 0 IFF map_len  == 0
   switch ( ptr_vec->open_mode ) { 
-    case 0 : 
-      if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
-      if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+    case 0 :
+      if ( ! ptr_vec->is_virtual ) { 
+        if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
+        if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+      }
       break;
     case 1 :
     case 2 :
@@ -1139,12 +1141,10 @@ vec_start_write(
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
   bool is_write = true;
-  if ( ! ptr_vec->is_virtual ) {
-    status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
-    if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-    ptr_vec->map_addr  = X;
-    ptr_vec->map_len   = nX;
-  }
+  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
+  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+  ptr_vec->map_addr  = X;
+  ptr_vec->map_len   = nX;
   ptr_vec->open_mode = 2; // for write
 BYE:
   return status;
