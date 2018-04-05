@@ -587,21 +587,14 @@ static int l_vec_new_virtual( lua_State *L)
   int status = 0;
   VEC_REC_TYPE *ptr_vec = NULL;
   void * map_addr = NULL;
+  luaL_buffinit(L, &g_errbuf);
 
   //TODO: Check how to get mmap pointer from stack, stack_location = 1
-  int x =  lua_type (L, 1);
-  const char *y = lua_typename(L, x);
-  // printf("Type is %s\n", y);
-  // map_addr = luaL_checkudata(L, 1, "userdata");
- 
-  if ( luaL_testudata (L, 1, "userdata") ) {
-    map_addr = luaL_checkudata(L, 1, "userdata");
-  }
-  else if ( luaL_testudata (L, 1, "cdata") ) {
-    map_addr = luaL_checkudata(L, 1, "cdata");
+  if ( luaL_testudata (L, 1, "CMEM") ) {
+    map_addr = luaL_checkudata(L, 1, "CMEM");
   }
   else {
-    fprintf(stderr, "NOT  Expected\n");
+    fprintf(stderr, "NOT  CMEM\n");
     go_BYE(-1);
   }
  
