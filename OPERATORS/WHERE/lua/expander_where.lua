@@ -70,7 +70,11 @@ local function expander_where(op, a, b)
       assert(a_len == b_len)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Where vector cannot have nulls")
-      local status = qc[func_name](get_ptr(a_chunk), get_ptr(b_chunk), aidx, a_len, get_ptr(out_buf), 
+      
+      local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
+      local casted_b_chunk = ffi.cast( qconsts.qtypes[b:fldtype()].ctype .. "*",  get_ptr(b_chunk))
+      local casted_out_buf = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(out_buf))
+      local status = qc[func_name](casted_a_chunk, casted_b_chunk, aidx, a_len, casted_out_buf, 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
       if ( aidx[0] == a_len ) then
