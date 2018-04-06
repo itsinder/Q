@@ -1,4 +1,8 @@
 local Q = require 'Q'
+local lVector = require 'Q/RUNTIME/lua/lVector'
+local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local ffi = require 'Q/UTILS/lua/q_ffi'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {}
 
@@ -95,8 +99,53 @@ end
 
 tests.t2 = function()
   -- Test virtual vector from virtual vector
+  local len = 65536 * 2 + 2
+  local in1 = {}
+  for i = 1, len do
+    in1[i] = i
+  end
+  local parent = Q.mk_col(in1, "I4")
+  local nX, X, nn_X = parent:start_write()
+  
+  -- create virtual vector 1 with elements 65536 + 1
+  local arg = {map_addr = X, num_elements = 65536+1, qtype = "I4"}
+  local vir_vec1 = lVector.virtual_new(arg)
+
+  -- create virtual vector 2 with remaining elements
+  local casted_X = ffi.cast("CMEM_REC_TYPE *", X)
+  casted_X[0].data = ffi.cast("char *", casted_X[0].data) + (65536 + 1) * 4
+  arg = {map_addr = X, num_elements = 65536+1, qtype = "I4"}
+  local vir_vec2 = lVector.virtual_new(arg)
+
+  -- get_one
+  for i = 1, vir_vec1:length() do
+    local val, nn_val = vir_vec1:get_one(i-1)
+    assert(val:to_num() == i, "Mismatch vir_vec1, expected = " .. tostring(i) .. ", actual = " .. tostring(val:to_num()))
+  end
+  
+  -- get_one
+  for i = 1, vir_vec2:length() do
+    local val, nn_val = vir_vec2:get_one(i-1)
+    assert(val:to_num() == 65537 + i, "Mismatch vir_vec1, expected = " .. tostring(65537 + i) .. ", actual = " .. tostring(val:to_num()))
+  end
+  print("Virtual Vector 1")
+  print(vir_vec1:get_one(0))
+  print(vir_vec1:get_one(vir_vec1:length()-1))
+
+  print("Virtual Vector 2")
+  print(vir_vec2:get_one(0))
+  print(vir_vec2:get_one(vir_vec2:length()-1))
+
+  print("Total length")
+  print(vir_vec1:length() + vir_vec2:length())
+
+  parent:end_write()
+
+  print("SUCCESS")
 end
 
 tests.t3 = function()
   -- Test modification in virtual vector, it should affect parent vector
 end
+
+return tests
