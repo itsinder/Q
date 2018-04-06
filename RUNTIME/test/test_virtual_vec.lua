@@ -95,6 +95,7 @@ tests.t1 = function()
   virtual_vec:check()
 
   col1:end_write()
+  print("SUCCESS")
 end
 
 tests.t2 = function()
@@ -112,8 +113,9 @@ tests.t2 = function()
   local vir_vec1 = lVector.virtual_new(arg)
 
   -- create virtual vector 2 with remaining elements
+  
   local casted_X = ffi.cast("CMEM_REC_TYPE *", X)
-  casted_X[0].data = ffi.cast("char *", casted_X[0].data) + (65536 + 1) * 4
+  casted_X[0].data = ffi.cast("int32_t *", casted_X[0].data) + 65536+1
   arg = {map_addr = X, num_elements = 65536+1, qtype = "I4"}
   local vir_vec2 = lVector.virtual_new(arg)
 
@@ -128,6 +130,8 @@ tests.t2 = function()
     local val, nn_val = vir_vec2:get_one(i-1)
     assert(val:to_num() == 65537 + i, "Mismatch vir_vec1, expected = " .. tostring(65537 + i) .. ", actual = " .. tostring(val:to_num()))
   end
+
+  --[[
   print("Virtual Vector 1")
   print(vir_vec1:get_one(0))
   print(vir_vec1:get_one(vir_vec1:length()-1))
@@ -138,8 +142,96 @@ tests.t2 = function()
 
   print("Total length")
   print(vir_vec1:length() + vir_vec2:length())
+  ]]
+
+  -- create virtual vector vir_vec11 from vir_vec1
+  nX, X, nn_X = vir_vec1:start_write()
+
+  local arg = {map_addr = X, num_elements = 32768, qtype = "I4"}
+  local vir_vec11 = lVector.virtual_new(arg)
+  
+  -- create virtual vector vir_vec12 from vir_vec1
+  casted_X = ffi.cast("CMEM_REC_TYPE *", X)
+  casted_X[0].data = ffi.cast("int32_t *", casted_X[0].data) + 32768
+  arg = {map_addr = X, num_elements = 32769, qtype = "I4"}
+  local vir_vec12 = lVector.virtual_new(arg)
+  
+  vir_vec1:end_write()
+
+  --print("Virtual Vector 11")
+  val, nn_val = vir_vec11:get_one(0)
+  assert(val:to_num() == 1, "Mismatch, expected " .. tostring(1) .. ", actual " .. tostring(val:to_num()))
+  val, nn_val = vir_vec11:get_one(vir_vec11:length()-1)
+  assert(val:to_num() == 32768, "Mismatch, expected " .. tostring(32768) .. ", actual " .. tostring(val:to_num()))
+
+  --print("Virtual Vector 12")
+  val, nn_val = vir_vec12:get_one(0)
+  assert(val:to_num() == 32769, "Mismatch, expected " .. tostring(32769) .. ", actual " .. tostring(val:to_num()))
+  val, nn_val = vir_vec12:get_one(vir_vec12:length()-1)
+  assert(val:to_num() == 65537, "Mismatch, expected " .. tostring(65537) .. ", actual " .. tostring(val:to_num()))
+
+  -- create virtual vector vir_vec21 from vir_vec2
+  nX, X, nn_X = vir_vec2:start_write()
+
+  local arg = {map_addr = X, num_elements = 32768, qtype = "I4"}
+  local vir_vec21 = lVector.virtual_new(arg)
+
+  -- create virtual vector vir_vec22 from vir_vec2
+  casted_X = ffi.cast("CMEM_REC_TYPE *", X)
+  casted_X[0].data = ffi.cast("int32_t *", casted_X[0].data) + 32768
+  arg = {map_addr = X, num_elements = 32769, qtype = "I4"}
+  local vir_vec22 = lVector.virtual_new(arg)
+
+  vir_vec2:end_write()
+
+  --print("Virtual Vector 21")
+  val, nn_val = vir_vec21:get_one(0)
+  assert(val:to_num() == 65538, "Mismatch, expected " .. tostring(65538) .. ", actual " .. tostring(val:to_num()))
+  val, nn_val = vir_vec21:get_one(vir_vec21:length()-1)
+  assert(val:to_num() == 98305, "Mismatch, expected " .. tostring(98305) .. ", actual " .. tostring(val:to_num()))
+
+  --print("Virtual Vector 22")
+  val, nn_val = vir_vec22:get_one(0)
+  assert(val:to_num() == 98306, "Mismatch, expected " .. tostring(98306) .. ", actual " .. tostring(val:to_num()))
+  val, nn_val = vir_vec22:get_one(vir_vec22:length()-1)
+  assert(val:to_num() == 131074, "Mismatch, expected " .. tostring(131074) .. ", actual " .. tostring(val:to_num()))
+ 
+
+  -- Change Values
+  nX, X, nn_X = vir_vec11:start_write()
+  local data_ptr = get_ptr(X, vir_vec11:qtype())
+  data_ptr[0] = 0
+  data_ptr[vir_vec11:length()-1] = 0
+  vir_vec11:end_write()
+
+  nX, X, nn_X = vir_vec12:start_write()
+  local data_ptr = get_ptr(X, vir_vec12:qtype())
+  data_ptr[0] = 0
+  data_ptr[vir_vec12:length()-1] = 0
+  vir_vec12:end_write()
+
+  nX, X, nn_X = vir_vec21:start_write()
+  local data_ptr = get_ptr(X, vir_vec21:qtype())
+  data_ptr[0] = 0
+  data_ptr[vir_vec21:length()-1] = 0
+  vir_vec21:end_write()
+
+  nX, X, nn_X = vir_vec22:start_write()
+  local data_ptr = get_ptr(X, vir_vec22:qtype())
+  data_ptr[0] = 0
+  data_ptr[vir_vec22:length()-1] = 0
+  vir_vec22:end_write()
 
   parent:end_write()
+  
+  assert(parent:get_one(0):to_num() == 0)
+  assert(parent:get_one(32767):to_num() == 0)
+  assert(parent:get_one(32768):to_num() == 0)
+  assert(parent:get_one(65536):to_num() == 0)
+  assert(parent:get_one(65537):to_num() == 0)
+  assert(parent:get_one(98304):to_num() == 0)
+  assert(parent:get_one(98305):to_num() == 0)
+  assert(parent:get_one(131073):to_num() == 0)
 
   print("SUCCESS")
 end
