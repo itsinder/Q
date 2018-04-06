@@ -554,6 +554,7 @@ vec_new_virtual(
   ptr_vec->num_elements = num_elements;
   ptr_vec->is_nascent = false;
   ptr_vec->is_eov = true;
+  ptr_vec->is_memo = true;
   ptr_vec->open_mode = 0;
   ptr_vec->map_addr = map_addr;
   ptr_vec->map_len = (ptr_vec->num_elements * ptr_vec->field_size);
@@ -1134,18 +1135,22 @@ vec_start_write(
   else {
     go_BYE(-1);
   }
-  if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
-  if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
+  if ( ! ptr_vec->is_virtual ) {
+    if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
+    if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
+  }
   if ( ptr_vec->chunk     != NULL ) {
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
-  bool is_write = true;
-  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  ptr_vec->map_addr  = X;
-  ptr_vec->map_len   = nX;
-  ptr_vec->open_mode = 2; // for write
+  if ( ! ptr_vec->is_virtual ) {
+    bool is_write = true;
+    status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
+    if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+    ptr_vec->map_addr  = X;
+    ptr_vec->map_len   = nX;
+    ptr_vec->open_mode = 2; // for write
+  }
 BYE:
   return status;
 }
@@ -1163,12 +1168,14 @@ vec_end_write(
   else {
     go_BYE(-1);
   }
-  if ( ptr_vec->open_mode != 2    ) { go_BYE(-1); }
-  if ( ptr_vec->map_addr  == NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len   == 0    )  { go_BYE(-1); }
-  munmap(ptr_vec->map_addr, ptr_vec->map_len);
-  ptr_vec->map_addr  = NULL;
-  ptr_vec->map_len   = 0;
+  if ( ! ptr_vec->is_virtual ) {
+    if ( ptr_vec->open_mode != 2    ) { go_BYE(-1); }
+    if ( ptr_vec->map_addr  == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len   == 0    )  { go_BYE(-1); }
+    munmap(ptr_vec->map_addr, ptr_vec->map_len);
+    ptr_vec->map_addr  = NULL;
+    ptr_vec->map_len   = 0;
+  }
   ptr_vec->open_mode = 0; // not opened for read or write
 BYE:
   return status;
