@@ -10,6 +10,7 @@ return function (
   subs.fn = "<<operator>>_" .. in_qtype 
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype
   subs.c_code_for_operator = "<<c_code_for_operator>>"
+  subs.in_qtype = in_qtype
   subs.out_qtype = <<out_qtype>>
   subs.out_ctype = qconsts.qtypes[subs.out_qtype].ctype
   subs.c_mem = nil
