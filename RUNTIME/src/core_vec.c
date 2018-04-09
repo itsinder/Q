@@ -140,6 +140,8 @@ vec_cast(
     )
 {
   int status = 0;
+  // Not supporting vec_cast for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   //--- START ERROR CHECKING
   status = chk_field_type(new_field_type, new_field_size); cBYE(status);
   if ( !ptr_vec->is_eov ) { go_BYE(-1); }
@@ -417,6 +419,8 @@ vec_clone(
     )
 {
   int status = 0;
+  // Not supporting vec_clone for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   // supporting clone operation for non_eov vectors, so commenting below condition
   // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
   // quit if opened for writing
@@ -624,6 +628,7 @@ vec_new(
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = is_memo;
+  ptr_vec->is_virtual = false;
   strcpy(ptr_vec->field_type, qtype);
 
   if ( file_name != NULL ) { // filename provided for materialized vec
@@ -787,6 +792,8 @@ vec_memo(
     )
 {
   int status = 0;
+  // Not supporting vec_memo for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); } 
   if ( ptr_vec->is_eov == false ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
     if (( is_memo == false ) && ( ptr_vec->is_persist == true )) {
@@ -1243,6 +1250,8 @@ vec_persist(
     )
 {
   int status = 0;
+  // Not supporting vec_persist for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
   ptr_vec->is_persist = is_persist;
 BYE:
@@ -1279,6 +1288,8 @@ vec_eov(
     )
 {
   int status = 0;
+  // Not supporting vec_eov for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_eov       == true  ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent   == false ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0     ) { 
