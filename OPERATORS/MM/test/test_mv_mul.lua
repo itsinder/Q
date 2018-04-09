@@ -2,9 +2,29 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local diff = require 'Q/UTILS/lua/diff'
-
+local plstring = require 'pl.stringx'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/OPERATORS/MM/test/"
+
+local compare = function (file1, file2)
+  local f1 = assert(io.open(file1, "r"))
+  local s1 = f1:read("*a")
+  f1:close()
+  local f2 = assert(io.open(file2, "r"))
+  local s2 = f2:read("*a")
+  f2:close()
+
+  local a1 = plstring.split(s1, "\n")
+  local a2 = plstring.split(s2, "\n")
+
+  for i, v in pairs(a1) do
+    if(tonumber(v) ~= tonumber(a2[i])) then
+      return false
+    end
+  end
+  return true
+end
+
 
 local tests = {}
 tests.t1 = function()
