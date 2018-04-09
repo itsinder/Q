@@ -420,7 +420,7 @@ vec_clone(
 {
   int status = 0;
   // Not supporting vec_clone for virtual vector
-  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
+  if ( ptr_old_vec->is_virtual ) { go_BYE(-1); }
   // supporting clone operation for non_eov vectors, so commenting below condition
   // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
   // quit if opened for writing
