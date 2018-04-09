@@ -789,6 +789,12 @@ vec_memo(
   int status = 0;
   if ( ptr_vec->is_eov == false ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
+    if (( is_memo == false ) && ( ptr_vec->is_persist == true )) {
+      // you can not modify is_memo to false if is_persist flag is set to true 
+      // because this will push vector in a state where is_memo = false and is_persist = true which is not a proper state for vector
+      // for more discussion on this, please refer doc Q/RUNTIME/doc/memo_flag_setting.txt
+      go_BYE(-1);
+    }
     ptr_vec->is_memo = is_memo;
   }
   else {
