@@ -2,7 +2,6 @@
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local diff = require 'Q/UTILS/lua/diff'
-
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/OPERATORS/MM/test/"
 
