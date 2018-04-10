@@ -34,5 +34,6 @@ typedef struct _vec_rec_type {
   int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
   uint32_t chunk_sz; // number of bytes allocated for chunk
+  bool is_virtual; // indicates whether vector is virtual or not
 } VEC_REC_TYPE;
 #endif

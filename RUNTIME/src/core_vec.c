@@ -140,6 +140,8 @@ vec_cast(
     )
 {
   int status = 0;
+  // Not supporting vec_cast for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   //--- START ERROR CHECKING
   status = chk_field_type(new_field_type, new_field_size); cBYE(status);
   if ( !ptr_vec->is_eov ) { go_BYE(-1); }
@@ -343,6 +345,13 @@ vec_free(
 {
   int status = 0;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
+  if ( ptr_vec->is_virtual ) {
+    // No need to perform any garbage collection as vector is virtual
+    // parent vector will perform the garbage collection
+    // Here, it's Q programmer's responsibility to properly use the virtual vectors so as parent shouldn't get garbage collected before virtual vectors 
+    // i.e when virtual vectors are in use, parent's scope should be alive 
+    return status;
+  }
   if ( ( ptr_vec->map_addr  != NULL ) && ( ptr_vec->map_len > 0 ) )  {
     munmap(ptr_vec->map_addr, ptr_vec->map_len);
     ptr_vec->map_addr = NULL;
@@ -410,6 +419,8 @@ vec_clone(
     )
 {
   int status = 0;
+  // Not supporting vec_clone for virtual vector
+  if ( ptr_old_vec->is_virtual ) { go_BYE(-1); }
   // supporting clone operation for non_eov vectors, so commenting below condition
   // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
   // quit if opened for writing
@@ -461,6 +472,97 @@ vec_clone(
   else {
     ptr_new_vec->file_size = 0;
   }
+BYE:
+  return status;
+}
+
+int
+get_qtype_and_field_size(
+    const char * const field_type,
+    char * res_qtype,
+    int * res_field_size
+    )
+{
+  int status = 0;
+
+  if ( res_field_size == NULL ) { go_BYE(-1); }
+  if ( res_qtype == NULL ) { go_BYE(-1); }
+  if ( field_type == NULL ) { go_BYE(-1); }
+
+  char qtype[4]; int field_size = 0;
+  memset(qtype, '\0', 4);
+  if ( strcmp(field_type, "B1") == 0 ) {
+    // What should be the field_size for B1?
+    strcpy(qtype, field_type); field_size = 1; // SPECIAL CASE
+  }
+  else if ( strcmp(field_type, "I1") == 0 ) {
+    strcpy(qtype, field_type); field_size = 1;
+  }
+  else if ( strcmp(field_type, "I2") == 0 ) {
+    strcpy(qtype, field_type); field_size = 2;
+  }
+  else if ( strcmp(field_type, "I4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "I8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strcmp(field_type, "F4") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4;
+  }
+  else if ( strcmp(field_type, "F8") == 0 ) {
+    strcpy(qtype, field_type); field_size = 8;
+  }
+  else if ( strncmp(field_type, "SC:", 3) == 0 ) {
+    char *cptr = (char *)field_type + 3;
+    status = txt_to_I4(cptr, &field_size); cBYE(status);
+    if ( field_size < 2 ) { go_BYE(-1); }
+    strcpy(qtype, "SC");
+  }
+  else if ( strcmp(field_type, "SV") == 0 ) {
+    strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
+  }
+  else {
+    go_BYE(-1);
+  }
+  strcpy(res_qtype, qtype);
+  *res_field_size = field_size;
+BYE:
+  return status;
+}
+
+int
+vec_new_virtual(
+    VEC_REC_TYPE *ptr_vec,
+    char * map_addr,
+    const char * const field_type,
+    uint32_t chunk_size,
+    int64_t num_elements
+    )
+{
+  int status = 0;
+
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
+  if ( chunk_size == 0 ) { go_BYE(-1); }
+  if ( num_elements <= 0 ) { go_BYE(-1); }
+  if ( map_addr == NULL ) { go_BYE(-1); }
+  if ( field_type == NULL ) { go_BYE(-1); }
+  
+  int field_size = 0;
+  
+  status = get_qtype_and_field_size(field_type, ptr_vec->field_type, &field_size); cBYE(status);
+  status = chk_field_type(ptr_vec->field_type, field_size); cBYE(status);
+  ptr_vec->field_size = field_size;
+  ptr_vec->chunk_size = chunk_size;
+  ptr_vec->num_elements = num_elements;
+  ptr_vec->is_nascent = false;
+  ptr_vec->is_eov = true;
+  ptr_vec->is_memo = true;
+  ptr_vec->open_mode = 0;
+  ptr_vec->map_addr = map_addr;
+  ptr_vec->map_len = (ptr_vec->num_elements * ptr_vec->field_size);
+  ptr_vec->is_virtual = true;
 BYE:
   return status;
 }
@@ -526,6 +628,7 @@ vec_new(
   ptr_vec->field_size = field_size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_memo    = is_memo;
+  ptr_vec->is_virtual = false;
   strcpy(ptr_vec->field_type, qtype);
 
   if ( file_name != NULL ) { // filename provided for materialized vec
@@ -588,9 +691,11 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   // Open mode == 0 IFF map_addr == \bot
   // Open mode == 0 IFF map_len  == 0
   switch ( ptr_vec->open_mode ) { 
-    case 0 : 
-      if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
-      if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+    case 0 :
+      if ( ! ptr_vec->is_virtual ) { 
+        if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
+        if ( ptr_vec->map_len  != 0 ) { go_BYE(-1); }
+      }
       break;
     case 1 :
     case 2 :
@@ -687,8 +792,16 @@ vec_memo(
     )
 {
   int status = 0;
-  if ( ptr_vec->is_nascent ) {
+  // Not supporting vec_memo for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); } 
+  if ( ptr_vec->is_eov == false ) {
     if ( ptr_vec->chunk_num >= 1 ) { go_BYE(-1); }
+    if (( is_memo == false ) && ( ptr_vec->is_persist == true )) {
+      // you can not modify is_memo to false if is_persist flag is set to true 
+      // because this will push vector in a state where is_memo = false and is_persist = true which is not a proper state for vector
+      // for more discussion on this, please refer doc Q/RUNTIME/doc/memo_flag_setting.txt
+      go_BYE(-1);
+    }
     ptr_vec->is_memo = is_memo;
   }
   else {
@@ -788,11 +901,13 @@ vec_get(
   }
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
-      case 0 : 
-        status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
-        cBYE(status);
-        ptr_vec->map_addr = X;
-        ptr_vec->map_len  = nX;
+      case 0 :
+        if ( ! ptr_vec->is_virtual ) {
+          status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
+          cBYE(status);
+          ptr_vec->map_addr = X;
+          ptr_vec->map_len  = nX;
+        }
         ptr_vec->open_mode = 1; // indicating read */
         break;
       case 1 : /* opened in read mode */
@@ -1033,18 +1148,22 @@ vec_start_write(
   else {
     go_BYE(-1);
   }
-  if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
-  if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
+  if ( ! ptr_vec->is_virtual ) {
+    if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
+    if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
+  }
   if ( ptr_vec->chunk     != NULL ) {
     status = vec_clean_chunk(ptr_vec); cBYE(status);
   }
-  bool is_write = true;
-  status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
-  if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
-  ptr_vec->map_addr  = X;
-  ptr_vec->map_len   = nX;
-  ptr_vec->open_mode = 2; // for write
+  if ( ! ptr_vec->is_virtual ) {
+    bool is_write = true;
+    status = rs_mmap(ptr_vec->file_name, &X, &nX, is_write); cBYE(status);
+    if ( ( X == NULL ) || ( nX == 0 ) ) { go_BYE(-1); }
+    ptr_vec->map_addr  = X;
+    ptr_vec->map_len   = nX;
+    ptr_vec->open_mode = 2; // for write
+  }
 BYE:
   return status;
 }
@@ -1062,12 +1181,14 @@ vec_end_write(
   else {
     go_BYE(-1);
   }
-  if ( ptr_vec->open_mode != 2    ) { go_BYE(-1); }
-  if ( ptr_vec->map_addr  == NULL ) { go_BYE(-1); }
-  if ( ptr_vec->map_len   == 0    )  { go_BYE(-1); }
-  munmap(ptr_vec->map_addr, ptr_vec->map_len);
-  ptr_vec->map_addr  = NULL;
-  ptr_vec->map_len   = 0;
+  if ( ! ptr_vec->is_virtual ) {
+    if ( ptr_vec->open_mode != 2    ) { go_BYE(-1); }
+    if ( ptr_vec->map_addr  == NULL ) { go_BYE(-1); }
+    if ( ptr_vec->map_len   == 0    )  { go_BYE(-1); }
+    munmap(ptr_vec->map_addr, ptr_vec->map_len);
+    ptr_vec->map_addr  = NULL;
+    ptr_vec->map_len   = 0;
+  }
   ptr_vec->open_mode = 0; // not opened for read or write
 BYE:
   return status;
@@ -1129,6 +1250,8 @@ vec_persist(
     )
 {
   int status = 0;
+  // Not supporting vec_persist for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
   ptr_vec->is_persist = is_persist;
 BYE:
@@ -1165,6 +1288,8 @@ vec_eov(
     )
 {
   int status = 0;
+  // Not supporting vec_eov for virtual vector
+  if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_eov       == true  ) { return status; } // Nothing to do 
   if ( ptr_vec->is_nascent   == false ) { go_BYE(-1); }
   if ( ptr_vec->num_elements == 0     ) { 
