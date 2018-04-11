@@ -4,6 +4,7 @@ local function drop_nulls(x, sval)
   local qc  = require 'Q/UTILS/lua/q_core'
   local ffi = require 'Q/UTILS/lua/q_ffi'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
+  local qconsts = require 'Q/UTILS/lua/q_consts'
 
   assert(x)
   assert(type(x) == "lVector")
@@ -35,7 +36,10 @@ local function drop_nulls(x, sval)
   --xptr    = ffi.cast(subs.ctype .. " *", xptr)
   --nn_xptr = ffi.cast("uint64_t *", nn_xptr)
   assert(qc[func_name], "Unknown function " .. func_name)
-  qc[func_name](get_ptr(xptr), get_ptr(nn_xptr), get_ptr(sval:to_cmem()), xlen)
+  local casted_xptr = ffi.cast(qconsts.qtypes[x:fldtype()].ctype .. "*", get_ptr(xptr))
+  local casted_nn_xptr = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_xptr))
+  local casted_sval = ffi.cast(qconsts.qtypes[x:fldtype()].ctype .. "*", get_ptr(sval:to_cmem()))
+  qc[func_name](casted_xptr, casted_nn_xptr, casted_sval, xlen)
   x:drop_nulls()
   x:end_write()
   return x

@@ -50,13 +50,14 @@ return function(func_name, A, b)
     local Ai_len, Ai_chunk, nn_Ai_chunk = A[i]:get_all()
     assert(Ai_len == n, "A["..i.."] should have same height as b")
     assert(nn_Ai_chunk == nil, "A["..i.."] should have no nil elements")
-    Aptr[i-1] = get_ptr(Ai_chunk)
+    Aptr[i-1] = ffi.cast(qconsts.qtypes[b_qtype].ctype .. "*",get_ptr(Ai_chunk))
   end
 
   assert(qc[func_name], "Symbol not found " .. func_name)
-  local status = qc[func_name](Aptr, copy_xptr, get_ptr(bptr), n)
+  local casted_bptr = ffi.cast(qconsts.qtypes[b_qtype].ctype .. "*", get_ptr(bptr))
+  local status = qc[func_name](Aptr, copy_xptr, casted_bptr, n)
   assert(status == 0, "solver failed")
-  assert(qc["full_positive_solver_check"](Aptr, copy_xptr, get_ptr(bptr), n, 0),
+  assert(qc["full_positive_solver_check"](Aptr, copy_xptr, casted_bptr, n, 0),
          "solution returned by solver "..func_name.." is invalid")
 
   local x_col = lVector({qtype = b_qtype, gen = true, has_nulls=false})
