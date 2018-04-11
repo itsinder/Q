@@ -94,6 +94,16 @@ local function save_global(filename)
   - if filename arg is not provided then checks for the Q_METADATA_FILE env variable,
   - if Q_METADATA_FILE variable is set then uses this path or else uses default path present in q_consts.lua ($HOME/local/Q/meta/saved.meta)
   ]]
+  --[[
+  Q.save("/tmp/saved.meta") : passing absolute path as argument saves the state at given location in the given file
+  Q.save("saved.meta")      : passing filename saves the state at default location (prepends $HOME/local/Q/meta to filename)
+                              in the given file
+  Q.save()                  : without passing filename saves at qconsts.default_meta_file location 
+                              which points to "$HOME/local/Q/meta/saved.meta" value
+      -- if Q_METADATA_FILE is set, then it saves the file at the location specified in Q_METADATA_FILE environment variable
+      -- if Q_METADATA_FILE is not set, then it saves the state at the default location 
+        specified by the qconsts.default_meta_file  variable which points to "$HOME/local/Q/meta/saved.meta" value
+]]
   
   local default_file_name = qconsts.default_meta_file
   if not filename then

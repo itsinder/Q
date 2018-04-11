@@ -5,8 +5,8 @@ local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local c_to_txt	= require 'Q/UTILS/lua/C_to_txt'
 local plpath  	= require 'pl.path'
-local genbin 	= require 'Q/RUNTIME/test/generate_bin'
 local Q		= require 'Q'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local script_dir = os.getenv("Q_SRC_ROOT") .. "/RUNTIME/test/"
 assert(plpath.isdir(script_dir))
@@ -146,7 +146,7 @@ tests.t3 = function()
   -- generating .bin files required for materialized vector
   qc.generate_bin(num_values, q_type, script_dir .. "_in1_I4.bin", "linear" )
   q_type = "B1"
-  genbin.generate_bin(num_values, q_type, script_dir .. "_nn_in1.bin")
+  qc.generate_bin(num_values, q_type, script_dir .. "_nn_in1.bin", nil)
 
   local x = lVector(
   { qtype = "I4", file_name = script_dir .. "_in1_I4.bin", nn_file_name = script_dir .. "_nn_in1.bin"})

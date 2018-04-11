@@ -5,7 +5,6 @@ local Scalar  = require 'libsclr'
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local fns = require 'Q/RUNTIME/test/generate_csv'
-local genbin = require 'Q/RUNTIME/test/generate_bin'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qconsts     = require 'Q/UTILS/lua/q_consts'
 local qc     = require 'Q/UTILS/lua/q_core'
@@ -63,7 +62,7 @@ tests.t1 = function()
   -- generating .bin files required for materialized vector
   qc.generate_bin(num_values, qtype, path_to_here .. "_in1_I4.bin", "linear" )
   qtype = "B1"
-  genbin.generate_bin(num_values, qtype, path_to_here .. "_nn_in1.bin")
+  qc.generate_bin(num_values, qtype, path_to_here .. "_nn_in1.bin", nil)
   
   x = lVector(
   { qtype = "I4", file_name = path_to_here .. "_in1_I4.bin", nn_file_name = path_to_here .. "_nn_in1.bin"})
