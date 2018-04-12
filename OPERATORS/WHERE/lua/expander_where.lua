@@ -77,12 +77,12 @@ local function expander_where(op, a, b)
       local status = qc[func_name](casted_a_chunk, casted_b_chunk, aidx, a_len, casted_out_buf, 
           sz_out, n_out)
       assert(status == 0, "C error in WHERE")
-      if ( aidx[0] == a_len ) then
+      if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
       end
-    until ( n_out[0] == sz_out )
-    return tonumber(n_out[0]), out_buf, nil 
+    until ( tonumber(n_out[0]) == sz_out )
+    return tonumber(n_out[0]), out_buf, nil
   end
   return lVector( { gen = where_gen, has_nulls = false, qtype = a:qtype() } )
 end
