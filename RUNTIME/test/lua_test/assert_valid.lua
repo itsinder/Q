@@ -196,7 +196,7 @@ fns.assert_nascent_vector2_3 = function(vec, test_name, num_elements, gen_method
   assert(vec:check())
   
   -- Perform vec basic operations
-  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method)
+  local status = nascent_vec_basic_operations(vec, test_name, num_elements, gen_method, false)
   assert(status, "Failed to perform vec basic operations")
   
   -- Validate metadata after vec:eov(), should be nascent vector as is_memo is false
@@ -596,7 +596,7 @@ fns.assert_materialized_vector6 = function(vec, test_name, num_elements)
   local addr, len = vec:get_chunk()
   assert(addr)
   iptr = ffi.cast(qconsts.qtypes[md.field_type].ctype .. " *", get_ptr(addr))
-  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  assert(tonumber(iptr[0]) == test_value, "Value mismatch with expected value")
   
   assert(vec:check())
 

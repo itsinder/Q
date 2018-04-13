@@ -65,7 +65,7 @@ for i, v in ipairs(T) do
     -- calling standard output function
     local result
     if type(ret) == "table" then result = true else result = false end
-    utils["testcase_results"](v, "test_performance.lua", "Load_csv Performance Testing", "Performance Testing", result, "")
+    utils["testcase_results"](v, "Load_csv Performance Testing", "Performance Testing", result, "")
     
     -- delete respective csv file
     plfile.delete(csv_file_path) 

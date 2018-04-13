@@ -159,7 +159,7 @@ end
 tests.t9 = function()
   -- this is a regression test to guard against malloc'ing less
   -- than what user asked for 
-  local n = 1024*1048576
+  local n = 1048576
   local size = 4*n
   local c1 = assert(cmem.new(size, "I4"))
   local iptr = get_ptr(c1, "I4")

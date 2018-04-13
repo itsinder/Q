@@ -51,5 +51,6 @@ return function (
   subs.out_ctype   = out_ctype
   subs.len         = len
   subs.out_qtype   = qtype
+  subs.c_mem_type  = 'PERIOD_' .. qtype .. '_REC_TYPE *'
   return subs, tmpl
 end

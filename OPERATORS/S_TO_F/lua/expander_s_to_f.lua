@@ -3,6 +3,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local multiple_of_8 = require 'Q/UTILS/lua/multiple_of_8'
+
 -- local dbg = require 'debugger'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
@@ -40,7 +41,9 @@ return function (a, args)
     if ( chunk_size <= 0 ) then
       return 0
     else
-      qc[func_name](get_ptr(buff), chunk_size, get_ptr(subs.c_mem), lb)
+      local casted_buff = ffi.cast( qconsts.qtypes[out_qtype].ctype .. "*",  get_ptr(buff))
+      local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(subs.c_mem))
+      qc[func_name](casted_buff, chunk_size, casted_struct, lb)
       return chunk_size, buff
     end
   end
