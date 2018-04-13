@@ -69,7 +69,7 @@ local function get_element(col, rowidx)
     -- Allocate space for output buf and initialize to zero
     buf = buf or cmem.new(buf_size)
     buf:zero()
-    local buf_ptr = get_ptr(buf)
+    local buf_ptr = ffi.cast("char *", get_ptr(buf))
     -- Call respective q_to_txt function
     local q_to_txt_fn_name = qconsts.qtypes[qtype].ctype_to_txt
     status = qc[q_to_txt_fn_name](casted + chunk_idx, nil, buf_ptr, buf_size)

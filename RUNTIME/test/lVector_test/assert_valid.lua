@@ -421,7 +421,7 @@ fns.assert_nascent_vector8_1_1 = function(vec, test_name, num_elements, gen_meth
   len, base_data, nn_data = vec:get_all()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
-  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  assert(tonumber(iptr[0]) == test_value, "Value mismatch with expected value")
   
   return true
 end
@@ -649,7 +649,7 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   len, base_data, nn_data = vec:get_all()
   assert(base_data)
   iptr = ffi.cast(qconsts.qtypes[vec:qtype()].ctype .. " *", get_ptr(base_data))
-  assert(iptr[0] == test_value, "Value mismatch with expected value")
+  assert(tonumber(iptr[0]) == test_value, "Value mismatch with expected value")
   
   assert(vec:check())
 

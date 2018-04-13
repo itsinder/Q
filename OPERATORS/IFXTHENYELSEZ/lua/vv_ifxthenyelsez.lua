@@ -39,7 +39,11 @@ local function vv_ifxthenyelsez(x, y, z)
     assert(nn_zptr == nil, "Not prepared for null values in z")
     assert(xlen == ylen)
     assert(ylen == zlen)
-    local status = qc[func_name](get_ptr(xptr), get_ptr(yptr), get_ptr(zptr), get_ptr(wbuf), ylen)
+    local casted_xptr = ffi.cast(qconsts.qtypes[x:fldtype()].ctype .. "*", get_ptr(xptr))
+    local casted_yptr = ffi.cast(qconsts.qtypes[y:fldtype()].ctype .. "*", get_ptr(yptr))
+    local casted_zptr = ffi.cast(qconsts.qtypes[z:fldtype()].ctype .. "*", get_ptr(zptr))
+    local casted_wbuf = ffi.cast(qconsts.qtypes[y:fldtype()].ctype .. "*", get_ptr(wbuf))    
+    local status = qc[func_name](casted_xptr, casted_yptr, casted_zptr, casted_wbuf, ylen)
     assert(status == 0, "C error in vv_ifxthenyelsez")
     chunk_idx = chunk_idx + 1
     return ylen, wbuf, nil

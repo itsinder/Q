@@ -17,6 +17,8 @@ return function (
     subs.fn = "bin_search_ainb_" .. a_qtype .. "_" .. b_qtype
     tmpl = 'bin_search_ainb.tmpl'
   end
+  subs.a_qtype = a_qtype
+  subs.b_qtype = b_qtype
   subs.a_ctype = qconsts.qtypes[a_qtype].ctype
   subs.b_ctype = qconsts.qtypes[b_qtype].ctype
   subs.b_qtype = b_qtype

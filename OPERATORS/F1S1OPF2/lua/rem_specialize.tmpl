@@ -7,6 +7,7 @@ return function (
   local subs = {}
   subs.fn = "<<operator>>_" .. in_qtype 
   subs.in_ctype = assert(qconsts.qtypes[in_qtype].ctype)
+  subs.in_qtype = in_qtype
   subs.out_qtype = in_qtype
   subs.out_ctype = assert(qconsts.qtypes[subs.out_qtype].ctype)
   subs.scalar_ctype = subs.out_ctype 
