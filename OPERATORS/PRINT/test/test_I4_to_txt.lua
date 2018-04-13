@@ -39,7 +39,7 @@ tests.t1 = function()
     buf:zero()
     status = qc.I4_to_txt(X + i, nil, buf_copy, BUFLEN-1);
     if status == 0 then
-      print(ffi.string(buf))
+      print(ffi.string(buf_copy))
     else
       print("Error")
     end

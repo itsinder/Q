@@ -27,6 +27,7 @@ install_apt_get_dependencies(){
   sudo apt-get install libncurses5-dev -y # for lua-5.1.5
   sudo apt-get install libssl-dev -y # for QLI
   sudo apt-get install m4 -y         # for QLI
+  sudo apt-get install libreadline-dev -y 
 }
 
 install_lua_from_apt_get(){
@@ -122,10 +123,17 @@ install_debug_lua_from_source(){
 
 }
 
+clean_q(){
+  my_print "Cleaning Q"
+  cd ../UTILS/build
+  make clean
+  cd -
+}
+
 build_q(){
   my_print "Building Q"
   cd ../UTILS/build
-  make clean && make all
+  make all
   cd -
 }
 
@@ -203,7 +211,7 @@ install_apt_get_dependencies
 if [ $LUA_DEBUG -eq 1 ]
 then
   install_debug_lua_from_source
-  install_luaffi
+  #install_luaffi
 else
   install_lua_from_source
   install_luajit_from_source
@@ -228,11 +236,12 @@ sudo apt-get install liblapacke-dev liblapack-dev -y
 #  ######## Build Q #########
 my_print "Building Q"
 cleanup ../ #cleaning up all files
-build_q
+clean_q
 if [ $LUA_DEBUG -eq 1 ]
 then
   install_luaffi
 fi
+build_q
 run_q_tests
 #
 #

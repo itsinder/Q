@@ -60,7 +60,7 @@ local function load_csv(
   local x_idx = 0
   local sz_in_buf = 2048 -- TODO Undo hard coding 
   local in_buf  = assert(cmem.new(sz_in_buf))
-  local in_buf_ptr  = assert(get_ptr(in_buf))
+  local in_buf_ptr  = ffi.cast("char *", get_ptr(in_buf))
   local row_idx = 1
   local col_idx = 1
   local num_in_out_buf = 0
@@ -75,6 +75,7 @@ local function load_csv(
     end
     in_buf:zero();
     x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, sz_in_buf)
+    x_idx = tonumber(x_idx)
     assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
     if ( ( not is_hdr ) or ( is_hdr and consumed_hdr ) ) then 
       assert(x_idx > 0 , err.INVALID_INDEX_ERROR)

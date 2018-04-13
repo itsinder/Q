@@ -24,10 +24,9 @@ local function load_csv_fast_C(M, infile, is_hdr)
   
   local num_nulls = get_ptr(cmem.new(nC * ffi.sizeof("uint64_t")))
   num_nulls = ffi.cast("uint64_t *", num_nulls)
-
   local fld_name_width = 4 -- TODO Undo this hard coiding
   for i = 1, nC do
-    fldtypes[i-1]  = get_ptr(cmem.new(fld_name_width * ffi.sizeof("char")))
+    fldtypes[i-1]  = ffi.cast("char *", get_ptr(cmem.new(fld_name_width * ffi.sizeof("char"))))
     ffi.copy(fldtypes[i-1], M[i].qtype)
     is_load[i-1]   = M[i].is_load
     has_nulls[i-1] = M[i].has_nulls

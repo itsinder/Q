@@ -85,5 +85,6 @@ return function (
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
   subs.out_qtype = qtype
+  subs.c_mem_type = "RAND_" .. qtype .. "_REC_TYPE *"
   return subs, tmpl
 end
