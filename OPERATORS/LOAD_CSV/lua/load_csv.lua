@@ -5,7 +5,6 @@ local ffi           = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local plpath        = require 'pl.path'
-local plstring      = require 'pl.stringx'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
@@ -80,7 +79,7 @@ local function load_csv(
     if ( ( not is_hdr ) or ( is_hdr and consumed_hdr ) ) then 
       assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
       if ( M[col_idx].is_load ) then
-        local str = plstring.strip(ffi.string(in_buf_ptr))
+        local str = ffi.string(in_buf_ptr)
         local is_null = (str == "")
         -- Process null value case
         if is_null then
