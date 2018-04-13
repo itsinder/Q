@@ -81,7 +81,7 @@ fns.validate_values = function(vec, qtype, chunk_number, field_size )
     
     local expected = i*10 % qconsts.qtypes[qtype].max
   
-    local actual_val = casted[chunk_idx]
+    local actual_val = tonumber(casted[chunk_idx])
     if ( actual_val ~= expected ) then
       status = false
       print("Value mismatch at index " .. tostring(i) .. ", expected: " .. tostring(expected) .. " .... actual: " .. tostring(actual_val))

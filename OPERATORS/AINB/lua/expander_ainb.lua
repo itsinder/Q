@@ -44,8 +44,11 @@ local expander_ainb = function(op, a, b)
       return 0, nil, nil
     end
     assert(nn_aptr == nil, "Not prepared for null values in a")
-    -- Using get_prt() for aptr and bptr as lVector:chunk() returns CMEM structure
-    local status = qc[func_name](get_ptr(aptr), alen, get_ptr(bptr), blen, get_ptr(cbuf))
+    -- Using get_prt() for aptr and bptr as lVector:chunk() returns CMEM structure 
+    local casted_aptr = ffi.cast( qconsts.qtypes[subs.a_qtype].ctype .. "*", get_ptr(aptr))
+    local casted_bptr = ffi.cast( qconsts.qtypes[subs.b_qtype].ctype .. "*", get_ptr(bptr))
+    local casted_cbuf = ffi.cast( qconsts.qtypes['B1'].ctype .. "*", get_ptr(cbuf))
+    local status = qc[func_name]( casted_aptr, alen, casted_bptr, blen, casted_cbuf)
     assert(status == 0, "C error in ainb")
     chunk_idx = chunk_idx + 1
     return alen, cbuf, nil

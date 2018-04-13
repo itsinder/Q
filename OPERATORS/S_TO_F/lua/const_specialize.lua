@@ -23,6 +23,7 @@ return function (
   subs.fn = "const_" .. qtype
   subs.c_mem = val:to_cmem()
   subs.out_ctype = out_ctype
+  subs.c_mem_type = out_ctype .. "*"
   subs.len = len
   if ( ( qtype == "F4" ) or ( subs.qtype == "F8" ) )  then 
     subs.format = "%llf"

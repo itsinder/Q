@@ -56,8 +56,13 @@
         ffi.memset(get_ptr(nn_f2_buf), 0, qconsts.chunk_size)
       end
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
-      if f1_len > 0 then
-        qc[func_name](get_ptr(f1_chunk), get_ptr(nn_f1_chunk), f1_len, get_ptr(subs.c_mem), get_ptr(f2_buf), get_ptr(nn_f2_buf))
+      if f1_len > 0 then  
+        local casted_f1_chunk = ffi.cast(qconsts.qtypes[subs.in_qtype].ctype .. "*" ,get_ptr(f1_chunk))
+        local casted_nn_f1_chunk = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f1_chunk))
+        local casted_ptr_sval = ffi.cast(qconsts.qtypes[f1:fldtype()].ctype .. "*" ,get_ptr(subs.c_mem))
+        local casted_f2_buf = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. "*", get_ptr(f2_buf))
+        local casted_nn_f2_buf = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f2_buf))
+        qc[func_name](casted_f1_chunk, casted_nn_f1_chunk, f1_len, casted_ptr_sval, casted_f2_buf, casted_nn_f2_buf)
       end
       chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf
