@@ -10,3 +10,5 @@ $ bash test_vvadd.sh
 $ <luajit/lua> test_vvadd.lua
 
 You will get C execution time on console
+
+Note: num_elements are set to 100000000, if you want to update num_elements then modify test_vvadd.lua

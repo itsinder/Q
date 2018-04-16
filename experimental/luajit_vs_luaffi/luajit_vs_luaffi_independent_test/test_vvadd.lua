@@ -2,7 +2,7 @@ local ffi = require 'ffi'
 local plfile = require 'pl.file'
 local timer = require 'posix.time'
 
-local num_elements = 1000000
+local num_elements = 100000000
 
 local header_file = "vvadd_I4_I4_I4.h"
 ffi.cdef([[
