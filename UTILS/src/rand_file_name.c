@@ -4,17 +4,21 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 #include "q_macros.h"
 #include "_rand_file_name.h"
 
 static inline uint64_t RDTSC()
 {
-  return (uint64_t) clock();
-  // TODO P2 We should go back to following. 
-  // We went to clock because of Raspberry PI
-  // unsigned int hi, lo;
-  //   __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-  //     return ((uint64_t)hi << 32) | lo;
+#ifdef RASPBERRY_PI
+  unsigned int hi, lo;
+    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+#else
+  struct timeval Tps; struct timezone Tpf;
+  gettimeofday (&Tps, &Tpf);
+  return ((uint64_t )Tps.tv_sec + 1000000* (uint64_t )Tps.tv_usec);
+#endif
 }
 //START_FUNC_DECL
 int
