@@ -2,6 +2,8 @@ local ffi = require 'ffi'
 local plfile = require 'pl.file'
 local timer = require 'posix.time'
 
+local num_elements = 1000000
+
 local header_file = "vvadd_I4_I4_I4.h"
 ffi.cdef([[
   void * malloc(size_t size);
@@ -12,7 +14,6 @@ local qc = ffi.load('vvadd_I4_I4_I4.so')
 
 local function vvadd()
   local in_buf1, in_buf2, out_buf
-  local num_elements = 10000
   local num_width = 4
   local func_name = "vvadd_I4_I4_I4"
   
