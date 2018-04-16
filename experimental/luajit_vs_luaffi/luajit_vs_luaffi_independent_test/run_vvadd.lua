@@ -10,7 +10,7 @@ ffi.cdef([[
   void free(void *ptr);
   ]])
 ffi.cdef(plfile.read(header_file))
-local qc = ffi.load('vvadd_I4_I4_I4.so')
+local qc = ffi.load('libvvadd_I4_I4_I4.so')
 
 local function vvadd()
   local in_buf1, in_buf2, out_buf
@@ -25,7 +25,7 @@ local function vvadd()
   -- cast appropriately
   in_buf1 = ffi.cast("int32_t *", in_buf1)
   in_buf2 = ffi.cast("int32_t *", in_buf2)
-
+  out_buf = ffi.cast("int32_t *", out_buf)
   -- Initialize input arrays
   for i = 1, num_elements do
     in_buf1[i-1] = i
