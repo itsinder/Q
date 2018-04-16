@@ -103,7 +103,7 @@ return {
 
     -- SV type contains special character like double quotes etc
     { testcase_no = 27, meta = "gm_valid_escape_char.lua", data = "valid_escape.csv", category= "category2",
-          output_regex = {"This is valid text containing \"quoted\" text and , comma ","ok","Some random valid string","valid data"},          name = "valid_escape_char" 
+          output_regex = {"This is valid text containing \"quoted\" text and , comma","ok","Some random valid string","valid data"},          name = "valid_escape_char" 
     },
     -- CSV file with end of line \n    
     --{ meta=  "gm_eoln.lua", data= "file_with_eol.csv", category= "category2",

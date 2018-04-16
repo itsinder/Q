@@ -60,6 +60,9 @@ local function load_csv(
   local sz_in_buf = 2048 -- TODO Undo hard coding 
   local in_buf  = assert(cmem.new(sz_in_buf))
   local in_buf_ptr  = ffi.cast("char *", get_ptr(in_buf))
+  -- in_lbuf is required for get_cell to perform the trim operation
+  local in_lbuf = assert(cmem.new(sz_in_buf))
+  local in_lbuf_ptr  = ffi.cast("char *", get_ptr(in_lbuf))
   local row_idx = 1
   local col_idx = 1
   local num_in_out_buf = 0
@@ -73,7 +76,8 @@ local function load_csv(
       is_last_col = true;
     end
     in_buf:zero();
-    x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, sz_in_buf)
+    in_lbuf:zero();
+    x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, in_lbuf_ptr, sz_in_buf)
     x_idx = tonumber(x_idx)
     assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
     if ( ( not is_hdr ) or ( is_hdr and consumed_hdr ) ) then 

@@ -13,6 +13,7 @@ get_cell(
     size_t xidx,
     bool is_last_col,
     char *buf,
+    char *lbuf,
     size_t bufsz
     )
 //STOP_FUNC_DECL
@@ -26,9 +27,8 @@ get_cell(
   if ( nX == 0 ) { go_BYE(-1); }
   if ( xidx == nX ) { go_BYE(-1); }
   if ( buf == NULL ) { go_BYE(-1); }
+  if ( lbuf == NULL ) { go_BYE(-1); }
   if ( bufsz == 0 ) { go_BYE(-1); }
-  char *lbuf = NULL;
-  lbuf = malloc(bufsz);
   memset(lbuf, '\0', bufsz);
   memset(buf, '\0', bufsz);
   char last_char;
@@ -49,7 +49,10 @@ get_cell(
   //----------------------------
   for ( ; ; ) { 
     if ( xidx > nX ) { go_BYE(-1); }
-    if ( xidx == nX ) { goto BYE; }
+    if ( xidx == nX ) {
+      status = trim(lbuf, buf, bufsz); cBYE(status);
+      return xidx;
+    }
     if ( X[xidx] == last_char ) {
       xidx++; // jumo over last char;
       if ( start_dquote ) { 
@@ -62,7 +65,8 @@ get_cell(
         }
         xidx++;
       }
-      goto BYE;
+      status = trim(lbuf, buf, bufsz); cBYE(status);
+      return xidx;
     }
     //---------------------------------
     if ( X[xidx] == bslash ) {
@@ -77,8 +81,5 @@ get_cell(
   }
 BYE:
   if ( status < 0 ) { xidx = 0; }
-  // Trim the buffer content
-  status = trim(lbuf, buf, bufsz); cBYE(status);
-  free_if_non_null(lbuf);
   return xidx;
 }
