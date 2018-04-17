@@ -5,8 +5,8 @@ local function sumby(x, g, ng, optargs)
   assert(g, "no arg y to sumby")
   assert(type(x) == "lVector",  "x is not lVector")
   assert(type(g) == "lVector",  "g is not lVector")
-  -- TODO: assert on type(ng), either number of scalar
   assert(ng > 0)
+  assert(type(ng) == "number")
   local status, col = pcall(expander, "sumby", x, g, ng, optargs)
   if not status then print(col) end
   assert(status, "Could not execute SUMBY")

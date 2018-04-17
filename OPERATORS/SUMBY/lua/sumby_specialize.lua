@@ -9,6 +9,7 @@ return function (
   local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
   assert(pltable.find(val_qtypes, val_qtype))
   assert(pltable.find(grpby_qtypes, grpby_qtype))
+  local out_qtype
   if ( ( val_qtype == "F4" ) or ( val_qtype == "F8" ) ) then 
     out_qtype = "F8"
   else

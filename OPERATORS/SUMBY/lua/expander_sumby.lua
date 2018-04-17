@@ -10,9 +10,9 @@ local function expander_sumby(op, a, b, nb, optargs)
   assert(op == "sumby")
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
-  -- TODO: assert on type(nb), eigher scalar or number
+  assert(type(nb) == "number")
   assert(nb > 0)
-  local sp_fn_name = "Q/OPERATORS/WHERE/lua/sumby_specialize"
+  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
 
   local is_safe = false
@@ -26,13 +26,15 @@ local function expander_sumby(op, a, b, nb, optargs)
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
-  
-  local sz_out          = qconsts.chunk_size 
+  local sz_out = nb
   local sz_out_in_bytes = sz_out * qconsts.qtypes[subs.out_qtype].width
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  
+  local is_memo
+  if nb > qconsts.chunk_size then
+    is_memo = true
+  end
   local function sumby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
@@ -43,8 +45,8 @@ local function expander_sumby(op, a, b, nb, optargs)
       first_call = false
     end
     while true do
-      local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
-      local b_len, b_chunk, b_nn_chunk = b:chunk(a_chunk_idx)
+      local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
+      local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
       assert(a_len == b_len)
       if a_len == 0 then
         return 0, nil, nil 
@@ -63,7 +65,7 @@ local function expander_sumby(op, a, b, nb, optargs)
       end
     end
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype } )
+  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype, is_memo = is_memo } )
 end
 
 return expander_sumby
