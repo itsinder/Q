@@ -238,16 +238,16 @@ load_csv_fast(
       is_last_col = false;
     }
 
-    xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, lbuf, BUFSZ);
+    if ( is_trim[col_ctr] ) {
+      xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, lbuf, BUFSZ);
+    }
+    else {
+      xidx = get_cell(mmap_file, file_size, xidx, is_last_col, buf, NULL, BUFSZ);
+    }
+
     if ( xidx == 0 ) { 
       go_BYE(-1); } //means the file is empty or some error
     if ( xidx > file_size ) { break; } // check == or >= 
-    // Commented the below trimming logic as get_cell is doing it internally
-/*
-    if ( is_trim[col_ctr] ) { 
-      status = trim(lbuf, buf, BUFSZ); cBYE(status);
-    }
-*/
 /*
     fprintf(stderr, "%llu, %u, %llu, %s \n", 
        (unsigned long long)row_ctr, col_ctr, 

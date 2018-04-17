@@ -22,12 +22,16 @@ get_cell(
   char dquote = '"'; char comma = ','; 
   char bslash = '\\'; char eoln = '\n';
   uint32_t bufidx = 0;
+  bool is_trim = true;
   //--------------------------------
   if ( X == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
   if ( xidx == nX ) { go_BYE(-1); }
   if ( buf == NULL ) { go_BYE(-1); }
-  if ( lbuf == NULL ) { go_BYE(-1); }
+  if ( lbuf == NULL ) {
+    is_trim = false;
+    lbuf = buf;
+  }
   if ( bufsz == 0 ) { go_BYE(-1); }
   memset(lbuf, '\0', bufsz);
   memset(buf, '\0', bufsz);
@@ -50,7 +54,9 @@ get_cell(
   for ( ; ; ) { 
     if ( xidx > nX ) { go_BYE(-1); }
     if ( xidx == nX ) {
-      status = trim(lbuf, buf, bufsz); cBYE(status);
+      if ( is_trim ) {
+        status = trim(lbuf, buf, bufsz); cBYE(status);
+      }
       return xidx;
     }
     if ( X[xidx] == last_char ) {
@@ -65,7 +71,9 @@ get_cell(
         }
         xidx++;
       }
-      status = trim(lbuf, buf, bufsz); cBYE(status);
+      if ( is_trim ) {
+        status = trim(lbuf, buf, bufsz); cBYE(status);
+      }
       return xidx;
     }
     //---------------------------------

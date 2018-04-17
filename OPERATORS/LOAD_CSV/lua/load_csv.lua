@@ -75,9 +75,12 @@ local function load_csv(
     if ( col_idx == num_cols ) then
       is_last_col = true;
     end
-    in_buf:zero();
-    in_lbuf:zero();
-    x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, in_lbuf_ptr, sz_in_buf)
+    if M[col_idx].qtype == "SV" or M[col_idx].qtype == "SC" then
+      -- Here, we don't want to perform trim operation in get_cell
+      x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, nil, sz_in_buf)
+    else
+      x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, in_lbuf_ptr, sz_in_buf)
+    end
     x_idx = tonumber(x_idx)
     assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
     if ( ( not is_hdr ) or ( is_hdr and consumed_hdr ) ) then 
