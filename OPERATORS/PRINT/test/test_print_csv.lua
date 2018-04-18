@@ -112,6 +112,9 @@ for i, v in ipairs(T) do
       end
     
     end
+    if v.category == "category1_1" then
+      file.delete(test_input_dir .. D)
+    end
   end
 end
 return test_print 

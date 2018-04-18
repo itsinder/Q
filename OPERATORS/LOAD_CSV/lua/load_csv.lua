@@ -5,7 +5,6 @@ local ffi           = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local plpath        = require 'pl.path'
-local plstring      = require 'pl.stringx'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
@@ -61,6 +60,9 @@ local function load_csv(
   local sz_in_buf = 2048 -- TODO Undo hard coding 
   local in_buf  = assert(cmem.new(sz_in_buf))
   local in_buf_ptr  = ffi.cast("char *", get_ptr(in_buf))
+  -- in_lbuf is required for get_cell to perform the trim operation
+  local in_lbuf = assert(cmem.new(sz_in_buf))
+  local in_lbuf_ptr  = ffi.cast("char *", get_ptr(in_lbuf))
   local row_idx = 1
   local col_idx = 1
   local num_in_out_buf = 0
@@ -73,14 +75,18 @@ local function load_csv(
     if ( col_idx == num_cols ) then
       is_last_col = true;
     end
-    in_buf:zero();
-    x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, sz_in_buf)
+    if M[col_idx].qtype == "SV" or M[col_idx].qtype == "SC" then
+      -- Here, we don't want to perform trim operation in get_cell
+      x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, nil, sz_in_buf)
+    else
+      x_idx = qc.get_cell(X, nX, x_idx, is_last_col, in_buf_ptr, in_lbuf_ptr, sz_in_buf)
+    end
     x_idx = tonumber(x_idx)
     assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
     if ( ( not is_hdr ) or ( is_hdr and consumed_hdr ) ) then 
       assert(x_idx > 0 , err.INVALID_INDEX_ERROR)
       if ( M[col_idx].is_load ) then
-        local str = plstring.strip(ffi.string(in_buf_ptr))
+        local str = ffi.string(in_buf_ptr)
         local is_null = (str == "")
         -- Process null value case
         if is_null then

@@ -7,6 +7,7 @@ local fns = require 'Q/OPERATORS/LOAD_CSV/test/testcases/handle_category'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath = require 'pl.path'
 local gen_csv = require 'Q/RUNTIME/test/generate_csv'
+local plfile = require 'pl.file'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/testcases"
@@ -55,6 +56,9 @@ for i, v in ipairs(T) do
       fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
       utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
       assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
+    end
+    if v.category == "category2_1" then
+      plfile.delete(test_input_dir .. D)
     end
   end
 end

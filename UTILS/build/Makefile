@@ -29,6 +29,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
 	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua clean
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua clean
+	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -77,6 +78,9 @@ ainb:
 
 where:
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/
+
+sumby:
+	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua/
 
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
