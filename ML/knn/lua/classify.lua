@@ -1,6 +1,6 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
-local chk_params = require 'chk_params'
+local chk_params = require 'Q/ML/knn/lua/chk_params'
 
 local function classify(
   T, -- table of m lvectors of length n
@@ -10,14 +10,15 @@ local function classify(
   cnts -- lVector of length m (optional)
   )
   local nT, n, ng = chk_params(T, g, x, alpha)
+  print(nT, n, ng)
   dk = {}
   for i = 1, nT do 
-    dk[i] = Q.vsmul(Q.sqr(Q.vssub(T[i], x[i])), alpha[i])
+    dk[i] = Q.vsmul(Q.pow(Q.vssub(T[i], x[i]), 2), alpha[i])
   end
-  local one = Scalar.new(0, "F4")
+  local one = Scalar.new(1, "F4")
   local d = Q.const({ val = one, qtype = "F4", len = n})
-  for i = 1, nx do 
-    d = Q.vvsum(dk[i], d):eval()
+  for i = 1, nT do 
+    d = Q.vvadd(dk[i], d):eval()
   end
   d = Q.reciprocal(d):eval()
   -- Now, we need to sum d grouped by value of goal attribute
@@ -34,3 +35,5 @@ local function classify(
   --=============================
   return rslt 
 end
+
+return classify
