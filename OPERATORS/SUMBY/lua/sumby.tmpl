@@ -6,11 +6,12 @@ return require 'Q/UTILS/lua/code_gen' {
 ${includes}
 extern int
 ${fn}(  
-      const ${in1_ctype} * restrict val_fld,  
+      const ${val_ctype} * restrict val_fld,  
       uint64_t nR_in,
-      const ${in2_ctype} * restrict grpby_fld,  
+      const ${grpby_ctype} * restrict grpby_fld,  
       uint64_t nR_out,
-      ${out_ctype} * restrict out
+      ${out_ctype} * restrict out,
+      bool is_safe
       ) 
 ;
 
@@ -31,12 +32,17 @@ ${fn}(
 
 { 
   int status = 0;
-  for ( uint64_t i = 0; i < nR_in; i++ ) { 
-    ${val_ctype} val = val_fld[i];
-    ${grpby_cytpe} grpby = grpby_fld[i];
-    if ( is_safe ) {  // TODO P3 Will this if be branch predicted properly?
+
+  if ( is_safe ) {
+    for ( uint64_t i = 0; i < nR_in; i++ ) {
+      ${grpby_ctype} grpby = grpby_fld[i];
       if ( ( grpby < 0 ) || ( grpby > nR_out ) ) { go_BYE(-1); }
     }
+  }
+
+  for ( uint64_t i = 0; i < nR_in; i++ ) { 
+    ${val_ctype} val = val_fld[i];
+    ${grpby_ctype} grpby = grpby_fld[i];
     out[grpby] += val;
   } 
 BYE:

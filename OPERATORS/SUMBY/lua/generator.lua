@@ -5,9 +5,6 @@
   if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
   if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 
-  local operator_file = assert(arg[1])
-  assert(plpath.isfile(operator_file))
-  local operators = dofile(operator_file)
   local val_qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
   local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
 
@@ -26,6 +23,9 @@
         gen_code.dotc(subs, tmpl, srcdir)
         print("Produced ", subs.fn)
         num_produced = num_produced + 1
+      else
+        print(subs)
+        break
       end
     end
   end
