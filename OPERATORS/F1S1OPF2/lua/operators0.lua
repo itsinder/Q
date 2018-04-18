@@ -1,7 +1,6 @@
 return { 
   "exp", 
   "sqrt",
-  "sqr",
   "log", 
   "incr", 
   "decr", 

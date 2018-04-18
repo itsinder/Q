@@ -8,6 +8,10 @@ y = string.gsub(x, "<<operator>>", "vsadd")
 y = string.gsub(y, "<<c_code>>", "c = a + b")
 plfile.write("vsadd_specialize.lua", y)
 --=======================
+y = string.gsub(x, "<<operator>>", "pow")
+y = string.gsub(y, "<<c_code>>", "c = pow((double)a, (double)b)")
+plfile.write("pow_specialize.lua", y)
+--=======================
 y = string.gsub(x, "<<operator>>", "vssub")
 y = string.gsub(y, "<<c_code>>", "c = a - b")
 plfile.write("vssub_specialize.lua", y)
@@ -111,11 +115,6 @@ y = string.gsub(x, "<<operator>>", "sqrt")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = sqrt((double)a);")
 y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
 plfile.write("sqrt_specialize.lua", y)
---=======================
-y = string.gsub(x, "<<operator>>", "sqr")
-y = string.gsub(y, "<<c_code_for_operator>>", "c = pow((double)a, 2);")
-y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
-plfile.write("sqr_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "log")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = log((double)a);")
