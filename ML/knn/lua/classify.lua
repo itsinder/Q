@@ -10,10 +10,11 @@ local function classify(
   cnts -- lVector of length m (optional)
   )
   local nT, n, ng = chk_params(T, g, x, alpha)
-  print(nT, n, ng)
   dk = {}
-  for i = 1, nT do 
-    dk[i] = Q.vsmul(Q.pow(Q.vssub(T[i], x[i]), 2), alpha[i])
+  local i = 1
+  for key, val in pairs(T) do
+    dk[i] = Q.vsmul(Q.pow(Q.vssub(val, x[i]), 2), alpha[i])
+    i = i + 1
   end
   local one = Scalar.new(1, "F4")
   local d = Q.const({ val = one, qtype = "F4", len = n})

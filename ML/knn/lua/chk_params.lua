@@ -1,5 +1,6 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
+local utils = require 'Q/UTILS/lua/utils'
 
 local function chk_params(
   T, -- table of m lvectors of length n
@@ -15,16 +16,16 @@ local function chk_params(
   --=====================================
   assert(type(T) == "table")
   for k, v in pairs(T) do
+    n = v:length()
+    break
+  end
+  for k, v in pairs(T) do
     assert(type(v) == "lVector")
     assert(v:fldtype() == "F4")
-    if ( k == 1 ) then 
-      n = v:length()
-    else
-      assert(n == v:length(), tostring(n) .. " != " .. tostring(v:length()))
-    end
+    assert(n == v:length())
     nT = nT + 1
   end
-  assert(#T == nT)
+  assert(utils.table_length(T) == nT)
   --=====================================
   assert(type(alpha) == "table")
   for k, v in pairs(alpha) do
