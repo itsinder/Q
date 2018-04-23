@@ -132,4 +132,14 @@ fns.sort_table = function(cols, sort_order)
   
 end
 
+fns.get_index = function(vec, value)
+  local val, nn_val
+  for i = 0, vec:length() - 1 do
+    val, nn_val = vec:get_one(i)
+    if val:to_num() == value then
+      return i
+    end
+  end
+end
+
 return fns

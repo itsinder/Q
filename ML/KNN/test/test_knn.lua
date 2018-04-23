@@ -1,5 +1,5 @@
 local Q = require 'Q'
-local classify = require 'Q/ML/knn/lua/classify'
+local classify = require 'Q/ML/KNN/lua/classify'
 local utils = require 'Q/UTILS/lua/utils'
 local Scalar = require 'libsclr'
 local tests = {}
@@ -56,13 +56,13 @@ end
 
 tests.t3 = function()
   -- TODO: add load code for room_occupancy data
-  -- Load the iris flower data
+  -- Load room_occupancy data
   local saved_file = os.getenv("Q_METADATA_DIR") .. "/room_occupancy.saved"
   dofile(saved_file)
 
   local g_vec = T['occupy_status']
 
-  -- Remove 'flower_type' from table
+  -- Remove 'occupy_status' from table
   T['occupy_status'] = nil
 
   -- predict_input {1.643221, 0.281781, -0.613726, 0.004625, 0.797606}, prediction result = 0
@@ -73,8 +73,79 @@ tests.t3 = function()
 
   local result = classify(T, g_vec, x, alpha)
   assert(type(result) == "lVector")
-  Q.print_csv(result)
+  local max = Q.max(result):eval():to_num()
+  local index = utils.get_index(result, max)
+  print(max, index)
   print("completed t3 successfully")
+end
+
+local get_accuracy = function(expected_val, predicted_val)
+  assert(type(expected_val) == "table")
+  assert(type(predicted_val) == "table")
+  assert(#expected_val == #predicted_val)
+  local correct = 0
+  for i = 1, #expected_val do
+    if expected_val[i] == predicted_val[i] then
+      correct = correct + 1
+    end
+  end
+  return (correct/#expected_val)*100
+end
+
+tests.t4 = function()
+  -- TODO: add load code for room_occupancy data
+  -- Load room_occupancy_train data
+  local saved_file = os.getenv("Q_METADATA_DIR") .. "/room_occupancy_train.saved"
+  dofile(saved_file)
+
+  local g_vec_train = T_train['occupy_status']
+
+  -- Remove 'occupy_status' from table
+  T_train['occupy_status'] = nil
+
+  -- Load room_occupancy_test data
+  saved_file = os.getenv("Q_METADATA_DIR") .. "/room_occupancy_test.saved"
+  dofile(saved_file)
+
+  local g_vec_test = T_test['occupy_status']
+
+  -- Remove 'occupy_status' from table
+  T_test['occupy_status'] = nil
+
+  local test_sample_count = g_vec_test:length()
+
+  -- prepate test_table
+  local val, nn_val
+  local X = {}
+  local expected_predict_value = {}
+  local actual_predict_value = {}
+  for len = 1, test_sample_count do
+    local x = {}
+    for i, v in pairs(T_test) do
+      val, nn_val = v:get_one(len-1)
+      x[#x+1] = Scalar.new(val:to_num(), "F4")
+    end
+    expected_predict_value[len] = g_vec_test:get_one(len-1):to_num()
+    X[len] = x
+  end
+
+  local alpha_val = Scalar.new(1, "F4")
+  alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
+
+  local result
+  local max
+  local index
+  for i = 1, test_sample_count do
+    -- predict_input
+    result = classify(T_train, g_vec_train, X[i], alpha)
+    assert(type(result) == "lVector")
+    max = Q.max(result):eval():to_num()
+    index = utils.get_index(result, max)
+    actual_predict_value[i] = index
+  end
+  local accuracy = get_accuracy(expected_predict_value, actual_predict_value)
+  print("Accuracy = ", accuracy)
+  print("completed t4 successfully")
 end
 
 return tests

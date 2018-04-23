@@ -1,6 +1,6 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
-local chk_params = require 'Q/ML/knn/lua/chk_params'
+local chk_params = require 'Q/ML/KNN/lua/chk_params'
 
 local function classify(
   T, -- table of m lvectors of length n
