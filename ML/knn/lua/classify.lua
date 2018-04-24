@@ -6,16 +6,18 @@ local function classify(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
   x, -- table of m Scalars 
+  exponent, -- Scalar
   alpha, -- table of m Scalars (scale for different attributes)
   cnts -- lVector of length m (optional)
   )
+  local sone = Scalar.new(1, "F4")
+  --==============================================
   local nT, n, ng = chk_params(T, g, x, alpha)
   dk = {}
   for i = 1, nT do 
-    dk[i] = Q.vsmul(Q.sqr(Q.vssub(T[i], x[i])), alpha[i])
+    dk[i] = Q.vsmax(Q.abs(Q.vsmul(Q.pow(Q.vssub(T[i], x[i]), exponent), alpha[i])), sone)
   end
-  local one = Scalar.new(0, "F4")
-  local d = Q.const({ val = one, qtype = "F4", len = n})
+  local d = Q.const({ val = sone, qtype = "F4", len = n})
   for i = 1, nx do 
     d = Q.vvsum(dk[i], d):eval()
   end
@@ -25,7 +27,7 @@ local function classify(
   -- Scale by original population, calculate cnts if not given
   local l_cnts
   if ( not cnts ) then 
-    local vone = Q.const({ val = one, qtype = "F4", len = n})
+    local vone = Q.const({ val = sone, qtype = "F4", len = n})
     l_cnts = Q.sumby(vone, g, ng)
   else
     l_cnts = cnts

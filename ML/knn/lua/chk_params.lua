@@ -5,6 +5,7 @@ local function chk_params(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
   x, -- lVector of length m
+  exponent, -- Scalar
   alpha -- table of m Scalars (scale for different attributes)
   )
   -- START: Checking
@@ -12,6 +13,12 @@ local function chk_params(
   local nx = 0
   local nalpha = 0
   local n
+
+  local sone = Scalar.new(1, "F4")
+  --==============================================
+  assert(type(exponent) == "Scalar")
+  assert(exponent:fldtype() == "F4")
+  assert(exponent >= sone)
   --=====================================
   assert(type(T) == "table")
   for k, v in pairs(T) do 
