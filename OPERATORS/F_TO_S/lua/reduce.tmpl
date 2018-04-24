@@ -10,6 +10,8 @@ return require 'Q/UTILS/lua/code_gen' {
 typedef struct _reduce_${op}_${qtype}_args {
   ${reduce_ctype} ${op}_val;
   uint64_t num; // number of non-null elements inspected
+  uint64_t ${op}_index; // storing min value index
+  uint32_t chunk_idx; // storing the chunk_idx of min value
   } REDUCE_${op}_${qtype}_ARGS;
   
 ${includes}
@@ -47,6 +49,8 @@ ${fn}(
   }
   
   ${reduce_ctype} curr_val = ptr_args->${op}_val;
+  ${reduce_ctype} curr_index = ptr_args->${op}_index;
+  uint32_t curr_chunk_idx =  ptr_args->chunk_idx;
   uint32_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 
   uint64_t block_size = nR / num_threads;
@@ -56,16 +60,28 @@ ${fn}(
     uint64_t ub = lb + block_size;
     if ( t == (num_threads-1) ) { ub = nR; }
     ${reduce_ctype} lval = ${initial_val};
+    uint64_t index = 0;
+    uint32_t chk_idx = 0;
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       lval = ${reducer}(lval, inv);
+      if (lval == inv){
+        index = i;
+        chk_idx = idx;
+      }
     }
 // TODO #pragma omp critical (_${fn})
     {
     curr_val = ${t_reducer}(curr_val, lval);
+    if (curr_val == lval){
+       curr_index = index;
+       curr_chunk_idx = chk_idx;
+    }
     }
   } 
   ptr_args->${op}_val = curr_val;
+  ptr_args->${op}_index = curr_index;
+  ptr_args->chunk_idx = curr_chunk_idx;
   ptr_args->num     += nR;
   return status;
 }

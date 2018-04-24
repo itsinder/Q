@@ -41,7 +41,7 @@ return function (a, x, y, optargs )
         end
       end
       return reduce_struct
-    end 
+    end
   end
   local s =  Reducer ( { gen = lgen, func = getter, value = reduce_struct} )
   return s
