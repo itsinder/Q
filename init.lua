@@ -28,6 +28,7 @@ require "Q/OPERATORS/APPROX/FREQUENT/lua/approx_frequent"
 require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
 require 'Q/OPERATORS/WHERE/lua/where'
+require 'Q/OPERATORS/SUMBY/lua/sumby'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'

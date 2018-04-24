@@ -14,7 +14,7 @@ all : libf1s1opf2.so _f1s1opf2.lua
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
 	abs_specialize.lua \
-	sqrt_specialize.lua \
+	sqrt_specialize.lua sqr_specialize.lua \
 	log_specialize.lua exp_specialize.lua \
 	logit_specialize.lua logit2_specialize.lua 
 	luajit gen_specializers.lua f1opf2
