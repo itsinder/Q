@@ -8,7 +8,7 @@
 \bi
 \item Let \(F = \{f_i\}\) be a table of F4 vectors, representing the features.
 \item Let \(g\) be a B1 vector, representing the outcome which we wish to
-predict
+predict. We will refer to the value 1 as positive and 0 as negative.
 \ei
 
 A decision tree is a Lua table where each element identifies
@@ -33,10 +33,10 @@ Let \(\alpha\) be minimum benefit required to continue branching \\
 Initialize, \(T = \{\}\) \\
 \(F, g\) as described above \\
 {\bf function } DT(T, F, g) \+ \ \\
-  \(n_P, n = Q.sum(g) \) \\
-  {\bf forall} \(f \in F:~ s(f), b(f) = \mathrm{Benefit}(f, g, n_N, n_P)\) \\ 
-  Let \(f'\) be feature with maximum benefit \\
-  {\bf if} benefit \(\geq \alpha\) {\bf then } \+  \\
+  \(n_P, n = Q.sum(g); n_N = n - n_P \) \\
+  {\bf forall} \(f \in F:~ b(f), s(f) = \mathrm{Benefit}(f, g, n_N, n_P)\) \\ 
+  Let \(f'\) be feature with maximum \(b(f) = \alpha'\) \\
+  {\bf if} \(\alpha' \geq \alpha\) {\bf then } \+  \\
     \(x = Q.vsgt(f', s(f'))\) \\
     \(n_R, n  = Q.sum(x) \) \\
     \(F_L = F_R = \{\}\) \\
@@ -67,29 +67,29 @@ Initialize, \(T = \{\}\) \\
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= 
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 {\bf function } \(\mathrm{Benefit}(f, g, n_N, n_P)\) \+  \\
-  \(p_{max} = -\infty\) \\ 
-  \(b_{opt} = \bot\) \\ 
-  \(f', g' = \mathrm{Q.reorder}(f, g)\) \\
-  counter = {}; counter[0] = 0; counter[1] = 0 \\
-  idx = 0 \\ 
-  n = f:length() \\ 
-  REPEAT: \+ \\ 
-  b = f[idx] \\
-  counter[g[idx]]++ \\
-  {\bf for } ( j = idx; \(j < n\); j++ ) {\bf do} \+ \\
-    {\bf if } \(f_j \neq b\) {\bf then } \+ \\ 
-      {\bf break} \- \\ 
-    {\bf endif} \\ 
-    counter[g[j]]++ \- \\
-  {\bf endfor} \\ 
-  \(p = \mathrm{WeightedBenefit}(counter[0], counter[1], n_N,n_P)\) \\
-  {\bf if } \(p > p_{max}\) {\bf then } \+ \\ 
-    \(p_{max} = p \)  \\
-    \(b_{bot} = b \) \- \\
-  {\bf endif} \\ 
-  idx = j \\
-  {\bf goto} REPEAT \- \\ 
-  DONE \- \\
+  \(p_{max} = -\infty\) \\
+  \(b_{opt} = \bot\) \\
+  \(f', g' = \mathrm{Q.sort2}(f, g, \) ``A\_'' ) ---
+  Sort \(f,g\) with \(f\) ascending and \(g\) drag along \\
+  \(C = \{\},~C[0] = 0,~C[1] = 0\) --- Counters for goal values \\
+  \(i = 0,~ n = n_N + n_P\) \\ 
+  {\bf while} \(i < n\) {\bf do} \+ \\
+    \(b = f_i\) \\
+    \(C[g_i] = C[g_i] + 1\) \\
+    \(i = i + 1 \) \\
+    {\bf for } ( ; \(i < n\); \(i++\) ) {\bf do} \+ \\
+      {\bf if } \(f_i \neq b\) {\bf then } \+ \\
+        {\bf break} \- \\
+      {\bf endif} \\
+      \(C[g_i] = C[g_i] + 1\) \- \\
+    {\bf endfor} \\
+    \(p = \mathrm{WeightedBenefit}(C[0], C[1], n_N, n_P)\) \\
+    {\bf if } \(p > p_{max}\) {\bf then } \+ \\
+      \(p_{max} = p \)  \\
+      \(b_{opt} = b \) \- \\
+    {\bf endif} \- \\
+  {\bf endwhile} \\
+  {\bf return} \(p_{max}, b_{opt}\) \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
