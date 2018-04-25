@@ -1,6 +1,10 @@
 local plpath = require 'pl.path'
 local timer = require 'posix.time'
 local g_err	= require 'Q/UTILS/lua/error_code'
+local base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
+local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local fns = {}
 
@@ -132,6 +136,7 @@ fns.sort_table = function(cols, sort_order)
   
 end
 
+-- function to get index of a value from a vector
 fns.get_index = function(vec, value)
   local val, nn_val
   for i = 0, vec:length() - 1 do
@@ -140,6 +145,42 @@ fns.get_index = function(vec, value)
       return i
     end
   end
+end
+
+-- function to get vector from table of values
+fns.table_to_vector = function(tbl, qtype)
+  assert(type(tbl) == "table", "must of type lVector")
+  assert(#tbl < 1000000, "max limit is upto 1 million")
+  -- In case of qtype 'B1' ?
+  assert(type(qtype) == "string" and base_qtype(qtype))
+  
+  local col = mk_col(tbl, qtype)
+  return col
+end
+
+-- function to get table of vector values
+fns.vector_to_table = function(vector)
+  assert(type(vector) == "lVector", "must be of lVector type")
+  assert(vector:num_elements() < 1000000, "max limit is upto 1 million")
+  local tbl = {} 
+  
+  local no_of_chunks = vector:num_elements() / qconsts.chunk_size
+  local qtype = vector:qtype()
+  local status, len, base_data, nn_data 
+  
+  for chunk_number = 0, no_of_chunks do
+    status, len, base_data, nn_data = pcall(vector.chunk, vector, chunk_number)
+  
+    assert(status, "Failed to get the chunk from vector")
+    assert(base_data, "Received base data is nil")
+    assert(len, "Received length is not proper")
+  
+    for i = 1, len do
+      local value = c_to_txt(vector,i)
+      tbl[#tbl+1] = value
+    end
+  end
+  return tbl
 end
 
 return fns
