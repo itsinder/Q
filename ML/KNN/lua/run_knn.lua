@@ -24,6 +24,9 @@ end
 local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
   -- It's assumed that data is already loaded into global_T variable
   -- global_T will be a table having vectors as it's elements
+
+  local accuracy = {}
+
   assert(iterations > 0)
   assert(type(alpha) == "table")
 
@@ -39,42 +42,45 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
     assert(splt_ratio < 1 and splt_ratio > 0)
     split_ratio = splt_ratio
   end
+  
+  for itr = 1, iterations do
+    local Train, Test = get_train_test_split(split_ratio, global_T)
+    local g_vec_train = Train[goal_column_index]
+    Train[goal_column_index] = nil
+    local g_vec_test = Test[goal_column_index]
+    Test[goal_column_index] = nil
 
-  local Train, Test = get_train_test_split(split_ratio, global_T)
-  local g_vec_train = Train[goal_column_index]
-  Train[goal_column_index] = nil
-  local g_vec_test = Test[goal_column_index]
-  Test[goal_column_index] = nil
+    -- Prepare test table
+    local test_sample_count = g_vec_test:length()
+    local val, nn_val
+    local X = {}
+    local expected_predict_value = {}
+    local actual_predict_value = {}
 
-  -- Prepare test table
-  local test_sample_count = g_vec_test:length()
-  local val, nn_val
-  local X = {}
-  local expected_predict_value = {}
-  local actual_predict_value = {}
-
-  for len = 1, test_sample_count do
-    local x = {}
-    for i, v in pairs(T_test) do
-      val, nn_val = v:get_one(len-1)
-      x[#x+1] = Scalar.new(val:to_num(), "F4")
+    for len = 1, test_sample_count do
+      local x = {}
+      for i, v in pairs(T_test) do
+        val, nn_val = v:get_one(len-1)
+        x[#x+1] = Scalar.new(val:to_num(), "F4")
+      end
+      expected_predict_value[len] = g_vec_test:get_one(len-1):to_num()
+      X[len] = x
     end
-    expected_predict_value[len] = g_vec_test:get_one(len-1):to_num()
-    X[len] = x
-  end
 
-  local result
-  local max
-  local index
-  for i = 1, test_sample_count do
-    -- predict for inputs
-    result = classify(T_train, g_vec_train, X[i], exponent, alpha)
-    assert(type(result) == "lVector")
-    max = Q.max(result):eval():to_num()
-    index = utils.get_index(result, max)
-    actual_predict_value[i] = index
+    local result
+    local max
+    local index
+    for i = 1, test_sample_count do
+      -- predict for inputs
+      result = classify(T_train, g_vec_train, X[i], exponent, alpha)
+      assert(type(result) == "lVector")
+      max = Q.max(result):eval():to_num()
+      index = utils.get_index(result, max)
+      actual_predict_value[i] = index
+    end
+    local acr = get_accuracy(expected_predict_value, actual_predict_value)
+    print("Accuracy = ", acr)
+    accuracy[#accuracy + 1] = acr
   end
-  local accuracy = get_accuracy(expected_predict_value, actual_predict_value)
-  print("Accuracy = ", accuracy)
-
+  return accuracy
 end
