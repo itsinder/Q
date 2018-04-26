@@ -26,7 +26,9 @@ tests.t1 = function()
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val}
 
-  local result = classify(T, g_vec, x, alpha)
+  local exp = Scalar.new(2, "F4")
+
+  local result = classify(T, g_vec, x, exp, alpha)
   assert(type(result) == "lVector")
   Q.print_csv(result)
 end
@@ -48,7 +50,9 @@ tests.t2 = function()
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val}
 
-  local result = classify(T, g_vec, x, alpha)
+  local exp = Scalar.new(2, "F4")
+
+  local result = classify(T, g_vec, x, exp, alpha)
   assert(type(result) == "lVector")
   Q.print_csv(result)
   print("completed t2 successfully")
@@ -71,7 +75,9 @@ tests.t3 = function()
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
 
-  local result = classify(T, g_vec, x, alpha)
+  local exp = Scalar.new(2, "F4")
+
+  local result = classify(T, g_vec, x, exp, alpha)
   assert(type(result) == "lVector")
   local max = Q.max(result):eval():to_num()
   local index = utils.get_index(result, max)
@@ -131,13 +137,13 @@ tests.t4 = function()
 
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
-
+  local exp = Scalar.new(2, "F4")
   local result
   local max
   local index
   for i = 1, test_sample_count do
     -- predict_input
-    result = classify(T_train, g_vec_train, X[i], alpha)
+    result = classify(T_train, g_vec_train, X[i], exp, alpha)
     assert(type(result) == "lVector")
     max = Q.max(result):eval():to_num()
     index = utils.get_index(result, max)

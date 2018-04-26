@@ -12,7 +12,7 @@ local function classify(
   )
   local sone = Scalar.new(1, "F4")
   --==============================================
-  local nT, n, ng = chk_params(T, g, x, alpha)
+  local nT, n, ng = chk_params(T, g, x, exponent, alpha)
   dk = {}
   local i = 1
   for key, val in pairs(T) do
