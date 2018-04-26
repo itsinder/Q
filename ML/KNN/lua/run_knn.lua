@@ -68,7 +68,7 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
   local index
   for i = 1, test_sample_count do
     -- predict for inputs
-    result = classify(T_train, g_vec_train, X[i], alpha)
+    result = classify(T_train, g_vec_train, X[i], exponent, alpha)
     assert(type(result) == "lVector")
     max = Q.max(result):eval():to_num()
     index = utils.get_index(result, max)
