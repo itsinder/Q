@@ -1,0 +1,59 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include "_get_bit_u64.h"
+#include <unistd.h>
+#include <stdint.h>
+#include <math.h>
+
+extern int
+${fn}(  
+      const uint64_t * const restrict in,
+      uint64_t *nn_in,
+      uint64_t nR,
+      void *dummy,
+      ${out_ctype} * restrict out,  
+      uint64_t *nn_out
+      ) 
+;
+
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(  
+      const uint64_t * const in,
+      uint64_t *nn_in,
+      uint64_t nR,
+      void *dummy,
+      ${out_ctype} * restrict out,  
+      uint64_t *nn_out
+      )
+
+{
+  int status = 0;
+  uint64_t val = 0;
+  if ( in == NULL ) { go_BYE(-1); }
+  if ( nR == 0 ) { go_BYE(-1); }
+
+// TODO #pragma omp parallel for 
+  for ( uint64_t i = 0; i < nR; i++ ) { 
+    val = get_bit_u64(in, i);
+    if ( val == 0 ) {
+      val = 1;
+    }
+    else if ( val == 1 ) {
+      val = 0;
+    }
+    status = set_bit_u64(out, i, val);
+  }
+BYE:
+  if ( status < 0 ) { WHEREAMI; }
+  return status;
+}
+   ]]
+}
