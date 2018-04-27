@@ -1,10 +1,19 @@
 local Q = require 'Q'
+local Scalar = require 'libsclr'
+local classify = require 'Q/ML/KNN/lua/classify'
+local utils = require 'Q/UTILS/lua/utils'
 
-local get_train_test_split = function(split_ratio, global_T)
-  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = global_T:length()}):eval()
+local get_train_test_split = function(split_ratio, global_T, total_length)
+  local Train = {}
+  local Test = {}
+  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
   local random_vec_bool = Q.vsleq(random_vec, split_ratio):eval()
-  local Train = Q.where(global_T, random_vec_bool)
-  local Test = Q.where(global_T, Q.vsnot(random_vec_bool))
+
+  for i, v in pairs(global_T) do
+    Train[i] = Q.where(v, random_vec_bool):eval()
+    Test[i] = Q.where(v, Q.vsnot(random_vec_bool)):eval()
+  end
+  
   return Train, Test
 end
 
@@ -30,9 +39,9 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
   assert(iterations > 0)
   assert(type(alpha) == "table")
 
-  local exponent = 2
+  local exponent = Scalar.new(2, "F4")
   if exp then
-    assert(type(exp) == "number")
+    assert(type(exp) == "Scalar")
     exponent = exp
   end
 
@@ -44,7 +53,20 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
   end
   
   for itr = 1, iterations do
-    local Train, Test = get_train_test_split(split_ratio, global_T)
+    local Train, Test = get_train_test_split(split_ratio, T, T[goal_column_index]:length())
+    --[[
+    print(T[goal_column_index]:length())
+    print("#############################")
+    print("TRAIN")
+    for i, v in pairs(Train) do
+      print(i, v:length())
+    end
+    print("#############################")
+    print("TEST")
+    for i, v in pairs(Test) do
+      print(i, v:length())
+    end
+    ]]
     local g_vec_train = Train[goal_column_index]
     Train[goal_column_index] = nil
     local g_vec_test = Test[goal_column_index]
@@ -59,7 +81,7 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
 
     for len = 1, test_sample_count do
       local x = {}
-      for i, v in pairs(T_test) do
+      for i, v in pairs(Test) do
         val, nn_val = v:get_one(len-1)
         x[#x+1] = Scalar.new(val:to_num(), "F4")
       end
@@ -72,15 +94,17 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
     local index
     for i = 1, test_sample_count do
       -- predict for inputs
-      result = classify(T_train, g_vec_train, X[i], exponent, alpha)
+      result = classify(Train, g_vec_train, X[i], exponent, alpha)
       assert(type(result) == "lVector")
       max = Q.max(result):eval():to_num()
       index = utils.get_index(result, max)
       actual_predict_value[i] = index
     end
     local acr = get_accuracy(expected_predict_value, actual_predict_value)
-    print("Accuracy = ", acr)
+    -- print("Accuracy: " .. tostring(acr))
     accuracy[#accuracy + 1] = acr
   end
   return accuracy
 end
+
+return run_knn

@@ -154,4 +154,24 @@ tests.t4 = function()
   print("completed t4 successfully")
 end
 
+tests.t5 = function()
+  -- Tests the run_knn function
+  local run_knn = require 'Q/ML/KNN/lua/run_knn'
+
+  local saved_file_path = os.getenv("Q_METADATA_DIR") .. "/room_occupancy.saved"
+  dofile(saved_file_path)
+
+  local iterations = 20
+  local split_ratio = 0.7
+  local alpha_val = Scalar.new(1, "F4")
+  alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
+  local exponent = Scalar.new(2, "F4")
+  local goal_column_index = "occupy_status"
+
+  local result = run_knn(iterations, split_ratio, alpha, exponent, goal_column_index)
+  for i, v in pairs(result) do
+    print(i, v)
+  end
+end
+
 return tests
