@@ -164,22 +164,11 @@ fns.vector_to_table = function(vector)
   assert(vector:num_elements() < 1000000, "max limit is upto 1 million")
   local tbl = {} 
   
-  local no_of_chunks = vector:num_elements() / qconsts.chunk_size
-  local qtype = vector:qtype()
-  local status, len, base_data, nn_data 
-  
-  for chunk_number = 0, no_of_chunks do
-    status, len, base_data, nn_data = pcall(vector.chunk, vector, chunk_number)
-  
-    assert(status, "Failed to get the chunk from vector")
-    assert(base_data, "Received base data is nil")
-    assert(len, "Received length is not proper")
-  
-    for i = 1, len do
-      local value = c_to_txt(vector,i)
-      tbl[#tbl+1] = value
-    end
+  for i = 1, vector:num_elements() do
+    local value = c_to_txt(vector,i)
+    tbl[#tbl+1] = value
   end
+
   return tbl
 end
 
