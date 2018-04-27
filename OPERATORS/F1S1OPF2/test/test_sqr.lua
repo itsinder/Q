@@ -11,10 +11,10 @@ tests.t1 = function()
 
   local a = Q.mk_col(input, "I4")
 
-  local b = Q.sqr(a)
+  local b = Q.pow(a, 2)
   b:eval()
 
-  --Q.print_csv(b)
+  Q.print_csv(b)
 
   -- verify output
   local val, nn_val
@@ -22,7 +22,6 @@ tests.t1 = function()
     val, nn_val = b:get_one(i-1)
     assert(val:to_num() == i*i)
   end
-  
   print("DONE")
 end
 -- TODO: add more tests considering corner cases

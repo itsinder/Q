@@ -34,7 +34,7 @@ end
 tests.vvandnot = function()
   local col1 = { 0, 0, 1, 1 }
   local col2 = { 0, 1, 0, 1 }
-  local expected = "1\n1\n1\n0\n"
+  local expected = "0\n0\n1\n0\n"
   local col1 = Q.mk_col (col1, "B1")
   local col2 = Q.mk_col (col2, "B1")
   local result_col = Q.vvandnot(col1, col2, { junk = "junk" } )
