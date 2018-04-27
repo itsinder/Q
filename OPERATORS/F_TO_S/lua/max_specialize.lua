@@ -13,7 +13,6 @@ typedef struct _reduce_max_<<qtype>>_args {
   <<reduce_ctype>> max_val;
   uint64_t num; // number of non-null elements inspected
   uint64_t max_index;
-  uint32_t chunk_idx;
 } REDUCE_max_<<qtype>>_ARGS;
   ]]
     local tmpl = 'reduce.tmpl'
@@ -49,15 +48,13 @@ typedef struct _reduce_max_<<qtype>>_args {
       c_mem_ptr.max_val  = qconsts.qtypes[qtype].min
       c_mem_ptr.num = 0
       c_mem_ptr.max_index = 0
-      c_mem_ptr.chunk_idx = 0
       subs.c_mem = c_mem
       subs.c_mem_type = "REDUCE_max_" .. qtype .. "_ARGS *"
     --==============================
       subs.getter = function (x) 
-      local y = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
-      local max_index = tonumber(y[0].max_index) + tonumber(y[0].chunk_idx)
+        local y = ffi.cast("REDUCE_max_" .. qtype .. "_ARGS *", get_ptr(c_mem))
         return Scalar.new(x, subs.reduce_qtype), 
-           Scalar.new(tonumber(y[0].num), "I8"), Scalar.new(max_index, "I8")
+          Scalar.new(tonumber(y[0].num), "I8"), Scalar.new(tonumber(y[0].max_index), "I8")
       end
     --==============================
     end

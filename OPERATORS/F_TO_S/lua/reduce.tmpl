@@ -50,7 +50,6 @@ ${fn}(
   
   ${reduce_ctype} curr_val = ptr_args->${op}_val;
   ${reduce_ctype} curr_index = ptr_args->${op}_index;
-  uint32_t curr_chunk_idx =  ptr_args->chunk_idx;
   uint32_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 
   uint64_t block_size = nR / num_threads;
@@ -61,13 +60,11 @@ ${fn}(
     if ( t == (num_threads-1) ) { ub = nR; }
     ${reduce_ctype} lval = ${initial_val};
     uint64_t index = 0;
-    uint32_t chk_idx = 0;
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       lval = ${reducer}(lval, inv);
       if (lval == inv){
-        index = i;
-        chk_idx = idx;
+        index = i + idx;
       }
     }
 // TODO #pragma omp critical (_${fn})
@@ -75,13 +72,11 @@ ${fn}(
     curr_val = ${t_reducer}(curr_val, lval);
     if (curr_val == lval){
        curr_index = index;
-       curr_chunk_idx = chk_idx;
     }
     }
-  } 
+  }
   ptr_args->${op}_val = curr_val;
   ptr_args->${op}_index = curr_index;
-  ptr_args->chunk_idx = curr_chunk_idx;
   ptr_args->num     += nR;
   return status;
 }
