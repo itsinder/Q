@@ -5,7 +5,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
-local function numby(a, nb)
+local function expander_numby(a, nb, optargs)
   -- Verification
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(nb) == "number")
@@ -26,48 +26,57 @@ local function numby(a, nb)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
-  assert(qc[func_name], "Symbol not defined " .. func_name)
+  local out_qtype = subs.out_qtype
+
+  local fake = true
+  local fnptr
+  if ( fake ) then 
+    local xxx = ffi.load("libsumby.so")
+    fnptr = assert(xxx[func_name])
+  else
+    fnptr = assert(qc[func_name], "Symbol not defined " .. func_name)
+  end
 
   local sz_out = nb
-  local sz_out_in_bytes = sz_out * qconsts.qtypes[subs.out_qtype].width
+  local sz_out_in_bytes = sz_out * qconsts.qtypes[out_qtype].width
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local is_memo
+  local is_memo = false -- TODO DISCUSS WITH KRUSHNAKANT
   if nb > qconsts.chunk_size then
     is_memo = true
   end
-  local function sumby_gen(chunk_num)
-    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+  local in_ctype  = subs.in_ctype
+  local out_ctype = subs.out_ctype
+  local function numby_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected 
+    -- chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
-      out_buf:zero()
+      out_buf:zero() -- particularly important for this operator
       first_call = false
     end
     while true do
       local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
-      local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
-      assert(a_len == b_len)
       if a_len == 0 then
         return 0, nil, nil 
       end
       assert(a_nn_chunk == nil, "Null is not supported")
-      assert(b_nn_chunk == nil, "Null is not supported")
     
-      local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
-      local casted_b_chunk = ffi.cast( qconsts.qtypes[b:fldtype()].ctype .. "*",  get_ptr(b_chunk))
-      local casted_out_buf = ffi.cast( qconsts.qtypes[subs.out_qtype].ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](casted_a_chunk, a_len, casted_b_chunk, nb, casted_out_buf, is_safe)
-      assert(status == 0, "C error in SUMBY")
+      local casted_a_chunk = ffi.cast(in_ctype .. " *",  get_ptr(a_chunk))
+      local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
+      local status = fnptr(casted_a_chunk, a_len, casted_out_buf, nb, is_safe)
+      assert(status == 0, "C error in NUMBY")
       chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then
         return nb, out_buf, nil
       end
     end
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype, is_memo = is_memo } )
+  return lVector( { gen = numby_gen, has_nulls = false, 
+  qtype = out_qtype, is_memo = is_memo } )
 end
 
-return expander_sumby
+return expander_numby
