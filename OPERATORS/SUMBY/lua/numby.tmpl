@@ -1,0 +1,42 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+#include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include "q_incs.h"
+
+extern int ${fn}(
+    ${ctype} *X, /* [nX] */
+    uint32_t nX,
+    int64_t *Z, /* [nZ] */
+    int32_t nZ,
+    bool is_safe
+    );
+    ]],
+    definition = [[
+
+#include "_${fn}.h"
+int ${fn}(
+    ${ctype} *X, /* [nX] */
+    uint32_t nX,
+    int64_t *Z, /* [nZ] */
+    int32_t nZ,
+    bool is_safe
+    )
+{
+  int status = 0;
+
+  for ( uint64_t i = 0; i < nX; i++ ) {
+    ${ctype} x = X[i];
+    if ( is_safe ) {
+      ${checking_code}
+    }
+    Z[x]++;
+  }
+${bye}
+  return status;
+}
+]]
+}
