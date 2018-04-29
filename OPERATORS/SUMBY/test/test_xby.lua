@@ -10,10 +10,11 @@ tests.t1 = function()
   while ( ( len % 3 ) != 1 ) do
     len = len + 1
   end
-  local a = Q.period({ len = len, start = 10, by = 10, period = 6, qtype = "I4"})
+  local b = Q.seq({ len = len, start = 0, by = 1, qtype = "I4"}):eval()
+  -- b has values 0, 1, 2
+  local period = b:length()*2
+  local a = Q.period({ len = len, start = 10, by = 10, period = period, qtype = "I4"})
   -- a has values 10, 20, 30, 40, 50, 60, 10, 20, 30, 40, 50, 60, ...
-  local b = Q.seq({ len = len, start = 1, by = 2, qtype = "I4"}):eval()
-  -- a has values 1, 3, 5
   operators = { "min", "max", "num" }
   for k, operator in ipairs(operators ) do 
     local rslt, exp_rslt
