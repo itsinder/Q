@@ -31,6 +31,12 @@ tests.t1 = function()
     else
       assert(nil)
     end
+    -- when you do minby or maxby, 
+    --   if input vector is I*, output vector is I8
+    --   if input vector is F*, output vector is F8
+    -- when you do numby
+    --   output vector is I8
+    assert(rslt:fldtype() == "I8")
     -- verify
     assert(rslt:length() == nb)
     local n1, n2 = Q.sum(Q.vvneq(rslt, exp_rslt)):eval()
