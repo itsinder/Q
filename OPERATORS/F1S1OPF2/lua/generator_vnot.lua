@@ -8,7 +8,7 @@
   local qtypes = { 'B1' }
 
   local num_produced = 0
-  local sp_fn = assert(require("vsnot_specialize"))
+  local sp_fn = assert(require("vnot_specialize"))
 
   local function generate_files(in_qtype, args)
     local status, subs, tmpl = pcall(sp_fn, in_qtype, args)
@@ -27,6 +27,6 @@
   for _, in_qtype in ipairs(qtypes) do 
     status = pcall(generate_files, in_qtype)
     assert(status, 
-     "Failed to generate files for vsnot")
+     "Failed to generate files for vnot")
   end
   assert(num_produced > 0)

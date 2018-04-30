@@ -11,7 +11,7 @@ local get_train_test_split = function(split_ratio, global_T, total_length)
 
   for i, v in pairs(global_T) do
     Train[i] = Q.where(v, random_vec_bool):eval()
-    Test[i] = Q.where(v, Q.vsnot(random_vec_bool)):eval()
+    Test[i] = Q.where(v, Q.vnot(random_vec_bool)):eval()
   end
   
   return Train, Test
