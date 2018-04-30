@@ -20,8 +20,10 @@ clean :
 	rm -f *.so
 
 libsumby.so : ${GEN_FILES} \
-	sumby.tmpl
+	sumby.tmpl \
+	numby.tmpl
 	luajit generator.lua
+	luajit numby_generator.lua
 	gcc ${GEN_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libsumby.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
@@ -60,3 +62,12 @@ GEN_FILES = \
         ../gen_src/_sumby_F8_I2_F8.c \
         ../gen_src/_sumby_F8_I4_F8.c \
         ../gen_src/_sumby_F8_I8_F8.c \
+	../gen_src/_numby_I1.c \
+	../gen_src/_numby_I1_safe.c \
+	../gen_src/_numby_I2.c \
+	../gen_src/_numby_I2_safe.c \
+	../gen_src/_numby_I4.c \
+	../gen_src/_numby_I4_safe.c \
+	../gen_src/_numby_I8.c \
+	../gen_src/_numby_I8_safe.c \
+

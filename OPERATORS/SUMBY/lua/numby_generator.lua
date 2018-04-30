@@ -7,15 +7,15 @@ if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 
 local num_produced = 0
 
-local val_qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
 local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-local operators = { 'sumby' }
+local operators = { 'numby' }
+local is_safes = { true, false }
 for k, operator in pairs(operators) do 
   local sp_fn = assert(require((operator .. "_specialize")))
-  for i, val_qtype in ipairs(val_qtypes) do 
+  for k, is_safe in pairs(is_safes) do 
     for j, grpby_qtype in ipairs(grpby_qtypes) do 
      local status, subs, tmpl = pcall(
-       sp_fn, val_qtype, grpby_qtype, optargs)
+       sp_fn, grpby_qtype, is_safe)
       if ( status ) then 
         assert(type(subs) == "table")
         assert(type(tmpl) == "string")
@@ -23,7 +23,7 @@ for k, operator in pairs(operators) do
         -- print(tmpl)
         gen_code.doth(subs, tmpl, incdir)
         gen_code.dotc(subs, tmpl, srcdir)
-        print("Produced ", subs.fn)
+        -- print("Produced ", subs.fn)
         num_produced = num_produced + 1
       else
         print(subs)

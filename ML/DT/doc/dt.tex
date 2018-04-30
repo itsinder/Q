@@ -30,13 +30,17 @@ A decision tree is a Lua table where each element identifies
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \=
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 Let \(\alpha\) be minimum benefit required to continue branching \\ 
-Initialize, \(T = \{\}\) \\
+Let values taken on by goal be 0 (negative), 1 (positive)  \(\Rightarrow n_G = 2\) \\
+Let \(n_N =\) number of instances classified as negative \\ 
+Let \(n_P =\) number of instances classified as positive \\ 
+Let \(T\) be table of vectors, each vector being an attribute \\
+Initialize, decision tree \(D = \{\}\) \\
 \(F, g\) as described above \\
-{\bf function } DT(T, F, g) \+ \ \\
-  \(n_P, n = Q.sum(g); n_N = n - n_P \) \\
-  {\bf forall} \(f \in F:~ b(f), s(f) = \mathrm{Benefit}(f, g, n_N, n_P)\) \\ 
-  Let \(f'\) be feature with maximum \(b(f) = \alpha'\) \\
-  {\bf if} \(\alpha' \geq \alpha\) {\bf then } \+  \\
+{\bf function } MakeDecisionTree(D, T, g) \+ \ \\
+  \(C = Q.\mathrm{numby}(g, n_G);~n_N = C[0];~n_P = C[1]\) \\ 
+  {\bf forall} \(f \in T:~ b(f), s(f) = \mathrm{Benefit}(f, g, n_N, n_P)\) \\ 
+  Let \(f'\) be feature with maximum benefit. \\
+  {\bf if} \(b(f') \geq \alpha\) {\bf then } \+  \\
     \(x = Q.vsgt(f', s(f'))\) \\
     \(n_R, n  = Q.sum(x) \) \\
     \(F_L = F_R = \{\}\) \\
