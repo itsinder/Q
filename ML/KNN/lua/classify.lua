@@ -16,7 +16,7 @@ local function classify(
   dk = {}
   local i = 1
   for key, val in pairs(T) do
-    dk[i] = Q.vsmax(Q.abs(Q.vsmul(Q.pow(Q.vssub(val, x[i]), exponent), alpha[i])))
+    dk[i] = Q.vsmul(Q.pow(Q.vssub(val, x[i]), exponent), alpha[i])
     i = i + 1
   end
   local d = Q.const({ val = sone, qtype = "F4", len = n})
