@@ -16,7 +16,7 @@ tests.t1 = function()
     end
   end
   local col = Q.mk_col(in_table, "B1")
-  local n_col = Q.vsnot(col)
+  local n_col = Q.vnot(col)
   n_col:eval()
 
   local val, nn_val

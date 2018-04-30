@@ -4,9 +4,9 @@ return function (
   local qconsts = require 'Q/UTILS/lua/q_consts'
   assert(in_qtype == "B1", "Only B1 is supported")
   --preamble
-  local tmpl = 'vsnot.tmpl'
+  local tmpl = 'vnot.tmpl'
   local subs = {}; 
-  subs.fn = "vsnot_" .. in_qtype
+  subs.fn = "vnot_" .. in_qtype
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype
   subs.in_qtype = in_qtype
   subs.out_qtype = in_qtype
