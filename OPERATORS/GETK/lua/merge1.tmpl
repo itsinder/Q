@@ -1,0 +1,65 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include <unistd.h>
+#include <stdint.h>
+#include <math.h>
+
+extern int 
+merge_${min_or_max}_${ctype}(
+    ${ctype} *X, /* [nX] */
+    int nX,
+    ${ctype} *Y, /* [nY] */
+    int nY,
+    ${ctype} *Z, /* [nX] */
+    int *ptr_nZ
+    );
+
+]],
+definition = [[
+int 
+merge_${min_or_max}_${ctype}(
+    ${ctype} *X, /* [nX] */
+    int nX,
+    ${ctype} *Y, /* [nY] */
+    int nY,
+    ${ctype} *Z, /* [nX] */
+    int *ptr_nZ
+    )
+{
+  int status = 0;
+  int xidx = 0, yidx = 0, zidx = 0;
+
+  for ( ; zidx < nX; ) {
+    if ( xidx >= nX ) {
+      // copy whatever is needed from Y
+      for ( ; yidx < nY; ) { 
+        Z[zidx++] = Y[yidx++];
+      }
+      break;
+    }
+    if ( yidx >= nY ) {
+      // copy whatever is needed from X
+      for ( ; xidx < nX; ) { 
+        Z[zidx++] = X[xidx++];
+      }
+      break;
+    }
+    if ( Y[yidx] ${comparator} X[xidx] ) { 
+      Z[zidx] = Y[yidx];
+      yidx++;
+    }
+    else  {
+      Z[zidx] = X[yidx];
+      xidx++;
+    }
+    zidx++;
+  }
+  *ptr_nZ = zidx;
+BYE:
+  return status;
+}
+]]
+}
