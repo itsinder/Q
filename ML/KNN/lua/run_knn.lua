@@ -3,15 +3,24 @@ local Scalar = require 'libsclr'
 local classify = require 'Q/ML/KNN/lua/classify'
 local utils = require 'Q/UTILS/lua/utils'
 
-local get_train_test_split = function(split_ratio, global_T, total_length)
+local get_train_test_split = function(split_ratio, T, total_length, feature_column_indices)
   local Train = {}
   local Test = {}
   local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
   local random_vec_bool = Q.vsleq(random_vec, split_ratio):eval()
+  
+  if not feature_column_indices then
+    local column_indices = {}
+    for i, _ in pairs(T) do
+      column_indices[#column_indices + 1] = i
+    end
+    feature_column_indices = column_indices
+  end
+  assert(feature_column_indices)
 
-  for i, v in pairs(global_T) do
-    Train[i] = Q.where(v, random_vec_bool):eval()
-    Test[i] = Q.where(v, Q.vnot(random_vec_bool)):eval()
+  for _, v in pairs(feature_column_indices) do
+    Train[v] = Q.where(T[v], random_vec_bool):eval()
+    Test[v] = Q.where(T[v], Q.vnot(random_vec_bool)):eval()
   end
   
   return Train, Test
@@ -30,30 +39,59 @@ local get_accuracy = function(expected_val, predicted_val)
   return (correct/#expected_val)*100
 end
 
-local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
-  -- It's assumed that data is already loaded into global_T variable
-  -- global_T will be a table having vectors as it's elements
+local get_average = function(accuracy_list)
+  local average = 0
+  for i = 1, #accuracy_list do
+    average = average + accuracy_list[i]
+  end
+  average = average / #accuracy_list
+  return average
+end
+
+-- TODO: Think of interface for production mode where input_sample, alpha will be given,
+-- you need  to predict the goal value (assuming data is already loaded)
+local run_knn = function(args)
+  -- It's assumed that data is already loaded into 'T' variable
+  -- 'T' will be a table having vectors as it's elements
 
   local accuracy = {}
 
+  assert(type(args) == "table")
+
+  local iterations = 1
+  if args.iterations then
+    assert(type(args.iterations == "number"))
+    iterations = args.iterations
+  end
   assert(iterations > 0)
-  assert(type(alpha) == "table")
 
   local exponent = Scalar.new(2, "F4")
-  if exp then
-    assert(type(exp) == "Scalar")
-    exponent = exp
-  end
-
-  local split_ratio = 0.8
-  if splt_ratio then
-    assert(type(splt_ratio) == "number")
-    assert(splt_ratio < 1 and splt_ratio > 0)
-    split_ratio = splt_ratio
+  if args.exponent then
+    assert(type(args.exponent) == "Scalar")
+    exponent = args.exponent
   end
   
+  local alpha = args.alpha
+  assert(type(alpha) == "table")
+
+  local split_ratio = 0.8
+  if args.split_ratio then
+    assert(type(args.split_ratio) == "number")
+    assert(args.split_ratio < 1 and args.split_ratio > 0)
+    split_ratio = args.split_ratio
+  end
+    
+  local goal_column_index = args.goal_column_index
+  assert(goal_column_index)
+
+  local feature_column_indices
+  if args.column_indices then
+    assert(type(args.column_indices) == "table")
+    feature_column_indices = args.column_indices
+  end
+
   for itr = 1, iterations do
-    local Train, Test = get_train_test_split(split_ratio, T, T[goal_column_index]:length())
+    local Train, Test = get_train_test_split(split_ratio, T, T[goal_column_index]:length(), feature_column_indices)
     --[[
     print(T[goal_column_index]:length())
     print("#############################")
@@ -104,7 +142,7 @@ local run_knn = function(iterations, splt_ratio, alpha, exp, goal_column_index)
     -- print("Accuracy: " .. tostring(acr))
     accuracy[#accuracy + 1] = acr
   end
-  return accuracy
+  return get_average(accuracy), accuracy
 end
 
 return run_knn
