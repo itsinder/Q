@@ -36,7 +36,7 @@ ${fn}(
 
 {
   int status = 0;
-  uint64_t loop_count = ceil(nR / 64);
+  uint64_t loop_count = ceil((double)nR / 64);
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
