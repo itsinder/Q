@@ -18,7 +18,10 @@ local function expander_sumby(op, a, b, nb, optargs)
   local is_safe = false
   if optargs then
     assert(type(optargs) == "table")
-    is_safe = optargs["is_safe"]
+    if ( optargs["is_safe"] ) then
+      is_safe =  optargs["is_safe"]
+      assert(type(is_safe) == "boolean")
+    end
   end
 
   local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype())
@@ -49,7 +52,11 @@ local function expander_sumby(op, a, b, nb, optargs)
       local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
       assert(a_len == b_len)
       if a_len == 0 then
-        return 0, nil, nil 
+        if chunk_idx == 0 then
+          return 0, nil, nil
+        else
+          return nb, out_buf, nil
+        end
       end
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Null is not supported")
