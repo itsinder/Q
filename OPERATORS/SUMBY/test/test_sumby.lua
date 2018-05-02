@@ -23,17 +23,20 @@ tests.t1 = function()
 end
 
 tests.t2 = function()
+  -- sumby test in safe mode by setting is_safe to true
+  -- group by column exceeds limit
   local a = Q.mk_col({1, 2, 4, 5, 6, 7, 8, 9}, "I4")
   local b = Q.mk_col({0, 1, 4, 1, 1, 2, 0, 2}, "I2")
   local nb = 3
   local res = Q.sumby(a, b, nb, {is_safe = true})
+  res:eval()
   local status = pcall(res.eval, res)
   assert(status == false)
   print("Test t2 completed")
 end
 
 tests.t3 = function()
-  -- Values of b not containing with 0
+  -- Values of b, not having 0
   local a = Q.mk_col({1, 2, 4, 5, 6, 7, 8, 9}, "I4")
   local b = Q.mk_col({1, 1, 3, 1, 1, 2, 1, 2}, "I2")
   local exp_val = {0, 22, 16}
