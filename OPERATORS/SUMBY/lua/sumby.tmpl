@@ -36,7 +36,7 @@ ${fn}(
   if ( is_safe ) {
     for ( uint64_t i = 0; i < nR_in; i++ ) {
       ${grpby_ctype} grpby = grpby_fld[i];
-      if ( ( grpby < 0 ) || ( grpby >= nR_out ) ) { go_BYE(-1); }
+      if ( ( grpby < 0 ) || ( grpby >= (${out_ctype})nR_out ) ) { go_BYE(-1); }
     }
   }
 
