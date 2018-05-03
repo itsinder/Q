@@ -24,6 +24,7 @@ tests.t1 = function()
   assert(min_value:to_num() == expected_min_value)
   -- as indexing starts with 0, so idx-1
   assert(min_idx:to_num() == expected_min_idx-1 )
+  print("Successfully completed test t1")
 end
 
 -- Q.min(), min value at chunk_size index
@@ -44,6 +45,7 @@ tests.t2 = function()
   assert(min_value:to_num() == expected_min_value)
   -- as indexing starts with 0, so idx-1
   assert(min_idx:to_num() == expected_min_idx-1)
+  print("Successfully completed test t2")
 end
 
 -- Q.min(), min value at chunk_size+1 index
@@ -64,6 +66,7 @@ tests.t3 = function()
   assert(min_value:to_num() == expected_min_value)
   -- as indexing starts with 0, so idx-1
   assert(min_idx:to_num() == expected_min_idx-1)
+  print("Successfully completed test t3")
 end
 
 -- Q.min(), min value at chunk_size*2 index
@@ -84,6 +87,7 @@ tests.t4 = function()
   assert(min_value:to_num() == expected_min_value)
   -- as indexing starts with 0, so idx-1
   assert(min_idx:to_num() == expected_min_idx-1)
+  print("Successfully completed test t4")
 end
 
 
@@ -105,6 +109,7 @@ tests.t5 = function()
   assert(max_value:to_num() == expected_max_value)
   -- as indexing starts with 0, so idx-1
   assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t5")
 end
 
 -- Q.max(), max value at chunk_size index
@@ -125,6 +130,7 @@ tests.t6 = function()
   assert(max_value:to_num() == expected_max_value)
   -- as indexing starts with 0, so idx-1
   assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t6")
 end
 
 -- Q.max(), max value at chunk_size+1 index
@@ -145,6 +151,7 @@ tests.t7 = function()
   assert(max_value:to_num() == expected_max_value)
   -- as indexing starts with 0, so idx-1
   assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t7")
 end
 
 -- Q.max(), max value at chunk_size*2 index
@@ -165,6 +172,23 @@ tests.t8 = function()
   assert(max_value:to_num() == expected_max_value)
   -- as indexing starts with 0, so idx-1
   assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t8")
+end
+
+-- occurence of max value is twice, should return first occurence index
+tests.t9 = function()
+  local mk_col_table = {100, 20, 30, 40, 50, 60, 70, 80, 90, 100}
+  local expected_max_value = 100
+  local expected_max_idx = 1
+  
+  local c1 = Q.mk_col( mk_col_table, "I4")
+  local value = Q.max(c1)
+  value:eval()
+  local max_value, no_of_trav, max_idx = value:value()
+  assert(max_value:to_num() == expected_max_value)
+  -- as indexing starts with 0, so idx-1
+  assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t9")
 end
 
 return tests
