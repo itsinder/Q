@@ -33,10 +33,6 @@ local function expander_numby(a, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local is_memo = false -- TODO DISCUSS WITH KRUSHNAKANT
-  if nb > qconsts.chunk_size then
-    is_memo = true
-  end
   local in_ctype  = subs.in_ctype
   local out_ctype = subs.out_ctype
   local function numby_gen(chunk_num)
@@ -70,8 +66,7 @@ local function expander_numby(a, nb, optargs)
       end
     end
   end
-  return lVector( { gen = numby_gen, has_nulls = false, 
-  qtype = out_qtype, is_memo = is_memo } )
+  return lVector( { gen = numby_gen, has_nulls = false, qtype = out_qtype } )
 end
 
 return expander_numby

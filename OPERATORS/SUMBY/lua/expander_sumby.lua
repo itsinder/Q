@@ -34,10 +34,6 @@ local function expander_sumby(op, a, b, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local is_memo
-  if nb > qconsts.chunk_size then
-    is_memo = true
-  end
   local function sumby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
@@ -72,7 +68,7 @@ local function expander_sumby(op, a, b, nb, optargs)
       end
     end
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype, is_memo = is_memo } )
+  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype } )
 end
 
 return expander_sumby
