@@ -3,6 +3,7 @@ local lVector  = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
+local Scalar    = require 'libsclr'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local function expander_index(op, a, b)
@@ -27,17 +28,23 @@ local function expander_index(op, a, b)
     assert(chunk_num == chunk_index)
     local idx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
     idx = ffi.cast("uint64_t *", idx)
-    repeat
+    while(true) do
       local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
       local chunk_idx = chunk_index * qconsts.chunk_size
       chunk_index = chunk_index + 1
-      if a_len and ( a_len > 0 ) then
+      if a_len and ( a_len > 0 ) or tonumber(idx[0]) == -1 then
         local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
         local status = qc[func_name](casted_a_chunk, a_len, b, idx, chunk_idx)
         assert(status == 0, "C error in INDEX")
+      else
+        break
       end
-    until(tonumber(idx[0]) ~= 0)
-    return tonumber(idx[0])
+    end
+    if tonumber(idx[0]) ~= -1  then 
+      return Scalar.new(tonumber(idx[0]), "I8") 
+    else
+      return nil
+    end
   end
   return index_gen(chunk_index)
 end

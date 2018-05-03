@@ -11,8 +11,8 @@ tests.t1 = function()
   local qtype = "I4"
   local vec = utils.table_to_vector(tbl, qtype)
   local ind = Q.index(vec, 50)
-  assert(ind == 4, "wrong index returned")
-  print("index of 50 is " .. ind)
+  assert(ind:to_num() == 4, "wrong index returned")
+  print("index of 50 is " .. ind:to_num())
   assert(type(vec) == 'lVector', "output not of type lVector")
   assert(vec:num_elements() == #tbl, "table and vector length not same")
   print("t1 test completed successfully")
@@ -34,9 +34,20 @@ tests.t2 = function()
   local ind = Q.index(vec, 9)
   local stop_time = timer.clock_gettime(0)
   local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
-  assert(ind == 327678, "wrong index returned")
-  print("Index of 9 is " .. ind, " execution time = " .. time)
+  assert(ind:to_num() == 327678, "wrong index returned")
+  print("Index of 9 is " .. ind:to_num(), " execution time = " .. time)
   print("t2 test completed successfully")
 end
+
+-- testing Q.index() to return nil in case it doesn't find value in vector
+tests.t3 = function()
+  local tbl = {10,20,30,40,50,60,70,80,90,100}
+  local qtype = "I4"
+  local vec = utils.table_to_vector(tbl, qtype)
+  local ind = Q.index(vec, 110)
+  assert(ind==nil, "should return nil")
+  print("t3 test completed successfully")
+end
+
 
 return tests
