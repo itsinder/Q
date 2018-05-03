@@ -1021,7 +1021,11 @@ vec_add_B1(
     memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
 
-  if ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) {
+  /* TODO: Ideally if ( len % 8 != 0 ) then the write operation should work in combination of byte and bit fashion
+  i.e if len = 66 then first 64 bits should go in byte writing fashion 
+  and remaining 2 bits should be written in bit fashion.
+  Above comment is valid only if ( ptr_vec->num_in_chunk % 8 ) ==  0 */
+  if ( ( ( ptr_vec->num_in_chunk % 8 ) ==  0 ) && ( ( len % 8 ) == 0 ) ) {
     // we are nicely byte aligned
     for ( ; len > 0 ; ) { 
       flush_buffer_B1(ptr_vec);
@@ -1053,10 +1057,13 @@ vec_add_B1(
     uint32_t word_idx = 0;
     uint32_t chunk_bit_idx = ( ptr_vec->num_in_chunk % 8 );
     uint32_t chunk_word_idx = ( ptr_vec->num_in_chunk / 8 );
+    if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
+      chunk_word_idx = 0;
+    }
     for ( uint32_t i = 0; i < len; i++ ) { 
       flush_buffer_B1(ptr_vec);
       uint8_t bit_val = (((uint8_t *)addr)[word_idx] >> bit_idx) & 0x1;
-      if ( bit_val == 1 ) { 
+      if ( bit_val == 1 ) {
         uint8_t mask = 1 << chunk_bit_idx;
         ((uint8_t *)ptr_vec->chunk)[chunk_word_idx] |= mask;
       }
