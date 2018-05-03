@@ -14,12 +14,11 @@ local function expander_index(op, a, b)
   local sp_fn_name = "Q/OPERATORS/INDEX/lua/index_specialize"
   local spfn = assert(require(sp_fn_name))
 
-  local status, subs, len = pcall(spfn, a:fldtype())
+  local status, subs, tmpl = pcall(spfn, a:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
-  
 
   local chunk_index = 0
   
@@ -30,12 +29,11 @@ local function expander_index(op, a, b)
     idx = ffi.cast("uint64_t *", idx)
     repeat
       local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
-      --assert(chk_chunk(a_len, a_chunk, nn_a_chunk))
       local chunk_idx = chunk_index * qconsts.chunk_size
       chunk_index = chunk_index + 1
       if a_len and ( a_len > 0 ) then
         local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
-        local status = qc[func_name](casted_a_chunk, a_len, b, idx, chunk_idx);
+        local status = qc[func_name](casted_a_chunk, a_len, b, idx, chunk_idx)
         assert(status == 0, "C error in INDEX")
       end
     until(tonumber(idx[0]) ~= 0)
