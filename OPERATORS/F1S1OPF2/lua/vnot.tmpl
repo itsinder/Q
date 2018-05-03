@@ -42,6 +42,7 @@ ${fn}(
 
 // TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < loop_count; i++ ) {
+    //TODO: Do not modify unused bits from last 64 bits
     out[i] = ~ in[i];
   }
 BYE:
