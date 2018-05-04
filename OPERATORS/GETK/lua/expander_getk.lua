@@ -41,7 +41,7 @@ local function expander_getk(a, fval, k, optargs)
   local bufZ = cmem.new(k * width, qtype)
   bufZ:zero()
   local casted_bufZ = ffi.cast(ctype .. "*", get_ptr(bufZ))
-  local nZ = 0
+  local nZ = k
 
   local num_in_Z = cmem.new(4, "I4");
   local ptr_num_in_Z = ffi.cast("uint32_t *",  get_ptr(num_in_Z))

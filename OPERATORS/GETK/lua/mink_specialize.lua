@@ -7,6 +7,7 @@ local function mink_specialize(fval, k, optargs)
   local tmpl = "XXXXXXX"
   subs.comparator = " < " -- will be > for maxby, what for numby???
   subs.sort_fn = "qsort_asc_" .. subs.qtype -- will be dsc for maxby
+  subs.merge_fn = "merge_min"
   -- no need to sort for numby
   assert(qc[subs.sort_fn])
 
