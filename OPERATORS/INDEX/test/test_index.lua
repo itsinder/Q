@@ -19,7 +19,7 @@ tests.t1 = function()
 end
 
 -- testing Q.index to return index of value(num_elements > chunk_size)
--- value is present in second chunk at index (65536*2)-1
+-- value is present in last chunk at index (65536*5)-1
 tests.t2 = function()
   local tbl = {}
   local qtype = "I4"
@@ -49,5 +49,21 @@ tests.t3 = function()
   print("t3 test completed successfully")
 end
 
+-- testing Q.index to return index of value(num_elements > chunk_size)
+-- value is present in second chunk at index 65540
+tests.t4 = function()
+  local tbl = {}
+  local qtype = "I4"
+  
+  for i = 1, 65536*3 do
+    tbl[#tbl+1] = ( i * 10 ) % qconsts.qtypes[qtype].max
+  end
+  tbl[65541] = 9
+  local vec = Q.mk_col(tbl, qtype)
+  
+  local ind = Q.index(vec, 9)
+  assert(ind:to_num() == 65541-1, "wrong index returned")
+  print("t4 test completed successfully")
+end
 
 return tests

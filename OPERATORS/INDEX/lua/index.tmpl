@@ -10,7 +10,7 @@ ${fn}(
       const ${a_ctype} * restrict A,
       uint64_t nA,
       ${a_ctype} value,
-      uint64_t *idx,
+      int64_t *idx,
       uint64_t chunk_idx
       );
    ]],
@@ -23,7 +23,7 @@ ${fn}(
       const ${a_ctype} * restrict A,
       uint64_t nA,
       ${a_ctype} value,
-      uint64_t *idx,
+      int64_t *idx,
       uint64_t chunk_idx
       )
 {

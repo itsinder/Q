@@ -27,15 +27,19 @@ local function expander_index(op, a, b)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_index)
     local idx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
-    idx = ffi.cast("uint64_t *", idx)
+    idx = ffi.cast("int64_t *", idx)
     while(true) do
       local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
       local chunk_idx = chunk_index * qconsts.chunk_size
       chunk_index = chunk_index + 1
-      if a_len and ( a_len > 0 ) or tonumber(idx[0]) == -1 then
+      if a_len and ( a_len > 0 ) then
         local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
         local status = qc[func_name](casted_a_chunk, a_len, b, idx, chunk_idx)
         assert(status == 0, "C error in INDEX")
+        if tonumber(idx[0]) ~= -1 then
+          break
+        end
+        -- continue the search
       else
         break
       end
