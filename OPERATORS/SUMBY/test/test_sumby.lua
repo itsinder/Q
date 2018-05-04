@@ -29,7 +29,6 @@ tests.t2 = function()
   local b = Q.mk_col({0, 1, 4, 1, 1, 2, 0, 2}, "I2")
   local nb = 3
   local res = Q.sumby(a, b, nb, {is_safe = true})
-  res:eval()
   local status = pcall(res.eval, res)
   assert(status == false)
   print("Test t2 completed")

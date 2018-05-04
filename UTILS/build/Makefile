@@ -30,6 +30,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua clean
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua clean
 	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua clean
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua clean
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua clean
 
 install: uninstall 
@@ -82,6 +83,9 @@ where:
 
 sumby:
 	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua/
+
+getk:
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua/
 
 index:
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
@@ -142,6 +146,7 @@ q_operators: f1f2opf3 \
 	drop_nulls \
 	where \
 	sumby  \
-	index
+	index \
+	getk
 	echo "all done for operators"
 

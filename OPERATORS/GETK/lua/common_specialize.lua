@@ -1,3 +1,4 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local function common_specialize(fval, k, optargs, subs)
   assert(fval)
   assert(type(fval) == "lVector", "f1 must be a lVector")
@@ -17,9 +18,10 @@ local function common_specialize(fval, k, optargs, subs)
       is_ephemeral = true
     end
   end
-  subs.is_ephemeral = true 
+  subs.is_ephemeral = is_ephemeral
   subs.qtype = qtype
   subs.ctype = ctype
+  subs.width = width
   return subs
 end
 return common_specialize
