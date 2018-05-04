@@ -28,6 +28,7 @@ local function expander_index(op, a, b)
     assert(chunk_num == chunk_index)
     local idx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
     idx = ffi.cast("int64_t *", idx)
+    idx[0] = -1
     while(true) do
       local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
       local chunk_idx = chunk_index * qconsts.chunk_size
