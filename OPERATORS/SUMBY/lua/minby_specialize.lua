@@ -9,7 +9,7 @@ return function (
   local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
   assert(pltable.find(val_qtypes, val_qtype))
   assert(pltable.find(grpby_qtypes, grpby_qtype))
-  local tmpl = 'minby.tmpl'
+  local tmpl = 'maxby_minby.tmpl'
   local subs = {};
   subs.fn = "minby_" .. val_qtype .. "_" .. grpby_qtype .. "_" .. val_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype
