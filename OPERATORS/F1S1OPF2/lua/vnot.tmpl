@@ -36,6 +36,8 @@ ${fn}(
 
 {
   int status = 0;
+  // Using ceil operator because this will include the last 64 bit chunk for the processing 
+  // though there might be some unused bits in last 64 bit chunk but vector code is taking care of it (not using those bits).
   uint64_t loop_count = ceil((double)nR / 64);
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
