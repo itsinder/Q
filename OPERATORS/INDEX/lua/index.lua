@@ -5,7 +5,7 @@ local function index(x, y)
   assert(y, "no arg y to index")
   assert(type(x) == "lVector", "x is not lVector")
   -- TODO: discuss with Ramesh: whether to support type(y) as Scalar?
-  assert(type(y) == "number", "y is not of type number")
+  assert(type(y) == "Scalar", "y is not of type Scalar ")
 
   local status, col = pcall(expander, "index", x, y)
   if not status then print(col) end
