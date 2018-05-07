@@ -42,7 +42,7 @@ int merge_min(
       yidx++;
     }
     else  {
-      Z[zidx] = X[yidx];
+      Z[zidx] = X[xidx];
       xidx++;
     }
     zidx++;
