@@ -1,35 +1,33 @@
 local Q = require 'Q'
-local classify = require 'Q/ML/KNN/lua/classify'
+local classify_conv = require 'Q/ML/KNN/lua/classify_conv'
 local utils = require 'Q/UTILS/lua/utils'
 local Scalar = require 'libsclr'
 local tests = {}
 
 tests.t1 = function()
   local n = 2
-  local m = 4
+  local m = 3
   local g_vec        -- it's size will be n
   local x            -- input sample of length m, it is not vector
   local alpha        -- it's length is m, it is not vector
   
   local train_vec
 
-  local T = {}
-  for i = 1, m do
-    T[i] = Q.mk_col({2, 4}, "F4")
-  end
+  local T = {Q.mk_col({2, 3, 1, 6}, "F4"), Q.mk_col({4, 5, 3, 1}, "F4"), Q.mk_col({6, 4, 5, 2}, "F4")}
 
-  g_vec = Q.mk_col({0, 1}, "I4")
+  g_vec = Q.mk_col({0, 1, 1, 1}, "I4")
 
   local x_val = Scalar.new(3, "F4")
-  x = {x_val, x_val, x_val, x_val}
+  x = {Scalar.new(1, "F4"), Scalar.new(3, "F4"), Scalar.new(5, "F4")}
 
   local alpha_val = Scalar.new(1, "F4")
-  alpha = {alpha_val, alpha_val, alpha_val, alpha_val}
+  alpha = {alpha_val, alpha_val, alpha_val}
 
-  local exp = Scalar.new(2, "F4")
+  local exponent = Scalar.new(2, "F4")
 
-  local result = classify(T, g_vec, x, exp, alpha)
+  local result = classify_conv(T, g_vec, x, exponent, alpha)
   assert(type(result) == "lVector")
+  print("############################")
   Q.print_csv(result)
 end
 
@@ -52,7 +50,7 @@ tests.t2 = function()
 
   local exp = Scalar.new(2, "F4")
 
-  local result = classify(T, g_vec, x, exp, alpha)
+  local result = classify_conv(T, g_vec, x, exp, alpha)
   assert(type(result) == "lVector")
   Q.print_csv(result)
   print("completed t2 successfully")
@@ -68,17 +66,17 @@ tests.t3 = function()
 
   -- Remove 'occupy_status' from table
   T['occupy_status'] = nil
-
-  -- predict_input {1.643221, 0.281781, -0.613726, 0.004625, 0.797606}, prediction result = 0
+  -- predict_input {0.964658, 0.119058, -0.613726, -0.316722, 0.406712}, prediction result = 0
   local x = {Scalar.new(1.643221, "F4"), Scalar.new(0.281781, "F4"), Scalar.new(-0.613726, "F4"), Scalar.new(0.004625, "F4"), Scalar.new(0.797606, "F4")}
 
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
 
-  local exp = Scalar.new(2, "F4")
+  local exponent = Scalar.new(2, "F4")
 
-  local result = classify(T, g_vec, x, exp, alpha)
+  local result = classify_conv(T, g_vec, x, exponent, alpha)
   assert(type(result) == "lVector")
+  Q.print_csv(result)
   local max = Q.max(result):eval():to_num()
   local index = utils.get_index(result, max)
   print(max, index)
@@ -143,7 +141,7 @@ tests.t4 = function()
   local index
   for i = 1, test_sample_count do
     -- predict_input
-    result = classify(T_train, g_vec_train, X[i], exp, alpha)
+    result = classify_conv(T_train, g_vec_train, X[i], exp, alpha)
     assert(type(result) == "lVector")
     max = Q.max(result):eval():to_num()
     index = utils.get_index(result, max)
@@ -168,6 +166,26 @@ tests.t5 = function()
 
   local args = {iterations = 10, split_ratio = 0.7, alpha = alpha, exponent = exponent, goal_column_index = goal_column_index}
 
+  local avg_accuracy, accuracy_table = run_knn(args)
+  print("Average: ", avg_accuracy)
+  for i, v in pairs(accuracy_table) do
+    print(i, v)
+  end
+end
+
+tests.t6 = function()
+  -- Tests the run_knn function
+  local run_knn = require 'Q/ML/KNN/lua/run_knn'
+
+  local saved_file_path = os.getenv("Q_METADATA_DIR") .. "/rirs_flower.saved"
+  dofile(saved_file_path)
+
+  local alpha_val = Scalar.new(1, "F4")
+  alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
+  local exponent = Scalar.new(2, "F4")
+  local goal_column_index = "flower_type"
+  
+  local args = {iterations = 10, split_ratio = 0.7, alpha = alpha, exponent = exponent, goal_column_index = goal_column_index}
   local avg_accuracy, accuracy_table = run_knn(args)
   print("Average: ", avg_accuracy)
   for i, v in pairs(accuracy_table) do

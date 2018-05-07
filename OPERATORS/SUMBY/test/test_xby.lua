@@ -7,7 +7,7 @@ local tests = {}
 tests.t1 = function()
   local len = qconsts.chunk_size + 1
   -- set len to more than a chunk and so that exp_rslt for numby is correct
-  while ( ( len % 3 ) != 1 ) do
+  while ( ( len % 3 ) ~= 1 ) do
     len = len + 1
   end
   local b = Q.seq({ len = len, start = 0, by = 1, qtype = "I4"}):eval()
@@ -44,3 +44,5 @@ tests.t1 = function()
   end
   print("Test t1 completed")
 end
+
+return tests

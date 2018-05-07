@@ -36,12 +36,13 @@ ${fn}(
 
 {
   int status = 0;
-  uint64_t loop_count = ceil(nR / 64);
+  uint64_t loop_count = ceil((double)nR / 64);
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
 // TODO #pragma omp parallel for 
   for ( uint64_t i = 0; i < loop_count; i++ ) {
+    //TODO: Do not modify unused bits from last 64 bits
     out[i] = ~ in[i];
   }
 BYE:

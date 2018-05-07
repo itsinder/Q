@@ -18,7 +18,10 @@ local function expander_sumby(op, a, b, nb, optargs)
   local is_safe = false
   if optargs then
     assert(type(optargs) == "table")
-    is_safe = optargs["is_safe"]
+    if ( optargs["is_safe"] ) then
+      is_safe =  optargs["is_safe"]
+      assert(type(is_safe) == "boolean")
+    end
   end
 
   local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype())
@@ -31,10 +34,6 @@ local function expander_sumby(op, a, b, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local is_memo
-  if nb > qconsts.chunk_size then
-    is_memo = true
-  end
   local function sumby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
@@ -49,7 +48,11 @@ local function expander_sumby(op, a, b, nb, optargs)
       local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
       assert(a_len == b_len)
       if a_len == 0 then
-        return 0, nil, nil 
+        if chunk_idx == 0 then
+          return 0, nil, nil
+        else
+          return nb, out_buf, nil
+        end
       end
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Null is not supported")
@@ -65,7 +68,7 @@ local function expander_sumby(op, a, b, nb, optargs)
       end
     end
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype, is_memo = is_memo } )
+  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype } )
 end
 
 return expander_sumby
