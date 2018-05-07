@@ -1,6 +1,6 @@
 local T = {}
 local function maxby(x, g, ng, optargs)
-  local expander = require 'Q/OPERATORS/SUMBY/lua/expander_maxby'
+  local expander = require 'Q/OPERATORS/SUMBY/lua/expander_maxby_minby'
   assert(x, "no arg x to maxby")
   assert(g, "no arg y to maxby")
   assert(type(x) == "lVector",  "x is not lVector")

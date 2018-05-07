@@ -6,25 +6,55 @@ local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 
-  -- This operator produces 1 vector
-local function expander_getk(a, fval, k, optargs)
+local function check_args(a, fval, k, optargs)
   assert(a)
   assert(type(a) == "string")
   assert( ( a == "mink" ) or ( a == "maxk" ) )
+
+  assert(fval)
+  assert(type(fval) == "lVector", "f1 must be a lVector")
+  assert(fval:has_nulls() == false)
+
+  -- Here is a case where it makes sense for k to be a number
+  -- and NOT a Scalar
+  assert(k)
+  assert(type(k) == "number")
+  assert( (k > 0 ) and ( k < qconsts.chunk_size ) )
+  -- TODO: Should it be k <= qconsts.chunk_size ?
+
+  if ( optargs ) then
+    assert(type(optargs) == "table")
+  end
+  -- optargs is a palce holder for now
+  return true
+end
+
+-- This operator produces 1 vector
+local function expander_getk(a, fval, k, optargs)
+  -- validate input args
+  check_args(a, fval, k, optargs)
+
   local sp_fn_name = "Q/OPERATORS/GETK/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
-  local status, subs, tmpl = pcall(spfn, fval, k, optargs)
+  local status, subs, tmpl = pcall(spfn, fval:qtype())
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
-  local func_name = assert(subs.sort_fn)
-  assert(qc[func_name], "Symbol not available" .. func_name)
-  local is_ephemeral = subs.is_ephemeral
+  local sort_fn = assert(subs.sort_fn)
+  assert(qc[sort_fn], "Symbol not available" .. sort_fn)
+  local func = assert(subs.fn)
+  assert(qc[func], "Symbol not available" .. func)
+
+  local is_ephemeral = false
+  if ( optargs ) then
+    if ( optargs.is_ephemeral == true ) then
+      is_ephemeral = true
+    end
+  end
+
   local qtype = assert(subs.qtype)
   local ctype = assert(subs.ctype)
   local width = assert(subs.width)
-  local sort_fn = subs.sort_fn 
-
   --=================================================
   local chunk_idx = 0
   local first_call = true
@@ -42,7 +72,7 @@ local function expander_getk(a, fval, k, optargs)
     if ( first_call ) then
       -- create a buffer to sort each chunk as you get it
       sort_buf_val = cmem.new(n * width, qtype)
-      sort_buf_val:zero()
+      sort_buf_val:zero() -- a precuation, not necessary
       casted_sort_buf_val = ffi.cast(ctype .. "*", get_ptr(sort_buf_val))
 
       -- create buffers for keeping topk from each chunk
@@ -75,7 +105,7 @@ local function expander_getk(a, fval, k, optargs)
         ffi.C.memcpy(casted_bufX, casted_sort_buf_val, nY*width)
         nX = nY
       else
-        qc[subs.merge_fn](casted_bufX, nX, casted_sort_buf_val, nY, casted_bufZ, nZ, ptr_num_in_Z)
+        qc[func](casted_bufX, nX, casted_sort_buf_val, nY, casted_bufZ, nZ, ptr_num_in_Z)
         -- copy from bufZ to bufX
         local num_in_Z = ptr_num_in_Z[0]
         ffi.C.memcpy(casted_bufX, casted_bufZ, num_in_Z*width)

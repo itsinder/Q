@@ -5,14 +5,14 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
-local function expander_maxby(op, a, b, nb, optargs)
+local function expander_maxby_minby(op, a, b, nb, optargs)
   -- Verification
-  assert(op == "maxby")
+  assert(op == "minby" or op == "maxby")
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")
   assert(nb > 0)
-  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/maxby_specialize"
+  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/" .. op .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
   local is_safe = false
@@ -34,7 +34,7 @@ local function expander_maxby(op, a, b, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local function maxby_gen(chunk_num)
+  local function minby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
@@ -73,7 +73,7 @@ local function expander_maxby(op, a, b, nb, optargs)
       end
     end
   end
-  return lVector( { gen = maxby_gen, has_nulls = false, qtype = subs.out_qtype } )
+  return lVector( { gen = minby_gen, has_nulls = false, qtype = subs.out_qtype } )
 end
 
-return expander_maxby
+return expander_maxby_minby
