@@ -1,14 +1,22 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
-local common_specialize = require 'Q/OPERATORS/GETK/lua/common_specialize'
-
-local function mink_specialize(fval, k, optargs)
+local function mink_specialize(fldtype)
   local subs = {}
-  subs = assert(common_specialize(fval, k, optargs, subs))
-  local tmpl = "XXXXXXX"
-  subs.comparator = " < " -- will be > for maxby, what for numby???
-  subs.sort_fn = "qsort_dsc_" .. subs.qtype -- will be dsc for maxby
-  -- no need to sort for numby
-  assert(qc[subs.sort_fn])
+
+  local qtype = fldtype
+  local ctype = qconsts.qtypes[qtype].ctype
+  local width = qconsts.qtypes[qtype].width
+
+  subs.qtype = qtype
+  subs.ctype = ctype
+  subs.width = width
+
+  local tmpl = "merge1.tmpl"
+  subs.fn = "merge_max_" .. qtype
+  subs.min_or_max = "max"
+  subs.comparator = ">"
+  subs.sort_fn = "qsort_dsc_" .. subs.qtype
+  subs.merge_fn = "merge_max"
 
   return subs, tmpl
 end

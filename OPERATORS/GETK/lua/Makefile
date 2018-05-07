@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/  -I../inc/ -I../../../UTILS/gen_inc 
+INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ -I../../../UTILS/gen_inc/ 
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG
@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libgetk.so 
+all : libgetk.so  
 	
 #----------------------------------
 clean :
@@ -19,15 +19,13 @@ clean :
 	rm -f _*
 	rm -f *.so
 
-SRC_FILES =  \
-	../src/merge.c  \
-
-
-libgetk.so : ${SRC_FILES}
-	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${SRC_FILES} ${CFLAGS} ${INCS} -shared -o libgetk.so
-	test -d  ${Q_BUILD_DIR}/src/
-	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
-	cp ../inc/merge.h ${Q_BUILD_DIR}/include/
+libgetk.so : ${GEN_FILES} \
+	merge1.tmpl
+	luajit generator.lua
+	gcc ${GEN_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libgetk.so
+	test -d ${Q_BUILD_DIR}
+	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
+	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
 test_q : libgetk.so
 	echo "TODO"
@@ -37,3 +35,16 @@ test_c :  libgetk.so
 
 test : test_q test_c
 
+GEN_FILES = \
+	../gen_src/_merge_max_F4.c \
+	../gen_src/_merge_max_F8.c \
+	../gen_src/_merge_max_I1.c \
+	../gen_src/_merge_max_I2.c \
+	../gen_src/_merge_max_I4.c \
+	../gen_src/_merge_max_I8.c \
+	../gen_src/_merge_min_I8.c \
+	../gen_src/_merge_min_I4.c \
+	../gen_src/_merge_min_I2.c \
+	../gen_src/_merge_min_I1.c \
+	../gen_src/_merge_min_F8.c \
+	../gen_src/_merge_min_F4.c \
