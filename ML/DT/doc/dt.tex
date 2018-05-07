@@ -151,3 +151,38 @@ Initialize, decision tree \(D = \{\}\) \\
 \label{compute_benefit_categorical}
 \caption{Benefit Computation (categorical attributes)}
 \end{figure}
+
+\section{Benefit Computation}
+It is useful to model this problem as a gambling problem where we are 
+sampling with replacement. 
+\bi
+\item Let there be 100 balls, with 60  being marked Heads and 40
+being marked Tails. 
+\item Assume that we have to gamble on whether a ball picked at random is Heads
+ot Tails. If the ``house'' sets odds to ensure a fair game, then it would offer
+a payout of 4/6 if you bet heads and 6/4 if you bet tails. 
+\item If you bet heads, then the expected benefit is 
+\(\frac{60}{100} \times \frac{4}{6} + 
+\frac{40}{100} \times (-1)  = 0\)
+\item If you bet tails, then the expected benefit is 
+\(\frac{60}{100} \times (-1) + 
+\frac{40}{100} \times \frac{6}{4}  = 0\)
+\ei
+
+Now, assume that before we place out bet, we are allowed to ask one questionm
+which has an answer of left or right. If left, we are told that the ball was
+selected from a population of 40 heads and 15 tails. If right, we are told that
+the ball was selected from a population of 20 heads and 25 tails. Clearly, we
+would bet heads if the answer is left and tails if the answer is right. The
+question is: What is the expected benefit for 100 trials?
+
+\(100 ( \times ( \frac{40+15}{100} \times ( 
+  \frac{40}{40+15} \times \frac{4}{6}  + 
+  \frac{15}{40+15} \times -1 ) ) + 
+  ( \frac{20+25}{100} \times ( 
+  \frac{20}{20+25} \times -1 + 
+  \frac{25}{20+25} \times \frac{6}{4}  ) ) )
+  \)
+which is \(
+ = (40 \times  \frac{4}{6}) -15 - 20 + (25 \times \frac{6}{4} )
+ = 29 \frac{1}{6}\)

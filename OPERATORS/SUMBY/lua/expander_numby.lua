@@ -41,17 +41,17 @@ local function expander_numby(a, nb, optargs)
   local sz_out_in_bytes = sz_out * qconsts.qtypes[out_qtype].width
   local out_buf = nil
   local first_call = true
-  local chunk_idx = 0
+  local chnk_idx = 0
   local is_memo = false -- TODO DISCUSS WITH KRUSHNAKANT
   if nb > qconsts.chunk_size then
     is_memo = true
   end
   local in_ctype  = subs.in_ctype
   local out_ctype = subs.out_ctype
-  local function numby_gen(chunk_num)
-    -- Adding assert on chunk_idx to have sync between expected 
-    -- chunk_num and generator's chunk_idx state
-    assert(chunk_num == chunk_idx)
+  local function numby_gen(chnk_num)
+    -- Adding assert on chnk_idx to have sync between expected 
+    -- chnk_num and generator's chnk_idx state
+    assert(chnk_num == chnk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
@@ -59,17 +59,16 @@ local function expander_numby(a, nb, optargs)
       first_call = false
     end
     while true do
-      local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
+      local a_len, a_chnk, a_nn_chnk = a:chunk(chnk_idx)
       if a_len == 0 then
         return 0, nil, nil 
       end
-      assert(a_nn_chunk == nil, "Null is not supported")
-    
-      local casted_a_chunk = ffi.cast(in_ctype .. " *",  get_ptr(a_chunk))
-      local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
-      local status = fnptr(casted_a_chunk, a_len, casted_out_buf, nb, is_safe)
+      assert(a_nn_chnk == nil, "Null is not supported")
+      local cst_a_chnk = ffi.cast(in_ctype .. " *",  get_ptr(a_chnk))
+      local cst_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
+      local status = fnptr(cst_a_chnk, a_len, cst_out_buf, nb, is_safe)
       assert(status == 0, "C error in NUMBY")
-      chunk_idx = chunk_idx + 1
+      chnk_idx = chnk_idx + 1
       if a_len < qconsts.chunk_size then
         return nb, out_buf, nil
       end
