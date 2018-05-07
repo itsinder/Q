@@ -15,13 +15,18 @@ local function check_args(a, fval, k, optargs)
   assert(type(fval) == "lVector", "f1 must be a lVector")
   assert(fval:has_nulls() == false)
 
+  -- Here is a case where it makes sense for k to be a number
+  -- and NOT a Scalar
   assert(k)
   assert(type(k) == "number")
   assert( (k > 0 ) and ( k < qconsts.chunk_size ) )
+  -- TODO: Should it be k <= qconsts.chunk_size ?
 
   if ( optargs ) then
     assert(type(optargs) == "table")
   end
+  -- optargs is a palce holder for now
+  return true
 end
 
 -- This operator produces 1 vector
@@ -67,7 +72,7 @@ local function expander_getk(a, fval, k, optargs)
     if ( first_call ) then
       -- create a buffer to sort each chunk as you get it
       sort_buf_val = cmem.new(n * width, qtype)
-      sort_buf_val:zero()
+      sort_buf_val:zero() -- a precuation, not necessary
       casted_sort_buf_val = ffi.cast(ctype .. "*", get_ptr(sort_buf_val))
 
       -- create buffers for keeping topk from each chunk
