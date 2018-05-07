@@ -34,9 +34,10 @@ local function expander_index(op, a, b)
     -- rslt is a int64_t which will contain first index (if any)
     -- where specified value, b, occurs
     local rslt = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
-    rslt = ffi.cast("int64_t *", idx)
+    rslt = ffi.cast("int64_t *", rslt)
     rslt[0] = -1 -- initialize to some invalid value
     -- TODO local bval = get b value from Sclar b
+    local bval = b:to_num()
     while ( true ) do
       local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
       -- vec_pos indicates how many elements of vector we have consumed
@@ -56,7 +57,7 @@ local function expander_index(op, a, b)
     -- TODO see if you can do (rslt ~= -1) directly
     if tonumber(rslt[0]) ~= -1  then 
       -- TODO: Consider using cmem to scalar here instead of below
-      return Scalar.new(tonumber(idx[0]), "I8") 
+      return Scalar.new(tonumber(rslt[0]), "I8") 
     else
       return nil
     end
