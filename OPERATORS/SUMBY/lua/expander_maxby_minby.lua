@@ -5,7 +5,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
-local function expander_minby(op, a, b, nb, optargs)
+local function expander_maxby_minby(op, a, b, nb, optargs)
   -- Verification
   assert(op == "minby" or op == "maxby")
   assert(type(a) == "lVector", "a must be a lVector ")
@@ -76,4 +76,4 @@ local function expander_minby(op, a, b, nb, optargs)
   return lVector( { gen = minby_gen, has_nulls = false, qtype = subs.out_qtype } )
 end
 
-return expander_minby
+return expander_maxby_minby
