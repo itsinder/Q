@@ -13,8 +13,8 @@ tests.t1 = function()
   local vec = utils.table_to_vector(tbl, qtype)
   local value = Scalar.new(50, "I4")
   local ind = Q.index(vec, value)
-  assert(ind:to_num() == 4, "wrong index returned")
-  print("index of 50 is " .. ind:to_num())
+  assert(ind == 4, "wrong index returned")
+  print("index of 50 is " .. ind)
   assert(type(vec) == 'lVector', "output not of type lVector")
   assert(vec:num_elements() == #tbl, "table and vector length not same")
   print("t1 test completed successfully")
@@ -37,8 +37,8 @@ tests.t2 = function()
   local ind = Q.index(vec, value)
   local stop_time = timer.clock_gettime(0)
   local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
-  assert(ind:to_num() == 327678, "wrong index returned")
-  print("Index of 9 is " .. ind:to_num(), " execution time = " .. time)
+  assert(ind == 327678, "wrong index returned")
+  print("Index of 9 is " .. ind, " execution time = " .. time)
   print("t2 test completed successfully")
 end
 
@@ -66,10 +66,32 @@ tests.t4 = function()
   tbl[65541] = 9
   local value = Scalar.new(9, "I4")
   local vec = Q.mk_col(tbl, qtype)
-  
   local ind = Q.index(vec, value)
-  assert(ind:to_num() == 65541-1, "wrong index returned")
+  assert(ind == 65541-1, "wrong index returned")
   print("t4 test completed successfully")
+end
+
+-- testing Q.index() by giving input value of type number, 
+-- it should return valid index
+tests.t5 = function()
+  local tbl = {10,20,30,40,50,60,70,80,90,100}
+  local qtype = "I1"
+  local value = 100
+  local vec = Q.mk_col(tbl, qtype)
+  local ind = Q.index(vec, value)
+  assert(ind == 9, "wrong index returned")
+  print("t5 test completed successfully")
+end
+
+-- testing Q.index() to return error in case of value > valid qtype range
+tests.t6 = function()
+  local tbl = {10,20,30,40,50,60,70,80,90,100}
+  local qtype = "I1"
+  local value = 128
+  local vec = Q.mk_col(tbl, qtype)
+  local status, reason = pcall(Q.index,vec, value)
+  assert(status == false)
+  print("t6 test completed successfully")
 end
 
 return tests

@@ -6,13 +6,12 @@ local cmem    = require 'libcmem'
 local Scalar    = require 'libsclr'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
--- should have some documentation as to what index operator does
 
 local function expander_index(op, a, b)
   -- Verification
   assert(op == "index")
   assert(type(a) == "lVector", "a must be a lVector ")
-  assert(type(b) == "Scalar", "b must be a Scalar ")
+  assert(type(b) == "Scalar", "b must be a Scalar")
   assert(b:fldtype() == a:fldtype(), "Vector and Scalar should have same type")
   -- TODO Relax above assumption about same fieldtypes later
   
@@ -54,10 +53,8 @@ local function expander_index(op, a, b)
       end
       chunk_index = chunk_index + 1
     end
-    -- TODO see if you can do (rslt ~= -1) directly
-    if tonumber(rslt[0]) ~= -1  then 
-      -- TODO: Consider using cmem to scalar here instead of below
-      return Scalar.new(tonumber(rslt[0]), "I8") 
+    if tonumber(rslt[0]) ~= -1  then
+      return tonumber(rslt[0])
     else
       return nil
     end
