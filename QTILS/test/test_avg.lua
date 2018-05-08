@@ -1,6 +1,5 @@
-local Q = require 'Q'
-
 local tests = {}
+local Q = require 'Q'
 
 tests.t1 = function()
   local in_table = {}
