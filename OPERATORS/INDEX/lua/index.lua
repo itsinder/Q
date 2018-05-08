@@ -3,6 +3,7 @@ local function index(x, y)
 -- Q.index() : searches the index of given value(i.e. y) from the given vector(i.e. x)
             -- if found, returns index(a lua number)
             -- else returns nil
+-- In Q.index(), indexing starts with 0
 -- Convention: Q.index(vector, value)
 -- 1) vector : a vector
 -- 2) value  : number or Scalar value
