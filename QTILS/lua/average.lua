@@ -1,7 +1,9 @@
-local Q = require 'Q'
 local Scalar = require 'libsclr'
 
+local T = {}
+
 local function avg(x)
+  local Q = require 'Q'
   assert(x and type(x) == "lVector", "input must be of type lVector")
   local sum, count = Q.sum(x):eval()
   local avg
@@ -15,4 +17,4 @@ local function avg(x)
 end
 T.avg = avg
 require('Q/q_export').export('avg', avg)
-
+return T
