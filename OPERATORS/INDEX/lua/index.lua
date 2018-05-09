@@ -12,7 +12,6 @@ local function index(x, y)
   assert(x, "no arg x to index")
   assert(y, "no arg y to index")
   assert(type(x) == "lVector", "x is not lVector")
-  -- TODO: discuss with Ramesh: whether to support type(y) as Scalar?
   assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
   if(type(y) == "number") then
     y = assert(Scalar.new(y, x:fldtype()), "value out of range")
@@ -22,7 +21,7 @@ local function index(x, y)
   assert(status, "Could not execute INDEX")
   return col
 end
-T.where = index
+T.index = index
 require('Q/q_export').export('index', index)
 
 return T
