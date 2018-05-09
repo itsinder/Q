@@ -2,7 +2,7 @@
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
-
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local a = Q.mk_col({10, 20, 30, 40, 50}, "I4"):set_name("a")
 
 local tests = {}
@@ -140,4 +140,38 @@ tests.t7 = function ()
   print("Test t7 succeeded")
 end
 --=========================================
+
+tests.t8 = function ()
+  print("=======================================")
+  -- more than chunk size values present in a and b
+  local chunk_sz = qconsts.chunk_size
+  local len = chunk_sz * 2 + 5
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
+  local b_input_table = {}
+  local exp_table = {}
+  for i=1, chunk_sz-1 do
+    b_input_table[i] = 1
+  end
+  b_input_table[chunk_sz] = 0
+  for i = chunk_sz+1, chunk_sz * 2 do
+    b_input_table[i] = 0
+  end
+  for i = (chunk_sz * 2 + 1), len do
+    b_input_table[i] = 1
+  end
+
+  local b = Q.mk_col(b_input_table, "B1")
+  local n_expected = chunk_sz-1 + 5
+
+
+  local c = Q.where(a, b)
+  c:eval()
+  --Q.print_csv(a, { opfile = "/tmp/a_out.txt"} )
+  --Q.print_csv(c, { opfile = "/tmp/c_out.txt"} )
+  --Q.print_csv(b, { opfile = "/tmp/b_out.txt"} )
+  assert(c:length() == n_expected)
+
+  print("Test t8 succeeded")
+end
+
 return tests
