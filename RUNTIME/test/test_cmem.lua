@@ -168,5 +168,28 @@ tests.t9 = function()
   end
   print("test t9 passed")
 end
+
+tests.t10 = function()
+  -- tests set min and max 
+  local n = 16
+  local qtypes = { }
+  qtypes.I1 = 1
+  qtypes.I2 = 2
+  qtypes.I4 = 4
+  qtypes.I8 = 8
+  qtypes.F4 = 4
+  qtypes.F8 = 8
+  for qtype, width in pairs(qtypes) do 
+    print(qtype, width)
+    local size = width * n
+    local c1 = assert(cmem.new(size, qtype))
+    c1:set_min()
+    -- c1:prbuf(n)
+    c1:set_max()
+    -- c1:prbuf(n)
+  end
+  -- TODO P3 Visual inspection shows this test passes. Automate it.
+  print("test t10 passed")
+end
   
 return tests
