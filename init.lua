@@ -28,9 +28,7 @@ require "Q/OPERATORS/APPROX/FREQUENT/lua/approx_frequent"
 require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
 require 'Q/OPERATORS/WHERE/lua/where'
-require 'Q/OPERATORS/SUMBY/lua/sumby'
-require 'Q/OPERATORS/SUMBY/lua/numby'
-require 'Q/OPERATORS/SUMBY/lua/maxby_minby'
+require 'Q/OPERATORS/GROUPBY/lua/groupby'
 require 'Q/OPERATORS/INDEX/lua/index'
 require 'Q/OPERATORS/GETK/lua/getk'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER

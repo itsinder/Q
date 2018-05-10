@@ -10,7 +10,7 @@ local function expander_numby(a, nb, optargs)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(nb) == "number")
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
-  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/numby_specialize"
+  local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/numby_specialize"
   local spfn = assert(require(sp_fn_name))
 
   -- Keeping default is_safe value as true

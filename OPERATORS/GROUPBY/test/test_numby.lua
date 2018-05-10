@@ -22,7 +22,7 @@ tests.t1 = function()
   local len = 2*qconsts.chunk_size + 1
   local period = 3
   local a = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
-  Q.numby = require 'Q/OPERATORS/SUMBY/lua/expander_numby'
+  Q.numby = require 'Q/OPERATORS/GROUPBY/lua/expander_numby'
   local rslt = Q.numby(a, period)
   Q.print_csv(rslt)
   print("Test t1 completed")
@@ -33,7 +33,7 @@ tests.t2 = function()
   local len = qconsts.chunk_size
   local period = 3
   local a = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
-  Q.numby = require 'Q/OPERATORS/SUMBY/lua/expander_numby'
+  Q.numby = require 'Q/OPERATORS/GROUPBY/lua/expander_numby'
   local rslt = Q.numby(a, period)
   Q.print_csv(rslt)
   print("Test t2 completed")

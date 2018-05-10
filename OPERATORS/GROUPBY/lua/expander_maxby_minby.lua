@@ -11,8 +11,9 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")
-  assert(nb > 0)
-  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/" .. op .. "_specialize"
+  assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
+
+  local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/" .. op .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
   -- Keeping default is_safe value as true
