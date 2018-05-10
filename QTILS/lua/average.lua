@@ -8,7 +8,7 @@ local function avg(x)
   local sum, count = Q.sum(x):eval()
   local avg
   if count:to_num() > 0 then
-    local avg = sum:conv("F8") / count:conv("F8")
+    local avg = sum:conv("F8") / count
     return avg
   else
     return nil
