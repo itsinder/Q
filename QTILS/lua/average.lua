@@ -8,6 +8,7 @@ local function avg(x)
   local sum, count = Q.sum(x):eval()
   local avg
   if count:to_num() > 0 then
+    -- TODO: use scalar division
     local avg = sum:to_num() / count:to_num()
     local z = Scalar.new(avg, "F8")
     return z
