@@ -21,7 +21,7 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
   local is_safe = true
   if optargs then
     assert(type(optargs) == "table")
-    if ( optargs["is_safe"] ) then
+    if ( optargs["is_safe"] == false ) then
       is_safe =  optargs["is_safe"]
       assert(type(is_safe) == "boolean")
     end
