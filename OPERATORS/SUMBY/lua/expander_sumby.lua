@@ -11,11 +11,13 @@ local function expander_sumby(op, a, b, nb, optargs)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")
-  assert(nb > 0)
+  assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/SUMBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
 
-  local is_safe = false
+  -- Keeping default is_safe value as true
+  -- This will not allow C code to write values at incorrect locations
+  local is_safe = true
   if optargs then
     assert(type(optargs) == "table")
     if ( optargs["is_safe"] ) then

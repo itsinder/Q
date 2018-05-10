@@ -15,7 +15,9 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
   local sp_fn_name = "Q/OPERATORS/SUMBY/lua/" .. op .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
-  local is_safe = false
+  -- Keeping default is_safe value as true
+  -- This will not allow C code to write values at incorrect locations
+  local is_safe = true
   if optargs then
     assert(type(optargs) == "table")
     if ( optargs["is_safe"] ) then
