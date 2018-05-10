@@ -5,9 +5,8 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
-local function expander_sumby(op, a, b, nb, optargs)
+local function expander_sumby(a, b, nb, optargs)
   -- Verification
-  assert(op == "sumby")
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")

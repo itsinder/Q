@@ -7,7 +7,7 @@ local function sumby(x, g, ng, optargs)
   local expander = require 'Q/OPERATORS/GROUPBY/lua/expander_sumby'
   assert(x, "no arg x to sumby")
   assert(g, "no arg g to sumby")
-  local status, col = pcall(expander, "sumby", x, g, ng, optargs)
+  local status, col = pcall(expander, x, g, ng, optargs)
   if not status then print(col) end
   assert(status, "Could not execute SUMBY")
   return col
@@ -19,7 +19,7 @@ require('Q/q_export').export('sumby', sumby)
 local function numby(g, ng, optargs)
   local expander = require 'Q/OPERATORS/GROUPBY/lua/expander_numby'
   assert(g, "no arg g to numby")
-  local status, col = pcall(expander, "numby", g, ng, optargs)
+  local status, col = pcall(expander, g, ng, optargs)
   if not status then print(col) end
   assert(status, "Could not execute NUMBY")
   return col
