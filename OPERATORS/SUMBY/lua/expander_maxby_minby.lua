@@ -5,14 +5,14 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
-local function expander_sumby(op, a, b, nb, optargs)
+local function expander_maxby_minby(op, a, b, nb, optargs)
   -- Verification
-  assert(op == "sumby")
+  assert(op == "minby" or op == "maxby")
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")
   assert(nb > 0)
-  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/sumby_specialize"
+  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/" .. op .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
   local is_safe = false
@@ -34,13 +34,17 @@ local function expander_sumby(op, a, b, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
-  local function sumby_gen(chunk_num)
+  local function minby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
-      out_buf:zero()
+      local iptr = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. " *", get_ptr(out_buf))
+      --out_buf:zero()
+      for i=0, sz_out do
+        iptr[i] = subs.initial_val
+      end
       first_call = false
     end
     while true do
@@ -61,14 +65,15 @@ local function expander_sumby(op, a, b, nb, optargs)
       local casted_b_chunk = ffi.cast( qconsts.qtypes[b:fldtype()].ctype .. "*",  get_ptr(b_chunk))
       local casted_out_buf = ffi.cast( qconsts.qtypes[subs.out_qtype].ctype .. "*",  get_ptr(out_buf))
       local status = qc[func_name](casted_a_chunk, a_len, casted_b_chunk, nb, casted_out_buf, is_safe)
-      assert(status == 0, "C error in SUMBY")
+      assert(status == 0, "C error in MINBY")
       chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then
+        print(type(out_buf))
         return nb, out_buf, nil
       end
     end
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype } )
+  return lVector( { gen = minby_gen, has_nulls = false, qtype = subs.out_qtype } )
 end
 
-return expander_sumby
+return expander_maxby_minby

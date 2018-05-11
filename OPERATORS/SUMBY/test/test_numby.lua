@@ -28,6 +28,7 @@ tests.t1 = function()
   -- Q.print_csv(rslt)
   print("Test t1 completed")
 end
+
 tests.t2 = function()
   local len = 2*qconsts.chunk_size + 1
   local lb = 0
@@ -45,4 +46,18 @@ tests.t2 = function()
   end
   print("Test t2 completed")
 end
+
+
+tests.t3 = function()
+  -- Elements equal to chunk_size
+  local len = qconsts.chunk_size
+  local period = 3
+  local a = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
+  Q.numby = require 'Q/OPERATORS/SUMBY/lua/expander_numby'
+  local rslt = Q.numby(a, period)
+  Q.print_csv(rslt)
+  print("Test t3 completed")
+end
+
+
 return tests

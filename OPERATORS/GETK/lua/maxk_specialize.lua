@@ -12,10 +12,12 @@ local function mink_specialize(fldtype)
   subs.width = width
 
   local tmpl = "merge1.tmpl"
-  subs.fn = "merge_min_" .. qtype
-  subs.min_or_max = "min"
-  subs.comparator = "<"
-  subs.sort_fn = "qsort_asc_" .. subs.qtype
+  subs.fn = "merge_max_" .. qtype
+  subs.min_or_max = "max"
+  subs.comparator = ">"
+  subs.sort_fn = "qsort_dsc_" .. subs.qtype
+  subs.merge_fn = "merge_max"
+
   return subs, tmpl
 end
 return mink_specialize

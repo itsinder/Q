@@ -11,21 +11,27 @@ local function classify(
   cnts -- lVector of length m (optional)
   )
   local sone = Scalar.new(1, "F4")
+  local szero = Scalar.new(0, "F4")
   --==============================================
   local nT, n, ng = chk_params(T, g, x, exponent, alpha)
+  local distance = Q.const({val = szero, qtype = "F4", len = n})
   dk = {}
   local i = 1
+
   for key, val in pairs(T) do
     dk[i] = Q.vsmul(Q.pow(Q.vssub(val, x[i]), exponent), alpha[i])
     i = i + 1
   end
-  local d = Q.const({ val = sone, qtype = "F4", len = n})
-  for i = 1, nT do 
-    d = Q.vvadd(dk[i], d):eval()
+
+  for i = 1, nT do
+    distance = Q.vvadd(dk[i], distance)
   end
-  d = Q.reciprocal(d):eval()
+
+  distance = Q.sqrt(distance)
+
   -- Now, we need to sum d grouped by value of goal attribute
-  local rslt = Q.sumby(d, g, ng)
+  local rslt = Q.sumby(distance, g, ng)
+
   -- Scale by original population, calculate cnts if not given
   local l_cnts
   if ( not cnts ) then 

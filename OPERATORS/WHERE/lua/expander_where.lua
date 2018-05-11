@@ -27,7 +27,7 @@ local function expander_where(op, a, b)
     end
   end
 
-  local status, subs, len = pcall(spfn, a:fldtype())
+  local status, subs, tmpl = pcall(spfn, a:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)

@@ -29,11 +29,16 @@ require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
 require 'Q/OPERATORS/WHERE/lua/where'
 require 'Q/OPERATORS/SUMBY/lua/sumby'
+require 'Q/OPERATORS/SUMBY/lua/minby'
+require 'Q/OPERATORS/SUMBY/lua/maxby'
+require 'Q/OPERATORS/INDEX/lua/index'
+require 'Q/OPERATORS/GETK/lua/getk'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'
 require 'Q/QTILS/lua/vvpromote'
 require 'Q/QTILS/lua/fold'
+require 'Q/QTILS/lua/average'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 
 return require 'Q/q_export'

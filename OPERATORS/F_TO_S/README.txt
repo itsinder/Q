@@ -5,5 +5,5 @@ Note:
    - min/max value
    - number of values traversed
    - index of respective min/max value
-3) If the occurence of min/max value in a vector is twice, it returns index of second min/max value
+3) If the occurence of min/max value in a vector is twice, it returns index of first min/max value
 

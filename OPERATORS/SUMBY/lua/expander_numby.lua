@@ -27,25 +27,12 @@ local function expander_numby(a, nb, optargs)
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   local out_qtype = subs.out_qtype
-
-  local fake = true
-  local fnptr
-  if ( fake ) then 
-    local xxx = ffi.load("libsumby.so")
-    fnptr = assert(xxx[func_name])
-  else
-    fnptr = assert(qc[func_name], "Symbol not defined " .. func_name)
-  end
-
+  assert(qc[func_name], "Symbol not defined " .. func_name)
   local sz_out = nb
   local sz_out_in_bytes = sz_out * qconsts.qtypes[out_qtype].width
   local out_buf = nil
   local first_call = true
-  local chnk_idx = 0
-  local is_memo = false -- TODO DISCUSS WITH KRUSHNAKANT
-  if nb > qconsts.chunk_size then
-    is_memo = true
-  end
+  local chunk_idx = 0
   local in_ctype  = subs.in_ctype
   local out_ctype = subs.out_ctype
   local function numby_gen(chnk_num)
@@ -61,12 +48,17 @@ local function expander_numby(a, nb, optargs)
     while true do
       local a_len, a_chnk, a_nn_chnk = a:chunk(chnk_idx)
       if a_len == 0 then
-        return 0, nil, nil 
+        if chunk_idx == 0 then
+          return 0, nil, nil
+        else
+          return nb, out_buf, nil
+        end
       end
-      assert(a_nn_chnk == nil, "Null is not supported")
-      local cst_a_chnk = ffi.cast(in_ctype .. " *",  get_ptr(a_chnk))
-      local cst_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
-      local status = fnptr(cst_a_chnk, a_len, cst_out_buf, nb, is_safe)
+      assert(a_nn_chunk == nil, "Null is not supported")
+    
+      local casted_a_chunk = ffi.cast(in_ctype .. " *",  get_ptr(a_chunk))
+      local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
+      local status = qc[func_name](casted_a_chunk, a_len, casted_out_buf, nb, is_safe)
       assert(status == 0, "C error in NUMBY")
       chnk_idx = chnk_idx + 1
       if a_len < qconsts.chunk_size then
@@ -74,8 +66,7 @@ local function expander_numby(a, nb, optargs)
       end
     end
   end
-  return lVector( { gen = numby_gen, has_nulls = false, 
-  qtype = out_qtype, is_memo = is_memo } )
+  return lVector( { gen = numby_gen, has_nulls = false, qtype = out_qtype } )
 end
 
 return expander_numby
