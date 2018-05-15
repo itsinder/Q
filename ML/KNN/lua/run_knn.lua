@@ -3,12 +3,16 @@ local Scalar = require 'libsclr'
 local classify = require 'Q/ML/KNN/lua/classify'
 local utils = require 'Q/UTILS/lua/utils'
 
-local get_train_test_split = function(split_ratio, T, total_length, feature_column_indices)
+local get_train_test_split = function(split_ratio, T, feature_column_indices)
   local Train = {}
   local Test = {}
+  local total_length
+  for i, v in pairs(T) do
+    total_length = v:length()
+    break
+  end
   local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
   local random_vec_bool = Q.vsleq(random_vec, split_ratio):eval()
-  
   if not feature_column_indices then
     local column_indices = {}
     for i, _ in pairs(T) do
@@ -17,12 +21,10 @@ local get_train_test_split = function(split_ratio, T, total_length, feature_colu
     feature_column_indices = column_indices
   end
   assert(feature_column_indices)
-
   for _, v in pairs(feature_column_indices) do
     Train[v] = Q.where(T[v], random_vec_bool):eval()
     Test[v] = Q.where(T[v], Q.vnot(random_vec_bool)):eval()
   end
-  
   return Train, Test
 end
 
@@ -91,7 +93,7 @@ local run_knn = function(args)
   end
 
   for itr = 1, iterations do
-    local Train, Test = get_train_test_split(split_ratio, T, T[goal_column_index]:length(), feature_column_indices)
+    local Train, Test = get_train_test_split(split_ratio, T, feature_column_indices)
 
     local g_vec_train = Train[goal_column_index]
     Train[goal_column_index] = nil
