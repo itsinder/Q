@@ -47,11 +47,11 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
-      out_buf = assert(cmem.new(sz_out_in_bytes))
-      -- RAMESH TODO Finish cmem.min() and cmem.max() operators
-      local iptr = ffi.cast(out_ctype .. " *", get_ptr(out_buf))
-      for i=0, sz_out do
-        iptr[i] = subs.initial_val
+      out_buf = assert(cmem.new(sz_out_in_bytes, a:fldtype()))
+      if op == "maxby" then
+        out_buf:set_min()
+      elseif op == "minby" then
+        out_buf:set_max()
       end
       first_call = false
     end
