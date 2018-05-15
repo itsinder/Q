@@ -32,8 +32,7 @@ tests.t2 = function()
   local a = Q.mk_col({1, 2, 4, 5, 6, 7, 8, 9}, "I4")
   local b = Q.mk_col({0, 1, 4, 1, 1, 2, 0, 2}, "I2")
   local nb = 3
-  local res = Q.maxby(a, b, nb, {is_safe = true})
-  local status = pcall(res.eval, res)
+  local status, res = pcall(Q.minby, a, b, nb, {is_safe = true})
   assert(status == false)
   print("Test t2 completed")
 end

@@ -59,6 +59,7 @@ local function minby(x, g, ng, optargs)
 
   -- call raw_minby
   local minby_col = T.raw_minby(x, g, ng, optargs)
+  minby_col:eval()
   -- call numby to get goal value occurance count
   local numby_col = T.numby(g, ng, optargs)
   -- get B1 vector according to occurance count
@@ -66,7 +67,6 @@ local function minby(x, g, ng, optargs)
   local vsgt_res = Q.vsgt(numby_col, szero):eval()
   -- Set null vector for raw_minby result i.e minby_col
   -- Set null vector if any goal value occurance count is 0
-  minby_col:eval()
   local vsgt_res_sum = Q.sum(vsgt_res):eval():to_num()
   if vsgt_res_sum ~= vsgt_res:length() then 
     minby_col:make_nulls(vsgt_res)
@@ -83,6 +83,7 @@ local function maxby(x, g, ng, optargs)
 
   -- call raw_maxby
   local maxby_col = T.raw_maxby(x, g, ng, optargs)
+  maxby_col:eval()
   -- call numby to get goal value occurance count
   local numby_col = T.numby(g, ng, optargs)
   -- get B1 vector according to occurance count
@@ -90,7 +91,6 @@ local function maxby(x, g, ng, optargs)
   local vsgt_res = Q.vsgt(numby_col, szero):eval()
   -- Set null vector for raw_maxby result i.e maxby_col
   -- Set null vector if any goal value occurance count is 0
-  maxby_col:eval()
   local vsgt_res_sum = Q.sum(vsgt_res):eval():to_num()
   if vsgt_res_sum ~= vsgt_res:length() then 
     maxby_col:make_nulls(vsgt_res)
