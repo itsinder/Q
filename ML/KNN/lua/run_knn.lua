@@ -3,12 +3,16 @@ local Scalar = require 'libsclr'
 local classify = require 'Q/ML/KNN/lua/classify'
 local utils = require 'Q/UTILS/lua/utils'
 
-local get_train_test_split = function(split_ratio, T, total_length, feature_column_indices)
+local get_train_test_split = function(split_ratio, T, feature_column_indices)
   local Train = {}
   local Test = {}
+  local total_length
+  for i, v in pairs(T) do
+    total_length = v:length()
+    break
+  end
   local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
   local random_vec_bool = Q.vsleq(random_vec, split_ratio):eval()
-  
   if not feature_column_indices then
     local column_indices = {}
     for i, _ in pairs(T) do
@@ -17,12 +21,10 @@ local get_train_test_split = function(split_ratio, T, total_length, feature_colu
     feature_column_indices = column_indices
   end
   assert(feature_column_indices)
-
   for _, v in pairs(feature_column_indices) do
     Train[v] = Q.where(T[v], random_vec_bool):eval()
     Test[v] = Q.where(T[v], Q.vnot(random_vec_bool)):eval()
   end
-  
   return Train, Test
 end
 
@@ -91,22 +93,11 @@ local run_knn = function(args)
   end
 
   for itr = 1, iterations do
-    local Train, Test = get_train_test_split(split_ratio, T, T[goal_column_index]:length(), feature_column_indices)
-    --[[
-    print(T[goal_column_index]:length())
-    print("#############################")
-    print("TRAIN")
-    for i, v in pairs(Train) do
-      print(i, v:length())
-    end
-    print("#############################")
-    print("TEST")
-    for i, v in pairs(Test) do
-      print(i, v:length())
-    end
-    ]]
+    local Train, Test = get_train_test_split(split_ratio, T, feature_column_indices)
+
     local g_vec_train = Train[goal_column_index]
     Train[goal_column_index] = nil
+
     local g_vec_test = Test[goal_column_index]
     Test[goal_column_index] = nil
 
@@ -119,7 +110,7 @@ local run_knn = function(args)
 
     for len = 1, test_sample_count do
       local x = {}
-      for i, v in pairs(Test) do
+      for _, v in pairs(Test) do
         val, nn_val = v:get_one(len-1)
         x[#x+1] = Scalar.new(val:to_num(), "F4")
       end
@@ -134,8 +125,8 @@ local run_knn = function(args)
       -- predict for inputs
       result = classify(Train, g_vec_train, X[i], exponent, alpha)
       assert(type(result) == "lVector")
-      max = Q.max(result):eval():to_num()
-      index = utils.get_index(result, max)
+      max = Q.max(result):eval()
+      index = Q.index(result, max)
       actual_predict_value[i] = index
     end
     local acr = get_accuracy(expected_predict_value, actual_predict_value)

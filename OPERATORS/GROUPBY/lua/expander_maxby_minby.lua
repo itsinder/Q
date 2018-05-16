@@ -11,14 +11,17 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(type(nb) == "number")
-  assert(nb > 0)
-  local sp_fn_name = "Q/OPERATORS/SUMBY/lua/" .. op .. "_specialize"
+  assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
+
+  local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/" .. op .. "_specialize"
   local spfn = assert(require(sp_fn_name))
 
-  local is_safe = false
+  -- Keeping default is_safe value as true
+  -- This will not allow C code to write values at incorrect locations
+  local is_safe = true
   if optargs then
     assert(type(optargs) == "table")
-    if ( optargs["is_safe"] ) then
+    if ( optargs["is_safe"] == false ) then
       is_safe =  optargs["is_safe"]
       assert(type(is_safe) == "boolean")
     end
@@ -34,16 +37,21 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
+
+  local a_ctype = qconsts.qtypes[a:fldtype()].ctype 
+  local b_ctype = qconsts.qtypes[b:fldtype()].ctype 
+  local out_ctype = qconsts.qtypes[subs.out_qtype].ctype 
+
   local function minby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
-      out_buf = assert(cmem.new(sz_out_in_bytes))
-      local iptr = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. " *", get_ptr(out_buf))
-      --out_buf:zero()
-      for i=0, sz_out do
-        iptr[i] = subs.initial_val
+      out_buf = assert(cmem.new(sz_out_in_bytes, a:fldtype()))
+      if op == "maxby" then
+        out_buf:set_min()
+      elseif op == "minby" then
+        out_buf:set_max()
       end
       first_call = false
     end
@@ -61,9 +69,9 @@ local function expander_maxby_minby(op, a, b, nb, optargs)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Null is not supported")
     
-      local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
-      local casted_b_chunk = ffi.cast( qconsts.qtypes[b:fldtype()].ctype .. "*",  get_ptr(b_chunk))
-      local casted_out_buf = ffi.cast( qconsts.qtypes[subs.out_qtype].ctype .. "*",  get_ptr(out_buf))
+      local casted_a_chunk = ffi.cast(a_ctype .. "*",  get_ptr(a_chunk))
+      local casted_b_chunk = ffi.cast(b_ctype .. "*",  get_ptr(b_chunk))
+      local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
       local status = qc[func_name](casted_a_chunk, a_len, casted_b_chunk, nb, casted_out_buf, is_safe)
       assert(status == 0, "C error in MINBY")
       chunk_idx = chunk_idx + 1

@@ -21,6 +21,8 @@
 
 #include "cmem.h"
 
+#define MIN_VAL 1
+#define MAX_VAL 2
 #define BUFLEN 2047 // TODO: Should not be hard coded. See max txt length
 int luaopen_libcmem (lua_State *L);
 
@@ -169,6 +171,93 @@ static int l_cmem_name( lua_State *L) {
   lua_pushstring(L, ptr_cmem->cell_name);
   return 1;
 }
+
+static int cmem_set_min_max(
+    CMEM_REC_TYPE *ptr_cmem,
+    int mode 
+    )
+{
+  int width;
+  if ( ptr_cmem == NULL ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->size <= 0 ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->data == NULL ) { WHEREAMI; return -1; }
+  if ( strcmp(ptr_cmem->field_type, "I1") == 0 ) { 
+    int8_t val; int8_t *x = (int8_t *)(ptr_cmem->data);
+    width = sizeof(int8_t);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = SCHAR_MIN; } else { val = SCHAR_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I2") == 0 ) { 
+    int16_t val; int16_t *x = (int16_t *)(ptr_cmem->data);
+    width = sizeof(int16_t);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = SHRT_MIN; } else { val = SHRT_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I4") == 0 ) { 
+    int32_t val; int32_t *x = (int32_t *)(ptr_cmem->data);
+    width = sizeof(int32_t);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = INT_MIN; } else { val = INT_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I8") == 0 ) { 
+    int64_t val; int64_t *x = (int64_t *)(ptr_cmem->data);
+    width = sizeof(int64_t);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = LONG_MIN; } else { val = LONG_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "F4") == 0 ) { 
+    float val; float *x = (float *)(ptr_cmem->data);
+    width = sizeof(float);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = FLT_MIN; } else { val = FLT_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "F8") == 0 ) { 
+    double val; double *x = (double *)(ptr_cmem->data);
+    width = sizeof(double);
+    int n = ptr_cmem->size / width;
+    if ( mode == MIN_VAL ) { val = DBL_MIN ; } else { val = DBL_MAX; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else {
+    WHEREAMI; return -1; 
+  }
+  //---------------------------------
+  if ( ( ptr_cmem->size % width ) != 0 ) { WHEREAMI; return -1; }
+  return 0;
+}
+
+static int l_cmem_set_max( lua_State *L)
+{
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
+  int status = cmem_set_min_max(ptr_cmem, MAX_VAL);
+  if ( status < 0 ) { 
+    lua_pushboolean(L, true);
+  }
+  else {
+    lua_pushboolean(L, false);
+  }
+  return 1;
+}
+
+static int l_cmem_set_min( lua_State *L)
+{
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
+  int status = cmem_set_min_max(ptr_cmem, MIN_VAL);
+  if ( status < 0 ) { 
+    lua_pushboolean(L, true);
+  }
+  else {
+    lua_pushboolean(L, false);
+  }
+  return 1;
+}
+
+
 static int cmem_zero( 
     CMEM_REC_TYPE *ptr_cmem
     )
@@ -469,6 +558,8 @@ static const struct luaL_Reg cmem_methods[] = {
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
     { "zero",        l_cmem_zero },
+    { "set_min",        l_cmem_set_min },
+    { "set_max",        l_cmem_set_max },
     { "to_str",        l_cmem_to_str },
     { "prbuf",        l_cmem_prbuf },
     { "fldtype",     l_cmem_fldtype },
@@ -485,6 +576,8 @@ static const struct luaL_Reg cmem_functions[] = {
     { "to_str",        l_cmem_to_str },
     { "prbuf",        l_cmem_prbuf },
     { "zero",        l_cmem_zero },
+    { "set_min",        l_cmem_set_min },
+    { "set_max",        l_cmem_set_max },
     { "fldtype",     l_cmem_fldtype },
     { "data",     l_cmem_data },
     { "size",     l_cmem_size },
