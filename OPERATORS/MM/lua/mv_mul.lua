@@ -70,8 +70,10 @@ local mv_mul = function(X, y)
     chunk_idx = chunk_idx + 1
     --=================================
     if ( len > 0 ) then 
-      -- mv_mul_simple_F4_F4_F4( double ** x, double * y, double * z, int m, int k); 
-      local status = qc[func_name](Xptr, get_ptr(yptr), get_ptr(z_buf), len, #X)
+      -- mv_mul_simple_F4_F4_F4( double ** x, double * y, double * z, int m, int k);
+      local casted_yptr = ffi.cast( qconsts.qtypes[y:qtype()].ctype .. "*", get_ptr(yptr))
+      local casted_z_buf = ffi.cast( qconsts.qtypes[subs.z_qtype].ctype .. "*", get_ptr(z_buf)) 
+      local status = qc[func_name](Xptr, casted_yptr, casted_z_buf, len, #X)
       assert(status == 0, "C error in ", func_name)
       return len, z_buf, nn_z_buf
     else

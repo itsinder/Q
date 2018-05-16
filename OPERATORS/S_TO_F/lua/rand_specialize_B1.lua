@@ -45,5 +45,6 @@ return function (
   subs.fn = "rand_B1"
   subs.c_mem = c_mem
   subs.len = len
+  subs.c_mem_type = "RAND_B1_REC_TYPE *"
   return subs
 end

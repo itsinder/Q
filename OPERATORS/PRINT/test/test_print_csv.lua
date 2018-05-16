@@ -59,58 +59,62 @@ for i, v in ipairs(T) do
         utils["testcase_results"](v, "Print_csv", "Unit Test", false, "")
         assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
       end
-      goto skip
-    end
     
-    local status, load_ret = pcall(load_csv,test_input_dir .. D, M, {use_accelerator = false})
-    if status then
-      -- Persist vector or else input csv get deleted
-      --for i=1, #load_ret do
-      --  load_ret[i]:persist(true)
-      --end
-      -- if handle_input_function is present, then filter is taken from the output of this function
-      -- in other cases , filter object is taken from metadata
-      local key = "handle_input_"..v.category
-      if fns[key] then
-        v.opt_args["filter"] = fns[key]()
-      end
-      if type(v.opt_args) == "table" then
-        if v.opt_args["opfile"] == "" then 
-          v.opt_args["opfile"] = "" 
-        elseif v.opt_args["opfile"] then 
-          v.opt_args["opfile"] = print_out_dir .. v.opt_args["opfile"] 
-        end
-       end 
-      -- category2 are negative testcases ( error messages )
-      if v.category == "category2" then
-        print("START: Deliberate error attempt")
-      end
-      local status, print_ret = pcall(print_csv, load_ret, v.opt_args)
-      if not status then print(print_ret) end
-      if v.category == "category2" then
-        print(print_ret)
-        print("STOP : Deliberate error attempt")
-      end
-      
-      key = "handle_"..v.category
-      if fns[key] then
-        result = fns[key](i, v, print_ret, status, load_ret)
-        -- preamble
-        utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
-        assert(result,"handle " .. v.category .. " assertions failed")
-      else
-        fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
-        -- preamble
-        utils["testcase_results"](v, "Print_csv", "Unit Test", false, "")
-        assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
-      end
     else
-      --print(" testcase failed: load api failed in print testcase. this should not happen")
-      fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
-      utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
-      assert(status)
+    
+      local status, load_ret = pcall(load_csv,test_input_dir .. D, M, {use_accelerator = false})
+      if status then
+        -- Persist vector or else input csv get deleted
+        --for i=1, #load_ret do
+        --  load_ret[i]:persist(true)
+        --end
+        -- if handle_input_function is present, then filter is taken from the output of this function
+        -- in other cases , filter object is taken from metadata
+        local key = "handle_input_"..v.category
+        if fns[key] then
+          v.opt_args["filter"] = fns[key]()
+        end
+        if type(v.opt_args) == "table" then
+          if v.opt_args["opfile"] == "" then 
+            v.opt_args["opfile"] = "" 
+          elseif v.opt_args["opfile"] then 
+            v.opt_args["opfile"] = print_out_dir .. v.opt_args["opfile"] 
+          end
+         end 
+        -- category2 are negative testcases ( error messages )
+        if v.category == "category2" then
+          print("START: Deliberate error attempt")
+        end
+        local status, print_ret = pcall(print_csv, load_ret, v.opt_args)
+        if not status then print(print_ret) end
+        if v.category == "category2" then
+          print(print_ret)
+          print("STOP : Deliberate error attempt")
+        end
+        
+        key = "handle_"..v.category
+        if fns[key] then
+          result = fns[key](i, v, print_ret, status, load_ret)
+          -- preamble
+          utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
+          assert(result,"handle " .. v.category .. " assertions failed")
+        else
+          fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
+          -- preamble
+          utils["testcase_results"](v, "Print_csv", "Unit Test", false, "")
+          assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
+        end
+      else
+        --print(" testcase failed: load api failed in print testcase. this should not happen")
+        fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
+        utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
+        assert(status)
+      end
+    
     end
-    ::skip::
+    if v.category == "category1_1" then
+      file.delete(test_input_dir .. D)
+    end
   end
 end
 return test_print 

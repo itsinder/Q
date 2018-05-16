@@ -23,8 +23,9 @@ addr = ffi.cast("const char * const ", addr)
 
 for i = 1, 128 do
   local len = 48
-  local file_name = get_ptr(cmem.new(len))
-  ffi.fill(file_name, len)
+  local file_name = cmem.new(len)
+  file_name:zero()
+  file_name = ffi.cast("char *", get_ptr(file_name))
   local status = qc['rand_file_name'](file_name, len-1)
   assert(status == 0)
   print(i, addr, ffi.string(file_name))

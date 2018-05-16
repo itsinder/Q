@@ -12,6 +12,7 @@ return function (
 typedef struct _reduce_min_<<qtype>>_args {
   <<reduce_ctype>> min_val;
   uint64_t num; // number of non-null elements inspected
+  uint64_t min_index;
 } REDUCE_min_<<qtype>>_ARGS;
   ]]
     
@@ -50,13 +51,14 @@ typedef struct _reduce_min_<<qtype>>_args {
       local c_mem_ptr = ffi.cast("REDUCE_min_" .. qtype .. "_ARGS *", get_ptr(c_mem))
       c_mem_ptr.min_val  = qconsts.qtypes[qtype].max
       c_mem_ptr.num = 0
+      c_mem_ptr.min_index = 0
       subs.c_mem = c_mem
       subs.c_mem_type = "REDUCE_min_" .. qtype .. "_ARGS *"
     --==============================
       subs.getter = function (x) 
         local y = ffi.cast("REDUCE_min_" .. qtype .. "_ARGS *", get_ptr(c_mem))
         return Scalar.new(x, subs.reduce_qtype), 
-           Scalar.new(tonumber(y[0].num), "I8")
+           Scalar.new(tonumber(y[0].num), "I8"), Scalar.new(tonumber(y[0].min_index), "I8")
       end
     --==============================
     end

@@ -77,10 +77,30 @@ function lVector:file_size()
   return Vector.file_size(self._base_vec)
 end
 
-
 function lVector:is_eov()
   if ( qconsts.debug ) then self:check() end
   return Vector.is_eov(self._base_vec)
+end
+
+function lVector.virtual_new(arg)
+  local vector = setmetatable({}, lVector)
+  -- for meta data stored in vector
+  vector._meta = {}
+
+  local qtype
+  local num_elements
+  local map_addr
+
+  assert(type(arg) == "table", "lVector construction requires table as arg")
+
+  qtype = assert(arg.qtype, "virtual vector needs qtype to be specified")
+  num_elements = assert(arg.num_elements, "virtual vector needs num_elements to be specified")
+  map_addr = assert(arg.map_addr, "virtual vector needs mmap address to be specified")
+
+  vector._base_vec = Vector.virtual(map_addr, qtype, num_elements)
+  assert(vector._base_vec)
+
+  return vector
 end
 
 function lVector.new(arg)
@@ -626,10 +646,12 @@ function lVector:chunk(chunk_num)
 end
 
 function lVector:meta()
-  local base_meta = load(Vector.meta(self._base_vec))()
+  -- with lua interpreter, load() is not supported with strings so using loadstring() 
+  -- earlier with luajit interpreter, load() supported strings 
+  local base_meta = loadstring(Vector.meta(self._base_vec))()
   local nn_meta = nil
   if ( self._nn_vec ) then 
-    nn_meta = load(Vector.meta(self._nn_vec))()
+    nn_meta = loadstring(Vector.meta(self._nn_vec))()
   end
   if ( qconsts.debug ) then self:check() end
   return { base = base_meta, nn = nn_meta, aux = self._meta}

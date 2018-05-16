@@ -21,7 +21,8 @@ f1opf2_specializers: f1opf2_specialize.tmpl \
 
 arith_specializers: arith_specialize.tmpl \
 	vsadd_specialize.lua vssub_specialize.lua \
-	vsmul_specialize.lua vsdiv_specialize.lua  
+	vsmul_specialize.lua vsdiv_specialize.lua \
+	pow_specialize.lua
 	luajit gen_specializers.lua arith
 
 cmp_specializers: vsgeq_specialize.lua vsleq_specialize.lua  \
@@ -59,6 +60,7 @@ clean :
 	rm -f incr_specialize.lua
 	rm -f log_specialize.lua
 	rm -f sqrt_specialize.lua
+	rm -f pow_specialize.lua
 	rm -f logit_specialize.lua
 	rm -f logit2_specialize.lua
 #-------------
@@ -102,6 +104,8 @@ log_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 sqrt_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
+pow_specialize.lua  : arith_specialize.tmpl
+	lua gen_specializers.lua arith
 exp_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 logit_specialize.lua  : f1opf2_specialize.tmpl
@@ -109,7 +113,7 @@ logit_specialize.lua  : f1opf2_specialize.tmpl
 logit2_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 
-libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
+libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files _vnot_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
@@ -117,6 +121,9 @@ libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
 
 _convert_files : convert_specialize.lua
 	luajit generator_conv.lua
+
+_vnot_files : vnot_specialize.lua
+	luajit generator_vnot.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua

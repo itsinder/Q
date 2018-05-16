@@ -14,6 +14,7 @@ return function (
     local subs = {}; 
     subs.fn = "<<operator>>_" .. in_qtype 
     subs.in_ctype = qconsts.qtypes[in_qtype].ctype
+    subs.in_qtype = in_qtype 
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
     subs.c_mem = scalar:to_cmem()

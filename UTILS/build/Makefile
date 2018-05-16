@@ -29,6 +29,9 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/PCA/src clean
 	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua clean
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua clean
+	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua clean
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua clean
+	make -C ${BASE_PATH}/OPERATORS/INDEX/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -78,6 +81,15 @@ ainb:
 where:
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/
 
+sumby:
+	make -C ${BASE_PATH}/OPERATORS/SUMBY/lua/
+
+getk:
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua/
+
+index:
+	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
+  
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
 
@@ -132,6 +144,9 @@ q_operators: f1f2opf3 \
 	approx_frequent \
 	corrm \
 	drop_nulls \
-	where
+	where \
+	sumby  \
+	index \
+	getk
 	echo "all done for operators"
 

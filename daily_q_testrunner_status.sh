@@ -4,6 +4,10 @@ set +e
 export Q_SRC_ROOT="$HOME/WORK/Q"
 cd $Q_SRC_ROOT
 
+#cleaning up of data files in local/Q/data/ directory
+rm -f ../../local/Q/data/_*
+rm -f ../../local/Q/trace/qcore.log
+
 #cleaning up files in git repo
 git checkout .
 git clean -fd
