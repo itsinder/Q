@@ -49,7 +49,7 @@ ${fn}(
   }
   
   ${reduce_ctype} curr_val = ptr_args->${op}_val;
-  ${reduce_ctype} curr_index = ptr_args->${op}_index;
+  int64_t curr_index = ptr_args->${op}_index;
   uint32_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 
   ${reduce_ctype} ${op}_val = ${initial_val};
@@ -61,7 +61,7 @@ ${fn}(
     if ( t == (num_threads-1) ) { ub = nR; }
     ${reduce_ctype} lval = ${initial_val};
     ${reduce_ctype} val = ${initial_val};
-    uint64_t index = 0;
+    int64_t index = -1;
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       inv = in[i];
       val = ${reducer}(lval, inv);

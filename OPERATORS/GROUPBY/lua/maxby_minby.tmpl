@@ -6,11 +6,11 @@ return require 'Q/UTILS/lua/code_gen' {
 ${includes}
 extern int
 ${fn}(  
-      const ${val_ctype} * restrict val_fld,  
+      const ${val_ctype} * restrict val_fld, /* [nR_in] */ 
       uint64_t nR_in,
-      const ${grpby_ctype} * restrict grpby_fld,  
+      const ${grpby_ctype} * restrict grpby_fld, /* [nR_in] */ 
       uint64_t nR_out,
-      ${out_ctype} * restrict out,
+      ${out_ctype} * restrict out, /* [nR_out] */
       bool is_safe
       ) 
 ;
