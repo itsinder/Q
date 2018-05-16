@@ -58,8 +58,15 @@ local function is_polluter(file_name)
 	return line:match("POLLUTER") ~= nil
 end
 
+local calls = 0
 local function run_isolated_tests(suite_name, isolated)
-	local base_str =  [[
+	calls = calls + 1
+  if calls == 20 then
+    print("")
+    calls = 0
+  end
+  io.write(".")
+  local base_str =  [[
 	export LUA_PATH="/?.lua;$LUA_PATH";
 	L -lluacov -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
 	local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
