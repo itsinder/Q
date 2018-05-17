@@ -25,8 +25,10 @@ clean :
 	rm -f *.so
 
 libindex.so : ${GEN_FILES} \
-	index.tmpl
+	index.tmpl \
+  	indices.tmpl
 	luajit generator.lua
+	luajit generator_indices.lua
 	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libindex.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
@@ -47,3 +49,5 @@ GEN_FILES = \
 	../gen_src/_index_I2.c \
 	../gen_src/_index_I4.c \
 	../gen_src/_index_I8.c \
+	../gen_src/_indices.c \
+  
