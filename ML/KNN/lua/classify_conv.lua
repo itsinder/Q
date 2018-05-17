@@ -47,7 +47,7 @@ local function classify(
   local k_g = get_k_goals(distance, k_distance, g)
 
   -- Now, we need to sum d grouped by value of goal attribute
-  local rslt = Q.sumby(k_distance, k_g, ng)
+  local rslt = Q.numby(k_g, ng)
   --[[
   -- Scale by original population, calculate cnts if not given
   local l_cnts
