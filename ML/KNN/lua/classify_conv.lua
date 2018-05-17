@@ -22,9 +22,12 @@ local function classify(
   x, -- table of m Scalars
   exponent, -- Scalar
   alpha, -- table of m Scalars (scale for different attributes)
+  k,
   cnts -- lVector of length m (optional)
   )
-  local k = 5 -- This will be a input arg to this function
+  if not k then
+    k = 5
+  end
   local sone = Scalar.new(1, "F4")
   local szero = Scalar.new(0, "F4")
   --==============================================
