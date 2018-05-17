@@ -26,7 +26,7 @@ before_script:
   - source setup.sh
 
 script:
-  - busted . -v -c --lua=luajit -p="_spec.lua"
+  - luajit TEST_RUNNER/q_testrunner.lua i ./
   - luacov
 
 after_success:
