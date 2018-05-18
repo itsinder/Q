@@ -29,7 +29,7 @@ require "Q/OPERATORS/PCA/lua/corr_mat"
 require 'libsclr'
 require 'Q/OPERATORS/WHERE/lua/where'
 require 'Q/OPERATORS/GROUPBY/lua/groupby'
-require 'Q/OPERATORS/INDEX/lua/index'
+require 'Q/OPERATORS/INDEX/lua/indexing'
 require 'Q/OPERATORS/GETK/lua/getk'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
