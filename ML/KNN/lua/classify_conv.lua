@@ -20,14 +20,28 @@ local function classify(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
   x, -- table of m Scalars
-  exponent, -- Scalar
-  alpha, -- table of m Scalars (scale for different attributes)
-  k,
-  cnts -- lVector of length m (optional)
+  args
   )
-  if not k then
-    k = 5
+
+  -- It is a Scalar
+  local exponent = Scalar.new(2, "F4")
+  if args.exponent then
+    exponent = args.exponent
   end
+
+  -- table of m Scalars (scale for different attributes)
+  local alpha = args.alpha
+
+  -- number indicating how much neighbours to use
+  local k = 5
+  if args.k then
+    assert(type(args.k) == "number")
+    k = args.k
+  end
+
+  -- lVector of length m (optional)
+  local cnts = args.cnts
+
   local sone = Scalar.new(1, "F4")
   local szero = Scalar.new(0, "F4")
   --==============================================

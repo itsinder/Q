@@ -64,32 +64,28 @@ local run_knn = function(args)
   if args.iterations then
     assert(type(args.iterations == "number"))
     iterations = args.iterations
+    -- setting unused fields to nil to avoid the pollution of 'args' table
+    args.iterations = nil
   end
   assert(iterations > 0)
-
-  local exponent = Scalar.new(2, "F4")
-  if args.exponent then
-    assert(type(args.exponent) == "Scalar")
-    exponent = args.exponent
-  end
-  
-  local alpha = args.alpha
-  assert(type(alpha) == "table")
 
   local split_ratio = 0.8
   if args.split_ratio then
     assert(type(args.split_ratio) == "number")
     assert(args.split_ratio < 1 and args.split_ratio > 0)
     split_ratio = args.split_ratio
+    args.split_ratio = nil
   end
     
   local goal_column_index = args.goal_column_index
   assert(goal_column_index)
+  args.goal_column_index = nil
 
   local feature_column_indices
   if args.column_indices then
     assert(type(args.column_indices) == "table")
     feature_column_indices = args.column_indices
+    args.column_indices = nil
   end
 
   for itr = 1, iterations do
@@ -121,10 +117,11 @@ local run_knn = function(args)
     local index
     for i = 1, test_sample_count do
       -- predict for inputs
-      result = classify(Train, g_vec_train, X[i], exponent, alpha)
+      result = classify(Train, g_vec_train, X[i], args)
       assert(type(result) == "lVector")
       max, num_val, index = Q.max(result):eval()
       actual_predict_value[i] = index:to_num()
+      collectgarbage()
     end
     local acr = get_accuracy(expected_predict_value, actual_predict_value)
     -- print("Accuracy: " .. tostring(acr))
