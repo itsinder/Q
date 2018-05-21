@@ -10,7 +10,7 @@ tests.t1 = function ()
   local tbl = {1, 0, 0, 1, 0, 1, 0, 0}
   local b = Q.mk_col(tbl, "B1")
   local out_table = {0, 3, 5}
-  local c = Q.indices(b):eval()
+  local c = Q.index(b):eval()
   assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
   assert(c:length() == #out_table)
   for i = 1, c:length() do
@@ -31,7 +31,7 @@ tests.t2 = function ()
     end
   end
   local b = Q.mk_col(tbl, "B1")
-  local c = Q.indices(b):eval()
+  local c = Q.index(b):eval()
   assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
   for i = 1, c:length() do
     local value = c_to_txt(c, i)

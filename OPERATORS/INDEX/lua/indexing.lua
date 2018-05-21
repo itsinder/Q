@@ -1,41 +1,49 @@
 local T = {}
 
 local function index(x, y)
--- Q.index() : searches the index of given value(i.e. y) from the given vector(i.e. x)
+-- Q.index(x, y) : searches the index of given value(i.e. y) from the given vector(i.e. x)
             -- if found, returns index(a lua number)
             -- else returns nil
--- In Q.index(), indexing starts with 0
+-- In Q.index(x, y), indexing starts with 0
 -- Convention: Q.index(vector, value)
--- 1) vector : a vector
+-- 1) vector : a vector other than B1 qtype
 -- 2) value  : number or Scalar value
-  local expander = require 'Q/OPERATORS/INDEX/lua/expander_index'
-  local Scalar = require 'libsclr'
+
+-- TODO: Q.index(x, y) with x vector of qtype 'B1' can be supported 
+-- in indices, to return index of first index of y value 
+
+-- Q.index(x) : returns a I8 vector containing the indices of 1 in given boolean vector(B1)
+-- In Q.index(x), indexing starts with 0
+-- Convention: Q.index(B1_vector)
+
   assert(x, "no arg x to index")
-  assert(y, "no arg y to index")
-  assert(type(x) == "lVector", "x is not lVector")
-  assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
-  if(type(y) == "number") then
-    y = assert(Scalar.new(y, x:fldtype()), "value out of range")
+  assert(type(x) == "lVector",  "x is not lVector")
+  local expander
+  local op
+  
+  if y then
+    assert(x:qtype() ~= "B1", "B1 not supported")
+    assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
+    expander = require 'Q/OPERATORS/INDEX/lua/expander_index'
+    op = "index"
+    local Scalar = require 'libsclr'
+    assert(y, "no arg y to index")
+    assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
+    if(type(y) == "number") then
+      y = assert(Scalar.new(y, x:fldtype()), "value out of range")
+    end
+  elseif x:qtype() == "B1" then
+    expander = require 'Q/OPERATORS/INDEX/lua/expander_indices'
+    op = "indices"
+  else
+    assert(nil, "Improper arguments to index operator")
   end
-  local status, col = pcall(expander, "index", x, y)
+
+  local status, col = pcall(expander, op, x, y)
   if not status then print(col) end
   assert(status, "Could not execute INDEX")
   return col
 end
+
 T.index = index
 require('Q/q_export').export('index', index)
-
-local function indices(x)
-  local expander = require 'Q/OPERATORS/INDEX/lua/expander_indices'
-  assert(x, "no arg x to indices")
-  assert(type(x) == "lVector",  "x is not lVector")
-  assert(x:qtype() == "B1", "x is not B1")
-  local status, col = pcall(expander, "indices", x)
-  if not status then print(col) end
-  assert(status, "Could not execute INDICES")
-  return col
-end
-T.indices = indices
-require('Q/q_export').export('indices', indices)
-
-return T
