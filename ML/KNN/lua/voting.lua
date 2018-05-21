@@ -30,7 +30,7 @@ local function voting(
   dk = {}
   local i = 1
   for key, vec in pairs(T) do
-    dk[i] = Q.vsmul(Q.sqr(Q.vssub(vec, x[i])), alpha[i])
+    dk[i] = Q.vsmul(Q.pow(Q.vssub(vec, x[i]), 2), alpha[i])
     i = i + 1
   end
   local d = Q.const({ val = 0, qtype = "F4", len = n})
