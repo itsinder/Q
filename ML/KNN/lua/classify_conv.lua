@@ -59,7 +59,8 @@ local function classify(
     distance = Q.vvadd(dk[i], distance)
   end
 
-  distance = Q.sqrt(distance)
+  -- commenting the sqrt operation as it is not required
+  --distance = Q.sqrt(distance)
   local k_distance = Q.mink(distance, k):eval()
   local k_g = get_k_goals(distance, k_distance, g)
 
