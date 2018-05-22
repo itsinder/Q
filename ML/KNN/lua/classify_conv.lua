@@ -20,11 +20,28 @@ local function classify(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
   x, -- table of m Scalars
-  exponent, -- Scalar
-  alpha, -- table of m Scalars (scale for different attributes)
-  cnts -- lVector of length m (optional)
+  args
   )
-  local k = 5 -- This will be a input arg to this function
+
+  -- It is a Scalar
+  local exponent = Scalar.new(2, "F4")
+  if args.exponent then
+    exponent = args.exponent
+  end
+
+  -- table of m Scalars (scale for different attributes)
+  local alpha = args.alpha
+
+  -- number indicating how much neighbours to use
+  local k = 5
+  if args.k then
+    assert(type(args.k) == "number")
+    k = args.k
+  end
+
+  -- lVector of length m (optional)
+  local cnts = args.cnts
+
   local sone = Scalar.new(1, "F4")
   local szero = Scalar.new(0, "F4")
   --==============================================
@@ -42,12 +59,13 @@ local function classify(
     distance = Q.vvadd(dk[i], distance)
   end
 
-  distance = Q.sqrt(distance)
+  -- commenting the sqrt operation as it is not required
+  --distance = Q.sqrt(distance)
   local k_distance = Q.mink(distance, k):eval()
   local k_g = get_k_goals(distance, k_distance, g)
 
   -- Now, we need to sum d grouped by value of goal attribute
-  local rslt = Q.sumby(k_distance, k_g, ng)
+  local rslt = Q.numby(k_g, ng)
   --[[
   -- Scale by original population, calculate cnts if not given
   local l_cnts

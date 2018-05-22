@@ -1,6 +1,6 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
-local classify = require 'Q/ML/KNN/lua/classify'
+local classify = require 'Q/ML/KNN/lua/classify_conv'
 local utils = require 'Q/UTILS/lua/utils'
 
 local get_train_test_split = function(split_ratio, T, feature_column_indices)
@@ -64,32 +64,28 @@ local run_knn = function(args)
   if args.iterations then
     assert(type(args.iterations == "number"))
     iterations = args.iterations
+    -- setting unused fields to nil to avoid the pollution of 'args' table
+    args.iterations = nil
   end
   assert(iterations > 0)
-
-  local exponent = Scalar.new(2, "F4")
-  if args.exponent then
-    assert(type(args.exponent) == "Scalar")
-    exponent = args.exponent
-  end
-  
-  local alpha = args.alpha
-  assert(type(alpha) == "table")
 
   local split_ratio = 0.8
   if args.split_ratio then
     assert(type(args.split_ratio) == "number")
     assert(args.split_ratio < 1 and args.split_ratio > 0)
     split_ratio = args.split_ratio
+    args.split_ratio = nil
   end
     
   local goal_column_index = args.goal_column_index
   assert(goal_column_index)
+  args.goal_column_index = nil
 
   local feature_column_indices
   if args.column_indices then
     assert(type(args.column_indices) == "table")
     feature_column_indices = args.column_indices
+    args.column_indices = nil
   end
 
   for itr = 1, iterations do
@@ -107,7 +103,6 @@ local run_knn = function(args)
     local X = {}
     local expected_predict_value = {}
     local actual_predict_value = {}
-
     for len = 1, test_sample_count do
       local x = {}
       for _, v in pairs(Test) do
@@ -117,17 +112,16 @@ local run_knn = function(args)
       expected_predict_value[len] = g_vec_test:get_one(len-1):to_num()
       X[len] = x
     end
-
     local result
     local max
     local index
     for i = 1, test_sample_count do
       -- predict for inputs
-      result = classify(Train, g_vec_train, X[i], exponent, alpha)
+      result = classify(Train, g_vec_train, X[i], args)
       assert(type(result) == "lVector")
-      max = Q.max(result):eval()
-      index = Q.index(result, max)
-      actual_predict_value[i] = index
+      max, num_val, index = Q.max(result):eval()
+      actual_predict_value[i] = index:to_num()
+      collectgarbage()
     end
     local acr = get_accuracy(expected_predict_value, actual_predict_value)
     -- print("Accuracy: " .. tostring(acr))
