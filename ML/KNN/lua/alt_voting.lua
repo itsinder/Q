@@ -64,3 +64,5 @@ local function voting(
     c_train, m, n_train, c_alpha, c_test, n_test, c_output)
   end
 return alt_voting
+
+
