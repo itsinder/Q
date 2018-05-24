@@ -1,4 +1,5 @@
 #include "q_incs.h"
+#include "calc_vote_per_g.h"
 
 int calc_vote_per_g(
     float **d_train, /* [m][n_train] */
@@ -40,4 +41,3 @@ int calc_vote_per_g(
 BYE:
   return status;
 }
-

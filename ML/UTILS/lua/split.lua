@@ -1,16 +1,19 @@
-local function split_into_train_test (
+local Q = require 'Q'
+local Scalar = require 'libsclr'
+local function split (
   T,  -- table of m lVectors of length n
   split_ratio,  -- Scalar between 0 and 1 
   features_of_interest
   )
   assert(T)
   assert(type(T) == "table")
-  if ( type(split_ration) == "number" ) then 
+  if ( type(split_ratio) == "number" ) then 
     split_ratio = assert(Scalar.new(split_ratio, "F4"))
   elseif ( type(split_ration) == "Scalar" ) then 
     assert(split_ratio:fldtype() == "F4")
   end
-  assert ( (split_ratio > 0.0) and (split_ratio < 1.0 ) )
+  assert(Scalar.gt(split_ratio, 0)) -- TODO Improve P3
+  assert(Scalar.lt(split_ratio, 1)) -- TODO Improve P3
 
   local Train = {}
   local Test = {}
@@ -25,11 +28,14 @@ local function split_into_train_test (
     features_in_data[#features_in_data] = k
   end
   --==============================
+  local features_of_interest 
   if not features_of_interest then
-    local features_of_interest = {}
+    features_of_interest = {}
     for k, _ in pairs(T) do
       features_of_interest[#features_of_interest + 1] = k
     end
+  else
+    features_of_interest = features_of_interest
   end
   assert(type(features_of_interest) == "table")
   local num_features = 0
@@ -45,10 +51,17 @@ local function split_into_train_test (
   --=======================================
   local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = n})
   local random_vec_bool = Q.vsleq(random_vec, split_ratio)
+  local n1, n2 = Q.sum(random_vec_bool):eval()
+  -- TODO P2: Should not need to convert number to scalar for comparison
+  assert(( n1 > Scalar.new(0, "I8") ), "cannot return null Vectors")
+  assert(( n1 ~= n2 ), "cannot return null Vectors")
+  --=======================================
+  local T_train = {}
+  local T_test  = {}
   for _, feature in pairs(features_of_interest) do
-    Train[feature] = Q.where(T[v], random_vec_bool)
-    Test [feature] = Q.where(T[v], Q.vnot(random_vec_bool))
+    T_train[feature] = Q.where(T[feature], random_vec_bool):eval()
+    T_test [feature] = Q.where(T[feature], Q.vnot(random_vec_bool)):eval()
   end
-  return Train, Test
+  return T_train, T_test
 end
-return split_into_train_test
+return split

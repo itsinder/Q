@@ -750,7 +750,9 @@ int luaopen_libsclr (lua_State *L) {
 
   lua_pushcfunction(L, l_sclr_eq); lua_setfield(L, -2, "__eq");
   lua_pushcfunction(L, l_sclr_lt); lua_setfield(L, -2, "__lt");
+  lua_pushcfunction(L, l_sclr_gt); lua_setfield(L, -2, "__gt");
   lua_pushcfunction(L, l_sclr_leq); lua_setfield(L, -2, "__le");
+  lua_pushcfunction(L, l_sclr_geq); lua_setfield(L, -2, "__ge");
   /* negations of above happen automatically. No need to do them here */
 
   lua_pushcfunction(L, l_sclr_add); lua_setfield(L, -2, "__add");
