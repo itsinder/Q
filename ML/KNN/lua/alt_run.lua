@@ -2,6 +2,7 @@ local Q = require 'Q'
 local Scalar = require 'libsclr'
 local plpath = require 'pl.path'
 local alt_voting = require 'alt_voting'
+local prediction_from_votes = require 'prediction_from_votes'
 
 local q_src_root = os.getenv("Q_SRC_ROOT")
 assert(plpath.isdir(q_src_root))
@@ -46,6 +47,11 @@ for g = 0, 1 do -- 2 values of goal. Hard coded for now.
   alt_voting(l_train, m, n_train, alpha, Test, n_test, vote[g])
   -- Q.print_csv(vote[g])
 end
+g_predicted = prediction_from_votes(vote):eval()
+local n1, n2 = Q.sum(Q.vveq(g_predicted, g_test)):eval()
+print(n1)
+print(n2)
+print("Accuracy is " .. n1:to_str("I4") .. " out of " .. n2:to_str("I4"))
 x = nil
 
 
