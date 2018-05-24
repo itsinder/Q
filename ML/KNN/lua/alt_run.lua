@@ -47,18 +47,10 @@ for g = 0, 1 do -- 2 values of goal. Hard coded for now.
   alt_voting(l_train, m, n_train, alpha, Test, n_test, vote[g])
   -- Q.print_csv(vote[g])
 end
-g_predicted = prediction_from_votes(vote):eval()
+g_predicted = prediction_from_votes(vote)
+-- local jnk = Q.vveq(g_predicted, g_test):eval()
 local n1, n2 = Q.sum(Q.vveq(g_predicted, g_test)):eval()
-print(n1)
-print(n2)
-print("Accuracy is " .. n1:to_str("I4") .. " out of " .. n2:to_str("I4"))
-x = nil
-
-
-
-  
-
-
+print("Accuracy is " .. n1:to_str() .. " out of " .. n2:to_str())
 
 Q.save(get_meta_file())
 print("Done")
