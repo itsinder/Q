@@ -11,14 +11,18 @@ local script_dir = q_src_root .. "/ML/KNN/data/"
 assert(plpath.isdir(script_dir))
 
 local function delete_attr(T, g)
-  local g_attr = assert(T[g]); 
+  local gvec = assert(T[g]); 
+  local m = 0
+  local n = 0
   x = {}
   for k, v in pairs(T) do 
     if ( k ~= g ) then
       x[k] = v
+      m = m + 1
+      n = v:length()
     end
   end
-return x, g_attr
+return x, gvec, m, n
 end
 
 local split = require 'Q/ML/UTILS/lua/split'
@@ -34,20 +38,11 @@ local goal = "occupy_status"
 -- T = load_data(meta_data_file, data_file)
 T = Q.load_csv(data_file, dofile(meta_data_file))
 Train, Test = split(T, split_ratio)
--- TODO T = delete_attr(T, goal)
-Train, g_train = delete_attr(Train, goal)
-Test,  g_test  = delete_attr(Test,  goal)
+T, g, m, n = delete_attr(T, goal)
+Train, g_train, m_train, n_train = delete_attr(Train, goal)
+Test,  g_test,  m_test,  n_test  = delete_attr(Test,  goal)
 
-n_train = g_train:length()
-n_test  = g_test:length()
-
-local n
-for k, v in pairs(Train) do 
-  n = v:length(); 
-  -- local filename = "_" .. k; Q.print_csv(v, { opfile = filename})
-end
-
-alt_scale(T, m, n)
+-- alt_scale(T, m, n)
 
 alpha = Q.const({ val = 1, len = m, qtype = "F4"}):eval()
 vote = {}
