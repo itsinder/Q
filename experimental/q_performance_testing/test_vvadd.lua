@@ -25,7 +25,9 @@ print("vvadd total execution time : " .. tostring(tonumber(stop_time-start_time)
 
 print("=========================")
 
-for i, v in pairs(_G['g_time']) do
-  print(i, tostring(tonumber(v)/1000000))
+if _G['g_time'] then
+  for i, v in pairs(_G['g_time']) do
+    print(i, tostring(tonumber(v)/1000000))
+  end
 end
 
