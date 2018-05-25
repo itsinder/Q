@@ -18,5 +18,5 @@ $ time luajit run_add_lua_c_api.lua
 
 Results that I got on my VM are as below
 Average timing:
-luajit ffi C test = 3.472 sec
-lua-C api C test = 28.835 sec
+luajit ffi C test = 5.681 sec
+lua-C api C test = 26.6723 sec
