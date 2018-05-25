@@ -14,8 +14,10 @@ uint64_t add( uint64_t limit ) {
 int main(int argc, char **argv) {
   uint64_t limit = atoi(argv[1]);
   uint64_t result = 0;
-  result = add(limit);
-  printf("%" PRIu64 "\n", result);
+  for ( int i = 0; i < 100; i++ ) {
+    result = add(limit);
+  }
+  //printf("%" PRIu64 "\n", result);
   return 0;
 }
 */
