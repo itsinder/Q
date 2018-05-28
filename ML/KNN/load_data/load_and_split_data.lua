@@ -35,7 +35,7 @@ local function load_data(metadata_file, data_file)
   return ret
 end
 
-assert(#arg == 2, "Usage: luajit load_room_occupancy_data.lua <csv_file_path> <split_ratio>")
+assert(#arg == 2, "Usage: luajit load_and_split_data.lua <csv_file_path> <split_ratio>")
 
 local metadata_file = script_dir .. "room_occupancy_meta.lua"
 local data_file = arg[1]
