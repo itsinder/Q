@@ -6,16 +6,31 @@ local function voting(
   T, -- table of m lVectors of length n
   g, -- lVector of length n
   x, -- table of m Scalars, input
-  exponent, -- Scalar
-  voting_algo, -- string
-  alpha -- table of m Scalars (scale for different attributes)
+  args
   )
+
+  -- It is a Scalar
+  local exponent = Scalar.new(2, "F4")
+  if args.exponent then
+    exponent = args.exponent
+  end
+
+  -- table of m Scalars (scale for different attributes)
+  local alpha = args.alpha
+
+  -- voting algo (string)
+  local voting_algo = "one_over_one_plus"
+  if args.voting_algo then
+    voting_algo = args.voting_algo
+    -- TODO: below assert needs to be in chk_params
+    assert(type(voting_algo) == "string")
+  end
   --==============================================
   local m, n, ng = chk_params(T, g, x, exponent, alpha)
   dk = {}
   local i = 1
   for key, vec in pairs(T) do
-    dk[i] = Q.vsmul(Q.sqr(Q.vssub(vec, x[i])), alpha[i])
+    dk[i] = Q.vsmul(Q.pow(Q.vssub(vec, x[i]), 2), alpha[i])
     i = i + 1
   end
   local d = Q.const({ val = 0, qtype = "F4", len = n})

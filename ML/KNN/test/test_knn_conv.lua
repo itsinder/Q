@@ -25,12 +25,17 @@ tests.t1 = function()
 
   local exponent = Scalar.new(2, "F4")
 
-  local result = classify_conv(T, g_vec, x, exponent, alpha)
+  local args = {}
+  args['exponent'] = exponent
+  args['alpha'] = alpha
+
+  local result = classify_conv(T, g_vec, x, args)
   assert(type(result) == "lVector")
   print("############################")
   Q.print_csv(result)
 end
 
+--[[
 tests.t2 = function()
   -- TODO: Add load code for iris_flower data
   -- Load the iris flower data
@@ -55,12 +60,15 @@ tests.t2 = function()
   Q.print_csv(result)
   print("completed t2 successfully")
 end
+]]
 
 tests.t3 = function()
   -- TODO: add load code for room_occupancy data
   -- Load room_occupancy data
-  local saved_file = os.getenv("Q_METADATA_DIR") .. "/room_occupancy.saved"
-  dofile(saved_file)
+  local load_room_occupancy_data = require 'Q/ML/KNN/load_data/load_room_occupancy_data'
+
+  -- T needs to be global
+  T = load_room_occupancy_data()
 
   local g_vec = T['occupy_status']
 
@@ -74,7 +82,11 @@ tests.t3 = function()
 
   local exponent = Scalar.new(2, "F4")
 
-  local result = classify_conv(T, g_vec, x, exponent, alpha)
+  local args = {}
+  args['exponent'] = exponent
+  args['alpha'] = alpha
+
+  local result = classify_conv(T, g_vec, x, args)
   assert(type(result) == "lVector")
   Q.print_csv(result)
   local max = Q.max(result):eval():to_num()
@@ -96,6 +108,7 @@ local get_accuracy = function(expected_val, predicted_val)
   return (correct/#expected_val)*100
 end
 
+--[[
 tests.t4 = function()
   -- TODO: add load code for room_occupancy data
   -- Load room_occupancy_train data
@@ -151,20 +164,22 @@ tests.t4 = function()
   print("Accuracy = ", accuracy)
   print("completed t4 successfully")
 end
+]]
 
 tests.t5 = function()
   -- Tests the run_knn function
   local run_knn = require 'Q/ML/KNN/lua/run_knn'
+  local load_room_occupancy_data = require 'Q/ML/KNN/load_data/load_room_occupancy_data'
 
-  local saved_file_path = os.getenv("Q_METADATA_DIR") .. "/room_occupancy.saved"
-  dofile(saved_file_path)
+  -- T needs to be global
+  T = load_room_occupancy_data()
 
   local alpha_val = Scalar.new(1, "F4")
   alpha = {alpha_val, alpha_val, alpha_val, alpha_val, alpha_val}
   local exponent = Scalar.new(2, "F4")
   local goal_column_index = "occupy_status"
 
-  local args = {iterations = 10, split_ratio = 0.7, alpha = alpha, exponent = exponent, goal_column_index = goal_column_index}
+  local args = {iterations = 1, split_ratio = 0.7, alpha = alpha, exponent = exponent, goal_column_index = goal_column_index}
 
   local avg_accuracy, accuracy_table = run_knn(args)
   print("Average: ", avg_accuracy)
@@ -173,6 +188,7 @@ tests.t5 = function()
   end
 end
 
+--[[
 tests.t6 = function()
   -- Tests the run_knn function
   local run_knn = require 'Q/ML/KNN/lua/run_knn'
@@ -192,5 +208,6 @@ tests.t6 = function()
     print(i, v)
   end
 end
+]]
 
 return tests

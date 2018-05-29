@@ -38,5 +38,5 @@ require 'Q/QTILS/lua/vvpromote'
 require 'Q/QTILS/lua/fold'
 require 'Q/QTILS/lua/average'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
-
+_G['g_time'] = {}
 return require 'Q/q_export'
