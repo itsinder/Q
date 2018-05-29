@@ -8,3 +8,4 @@ time ./add $n
 time luajit ffi_add.lua $n
 time lua c_api_add.lua $n
 
+rm -f a.out _* libadd.so add.so add
