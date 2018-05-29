@@ -7,15 +7,17 @@ local file = io.open(header_file, "r")
 ffi.cdef(file:read("*all"))
 file:close()
 
-local function sum_of_n()
-  local input = 100000000
+local limit = 100000000
+if ( arg ) and ( arg[1] ) then 
+  limit = tonumber(arg[1])
+end
 
-  local output = qc['add'](input)
+local function sum_of_n()
+  local output = qc['add'](limit)
   --print(tonumber(output))
 end
+
 
 for i = 1, 100 do
   sum_of_n()
 end
-
-print("DONE")
