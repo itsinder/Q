@@ -72,6 +72,13 @@ function lVector:is_memo()
   return Vector.is_memo(self._base_vec)
 end
 
+--TODO: use appropriate name
+function lVector:is_memo_new()
+  if ( qconsts.debug ) then self:check() end
+  local casted_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_vec.is_memo
+end
+
 function lVector:file_size()
   if ( qconsts.debug ) then self:check() end
   return Vector.file_size(self._base_vec)
@@ -310,6 +317,13 @@ end
 function lVector:fldtype()
   if ( qconsts.debug ) then self:check() end
   return Vector.fldtype(self._base_vec)
+end
+
+--TODO: use appropriate name
+function lVector:fldtype_new()
+  if ( qconsts.debug ) then self:check() end
+  local casted_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return ffi.string(casted_vec.field_type)
 end
 
 function lVector:qtype()
