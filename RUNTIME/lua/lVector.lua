@@ -9,6 +9,7 @@ local plstring		= require 'pl.stringx'
 local register_type	= require 'Q/UTILS/lua/q_types'
 local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
 local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
+local qc		= require 'Q/UTILS/lua/q_core'
 --====================================
 local lVector = {}
 lVector.__index = lVector

@@ -3,18 +3,18 @@ local Q = require 'Q'
 local tests = {}
 
 tests.t1 = function()
-  local len = 5
+  local len = 65536*2 + 456
   local input = {}
   for i = 1, len do
     input[i] = i
   end
 
-  local a = Q.mk_col(input, "I4")
+  local a = Q.mk_col(input, "I8")
 
   local b = Q.pow(a, 2)
   b:eval()
 
-  Q.print_csv(b)
+  -- Q.print_csv(b)
 
   -- verify output
   local val, nn_val
@@ -27,17 +27,17 @@ end
 
 -- testing Q.sqr() for returning correct values
 tests.t2 = function()
-  local len = 5
+  local len = 65536*2 + 456
   local input = {}
   for i = 1, len do
     input[i] = i
   end
-  local a = Q.mk_col(input, "I1")
+  local a = Q.mk_col(input, "I8")
 
   local b = Q.sqr(a)
   b:eval()
 
-  Q.print_csv(b)
+  -- Q.print_csv(b)
 
   -- verify output
   local val, nn_val
@@ -47,5 +47,6 @@ tests.t2 = function()
   end
   print("DONE")
 end
--- TODO: add more tests considering corner cases
+-- TODO: add more tests considering corner cases, 
+-- like what if sqr or pow crosses qtype limit
 return tests
