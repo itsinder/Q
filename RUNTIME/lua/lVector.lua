@@ -75,8 +75,7 @@ end
 --TODO: use appropriate name
 function lVector:is_memo_new()
   if ( qconsts.debug ) then self:check() end
-  local casted_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
-  return casted_vec.is_memo
+  return self._casted_base_vec.is_memo
 end
 
 function lVector:file_size()
@@ -194,6 +193,8 @@ function lVector.new(arg)
   vector._base_vec = Vector.new(qtype, q_data_dir, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
+  -- cast _base_vec
+  vector._casted_base_vec = ffi.cast("VEC_REC_TYPE *", vector._base_vec)
   local num_elements = Vector.num_elements(vector._base_vec)
   if ( has_nulls ) then 
     if ( not is_nascent ) then 
@@ -201,13 +202,15 @@ function lVector.new(arg)
     end
     vector._nn_vec = Vector.new("B1", q_data_dir, nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
+    -- cast _nn_vec
+    vector._casted_nn_vec = ffi.cast("VEC_REC_TYPE *", vector._nn_vec)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
     Vector.set_name(vector._base_vec, arg.name)
     if ( vector._nn_vec ) then 
       Vector.set_name(vector._nn_vec, "nn_" .. arg.name)
     end
-  end 
+  end
   return vector
 end
 
@@ -322,8 +325,7 @@ end
 --TODO: use appropriate name
 function lVector:fldtype_new()
   if ( qconsts.debug ) then self:check() end
-  local casted_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
-  return ffi.string(casted_vec.field_type)
+  return ffi.string(self._casted_base_vec.field_type)
 end
 
 function lVector:qtype()
