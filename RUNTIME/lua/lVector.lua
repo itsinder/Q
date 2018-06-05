@@ -11,6 +11,11 @@ local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
 local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
 local qc		= require 'Q/UTILS/lua/q_core'
 --====================================
+-- TODO: currently commenting the cdef of vec_structure because
+-- ffi.cdef is called with pcall in lVector code but not in q_core.lua
+-- so, if in any file, lVector is required and followed by q_core require then
+-- it gives error.
+-- For now, require q_core in lVector code
 --[[
 local vec_struct = [[
 typedef struct _vec_rec_type {
