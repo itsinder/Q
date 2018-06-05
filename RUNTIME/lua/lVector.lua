@@ -11,6 +11,38 @@ local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
 local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
 local qc		= require 'Q/UTILS/lua/q_core'
 --====================================
+--[[
+local vec_struct = [[
+typedef struct _vec_rec_type {
+  char field_type[3+1];
+  uint32_t field_size;
+  uint32_t chunk_size;
+
+  uint64_t num_elements;
+  uint32_t num_in_chunk;
+  uint32_t chunk_num;
+
+  // TODO Change 31 to  Q_MAX_LEN_INTERNAL_NAME
+  char name[31+1];
+  // TODO Change 255 to  Q_MAX_LEN_FILE_NAME
+  char file_name[255+1];
+  uint64_t file_size; // valid only after eov()
+  char *map_addr;
+  size_t map_len;
+
+  bool is_persist;
+  bool is_nascent;
+  bool is_memo;
+  bool is_eov;
+  int open_mode; // 0 = unopened, 1 = read, 2 = write
+  char *chunk;
+  uint32_t chunk_sz; // number of bytes allocated for chunk
+  bool is_virtual; // indicates whether vector is virtual or not
+} VEC_REC_TYPE;
+]]
+
+-- pcall(ffi.cdef, vec_struct)
+--====================================
 local lVector = {}
 lVector.__index = lVector
 
@@ -35,7 +67,8 @@ register_type(lVector, "lVector")
 function lVector:get_name()
   -- the name of an lVector is the name of its base Vector
   if ( qconsts.debug ) then self:check() end
-  return Vector.get_name(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return ffi.string(casted_base_vec.name)
 end
 
 function lVector:set_name(vname)
@@ -68,25 +101,41 @@ function lVector:cast(new_field_type)
   return self
 end
 
-function lVector:is_memo()
+-- Older version of is_memo, kept just for reference if required in future
+function lVector:is_memo_old()
   if ( qconsts.debug ) then self:check() end
   return Vector.is_memo(self._base_vec)
 end
 
---TODO: use appropriate name
-function lVector:is_memo_new()
+function lVector:is_memo()
   if ( qconsts.debug ) then self:check() end
-  return self._casted_base_vec.is_memo
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.is_memo
+end
+
+function lVector:is_nascent()
+  if ( qconsts.debug ) then self:check() end
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.is_nascent
+end
+
+function lVector:num_in_chunk()
+  if ( qconsts.debug ) then self:check() end
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.num_in_chunk
 end
 
 function lVector:file_size()
   if ( qconsts.debug ) then self:check() end
-  return Vector.file_size(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  -- added tonumber() because casted_base_vec.file_size is of type cdata
+  return tonumber(casted_base_vec.file_size)
 end
 
 function lVector:is_eov()
   if ( qconsts.debug ) then self:check() end
-  return Vector.is_eov(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.is_eov
 end
 
 function lVector.virtual_new(arg)
@@ -194,17 +243,14 @@ function lVector.new(arg)
   vector._base_vec = Vector.new(qtype, q_data_dir, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
-  -- cast _base_vec
-  vector._casted_base_vec = ffi.cast("VEC_REC_TYPE *", vector._base_vec)
-  local num_elements = Vector.num_elements(vector._base_vec)
+  -- added tonumber() because returned num_elements was of type cdata
+  local num_elements = tonumber(ffi.cast("VEC_REC_TYPE *", vector._base_vec).num_elements)
   if ( has_nulls ) then 
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
     vector._nn_vec = Vector.new("B1", q_data_dir, nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
-    -- cast _nn_vec
-    vector._casted_nn_vec = ffi.cast("VEC_REC_TYPE *", vector._nn_vec)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
     Vector.set_name(vector._base_vec, arg.name)
@@ -292,12 +338,14 @@ end
 
 function lVector:chunk_num()
   if ( qconsts.debug ) then self:check() end
-  return Vector.chunk_num(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.chunk_num
 end
 
 function lVector:chunk_size()
   if ( qconsts.debug ) then self:check() end
-  return Vector.chunk_size(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.chunk_size
 end
 
 function lVector:has_nulls()
@@ -307,46 +355,55 @@ end
 
 function lVector:num_elements()
   if ( qconsts.debug ) then self:check() end
-  return Vector.num_elements(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  -- added tonumber() because casted_base_vec.num_elements is of type cdata
+  return tonumber(casted_base_vec.num_elements)
 end
 
 function lVector:length()
-  if ( not self:is_eov() ) then 
+  if ( not self:is_eov() ) then
     return nil
   end
   if ( qconsts.debug ) then self:check() end
-  return Vector.num_elements(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  -- added tonumber() because casted_base_vec.num_elements is of type cdata
+  return tonumber(casted_base_vec.num_elements)
+end
+
+-- Older version of fldtype(), kept just for reference if required in future
+function lVector:fldtype_old()
+  if ( qconsts.debug ) then self:check() end
+  return Vector.fldtype(self._base_vec)
 end
 
 function lVector:fldtype()
   if ( qconsts.debug ) then self:check() end
-  return Vector.fldtype(self._base_vec)
-end
-
---TODO: use appropriate name
-function lVector:fldtype_new()
-  if ( qconsts.debug ) then self:check() end
-  return ffi.string(self._casted_base_vec.field_type)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return ffi.string(casted_base_vec.field_type)
 end
 
 function lVector:qtype()
   if ( qconsts.debug ) then self:check() end
-  return Vector.fldtype(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return ffi.string(casted_base_vec.field_type)
 end
 
 function lVector:field_size()
   if ( qconsts.debug ) then self:check() end
-  return Vector.field_size(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.field_size
 end
 
 function lVector:field_width()
   if ( qconsts.debug ) then self:check() end
-  return Vector.field_size(self._base_vec)
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return casted_base_vec.field_size
 end
 
 function lVector:file_name()
   if ( qconsts.debug ) then self:check() end
-  return self:meta().base.file_name
+  local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
+  return ffi.string(casted_base_vec.file_name)
 end
 
 function lVector:nn_file_name()
@@ -363,7 +420,7 @@ function lVector:check()
   local chk = Vector.check(self._base_vec)
   assert(chk, "Error on base vector")
   local num_elements = Vector.num_elements(self._base_vec)
-  if ( self._nn_vec ) then 
+  if ( self._nn_vec ) then
     local nn_num_elements = Vector.num_elements(self._nn_vec)
     chk = Vector.check(self._nn_vec)
     assert(num_elements == nn_num_elements)
@@ -377,7 +434,8 @@ function lVector:check()
 end
 
 function lVector:set_generator(gen)
-  assert(Vector.num_elements(self._base_vec) == 0, 
+  assert(self:num_elements() == 0,
+  --assert(Vector.num_elements(self._base_vec) == 0, 
     "Cannot set generator once elements generated")
   assert(not self:is_eov(), 
     "Cannot set generator for materialized vector")
@@ -394,7 +452,8 @@ function lVector:eov()
   end
 -- destroy generator and therebuy release resources held by it 
   self._gen = nil 
-  if ( Vector.num_elements(self._base_vec) == 0 ) then 
+  --if ( Vector.num_elements(self._base_vec) == 0 ) then
+  if ( self:num_elements() == 0 ) then
     return nil
   end
   if ( qconsts.debug ) then self:check() end
@@ -596,7 +655,8 @@ function lVector:chunk(chunk_num)
   local status
   local base_addr, base_len
   local nn_addr,   nn_len  
-  local is_nascent = Vector.is_nascent(self._base_vec)
+  --local is_nascent = Vector.is_nascent(self._base_vec)
+  local is_nascent = self:is_nascent()
   local is_eov = self:is_eov()
   assert(chunk_num, "chunk_num is a mandatory argument")
   assert(type(chunk_num) == "number")
@@ -608,10 +668,10 @@ function lVector:chunk(chunk_num)
   -- cond2 => Vector is nascent and you are asking for current chunk
   -- or previous chunk 
   local cond2 = ( not is_eov ) and 
-          ( ( ( Vector.chunk_num(self._base_vec) == l_chunk_num ) and 
-          ( Vector.num_in_chunk(self._base_vec) > 0 ) ) or 
-          ( ( l_chunk_num < Vector.chunk_num(self._base_vec) ) and 
-          ( Vector.is_memo(self._base_vec) == true ) ) )
+          ( ( ( self:chunk_num() == l_chunk_num ) and 
+          ( self:num_in_chunk() > 0 ) ) or 
+          ( ( l_chunk_num < self:chunk_num() ) and 
+          ( self:is_memo() == true ) ) )
   if ( cond1 or cond2 ) then 
     base_addr, base_len = Vector.get_chunk(self._base_vec, l_chunk_num)
     if ( not base_addr ) then
@@ -687,7 +747,7 @@ function lVector:reincarnate()
   T[#T+1] = "lVector ( { "
 
   T[#T+1] = "qtype = \"" 
-  T[#T+1] = Vector.fldtype(self._base_vec)
+  T[#T+1] = self:fldtype()
   T[#T+1] = "\", "
 
   T[#T+1] = "file_name = \"" 

@@ -11,7 +11,7 @@ tests.t1 = function()
   local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   start = qc.get_time_usec()
   for i=1, 10000000 do
-    result = x:fldtype()
+    result = x:fldtype_old()
   end
   stop = qc.get_time_usec()
   print(tonumber(stop-start))
@@ -24,7 +24,7 @@ tests.t2 = function()
   local x = lVector( { qtype = "I4", gen = true, has_nulls = false})
   start = qc.get_time_usec()
   for i=1, 10000000 do
-    result = x:fldtype_new()
+    result = x:fldtype()
   end
   stop = qc.get_time_usec()
   print(tonumber(stop-start))
