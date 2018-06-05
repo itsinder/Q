@@ -15,6 +15,7 @@ all : libf1s1opf2.so _f1s1opf2.lua
 f1opf2_specializers: f1opf2_specialize.tmpl \
 	abs_specialize.lua \
 	sqrt_specialize.lua \
+	sqr_specialize.lua \
 	log_specialize.lua exp_specialize.lua \
 	logit_specialize.lua logit2_specialize.lua 
 	luajit gen_specializers.lua f1opf2
@@ -60,6 +61,7 @@ clean :
 	rm -f incr_specialize.lua
 	rm -f log_specialize.lua
 	rm -f sqrt_specialize.lua
+	rm -f sqr_specialize.lua
 	rm -f pow_specialize.lua
 	rm -f logit_specialize.lua
 	rm -f logit2_specialize.lua
@@ -103,6 +105,8 @@ decr_specialize.lua  : f1opf2_specialize.tmpl
 log_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 sqrt_specialize.lua  : f1opf2_specialize.tmpl
+	lua gen_specializers.lua f1opf2
+sqr_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 pow_specialize.lua  : arith_specialize.tmpl
 	lua gen_specializers.lua arith

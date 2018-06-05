@@ -116,6 +116,11 @@ y = string.gsub(y, "<<c_code_for_operator>>", "c = sqrt((double)a);")
 y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
 plfile.write("sqrt_specialize.lua", y)
 --=======================
+y = string.gsub(x, "<<operator>>", "sqr")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = (a * a);")
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
+plfile.write("sqr_specialize.lua", y)
+--=======================
 y = string.gsub(x, "<<operator>>", "log")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = log((double)a);")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')

@@ -51,6 +51,9 @@ all : libutils.so ${hdr_files} asc2bin
   
 ../gen_inc/_get_time_usec.h : 
 	lua ../lua/cli_extract_func_decl.lua get_time_usec.c ${INCDIR}
+  
+../gen_inc/_rdtsc.h : 
+	lua ../lua/cli_extract_func_decl.lua rdtsc.c ${INCDIR}
 
 ../gen_inc/_bytes_to_bits.h : 
 	lua ../lua/cli_extract_func_decl.lua bytes_to_bits.c ${INCDIR}
@@ -120,6 +123,7 @@ hdr_files = \
 	../gen_inc/_mmap.h \
 	../gen_inc/_munmap.h \
 	../gen_inc/_get_time_usec.h \
+	../gen_inc/_rdtsc.h \
 	../gen_inc/_write_bits_to_file.h \
         ../gen_inc/_get_bit.h \
         ../gen_inc/_get_bit_u64.h \
@@ -149,6 +153,7 @@ SRC_FILES=  \
 	mmap.c \
 	munmap.c \
 	get_time_usec.c \
+	rdtsc.c \
 	bytes_to_bits.c \
 	bits_to_bytes.c \
 	write_bits_to_file.c  \
