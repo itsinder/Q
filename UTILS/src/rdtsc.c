@@ -1,33 +1,33 @@
 //START_INCLUDES
 #include <stdio.h>
 #include <stdint.h>
-//#include <intrin.h>
+#include "_get_time_usec.h"
 //STOP_INCLUDES
-#include<_rdtsc.h> 
-//  Windows
-//uint64_t rdtsc(){
-//    return __rdtsc();
-//}
-//  Linux/GCC
+#include "_rdtsc.h"
+
 //START_FUNC_DECL
 uint64_t
-rdtsc(
+RDTSC(
     )
 //STOP_FUNC_DECL  
 {
-    unsigned int lo,hi;
-    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-    return ((uint64_t)hi << 32) | lo;
+#ifdef RASPBERRY_PI
+  return get_time_usec();
+#else
+  unsigned int lo, hi;
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+#endif
 }
 
 /* 
 int main(int argc, char* argv[]) {
-  uint64_t tick = rdtsc();  // tick before
+  uint64_t tick = RDTSC();  // tick before
   int i ;
   for (i = 1; i < argc; ++ i) {
     system(argv[i]); // start the command
   }
-  // printf("%ld",rdtsc() - tick); // difference
+  // printf("%ld",RDTSC() - tick); // difference
   return 0;
 }
 */
