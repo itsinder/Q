@@ -163,33 +163,4 @@ tests.t5 = function()
 end
 --===========================================
 
---====== Testing nascent vector with generator and Vector's buffer
--- NOTE NOTE NOTE We are NOT using this function until we think 
--- through the get_vec_buf and release_vec_buf completely
-t6 = function()
-  -- print("Creating nascent vector with generator using Vector buffer")
-  local gen2 = require 'Q/RUNTIME/test/gen2'
-  x = lVector( { qtype = "I4", gen = gen2, has_nulls = false})
-
-  local num_chunks = 2
-  local chunk_size = qconsts.chunk_size
-  for chunk_num = 1, num_chunks do 
-    local a, b, c = x:chunk(chunk_num-1)
-    x:check()
-  end
-  assert(x:is_eov() == true)
-  local status = pcall(x.eov)
-  assert(not status)
-  local len, base_data, nn_data = x:chunk(0)
-  assert(base_data)
-  assert(not nn_data)
-  assert(len == chunk_size )
-
-  local iptr = ffi.cast("int32_t *", base_data)
-  for i = 1, len do
-    -- TODO P1 assert(iptr[i-1] == i)
-  end
-  print("Successfully completed test t6")
-end
-
 return tests

@@ -199,51 +199,6 @@ BYE:
   return 3;
 }
 //----------------------------------------
-#ifdef USE_VEC_BUF
-static int l_vec_release_vec_buf( lua_State *L) {
-  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  int32_t num_in_chunk  = luaL_checknumber(L, 2);
-  if ( num_in_chunk < 0 ) { WHEREAMI; goto BYE; }
-  if ( ( ptr_vec->is_nascent ) && ( ptr_vec->num_in_chunk == 0 ) ) { 
-    ptr_vec->num_in_chunk += num_in_chunk;
-    ptr_vec->num_elements += num_in_chunk;
-    lua_pushboolean(L, true);
-    return 1;
-  }
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: in vec_release_vec_buf");
-  return 2;
-}
-//----------------------------------------
-static int l_vec_get_vec_buf( lua_State *L) {
-  int status = 0;
-  CMEM_REC_TYPE *ptr_cmem = NULL;
-  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  // malloc vector's buffer if necessary
-  // TODO Discuss with Krushnakant
-  if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
-    return_if_malloc_failed(ptr_vec->chunk);
-  }
-
-  ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
-  return_if_malloc_failed(ptr_cmem);
-  // printf("cmem dupe to %x \n", ptr_cmem);
-  memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
-  luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
-  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
-
-  cmem_dupe(ptr_cmem, ptr_vec->chunk, ptr_vec->chunk_sz, ptr_vec->field_type, "");
-  return 1;
-BYE:
-  free_if_non_null(ptr_cmem);
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: no chunk for materialized vector");
-  return 2;
-}
-#endif 
-//----------------------------------------
 static int l_vec_get( lua_State *L) {
   int status = 0;
   char *ret_addr = NULL;
@@ -318,21 +273,10 @@ static int l_vec_get_chunk( lua_State *L)
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   cmem_undef(ptr_cmem);
 
-  if  ( lua_isnumber(L, 2) ) { 
-    chunk_num = luaL_checknumber(L, 2);
-    if ( chunk_num < 0 ) { go_BYE(-1); }
-    idx = chunk_num * chunk_size;
-  }
-  else {
-    if ( ptr_vec->is_nascent ) { 
-      chunk_num = ptr_vec->chunk_num;
-    }
-    else {
-      chunk_num = 0;
-    }
-    idx = chunk_num * chunk_size;
-  }
+  chunk_num = luaL_checknumber(L, 2);
   if ( chunk_num < 0 ) { go_BYE(-1); }
+  idx = chunk_num * chunk_size;
+
   bool is_malloc = false; 
   if ( ( chunk_num < ptr_vec->chunk_num ) && ( ptr_vec->is_eov == false ) ){
     if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
@@ -714,10 +658,6 @@ static const struct luaL_Reg vector_methods[] = {
     { "chunk_size", l_vec_chunk_size },
     { "get_chunk", l_vec_get_chunk },
     { "put_chunk", l_vec_put_chunk },
-#ifdef USE_VEC_BUF 
-    { "get_vec_buf", l_vec_get_vec_buf },
-    { "release_vec_buf", l_vec_release_vec_buf },
-#endif
     { "is_memo", l_vec_is_memo },
     { "is_eov", l_vec_is_eov },
     { "cast", l_vec_cast },
@@ -740,10 +680,6 @@ static const struct luaL_Reg vector_functions[] = {
     { "meta", l_vec_meta },
     { "num_elements", l_vec_num_elements },
     { "num_in_chunk", l_vec_num_in_chunk },
-#ifdef USE_VEC_BUF 
-    { "release_vec_buf", l_vec_release_vec_buf },
-    { "get_vec_buf", l_vec_get_vec_buf },
-#endif
     { "put1", l_vec_put1 },
     { "persist", l_vec_persist },
     { "memo", l_vec_memo },
