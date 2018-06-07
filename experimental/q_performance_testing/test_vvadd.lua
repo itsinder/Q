@@ -18,6 +18,11 @@ start_time = qc.get_time_usec()
 
 for i = 1, 5000 do
   local vvadd_res = Q.vvadd(col1, col2):eval()
+  --[[
+  if i % 50 == 0 then
+    collectgarbage()
+  end
+  ]]
 end
 
 stop_time = qc.get_time_usec()
