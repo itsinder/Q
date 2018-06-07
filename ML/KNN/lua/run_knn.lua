@@ -52,40 +52,40 @@ end
 
 -- TODO: Think of interface for production mode where input_sample, alpha will be given,
 -- you need  to predict the goal value (assuming data is already loaded)
-local run_knn = function(args)
+local run_knn = function(optargs)
   -- It's assumed that data is already loaded into 'T' variable
   -- 'T' will be a table having vectors as it's elements
 
   local accuracy = {}
 
-  assert(type(args) == "table")
+  assert(type(optargs) == "table")
 
   local iterations = 1
-  if args.iterations then
-    assert(type(args.iterations == "number"))
-    iterations = args.iterations
-    -- setting unused fields to nil to avoid the pollution of 'args' table
-    args.iterations = nil
+  if optargs.iterations then
+    assert(type(optargs.iterations == "number"))
+    iterations = optargs.iterations
+    -- setting unused fields to nil to avoid the pollution of 'optargs' table
+    optargs.iterations = nil
   end
   assert(iterations > 0)
 
   local split_ratio = 0.8
-  if args.split_ratio then
-    assert(type(args.split_ratio) == "number")
-    assert(args.split_ratio < 1 and args.split_ratio > 0)
-    split_ratio = args.split_ratio
-    args.split_ratio = nil
+  if optargs.split_ratio then
+    assert(type(optargs.split_ratio) == "number")
+    assert(optargs.split_ratio < 1 and optargs.split_ratio > 0)
+    split_ratio = optargs.split_ratio
+    optargs.split_ratio = nil
   end
     
-  local goal_column_index = args.goal_column_index
+  local goal_column_index = optargs.goal_column_index
   assert(goal_column_index)
-  args.goal_column_index = nil
+  optargs.goal_column_index = nil
 
   local feature_column_indices
-  if args.column_indices then
-    assert(type(args.column_indices) == "table")
-    feature_column_indices = args.column_indices
-    args.column_indices = nil
+  if optargs.column_indices then
+    assert(type(optargs.column_indices) == "table")
+    feature_column_indices = optargs.column_indices
+    optargs.column_indices = nil
   end
 
   for itr = 1, iterations do
@@ -117,10 +117,11 @@ local run_knn = function(args)
     local index
     for i = 1, test_sample_count do
       -- predict for inputs
-      result = classify(Train, g_vec_train, X[i], args)
+      result = classify(Train, g_vec_train, X[i], optargs)
       assert(type(result) == "lVector")
       max, num_val, index = Q.max(result):eval()
       actual_predict_value[i] = index:to_num()
+      -- TODO: remove this collectgarbage() call once the rest of Q stabilizes
       collectgarbage()
     end
     local acr = get_accuracy(expected_predict_value, actual_predict_value)
