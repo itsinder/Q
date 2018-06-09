@@ -602,26 +602,6 @@ function lVector:eval()
   return self
 end
 
-function lVector:release_vec_buf(chunk_size)
-  local status
-  assert(Vector.release_vec_buf(self._base_vec, chunk_size))
-  if ( self._nn_vec ) then
-    assert(Vector.release_vec_buf(self._nn_vec, chunk_size))
-  end
-  if ( qconsts.debug ) then self:check() end
-  return true
-end
-
-function lVector:get_vec_buf()
-  local nn_buf
-  local base_buf = assert(Vector.get_vec_buf(self._base_vec))
-  if ( self._nn_vec ) then
-    nn_buf = assert(Vector.get_vec_buf(self._nn_vec))
-  end
-  if ( qconsts.debug ) then self:check() end
-  return base_buf, nn_buf
-end
-
 function lVector:get_all()
   assert(self:is_eov())
   local nn_addr, nn_len
