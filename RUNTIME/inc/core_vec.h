@@ -1,6 +1,14 @@
 #ifndef __VEC_H
 #define __VEC_H
 #include "mmap_types.h"
+extern void
+vec_reset_timers(
+    void
+    );
+extern void
+vec_print_timers(
+    void
+    );
 extern int
 chk_field_type(
     const char * const field_type,
