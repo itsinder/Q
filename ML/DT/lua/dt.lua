@@ -27,10 +27,9 @@ local function make_dt(
   )
   local m, n, ng = chk_params(T, g)
   
-  local vone = Q.const({ val = sone, qtype = "I4", len = n})
-  -- TODO local cnts = Q.numby(g, ng)
-  local n_N = cnts:get1(0)
-  local n_P = cnts:get1(1)
+  local cnts = Q.numby(g, ng):eval()
+  local n_N = cnts:get_one(0)
+  local n_P = cnts:get_one(1)
   local best_bf, best_sp, best_k
   for k, f in pairs(T) do 
     local bf, sf = benefit(f, g, n_N, n_P)

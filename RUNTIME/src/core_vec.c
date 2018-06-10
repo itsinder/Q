@@ -1,4 +1,3 @@
-#include <math.h>
 #include "q_incs.h"
 #include "mmap_types.h"
 #include "core_vec.h"
@@ -14,7 +13,80 @@
 
 #include "lauxlib.h"
 
+
+static uint64_t
+RDTSC(
+    )
+//STOP_FUNC_DECL
+{
+#ifdef RASPBERRY_PI
+  return get_time_usec();
+#else
+  unsigned int lo, hi;
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+#endif
+}
+
+
+static uint64_t t_l_vec_add;         static uint32_t n_l_vec_add;
+static uint64_t t_l_vec_check;       static uint32_t n_l_vec_check;
+static uint64_t t_l_vec_clone;       static uint32_t n_l_vec_clone;
+static uint64_t t_l_vec_end_write;   static uint32_t n_l_vec_end_write;
+static uint64_t t_l_vec_eov;         static uint32_t n_l_vec_eov;
+static uint64_t t_l_vec_free;         static uint32_t n_l_vec_free;
+static uint64_t t_l_vec_get;         static uint32_t n_l_vec_get;
+static uint64_t t_l_vec_memo;        static uint32_t n_l_vec_memo;
+static uint64_t t_l_vec_new;         static uint32_t n_l_vec_new;
+static uint64_t t_l_vec_new_virtual; static uint32_t n_l_vec_new_virtual;
+static uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
+static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
+static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
+
 extern luaL_Buffer g_errbuf;
+
+void
+vec_reset_timers(
+    void
+    )
+{
+  printf("reset timers\n");
+  t_l_vec_add = 0;        n_l_vec_add = 0;
+  t_l_vec_check = 0;        n_l_vec_check = 0;
+  t_l_vec_clone = 0;        n_l_vec_clone = 0;
+  t_l_vec_end_write = 0;    n_l_vec_end_write = 0;
+  t_l_vec_eov = 0;          n_l_vec_eov = 0;
+  t_l_vec_free = 0;        n_l_vec_free = 0;
+  t_l_vec_get = 0;          n_l_vec_get = 0;
+  t_l_vec_memo = 0;        n_l_vec_memo = 0;
+  t_l_vec_new = 0;        n_l_vec_new = 0;
+  t_l_vec_new_virtual = 0;        n_l_vec_new_virtual = 0;
+  t_l_vec_persist = 0;        n_l_vec_persist = 0;
+  t_l_vec_set = 0;          n_l_vec_set = 0;
+  t_l_vec_start_write = 0;  n_l_vec_start_write = 0;
+}
+
+void
+vec_print_timers(
+    void
+    )
+{
+  printf("print timers\n");
+  fprintf(stdout, "add,%u,%" PRIu64 "\n",n_l_vec_add, t_l_vec_add);
+  fprintf(stdout, "check,%u,%" PRIu64 "\n",n_l_vec_check, t_l_vec_check);
+  fprintf(stdout, "clone,%u,%" PRIu64 "\n",n_l_vec_clone, t_l_vec_clone);
+  fprintf(stdout, "end_write,%u,%" PRIu64 "\n", n_l_vec_end_write, t_l_vec_end_write);
+  fprintf(stdout, "eov,%u,%" PRIu64 "\n", n_l_vec_eov, t_l_vec_eov);
+  fprintf(stdout, "free,%u,%" PRIu64 "\n",n_l_vec_free, t_l_vec_free);
+  fprintf(stdout, "get,%u,%" PRIu64 "\n",n_l_vec_get, t_l_vec_get);
+  fprintf(stdout, "memo,%u,%" PRIu64 "\n",n_l_vec_memo, t_l_vec_memo);
+  fprintf(stdout, "new,%u,%" PRIu64 "\n",n_l_vec_new, t_l_vec_new);
+  fprintf(stdout, "new_virtual,%u,%" PRIu64 "\n",n_l_vec_new_virtual, t_l_vec_new_virtual);
+  fprintf(stdout, "persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
+  fprintf(stdout, "set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
+  fprintf(stdout, "start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
+}
+
 
 static bool 
 is_file_size_okay(
@@ -344,6 +416,7 @@ vec_free(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_free++;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
   if ( ptr_vec->is_virtual ) {
     // No need to perform any garbage collection as vector is virtual
@@ -381,6 +454,7 @@ vec_free(
   }
   // Don't do this in C. Lua will do it: free(ptr_vec);
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_free += delta; }
   return status;
 }
 
@@ -419,6 +493,7 @@ vec_clone(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_clone++;
   // Not supporting vec_clone for virtual vector
   if ( ptr_old_vec->is_virtual ) { go_BYE(-1); }
   // supporting clone operation for non_eov vectors, so commenting below condition
@@ -473,6 +548,7 @@ vec_clone(
     ptr_new_vec->file_size = 0;
   }
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_clone += delta; }
   return status;
 }
 
@@ -541,6 +617,7 @@ vec_new_virtual(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_new_virtual++;
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
@@ -564,6 +641,7 @@ vec_new_virtual(
   ptr_vec->map_len = (ptr_vec->num_elements * ptr_vec->field_size);
   ptr_vec->is_virtual = true;
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_new_virtual += delta; }
   return status;
 }
 
@@ -579,6 +657,7 @@ vec_new(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_new++;
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   if ( q_data_dir == NULL ) { go_BYE(-1); }
@@ -646,6 +725,7 @@ vec_new(
   }
 
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_new += delta; }
   return status;
 }
 
@@ -654,6 +734,7 @@ vec_check(
     VEC_REC_TYPE *ptr_vec
     )
 {
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_check++;
   /*
 is_nascent = true, is_eov = false (nascent vector without eov())
 is_nascent = true, is_eov = true (nascent vector, after eov() call)
@@ -782,6 +863,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
   }
 
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_check += delta; }
   return status;
 }
 
@@ -792,6 +874,7 @@ vec_memo(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_memo++;
   // Not supporting vec_memo for virtual vector
   if ( ptr_vec->is_virtual ) { go_BYE(-1); } 
   if ( ptr_vec->is_eov == false ) {
@@ -809,6 +892,7 @@ vec_memo(
   }
 
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_memo += delta; }
   return status;
 }
 
@@ -844,6 +928,7 @@ vec_get(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_get++;
   FILE *fp = NULL;
   char *addr = NULL;
   char *ret_addr = NULL;
@@ -1004,6 +1089,7 @@ vec_get(
   *ptr_ret_len  = ret_len;
 BYE:
   fclose_if_non_null(fp);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_get += delta; }
   return status;
 }
 
@@ -1099,6 +1185,7 @@ vec_add(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_add++;
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
   if ( !ptr_vec->is_nascent ) { go_BYE(-1); }
@@ -1139,6 +1226,7 @@ vec_add(
     go_BYE(-1);
   }
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_add += delta; }
   return status;
 }
 
@@ -1148,6 +1236,7 @@ vec_start_write(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_start_write++;
   char *X = NULL; uint64_t nX = 0;
   if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_memo == true ) ) {
     /* all is well */
@@ -1172,6 +1261,7 @@ vec_start_write(
     ptr_vec->open_mode = 2; // for write
   }
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_start_write += delta; }
   return status;
 }
 
@@ -1181,6 +1271,7 @@ vec_end_write(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_end_write++;
   if ( ( ptr_vec->is_eov == true ) && ( ptr_vec->is_nascent == false ) &&
        ( ptr_vec->is_memo == true ) ) {
     /* all is well */
@@ -1198,6 +1289,7 @@ vec_end_write(
   }
   ptr_vec->open_mode = 0; // not opened for read or write
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_end_write += delta; }
   return status;
 }
 
@@ -1210,6 +1302,7 @@ vec_set(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_set++;
   if ( addr == NULL ) { go_BYE(-1); }
   if ( len == 0 ) { go_BYE(-1); }
   if ( ptr_vec->open_mode != 2 ) { go_BYE(-1); }
@@ -1247,6 +1340,7 @@ vec_set(
     memcpy(dst, addr,len * ptr_vec->field_size); 
   }
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_set += delta; }
   return status;
 }
 
@@ -1256,12 +1350,14 @@ vec_persist(
     bool is_persist
     )
 {
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_persist++;
   int status = 0;
   // Not supporting vec_persist for virtual vector
   if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_memo == false ) { go_BYE(-1); }
   ptr_vec->is_persist = is_persist;
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_persist += delta; }
   return status;
 }
 
@@ -1295,6 +1391,7 @@ vec_eov(
     )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_l_vec_eov++;
   // Not supporting vec_eov for virtual vector
   if ( ptr_vec->is_virtual ) { go_BYE(-1); }
   if ( ptr_vec->is_eov       == true  ) { return status; } // Nothing to do 
@@ -1324,5 +1421,6 @@ vec_eov(
   // We defer mmaping the file to when access is requested
   // We defer deleting the chunk until vec_clean_chunk is called
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_eov += delta; }
   return status;
 }

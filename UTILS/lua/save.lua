@@ -75,13 +75,17 @@ local function save(name, value, saved, file)
   elseif ( type(value) == "lVector" ) then 
     -- TODO Indrajeet to check
     local persist_str = value:reincarnate()
-    file:write(persist_str)
-    file:write("\n")
-    save(name .. "._meta", value._meta, saved, file)
-    file:write(name .. ":persist(true)")
-    file:write("\n")
+    if ( persist_str ) then 
+      file:write(persist_str)
+      file:write("\n")
+      save(name .. "._meta", value._meta, saved, file)
+      file:write(name .. ":persist(true)")
+      file:write("\n")
+    else
+      print("Not saving lVector because not eov ", name)
+    end
   else
-    error("cannot save a " .. type(value))
+    error("cannot save " .. name .. " of type " .. type(value))
   end
 end
 

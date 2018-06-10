@@ -237,8 +237,7 @@ sudo apt-get install liblapacke-dev liblapack-dev -y
 my_print "Building Q"
 cleanup ../ #cleaning up all files
 clean_q
-if [ $LUA_DEBUG -eq 1 ]
-then
+if [ $LUA_DEBUG ]; then 
   install_luaffi
 fi
 build_q

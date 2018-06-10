@@ -16,6 +16,17 @@ tests.t1 = function ()
     z = Scalar.sub(y, x)
     w = (z == Scalar.new(333, "F4"))
     assert(w == true)
+
+    assert(Scalar.gt(z, 331))
+    assert(Scalar.lt(z, 334))
+    assert(Scalar.geq(z, 333))
+    assert(Scalar.leq(z, 333))
+    --[[
+    assert(z > 331)
+    assert(z < 333)
+    assert(z >= 331)
+    assert(z <= 333)
+    ==]]
   end
   print("Successfully completed test t1")
 end

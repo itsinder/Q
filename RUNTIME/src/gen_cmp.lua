@@ -82,9 +82,18 @@ static int l_sclr___KEY__(lua_State *L)
   int ret_val;
 
   SCLR_REC_TYPE *ptr_sclr1 = (SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
-  SCLR_REC_TYPE *ptr_sclr2 = (SCLR_REC_TYPE *)luaL_checkudata(L, 2, "Scalar");
-  status = eval_cmp( ptr_sclr1->field_type, ptr_sclr2->field_type, 
+  if ( lua_isnumber(L, 2) ) { 
+    SCLR_REC_TYPE val2; 
+    strcpy(val2.field_type, "F8");
+    val2.cdata.valF8 = luaL_checknumber(L, 2);
+    status = eval_cmp( ptr_sclr1->field_type, "F8",
+      "__VAL__", ptr_sclr1->cdata, val2.cdata, &ret_val);
+  }
+  else {
+    SCLR_REC_TYPE *ptr_sclr2 = (SCLR_REC_TYPE *)luaL_checkudata(L, 2, "Scalar");
+    status = eval_cmp( ptr_sclr1->field_type, ptr_sclr2->field_type, 
       "__VAL__", ptr_sclr1->cdata, ptr_sclr2->cdata, &ret_val);
+  }
   cBYE(status);
   lua_pushboolean(L, ret_val);
   return 1;

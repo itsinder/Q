@@ -11,6 +11,7 @@ math.randomseed(os.time())
 local tests = {}
 tests.t1 = function()
   local num_iters = 64
+  Vector.reset_timers()
   for i = 1, num_iters do 
     local xtype = rand_qtype()
     local x = lVector( { qtype = xtype, gen = true, has_nulls = false})
@@ -41,5 +42,7 @@ tests.t1 = function()
     assert(x:check())
     assert(x:num_elements() == counter)
   end
+  Vector.print_timers()
+  print("Completed test1")
 end
 return tests
