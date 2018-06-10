@@ -7,6 +7,7 @@
 //START_FUNC_DECL
 uint64_t 
 get_time_usec(
+    void
     )
 //STOP_FUNC_DECL
 {

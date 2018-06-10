@@ -14,13 +14,15 @@ copy_file(
 {
   int status = 0;
   FILE *src_fp;
+  char *buffer = NULL;
+  
 
   src_fp = fopen(src_file, "rb");
   return_if_fopen_failed(src_fp, src_file, "rb");
 
   int64_t read_size = 0;
   int64_t buf_size = 1024; // TODO: Remove this hard-coding, size of intermediate buffer
-  char *buffer = malloc(buf_size);
+  buffer = malloc(buf_size); return_if_malloc_failed(buffer);
 
   while ( !feof(src_fp) ) {
     read_size = fread(buffer, 1, buf_size, src_fp);

@@ -392,7 +392,7 @@ BYE:
 static int l_cmem_set( lua_State *L) {
 
   CMEM_REC_TYPE *ptr_cmem  = luaL_checkudata( L, 1, "CMEM");
-  lua_Number val;
+  lua_Number val = 0;
   char *str_val = NULL;
   // NOTE: Do NOT change order of if. Lua will claim it as string 
   // even if it is a number

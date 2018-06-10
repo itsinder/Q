@@ -8,6 +8,7 @@
 //START_FUNC_DECL
 uint64_t
 RDTSC(
+    void
     )
 //STOP_FUNC_DECL  
 {
