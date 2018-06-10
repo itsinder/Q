@@ -43,6 +43,8 @@ static uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
 static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
 static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 
+static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
+
 extern luaL_Buffer g_errbuf;
 
 void
@@ -64,6 +66,8 @@ vec_reset_timers(
   t_l_vec_persist = 0;        n_l_vec_persist = 0;
   t_l_vec_set = 0;          n_l_vec_set = 0;
   t_l_vec_start_write = 0;  n_l_vec_start_write = 0;
+
+  t_flush_buffer = 0;  n_flush_buffer = 0;
 }
 
 void
@@ -85,6 +89,8 @@ vec_print_timers(
   fprintf(stdout, "persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
   fprintf(stdout, "set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
   fprintf(stdout, "start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
+
+  fprintf(stdout, "flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
 }
 
 
@@ -251,9 +257,9 @@ BYE:
 int
 update_file_name(VEC_REC_TYPE *ptr_vec) {
   int status = 0;
-  if ( ptr_vec == NULL ) { go_BYE(-1); }
   char *temp_buf_path = NULL;
   char *temp_buf_file = NULL;
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
   temp_buf_path = malloc(Q_MAX_LEN_FILE_NAME);
   temp_buf_file = malloc(Q_MAX_LEN_BASE_FILE);
   do {
@@ -278,6 +284,7 @@ flush_buffer(
           )
 {
   int status = 0;
+  uint64_t delta = 0, t_start = RDTSC(); n_flush_buffer++;
   if ( ptr_vec->is_memo ) {
     if ( !isfile(ptr_vec->file_name) ) {
       // create randomly generated file name and append to ptr_vec->file_name field
@@ -293,6 +300,7 @@ flush_buffer(
   memset(ptr_vec->chunk, '\0', 
       (ptr_vec->field_size * ptr_vec->chunk_size));
 BYE:
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_flush_buffer += delta; }
   return status;
 }
 

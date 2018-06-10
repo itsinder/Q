@@ -7,6 +7,9 @@
 #include <float.h>
 //STOP_INCLUDES
 #include "q_macros.h"
+#include "_set_bit_u64.h"
+#include "_generate_bin.h"
+#include "_get_time_usec.h"
 
 typedef enum _qtype_type { undef_qtype, B1, I1, I2, I4, I8, F4, F8 } qtype_type;
 
@@ -92,7 +95,7 @@ generate_bin(
     uint64_t temp_B1 = 0;
     int8_t bit_idx;
     uint8_t bit_val = 0;
-    for ( uint64_t i = 1; i <= num_values; i++ ) {
+    for ( int64_t i = 1; i <= num_values; i++ ) {
         uint64_t val = i * 10;
         switch ( qtype ) {
             case B1 :

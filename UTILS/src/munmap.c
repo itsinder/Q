@@ -21,5 +21,5 @@ rs_munmap(
    mcr_rs_munmap(X, nX);
    cBYE(status);  
  BYE:
-   return(status);
+   return status;
 }

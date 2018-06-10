@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local Vector = require 'libvec'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local file_name = "profile_result.txt"
@@ -16,6 +17,7 @@ local qc = require 'Q/UTILS/lua/q_core'
 local start_time, stop_time, time
 start_time = qc.get_time_usec()
 
+Vector.reset_timers()
 for i = 1, 5000 do
   local x = Q.vvadd(col1, col2):memo(false)
   local vvadd_res = x:eval()
@@ -25,6 +27,7 @@ for i = 1, 5000 do
   end
   ]]
 end
+Vector.print_timers()
 
 stop_time = qc.get_time_usec()
 print("vvadd total execution time : " .. tostring(tonumber(stop_time-start_time)/1000000))
