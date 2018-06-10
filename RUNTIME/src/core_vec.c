@@ -178,6 +178,8 @@ BYE:
   return status;
 }
 
+#undef XXXXX // TODO P1 Do we need this function? Can we deprecate?
+#ifdef XXXXX
 char *
 vec_get_buf(
   VEC_REC_TYPE *ptr_vec
@@ -203,6 +205,7 @@ vec_get_buf(
 BYE:
   return chunk;
 }
+#endif
 
 int 
 vec_cast(
