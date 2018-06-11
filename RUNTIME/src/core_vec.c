@@ -13,7 +13,6 @@
 
 #include "lauxlib.h"
 
-
 static uint64_t
 RDTSC(
     )
@@ -44,8 +43,46 @@ static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
 static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 
 static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
+static uint64_t t_memcpy;            static uint32_t n_memcpy;
+static uint64_t t_memset;            static uint32_t n_memset;
 
 extern luaL_Buffer g_errbuf;
+
+static inline void 
+l_memcpy(
+    void *dest,
+    const void *src,
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_memcpy++;
+#define BASIC
+#ifdef BASIC
+  memcpy(dest, src, n);
+#else
+  uint64_t *l_d = (uint64_t *)dest;
+  uint64_t *l_s = (uint64_t *)src;
+  size_t    l_n = n / sizeof(uint64_t);
+  for ( uint32_t i = 0; i < l_n; i++ ) { 
+    *l_d = *l_s++;
+  }
+#endif
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_memcpy += delta; }
+}
+
+static inline void *
+l_memset(
+    void *s, 
+    int c, 
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_memset++;
+  void *x = memset(s, c, n);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
+  return x;
+}
+
 
 void
 vec_reset_timers(
@@ -53,21 +90,22 @@ vec_reset_timers(
     )
 {
   printf("reset timers\n");
-  t_l_vec_add = 0;        n_l_vec_add = 0;
+  t_l_vec_add = 0;          n_l_vec_add = 0;
   t_l_vec_check = 0;        n_l_vec_check = 0;
   t_l_vec_clone = 0;        n_l_vec_clone = 0;
   t_l_vec_end_write = 0;    n_l_vec_end_write = 0;
   t_l_vec_eov = 0;          n_l_vec_eov = 0;
-  t_l_vec_free = 0;        n_l_vec_free = 0;
+  t_l_vec_free = 0;         n_l_vec_free = 0;
   t_l_vec_get = 0;          n_l_vec_get = 0;
-  t_l_vec_memo = 0;        n_l_vec_memo = 0;
-  t_l_vec_new = 0;        n_l_vec_new = 0;
-  t_l_vec_new_virtual = 0;        n_l_vec_new_virtual = 0;
-  t_l_vec_persist = 0;        n_l_vec_persist = 0;
+  t_l_vec_memo = 0;         n_l_vec_memo = 0;
+  t_l_vec_new = 0;          n_l_vec_new = 0;
+  t_l_vec_new_virtual = 0;  n_l_vec_new_virtual = 0;
+  t_l_vec_persist = 0;      n_l_vec_persist = 0;
   t_l_vec_set = 0;          n_l_vec_set = 0;
   t_l_vec_start_write = 0;  n_l_vec_start_write = 0;
 
-  t_flush_buffer = 0;  n_flush_buffer = 0;
+  t_flush_buffer = 0;       n_flush_buffer = 0;
+  t_memcpy = 0;             n_memcpy = 0;
 }
 
 void
@@ -76,21 +114,23 @@ vec_print_timers(
     )
 {
   printf("print timers\n");
-  fprintf(stdout, "add,%u,%" PRIu64 "\n",n_l_vec_add, t_l_vec_add);
-  fprintf(stdout, "check,%u,%" PRIu64 "\n",n_l_vec_check, t_l_vec_check);
-  fprintf(stdout, "clone,%u,%" PRIu64 "\n",n_l_vec_clone, t_l_vec_clone);
-  fprintf(stdout, "end_write,%u,%" PRIu64 "\n", n_l_vec_end_write, t_l_vec_end_write);
-  fprintf(stdout, "eov,%u,%" PRIu64 "\n", n_l_vec_eov, t_l_vec_eov);
-  fprintf(stdout, "free,%u,%" PRIu64 "\n",n_l_vec_free, t_l_vec_free);
-  fprintf(stdout, "get,%u,%" PRIu64 "\n",n_l_vec_get, t_l_vec_get);
-  fprintf(stdout, "memo,%u,%" PRIu64 "\n",n_l_vec_memo, t_l_vec_memo);
-  fprintf(stdout, "new,%u,%" PRIu64 "\n",n_l_vec_new, t_l_vec_new);
-  fprintf(stdout, "new_virtual,%u,%" PRIu64 "\n",n_l_vec_new_virtual, t_l_vec_new_virtual);
-  fprintf(stdout, "persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
-  fprintf(stdout, "set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
-  fprintf(stdout, "start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
+  fprintf(stdout, "0,add,%u,%" PRIu64 "\n",n_l_vec_add, t_l_vec_add);
+  fprintf(stdout, "0,check,%u,%" PRIu64 "\n",n_l_vec_check, t_l_vec_check);
+  fprintf(stdout, "0,clone,%u,%" PRIu64 "\n",n_l_vec_clone, t_l_vec_clone);
+  fprintf(stdout, "0,end_write,%u,%" PRIu64 "\n", n_l_vec_end_write, t_l_vec_end_write);
+  fprintf(stdout, "0,eov,%u,%" PRIu64 "\n", n_l_vec_eov, t_l_vec_eov);
+  fprintf(stdout, "0,free,%u,%" PRIu64 "\n",n_l_vec_free, t_l_vec_free);
+  fprintf(stdout, "0,get,%u,%" PRIu64 "\n",n_l_vec_get, t_l_vec_get);
+  fprintf(stdout, "0,memo,%u,%" PRIu64 "\n",n_l_vec_memo, t_l_vec_memo);
+  fprintf(stdout, "0,new,%u,%" PRIu64 "\n",n_l_vec_new, t_l_vec_new);
+  fprintf(stdout, "0,new_virtual,%u,%" PRIu64 "\n",n_l_vec_new_virtual, t_l_vec_new_virtual);
+  fprintf(stdout, "0,persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
+  fprintf(stdout, "0,set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
+  fprintf(stdout, "0,start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
 
-  fprintf(stdout, "flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
+  fprintf(stdout, "1,flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
+  fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
+  fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
 }
 
 
@@ -197,7 +237,7 @@ vec_get_buf(
     if ( ptr_vec->chunk == NULL ) { 
       ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
-      memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+      l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
     else {
       if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
@@ -297,8 +337,7 @@ flush_buffer(
   ptr_vec->num_in_chunk = 0;
   ptr_vec->chunk_num++;
   // TODO P4: memset is not really needed
-  memset(ptr_vec->chunk, '\0', 
-      (ptr_vec->field_size * ptr_vec->chunk_size));
+  // memset(ptr_vec->chunk, '\0', (ptr_vec->field_size * ptr_vec->chunk_size));
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_flush_buffer += delta; }
   return status;
@@ -321,7 +360,7 @@ int flush_buffer_B1(
     }
     ptr_vec->num_in_chunk = 0;
     ptr_vec->chunk_num++;
-    memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
+    l_memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
     // Note that ptr_vec->field_size  == 0 for B1 
   }
 BYE:
@@ -512,7 +551,7 @@ vec_clone(
   // quit if opened for writing
   if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
   // Commenting memcpy as we are setting fields explicitly
-  // memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
+  // l_memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
 
   ptr_new_vec->open_mode = 0; // unopened
   ptr_new_vec->field_size = ptr_old_vec->field_size;
@@ -531,7 +570,7 @@ vec_clone(
   if ( ptr_old_vec->chunk != NULL ) { 
     ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
     return_if_malloc_failed(ptr_new_vec->chunk); 
-    memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
+    l_memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
     ptr_new_vec->chunk_num = ptr_old_vec->chunk_num;
     ptr_new_vec->num_in_chunk = ptr_old_vec->num_in_chunk;
@@ -1115,7 +1154,7 @@ vec_add_B1(
   if ( ptr_vec->chunk == NULL ) { 
     ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
-    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+    l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
 
   /* TODO: Ideally if ( len % 8 != 0 ) then the write operation should work in combination of byte and bit fashion
@@ -1142,7 +1181,7 @@ vec_add_B1(
         num_byts_to_copy = num_bits_to_copy / 8;
       }
       char *dst = ptr_vec->chunk + (ptr_vec->num_in_chunk / 8);
-      memcpy(dst, addr, num_byts_to_copy);
+      l_memcpy(dst, addr, num_byts_to_copy);
       ptr_vec->num_in_chunk += num_bits_to_copy;
       len  -= num_bits_to_copy;
       addr += num_byts_to_copy;
@@ -1209,7 +1248,7 @@ vec_add(
   if ( ptr_vec->chunk == NULL ) { 
     ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
-    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+    l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
 
   uint64_t initial_num_elements = ptr_vec->num_elements;
@@ -1225,7 +1264,7 @@ vec_add(
       char *dst = ptr_vec->chunk + 
         (ptr_vec->num_in_chunk * ptr_vec->field_size);
       char *src = addr + (num_copied * ptr_vec->field_size);
-      memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
+      l_memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
       ptr_vec->num_in_chunk += num_to_copy;
       ptr_vec->num_elements += num_to_copy;
       num_left_to_copy      -= num_to_copy;
@@ -1348,7 +1387,7 @@ vec_set(
   }
   else {
     char *dst = ptr_vec->map_addr + offset;
-    memcpy(dst, addr,len * ptr_vec->field_size); 
+    l_memcpy(dst, addr,len * ptr_vec->field_size); 
   }
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_set += delta; }
