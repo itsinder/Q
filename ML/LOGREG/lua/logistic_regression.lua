@@ -4,10 +4,10 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local T = {}
 
 local function beta_step(X, y, beta)
-  local Xbeta = Q.mv_mul(X, beta)
-  local p = Q.logit(Xbeta)
-  local w = Q.logit2(Xbeta)
-  local ysubp = Q.vvsub(y, p)
+  local Xbeta = Q.mv_mul(X, beta):set_name("Xbeta"):eval()
+  local p     = Q.logit(Xbeta):eval()
+  local w     = Q.logit2(Xbeta):eval()
+  local ysubp = Q.vvsub(y, p):eval()
   local A = {} -- initially a table of Lua tables, later a table of Q vectors
   local b = {} -- initially a Lua table, later a Q vector
 
@@ -22,23 +22,17 @@ local function beta_step(X, y, beta)
   for i = 1, #A do
     for j = 1, #A do
       local a_ij = A[i][j]:to_num()
-      io.write(a_ij, " " )
     end
-    io.write(b[i]:to_num(), " " )
-    io.write("\n")
   end
-  print("=====================")
   b = Q.mk_col(b, "F8")
   for i = 1, #A do
     A[i] = Q.mk_col(A[i], "F8")
   end
 
   local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
-  print(type( beta_new_sub_beta))
   local beta_new = Q.vvadd(beta_new_sub_beta, beta)
-  for i = 1, #A do
-    print(beta_new_sub_beta:get_one(i-1):to_num())
-  end
+  Q.print_csv(beta_new)
+  assert(nil, "PREMATURE")
   print("=++++++++++++++++++++")
   return beta_new
 
@@ -153,11 +147,10 @@ local function lr_setup(
   -- add an additional column to X of 1's. Math justification in documentation
   local xtype = X[1]:fldtype()
   local M = y:length()
-  X[#X + 1] = Q.const({ val = 1, len = M, qtype = xtype })
-  X[#X]:eval()
+  X[#X + 1] = Q.const({ val = 1, len = M, qtype = xtype }):eval()
   local M = #X
   --- initialize beta to 0 
-  beta = Q.const({ val = 0, len = M, qtype = 'F8' })
+  beta = Q.const({ val = 0, len = M, qtype = xtype })
   return beta
 end
 

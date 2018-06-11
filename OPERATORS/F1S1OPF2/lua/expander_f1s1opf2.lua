@@ -46,7 +46,8 @@
     local chunk_idx = 0
     --============================================
     local f2_gen = function(chunk_num)
-      -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+      -- Adding assert on chunk_idx to have sync between expected 
+      -- chunk_num and generator's chunk_idx state
       assert(chunk_num == chunk_idx)
       f2_buf = f2_buf or cmem.new(buf_sz, f2_qtype)
       assert(f2_buf)
@@ -56,13 +57,18 @@
         ffi.memset(get_ptr(nn_f2_buf), 0, qconsts.chunk_size)
       end
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
+
+      local cast_as_B1 = qconsts.qtypes['B1'].ctype .. "*"
+      local cast_f1 = qconsts.qtypes[subs.in_qtype].ctype  .. "*" 
+      local cast_f2 = qconsts.qtypes[subs.out_qtype].ctype .. "*" 
+
       if f1_len > 0 then  
-        local casted_f1_chunk = ffi.cast(qconsts.qtypes[subs.in_qtype].ctype .. "*" ,get_ptr(f1_chunk))
-        local casted_nn_f1_chunk = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f1_chunk))
+        local cst_f1    = ffi.cast(cast_f1,    get_ptr(f1_chunk))
+        local cst_nn_f1 = ffi.cast(cast_as_B1, get_ptr(nn_f1_chunk))
         local casted_ptr_sval = ffi.cast(qconsts.qtypes[f1:fldtype()].ctype .. "*" ,get_ptr(subs.c_mem))
-        local casted_f2_buf = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. "*", get_ptr(f2_buf))
-        local casted_nn_f2_buf = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f2_buf))
-        qc[func_name](casted_f1_chunk, casted_nn_f1_chunk, f1_len, casted_ptr_sval, casted_f2_buf, casted_nn_f2_buf)
+        local cst_f2    = ffi.cast(cast_f2,    get_ptr(f2_buf))
+        local cst_nn_f2 = ffi.cast(cast_as_B1, get_ptr(nn_f2_buf))
+        qc[func_name](cst_f1, cst_nn_f1, f1_len, casted_ptr_sval, cst_f2, cst_nn_f2)
       end
       chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf
