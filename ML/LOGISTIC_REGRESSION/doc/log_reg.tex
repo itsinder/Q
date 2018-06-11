@@ -132,7 +132,7 @@ $$
 $$
 
 $$
-\sum y_i x_i = \sum x_i \dfrac{e^{\hat{\alpha} + \hat{\beta} x_i}}{1 = e^{\hat{\alpha} + \hat{\beta} x_i}} \quad \quad (1)
+\sum y_i x_i = \sum x_i \dfrac{e^{\hat{\alpha} + \hat{\beta} x_i}}{1 + e^{\hat{\alpha} + \hat{\beta} x_i}} \quad \quad (1)
 $$
 
 \noindent If we use the design matrix
@@ -147,7 +147,7 @@ $$
 \boldsymbol{X^t y} = \boldsymbol{X^t \hat{\pi}}
 $$
 \\
-where $\hat{\pi}$ is the vector of estimated $\pi_i$ values for the observations with values $(1, x_{1,i}, \ldots, x_{p,i})$ 
+where $\hat{\pi}$ is the vector of estimated $\pi_i$ values for the observations with values $(1, x_{1,i}, \ldots, x_{p,i})$. $x_{j,i}$ are the observed data values and the $1$ value is added so that an intercept value $\alpha$ is included in the linear model. 
 \\\\
 This equation is nonlinear so instead of solving directly for $\boldsymbol{\hat{\pi}}$, we will use an iterative method called Newton-Raphson.
 
@@ -241,7 +241,7 @@ $$
     \item $\boldsymbol{b} = \boldsymbol{X}^t(\boldsymbol{y - \hat{\pi}})$
     \end{itemize}
     
-    $\boldsymbol{\beta}_{(k+1)} = \boldsymbol{x} + \boldsymbol{\hat{\beta}}_{k}$
+    Note that $\boldsymbol{\beta}_{(k+1)} = \boldsymbol{x} + \boldsymbol{\hat{\beta}}_{k}$ and $\boldsymbol{\hat{\pi}} = \frac{e^{\boldsymbol{X\beta_{(k)}}}}{1 + e^{\boldsymbol{X\beta_{(k)}}}}$
     
     \item Iterate until $\boldsymbol{\hat{\beta}}$ has converged. At convergence, $(\boldsymbol{X}^t \boldsymbol{W}_{(k)} \boldsymbol{X})^{-1}$ is $\approx 0$
 \end{enumerate}
@@ -289,7 +289,7 @@ A basic classification procedure is the following:
 \begin{thebibliography}{9}
 
 \bibitem{notes citation} 
-Lecture notes from Professor Deborah Nolan, UC Berkeley, STAT 151A
+Lecture notes from Professor Deborah Nolan, UC Berkeley, STAT 151A, Spring 2017
 
 \bibitem{stats textbook} 
 Trevor Hastie, Robert Tibshirani, and Jerome Friedman. 
@@ -308,15 +308,10 @@ Image citation: Ruye Wang - Newton-Raphson method (univariate)
 \section{Data Structures}
 
 \bi
-\item \(X\) is an \(N \times M\) matrix containing the input data.
+\item \(X\) is an \(N \times M\) matrix containing the input data concatenated with the value $1$.
   \(X_{i, j}\) is value of \(j^{th}\) attribute of \(i^{th}\)
   instance. \(X\) is stored as \(M\) columns, where \(X_j\) is
   observations for attribute \(j\)
-
-Note: We must add an additional attribute which is the constant 1. Really, what
-we're solving for is a solution to $Y = \beta_0 + \sum_{j = 1}^N
-X_j \beta_j$, but to express this as one matrix expression we add a column of 1s to
-$X$ and solve $Y = X^T\beta$.
 
 \item \(y\) is an \(N \times 1\) classification vector. \(y_i\) is
   classification of instance \(i\) and can be 1 or 0.
@@ -326,7 +321,7 @@ $X$ and solve $Y = X^T\beta$.
   coefficients that we solve for in each iteration
 \item \(A\) is an \(M \times M\) matrix. Since it is symmetric, we can skip
   computing the lower diagonal elements.
-\item \(W\) is actually an \(N \times N\) matrix. However, since
+\item \(W = X^TWX\) is a diagonal \(N \times N\) matrix. Since the
   off-diagonal elements are zero, we can represent is as an \(N \times
   1\) vector.   When used as a vector, we will use lower case \(w\). When used
   as a matrix, we will use upper case \(W\). Note that \(W_{i, i} = w_i\) and
@@ -334,24 +329,10 @@ $X$ and solve $Y = X^T\beta$.
 \item \(b\) is an \(M \times 1\) vector, \(X^T W ( X \beta + W^{-1}(y - p) )\)
   \ei
 
-We start with an initial guess for \(\beta\) and then calculate better
-approximations using Equation~\ref{eqn1} until convergence.
-\begin{equation}
-\label{eqn1}
-(X^T W X) \times \beta ^{new} = X^T W ( X \beta + W^{-1}(y - p) )
-\end{equation}
-However we can simplify this expression by subtracting $X^TWX\beta$ from both
-sides to get
-\begin{equation}
-\label{eqn2}
-(X^T W X) \times (\beta ^{new} - \beta) = X^T(y - p)
-\end{equation}
-and when we find $\beta^{new} - \beta$, we can add $\beta$ to get $\beta^{new}$.
-To see the solver at the heart of each iteration, re-write Equation~\ref{eqn1} as Equation~\ref{eqn2}
-\begin{equation}
-\label{eqn3}
-A x = b
-\end{equation}
+With these elements, the Newton Raphson iteration becomes the following:
+\\
+$(X^TWX)\times (\beta^{new} - \beta) = X^T(y-p)$
+
 where 
 \be
 \item \(W\) is symmetric and positive definite
@@ -372,14 +353,14 @@ Step by step computations in Table~\ref{step_by_step_calc}.
 \centering
 \begin{tabular}{|l|l|l|l|} \hline \hline
   {\bf Name} & {\bf Description} & {\bf Type} & {\bf Code} \\ \hline \hline
-  \(t_1\) & \(X \beta\) & \((N \times M) \times (M \times 1)\)  &  \\
-  & & \(= N \times 1\) & \\ \hline
+  \(Xbeta\) & \(X \beta\) & \((N \times M) \times (M \times 1)\)  &  \\
+  & & \(= N \times 1\) & \(Xbeta = \mathrm{mv\_mul} (X, beta)\) \\ \hline
   \(p\) & & \(N \times 1\) & \( p = \mathrm{logit}(t1) = e^{t1}/(1 + e^{t1})\) \\ \hline
-  \(t_2\) &  \(y - p\) & \(N \times 1\) & \( t_2 = \mathrm{sub}(y, p)\) \\ \hline
+  \(ysubp\) &  \(y - p\) & \(N \times 1\) & \( t_2 = \mathrm{vvsub}(y, p)\) \\ \hline
   \(w\) & & \(N \times 1\) & \( w = \mathrm{logit2}(t1) = e^{t1}/(1 + e^{t1})^2\) \\ \hline
   \(b\) & \(X^T (y-p)\) & \((M\times N) \times (N \times 1)\)
   & \(\forall j_{j=1}^{j=M} b_j = \) \\ 
-        & & \( = M \times 1 \) & \(\mathrm{sumprod}(X_j, t_2)\) \\ \hline
+        & & \( = M \times 1 \) & \(\mathrm{sum}(\mathrm{vvmul}(X_i, ysubp))\) \\ \hline
   \(A\) & \(X^T W X\) & \((M \times N) \times (N \times N) \times (N \times M)\)
   & \(\forall_{j=1}^{j=M} \forall_{k=j}^{k=M} A_{j, k} = \) \\ 
   & & \(= (M \times M)\) & \(\mathrm{sumprod2}(X_j, w, X_k)\) \\ \hline
