@@ -106,6 +106,7 @@ vec_reset_timers(
 
   t_flush_buffer = 0;       n_flush_buffer = 0;
   t_memcpy = 0;             n_memcpy = 0;
+  t_memset = 0;             n_memset = 0;
 }
 
 void
