@@ -48,10 +48,8 @@ end
 local function chk_params(
     T_train, 
     T_test, 
-    alpha, 
     exponent
     )
-  assert(type(alpha) == "lVector")
   assert(type(exponent) == "Scalar")
   local m_train, n_train = chk_data(T_train)
   local m_test,  n_test  = chk_data(T_test)
@@ -62,7 +60,6 @@ local function alt_voting(
   T_train, -- table of m lVectors of length n_train
   m,
   n_train,
-  alpha, -- lVector of length m
   T_test, -- table of m lVectors of length n_test
   n_test,
   output, -- lVector of length n_test
@@ -70,11 +67,9 @@ local function alt_voting(
   )
   --[[
   m, n_train, n_test = chk_params(
-    T_train, T_test, alpha, exponent)
+    T_train, T_test, exponent)
     --]]
   
-  local _, c_alpha,  _ = alpha:get_all()
-  c_alpha= ffi.cast("float *",  get_ptr(c_alpha))
 
   local _, c_output, _ = output:start_write()
   c_output= ffi.cast("float *",  get_ptr(c_output))
@@ -82,7 +77,7 @@ local function alt_voting(
   c_train = mk_ptrs(T_train, m, "train")
   c_test  = mk_ptrs(T_test, m, "test")
   libc.calc_vote_per_g(
-    c_train, m, n_train, c_alpha, c_test, n_test, c_output)
+    c_train, m, n_train, c_test, n_test, c_output)
   output:end_write()
   end
 return alt_voting

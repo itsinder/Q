@@ -1,3 +1,9 @@
+-- given a table T of lVectors and a string identifying the goal attribute
+-- return
+-- 1) a goal lvector g
+-- 2) a table t of lVectors = T - g
+-- 3) m = number of columns of t 
+-- 4) n = length of lVectors
 local function extract_goal(
   T, 
   goal
@@ -7,19 +13,28 @@ local function extract_goal(
   local t = {}
   local g
   local qtype 
+  local m = 0
+  local n = 0
   for k, v in pairs(T) do 
     if ( not qtype ) then
       qtype = v:fldtype()
+      assert((qtype == "F4" ) or ( qtype == "F8"))
+      n = v:length()
     else
       assert(qtype == v:fldtype())
-      assert((qtype == "F4" ) or ( qtype == "F8"))
+      assert(n     == v:length())
     end
     if ( k == goal ) then 
       g = v
     else
       t[#t+1] = v
+      m = m + 1
     end
   end
-  return t, g
+  assert(m > 0)
+  assert(n > 0)
+  assert(g)
+  assert(qtype)
+  return t, g, m, n
 end
 return extract_goal

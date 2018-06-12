@@ -22,7 +22,7 @@ local function run_logistic_regression(
   assert(num_iters >= 1 )
   --==========================================
   local T = Q.load_csv(train_file, meta_data, optargs)
-  local T_train, g_train = extract_goal(T, goal)
+  local T_train, g_train, m_train, n_train = extract_goal(T, goal)
 
   local beta = log_reg.lr_setup(T_train, g_train)
   for i = 1, num_iters do

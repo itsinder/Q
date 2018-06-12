@@ -37,11 +37,11 @@ tests.t1 = function()
     Z = Q.mv_mul(X, Y):eval()
   end
   assert(Z:num_elements() == x1:length())
-  print("Completed mv_mul")
-  local opt_args = { opfile = script_dir .. "_out1.txt" }
-  Q.print_csv(Z, opt_args)
-  assert(compare(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
-  os.execute("rm -f " .. script_dir .. "_out1.txt")
+  local good_Z = Q.mk_col({ 
+    2100, 4200, 6300, 8400, 10500, 12600, 14700, 16800}, "F8")
+  assert(Q.vvseq(Z, good_Z, 0.01))
+  -- Q.print_csv({Z, good_Z})
+  print("Completed Test t1")
 end
 tests.t2 = function()
  --[[
