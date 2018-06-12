@@ -987,7 +987,9 @@ vec_get(
     }
     else {
       // printf("cleaning chunk \n");
-      if ( ptr_vec->chunk != NULL ) {
+      // will clean vec_buffer only if previous chunk is called
+      // if chunk_num is greater than available chunks then we will not clean vec_buffer
+      if ( ( ptr_vec->chunk != NULL ) && ( chunk_num < ptr_vec->chunk_num ) ) {
         status = vec_clean_chunk(ptr_vec); cBYE(status);
       }
     }
@@ -1074,7 +1076,9 @@ vec_get(
       }
     }
     else { // asking for a chunk ahead of where we currently are
-      go_BYE(-1);
+      status = -1;
+      goto BYE;
+      //go_BYE(-1);
     }
     /*
      * Consider a following use-case
@@ -1417,8 +1421,15 @@ vec_eov(
   // If you don't have a file name as yet, create one. 
   // this is the case when all data fits into one chunk
   if ( !isfile(ptr_vec->file_name) ) {
-    // create randomly generated file name and append to ptr_vec->file_name field
-    status = update_file_name(ptr_vec); cBYE(status);
+    if ( ptr_vec->is_persist == true ) {
+      // create randomly generated file name and append to ptr_vec->file_name field
+      status = update_file_name(ptr_vec); cBYE(status);
+    }
+    else {
+      // No need to flush to file as persist flag is not set
+      // vector elements will be served from internal buffer i.e ptr_vec->chunk
+      goto BYE;
+    }
   }
   status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
       ptr_vec->num_in_chunk, ptr_vec->file_name);
