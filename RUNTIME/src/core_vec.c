@@ -45,6 +45,7 @@ static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
 static uint64_t t_memcpy;            static uint32_t n_memcpy;
 static uint64_t t_memset;            static uint32_t n_memset;
+static uint64_t t_malloc;            static uint32_t n_malloc;
 
 extern luaL_Buffer g_errbuf;
 
@@ -56,17 +57,7 @@ l_memcpy(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_memcpy++;
-#define BASIC
-#ifdef BASIC
   memcpy(dest, src, n);
-#else
-  uint64_t *l_d = (uint64_t *)dest;
-  uint64_t *l_s = (uint64_t *)src;
-  size_t    l_n = n / sizeof(uint64_t);
-  for ( uint32_t i = 0; i < l_n; i++ ) { 
-    *l_d = *l_s++;
-  }
-#endif
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memcpy += delta; }
 }
 
@@ -78,11 +69,21 @@ l_memset(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_memset++;
-  void *x = memset(s, c, n);
+  // void *x = memset(s, c, n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
-  return x;
+  // return x;
 }
 
+static inline void *
+l_malloc(
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
+  void *x = malloc(n);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
+  return x;
+}
 
 void
 vec_reset_timers(
@@ -107,6 +108,7 @@ vec_reset_timers(
   t_flush_buffer = 0;       n_flush_buffer = 0;
   t_memcpy = 0;             n_memcpy = 0;
   t_memset = 0;             n_memset = 0;
+  t_malloc = 0;             n_malloc = 0;
 }
 
 void
@@ -132,6 +134,7 @@ vec_print_timers(
   fprintf(stdout, "1,flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
+  fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
 }
 
 
@@ -236,7 +239,7 @@ vec_get_buf(
   char *chunk = NULL;
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
       l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
@@ -569,7 +572,7 @@ vec_clone(
   memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
-    ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
+    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz);
     return_if_malloc_failed(ptr_new_vec->chunk); 
     l_memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
@@ -1153,7 +1156,7 @@ vec_add_B1(
 {
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -1247,7 +1250,7 @@ vec_add(
   }
 
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
