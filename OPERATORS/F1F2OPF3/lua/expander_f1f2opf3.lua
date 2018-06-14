@@ -39,7 +39,6 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
 
   local first_call = true
   local chunk_idx = 0
-  
   local f3_gen = function(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
@@ -61,8 +60,14 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
       local chunk1 = ffi.cast( qconsts.qtypes[f1:fldtype()].ctype .. "*",  get_ptr(f1_chunk))
       local chunk2 = ffi.cast( qconsts.qtypes[f2:fldtype()].ctype .. "*",  get_ptr(f2_chunk))
       local chunk3 = ffi.cast( qconsts.qtypes[f3_qtype].ctype .. "*",  get_ptr(f3_buf))
-
+      local start_time = qc.RDTSC()
       qc[func_name](chunk1, chunk2, f1_len, chunk3)
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][func_name] then
+        _G['g_time'][func_name] = (stop_time-start_time)
+      else
+        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+      end
     else
       f3_buf = nil
       nn_f3_buf = nil

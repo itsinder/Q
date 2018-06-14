@@ -37,10 +37,10 @@ local function expander_numby(a, nb, optargs)
   local chunk_idx = 0
   local in_ctype  = subs.in_ctype
   local out_ctype = subs.out_ctype
-  local function numby_gen(chnk_num)
-    -- Adding assert on chnk_idx to have sync between expected 
-    -- chnk_num and generator's chnk_idx state
-    assert(chnk_num == chnk_idx)
+  local function numby_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected 
+    -- chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
@@ -48,7 +48,7 @@ local function expander_numby(a, nb, optargs)
       first_call = false
     end
     while true do
-      local a_len, a_chnk, a_nn_chnk = a:chunk(chnk_idx)
+      local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
       if a_len == 0 then
         if chunk_idx == 0 then
           return 0, nil, nil
@@ -60,9 +60,17 @@ local function expander_numby(a, nb, optargs)
     
       local casted_a_chunk = ffi.cast(in_ctype .. " *",  get_ptr(a_chunk))
       local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
+      local start_time = qc.RDTSC()
       local status = qc[func_name](casted_a_chunk, a_len, casted_out_buf, nb, is_safe)
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][func_name] then
+        _G['g_time'][func_name] = (stop_time-start_time)
+      else
+        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+      end
+
       assert(status == 0, "C error in NUMBY")
-      chnk_idx = chnk_idx + 1
+      chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then
         return nb, out_buf, nil
       end

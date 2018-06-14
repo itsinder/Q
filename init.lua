@@ -12,6 +12,7 @@ require "Q/OPERATORS/IDX_SORT/lua/idx_sort"
 require "Q/OPERATORS/MM/lua/mv_mul"
 require "Q/UTILS/lua/save"
 require "Q/UTILS/lua/restore"
+require "Q/UTILS/lua/set_memo"
 require "Q/UTILS/lua/q_shutdown"
 require "Q/UTILS/lua/view_meta"
 require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3"
@@ -38,5 +39,6 @@ require 'Q/QTILS/lua/vvpromote'
 require 'Q/QTILS/lua/fold'
 require 'Q/QTILS/lua/average'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
+_G['g_time'] = {}
 
 return require 'Q/q_export'

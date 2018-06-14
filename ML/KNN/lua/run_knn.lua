@@ -2,6 +2,7 @@ local Q = require 'Q'
 local Scalar = require 'libsclr'
 local classify = require 'Q/ML/KNN/lua/classify_conv'
 local utils = require 'Q/UTILS/lua/utils'
+local Vector = require 'libvec'
 
 local get_train_test_split = function(split_ratio, T, feature_column_indices)
   local Train = {}
@@ -115,6 +116,7 @@ local run_knn = function(optargs)
     local result
     local max
     local index
+    Vector.reset_timers()
     for i = 1, test_sample_count do
       -- predict for inputs
       result = classify(Train, g_vec_train, X[i], optargs)
@@ -122,8 +124,9 @@ local run_knn = function(optargs)
       max, num_val, index = Q.max(result):eval()
       actual_predict_value[i] = index:to_num()
       -- TODO: remove this collectgarbage() call once the rest of Q stabilizes
-      collectgarbage()
+      --collectgarbage()
     end
+    Vector.print_timers()
     local acr = get_accuracy(expected_predict_value, actual_predict_value)
     -- print("Accuracy: " .. tostring(acr))
     accuracy[#accuracy + 1] = acr

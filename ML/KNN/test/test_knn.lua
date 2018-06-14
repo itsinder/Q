@@ -176,6 +176,13 @@ tests.t5 = function()
   local args = {iterations = 1, split_ratio = 0.7, alpha = alpha, exponent = exponent, goal_column_index = goal_column_index}
 
   local avg_accuracy, accuracy_table = run_knn(args)
+  print("====================================")
+  if _G['g_time'] then
+    for i, v in pairs(_G['g_time']) do
+      print(i, tostring(tonumber(v)))
+    end
+  end
+
   print("Average: ", avg_accuracy)
   for i, v in pairs(accuracy_table) do
     print(i, v)

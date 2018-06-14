@@ -98,14 +98,30 @@ local function expander_getk(a, fval, k, optargs)
       assert(qc[sort_fn], "function not found " .. sort_fn)
       sort_buf_val:zero()
       ffi.C.memcpy(casted_sort_buf_val, casted_chunk, len*width)
+      local start_time = qc.RDTSC()
       qc[sort_fn](casted_sort_buf_val, len)
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][sort_fn] then
+        _G['g_time'][sort_fn] = (stop_time-start_time)
+      else
+        _G['g_time'][sort_fn] = _G['g_time'][sort_fn] + (stop_time-start_time)
+      end
+
       --================================
       if ( k < len ) then nY = k else nY = len end
       if ( chunk_idx == 0 )  then
         ffi.C.memcpy(casted_bufX, casted_sort_buf_val, nY*width)
         nX = nY
       else
+        start_time = qc.RDTSC()
         qc[func](casted_bufX, nX, casted_sort_buf_val, nY, casted_bufZ, nZ, ptr_num_in_Z)
+        stop_time = qc.RDTSC()
+        if not _G['g_time'][func] then
+          _G['g_time'][func] = (stop_time-start_time)
+        else
+          _G['g_time'][func] = _G['g_time'][func] + (stop_time-start_time)
+        end
+
         -- copy from bufZ to bufX
         local num_in_Z = ptr_num_in_Z[0]
         ffi.C.memcpy(casted_bufX, casted_bufZ, num_in_Z*width)
