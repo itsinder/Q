@@ -33,7 +33,15 @@ return function (a, x, y, optargs )
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
       local casted_x_chunk = ffi.cast( qconsts.qtypes[x:fldtype()].ctype .. "*",  get_ptr(x_chunk))
       local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
+      local start_time = qc.RDTSC()
       qc[func_name](casted_x_chunk, x_len, casted_struct, idx);
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][func_name] then
+        _G['g_time'][func_name] = (stop_time-start_time)
+      else
+        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+      end
+
       if ( a == "is_next" ) then
         local X = ffi.cast(subs.c_mem_type, reduce_struct)
         if ( tonumber(X[0].is_violation) == 1 ) then 

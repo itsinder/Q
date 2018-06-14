@@ -176,7 +176,7 @@ function lVector.new(arg)
   local nn_file_name
   local has_nulls
   local is_nascent
-  local is_memo = true -- default to true
+  local is_memo = qconsts.is_memo -- referring value from qconsts, default to true
   -- Using env variable Q_DATA_DIR
   -- Passing q_data_dir to create the new vector's bin file in q_data_dir
   local q_data_dir = os.getenv("Q_DATA_DIR")

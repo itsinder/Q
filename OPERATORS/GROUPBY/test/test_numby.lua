@@ -23,7 +23,7 @@ tests.t2 = function()
   local ub = 4
   local range = ub - lb + 1
   local a = Q.rand({ len = len, lb = 0, ub = 4, qtype = "I4"})
-  Q.numby = require 'Q/OPERATORS/SUMBY/lua/expander_numby'
+  Q.numby = require 'Q/OPERATORS/GROUPBY/lua/expander_numby'
   local rslt = Q.numby(a, range)
   assert(type(rslt) == "lVector")
   -- Q.print_csv(rslt)
