@@ -298,7 +298,7 @@ static int l_vec_get_chunk( lua_State *L)
     ret_addr = ptr_cmem->data;
   }
   status = vec_get(ptr_vec, idx, chunk_size, &ret_addr, &ret_len);
-  if ( status < 0 ) { goto BYE; } // asked for too far
+  if ( status == -2 ) { goto BYE; } // asked for too far
   cBYE(status);
   if ( is_malloc ) { 
     // already taken care of 

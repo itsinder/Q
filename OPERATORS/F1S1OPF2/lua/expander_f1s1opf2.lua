@@ -62,7 +62,14 @@
         local casted_ptr_sval = ffi.cast(qconsts.qtypes[f1:fldtype()].ctype .. "*" ,get_ptr(subs.c_mem))
         local casted_f2_buf = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. "*", get_ptr(f2_buf))
         local casted_nn_f2_buf = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f2_buf))
+        local start_time = qc.RDTSC()
         qc[func_name](casted_f1_chunk, casted_nn_f1_chunk, f1_len, casted_ptr_sval, casted_f2_buf, casted_nn_f2_buf)
+        local stop_time = qc.RDTSC()
+        if not _G['g_time'][func_name] then
+          _G['g_time'][func_name] = (stop_time-start_time)
+        else
+          _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+        end
       end
       chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf

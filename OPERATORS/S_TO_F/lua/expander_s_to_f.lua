@@ -43,7 +43,15 @@ return function (a, args)
     else
       local casted_buff = ffi.cast( qconsts.qtypes[out_qtype].ctype .. "*",  get_ptr(buff))
       local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(subs.c_mem))
+      local start_time = qc.RDTSC()
       qc[func_name](casted_buff, chunk_size, casted_struct, lb)
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][func_name] then
+        _G['g_time'][func_name] = (stop_time-start_time)
+      else
+        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+      end
+
       return chunk_size, buff
     end
   end

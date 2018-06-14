@@ -60,7 +60,15 @@ local function expander_numby(a, nb, optargs)
     
       local casted_a_chunk = ffi.cast(in_ctype .. " *",  get_ptr(a_chunk))
       local casted_out_buf = ffi.cast(out_ctype .. "*",  get_ptr(out_buf))
+      local start_time = qc.RDTSC()
       local status = qc[func_name](casted_a_chunk, a_len, casted_out_buf, nb, is_safe)
+      local stop_time = qc.RDTSC()
+      if not _G['g_time'][func_name] then
+        _G['g_time'][func_name] = (stop_time-start_time)
+      else
+        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
+      end
+
       assert(status == 0, "C error in NUMBY")
       chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then
