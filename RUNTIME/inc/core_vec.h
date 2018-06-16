@@ -1,6 +1,7 @@
 #ifndef __VEC_H
 #define __VEC_H
 #include "mmap_types.h"
+#include "cmem.h"
 extern void
 vec_reset_timers(
     void
@@ -153,5 +154,11 @@ vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
     VEC_REC_TYPE *ptr_new_vec,
     const char *const q_data_dir
+    );
+extern int 
+vec_no_memcpy(
+    VEC_REC_TYPE *ptr_vec,
+    CMEM_REC_TYPE *ptr_cmem,
+    size_t chunk_size
     );
 #endif

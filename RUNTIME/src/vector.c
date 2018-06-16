@@ -89,6 +89,34 @@ get_chunk_size(
 }
 LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname);
 int luaopen_libvec (lua_State *L);
+//----------------------------------------
+static int l_vec_no_memcpy( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE  *ptr_vec  = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
+  int chunk_size;
+  status = get_chunk_size(L, &chunk_size);
+  status = vec_no_memcpy(ptr_vec, ptr_cmem, chunk_size); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: l_vec_no_memcpy. ");
+  return 2;
+}
+//-----------------------------------
+static int l_vec_flush_buffer( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE  *ptr_vec  = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  status = flush_buffer(ptr_vec); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: l_vec_flush_buffer. ");
+  return 2;
+}
+//-----------------------------------
 
 //----------------------------------------
 static int l_vec_set_name( lua_State *L) {
@@ -679,6 +707,8 @@ static const struct luaL_Reg vector_methods[] = {
     { "field_size", l_vec_field_size },
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },
+    { "no_memcpy", l_vec_no_memcpy },
+    { "flush_buffer", l_vec_flush_buffer },
     { NULL,          NULL               },
 };
  
@@ -713,69 +743,71 @@ static const struct luaL_Reg vector_functions[] = {
     { "end_write", l_vec_end_write },
     { "print_timers", l_print_timers },
     { "reset_timers", l_reset_timers },
-    { NULL,  NULL         }
-};
+      { "no_memcpy", l_vec_no_memcpy },
+      { "flush_buffer", l_vec_flush_buffer },
+      { NULL,  NULL         }
+  };
 
-/*
-** Implementation of luaL_testudata which will return NULL in case if udata is not of type tname
-** TODO: Check for the appropriate location for this function
-*/
-LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
-  void *p = lua_touserdata(L, ud);
-  if (p != NULL) {  /* value is a userdata? */
-    if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
-      lua_getfield(L, LUA_REGISTRYINDEX, tname);  /* get correct metatable */
-      if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
-        lua_pop(L, 2);  /* remove both metatables */
-        return p;
+  /*
+  ** Implementation of luaL_testudata which will return NULL in case if udata is not of type tname
+  ** TODO: Check for the appropriate location for this function
+  */
+  LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
+    void *p = lua_touserdata(L, ud);
+    if (p != NULL) {  /* value is a userdata? */
+      if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
+        lua_getfield(L, LUA_REGISTRYINDEX, tname);  /* get correct metatable */
+        if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
+          lua_pop(L, 2);  /* remove both metatables */
+          return p;
+        }
       }
     }
+    return NULL;  /* to avoid warnings */
   }
-  return NULL;  /* to avoid warnings */
-}
- 
-/*
-** Open vector library
-*/
-int luaopen_libvec (lua_State *L) {
-  /* Create the metatable and put it on the stack. */
-  luaL_newmetatable(L, "Vector");
-  /* Duplicate the metatable on the stack (We know have 2). */
-  lua_pushvalue(L, -1);
-  /* Pop the first metatable off the stack and assign it to __index
-   * of the second one. We set the metatable for the table to itself.
-   * This is equivalent to the following in lua:
-   * metatable = {}
-   * metatable.__index = metatable
-   */
-  lua_setfield(L, -2, "__index");
+   
+  /*
+  ** Open vector library
+  */
+  int luaopen_libvec (lua_State *L) {
+    /* Create the metatable and put it on the stack. */
+    luaL_newmetatable(L, "Vector");
+    /* Duplicate the metatable on the stack (We know have 2). */
+    lua_pushvalue(L, -1);
+    /* Pop the first metatable off the stack and assign it to __index
+     * of the second one. We set the metatable for the table to itself.
+     * This is equivalent to the following in lua:
+     * metatable = {}
+     * metatable.__index = metatable
+     */
+    lua_setfield(L, -2, "__index");
 
-  /* Register the object.func functions into the table that is at the 
-   * top of the stack. */
+    /* Register the object.func functions into the table that is at the 
+     * top of the stack. */
 
-  /* Set the methods to the metatable that should be accessed via
-   * object:func */
-  luaL_register(L, NULL, vector_methods);
+    /* Set the methods to the metatable that should be accessed via
+     * object:func */
+    luaL_register(L, NULL, vector_methods);
 
-  int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
-  if ( status != 0 ) {
-    WHEREAMI;
-    fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
-    exit(1);
-  } 
-  luaL_getmetatable(L, "Vector");
-  lua_pushstring(L, "Vector");
-  status =  lua_pcall(L, 2, 0, 0);
-  if (status != 0 ) {
-     WHEREAMI; 
-     fprintf(stderr, "Type Registering failed: %s\n", lua_tostring(L, -1));
-     exit(1);
-  }
+    int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
+    if ( status != 0 ) {
+      WHEREAMI;
+      fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
+      exit(1);
+    } 
+    luaL_getmetatable(L, "Vector");
+    lua_pushstring(L, "Vector");
+    status =  lua_pcall(L, 2, 0, 0);
+    if (status != 0 ) {
+       WHEREAMI; 
+       fprintf(stderr, "Type Registering failed: %s\n", lua_tostring(L, -1));
+       exit(1);
+    }
 
-  /* Register the object.func functions into the table that is at the
-   * top of the stack. */
-  lua_createtable(L, 0, 0);
-  luaL_register(L, NULL, vector_functions);
-  // Why is return code not 0
-  return 1;
+    /* Register the object.func functions into the table that is at the
+     * top of the stack. */
+    lua_createtable(L, 0, 0);
+    luaL_register(L, NULL, vector_functions);
+    // Why is return code not 0
+    return 1;
 }

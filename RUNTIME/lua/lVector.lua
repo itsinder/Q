@@ -143,6 +143,20 @@ function lVector:is_eov()
   return casted_base_vec.is_eov
 end
 
+function lVector:no_memcpy(cmem)
+  if ( qconsts.debug ) then self:check() end
+  local status = Vector.no_memcpy(self._base_vec, cmem)
+  return self
+end
+
+function lVector:flush_buffer()
+  if ( qconsts.debug ) then self:check() end
+  local status = Vector.flush_buffer(self._base_vec)
+  return self
+end
+
+
+
 function lVector.virtual_new(arg)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector

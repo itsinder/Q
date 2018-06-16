@@ -61,7 +61,7 @@ l_memcpy(
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memcpy += delta; }
 }
 
-static inline void *
+static inline void 
 l_memset(
     void *s, 
     int c, 
@@ -1248,6 +1248,13 @@ vec_add(
     status = vec_add_B1(ptr_vec, addr, len); cBYE(status);
     goto BYE; 
   }
+  //---------------------------------------
+  if ( ptr_vec->is_no_memcpy ) {
+    ptr_vec->num_in_chunk = len;
+    ptr_vec->num_elements += len;
+    goto BYE;
+  }
+  //---------------------------------------
 
   if ( ptr_vec->chunk == NULL ) { 
     ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
@@ -1440,6 +1447,28 @@ vec_get_name(
 }
 
 int
+vec_no_memcpy(
+    VEC_REC_TYPE *ptr_vec,
+    CMEM_REC_TYPE *ptr_cmem,
+    size_t chunk_size
+    )
+{
+  int status = 0;
+  if ( ptr_vec->chunk != NULL ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( ptr_vec->file_size != 0 ) { go_BYE(-1); }
+  // TODO P1 What other checks?
+  // TODO Check cmem number of elements
+  ptr_vec->chunk = ptr_cmem->data;
+  ptr_vec->chunk_sz = ptr_cmem->size;
+  ptr_vec->chunk_size = chunk_size; 
+  ptr_vec->is_no_memcpy = true;
+  ptr_cmem->is_foreign = true;
+BYE:
+  return status;
+
+}
+int
 vec_eov(
     VEC_REC_TYPE *ptr_vec
     )
@@ -1466,9 +1495,15 @@ vec_eov(
     // create randomly generated file name and append to ptr_vec->file_name field
     status = update_file_name(ptr_vec); cBYE(status);
   }
-  status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-      ptr_vec->num_in_chunk, ptr_vec->file_name);
-  cBYE(status);
+  if ( ptr_vec->num_in_chunk == 0 ) {
+    // in case of no_memcpy, flush buffer might have been called already
+    if ( !ptr_vec->is_no_memcpy ) { go_BYE(-1); }
+  }
+  else {
+    status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+        ptr_vec->num_in_chunk, ptr_vec->file_name);
+    cBYE(status);
+  }
   ptr_vec->file_size = get_file_size(ptr_vec->file_name);
   // Commenting this out ptr_vec->is_nascent = false;
 
