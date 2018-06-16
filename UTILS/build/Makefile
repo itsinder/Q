@@ -32,6 +32,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua clean
 	make -C ${BASE_PATH}/OPERATORS/GETK/lua clean
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua clean
+	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -89,6 +90,9 @@ getk:
 
 index:
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
+
+unique:
+	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/
   
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
@@ -147,6 +151,7 @@ q_operators: f1f2opf3 \
 	where \
 	sumby  \
 	index \
+	unique \
 	getk
 	echo "all done for operators"
 

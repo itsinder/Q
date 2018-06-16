@@ -1,63 +1,82 @@
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local lVector  = require 'Q/RUNTIME/lua/lVector'
+local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
-local Scalar    = require 'libsclr'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
---TODO: Modification in expander are yet to be done
-local function expander_unique(op, a, optargs)
+local function expander_unique(op, a)
   -- Verification
   assert(op == "unique")
   assert(type(a) == "lVector", "a must be a lVector ")
   
   local sp_fn_name = "Q/OPERATORS/UNIQUE/lua/unique_specialize"
   local spfn = assert(require(sp_fn_name))
+  
+--  -- TODO: why meta.aux???
+--  -- Check min and max value from bit vector metadata
+--  local meta = a:meta()
+--  if meta.aux and meta.aux["min"] and meta.aux["max"] then
+--    if meta.aux["min"] == 1 and meta.aux["max"] == 1 then
+--      return a
+--    elseif meta.aux["min"] == 0 and meta.aux["max"] == 0 then
+--      return nil
+--    end
+--  end
 
   local status, subs, tmpl = pcall(spfn, a:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
-
-  local ctype = qconsts.qtypes[a:fldtype()].ctype
-  local chunk_index = 0
   
+  local sz_out          = qconsts.chunk_size 
+  local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
   local out_buf = nil
-  local out_size = qconsts.chunk_size
+  local first_call = true
+  local n_out = nil
+  local aidx  = nil
+  local a_chunk_idx = 0
+  
   local function unique_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
-    assert(chunk_num == chunk_index)
-    out_buf = cmem.new()
-    local rslt = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
-    rslt = ffi.cast("int64_t *", rslt)
-    rslt[0] = -1 -- initialize to some invalid value
-    -- TODO local bval = get b value from Sclar b
-    local bval = b:to_num()
-    while ( true ) do
-      local a_len, a_chunk, nn_a_chunk = a:chunk(chunk_index)
-      -- vec_pos indicates how many elements of vector we have consumed
-      local vec_pos = chunk_index * qconsts.chunk_size
-      if ( not a_len ) or ( a_len == 0 ) then 
-        -- end of data
-        break
-      end
-      local cst_a_chunk = ffi.cast(ctype .. " *",  get_ptr(a_chunk))
-      local status = qc[func_name](cst_a_chunk, a_len, bval, rslt, vec_pos)
-      assert(status == 0, "C error in INDEX")
-      if tonumber(rslt[0]) ~= -1 then -- search is over
-        break
-      end
-      chunk_index = chunk_index + 1
+    --assert(chunk_num == a_chunk_idx)
+    if ( first_call ) then 
+      -- allocate buffer for output
+      out_buf = assert(cmem.new(sz_out_in_bytes))
+
+      n_out = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
+      n_out = ffi.cast("uint64_t *", n_out)
+
+      aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
+      aidx = ffi.cast("uint64_t *", aidx)
+      aidx[0] = 0
+  
+      first_call = false
     end
-    if tonumber(rslt[0]) ~= -1  then
-      return tonumber(rslt[0])
-    else
-      return nil
-    end
+    
+    -- Initialize num in out_buf to zero
+    n_out[0] = 0
+    
+    repeat 
+      local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      if a_len == 0 then 
+        return tonumber(n_out[0]), out_buf, nil 
+      end
+      assert(a_nn_chunk == nil, "Unique vector cannot have nulls")
+      
+      local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
+      local casted_out_buf = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(out_buf))
+      local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out)
+      assert(status == 0, "C error in UNIQUE")
+      if ( tonumber(aidx[0]) == a_len ) then
+        a_chunk_idx = a_chunk_idx + 1
+        aidx[0] = 0
+      end
+    until ( tonumber(n_out[0]) == sz_out )
+    return tonumber(n_out[0]), out_buf, nil
   end
-  return index_gen(chunk_index)
+  return lVector( { gen = unique_gen, has_nulls = false, qtype = a:qtype() } )
 end
 
-return expander_index
+return expander_unique

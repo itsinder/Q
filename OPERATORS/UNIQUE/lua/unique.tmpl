@@ -1,0 +1,57 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include "_get_bit_u64.h"
+extern int
+${fn}(
+      const ${a_ctype} * restrict A,
+      uint64_t nA,
+      uint64_t *ptr_aidx,
+      ${a_ctype} *C,
+      uint64_t nC,
+      uint64_t *ptr_num_in_C
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(
+      const ${a_ctype} * restrict A,
+      uint64_t nA,
+      uint64_t *ptr_aidx,
+      ${a_ctype} *C,
+      uint64_t nC,
+      uint64_t *ptr_num_in_C
+      )
+{
+  int status = 0;
+  
+  if ( A == NULL ) { go_BYE(-1); }
+  if ( nA == 0 ) { go_BYE(-1); }
+  if ( ptr_num_in_C == NULL ) { go_BYE(-1); }
+  if ( ptr_aidx == NULL ) { go_BYE(-1); }
+
+  uint64_t num_in_C = *ptr_num_in_C;
+  uint64_t aidx = *ptr_aidx;
+  if ( num_in_C > nC ) { go_BYE(-1); }
+  
+  for ( ; aidx < nA-1; aidx++ ) { 
+    if ( num_in_C == nC ) { break; }
+    if ( A[aidx] != A[aidx+1] ) {
+      C[num_in_C++] = A[aidx];
+      }
+    }
+  // Include last element
+  C[num_in_C++] = A[nA-1]; 
+  *ptr_num_in_C = num_in_C;
+  // added 1 to aidx due to for loop condition( aidx < nA-1 ) 
+  *ptr_aidx     = aidx+1;
+BYE:
+  return status;
+}
+   ]]
+}
