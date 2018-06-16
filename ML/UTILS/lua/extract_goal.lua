@@ -11,22 +11,22 @@ local function extract_goal(
   assert(type(T) == "table")
   assert(type(goal) == "string")
   local t = {}
-  local g
-  local qtype 
+  local g = nil
+  local qtype = nil
   local m = 0
   local n = 0
   for k, v in pairs(T) do 
-    if ( not qtype ) then
-      qtype = v:fldtype()
-      assert((qtype == "F4" ) or ( qtype == "F8"))
-      n = v:length()
-    else
-      assert(qtype == v:fldtype())
-      assert(n     == v:length())
-    end
     if ( k == goal ) then 
       g = v
     else
+      if ( not qtype ) then
+        qtype = v:fldtype()
+        assert((qtype == "F4" ) or ( qtype == "F8"))
+        n = v:length()
+      else
+        assert(qtype == v:fldtype())
+        assert(n     == v:length())
+      end
       t[#t+1] = v
       m = m + 1
     end

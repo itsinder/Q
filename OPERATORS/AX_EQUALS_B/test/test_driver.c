@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <lapacke.h>
-#include "macros.h"
+#include "q_macros.h"
 #include "matrix_helpers.h"
 #include "positive_solver.h"
 
