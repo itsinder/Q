@@ -17,19 +17,22 @@ local goal       = "pass"
 local num_iters  = 1000
 -- STOP : modifications for different data sets
 --=================================================
---[[
-for i = 1, 100 do
+local n_trials = 1000
+local first_betas = make_betas(train_file, meta, optargs, goal, num_iters)
+
+for i = 1, n_trials do
   local betas = make_betas(train_file, meta, optargs, goal, num_iters)
-  Q.print_csv(betas)
+  assert(Q.vvseq(betas, first_betas, 0.01), "Failure on " .. i )
+  print(i)
 end
-assert(nil, "PREMATURE")
---]]
 
 local betas = Q.mk_col({ 1.5046, -4.0777}, "F8")
 
-for i = 1, 1000 do 
+n_trials = 100000
+for i = 1, n_trials do 
   local predict1 = require 'Q/ML/LOGREG/lua/predict1'
   local x = Q.mk_col({ 2, 1 }, "F4")
   local prob = predict1(betas, x)
+  assert((( prob <= 0.2556884473407 ) and ( prob >= 0.2556884473405 ) ))
   print(i, prob)
 end

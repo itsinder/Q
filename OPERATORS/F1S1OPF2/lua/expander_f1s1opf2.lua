@@ -5,6 +5,7 @@
   local is_in   = require 'Q/UTILS/lua/is_in'
   local cmem	= require 'libcmem'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
+  local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
   local function expander_f1s1opf2(a, f1, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
@@ -17,10 +18,8 @@
       assert(type(optargs) == "table")
     end
     if ( y ) then 
+      y = to_scalar(y, f1:fldtype())
       --y not defined if no scalar like in incr, decr, exp, log
-      local ytype = type(y)
-      assert(is_in(ytype, {"Scalar", "number", "string"}), 
-        "scalar must be Scalar/string/number")
     end
     --==   Special case of no-op for convert 
     if ( ( a == "convert" ) and ( f1:fldtype() == y ) ) then
