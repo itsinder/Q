@@ -1,27 +1,32 @@
-local Q = require 'Q'
+local Q        = require 'Q'
+local Scalar  = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local function lr_logit(x)
-  -- Given x, return (1) e^x/(1+e^x) and (2) e^x/((1+e^x)^2)
+  -- Given x, return (1) 
+  -- /(1+e^(-1*x)) and 
+  -- (2) 1/((1+e^x)^2)
 
   assert(x)
   assert(type(x) == "lVector", "input must be a column")
   local fldtype = x:fldtype()
   assert( ( fldtype == "F4" ) or ( ( fldtype == "F8" ) ) )
 
-  local t1 = Q.exp(x) -- :memo(0)
-  local t2 = Q.vsadd(t1, 1) -- :memo(0)
-  local t3 = Q.vvdiv(t1, t2)
-  local t4 = Q.vvdiv(t3, t2)
+  local t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
+  local t2 = Q.exp(t1):memo(false)
+  local t3 = Q.incr(t2):memo(false)
+  local t4 = Q.sqr(t3):memo(false)
+  local logit  = Q.reciprocal(t3)
+  local logit2 = Q.reciprocal(t4)
 
   local cidx = 0  -- chunk index
-  local t3_len = 0
-  local t4_len = 0
+  local len = 0
+  local len2 = 0
   repeat 
-    t3_len = t3:chunk(cidx)
-    t4_len = t4:chunk(cidx)
-    assert(t3_len == t4_len)
+    len  = logit:chunk(cidx)
+    len2 = logit2:chunk(cidx)
+    assert(len == len2)
     cidx = cidx + 1
-  until ( t3_len == 0 )
-  return t3, t4
+  until ( len == 0 )
+  return logit, logit2
 end
 return lr_logit

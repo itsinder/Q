@@ -1,0 +1,48 @@
+\section{Reducing memory scans}
+
+\subsection{Fold}
+
+
+\subsection{Common sub-expression elimination}
+
+As discussed in Section~\ref{XXXX}, the following expressions need ot be
+calculated as part of the search process
+\begin{equation}
+\label{logit}
+  \frac{1}{1 + e^{-x}}
+\end{equation}
+\begin{equation}
+\label{logit2}
+    \frac{1}{(1 + e^{-x})^2}
+\end{equation}
+
+This is written in Q as follows
+\begin{verbatim}
+Q.set_memo(false)
+t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
+t2 = Q.exp(t1):memo(false)
+t3 = Q.incr(t2):memo(false)
+t4 = Q.sqr(t3):memo(false)
+logit  = Q.reciprocal(t3)
+logit2 = Q.reciprocal(t4)
+\end{verbatim}
+
+However, notice that using the above code introduces a subtle but critical bug
+when the number of elements in \(x\) exceeds the chunk size.
+If we were to call {\tt eval()} on {\tt logit}, then we would end up consuming
+sucessive chunks of {\tt t3}. Now, if we were to call {\tt eval()} on {\tt
+logit2}, we would fail when requesting the first chunk of {\tt t3}, since it has
+{\bf not} been memo-ized. One solution to this problem is to ensure that {\tt
+logit} and {\tt logit2} are evaluated in lock-step as shown below.
+\begin{verbatim} 
+  logit:set_memo(true)
+  logit2:set_memo(true)
+  cidx = 0  -- chunk index
+  repeat 
+    len  = logit:chunk(cidx)
+    logit2:chunk(cidx)
+    cidx = cidx + 1
+  until ( len == 0 )
+  return logit, logit2
+\end{verbatim}
+
