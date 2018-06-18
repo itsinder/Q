@@ -37,6 +37,7 @@ local function expander_unique(op, a)
   local n_out = nil
   local aidx  = nil
   local a_chunk_idx = 0
+  local last_unq_element = 0
   
   local function unique_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
@@ -51,6 +52,9 @@ local function expander_unique(op, a)
       aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
+      
+      last_unq_element = assert(get_ptr(cmem.new(ffi.sizeof(subs.a_ctype))))
+      last_unq_element = ffi.cast(subs.a_ctype .. " *", last_unq_element)
   
       first_call = false
     end
@@ -60,6 +64,7 @@ local function expander_unique(op, a)
     
     repeat 
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      
       if a_len == 0 then 
         return tonumber(n_out[0]), out_buf, nil 
       end
@@ -67,7 +72,7 @@ local function expander_unique(op, a)
       
       local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
       local casted_out_buf = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out)
+      local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out, last_unq_element, a_chunk_idx)
       assert(status == 0, "C error in UNIQUE")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1

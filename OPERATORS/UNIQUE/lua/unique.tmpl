@@ -11,7 +11,9 @@ ${fn}(
       uint64_t *ptr_aidx,
       ${a_ctype} *C,
       uint64_t nC,
-      uint64_t *ptr_num_in_C
+      uint64_t *ptr_num_in_C,
+      ${a_ctype} * last_unq_element,
+      uint64_t idx
       );
    ]],
    definition = [[
@@ -25,7 +27,9 @@ ${fn}(
       uint64_t *ptr_aidx,
       ${a_ctype} *C,
       uint64_t nC,
-      uint64_t *ptr_num_in_C
+      uint64_t *ptr_num_in_C,
+      ${a_ctype} * last_unq_element,
+      uint64_t idx
       )
 {
   int status = 0;
@@ -37,7 +41,16 @@ ${fn}(
 
   uint64_t num_in_C = *ptr_num_in_C;
   uint64_t aidx = *ptr_aidx;
+  ${a_ctype} last_unique_element = *last_unq_element;
   if ( num_in_C > nC ) { go_BYE(-1); }
+  
+  if ( idx != 0 ) {
+    for ( ; aidx < nA-1; aidx++) {
+      if ( A[aidx] != last_unique_element ) {
+        break;
+      }
+    }
+  }
   
   for ( ; aidx < nA-1; aidx++ ) { 
     if ( num_in_C == nC ) { break; }
@@ -46,10 +59,13 @@ ${fn}(
       }
     }
   // Include last element
-  C[num_in_C++] = A[nA-1]; 
+  if(A[nA-1] != last_unique_element) { 
+    C[num_in_C++] = A[nA-1];
+  }
   *ptr_num_in_C = num_in_C;
   // added 1 to aidx due to for loop condition( aidx < nA-1 ) 
   *ptr_aidx     = aidx+1;
+  *last_unq_element = A[nA-1];
 BYE:
   return status;
 }
