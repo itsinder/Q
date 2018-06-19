@@ -6,7 +6,7 @@
 #include "q_macros.h"
 
 int
-unique_I4(
+unique_func_I4(
       const int32_t * restrict A,
       uint64_t nA,
       uint64_t *ptr_aidx,
@@ -67,7 +67,7 @@ int main() {
   }
 
   // Call to unique
-  status = unique_I4(in_buf, size, aidx, out_buf, size, num_in_out);
+  status = unique_func_I4(in_buf, size, aidx, out_buf, size, num_in_out);
 
   printf("Unique elements in out_buf = %ld\n", *num_in_out);
   for ( int i = 0; i < *num_in_out; i++ ) {
