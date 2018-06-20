@@ -35,5 +35,6 @@ typedef struct _vec_rec_type {
   char *chunk;
   uint32_t chunk_sz; // number of bytes allocated for chunk
   bool is_virtual; // indicates whether vector is virtual or not
+  bool is_no_memcpy; // true=> we are trying to reduce memcpy
 } VEC_REC_TYPE;
 #endif

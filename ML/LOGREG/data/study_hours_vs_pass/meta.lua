@@ -1,4 +1,4 @@
 return {
   {name = "hours", qtype = "F4"},
-  {name = "pass", qtype = "I1"},
+  {name = "pass",  qtype = "I4"},
 }

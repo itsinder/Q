@@ -1,5 +1,6 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
+local Scalar = require 'libsclr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local file_name = "profile_result.txt"
@@ -10,33 +11,43 @@ for i = 1, len do
   in_table[i] = i
 end
 
-local col1 = Q.mk_col(in_table, "I4")
-local col2 = Q.mk_col(in_table, "I4")
+local col1 = Q.mk_col(in_table, "I4"):set_name("col1")
+local col2 = Q.mk_col(in_table, "I4"):set_name("col2")
+local col3 = Q.vsmul(col1, Scalar.new(2, "I4")):eval()
+local vec_meta = col1:meta()
 
 local qc = require 'Q/UTILS/lua/q_core'
 local start_time, stop_time, time
-start_time = qc.get_time_usec()
 
 Vector.reset_timers()
-for i = 1, 5000 do
-  local x = Q.vvadd(col1, col2):memo(false)
-  local vvadd_res = x:eval()
+local dbg = true
+start_time = qc.get_time_usec()
+for i = 1, 10000000 do
+  local x = Q.vvadd(col1, col2):memo(false):set_name("vvadd_out")
+  if ( dbg ) then 
+    local n1, n2 = Q.sum(x):eval()
+    assert(n1:to_num() == 2 * len * (len+1) / 2)
+  else
+    x:eval()
+  end
   --[[
   if i % 50 == 0 then
     collectgarbage()
   end
   ]]
 end
+stop_time = qc.get_time_usec()
 Vector.print_timers()
 
-stop_time = qc.get_time_usec()
 print("vvadd total execution time : " .. tostring(tonumber(stop_time-start_time)/1000000))
 
 print("=========================")
 
 if _G['g_time'] then
-  for i, v in pairs(_G['g_time']) do
-    print(i, tostring(tonumber(v)/1000000))
+  for k, v in pairs(_G['g_time']) do
+    local niters  = _G['g_ctr'][k] or "unknown"
+    local ncycles = tonumber(v)
+    print("0," .. k .. "," .. niters .. "," .. ncycles)
   end
 end
 
