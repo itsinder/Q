@@ -81,5 +81,3 @@ local function alt_voting(
   output:end_write()
   end
 return alt_voting
-
-
