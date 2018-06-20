@@ -16,7 +16,7 @@ local qc		= require 'Q/UTILS/lua/q_core'
 -- so, if in any file, lVector is required and followed by q_core require then
 -- it gives error.
 -- For now, require q_core in lVector code
---[[
+--[==[
 local vec_struct = [[
 typedef struct _vec_rec_type {
   char field_type[3+1];
@@ -45,6 +45,7 @@ typedef struct _vec_rec_type {
   bool is_virtual; // indicates whether vector is virtual or not
 } VEC_REC_TYPE;
 ]]
+--]==]
 
 -- pcall(ffi.cdef, vec_struct)
 --====================================
@@ -277,6 +278,7 @@ function lVector.new(arg)
       Vector.set_name(vector._nn_vec, "nn_" .. arg.name)
     end
   end
+  vector.siblings = {} -- no conjoined vectors
   return vector
 end
 
@@ -600,9 +602,16 @@ function lVector:eval()
     local chunk_num = self:chunk_num() 
     local base_len, base_addr, nn_addr 
     repeat
+      print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
+      -- for conjoined vectors
+      if self.siblings then
+        for _, v in pairs(self.siblings) do
+          v:chunk(chunk_num)
+        end
+      end
       chunk_num = chunk_num + 1 
-    until base_len ~= qconsts.chunk_size
+    until ( base_len ~= qconsts.chunk_size )
     -- if ( self:length() > 0 ) then self:eov() end
     -- Changed above to following
     if ( self:length() == 0 ) then 

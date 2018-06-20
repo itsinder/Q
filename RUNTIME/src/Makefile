@@ -19,7 +19,7 @@ clean:
 ../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
 	make -C ../../OPERATORS/PRINT/lua/
 
-libvec.so: libvec.so libcmem.so
+libvec.so: libcmem.so
 	gcc ${QC_FLAGS} $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \

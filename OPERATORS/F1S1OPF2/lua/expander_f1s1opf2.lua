@@ -30,6 +30,7 @@
     assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
     assert(qc[func_name], "Missing symbol " .. func_name)
+    print("XXXXXXX ", func_name)
     local f2_qtype = assert(subs.out_qtype)
     local f2_width = qconsts.qtypes[f2_qtype].width
     if f2_qtype == "B1" then f2_width = 1 end -- over count okay

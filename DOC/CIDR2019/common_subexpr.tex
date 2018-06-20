@@ -1,11 +1,38 @@
 \section{Reducing memory scans}
 
 \subsection{Fold}
+Consider the case where we want to perform many different reductions (e.g., min,
+max, sum, \ldots) over the same vector. To avoid several scans over the memory,
+it is better to evaluate the vector a chunk at a time, perform all the
+reductions, store the partial results and then repeat over successive chunks.
+Finding the min, max, sum of vector \(w\) is written as 
+\begin{verbatim}
+x, y, z = Q.fold({ "sum", "min", "max" }, w)
+\end{verbatim}
+where the fold operator is 
+\begin{verbatim}
+-- f_to_s is a table consisting of all reducers registered with Q
+local f_to_s = require 'Q/OPERATORS/F_TO_S/lua/_f_to_s'
+local function fold( fns, vec)
+  local status
+  local gens = {}
+  -- setup reducers for each input 
+  for i, v in ipairs(fns) do gens[i] = f_to_s[v](vec) end
+  -- for each chunk, evaluate reducer on that chunk
+  repeat 
+    for i, v in ipairs(fns) do status = gens[i]:next() end 
+  until not status
+  -- return results for each reducer in return_vals
+  local return_vals = {}
+  for i, v in ipairs(gens) do return_vals[i] = gens[i]:eval() end
+  return unpack(return_vals)
+end
+\end{verbatim}
 
 
 \subsection{Common sub-expression elimination}
 
-As discussed in Section~\ref{XXXX}, the following expressions need ot be
+As discussed in Section~\ref{XXXX}, the following expressions need to be
 calculated as part of the search process
 \begin{equation}
 \label{logit}
@@ -15,34 +42,56 @@ calculated as part of the search process
 \label{logit2}
     \frac{1}{(1 + e^{-x})^2}
 \end{equation}
-
-This is written in Q as follows
+The straight-forward implementation uses existing templates for the
+data pattern of the form ``\(y \leftarrow f(x)\)'' to create custom
+operators {\tt logit} and {\tt logit2}.  Therefore, the simplest implementation
+would be
+\begin{verbatim}
+y = Q.logit(x); z = Q.logit2(x)
+\end{verbatim}
+However, that leads to a lot
+of redundant computations.  This can be eliminated as follows
 \begin{verbatim}
 Q.set_memo(false)
 t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
 t2 = Q.exp(t1):memo(false)
 t3 = Q.incr(t2):memo(false)
 t4 = Q.sqr(t3):memo(false)
-logit  = Q.reciprocal(t3)
-logit2 = Q.reciprocal(t4)
+y  = Q.reciprocal(t3)
+z  = Q.reciprocal(t4)
 \end{verbatim}
 
-However, notice that using the above code introduces a subtle but critical bug
-when the number of elements in \(x\) exceeds the chunk size.
-If we were to call {\tt eval()} on {\tt logit}, then we would end up consuming
-sucessive chunks of {\tt t3}. Now, if we were to call {\tt eval()} on {\tt
-logit2}, we would fail when requesting the first chunk of {\tt t3}, since it has
-{\bf not} been memo-ized. One solution to this problem is to ensure that {\tt
-logit} and {\tt logit2} are evaluated in lock-step as shown below.
+However, notice that using the above code introduces a subtle but
+critical bug when the number of elements in \(x\) exceeds the chunk
+size.  If we were to call {\tt eval()} on \(y\), then we would
+end up consuming sucessive chunks of \(t_3\). Now, if we were to call
+{\tt eval()} on \(z\), we would fail when requesting the first
+chunk of \(t_3\), since it has {\bf not} been memo-ized. One solution
+is to ensure that \(y\) and \(z\) are evaluated in lock-step, after they have
+been created, as shown below.
 \begin{verbatim} 
-  logit:set_memo(true)
-  logit2:set_memo(true)
+  y:set_memo(true); z:set_memo(true) -- memo-ize the output vectors
   cidx = 0  -- chunk index
   repeat 
-    len  = logit:chunk(cidx)
-    logit2:chunk(cidx)
+    ly = y:chunk(cidx)
+    lz = z:chunk(cidx)
+    assert(ly == lz)
     cidx = cidx + 1
-  until ( len == 0 )
-  return logit, logit2
+  until ( ly == 0 )
 \end{verbatim}
 
+\subsection{Conjoined vectors}
+
+The solution of Section~\ref{XXX}, while correct, is inelegant and requires
+\(y\) and \(z\) to be memo-ized.
+We would prefer that the Q programmer to be able to
+inform the system that \(y\) and \(z\) need to be evaluated in lock-step 
+and not have to write the {\tt repeat} loop shown above. This leads to the
+following solution
+
+\begin{verbatim}
+x:set_memo(false); y:set_memo(false);  -- no memo-izing needed
+Q:conjoin({x, y}) -- indicate that they need to be evaluated together
+x:eval() -- evaluate x when needed
+assert(y:is_eov()) -- y would have been evaluated as a consequence of x
+\end{verbatim}

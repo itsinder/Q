@@ -69,9 +69,8 @@ l_memset(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_memset++;
-  // void *x = memset(s, c, n);
+  void *x = memset(s, c, n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
-  // return x;
 }
 
 static inline void *
@@ -988,10 +987,8 @@ vec_get(
   char *ret_addr = NULL;
   uint64_t ret_len  = 0;
   char *X = NULL; uint64_t nX = 0;
-  if ( len == 0 ) { 
-    // Providing len == 0 => vector must be materialized, we want everything
-    if ( !ptr_vec->is_eov ) { go_BYE(-1); }
-  }
+  // If len == 0 => vector must be materialized, we want everything
+  if ( ( len == 0 ) && ( !ptr_vec->is_eov ) ) { go_BYE(-1); }
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
   // from 64 = (67 -3) position. In other words, if you wanted
@@ -1007,10 +1004,11 @@ vec_get(
   uint32_t chunk_num = idx / ptr_vec->chunk_size;
   uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
   if ( ( ptr_vec->is_nascent == true) && ( ptr_vec->is_eov == true ) ) { 
-    // Check if required chunk is the last chunk and chunk is not yet cleaned
-    if ( chunk_num == ptr_vec->chunk_num && ptr_vec->chunk != NULL ) {
+    // Can we satisfy from current chunk? 
+    // Yes if required chunk is current chunk and chunk is not yet cleaned
+    if ( ( chunk_num == ptr_vec->chunk_num ) && 
+        ( ptr_vec->chunk != NULL ) ) {
       // printf("Serving request from in-memory buffer\n");
-      // Serve request from buffer
       if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
       uint32_t offset;
       if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
@@ -1033,15 +1031,32 @@ vec_get(
     }
     else {
       // printf("cleaning chunk \n");
+      /* TODO P1: Think about why this is necessary
       if ( ptr_vec->chunk != NULL ) {
         status = vec_clean_chunk(ptr_vec); cBYE(status);
       }
+      */
+    }
+    if ( ptr_vec->is_memo == false ) { 
+      printf(" we have no hope of serving this chunk\n");
+      *ptr_ret_addr = NULL;
+      *ptr_ret_len  = 0;
+      status = -2;
+      goto BYE;
     }
   }
   if ( ptr_vec->is_nascent == false ) {
     switch ( ptr_vec->open_mode ) {
       case 0 :
         if ( ! ptr_vec->is_virtual ) {
+          // TODO P2: Delete folllowing check
+          // Should not be setting file_name when no file created
+          if ( isdir(ptr_vec->file_name) ) { 
+            printf("XXXXX directory not file\n");
+            go_BYE(-1); 
+          }
+          if ( ptr_vec->file_size == 0 ) { go_BYE(-1); }
+          // TODO P2: Delete above
           status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
           cBYE(status);
           ptr_vec->map_addr = X;
