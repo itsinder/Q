@@ -282,6 +282,18 @@ function lVector.new(arg)
   return vector
 end
 
+function lVector:set_sibling(x)
+  assert(type(x) == "lVector")
+  local exists = false
+  for k, v in ipairs(self.siblings) do
+    if ( x == v ) then
+      exists = true
+    end
+  end
+  if ( not exists ) then
+    self.siblings[#self.siblings+1] = x
+  end
+end
 function lVector:persist(is_persist)
   local base_status = true
   local nn_status = true
@@ -602,11 +614,12 @@ function lVector:eval()
     local chunk_num = self:chunk_num() 
     local base_len, base_addr, nn_addr 
     repeat
-      print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
+      -- print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
       -- for conjoined vectors
       if self.siblings then
-        for _, v in pairs(self.siblings) do
+        for k, v in pairs(self.siblings) do
+          print("Getting chunk for conjoined vector " .. k)
           v:chunk(chunk_num)
         end
       end

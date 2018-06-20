@@ -1038,7 +1038,7 @@ vec_get(
       */
     }
     if ( ptr_vec->is_memo == false ) { 
-      printf(" we have no hope of serving this chunk\n");
+      // printf(" we have no hope of serving this chunk\n");
       *ptr_ret_addr = NULL;
       *ptr_ret_len  = 0;
       status = -2;
@@ -1135,7 +1135,11 @@ vec_get(
       }
     }
     else { // asking for a chunk ahead of where we currently are
-      go_BYE(-1);
+      // printf(" we have no hope of serving this chunk\n");
+      *ptr_ret_addr = NULL;
+      *ptr_ret_len  = 0;
+      status = -2;
+      goto BYE;
     }
     /*
      * Consider a following use-case

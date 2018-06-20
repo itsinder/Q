@@ -26,6 +26,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
   end 
   -- STOP : Dynamic compilation
   assert(qc[func_name], "Symbol not available" .. func_name)
+  print("XXXXXXX ", func_name)
   local f3_qtype = assert(subs.out_qtype)
   local f3_width = qconsts.qtypes[f3_qtype].width
   f3_width = f3_width or 1 -- to account for B1 and such types

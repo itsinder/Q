@@ -1,11 +1,26 @@
-\section{Reducing memory scans}
+\section{Choreographing computations}
+
+One of the main ways by which large data systems are optimized is minimizing the
+amount of data that is moved around, as is reflected by the large body of work in
+both academia and industry around optimzing compilers. 
+
+Q takes a fundamentally different approach. It is our belief that the
+choreography of computations is best left to the database programmer. This is
+possible if the database programmer has (i) some understanding of the underyling
+system architecture and (ii) relatively simple knobs to influence the run time
+system.  In this section, we use a number of examples to illustrate this point.
+
 
 \subsection{Fold}
 Consider the case where we want to perform many different reductions (e.g., min,
-max, sum, \ldots) over the same vector. To avoid several scans over the memory,
-it is better to evaluate the vector a chunk at a time, perform all the
-reductions, store the partial results and then repeat over successive chunks.
-Finding the min, max, sum of vector \(w\) is written as 
+max, sum, \ldots) over the same vector. The simple way to do this is
+\begin{verbatim}
+x = Q.sum(w); y = Q.min(w); z = Q.max(w)
+\end{verbatim}
+However, this necessitates several scans over the vector \(w\). It is more
+efficient to evaluate the vector \(w\) a chunk at a time, perform all the
+reductions on the chunk, store the partial results and then repeat over
+successive chunks. So, we can re-write the above as 
 \begin{verbatim}
 x, y, z = Q.fold({ "sum", "min", "max" }, w)
 \end{verbatim}
@@ -32,8 +47,9 @@ end
 
 \subsection{Common sub-expression elimination}
 
-As discussed in Section~\ref{XXXX}, the following expressions need to be
-calculated as part of the search process
+As part of the gradient descent algorithm used in logistic regression
+(Section~\ref{XXXX}), the following expressions need to be
+calculated 
 \begin{equation}
 \label{logit}
   \frac{1}{1 + e^{-x}}
@@ -42,17 +58,18 @@ calculated as part of the search process
 \label{logit2}
     \frac{1}{(1 + e^{-x})^2}
 \end{equation}
-The straight-forward implementation uses existing templates for the
-data pattern of the form ``\(y \leftarrow f(x)\)'' to create custom
-operators {\tt logit} and {\tt logit2}.  Therefore, the simplest implementation
-would be
+To implementing this in Q, we first 
+recognize that these operations are of the form ``\(y \leftarrow f(x)\)''. This
+allows us to re-use the templates for those data flow patterns to auto-generate
+code and create 
+custom operators {\tt logit} and {\tt logit2}. 
+Therefore, the simplest implementation would be
 \begin{verbatim}
 y = Q.logit(x); z = Q.logit2(x)
 \end{verbatim}
 However, that leads to a lot
 of redundant computations.  This can be eliminated as follows
 \begin{verbatim}
-Q.set_memo(false)
 t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
 t2 = Q.exp(t1):memo(false)
 t3 = Q.incr(t2):memo(false)
@@ -70,7 +87,6 @@ chunk of \(t_3\), since it has {\bf not} been memo-ized. One solution
 is to ensure that \(y\) and \(z\) are evaluated in lock-step, after they have
 been created, as shown below.
 \begin{verbatim} 
-  y:set_memo(true); z:set_memo(true) -- memo-ize the output vectors
   cidx = 0  -- chunk index
   repeat 
     ly = y:chunk(cidx)
@@ -80,10 +96,14 @@ been created, as shown below.
   until ( ly == 0 )
 \end{verbatim}
 
-\subsection{Conjoined vectors}
+However, this solution suffers from the drawback that it requires \(y\) and
+\(z\) to be evaluated before they are returned to the calling function.
+In other words, the following code would lead to an error, unless {\tt foo} had
+fully evaluated \(y\) and \(z\) as described above.
+\begin{verbatim}
+y, z = foo(....); y:eval(); z:eval()
+\end{verbatim}
 
-The solution of Section~\ref{XXX}, while correct, is inelegant and requires
-\(y\) and \(z\) to be memo-ized.
 We would prefer that the Q programmer to be able to
 inform the system that \(y\) and \(z\) need to be evaluated in lock-step 
 and not have to write the {\tt repeat} loop shown above. This leads to the
@@ -93,5 +113,6 @@ following solution
 x:set_memo(false); y:set_memo(false);  -- no memo-izing needed
 Q:conjoin({x, y}) -- indicate that they need to be evaluated together
 x:eval() -- evaluate x when needed
-assert(y:is_eov()) -- y would have been evaluated as a consequence of x
+.... -- any other computations can be performed
+y:eval() -- will behave as expected
 \end{verbatim}
