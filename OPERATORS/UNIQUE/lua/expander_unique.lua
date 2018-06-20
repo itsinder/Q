@@ -33,6 +33,7 @@ local function expander_unique(op, a)
   local sz_out          = qconsts.chunk_size 
   local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
   local out_buf = nil
+  local cnt_buf = nil
   local first_call = true
   local n_out = nil
   local aidx  = nil
@@ -45,6 +46,7 @@ local function expander_unique(op, a)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
+      cnt_buf = assert(cmem.new(sz_out * ffi.sizeof("uint64_t")))
 
       n_out = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       n_out = ffi.cast("uint64_t *", n_out)
@@ -72,8 +74,12 @@ local function expander_unique(op, a)
       
       local casted_a_chunk = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(a_chunk))
       local casted_out_buf = ffi.cast( qconsts.qtypes[a:fldtype()].ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out, last_unq_element, a_chunk_idx)
+      local casted_cnt_buf = ffi.cast( "uint64_t *",  get_ptr(cnt_buf))
+      local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out,
+        last_unq_element, a_chunk_idx, casted_cnt_buf)
       assert(status == 0, "C error in UNIQUE")
+      print(tonumber(last_unq_element[0]))
+      print("________________")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0

@@ -13,7 +13,8 @@ ${fn}(
       uint64_t nC,
       uint64_t *ptr_num_in_C,
       ${a_ctype} * last_unq_element,
-      uint64_t idx
+      uint64_t idx,
+      uint64_t *cnt_in_C
       );
    ]],
    definition = [[
@@ -29,7 +30,8 @@ ${fn}(
       uint64_t nC,
       uint64_t *ptr_num_in_C,
       ${a_ctype} * last_unq_element,
-      uint64_t idx
+      uint64_t idx,
+      uint64_t *cnt_in_C
       )
 {
   int status = 0;
@@ -49,17 +51,26 @@ ${fn}(
       if ( A[aidx] != last_unique_element ) {
         break;
       }
+      else{
+        cnt_in_C[num_in_C-1] = cnt_in_C[num_in_C-1] + 1;
+      }
     }
   }
   
   for ( ; aidx < nA-1; aidx++ ) { 
     if ( num_in_C == nC ) { break; }
     if ( A[aidx] != A[aidx+1] ) {
+      cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
       C[num_in_C++] = A[aidx];
       }
+    else{
+      cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
     }
+  }
+
+  cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
   // Include last element
-  if(A[nA-1] != last_unique_element) { 
+  if(A[nA-1] != last_unique_element) {
     C[num_in_C++] = A[nA-1];
   }
   *ptr_num_in_C = num_in_C;
