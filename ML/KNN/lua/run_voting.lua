@@ -1,30 +1,29 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
 local plpath = require 'pl.path'
-local alt_voting   = require 'Q/ML/KNN/lua/alt_voting'
+local voting_C   = require 'Q/ML/KNN/lua/voting_custom_code'
+local voting_Lua = require 'Q/ML/KNN/lua/voting'
 local prediction_from_votes = require 'Q/ML/KNN/lua/prediction_from_votes'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 local qc = require 'Q/UTILS/lua/q_core'
 
 local function run_voting(args)
-  meta_data_file = args.meta_data_file
-  data_file = args.data_file
-  split_ratio = args.split_ratio
-  goal = args.goal
+  meta_data_file = assert(args.meta_data_file)
+  data_file = assert(args.data_file)
+  split_ratio = assert(args.split_ratio)
+  goal = assert(args.goal)
+  language = assert(args.language)
   
-  print(data_file)
-  print(meta_data_file)
   T = Q.load_csv(data_file, dofile(meta_data_file))
   Train, Test = split_train_test(T, split_ratio)
   train, g_train, m_train, n_train = extract_goal(Train, goal)
   test,  g_test,  m_test,  n_test  = extract_goal(Test,  goal)
   -- Current implementation assumes 2 values of goal as 0, 1
-  local min_g, _ = Q.min(T[goal])
-  assert(min_g == 0)
-  local max_g, _ = Q.max(T[goal])
-  assert(max_g == 1)
-  assert(nil, "PREMATURE")
+  local min_g, _ = Q.min(g_train):eval()
+  assert(min_g:to_num() == 0)
+  local max_g, _ = Q.max(g_train):eval()
+  assert(max_g:to_num() == 1)
   --====================================================
   vote  = {}
   num_g = {} 
@@ -44,8 +43,13 @@ local function run_voting(args)
     vote[g] = Q.const({ val = 0, len = n_test, qtype = "F4"}):eval()
     
     local t_start = qc.get_time_usec()
-    alt_voting(l_train, m, n_train_g, test, n_test, vote[g])
-    time = time +  (qc.get_time_usec() - t_start)
+    if ( language == "C" ) then 
+      voting_C(train_g, m_train, n_train_g, test, n_test, vote[g], true)
+    elseif ( language == "Lua" ) then 
+      assert(nil, "TO BE IMPLEMENTED")
+    else
+      assert(nil, "Unknown language" .. language)
+    end
     -- Q.print_csv(vote[g])
   end
   g_predicted = prediction_from_votes(vote) 

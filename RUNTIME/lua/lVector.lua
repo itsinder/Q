@@ -715,6 +715,13 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(chunk_num, self)
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
+    print("lVector: chunk_num, buf_size = ", chunk_num, buf_size)
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
     if ( buf_size < qconsts.chunk_size ) then
       if ( buf_size > 0 ) then
         self:put_chunk(base_data, nn_data, buf_size)
@@ -731,6 +738,9 @@ function lVector:chunk(chunk_num)
         assert(chk == l_chunk_num)
       end
     end
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
     if ( qconsts.debug ) then self:check() end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data

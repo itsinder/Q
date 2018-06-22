@@ -10,13 +10,17 @@ local data_dir = q_src_root .. "/ML/KNN/data/"
 assert(plpath.isdir(data_dir))
 
 tests.t1 = function()
-  inputs = {
-    meta_data_file = data_dir .. "/occupancy/occupancy_meta.lua",
-    data_file      = data_dir .. "/occupancy/occupancy.csv",
-    split_ratio    = 0.8,
-    goal           = "occupy_status"
-  }
-  ret_vals = run_voting(inputs)
+  languages = { "C", "Lua" }
+  for _, language in ipairs(languages) do 
+    inputs = {
+      meta_data_file = data_dir .. "/occupancy/occupancy_meta.lua",
+      data_file      = data_dir .. "/occupancy/occupancy.csv",
+      split_ratio    = 0.8,
+      goal           = "occupy_status",
+      language       = language
+    }
+    ret_vals = run_voting(inputs)
+  end
   print("Test t1 completed")
 end
 tests.t1()

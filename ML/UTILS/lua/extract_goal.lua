@@ -16,6 +16,7 @@ local function extract_goal(
   local m = 0
   local n = 0
   for k, v in pairs(T) do 
+    assert(type(v) == "lVector")
     if ( k == goal ) then 
       g = v
     else
@@ -35,6 +36,8 @@ local function extract_goal(
   assert(n > 0)
   assert(g)
   assert(qtype)
+  assert(type(g) == "lVector")
+  assert(type(t) == "table")
   return t, g, m, n
 end
 return extract_goal
