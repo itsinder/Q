@@ -991,6 +991,14 @@ vec_get(
   char *X = NULL; uint64_t nX = 0;
   // If len == 0 => vector must be materialized, we want everything
   if ( ( len == 0 ) && ( !ptr_vec->is_eov ) ) { go_BYE(-1); }
+  // idx+len should not be greater than available vector elements
+  if ( idx+len > ptr_vec->num_elements ) { 
+    *ptr_ret_addr = NULL;
+    *ptr_ret_len  = 0;
+    status = -2;
+    goto BYE;
+  }
+
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
   // from 64 = (67 -3) position. In other words, if you wanted
