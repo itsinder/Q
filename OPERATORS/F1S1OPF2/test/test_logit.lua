@@ -1,6 +1,8 @@
 -- FUNCTIONAL STRESS
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+local Scalar = require 'libsclr'
+
 local tests = {}
 tests.t1 = function() 
   local x = Q.mk_col( {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8}, "F8")
@@ -22,6 +24,6 @@ tests.t1 = function()
   print(Q.logit(x))
   print(Q.vvdiv(Q.exp(x), Q.vsadd(Q.exp(x), 1)))
 --]]
-  assert(Q.vvseq(Q.logit(x), Q.vvdiv(Q.exp(x), Q.vsadd(Q.exp(x), 1)), 0.01))
+  assert(Q.vvseq(Q.logit(x), Q.vvdiv(Q.exp(x), Q.vsadd(Q.exp(x), Scalar.new(1, "F8"))), 0.01))
 end
 return tests

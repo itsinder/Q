@@ -13,7 +13,7 @@ local get_train_test_split = function(split_ratio, T, feature_column_indices)
     break
   end
   local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
-  local random_vec_bool = Q.vsleq(random_vec, split_ratio):eval()
+  local random_vec_bool = Q.vsleq(random_vec, Scalar.new(split_ratio, "F4")):eval()
   if not feature_column_indices then
     local column_indices = {}
     for i, _ in pairs(T) do

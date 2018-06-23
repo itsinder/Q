@@ -1,11 +1,13 @@
 -- FUNCTIONAL STRESS
 local Q = require 'Q'
+local Scalar = require 'libsclr'
 require 'Q/UTILS/lua/strict'
 require('Q/UTILS/lua/cleanup')()
+
 local tests = {}
 tests.t1 = function()
   local c1 = Q.mk_col( {1,2,3,4,5,6,7,8}, "I4")
-  local z = Q.vsadd(c1, 10 )
+  local z = Q.vsadd(c1, Scalar.new(10, "I4") )
   local opt_args = { opfile = "" }
   -- z:eval(); Q.print_csv(z, opt_args)
   --===========================

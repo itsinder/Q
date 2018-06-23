@@ -292,7 +292,8 @@ vec_cast(
   else {
     ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
   }
-  ptr_vec->field_size   = new_field_size; 
+  ptr_vec->field_size   = new_field_size;
+  status = vec_clean_chunk(ptr_vec); cBYE(status);
 BYE:
   return status;
 }
@@ -832,6 +833,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       }
       break;
     case 1 :
+      break;
     case 2 :
       if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
       if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
@@ -1003,49 +1005,33 @@ vec_get(
   }
   uint32_t chunk_num = idx / ptr_vec->chunk_size;
   uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
-  if ( ( ptr_vec->is_nascent == true) && ( ptr_vec->is_eov == true ) ) { 
-    // Can we satisfy from current chunk? 
-    // Yes if required chunk is current chunk and chunk is not yet cleaned
-    if ( ( chunk_num == ptr_vec->chunk_num ) && 
-        ( ptr_vec->chunk != NULL ) ) {
-      // printf("Serving request from in-memory buffer\n");
-      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-      uint32_t offset;
-      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-        offset = chunk_idx / 8; // 8 bits in a byte 
-      }
-      else {
-        offset = chunk_idx * ptr_vec->field_size;
-      }
-      ret_addr = ptr_vec->chunk + offset;
-      if ( len == 0 ) {
-        ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
-      }
-      else {
-        ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
-      }
-      *ptr_ret_addr = ret_addr;
-      *ptr_ret_len  = ret_len;
-      // Nothing more to do. Get out of here
-      goto BYE;
+  // Can we satisfy from current chunk? 
+  // Yes if required chunk is current chunk and chunk is not yet cleaned
+  if ( ( chunk_num == ptr_vec->chunk_num ) && 
+      ( ptr_vec->chunk != NULL ) && ( ptr_vec->is_nascent == true ) ) {
+    // printf("Serving request from in-memory buffer\n");
+    if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
+    uint32_t offset;
+    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+      offset = chunk_idx / 8; // 8 bits in a byte 
     }
     else {
-      // printf("cleaning chunk \n");
-      /* TODO P1: Think about why this is necessary
-      if ( ptr_vec->chunk != NULL ) {
-        status = vec_clean_chunk(ptr_vec); cBYE(status);
-      }
-      */
+      offset = chunk_idx * ptr_vec->field_size;
     }
-    if ( ptr_vec->is_memo == false ) { 
-      // printf(" we have no hope of serving this chunk\n");
-      *ptr_ret_addr = NULL;
-      *ptr_ret_len  = 0;
-      status = -2;
-      goto BYE;
+    ret_addr = ptr_vec->chunk + offset;
+    if ( len == 0 ) {
+      ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
     }
+    else {
+      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+    }
+    *ptr_ret_addr = ret_addr;
+    *ptr_ret_len  = ret_len;
+    // Nothing more to do. Get out of here
+    goto BYE;
   }
-  if ( ptr_vec->is_nascent == false ) {
+  else if ( ( ptr_vec->is_nascent == false ) || ( ( ptr_vec->is_eov == true ) && ( chunk_num < ptr_vec->chunk_num ) ) ) {
+    // printf("Serving request using mmap pointer\n");
     switch ( ptr_vec->open_mode ) {
       case 0 :
         if ( ! ptr_vec->is_virtual ) {
@@ -1095,19 +1081,8 @@ vec_get(
     }
   }
   else {
-    if ( chunk_num == ptr_vec->chunk_num ) {
-      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-      uint32_t offset;
-      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-        offset = chunk_idx / 8; // 8 bits in a byte 
-      }
-      else {
-        offset = chunk_idx * ptr_vec->field_size;
-      }
-      addr = ptr_vec->chunk + offset;
-      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
-    }
-    else if ( chunk_num < ptr_vec->chunk_num ) {
+    if ( chunk_num < ptr_vec->chunk_num ) {
+      // printf("Serving request from file\n");
       if ( ptr_vec->is_memo ) {
         // If memo is on, should be able to serve data from previous chunks 
         // as long as request does not bleed into current chunk
@@ -1131,7 +1106,11 @@ vec_get(
         ret_len = len;
       }
       else {
-        go_BYE(-1); 
+        // printf(" we have no hope of serving this chunk\n");
+        *ptr_ret_addr = NULL;
+        *ptr_ret_len  = 0;
+        status = -2;
+        goto BYE;
       }
     }
     else { // asking for a chunk ahead of where we currently are

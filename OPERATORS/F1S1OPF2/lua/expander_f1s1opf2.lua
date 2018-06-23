@@ -55,7 +55,7 @@
         assert(nn_f2_buf)
         ffi.memset(get_ptr(nn_f2_buf), 0, qconsts.chunk_size)
       end
-      print(sp_fn_name .. " requesting " .. chunk_idx)
+      -- print(sp_fn_name .. " requesting " .. chunk_idx)
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
       if f1_len > 0 then  
         local casted_f1_chunk = ffi.cast(qconsts.qtypes[subs.in_qtype].ctype .. "*" ,get_ptr(f1_chunk))
