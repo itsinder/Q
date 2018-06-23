@@ -40,5 +40,6 @@ require 'Q/QTILS/lua/fold'
 require 'Q/QTILS/lua/average'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 _G['g_time'] = {}
+_G['g_ctr']  = {}
 
 return require 'Q/q_export'

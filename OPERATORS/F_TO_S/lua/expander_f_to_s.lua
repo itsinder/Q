@@ -5,6 +5,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local chk_chunk      = require 'Q/UTILS/lua/chk_chunk'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
@@ -34,14 +35,8 @@ return function (a, x, y, optargs )
       local casted_x_chunk = ffi.cast( qconsts.qtypes[x:fldtype()].ctype .. "*",  get_ptr(x_chunk))
       local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
       local start_time = qc.RDTSC()
-      qc[func_name](casted_x_chunk, x_len, casted_struct, idx);
-      local stop_time = qc.RDTSC()
-      if not _G['g_time'][func_name] then
-        _G['g_time'][func_name] = (stop_time-start_time)
-      else
-        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
-      end
-
+      qc[func_name](casted_x_chunk, x_len, casted_struct, idx)
+      record_time(start_time, func_name)
       if ( a == "is_next" ) then
         local X = ffi.cast(subs.c_mem_type, reduce_struct)
         if ( tonumber(X[0].is_violation) == 1 ) then 

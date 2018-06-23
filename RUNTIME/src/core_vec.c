@@ -13,7 +13,6 @@
 
 #include "lauxlib.h"
 
-
 static uint64_t
 RDTSC(
     )
@@ -44,8 +43,46 @@ static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
 static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 
 static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
+static uint64_t t_memcpy;            static uint32_t n_memcpy;
+static uint64_t t_memset;            static uint32_t n_memset;
+static uint64_t t_malloc;            static uint32_t n_malloc;
 
 extern luaL_Buffer g_errbuf;
+
+static inline void 
+l_memcpy(
+    void *dest,
+    const void *src,
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_memcpy++;
+  memcpy(dest, src, n);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_memcpy += delta; }
+}
+
+static inline void 
+l_memset(
+    void *s, 
+    int c, 
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_memset++;
+  void *x = memset(s, c, n);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
+}
+
+static inline void *
+l_malloc(
+    size_t n
+    )
+{
+  uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
+  void *x = malloc(n);
+  delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
+  return x;
+}
 
 void
 vec_reset_timers(
@@ -53,21 +90,24 @@ vec_reset_timers(
     )
 {
   printf("reset timers\n");
-  t_l_vec_add = 0;        n_l_vec_add = 0;
+  t_l_vec_add = 0;          n_l_vec_add = 0;
   t_l_vec_check = 0;        n_l_vec_check = 0;
   t_l_vec_clone = 0;        n_l_vec_clone = 0;
   t_l_vec_end_write = 0;    n_l_vec_end_write = 0;
   t_l_vec_eov = 0;          n_l_vec_eov = 0;
-  t_l_vec_free = 0;        n_l_vec_free = 0;
+  t_l_vec_free = 0;         n_l_vec_free = 0;
   t_l_vec_get = 0;          n_l_vec_get = 0;
-  t_l_vec_memo = 0;        n_l_vec_memo = 0;
-  t_l_vec_new = 0;        n_l_vec_new = 0;
-  t_l_vec_new_virtual = 0;        n_l_vec_new_virtual = 0;
-  t_l_vec_persist = 0;        n_l_vec_persist = 0;
+  t_l_vec_memo = 0;         n_l_vec_memo = 0;
+  t_l_vec_new = 0;          n_l_vec_new = 0;
+  t_l_vec_new_virtual = 0;  n_l_vec_new_virtual = 0;
+  t_l_vec_persist = 0;      n_l_vec_persist = 0;
   t_l_vec_set = 0;          n_l_vec_set = 0;
   t_l_vec_start_write = 0;  n_l_vec_start_write = 0;
 
-  t_flush_buffer = 0;  n_flush_buffer = 0;
+  t_flush_buffer = 0;       n_flush_buffer = 0;
+  t_memcpy = 0;             n_memcpy = 0;
+  t_memset = 0;             n_memset = 0;
+  t_malloc = 0;             n_malloc = 0;
 }
 
 void
@@ -76,21 +116,24 @@ vec_print_timers(
     )
 {
   printf("print timers\n");
-  fprintf(stdout, "add,%u,%" PRIu64 "\n",n_l_vec_add, t_l_vec_add);
-  fprintf(stdout, "check,%u,%" PRIu64 "\n",n_l_vec_check, t_l_vec_check);
-  fprintf(stdout, "clone,%u,%" PRIu64 "\n",n_l_vec_clone, t_l_vec_clone);
-  fprintf(stdout, "end_write,%u,%" PRIu64 "\n", n_l_vec_end_write, t_l_vec_end_write);
-  fprintf(stdout, "eov,%u,%" PRIu64 "\n", n_l_vec_eov, t_l_vec_eov);
-  fprintf(stdout, "free,%u,%" PRIu64 "\n",n_l_vec_free, t_l_vec_free);
-  fprintf(stdout, "get,%u,%" PRIu64 "\n",n_l_vec_get, t_l_vec_get);
-  fprintf(stdout, "memo,%u,%" PRIu64 "\n",n_l_vec_memo, t_l_vec_memo);
-  fprintf(stdout, "new,%u,%" PRIu64 "\n",n_l_vec_new, t_l_vec_new);
-  fprintf(stdout, "new_virtual,%u,%" PRIu64 "\n",n_l_vec_new_virtual, t_l_vec_new_virtual);
-  fprintf(stdout, "persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
-  fprintf(stdout, "set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
-  fprintf(stdout, "start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
+  fprintf(stdout, "0,add,%u,%" PRIu64 "\n",n_l_vec_add, t_l_vec_add);
+  fprintf(stdout, "0,check,%u,%" PRIu64 "\n",n_l_vec_check, t_l_vec_check);
+  fprintf(stdout, "0,clone,%u,%" PRIu64 "\n",n_l_vec_clone, t_l_vec_clone);
+  fprintf(stdout, "0,end_write,%u,%" PRIu64 "\n", n_l_vec_end_write, t_l_vec_end_write);
+  fprintf(stdout, "0,eov,%u,%" PRIu64 "\n", n_l_vec_eov, t_l_vec_eov);
+  fprintf(stdout, "0,free,%u,%" PRIu64 "\n",n_l_vec_free, t_l_vec_free);
+  fprintf(stdout, "0,get,%u,%" PRIu64 "\n",n_l_vec_get, t_l_vec_get);
+  fprintf(stdout, "0,memo,%u,%" PRIu64 "\n",n_l_vec_memo, t_l_vec_memo);
+  fprintf(stdout, "0,new,%u,%" PRIu64 "\n",n_l_vec_new, t_l_vec_new);
+  fprintf(stdout, "0,new_virtual,%u,%" PRIu64 "\n",n_l_vec_new_virtual, t_l_vec_new_virtual);
+  fprintf(stdout, "0,persist,%u,%" PRIu64 "\n",n_l_vec_persist, t_l_vec_persist);
+  fprintf(stdout, "0,set,%u,%" PRIu64 "\n", n_l_vec_set, t_l_vec_set);
+  fprintf(stdout, "0,start_write,%u,%" PRIu64 "\n", n_l_vec_start_write, t_l_vec_start_write);
 
-  fprintf(stdout, "flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
+  fprintf(stdout, "1,flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
+  fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
+  fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
+  fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
 }
 
 
@@ -184,6 +227,8 @@ BYE:
   return status;
 }
 
+#undef XXXXX // TODO P1 Do we need this function? Can we deprecate?
+#ifdef XXXXX
 char *
 vec_get_buf(
   VEC_REC_TYPE *ptr_vec
@@ -193,9 +238,9 @@ vec_get_buf(
   char *chunk = NULL;
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
-      memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+      l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
     else {
       if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
@@ -209,6 +254,7 @@ vec_get_buf(
 BYE:
   return chunk;
 }
+#endif
 
 int 
 vec_cast(
@@ -246,7 +292,8 @@ vec_cast(
   else {
     ptr_vec->num_elements = ptr_vec->file_size / new_field_size;
   }
-  ptr_vec->field_size   = new_field_size; 
+  ptr_vec->field_size   = new_field_size;
+  status = vec_clean_chunk(ptr_vec); cBYE(status);
 BYE:
   return status;
 }
@@ -294,8 +341,7 @@ flush_buffer(
   ptr_vec->num_in_chunk = 0;
   ptr_vec->chunk_num++;
   // TODO P4: memset is not really needed
-  memset(ptr_vec->chunk, '\0', 
-      (ptr_vec->field_size * ptr_vec->chunk_size));
+  // memset(ptr_vec->chunk, '\0', (ptr_vec->field_size * ptr_vec->chunk_size));
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_flush_buffer += delta; }
   return status;
@@ -318,7 +364,7 @@ int flush_buffer_B1(
     }
     ptr_vec->num_in_chunk = 0;
     ptr_vec->chunk_num++;
-    memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
+    l_memset(ptr_vec->chunk, '\0', ptr_vec->chunk_size/8);
     // Note that ptr_vec->field_size  == 0 for B1 
   }
 BYE:
@@ -509,7 +555,7 @@ vec_clone(
   // quit if opened for writing
   if ( ptr_old_vec->open_mode == 2 ) { go_BYE(-1); }
   // Commenting memcpy as we are setting fields explicitly
-  // memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
+  // l_memcpy(ptr_new_vec, ptr_old_vec, sizeof(VEC_REC_TYPE));
 
   ptr_new_vec->open_mode = 0; // unopened
   ptr_new_vec->field_size = ptr_old_vec->field_size;
@@ -526,9 +572,9 @@ vec_clone(
   memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
-    ptr_new_vec->chunk = malloc(ptr_new_vec->chunk_sz);
+    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz);
     return_if_malloc_failed(ptr_new_vec->chunk); 
-    memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
+    l_memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
     ptr_new_vec->chunk_num = ptr_old_vec->chunk_num;
     ptr_new_vec->num_in_chunk = ptr_old_vec->num_in_chunk;
@@ -787,6 +833,7 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       }
       break;
     case 1 :
+      break;
     case 2 :
       if ( ptr_vec->map_addr == NULL ) { go_BYE(-1); }
       if ( ptr_vec->map_len  == 0 ) { go_BYE(-1); }
@@ -942,10 +989,16 @@ vec_get(
   char *ret_addr = NULL;
   uint64_t ret_len  = 0;
   char *X = NULL; uint64_t nX = 0;
-  if ( len == 0 ) { 
-    // Providing len == 0 => vector must be materialized, we want everything
-    if ( !ptr_vec->is_eov ) { go_BYE(-1); }
+  // If len == 0 => vector must be materialized, we want everything
+  if ( ( len == 0 ) && ( !ptr_vec->is_eov ) ) { go_BYE(-1); }
+  // idx+len should not be greater than available vector elements
+  if ( idx+len > ptr_vec->num_elements ) { 
+    *ptr_ret_addr = NULL;
+    *ptr_ret_len  = 0;
+    status = -2;
+    goto BYE;
   }
+
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
   // from 64 = (67 -3) position. In other words, if you wanted
@@ -960,42 +1013,44 @@ vec_get(
   }
   uint32_t chunk_num = idx / ptr_vec->chunk_size;
   uint32_t chunk_idx = idx %  ptr_vec->chunk_size;
-  if ( ( ptr_vec->is_nascent == true) && ( ptr_vec->is_eov == true ) ) { 
-    // Check if required chunk is the last chunk and chunk is not yet cleaned
-    if ( chunk_num == ptr_vec->chunk_num && ptr_vec->chunk != NULL ) {
-      // printf("Serving request from in-memory buffer\n");
-      // Serve request from buffer
-      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-      uint32_t offset;
-      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-        offset = chunk_idx / 8; // 8 bits in a byte 
-      }
-      else {
-        offset = chunk_idx * ptr_vec->field_size;
-      }
-      ret_addr = ptr_vec->chunk + offset;
-      if ( len == 0 ) {
-        ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
-      }
-      else {
-        ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
-      }
-      *ptr_ret_addr = ret_addr;
-      *ptr_ret_len  = ret_len;
-      // Nothing more to do. Get out of here
-      goto BYE;
+  // Can we satisfy from current chunk? 
+  // Yes if required chunk is current chunk and chunk is not yet cleaned
+  if ( ( chunk_num == ptr_vec->chunk_num ) && 
+      ( ptr_vec->chunk != NULL ) && ( ptr_vec->is_nascent == true ) ) {
+    // printf("Serving request from in-memory buffer\n");
+    if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
+    uint32_t offset;
+    if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
+      offset = chunk_idx / 8; // 8 bits in a byte 
     }
     else {
-      // printf("cleaning chunk \n");
-      if ( ptr_vec->chunk != NULL ) {
-        status = vec_clean_chunk(ptr_vec); cBYE(status);
-      }
+      offset = chunk_idx * ptr_vec->field_size;
     }
+    ret_addr = ptr_vec->chunk + offset;
+    if ( len == 0 ) {
+      ret_len  = (ptr_vec->num_in_chunk - chunk_idx);
+    }
+    else {
+      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
+    }
+    *ptr_ret_addr = ret_addr;
+    *ptr_ret_len  = ret_len;
+    // Nothing more to do. Get out of here
+    goto BYE;
   }
-  if ( ptr_vec->is_nascent == false ) {
+  else if ( ( ptr_vec->is_nascent == false ) || ( ( ptr_vec->is_eov == true ) && ( chunk_num < ptr_vec->chunk_num ) ) ) {
+    // printf("Serving request using mmap pointer\n");
     switch ( ptr_vec->open_mode ) {
       case 0 :
         if ( ! ptr_vec->is_virtual ) {
+          // TODO P2: Delete folllowing check
+          // Should not be setting file_name when no file created
+          if ( isdir(ptr_vec->file_name) ) { 
+            printf("XXXXX directory not file\n");
+            go_BYE(-1); 
+          }
+          if ( ptr_vec->file_size == 0 ) { go_BYE(-1); }
+          // TODO P2: Delete above
           status = rs_mmap(ptr_vec->file_name, &X, &nX, 0);
           cBYE(status);
           ptr_vec->map_addr = X;
@@ -1034,19 +1089,8 @@ vec_get(
     }
   }
   else {
-    if ( chunk_num == ptr_vec->chunk_num ) {
-      if ( chunk_idx + len > ptr_vec->chunk_size ) { go_BYE(-1); }
-      uint32_t offset;
-      if ( strcmp(ptr_vec->field_type, "B1") == 0 ) { 
-        offset = chunk_idx / 8; // 8 bits in a byte 
-      }
-      else {
-        offset = chunk_idx * ptr_vec->field_size;
-      }
-      addr = ptr_vec->chunk + offset;
-      ret_len  = mcr_min(len, (ptr_vec->num_in_chunk - chunk_idx));
-    }
-    else if ( chunk_num < ptr_vec->chunk_num ) {
+    if ( chunk_num < ptr_vec->chunk_num ) {
+      // printf("Serving request from file\n");
       if ( ptr_vec->is_memo ) {
         // If memo is on, should be able to serve data from previous chunks 
         // as long as request does not bleed into current chunk
@@ -1070,11 +1114,19 @@ vec_get(
         ret_len = len;
       }
       else {
-        go_BYE(-1); 
+        // printf(" we have no hope of serving this chunk\n");
+        *ptr_ret_addr = NULL;
+        *ptr_ret_len  = 0;
+        status = -2;
+        goto BYE;
       }
     }
     else { // asking for a chunk ahead of where we currently are
-      go_BYE(-1);
+      // printf(" we have no hope of serving this chunk\n");
+      *ptr_ret_addr = NULL;
+      *ptr_ret_len  = 0;
+      status = -2;
+      goto BYE;
     }
     /*
      * Consider a following use-case
@@ -1110,9 +1162,9 @@ vec_add_B1(
 {
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
-    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+    l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
 
   /* TODO: Ideally if ( len % 8 != 0 ) then the write operation should work in combination of byte and bit fashion
@@ -1139,7 +1191,7 @@ vec_add_B1(
         num_byts_to_copy = num_bits_to_copy / 8;
       }
       char *dst = ptr_vec->chunk + (ptr_vec->num_in_chunk / 8);
-      memcpy(dst, addr, num_byts_to_copy);
+      l_memcpy(dst, addr, num_byts_to_copy);
       ptr_vec->num_in_chunk += num_bits_to_copy;
       len  -= num_bits_to_copy;
       addr += num_byts_to_copy;
@@ -1202,11 +1254,18 @@ vec_add(
     status = vec_add_B1(ptr_vec, addr, len); cBYE(status);
     goto BYE; 
   }
+  //---------------------------------------
+  if ( ptr_vec->is_no_memcpy ) {
+    ptr_vec->num_in_chunk = len;
+    ptr_vec->num_elements += len;
+    goto BYE;
+  }
+  //---------------------------------------
 
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
     return_if_malloc_failed(ptr_vec->chunk);
-    memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
+    l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
 
   uint64_t initial_num_elements = ptr_vec->num_elements;
@@ -1222,7 +1281,7 @@ vec_add(
       char *dst = ptr_vec->chunk + 
         (ptr_vec->num_in_chunk * ptr_vec->field_size);
       char *src = addr + (num_copied * ptr_vec->field_size);
-      memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
+      l_memcpy(dst, src, (num_to_copy * ptr_vec->field_size));
       ptr_vec->num_in_chunk += num_to_copy;
       ptr_vec->num_elements += num_to_copy;
       num_left_to_copy      -= num_to_copy;
@@ -1345,7 +1404,7 @@ vec_set(
   }
   else {
     char *dst = ptr_vec->map_addr + offset;
-    memcpy(dst, addr,len * ptr_vec->field_size); 
+    l_memcpy(dst, addr,len * ptr_vec->field_size); 
   }
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_set += delta; }
@@ -1394,6 +1453,28 @@ vec_get_name(
 }
 
 int
+vec_no_memcpy(
+    VEC_REC_TYPE *ptr_vec,
+    CMEM_REC_TYPE *ptr_cmem,
+    size_t chunk_size
+    )
+{
+  int status = 0;
+  if ( ptr_vec->chunk != NULL ) { go_BYE(-1); }
+  if ( ptr_vec->is_eov ) { go_BYE(-1); }
+  if ( ptr_vec->file_size != 0 ) { go_BYE(-1); }
+  // TODO P1 What other checks?
+  // TODO Check cmem number of elements
+  ptr_vec->chunk = ptr_cmem->data;
+  ptr_vec->chunk_sz = ptr_cmem->size;
+  ptr_vec->chunk_size = chunk_size; 
+  ptr_vec->is_no_memcpy = true;
+  ptr_cmem->is_foreign = true;
+BYE:
+  return status;
+
+}
+int
 vec_eov(
     VEC_REC_TYPE *ptr_vec
     )
@@ -1420,9 +1501,15 @@ vec_eov(
     // create randomly generated file name and append to ptr_vec->file_name field
     status = update_file_name(ptr_vec); cBYE(status);
   }
-  status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
-      ptr_vec->num_in_chunk, ptr_vec->file_name);
-  cBYE(status);
+  if ( ptr_vec->num_in_chunk == 0 ) {
+    // in case of no_memcpy, flush buffer might have been called already
+    if ( !ptr_vec->is_no_memcpy ) { go_BYE(-1); }
+  }
+  else {
+    status = buf_to_file(ptr_vec->chunk, ptr_vec->field_size, 
+        ptr_vec->num_in_chunk, ptr_vec->file_name);
+    cBYE(status);
+  }
   ptr_vec->file_size = get_file_size(ptr_vec->file_name);
   // Commenting this out ptr_vec->is_nascent = false;
 

@@ -19,8 +19,8 @@ clean:
 ../../OPERATORS/PRINT/gen_src/_I1_to_txt.c :
 	make -C ../../OPERATORS/PRINT/lua/
 
-libvec.so: libvec.so libcmem.so
-	gcc -g ${QC_FLAGS} $(INCS) \
+libvec.so: libcmem.so
+	gcc ${QC_FLAGS} $(INCS) \
 		vector.c \
 		../../UTILS/src/err.c \
 		core_vec.c \
@@ -45,7 +45,7 @@ libvec.so: libvec.so libcmem.so
 		-shared -o libvec.so
 
 libcmem.so:
-	gcc -g ${QC_FLAGS} ${INCS} \
+	gcc ${QC_FLAGS} ${INCS} \
 		cmem.c \
 		../../OPERATORS/PRINT/src/B1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
@@ -61,7 +61,7 @@ libsclr.so: gen_cmp gen_arith libcmem.so
 	rm -f _*.c
 	lua gen_cmp.lua
 	lua gen_arith.lua
-	gcc -g ${QC_FLAGS} ${INCS} \
+	gcc ${QC_FLAGS} ${INCS} \
 		scalar.c \
 		cmem.c \
 		../../UTILS/src/err.c \

@@ -13,7 +13,7 @@ ffi.cdef([[
 int unique(int32_t *in_buf, int in_size, int32_t *out_buf, int out_size, int *num_in_out);  
 ]])
 
--- NOTE: Need to run Q/OPERATORS/UNIQUE/src/run_unique.sh to create unique.so file
+os.execute("cd " .. so_dir_path .. "; bash run_unique.sh")
 local qc = ffi.load(so_dir_path .. 'unique.so')
 
 -- lua test to check the working of UNIQUE operator only for I4 qtype
