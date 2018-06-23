@@ -5,6 +5,7 @@
   local is_in   = require 'Q/UTILS/lua/is_in'
   local cmem	= require 'libcmem'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   local function expander_f1s1opf2(a, f1, y, optargs )
     local sp_fn_name = "Q/OPERATORS/F1S1OPF2/lua/" .. a .. "_specialize"
@@ -65,14 +66,7 @@
         local casted_nn_f2_buf = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f2_buf))
         local start_time = qc.RDTSC()
         qc[func_name](casted_f1_chunk, casted_nn_f1_chunk, f1_len, casted_ptr_sval, casted_f2_buf, casted_nn_f2_buf)
-        local delta = qc.RDTSC() - start_time
-        if not _G['g_time'][func_name] then
-          _G['g_time'][func_name] = delta
-          _G['g_ctr'][func_name]  = 1
-        else
-          _G['g_time'][func_name] = _G['g_time'][func_name] + delta
-          _G['g_ctr'][func_name]  = _G['g_ctr'][func_name]  + 1
-        end
+        record_time(start_time, func_name)
       end
       chunk_idx = chunk_idx + 1
       return f1_len, f2_buf, nn_f2_buf

@@ -5,6 +5,7 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 local function check_args(a, fval, k, optargs)
   assert(a)
@@ -100,13 +101,7 @@ local function expander_getk(a, fval, k, optargs)
       ffi.C.memcpy(casted_sort_buf_val, casted_chunk, len*width)
       local start_time = qc.RDTSC()
       qc[sort_fn](casted_sort_buf_val, len)
-      local stop_time = qc.RDTSC()
-      if not _G['g_time'][sort_fn] then
-        _G['g_time'][sort_fn] = (stop_time-start_time)
-      else
-        _G['g_time'][sort_fn] = _G['g_time'][sort_fn] + (stop_time-start_time)
-      end
-
+      record_time(start_time, sort_fn)
       --================================
       if ( k < len ) then nY = k else nY = len end
       if ( chunk_idx == 0 )  then
@@ -115,13 +110,7 @@ local function expander_getk(a, fval, k, optargs)
       else
         start_time = qc.RDTSC()
         qc[func](casted_bufX, nX, casted_sort_buf_val, nY, casted_bufZ, nZ, ptr_num_in_Z)
-        stop_time = qc.RDTSC()
-        if not _G['g_time'][func] then
-          _G['g_time'][func] = (stop_time-start_time)
-        else
-          _G['g_time'][func] = _G['g_time'][func] + (stop_time-start_time)
-        end
-
+        record_time(start_time, func)
         -- copy from bufZ to bufX
         local num_in_Z = ptr_num_in_Z[0]
         ffi.C.memcpy(casted_bufX, casted_bufZ, num_in_Z*width)

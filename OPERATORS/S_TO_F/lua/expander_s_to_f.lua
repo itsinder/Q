@@ -3,10 +3,9 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local multiple_of_8 = require 'Q/UTILS/lua/multiple_of_8'
-
--- local dbg = require 'debugger'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 return function (a, args)
     -- Get name of specializer function. By convention
@@ -45,13 +44,7 @@ return function (a, args)
       local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(subs.c_mem))
       local start_time = qc.RDTSC()
       qc[func_name](casted_buff, chunk_size, casted_struct, lb)
-      local stop_time = qc.RDTSC()
-      if not _G['g_time'][func_name] then
-        _G['g_time'][func_name] = (stop_time-start_time)
-      else
-        _G['g_time'][func_name] = _G['g_time'][func_name] + (stop_time-start_time)
-      end
-
+      record_time(start_time, func_name)
       return chunk_size, buff
     end
   end
