@@ -991,6 +991,7 @@ vec_get(
   char *X = NULL; uint64_t nX = 0;
   // If len == 0 => vector must be materialized, we want everything
   if ( ( len == 0 ) && ( !ptr_vec->is_eov ) ) { go_BYE(-1); }
+  /* TODO: revisit below condition
   // idx+len should not be greater than available vector elements
   // START RAMESH TODO P0 DISCUSS WITH KRUSHNAKANT
   if ( ( idx == 0 ) && ( len > ptr_vec->num_elements ) )  {
@@ -1003,6 +1004,7 @@ vec_get(
     status = -2;
     goto BYE;
   }
+  */
 
   // If B1 and you ask for 5 elements starting from 67th, then 
   // this is translated to asking for (8 = 5+3) elements starting 
