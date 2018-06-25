@@ -19,7 +19,7 @@ main(
 {
   int status = 0;
   // config parameters
-  uint64_t n = 1 * 1048576;
+  uint64_t n = 1024 * 1048576;
   int num_bins = 32;
   //-- allocations needed for following
   int32_t **lX = NULL;
@@ -105,6 +105,7 @@ main(
   qsort_asc_I4 (X, n);
   t_stop = RDTSC();
   printf(" seq  time = %" PRIu64 "\n", t_stop - t_start);
+  printf("         n = %" PRIu64 "\n", n);
 
 BYE:
   free_if_non_null(X);
