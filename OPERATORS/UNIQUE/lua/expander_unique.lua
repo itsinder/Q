@@ -78,8 +78,6 @@ local function expander_unique(op, a)
       local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, n_out,
         last_unq_element, a_chunk_idx, casted_cnt_buf)
       assert(status == 0, "C error in UNIQUE")
-      print(tonumber(last_unq_element[0]))
-      print("________________")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
