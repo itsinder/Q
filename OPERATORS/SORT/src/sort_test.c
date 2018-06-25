@@ -1,3 +1,4 @@
+// gcc -O4 sort_test.c -fopenmp -lgomp
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -38,7 +39,8 @@ int parallel_sort(int ** arr, int num_elem, int ** info, int num_partitions) {
   int * vals = *arr;
   /*first linear scan to determine count of num elem in each partition*/
   // printf("first linear scan\n");
-#pragma omp parallel for schedule(static) num_threads(THREADS)
+// #pragma omp parallel for schedule(static) num_threads(THREADS)
+#pragma omp parallel for 
   for ( int i = 0; i < num_partitions; i++ ) {
     for ( int j = 0; j < num_elem; j++ ) {
       if ( (vals[j] >= info[i][0]) && (vals[j] < info[i][1]) ) {
@@ -73,11 +75,14 @@ int parallel_sort(int ** arr, int num_elem, int ** info, int num_partitions) {
   // print_info(info);
   
   // printf("last bit of sorting\n");
+  clock_t start = clock();
 #pragma omp parallel for schedule(static) num_threads(THREADS)
   for ( int i = 0; i < num_partitions; i++ ) {
     int loc = (int) (info[i][3] - info[i][2]);
     qsort(&bucketed_vals[loc], info[i][2], sizeof(int), cmpfunc);
   }
+  clock_t stop = clock();
+  printf("core time = %d \n", stop - start);
 
   free(*arr);
   *arr = bucketed_vals; /*now bucketed_vals is fully sorted*/
