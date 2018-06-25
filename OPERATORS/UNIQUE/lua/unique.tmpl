@@ -67,12 +67,16 @@ ${fn}(
       cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
     }
   }
-
-  cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
+  
   // Include last element
   if(A[nA-1] != last_unique_element) {
+    cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
     C[num_in_C++] = A[nA-1];
   }
+  else {
+     cnt_in_C[num_in_C-1] = cnt_in_C[num_in_C-1] + 1;
+  }
+  
   *ptr_num_in_C = num_in_C;
   // added 1 to aidx due to for loop condition( aidx < nA-1 ) 
   *ptr_aidx     = aidx+1;
