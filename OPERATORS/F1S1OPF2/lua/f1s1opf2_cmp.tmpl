@@ -42,7 +42,7 @@ ${fn}(
     num_last_block = nR - ( num_blocks * VECTOR_LENGTH);
     num_blocks++; 
   }
-// TODO #pragma omp parallel for 
+#pragma omp parallel for schedule(static)
   for ( uint64_t blk_idx = 0; blk_idx < num_blocks; blk_idx++ ) {  
     uint64_t lb = blk_idx * VECTOR_LENGTH;;
     uint64_t ub = lb + VECTOR_LENGTH;;

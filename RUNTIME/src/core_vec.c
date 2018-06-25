@@ -992,6 +992,11 @@ vec_get(
   // If len == 0 => vector must be materialized, we want everything
   if ( ( len == 0 ) && ( !ptr_vec->is_eov ) ) { go_BYE(-1); }
   // idx+len should not be greater than available vector elements
+  // START RAMESH TODO P0 DISCUSS WITH KRUSHNAKANT
+  if ( ( idx == 0 ) && ( len > ptr_vec->num_elements ) )  {
+    len = ptr_vec->num_elements;
+  }
+  // STOP  RAMESH
   if ( idx+len > ptr_vec->num_elements ) { 
     *ptr_ret_addr = NULL;
     *ptr_ret_len  = 0;

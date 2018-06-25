@@ -1,4 +1,5 @@
-local Q = require 'Q'
+local Q      = require 'Q'
+local Scalar = require 'libsclr'
 
 local function prediction_from_votes(
   V
@@ -18,10 +19,9 @@ local function prediction_from_votes(
     end
   end
   assert(ng == 2) -- TODO Not ready for others
-  y = Q.const({ val = 0, len = n, qtype = "I4"})
-  z = Q.const({ val = 1, len = n, qtype = "I4"})
   x = Q.vvgeq(lV[0], lV[1])
-  w = Q.ifxthenyelsez(x, y, z)
+  -- Note the assumption below that the class labels are 0 and 1
+  w = Q.ifxthenyelsez(x, Scalar.new(0, "I4"), Scalar.new(1, "I4"))
   return w
 end
 return prediction_from_votes

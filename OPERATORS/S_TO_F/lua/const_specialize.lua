@@ -9,9 +9,9 @@ return function (
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
 
   assert(type(args) == "table")
-  local val   = assert(args.val)
-  local qtype = assert(args.qtype)
-  local len   = assert(args.len)
+  local val   = assert(args.val, "No val provided")
+  local qtype = assert(args.qtype, "No qtype provided")
+  local len   = assert(args.len, "No length provided")
   local out_ctype = qconsts.qtypes[qtype].ctype
   assert(is_base_qtype(qtype))
   assert(len > 0, "vector length must be positive")
