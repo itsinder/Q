@@ -15,7 +15,7 @@ local tests = {}
 
 tests.t1 = function()
   local qtypes = { "I4", "I8",  "F8" }
-  local num_elements = 65538
+  local num_elements = 64*64*1024
   local iter = 1
   for _, qtype in ipairs(qtypes) do   
     local buf = cmem.new(16, qtype)
