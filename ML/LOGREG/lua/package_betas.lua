@@ -1,49 +1,4 @@
-local Q = require 'Q'
-local ffi = require 'Q/UTILS/lua/q_ffi'
-
-local T = {}
-
-local function beta_step(X, y, beta)
-  local Xbeta = Q.mv_mul(X, beta)
-  local p = Q.logit(Xbeta)
-  local w = Q.logit2(Xbeta)
-  local ysubp = Q.vvsub(y, p)
-  local A = {} -- initially a table of Lua tables, later a table of Q vectors
-  local b = {} -- initially a Lua table, later a Q vector
-
-  for i, X_i in ipairs(X) do
-    b[i] = Q.sum(Q.vvmul(X_i, ysubp)):eval()
-    A[i] = {}
-    for j, X_j in ipairs(X) do
-      A[i][j] = Q.sum( Q.vvmul(X_i, Q.vvmul(w, X_j))):eval()
-    end
-  end
-  -- convert from Lua table to Q vector
-  for i = 1, #A do
-    for j = 1, #A do
-      local a_ij = A[i][j]:to_num()
-      io.write(a_ij, " " )
-    end
-    io.write(b[i]:to_num(), " " )
-    io.write("\n")
-  end
-  print("=====================")
-  b = Q.mk_col(b, "F8")
-  for i = 1, #A do
-    A[i] = Q.mk_col(A[i], "F8")
-  end
-
-  local beta_new_sub_beta = Q.posdef_linear_solver(A, b)
-  print(type( beta_new_sub_beta))
-  local beta_new = Q.vvadd(beta_new_sub_beta, beta)
-  for i = 1, #A do
-    print(beta_new_sub_beta:get_one(i-1):to_num())
-  end
-  print("=++++++++++++++++++++")
-  return beta_new
-
-end
-
+-- Written by Garo. To be thrown away soon
 local function package_betas(betas)
   local function append_1(x)
     -- TODO: this is awful
@@ -145,25 +100,3 @@ local function package_betas(betas)
 end
 T.package_betas = package_betas
 require('Q/q_export').export('package_logistic_regression_betas', package_betas)
-
-local function lr_setup(
-  X, -- table of M columns of length N
-  y  -- vector of length M containing classification label
-)
-  -- add an additional column to X of 1's. Math justification in documentation
-  local xtype = X[1]:fldtype()
-  local M = y:length()
-  X[#X + 1] = Q.const({ val = 1, len = M, qtype = xtype })
-  X[#X]:eval()
-  local M = #X
-  --- initialize beta to 0 
-  beta = Q.const({ val = 0, len = M, qtype = 'F8' })
-  return beta
-end
-
---===============================================
-T.beta_step = beta_step
-T.lr_setup  = lr_setup
--- require('Q/q_export').export('make_logistic_regression_trainer', make_multinomial_trainer)
-
-return T

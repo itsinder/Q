@@ -26,22 +26,24 @@ local compare = function (file1, file2)
 end
 
 local tests = {}
-tests.t1 = function()
-  local num_trials = 2
+tests.t1 = function(
+  num_iters
+  )
+  if ( not num_iters ) then num_iters = 10 end 
   local x1 = Q.mk_col({1, 2, 3, 4, 5, 6, 7, 8}, 'F8')
   local x2 = Q.mk_col({10, 20, 30, 40, 50, 60, 70, 80}, 'F8')
   local X = {x1, x2}
   local Y = Q.mk_col({100, 200}, 'F8')
   local Z
-  for i = 1, num_trials do 
+  local good_Z = Q.mk_col({ 
+    2100, 4200, 6300, 8400, 10500, 12600, 14700, 16800}, "F8")
+  for i = 1, num_iters  do 
     Z = Q.mv_mul(X, Y):eval()
+    assert(Z:num_elements() == x1:length())
+    -- Q.print_csv({Z, good_Z})
+    assert(Q.vvseq(Z, good_Z, 0.01))
   end
-  assert(Z:num_elements() == x1:length())
-  print("Completed mv_mul")
-  local opt_args = { opfile = script_dir .. "_out1.txt" }
-  Q.print_csv(Z, opt_args)
-  assert(compare(script_dir .. "out1.txt", script_dir .. "_out1.txt"))
-  os.execute("rm -f " .. script_dir .. "_out1.txt")
+  print("Completed Test t1")
 end
 tests.t2 = function()
  --[[
@@ -70,6 +72,8 @@ tests.t3 = function()
     Z = Q.mv_mul(X, Y):eval()
   end
   assert(Z:num_elements() == x1:length())
+  Q.print_csv(Z)
+  os.exit()
   print("Completed mv_mul")
   local opt_args = { opfile =  script_dir .. "_out1.txt" }
   Q.print_csv(Z, opt_args)

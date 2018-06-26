@@ -39,7 +39,11 @@ local function vvseq(x, y, s, optargs)
   assert(sval >= 0)
   
   if ( mode == "difference" ) then 
-    return(sum(vsgt(abs(sub(x, y)), s)):eval():to_num() == 0 )
+    local xsub = sub(x, y):memo(false):set_name("xsub")
+    local xabs = abs(xsub):memo(false):set_name("xabs")
+    local xgt  = vsgt(xabs, s):memo(false):set_name("xgt")
+    local numgt = sum(xgt):eval():to_num()
+    return(numgt == 0)
   elseif ( mode == "ratio" ) then
     return (sum(vsgt(div(abs(sub(x, y)), vvmax(x, y)), s)):eval():to_num() == 0 )
   else

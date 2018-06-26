@@ -1,5 +1,5 @@
 local Q = require 'Q'
-
+local Scalar = require 'libsclr'
 local tests = {}
 
 tests.t1 = function()
@@ -11,7 +11,7 @@ tests.t1 = function()
 
   local a = Q.mk_col(input, "I8")
 
-  local b = Q.pow(a, 2)
+  local b = Q.pow(a, Scalar.new(2, "I8"))
   b:eval()
 
   -- Q.print_csv(b)

@@ -27,7 +27,7 @@ ${fn}(
     )
 {
   int status = 0;
-#pragma omp parallel for schedule (static, 64)
+// TODO #pragma omp parallel for schedule (static, 64)
   for ( int m = 0; m < M; m++ ) {
     double sum = 0;
 // TODO WHY DOES THIS NOT WORK ON SCRABBLE #pragma omp simd reduction(+:sum)

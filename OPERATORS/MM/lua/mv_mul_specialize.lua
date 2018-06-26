@@ -4,8 +4,7 @@ local promote = require 'Q/UTILS/lua/promote'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 return function (
   X,
-  y,
-  optargs
+  y
   )
   -- START: verify inputs
   assert(type(X) == "table", "X must be a table of lVectors")
@@ -14,20 +13,19 @@ return function (
 
   for k, x in ipairs(X) do 
     assert(type(x) == "lVector", "each element of X must be a lVector")
-    x_qtype  = x:qtype()
+    if ( not x_qtype ) then 
+      x_qtype  = x:qtype()
+    else
+      assert(x_qtype == x:qtype())
+    end
     assert(ok_types[x_qtype], "qtype not F4 or F8 for column " .. k)
   end
+  --===========================
   assert(type(y) == "lVector", "Y must be a lVector ")
   local k = #X
-  y_qtype  = y:qtype()
-  assert(ok_types[y_qtype], "qtype must be F4 or F8")
-
-  if ( ( optargs ) and ( optargs.z_qtype ) ) then 
-    z_qtype = assert(optargs.z_qtype)
-  else
-    z_qtype = promote(x_qtype, y_qtype)
-  end
-  assert(ok_types[z_qtype], "qtype of output must be F4 or F8")
+  y_qtype = y:qtype()
+  assert(ok_types[y_qtype], "qtype not F4 or F8 for goal")
+  z_qtype = promote(x_qtype, y_qtype)
 
   local tmpl = 'mv_mul_simple.tmpl'
   local subs = {}; 

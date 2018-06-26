@@ -11,7 +11,7 @@ local so_dir_path = q_src_root .. "/OPERATORS/UNIQUE/src/"
 
 ffi.cdef([[
 int
-unique_func_I4(
+unique(
       const int32_t * restrict A,
       uint64_t nA,
       uint64_t *ptr_aidx,
@@ -21,8 +21,8 @@ unique_func_I4(
       );  
 ]])
 
--- NOTE: Need to run Q/OPERATORS/UNIQUE/src/run_unique.sh to create unique.so file
-local qc = ffi.load(so_dir_path .. 'unique_func_I4.so')
+os.execute("cd " .. so_dir_path .. "; bash run_unique.sh")
+local qc = ffi.load(so_dir_path .. 'unique.so')
 
 -- lua test to check the working of UNIQUE operator only for I4 qtype
 local tests = {}
@@ -55,7 +55,7 @@ tests.t1 = function ()
   
   local casted_a_chunk = ffi.cast( "int32_t *",  get_ptr(a_chunk))
   local casted_out_buf = ffi.cast( "int32_t *",  get_ptr(out_buf))
-  local status = qc["unique_func_I4"](casted_a_chunk, a_len, aidx, casted_out_buf, num_elements, n_out)
+  local status = qc["unique"](casted_a_chunk, a_len, aidx, casted_out_buf, num_elements, n_out)
   assert(status == 0, "C error in UNIQUE")
   assert(tonumber(n_out[0]) == #expected_result)
   -- Validate the result

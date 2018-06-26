@@ -16,7 +16,7 @@ local qc		= require 'Q/UTILS/lua/q_core'
 -- so, if in any file, lVector is required and followed by q_core require then
 -- it gives error.
 -- For now, require q_core in lVector code
---[[
+--[==[
 local vec_struct = [[
 typedef struct _vec_rec_type {
   char field_type[3+1];
@@ -45,6 +45,7 @@ typedef struct _vec_rec_type {
   bool is_virtual; // indicates whether vector is virtual or not
 } VEC_REC_TYPE;
 ]]
+--]==]
 
 -- pcall(ffi.cdef, vec_struct)
 --====================================
@@ -142,6 +143,20 @@ function lVector:is_eov()
   local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
   return casted_base_vec.is_eov
 end
+
+function lVector:no_memcpy(cmem)
+  if ( qconsts.debug ) then self:check() end
+  local status = Vector.no_memcpy(self._base_vec, cmem)
+  return self
+end
+
+function lVector:flush_buffer()
+  if ( qconsts.debug ) then self:check() end
+  local status = Vector.flush_buffer(self._base_vec)
+  return self
+end
+
+
 
 function lVector.virtual_new(arg)
   local vector = setmetatable({}, lVector)
@@ -263,9 +278,22 @@ function lVector.new(arg)
       Vector.set_name(vector._nn_vec, "nn_" .. arg.name)
     end
   end
+  vector.siblings = {} -- no conjoined vectors
   return vector
 end
 
+function lVector:set_sibling(x)
+  assert(type(x) == "lVector")
+  local exists = false
+  for k, v in ipairs(self.siblings) do
+    if ( x == v ) then
+      exists = true
+    end
+  end
+  if ( not exists ) then
+    self.siblings[#self.siblings+1] = x
+  end
+end
 function lVector:persist(is_persist)
   local base_status = true
   local nn_status = true
@@ -586,9 +614,17 @@ function lVector:eval()
     local chunk_num = self:chunk_num() 
     local base_len, base_addr, nn_addr 
     repeat
+      -- print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
+      -- for conjoined vectors
+      if self.siblings then
+        for k, v in pairs(self.siblings) do
+          print("Getting chunk for conjoined vector " .. k)
+          v:chunk(chunk_num)
+        end
+      end
       chunk_num = chunk_num + 1 
-    until base_len ~= qconsts.chunk_size
+    until ( base_len ~= qconsts.chunk_size )
     -- if ( self:length() > 0 ) then self:eov() end
     -- Changed above to following
     if ( self:length() == 0 ) then 
@@ -679,6 +715,16 @@ function lVector:chunk(chunk_num)
     assert(self._gen)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(chunk_num, self)
+      --[[
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
+
+    print("lVector: chunk_num, buf_size = ", chunk_num, buf_size)
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
+      ]]
     if ( buf_size < qconsts.chunk_size ) then
       if ( buf_size > 0 ) then
         self:put_chunk(base_data, nn_data, buf_size)
@@ -695,6 +741,11 @@ function lVector:chunk(chunk_num)
         assert(chk == l_chunk_num)
       end
     end
+      --[[
+      local junk = self:meta()
+      for k, v in pairs(junk.base) do print(k, v) end
+      print("==================================")
+      ]]
     if ( qconsts.debug ) then self:check() end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
