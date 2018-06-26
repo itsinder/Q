@@ -1,7 +1,7 @@
 -- FUNCTIONAL 
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
-local sum_prod = require( 'Q/ML/LOGISTIC_REGRESSION/lua/sum_prod' )
+local sum_prod = require( 'Q/ML/LOGREG/lua/sum_prod' )
 
 local test = {}
 

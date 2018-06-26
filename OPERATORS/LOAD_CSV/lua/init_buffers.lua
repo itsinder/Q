@@ -61,6 +61,10 @@ local function init_buffers(M)
         "error creating dictionary " .. M[col_idx].dict .. " for " .. M[col_idx].name)
         cols[col_idx]:set_meta("dir", dicts[col_idx])
       end
+      if ( M[col_idx].meaning ~= nil ) then
+        assert(type(M[col_idx].meaning) == "string", "type of meaning field is not string")
+        cols[col_idx]:set_meta("meaning", M[col_idx].meaning)
+      end
       -- Allocate memory for output buf and add to pool
       out_bufs[col_idx] = cmem.new(n_buf * binary_width)
       out_bufs[col_idx]:zero() -- extra cautious

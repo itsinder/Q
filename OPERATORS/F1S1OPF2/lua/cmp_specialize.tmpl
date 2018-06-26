@@ -1,3 +1,4 @@
+local Scalar = require 'libsclr'
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
 return function (
@@ -8,7 +9,7 @@ return function (
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
     assert(is_base_qtype(in_qtype))
-    local scalar = assert(to_scalar(scalar, in_qtype))
+    assert(type(scalar) == "Scalar") 
 
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 

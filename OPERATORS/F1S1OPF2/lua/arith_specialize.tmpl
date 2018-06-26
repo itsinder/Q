@@ -8,14 +8,6 @@ return function (
   local Scalar        = require 'libsclr'
 
   assert(is_base_qtype(in_qtype))
-  if ( ( type(scalar) == "number" ) or ( type(scalar) == "string" ) ) then
-    scalar = assert(Scalar.new(scalar, in_qtype))
-  elseif type(scalar) == "Scalar" then 
-    scalar = assert(scalar:conv(in_qtype))
-  else
-    assert(nil, "no valid scalar provided")
-  end
-  --=========================
   local tmpl = 'arith.tmpl'
   local subs = {}; 
   subs.fn = "<<operator>>_" .. in_qtype .. "_" .. in_qtype

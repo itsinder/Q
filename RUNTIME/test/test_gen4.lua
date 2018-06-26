@@ -59,10 +59,10 @@ tests.t1 = function()
 
   T = x:meta()
   for k, v in pairs(T.base)  do print(k,v) end
-  assert(T.base.is_nascent == false)
+  assert(T.base.is_nascent == true)
   assert(T.base.open_mode == "READ")
-  assert(T.base.num_in_chunk == 0)
-  assert(T.base.chunk_num == 0)
+  assert(T.base.num_in_chunk == 10)
+  assert(T.base.chunk_num == 3)
 
   -- for k, v in pairs(T.base)  do print(k,v) end
   -- for k, v in pairs(T.aux)  do print(k,v) end

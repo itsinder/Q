@@ -137,12 +137,14 @@ y = string.gsub(y, "<<out_qtype>>", "in_qtype")
 plfile.write("decr_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit")
-y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 1;} else{double temp = exp((double)a); c = temp/(1+temp);}")
+y = string.gsub(y, "<<c_code_for_operator>>", 
+  "c = 1.0 / ( 1.0 + exp(-1.0 * a)); ")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit2")
-y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 0;} else{double temp = exp((double)a); c = temp/((1+temp)*(1+temp));}")
+y = string.gsub(y, "<<c_code_for_operator>>", 
+" c = 1.0 / mcr_sqr ( ( 1.0 + exp(-1.0 *a) ) ); " )
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit2_specialize.lua", y)
 --=======================
