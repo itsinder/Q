@@ -16,17 +16,6 @@ local function expander_indices(op, a)
   local sp_fn_name = "Q/OPERATORS/INDEX/lua/indices_specialize"
   local spfn = assert(require(sp_fn_name))
   
-  -- TODO: why meta.aux???
-  -- Check min and max value from bit vector metadata
-  local meta = a:meta()
-  if meta.aux and meta.aux["min"] and meta.aux["max"] then
-    if meta.aux["min"] == 1 and meta.aux["max"] == 1 then
-      return a
-    elseif meta.aux["min"] == 0 and meta.aux["max"] == 0 then
-      return nil
-    end
-  end
-
   local status, subs, tmpl = pcall(spfn, a:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
