@@ -47,6 +47,8 @@ ${fn}(
   if ( num_in_C > nC ) { go_BYE(-1); }
   
   if ( idx != 0 ) {
+    // this loop just traverses( also counts )
+    // the input vector till you get the next unique value
     for ( ; aidx < nA; aidx++) {
       if ( A[aidx] != last_unique_element ) {
         break;
@@ -55,6 +57,8 @@ ${fn}(
         cnt_in_C[num_in_C-1] = cnt_in_C[num_in_C-1] + 1;
       }
     }
+    // if no unique value found then 
+    // store the length till it has read the input vector
     if( aidx == nA ) {
       *ptr_aidx = aidx;
       goto BYE;
@@ -72,7 +76,7 @@ ${fn}(
     }
   }
   
-  // Include last element
+  // Include last element in out_buf, as comparing values adjacently
   cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
   C[num_in_C++] = A[nA-1];
   
