@@ -14,7 +14,8 @@ ${fn}(
       uint64_t *ptr_cidx,
       ${a_ctype} * last_unq_element,
       uint64_t idx,
-      uint64_t *cnt_in_C
+      uint64_t *cnt_in_C,
+      bool *brk_n_write
       );
    ]],
    definition = [[
@@ -31,7 +32,8 @@ ${fn}(
       uint64_t *ptr_cidx,   // number of elements written to C
       ${a_ctype} * last_unq_element,    // storing last visited unique value
       uint64_t idx,   // chunk number
-      uint64_t *cnt_in_C    // count buffer [nC]
+      uint64_t *cnt_in_C,    // count buffer [nC]
+      bool *brk_n_write   // flag which indicates when to flush output buffer
       )
 {
   int status = 0;
@@ -44,13 +46,20 @@ ${fn}(
   uint64_t num_in_C = *ptr_cidx;
   uint64_t aidx = *ptr_aidx;
   ${a_ctype} last_unique_element = *last_unq_element;
-  if ( num_in_C > nC ) { go_BYE(-1); }
+  //if ( num_in_C > nC ) { go_BYE(-1); }
   
   if ( idx != 0 ) {
     // this loop just traverses( also counts )
     // the input vector till you get the next unique value
     for ( ; aidx < nA; aidx++) {
       if ( A[aidx] != last_unique_element ) {
+        // setting 'brk_n_write'flag (chunk needs to be flushed)
+        // when next unique value is found i.e. counting of values is done
+        if ( num_in_C == nC ) {
+          *brk_n_write = true;
+          *ptr_aidx = aidx;
+          goto BYE; 
+        } 
         break;
       }
       else {

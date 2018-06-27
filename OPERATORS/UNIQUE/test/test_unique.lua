@@ -208,4 +208,77 @@ tests.t6 = function ()
   print("Test t6 succeeded")
 end
 
+-- validating unique to return unique values from input vector
+-- where num_elements > chunk_size and
+-- no_of_unique values > chunk_size
+-- [ 1, 2, ... 65534, 65535, 65536 ] [ 65536, 65536, 65537, 65537 ... 65537 ] 
+tests.t7 = function ()
+  local no_of_unq_values = chunk_size + 1
+  local chunk_size = qconsts.chunk_size
+  
+  local input_tbl = {}
+  for i = 1, chunk_size do
+    input_tbl[i] = i
+  end
+  
+  for i = chunk_size+1, chunk_size*2 do
+    if i == chunk_size+1 or i == chunk_size+2 then
+      input_tbl[i] = chunk_size
+    else
+      input_tbl[i] = chunk_size + 1
+    end
+  end
+
+  local input_col = Q.mk_col(input_tbl, "I4")
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == no_of_unq_values)
+  for i = 1, no_of_unq_values do
+    local value = c_to_txt(c, i)
+    -- print(value)
+    assert(value == i)
+  end
+  Q.print_csv(c, { opfile = path_to_here .. "output_t7.csv"} )
+  plfile.delete(path_to_here .. "/output_t7.csv") 
+  print("Test t7 succeeded")
+end
+
+-- validating unique to return unique values from input vector
+-- where num_elements > chunk_size and
+-- no_of_unique values > chunk_size
+-- [ 1, 2, ... 65534, 65535, 65536 ] [ 65536, ... 65536, 65536 ] ..
+-- [ 65536, 65536, 65537, 65537 ... 65537 ] 
+tests.t8 = function ()
+  local no_of_unq_values = chunk_size + 1
+  local chunk_size = qconsts.chunk_size
+  
+  local input_tbl = {}
+  for i = 1, chunk_size do
+    input_tbl[i] = i
+  end
+  
+  for i = chunk_size+1, chunk_size*2 do
+    input_tbl[i] = chunk_size
+  end
+  
+  for i = chunk_size*2+1, chunk_size*3 do
+    if i == chunk_size*2+1 or i == chunk_size*2+2 then
+      input_tbl[i] = chunk_size
+    else
+      input_tbl[i] = chunk_size + 1
+    end
+  end
+
+  local input_col = Q.mk_col(input_tbl, "I4")
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == no_of_unq_values)
+  for i = 1, no_of_unq_values do
+    local value = c_to_txt(c, i)
+      -- print(value)
+      assert(value == i)
+  end
+  Q.print_csv(c, { opfile = path_to_here .. "output_t8.csv"} )
+  plfile.delete(path_to_here .. "/output_t8.csv") 
+  print("Test t8 succeeded")
+end
+
 return tests
