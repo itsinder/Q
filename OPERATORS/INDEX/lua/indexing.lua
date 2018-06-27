@@ -26,11 +26,11 @@ local function index(x, y)
     assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
     expander = require 'Q/OPERATORS/INDEX/lua/expander_index'
     op = "index"
-    local Scalar = require 'libsclr'
+    local to_scalar = require 'Q/UTILS/lua/to_scalar'
     assert(y, "no arg y to index")
     assert(type(y) == "Scalar" or type(y) == "number", "y is not Scalar or number")
     if(type(y) == "number") then
-      y = assert(Scalar.new(y, x:fldtype()), "value out of range")
+      y = assert(to_scalar(y, x:fldtype()), "value out of range")
     end
   elseif x:qtype() == "B1" then
     expander = require 'Q/OPERATORS/INDEX/lua/expander_indices'
