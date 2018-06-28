@@ -172,4 +172,20 @@ fns.vector_to_table = function(vector)
   return tbl
 end
 
+-- Note: qc.RDTSC() returns CPU cycles (not CPU time)
+-- to get CPU time we need to calculate as follows:
+-- Time = CPU cycles / CPU frequency (MHz)
+-- RDTSC function performs this calculation and returns CPU time
+fns.RDTSC = function(cpu_cycles)
+  -- command to get cpu frequency (in MHz)
+  local handle = io.popen("lscpu | grep MHz")
+  local result = handle:read()
+  -- to get cpy freq(number) from string
+  local cpu_frequency = tonumber(string.match(result, "%d+"))
+  handle:close()
+  -- as cpu_frequency is in MHz so * by 1000000
+  local time = cpu_cycles / (cpu_frequency * 1000000)
+  return time
+end
+
 return fns

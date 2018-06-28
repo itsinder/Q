@@ -3,23 +3,40 @@
 #include<string.h>
 #include<stdbool.h>
 #include<inttypes.h>
+#include "q_macros.h"
 
-int unique(int32_t *in_buf, int in_size, int32_t *out_buf, int out_size, int *num_in_out) {
+int
+unique(
+      const int32_t * restrict A,
+      uint64_t nA,
+      uint64_t *ptr_aidx,
+      int32_t *C,
+      uint64_t nC,
+      uint64_t *ptr_num_in_C
+      )
+{
   int status = 0;
-  int out_num = 0;
-  if ( out_buf == NULL ) { return -1; }
-  for ( int i = 0; i < out_size; i++ ) {
-    out_buf[i] = 0;
-  }
-  *num_in_out = 0;
-  for ( int i = 0; i < (in_size - 1); i++ ) {
-    if ( in_buf[i] != in_buf[i+1] ) {
-      out_buf[out_num++] = in_buf[i];
+  
+  if ( A == NULL ) { go_BYE(-1); }
+  if ( nA == 0 ) { go_BYE(-1); }
+  if ( ptr_num_in_C == NULL ) { go_BYE(-1); }
+  if ( ptr_aidx == NULL ) { go_BYE(-1); }
+
+  uint64_t num_in_C = *ptr_num_in_C;
+  uint64_t aidx = *ptr_aidx;
+  if ( num_in_C > nC ) { go_BYE(-1); }
+  
+  for ( ; aidx < nA-1; aidx++ ) { 
+    if ( num_in_C == nC ) { break; }
+    if ( A[aidx] != A[aidx+1] ) {
+      C[num_in_C++] = A[aidx];
+      }
     }
-  }
   // Include last element
-  out_buf[out_num++] = in_buf[in_size-1];
-  *num_in_out = out_num;
+  C[num_in_C++] = A[nA-1];
+  *ptr_num_in_C = num_in_C;
+  *ptr_aidx     = aidx+1;
+BYE:
   return status;
 }
 
@@ -27,13 +44,15 @@ int main() {
   int status = 0;
   int size = 10;
   int32_t *in_buf, *out_buf;
-  int *num_in_out;
+  uint64_t *num_in_out, *aidx;
 
   // Allocate memory for in_buf & out_buf
   in_buf = malloc(size * sizeof("int32_t"));
   out_buf = malloc(size * sizeof("int32_t"));
-  num_in_out = malloc(sizeof("int"));
-
+  num_in_out = malloc(sizeof("uint64_t"));
+  aidx = malloc(sizeof("uint64_t"));
+  aidx[0] = 0;
+  
   // Initialize in_buf
   printf("Input buffer is\n");
   for ( int i = 0; i < size; i++ ) {
@@ -48,9 +67,9 @@ int main() {
   }
 
   // Call to unique
-  status = unique(in_buf, size, out_buf, size, num_in_out);
+  status = unique(in_buf, size, aidx, out_buf, size, num_in_out);
 
-  printf("Unique elements in out_buf = %d\n", *num_in_out);
+  printf("Unique elements in out_buf = %ld\n", *num_in_out);
   for ( int i = 0; i < *num_in_out; i++ ) {
     printf("%d\n", out_buf[i]);
   }

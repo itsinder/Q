@@ -1,0 +1,100 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include "_get_bit_u64.h"
+extern int
+${fn}(
+      const ${a_ctype} * restrict A,
+      uint64_t nA,
+      uint64_t *ptr_aidx,
+      ${a_ctype} *C,
+      uint64_t nC,
+      uint64_t *ptr_cidx,
+      ${a_ctype} * last_unq_element,
+      uint64_t idx,
+      uint64_t *cnt_in_C,
+      bool *brk_n_write
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+
+int
+${fn}(
+      const ${a_ctype} * restrict A,    // input buffer [nA]
+      uint64_t nA,
+      uint64_t *ptr_aidx,   // where in A to start reading from
+      ${a_ctype} *C,    // output buffer [nC]
+      uint64_t nC,    // size of C
+      uint64_t *ptr_cidx,   // number of elements written to C
+      ${a_ctype} * last_unq_element,    // storing last visited unique value
+      uint64_t idx,   // chunk number
+      uint64_t *cnt_in_C,    // count buffer [nC]
+      bool *brk_n_write   // flag which indicates when to flush output buffer
+      )
+{
+  int status = 0;
+  
+  if ( A == NULL ) { go_BYE(-1); }
+  if ( nA == 0 ) { go_BYE(-1); }
+  if ( ptr_cidx == NULL ) { go_BYE(-1); }
+  if ( ptr_aidx == NULL ) { go_BYE(-1); }
+
+  uint64_t num_in_C = *ptr_cidx;
+  uint64_t aidx = *ptr_aidx;
+  ${a_ctype} last_unique_element = *last_unq_element;
+  //if ( num_in_C > nC ) { go_BYE(-1); }
+  
+  if ( idx != 0 ) {
+    // this loop just traverses( also counts )
+    // the input vector till you get the next unique value
+    for ( ; aidx < nA; aidx++) {
+      if ( A[aidx] != last_unique_element ) {
+        // setting 'brk_n_write'flag (chunk needs to be flushed)
+        // when next unique value is found i.e. counting of values is done
+        if ( num_in_C == nC ) {
+          *brk_n_write = true;
+          *ptr_aidx = aidx;
+          goto BYE; 
+        } 
+        break;
+      }
+      else {
+        cnt_in_C[num_in_C-1] = cnt_in_C[num_in_C-1] + 1;
+      }
+    }
+    // if no unique value found then 
+    // store the length till it has read the input vector
+    if( aidx == nA ) {
+      *ptr_aidx = aidx;
+      goto BYE;
+    }
+  }
+  
+  for ( ; aidx < nA-1; aidx++ ) { 
+    if ( num_in_C == nC ) { break; }
+    if ( A[aidx] != A[aidx+1] ) {
+      cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
+      C[num_in_C++] = A[aidx];
+    }
+    else {
+      cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
+    }
+  }
+  
+  // Include last element in out_buf, as comparing values adjacently
+  cnt_in_C[num_in_C] = cnt_in_C[num_in_C] + 1;
+  C[num_in_C++] = A[nA-1];
+  
+  *ptr_cidx = num_in_C;
+  // added 1 to aidx due to for loop condition( aidx < nA-1 ) 
+  *ptr_aidx     = aidx+1;
+  *last_unq_element = A[nA-1];
+BYE:
+  return status;
+}
+   ]]
+}
