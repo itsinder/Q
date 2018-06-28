@@ -4,7 +4,6 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local qc      = require 'Q/UTILS/lua/q_core'
 local chk_chunk      = require 'Q/UTILS/lua/chk_chunk'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
-local qconsts = require 'Q/UTILS/lua/q_consts'
 local record_time = require 'Q/UTILS/lua/record_time'
 
 return function (a, x, y, optargs )

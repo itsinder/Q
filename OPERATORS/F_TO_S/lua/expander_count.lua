@@ -5,13 +5,16 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local chk_chunk      = require 'Q/UTILS/lua/chk_chunk'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local record_time = require 'Q/UTILS/lua/record_time'
+local to_scalar   = require 'Q/UTILS/lua/to_scalar'
 
 return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name),
   "Specializer missing " .. sp_fn_name)
   assert(type(x) == "lVector", "input x should be a lVector")
-  assert(type(y) == "Scalar", "input y must be a Scalar")
+  assert(y, "input y should be a scalar or a number")
+  -- expecting y of type scalar, if not convert to scalar
+  y = assert(to_scalar(y, x:fldtype()), "y should be a Scalar or number")
   assert(x:has_nulls() == false, "Not set up for null values as yet")
   local x_qtype = assert(x:fldtype())
   local status, subs, tmpl = pcall(spfn, x_qtype, optargs)

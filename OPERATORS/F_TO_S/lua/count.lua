@@ -1,8 +1,15 @@
 local T = {}
 local function count(x, y)
+  -- Q.count(x, y): 
+    -- counting the occurrences of a given value(i.e. y)from the given vector(i.e. x)
+        -- returns count (Scalar of type I8) of respective given value
+        -- else returns 0 (no occurrence)
+
+  -- Convention: Q.count(vector, value)
+  -- 1) vector : a vector other than B1 qtype
+  -- 2) value  : number or Scalar value
+  
   assert(type(x) == "lVector", "input must be of type lVector")
-  local to_scalar = assert( require 'Q/UTILS/lua/to_scalar' )
-  y = assert(to_scalar(y, x:fldtype()), "y should be a Scalar or number")
   local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_count')
   local status, z = pcall(expander, "count", x, y)
   if ( not status ) then print(z) end
