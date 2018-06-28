@@ -5,14 +5,16 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local Scalar    = require 'libsclr'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
-
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
 local function expander_index(op, a, b)
   -- Verification
   assert(op == "index")
   assert(type(a) == "lVector", "a must be a lVector ")
-  assert(type(b) == "Scalar", "b must be a Scalar")
-  assert(b:fldtype() == a:fldtype(), "Vector and Scalar should have same type")
+  assert(b, "input y should be a scalar or a number")
+  -- expecting y of type scalar, if not convert to scalar
+  b = assert(to_scalar(b, a:fldtype()), "y should be a Scalar or number")
+  assert(a:fldtype() == b:fldtype(), "Vector and Scalar should have same type")
   -- TODO Relax above assumption about same fieldtypes later
   
   local sp_fn_name = "Q/OPERATORS/INDEX/lua/index_specialize"
