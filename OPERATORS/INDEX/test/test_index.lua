@@ -89,7 +89,9 @@ tests.t6 = function()
   local qtype = "I1"
   local value = 128
   local vec = Q.mk_col(tbl, qtype)
+  print("START: Deliberate error attempt")
   local status, reason = pcall(Q.index,vec, value)
+  print("STOP: Deliberate error attempt")
   assert(status == false)
   print("t6 test completed successfully")
 end
