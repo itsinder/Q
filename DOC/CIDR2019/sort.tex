@@ -23,7 +23,7 @@ Vector \(x\). Then a simple parallel sort consists of
 (1) partitioning \(n\) elements of \(x\) into \(n_B\) bins so that each bin has
 \(n(b)\) elements
 (2) sorting each bin in parallel
-(3) copying each bin into the right place. Probabilistic gaurantees
+(3) copying each bin into the right place. Probabilistic guarantees
 of the form \(P[n(b) \geq (1+\beta) \times(n/n_B)] \leq \epsilon\) 
 allow us to allocate slightly more space than absoutely necessary and to 
 fall back to the sequential sort in the small probability that our estimates are off.
