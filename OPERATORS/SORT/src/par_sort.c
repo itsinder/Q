@@ -5,12 +5,36 @@
 #include <omp.h>
 #include "qsort_asc_I4.h"
 #include "q_incs.h"
+
+
+#define __DATA_TYPE__ uint32_t
+#define SHIFT_TO_TRUNCATE 16
+
 static uint64_t RDTSC( void)
 {
   unsigned int lo, hi;
   asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
   return ((uint64_t)hi << 32) | lo;
 }
+
+static inline int
+get_bidx(
+      uint16_t val, 
+      uint16_t *trunc_lb, 
+      uint16_t *trunc_ub, 
+      int num_bins
+      )
+{
+  int bidx = 0;
+#pragma omp simd reduction(+:bidx)
+  for ( int b = 0; b < num_bins; b++ ) {
+    uint8_t x = ( ( val >= trunc_lb[b] ) && ( val < trunc_ub[b] ));;
+    uint16_t mask = x ? 0xFFFFFFFF : 0;
+    bidx = bidx + ( mask & b );
+  }
+  return bidx;
+}
+
 int
 main(
     int argc,
@@ -19,29 +43,28 @@ main(
 {
   int status = 0;
   // config parameters
-  uint64_t n = 1024 * 1048576;
-  int num_bins = 32;
+  uint64_t n = 512 * 1048576;
+  int num_bins = 4;
   //-- allocations needed for following
-  int32_t **lX = NULL;
-  uint64_t *ub = NULL;
+  __DATA_TYPE__ **lX = NULL;
+  __DATA_TYPE__ *ub = NULL;
+  uint16_t *trunc_ub = NULL;
+  uint16_t *trunc_lb = NULL;
   uint64_t *num_in_bin = NULL;
   uint64_t *cum_num_in_bin = NULL;
-  int32_t *X = NULL;
+  __DATA_TYPE__ *X = NULL;
   // other variables
   uint64_t t_start, t_stop; // malloc and initialize data 
-  X = malloc(n * sizeof(int32_t));
+  X = malloc(n * sizeof(__DATA_TYPE__));
   return_if_malloc_failed(X);
   for ( int i = 0; i < n; i++ ) { X[i] = rand(); }
   //---------------------------------
   // Allocate space for each bin
   int bin_size = (int)((float)n / (float)num_bins  * 1.1);
 
-  lX = malloc(num_bins * sizeof(int32_t *));
+  lX = malloc(num_bins * sizeof(__DATA_TYPE__ *));
   return_if_malloc_failed(lX);
   for ( int b = 0; b < num_bins; b++ ) { lX[b] = NULL; }
-
-  num_in_bin = malloc(num_bins * sizeof(uint64_t));
-  return_if_malloc_failed(num_in_bin);
 
   num_in_bin = malloc(num_bins * sizeof(uint64_t));
   return_if_malloc_failed(num_in_bin);
@@ -52,6 +75,12 @@ main(
   ub = malloc(num_bins * sizeof(uint64_t));
   return_if_malloc_failed(ub);
 
+  trunc_ub = malloc(num_bins * sizeof(uint16_t));
+  return_if_malloc_failed(trunc_ub);
+
+  trunc_lb = malloc(num_bins * sizeof(uint16_t));
+  return_if_malloc_failed(trunc_lb);
+
   for ( int b = 0; b < num_bins; b++ ) { 
     num_in_bin[b] = 0;
     lX[b] = malloc(bin_size * sizeof(int32_t));
@@ -60,17 +89,35 @@ main(
   // START: This is a hack to estimate quantiles
   for ( int b = 0; b < num_bins; b++ ) { 
     ub[b] = (uint64_t)((float)(RAND_MAX) / (float)num_bins * (b+1));
+    trunc_ub[b] = ub[b] >> SHIFT_TO_TRUNCATE;
   }
   ub[num_bins-1] = INT_MAX;
+  trunc_ub[num_bins-1] = USHRT_MAX;
+
+  trunc_lb[0] = 0;
+  for ( int b = 1; b < num_bins; b++ ) { 
+    trunc_lb[b] = trunc_ub[b-1];
+  }
+
   // STOP : This is a hack to estimate quantiles
   // Copy each element from input into its correct bin
   t_start = RDTSC();
   for ( uint64_t i = 0; i < n; i++ ) { 
-    int32_t val = X[i];
+    __DATA_TYPE__ val = X[i];
+    val = val >> SHIFT_TO_TRUNCATE;
+
     int bidx = 0;
     for ( int b = 0; b < num_bins; b++ ) {
-      if ( val <= ub[b] ) { bidx = b; break; }
+      if ( val < trunc_ub[b] ) { bidx = b; break; }
     }
+    int chk_bidx = bidx;
+
+    /*
+     * int bidx = get_bidx(val, trunc_lb, trunc_ub, num_bins);
+    if ( bidx != chk_bidx ) { 
+      printf("hello world\n"); go_BYE(-1); 
+    }
+    */
     uint64_t where_to_put = num_in_bin[bidx];
     // printf("Placing %d in %d of %d \n", i, where_to_put, bidx);
     lX[bidx][where_to_put] = val;
@@ -92,10 +139,10 @@ main(
     cum_num_in_bin[b] = cum_num_in_bin[b-1] + num_in_bin[b-1];
   }
   t_start = RDTSC();
-#pragma omp parallel for 
+// #pragma omp parallel for 
   for ( int b = 0; b < num_bins; b++ ) {
-    int32_t *addr = X + cum_num_in_bin[b];
-    memcpy(addr, lX[b], sizeof(int32_t) * num_in_bin[b]);
+    __DATA_TYPE__ *addr = X + cum_num_in_bin[b];
+    memcpy(addr, lX[b], sizeof(__DATA_TYPE__) * num_in_bin[b]);
   }
   t_stop = RDTSC();
   printf(" move time = %" PRIu64 "\n", t_stop - t_start);
@@ -117,5 +164,8 @@ BYE:
     free_if_non_null(lX);
 
   free_if_non_null(num_in_bin);
+  free_if_non_null(ub);
+  free_if_non_null(trunc_ub);
+  free_if_non_null(trunc_lb);
   free_if_non_null(cum_num_in_bin);
 }
