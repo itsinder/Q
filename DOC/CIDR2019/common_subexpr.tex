@@ -30,8 +30,8 @@ where the fold operator is
 local f_to_s = require 'Q/OPERATORS/F_TO_S/lua/_f_to_s'
 local function fold( fns, vec)
   local status
-  local gens = {}
   -- setup reducers for each input 
+  local gens = {} 
   for i, v in ipairs(fns) do gens[i] = f_to_s[v](vec) end
   -- for each chunk, evaluate reducer on that chunk
   repeat 

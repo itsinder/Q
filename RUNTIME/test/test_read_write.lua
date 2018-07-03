@@ -8,6 +8,9 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local q_test_dir = os.getenv("Q_DATA_DIR")
 
+-- NOTE: appending '/' to Q_DATA_DIR value 
+-- as appending of '/' is not handled at vector.c level
+q_test_dir = q_test_dir .. "/"
 local tests = {} 
 
 tests.t1 = function()

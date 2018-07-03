@@ -43,6 +43,10 @@ local function load_csv(
         cols_to_return[M[i].name] = tt[ttidx]
         ttidx = ttidx + 1
       end
+      if ( M[i].meaning ~= nil ) then 
+        assert(type(M[i].meaning) == "string", "type of meaning field is not string")
+        cols_to_return[M[i].name]:set_meta("meaning", M[i].meaning)
+      end
     end
     return cols_to_return
   end
