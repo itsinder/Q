@@ -24,6 +24,7 @@ vvadd_I4_I4_I4(
 { 
   int status = 0;
 // TODO #pragma omp parallel for schedule(static, Q_MIN_CHUNK_SIZE_OPENMP)
+// #pragma omp parallel for schedule(static) num_threads(4)
   for ( uint64_t i = 0; i < nR; i++ ) {  
     int32_t inv1 = in1[i]; 
     int32_t inv2 = in2[i]; 

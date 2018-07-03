@@ -5,7 +5,7 @@
 
 int main() {
   int status = 0;
-  int chunk_size = 1024 * 64;
+  int chunk_size = 16 * 1024;
   int size = chunk_size * 2;
   int number_of_chunks = ceil((double)size/chunk_size);
   int32_t *in_buf1, *in_buf2, *out_buf;
