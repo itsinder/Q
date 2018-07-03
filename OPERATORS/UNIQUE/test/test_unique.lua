@@ -281,4 +281,80 @@ tests.t8 = function ()
   print("Test t8 succeeded")
 end
 
+-- validating unique to return unique values from input vector
+-- where num_elements are greater than chunk_size
+-- all elements are unique
+tests.t9 = function ()
+  local num_elements = qconsts.chunk_size + 100
+  local input_col = Q.seq( {start = 1, by = 1, qtype = "I4", len = num_elements} ):eval()
+  Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t9.csv"})
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == num_elements)
+  for i = 1, c:length() do
+    local value = c_to_txt(c, i)
+    -- print(value, i)
+    assert(value == i)
+  end
+  -- Q.print_csv(c)
+  plfile.delete(path_to_here .. "/input_file_t9.csv") 
+  print("Test t9 succeeded")
+end
+
+-- validating unique to return unique values from input vector
+-- where num_elements are greater than chunk_size
+-- all elements are same
+tests.t10 = function ()
+  local num_elements = qconsts.chunk_size + 100
+  local input_col = Q.const({ val = 1, len = num_elements, qtype = "I4"}):eval()
+  Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t10.csv"})
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == 1)
+  for i = 1, c:length() do
+    local value = c_to_txt(c, i)
+    -- print(value, i)
+    assert(value == i)
+  end
+  -- Q.print_csv(c)
+  plfile.delete(path_to_here .. "/input_file_t10.csv") 
+  print("Test t10 succeeded")
+end
+
+-- validating unique to return unique values from input vector
+-- where num_elements are greater than chunk_size
+-- random value n on n(some collisions not too many)
+-- as sorting 'asc' so validating using is_next(geq)
+tests.t11 = function ()
+  local num_elements = qconsts.chunk_size * 2
+  local input_col = Q.rand( { lb = 1, ub = 80000, qtype = "I4", len = num_elements }):eval()
+  input_col =  Q.sort(input_col, "asc")
+  Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t11.csv"})
+  local c = Q.unique(input_col):eval()
+  print(c:length())
+  assert(c:length())
+  local z = Q.is_next(c, "geq")
+  assert(type(z) == "Reducer")
+  local a, b = z:eval()
+  assert(type(a) == "boolean")
+  assert(type(b) == "number")
+  assert(a == true)
+  -- Q.print_csv(c)
+  plfile.delete(path_to_here .. "/input_file_t11.csv") 
+  print("Test t11 succeeded")
+end
+
+-- validating unique to return unique values from input vector
+-- internally should set 'sort_order' metadata as 'desc'
+tests.t12 = function ()
+  local expected_output = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }
+  local input_col = Q.mk_col( { 10, 10, 9, 9, 9, 8, 7, 7, 6, 6, 6, 5, 4, 3, 2, 1}, "I1")
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == #expected_output )
+  for i = 1, #expected_output do
+    local value = c_to_txt(c, i)
+    -- print(value, expected_output[i])
+    assert(value == expected_output[i])
+  end
+  -- Q.print_csv(c)
+  print("Test t12 succeeded")
+end
 return tests

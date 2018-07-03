@@ -40,6 +40,7 @@ require 'Q/QTILS/lua/vvseq'
 require 'Q/QTILS/lua/vvpromote'
 require 'Q/QTILS/lua/fold'
 require 'Q/QTILS/lua/average'
+require 'Q/QTILS/lua/is_sorted'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 _G['g_time'] = {}
 _G['g_ctr']  = {}

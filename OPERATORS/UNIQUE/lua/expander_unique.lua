@@ -4,6 +4,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local qtils = require 'Q/QTILS/lua/is_sorted'
 
 local function expander_unique(op, a)
   -- Verification
@@ -51,6 +52,15 @@ local function expander_unique(op, a)
       brk_n_write = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
       brk_n_write = ffi.cast("bool *", brk_n_write)
 
+      -- if a:sort_order field is nil then check the input vector for sort order
+      if ( a:get_meta( "sort_order") == nil ) then
+        -- calling an utility called is_sorted(vec)
+        local order = qtils.is_sorted(a)
+        assert( order, "input vector not sorted")
+        a:set_meta( "sort_order", order)
+      else
+        assert( (a:get_meta( "sort_order") == "asc") or ( a:get_meta( "sort_order") == "dsc" ), "input vector not sorted" )
+      end
       first_call = false
     end
     
