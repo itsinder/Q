@@ -357,4 +357,24 @@ tests.t12 = function ()
   -- Q.print_csv(c)
   print("Test t12 succeeded")
 end
+
+-- validating unique
+-- input vector is nort sorted
+-- internally should sort(by creating a clone of input vector) 
+-- and should set 'sort_order' metadata to default as 'asc'
+tests.t13 = function ()
+  local expected_output = { 1,2,3,4,5,6,7,8,9,10 }
+  local input_col = Q.mk_col( { 10, 9, 5, 2, 7, 6, 8, 4, 1, 3}, "I1")
+  local c = Q.unique(input_col):eval()
+  assert(c:length() == #expected_output )
+  for i = 1, #expected_output do
+    local value = c_to_txt(c, i)
+    -- print(value, expected_output[i])
+    assert(value == expected_output[i])
+  end
+  Q.print_csv(c)
+  -- Q.print_csv(input_col)
+  print("Test t13 succeeded")
+end
+
 return tests
