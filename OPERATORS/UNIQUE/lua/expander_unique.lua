@@ -32,22 +32,25 @@ local function expander_unique(op, a)
   local last_unq_element = 0
   local brk_n_write
   
-  -- if a:sort_order field is nil then check the input vector for sort order
-  if ( a:get_meta( "sort_order") == nil ) then
+  -- NOTE: For unique operator, input vector needs to be sorted(asc/dsc)  
+  local sort_order = a:get_meta( "sort_order")
+  -- if sort_order field is nil then check the input vector for sort order
+  if ( sort_order == nil ) then
     -- calling an utility called is_sorted(vec)
-    local order = qtils.is_sorted(a)
+    local status, order = qtils.is_sorted(a)
     -- if input vector is not sorted, cloning and sorting that cloned vector
-    if order == nil then
+    if status == false and order == nil then
       local a_clone = a:clone()
       a_clone = sort(a_clone, "asc")
-      order = "asc"
       a = a_clone
+    else
+      assert( status == true, "is_sorted utility failed")
+      assert( order, "input vector not sorted")
+      a:set_meta( "sort_order", order)
     end
-    assert( order, "input vector not sorted")
-    a:set_meta( "sort_order", order)
   else
-    assert( (a:get_meta( "sort_order") == "asc") or ( a:get_meta( "sort_order") == "dsc" ),
-      "input vector not sorted" )
+    assert( (sort_order == "asc") or ( sort_order == "dsc" ),
+      "input vector not sorted")
   end
   
   local function unique_gen(chunk_num)

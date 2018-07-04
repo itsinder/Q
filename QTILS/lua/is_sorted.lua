@@ -20,13 +20,18 @@ local function is_sorted(x)
   local is_dsc = is_dsc_reducer:eval()
   assert(type(is_dsc) == "boolean")
   
+  local status = nil
   local order = nil
   if is_asc == true then
+    status = true
     order = "asc"
   elseif is_dsc == true then
+    status = true
     order = "dsc"
+  else
+    status = false
   end
-  return order
+  return status, order
 end
 T.is_sorted = is_sorted
 require('Q/q_export').export('is_sorted', is_sorted)
