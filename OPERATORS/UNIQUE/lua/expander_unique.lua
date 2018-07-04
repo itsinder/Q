@@ -62,7 +62,7 @@ local function expander_unique(op, a)
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
-      cnt_buf = assert(cmem.new(sz_out * ffi.sizeof("uint64_t")))
+      cnt_buf = assert(cmem.new(sz_out * ffi.sizeof("int64_t")))
 
       cidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       cidx = ffi.cast("uint64_t *", cidx)
@@ -104,7 +104,7 @@ local function expander_unique(op, a)
       
       local casted_a_chunk = ffi.cast( subs.a_ctype .. "*",  get_ptr(a_chunk))
       local casted_out_buf = ffi.cast( subs.a_ctype .. "*",  get_ptr(out_buf))
-      local casted_cnt_buf = ffi.cast( "uint64_t *",  get_ptr(cnt_buf))
+      local casted_cnt_buf = ffi.cast( "int64_t *",  get_ptr(cnt_buf))
       local status = qc[func_name](casted_a_chunk, a_len, aidx, casted_out_buf, sz_out, cidx,
         last_unq_element, a_chunk_idx, casted_cnt_buf, brk_n_write )
       assert(status == 0, "C error in UNIQUE")
