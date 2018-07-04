@@ -15,13 +15,20 @@ local chunk_size = qconsts.chunk_size
 local tests = {}
 tests.t1 = function ()
   local out_table = {1, 2, 3, 4, 5}
+  local cnt_table = {1, 2, 4, 1, 1}
   local a = Q.mk_col({1, 2, 2, 3, 3, 3, 3, 4, 5}, "I4")
-  local c = Q.unique(a):eval()
+  local c, d = Q.unique(a)
+  c:eval()
+  assert(d:is_eov() == true)
   assert(c:length() == #out_table)
+  assert(d:length() == #cnt_table)
 
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     assert(value == out_table[i])
+
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   -- local opt_args = { opfile = "" }
   -- Q.print_csv(c, opt_args)

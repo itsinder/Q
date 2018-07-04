@@ -52,7 +52,10 @@ local function expander_unique(op, a)
     assert( (sort_order == "asc") or ( sort_order == "dsc" ),
       "input vector not sorted")
   end
-  
+
+  local unique_vec = lVector( { gen = true, has_nulls = false, qtype = a:qtype() } )
+  local cnt_vec = lVector( { gen = true, has_nulls = false, qtype = "I8" } )
+
   local function unique_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     --assert(chunk_num == a_chunk_idx)
@@ -85,8 +88,17 @@ local function expander_unique(op, a)
     repeat 
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
       
-      if a_len == 0 then 
-        return tonumber(cidx[0]), out_buf, nil 
+      if a_len == 0 then
+        if tonumber(cidx[0]) > 0 then
+          unique_vec:put_chunk(out_buf, nil, tonumber(cidx[0]))
+          cnt_vec:put_chunk(cnt_buf, nil, tonumber(cidx[0]))
+        end
+        if tonumber(cidx[0]) < qconsts.chunk_size then
+          unique_vec:eov()
+          cnt_vec:eov()
+        end
+        return tonumber(cidx[0])
+        -- return tonumber(cidx[0]), out_buf, nil 
       end
       assert(a_nn_chunk == nil, "Unique vector cannot have nulls")
       
@@ -102,9 +114,20 @@ local function expander_unique(op, a)
         aidx[0] = 0
       end
     until ( tonumber(cidx[0]) == sz_out and brk_n_write[0] == true)
-    return tonumber(cidx[0]), out_buf, nil
+
+    -- Write values to vector
+    unique_vec:put_chunk(out_buf, nil, tonumber(cidx[0]))
+    cnt_vec:put_chunk(cnt_buf, nil, tonumber(cidx[0]))
+    if tonumber(cidx[0]) < qconsts.chunk_size then
+      unique_vec:eov()
+      cnt_vec:eov()
+    end
+    return tonumber(cidx[0])
+    --return tonumber(cidx[0]), out_buf, nil
   end
-  return lVector( { gen = unique_gen, has_nulls = false, qtype = a:qtype() } )
+  unique_vec:set_generator(unique_gen)
+  return unique_vec, cnt_vec
+  --return lVector( { gen = unique_gen, has_nulls = false, qtype = a:qtype() } )
 end
 
 return expander_unique
