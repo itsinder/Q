@@ -39,15 +39,19 @@ end
 -- where num_elements are greater than chunk_size 
 tests.t2 = function ()
   local out_table = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+  local cnt_table = {26215, 26215, 26215, 26215, 26215, 26215, 26214, 26214, 26214, 26214}
   local input = Q.period({ len = chunk_size*4+2, start = 1, by = 1, period = 10, qtype = "I4"}):persist(true):eval()
   
   local input_col = Q.sort(input, "asc")
   -- Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t2.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, out_table[i])
     assert(value == out_table[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   print("Test t2 succeeded")
 end
@@ -58,6 +62,7 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 3, 3, 3, 3, 3, 3, ... 3 ]
 tests.t3 = function ()
   local expected_values = {1, 2, 3}
+  local cnt_table = {32767, 32768, 65537}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -76,12 +81,15 @@ tests.t3 = function ()
   local input_col = Q.mk_col(input_tbl, "I1")
   input_col = Q.sort(input_col, "asc"):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t3.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_values)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, expected_values[i])
     assert(value == expected_values[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t3.csv") 
@@ -94,6 +102,7 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3 ... 3 (half the length of second chunk)]
 tests.t4 = function ()
   local expected_values = {1, 2, 3}
+  local cnt_table = {32767, 32768, 32769}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -112,12 +121,15 @@ tests.t4 = function ()
   local input_col = Q.mk_col(input_tbl, "I1")
   input_col = Q.sort(input_col, "asc"):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t4.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_values)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, expected_values[i])
     assert(value == expected_values[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t4.csv") 
@@ -130,6 +142,7 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 4, 4, ... 5, 5 ]
 tests.t5 = function ()
   local expected_values = {1, 2, 3, 4, 5}
+  local cnt_table = {32767, 32768, 3, 32767, 32767}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -155,12 +168,15 @@ tests.t5 = function ()
   local input_col = Q.mk_col(input_tbl, "I1")
   input_col = Q.sort(input_col, "asc"):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t5.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_values)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, expected_values[i])
     assert(value == expected_values[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t5.csv") 
@@ -172,6 +188,7 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 3, 3 ... 3 ] [ 3, 3, 4, 4, ... 5, 5 ]
 tests.t6 = function ()
   local expected_values = {1, 2, 3, 4, 5}
+  local cnt_table = {32767, 32768, 65539, 32767, 32767}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -203,12 +220,15 @@ tests.t6 = function ()
   local input_col = Q.mk_col(input_tbl, "I1")
   input_col = Q.sort(input_col, "asc"):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t6.csv"})
-  local c = Q.unique(input_col):eval()
+  local c,d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_values)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, expected_values[i])
     assert(value == expected_values[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t6.csv") 
@@ -220,14 +240,17 @@ end
 -- no_of_unique values > chunk_size
 -- [ 1, 2, ... 65534, 65535, 65536 ] [ 65536, 65536, 65537, 65537 ... 65537 ] 
 tests.t7 = function ()
+  local cnt_table = {}
+  
   local no_of_unq_values = chunk_size + 1
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
   for i = 1, chunk_size do
     input_tbl[i] = i
+    cnt_table[i] = 1
   end
-  
+  cnt_table[chunk_size] = 3
   for i = chunk_size+1, chunk_size*2 do
     if i == chunk_size+1 or i == chunk_size+2 then
       input_tbl[i] = chunk_size
@@ -235,14 +258,17 @@ tests.t7 = function ()
       input_tbl[i] = chunk_size + 1
     end
   end
-
+  cnt_table[chunk_size + 1] = chunk_size - 2
   local input_col = Q.mk_col(input_tbl, "I4")
-  local c = Q.unique(input_col):eval()
+  local c,d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == no_of_unq_values)
   for i = 1, no_of_unq_values do
     local value = c_to_txt(c, i)
     -- print(value)
     assert(value == i)
+    value = c_to_txt(d, i)
+    assert(value, cnt_table[i])
   end
   Q.print_csv(c, { opfile = path_to_here .. "output_t7.csv"} )
   plfile.delete(path_to_here .. "/output_t7.csv") 
@@ -255,14 +281,16 @@ end
 -- [ 1, 2, ... 65534, 65535, 65536 ] [ 65536, ... 65536, 65536 ] ..
 -- [ 65536, 65536, 65537, 65537 ... 65537 ] 
 tests.t8 = function ()
+  local cnt_table = {}
   local no_of_unq_values = chunk_size + 1
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
   for i = 1, chunk_size do
     input_tbl[i] = i
+    cnt_table[i] = 1
   end
-  
+  cnt_table[chunk_size] = chunk_size + 3
   for i = chunk_size+1, chunk_size*2 do
     input_tbl[i] = chunk_size
   end
@@ -274,14 +302,17 @@ tests.t8 = function ()
       input_tbl[i] = chunk_size + 1
     end
   end
-
+  cnt_table[chunk_size+1] = chunk_size - 2
   local input_col = Q.mk_col(input_tbl, "I4")
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == no_of_unq_values)
   for i = 1, no_of_unq_values do
     local value = c_to_txt(c, i)
       -- print(value)
       assert(value == i)
+      value = c_to_txt(d, i)
+      assert(value == cnt_table[i])
   end
   Q.print_csv(c, { opfile = path_to_here .. "output_t8.csv"} )
   plfile.delete(path_to_here .. "/output_t8.csv") 
@@ -292,15 +323,22 @@ end
 -- where num_elements are greater than chunk_size
 -- all elements are unique
 tests.t9 = function ()
+  local cnt_table = {}
   local num_elements = qconsts.chunk_size + 100
+  for i = 1, num_elements do
+    cnt_table[i] = 1
+  end
   local input_col = Q.seq( {start = 1, by = 1, qtype = "I4", len = num_elements} ):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t9.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == num_elements)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, i)
     assert(value == i)
+    value = c_to_txt(d, i)
+    assert(value, cnt_table[i])
   end
   -- Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t9.csv") 
@@ -314,12 +352,14 @@ tests.t10 = function ()
   local num_elements = qconsts.chunk_size + 100
   local input_col = Q.const({ val = 1, len = num_elements, qtype = "I4"}):eval()
   Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t10.csv"})
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == 1)
   for i = 1, c:length() do
     local value = c_to_txt(c, i)
     -- print(value, i)
     assert(value == i)
+    value = c_to_txt(d, i)
   end
   -- Q.print_csv(c)
   plfile.delete(path_to_here .. "/input_file_t10.csv") 
@@ -353,13 +393,17 @@ end
 -- internally should set 'sort_order' metadata as 'desc'
 tests.t12 = function ()
   local expected_output = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }
+  local cnt_table = { 2, 3, 1, 2, 3, 1, 1, 1, 1, 1}
   local input_col = Q.mk_col( { 10, 10, 9, 9, 9, 8, 7, 7, 6, 6, 6, 5, 4, 3, 2, 1}, "I1")
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_output )
   for i = 1, #expected_output do
     local value = c_to_txt(c, i)
     -- print(value, expected_output[i])
     assert(value == expected_output[i])
+    value = c_to_txt(d, i)
+    assert(value, cnt_table[i])
   end
   -- Q.print_csv(c)
   print("Test t12 succeeded")
