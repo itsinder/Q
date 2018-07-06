@@ -126,6 +126,7 @@ local function expander_unique(op, a)
     --return tonumber(cidx[0]), out_buf, nil
   end
   unique_vec:set_generator(unique_gen)
+  cnt_vec:set_generator(unique_gen)
   return unique_vec, cnt_vec
   --return lVector( { gen = unique_gen, has_nulls = false, qtype = a:qtype() } )
 end

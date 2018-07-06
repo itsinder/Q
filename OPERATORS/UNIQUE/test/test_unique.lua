@@ -11,6 +11,7 @@ assert(plpath.isdir(path_to_here))
 local chunk_size = qconsts.chunk_size
 
 -- validating unique operator to return unique values from input vector
+-- FUNCTIONAL
 -- where num_elements are less than chunk_size
 local tests = {}
 tests.t1 = function ()
@@ -415,17 +416,45 @@ end
 -- and should set 'sort_order' metadata to default as 'asc'
 tests.t13 = function ()
   local expected_output = { 1,2,3,4,5,6,7,8,9,10 }
+  local cnt_table = { 1,1,1,1,1,1,1,1,1,1 }
   local input_col = Q.mk_col( { 10, 9, 5, 2, 7, 6, 8, 4, 1, 3}, "I1")
-  local c = Q.unique(input_col):eval()
+  local c, d = Q.unique(input_col)
+  c:eval()
   assert(c:length() == #expected_output )
+  assert(d:length() == #cnt_table)
   for i = 1, #expected_output do
     local value = c_to_txt(c, i)
     -- print(value, expected_output[i])
     assert(value == expected_output[i])
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
   end
   Q.print_csv(c)
   -- Q.print_csv(input_col)
   print("Test t13 succeeded")
+end
+
+-- Q.unique() returns 2 vectors (unique_vec and count_vec)
+-- testing: a call to count_vec:eval() should also evaluate unique_vec
+tests.t14 = function()
+  local expected_output = { 1,2,3,4,5 }
+  local cnt_table = { 1,2,3,4,5 }
+  local input_col = Q.mk_col( { 1,2,2,3,3,3,4,4,4,4,5,5,5,5,5 }, "I1")
+  local unique_vec, count_vec = Q.unique(input_col)
+  -- calling eval() for count_vec
+  count_vec:eval()
+  -- checking, unique_vec should also be evaluated
+  assert(unique_vec:num_elements() == #expected_output)
+  assert(unique_vec:is_eov() == true)
+  for i = 1, #expected_output do
+    local value = c_to_txt(unique_vec, i)
+    -- print(value, expected_output[i])
+    assert(value == expected_output[i])
+    value = c_to_txt(count_vec, i)
+    assert(value == cnt_table[i])
+  end
+  Q.print_csv(unique_vec)
+  print("Test t14 succeeded")
 end
 
 return tests
