@@ -13,23 +13,17 @@ local T = {}
 local function is_sorted(x)
   local Q = require 'Q'
   assert(x and type(x) == "lVector", "input must be of type lVector")
-  local is_asc_reducer = Q.is_next(x, "geq")
-  local is_asc = is_asc_reducer:eval()
-  assert(type(is_asc) == "boolean")
-  local is_dsc_reducer = Q.is_next(x, "leq")
-  local is_dsc = is_dsc_reducer:eval()
-  assert(type(is_dsc) == "boolean")
-  
-  local status = nil
+    
+  local status = false
   local order = nil
-  if is_asc == true then
+  -- is_next(geq) --> sort order is 'asc'
+  -- is_next(leq) --> sort order is 'dsc'
+  if ( Q.is_next(x, "geq"):eval() ) == true then
     status = true
     order = "asc"
-  elseif is_dsc == true then
+  elseif ( Q.is_next(x, "leq"):eval() ) == true then
     status = true
     order = "dsc"
-  else
-    status = false
   end
   return status, order
 end
