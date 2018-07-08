@@ -1,19 +1,16 @@
-permute = function(val_col, idx_col, idx_in_src)
-  local val_qtype = assert(val_col:fldtype())
-  local idx_qtype = assert(idx_col:fldtype())
-  local val_n = val_col:length()
-  local idx_n = idx_col:length()
-  assert(idx_n == val_n)
-
-  local tertyp = terra_types[val_qtype]  -- map Q data type to Terra data type
-  local chk_val_n, val_vec, nn_val_vec = val_col:get_all()
-  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:get_all()
-  local out_arr = ffi.malloc(qconsts.qtypes[val_qtype].width * val_n)
-
-  t_permute(tertyp, terra_types[idx_qtype])(val_vec, idx_vec, out_arr, val_n, idx_in_src)
-  -- create blank vector whose meta is cloned from val_col's meta
-  local out_col = create_col_with_meta(val_col)  
-  out_col:put_chunk(out_arr, nil, val_n) 
-  out_col:eov()
-  return out_col
+permute = function(val_vec, idx_vec, mode)
+  local val_qtype = assert(val_vec:fldtype())
+  local val_ttype = q_to_terra[val_qtype]  
+  local idx_qtype = assert(idx_vec:fldtype())
+  local idx_ttype = q_to_terra[idx_qtype]  
+  local val_n, val_vec = val_vec:get_all()
+  local     _, idx_vec = idx_vec:get_all()
+  local val_width = qconsts.qtypes[val_qtype].width
+  local out = ffi.malloc(val_width * val_n)
+  t_permute(val_ttype, idx_ttype)(val_vec, idx_vec, out, val_n, mode)
+  -- create blank vector whose meta is cloned from val_vec's meta
+  local out_vec = Vector({qtype = val_qtype})
+  out_vec:put_chunk(out, nil, val_n) 
+  out_vec:eov()
+  return out_vec
 end

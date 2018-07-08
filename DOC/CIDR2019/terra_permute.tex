@@ -4,9 +4,9 @@ Vectorized operators in Q are intrinsically overloaded i.e. the same Q operator 
 Overloading is achieved as follows.
 \be
 \item static compilation: In this case, the operator writer implements
-  templatized C-like code. At build time, C source code is generated for
-  all relevant combinations of data types which is then compiled into a 
-  single \verb+.so+.
+  templatized C-like code. At build time, the template is fleshed out for all
+  relevant combinations of data types to generate the \verb+.c+ and \verb+.h+
+  files, which are then compiled into a single \verb+.so+.
 \item dynamic compilation: 
   In this case too, we require the existence of templates. 
   The server starts up with a minimal set of core functionality. 
@@ -19,20 +19,23 @@ Overloading is achieved as follows.
 
 \item we define a function for a particular combination of data types
   dynamically, in a strongly typed language, that can bind seamlessly
-  with the host language (Lua, in our case). This was done using the Terra
-  language, details in Section \ref{terraPermute} 
+  with the host language (Lua, in our case). 
+  {\bf SRINATH to explain above in more detail.}
+  This was done using the Terra
+  language, details in Section \ref{Terra} 
   \ee
 
 \subsection{Terra} 
+\label{Terra} 
 Terra is ``a low-level system programming language that is embedded in and
-meta-programmed by the Lua programming language'' \cite{devito:terra}
+meta-programmed by the Lua programming language'' \cite{devito15xx}
 Terra offered the best of both worlds, the performance of compiled code
 with the dynamic typing of a scripting language.
 To evaluate Terra in context of Q, we implemented the {\tt permute()} operator, described below, using Terra.
 
 The \(permute\) operator applies an index \(\mathrm{idx}\) vector to an input vector \(x\)
 to produce a permuted variant \(y\) of \(x\). 
-If \(y = \mathrm{Q.permute}(x, \mathrm{idx})\) and \(x = \{10, 20, 30\}\) and
+If \(y = \mathrm{Q.permute}(x, \mathrm{idx}, \mathrm{mode})\) and \(x = \{10, 20, 30\}\) and
 \(\mathrm{idx} = \{2, 1,
 0\}\), then \(y = \{30, 20, 10\}\).
 It comes in two variants:
@@ -55,17 +58,13 @@ Scatter: \(y[\mathrm{idx}[i]] \leftarrow x[i]\)
 Figure~\ref{permute_in_terra} shows the Terra function used to implement it.
 Note the memoization of the function definition; thus given the combination of requisite data types, the Terra function is defined on-demand (lazily) and memoized for future usage.
 
-\subsubsection{Q to Terra data type mapping}
-Before we actually look at the {\tt permute()} function, we need to map Q data types onto the Terra data types. A global object {\tt terra\_types} is a simple mapping from Q data types to Terra data types, and is defined as
-\begin{verbatim}
-terra_types = {} 
-terra_types['I1'] = int8
-terra_types['I2'] = int16
--- mappings for the other data types follow
-\end{verbatim}
+In order to invoke the Terra function (Figure\ref{permute_in_terra} from Q, we
+need to map Q's data types to Terra. This is done with a simple global 
+array, \verb+q_to_terra+ such that, for example, 
+\verb+q_to_terra['I4'] = int32_t+
 
-\subsubsection{The {\tt permute()} Lua function}
-Q's permute operator, which uses the Terra function of Figure~\ref{XXX} 
+Q's permute operator, which uses the Terra function of
+Figure~\ref{permute_in_terra} 
 is presented in Figure~\ref{permute_in_Q}. 
 Given a vector of type {\tt val\_qtype} and an index vector, it 
 returns a vector of type {\tt val\_qtype}.

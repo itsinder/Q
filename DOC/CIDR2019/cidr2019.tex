@@ -1,6 +1,16 @@
 \startreport{Manual Over-rides for Analytical Databases}
 \reportauthor{Ramesh Subramonian et al}
 
+\makeatletter
+    \let\@internalcite\cite
+    \def\cite{\def\citeauthoryear##1##2{##1, ##2}\@internalcite}
+    \def\shortcite{\def\citeauthoryear##1{##2}\@internalcite}
+    \def\@biblabel#1{\def\citeauthoryear##1##2{##1, ##2}[#1]\hfill}
+\makeatother
+
+
+\input{abstract}
+
 \section{Q's data structures}
 
 Q has just two primitive data structures, vectors (Section~\ref{vectors}) 
@@ -15,3 +25,7 @@ and scalars (Section~\ref{scalars}).
 \input{common_subexpr}
 
 \input{terra_permute}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{cidr2019}
+
