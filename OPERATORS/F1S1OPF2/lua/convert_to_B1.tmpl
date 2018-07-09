@@ -39,7 +39,7 @@ ${fn}(
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
-// TODO #pragma omp parallel for 
+#pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < nR; i++ ) { 
     status = set_bit_u64(out, i, in[i]);
     if ( status < 0 ) { continue; }

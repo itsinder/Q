@@ -53,14 +53,15 @@ ${fn}(
   }
   for ( uint32_t tid = 0; tid < nT; tid++ ) { t_num_violation[tid] = 0; }
   uint64_t block_size = mcr_max(1, nR / nT);
-// TODO #pragma omp parallel for
+
+#pragma omp parallel for schedule(static)
   for ( uint32_t tid = 0; tid < nT; tid++ ) { 
     uint64_t lb = tid * block_size;
     uint64_t ub = lb + block_size;
     if ( lb == 0 ) { lb = 1; }
     if ( tid == (nT-1) ) { ub = nR; }
     uint64_t num_violation = 0;
-// TODO #pragma omp simd reduction(+:num_violation)
+#pragma omp simd reduction(+:num_violation)
     for ( uint64_t i  = lb; i < ub; i++ ) {  
       num_violation += in[i] ${comparison_operator} in[i-1];
     }
