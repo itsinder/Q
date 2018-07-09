@@ -1,109 +1,92 @@
 \section{Operator polymorphism in Q}
 
 Vectorized operators in Q are intrinsically overloaded i.e. the same Q operator (Lua function) can be invoked with vectors of any of the supported Q data-types [\ref{vectors}].
+Overloading is achieved as follows.
+\be
+\item static compilation: In this case, the operator writer implements
+  templatized C-like code. At build time, the template is fleshed out for all
+  relevant combinations of data types to generate the \verb+.c+ and \verb+.h+
+  files, which are then compiled into a single \verb+.so+.
+\item dynamic compilation: 
+  In this case too, we require the existence of templates. 
+  The server starts up with a minimal set of core functionality. 
+  However, the generation of the source file, compiling and loading
+  are done on demand. The results are cached
+  so that subsequent calls to the same operator do not incur this overhead.
 
-This kind of overloading can generally be achieved with any of the below mechanisms:
-\be
-\item static compilation: In this case, the operator writer implements templatized C-like code, from which C source code is generated for all combinations of data types which is then compiled during the build process. This is the approach we're using commonly inside the Q build currently.
-\item dynamic compilation: Benefit of this approach is that a function is compiled/linked only as and when needed for a given combination of data types. 
-\be
-\item when a C function is required for a particular combination of data types, the function is compiled dynamically from the templatized C-code. We have experimented with this, and are currently evaluating this approach for scalability and maintainability.
-\item we define a function for a particular combination of data types dynamically, in a strongly typed language, that can bind seamlessly with the host language (Lua, in our case).
-In this context, we explored Terra which is detailed in section \ref{terraPermute}
-\ee
-\ee
+  {\em Need to talk about what happens when  the server starts up again. Where
+  are the .so files and the .h files kept and cdef'd}
+
+\item we define a function for a particular combination of data types
+  dynamically, in a strongly typed language, that can bind seamlessly
+  with the host language (Lua, in our case). 
+  {\bf SRINATH to explain above in more detail.}
+  This was done using the Terra
+  language, details in Section \ref{Terra} 
+  \ee
 
 \subsection{Terra} 
-Terra is ``a low-level system programming language that is embedded in and meta-programmed by the Lua programming language''. [?? ref with url] 
+\label{Terra} 
+Terra is ``a low-level system programming language that is embedded in and
+meta-programmed by the Lua programming language'' \cite{devito15xx}
+Terra offered the best of both worlds, the performance of compiled code
+with the dynamic typing of a scripting language.
+To evaluate Terra in context of Q, we implemented the {\tt permute()} operator, described below, using Terra.
 
-Terra seemed a very promising option w.r.t. dynamic compilation. To evaluate Terra in context of Q, we implemented the {\tt permute()} operator, described below, using Terra.
-
-\subsection{The {\tt permute()} operator} 
-The \(permute\) operator applies an \(idx\) vector to an input vector \(x\) to produce a permuted variant \(y\) of \(x\). 
+The \(permute\) operator applies an index \(\mathrm{idx}\) vector to an input vector \(x\)
+to produce a permuted variant \(y\) of \(x\). 
+If \(y = \mathrm{Q.permute}(x, \mathrm{idx}, \mathrm{mode})\) and \(x = \{10, 20, 30\}\) and
+\(\mathrm{idx} = \{2, 1,
+0\}\), then \(y = \{30, 20, 10\}\).
 It comes in two variants:
-\be
-\item Gather : \(y[i] \leftarrow x[idx[i]]\) for  \(0 \leq i < n\)
-\item Scatter:  \(y[idx[i]] \leftarrow x[i]\) for  \(0 \leq i < n\)
-\ee
+(a) 
+Gather : \(y[i] \leftarrow x[\mathrm{idx}[i]]\) and (b) 
+Scatter: \(y[\mathrm{idx}[i]] \leftarrow x[i]\) 
 
-\subsubsection{Q {\tt permute()} usage example}
-\begin{verbatim}
-val_col = mk_col ({10, 20, 30, 40, 50, 60}, "I4")
-idx_col = mk_col({0, 5, 1, 4, 2, 3}, "I4")
--- gather
-y = Q.permute(val_col, idx_col, true) -- y is vector "10,60,20,50,30,40," 
--- scatter
-y = Q.permute(val_col, idx_col, false) -- y is vector "10,30,50,60,40,20,"
-\end{verbatim}
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{12 cm}
+\centering
+\verbatiminput{terra_code}
+\caption{Terra code for gather/scatter variations of permute}
+\label{permute_in_terra}
+\end{minipage}
+}
+\end{figure}
 
-\subsection{{\tt permute()} implementation using Terra} \label{terraPermute}
-\subsubsection{Terra function definition}
-Below is the internal, dynamically compiled, Terra function definition.
-
-Note that {\tt idx\_in\_src} is a boolean parameter; \(true \Rightarrow gather\); \(false \Rightarrow scatter\).
-
-\begin{verbatim}
-local t_permute = function(elemtyp, idxtyp)
-    return terra(src: &elemtyp, idx: &idxtyp, dest: &elemtyp, n: int, idx_in_src: bool)
-      if (idx_in_src) then
-        for i = 0,n do
-          dest[i]=src[idx[i]]
-        end
-      else
-        for i = 0,n do
-          dest[idx[i]] = src[i]
-        end
-      end
-    end
-end
-
-t_permute = terralib.memoize(t_permute)
-\end{verbatim}
-
+Figure~\ref{permute_in_terra} shows the Terra function used to implement it.
 Note the memoization of the function definition; thus given the combination of requisite data types, the Terra function is defined on-demand (lazily) and memoized for future usage.
 
-\subsubsection{Q to Terra data type mapping}
-Before we actually look at the {\tt permute()} function, we need to map Q data types onto the Terra data types. A global object {\tt terra\_types} is a simple mapping from Q data types to Terra data types, and is defined as
-\begin{verbatim}
-terra_types = {} 
-terra_types['I1'] = int8
-terra_types['I2'] = int16
--- mappings for the other data types follow
-\end{verbatim}
+In order to invoke the Terra function (Figure\ref{permute_in_terra} from Q, we
+need to map Q's data types to Terra. This is done with a simple global 
+array, \verb+q_to_terra+ such that, for example, 
+\verb+q_to_terra['I4'] = int32_t+
 
-\subsubsection{The {\tt permute()} Lua function}
-Finally, below is snippet from the Lua {\tt permute()} function (excluding various validations), that calls the internal {\tt t\_permute()}.
+Q's permute operator, which uses the Terra function of
+Figure~\ref{permute_in_terra} 
+is presented in Figure~\ref{permute_in_Q}. 
+Given a vector of type {\tt val\_qtype} and an index vector, it 
+returns a vector of type {\tt val\_qtype}.
+The code has been heavily edited in the interest of brevity.
 
-The operator returns a new vector of data type {\tt val\_qtype} that contains the elements of the source {\tt val\_col} vector permuted according to the {\tt idx\_col} vector.
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{q_permute_code}
+\caption{Q code for permute}
+\label{permute_in_Q}
+\end{minipage}
+}
+\end{figure}
 
-\begin{verbatim}
-permute = function(val_col, idx_col, idx_in_src)
-  local val_qtype = assert(val_col:fldtype())
-  local idx_qtype = assert(idx_col:fldtype())
-  local val_n = val_col:length()
-  local idx_n = idx_col:length()
-  assert(idx_n == val_n)
+In conclusion,
+the combination of Terra and Lua enables a powerful programming paradigm for dynamically compiled function definitions, and has potential for significantly improving the implementation-speed and maintainability of the operator implementations. 
+However, it is
+still an immature technology. Using it within the Lua runtime causes sever
+performance degradation. Simply including the statement 
+{\tt require('terra')} causes upto 50\% degradation even when no Terra code is
+used. 
 
-  local tertyp = terra_types[val_qtype]  -- map Q data type to Terra data type
-  local chk_val_n, val_vec, nn_val_vec = val_col:get_all()
-  local chk_idx_n, idx_vec, nn_idx_vec = idx_col:get_all()
-  local out_arr = ffi.malloc(qconsts.qtypes[val_qtype].width * val_n)
-
-  t_permute(tertyp, terra_types[idx_qtype])(val_vec, idx_vec, out_arr, val_n, idx_in_src)
-  -- create blank vector whose meta is cloned from val_col's meta
-  local out_col = create_col_with_meta(val_col)  
-  out_col:put_chunk(out_arr, nil, val_n) 
-  out_col:eov()
-  return out_col
-end
-\end{verbatim}
-
-\subsection{Terra: drawbacks/limitations}
-To enable the Terra functionality within the Lua runtime, we have to {\tt require('terra')}. It was found that merely enabling/including the Terra library negatively (upto 50\% degradation observed) impacted the performance of Lua code; this was for even the Lua code/operators that doesn't use Terra at all.
-
-\subsection{Terra: status and conclusion}
-We are currently investigating the performance issue with the Terra community; for now, the performance impact is significant enough that we have paused/disabled Terra-based approach.
-
-The combination of Terra and Lua enables a powerful programming paradigm for dynamically compiled function definitions, and has potential for significantly improving the implementation-speed and maintainability of the operator implementations. 
-
-If/when the performance issues are resolved, we anticipate high likelihood of Terra playing an increasing important role in our operator implementations.

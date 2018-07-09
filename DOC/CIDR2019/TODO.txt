@@ -1,3 +1,4 @@
+
 Should we add section on comparisons of 
 1) dyncall (see PhD thesis adler 2012)
 2) LuaFFI 
@@ -95,3 +96,25 @@ Proceedings of the 18th ACM SIGPLAN International
 Conference on Functional Programming (ICFP ’13),
 http://dx.doi.org/10.1145/2500365.2500601.
 -----------------------------------------
+
+---
+In particular introducing "mode" is pretty nice - apologies for my laziness in not taking that step (I felt it was rather awkward to have two terms and then define both of them etc., but didn't give enough effort to finding the right way... your's is rather simple and neat and always).
+>>> Thanks
+---
+y = Q.permute(x, idx)
+
+This isn't actually how the function is invoked; there's a third parameter needed, but maybe you did this for simplicity?
+>>> CHANGED to y = Q.permute(x, idx, mode)
+---
+Fig1 : should 'scatter'/'gather' be enclosed in quotes? (Also, are we just targeting pseudo code? Else should we have Krushnakant run it once to ensure it's correct?)
+>>> Done
+---
+Regarding note about .so files' dynamic compilation - I'm not sure about that (never understood it sufficiently), we'll need to check with Indrajeet maybe?
+>>> I really like the idea of customizing the server on the fly. Indrajeet had done a proof of concept. I'd like to finish this before the paper is submitted.
+---
+Not clear on reason why you removed the "status/next-steps" points... can talk about it later.
+>>> I thought the "In conclusion, ..." paragraph provided an adequate summary. Let's discuss
+---
+Also see numerous small edits scattered that have gone into improving it significantly overall... nice to see this.
+>>> Thanks
+

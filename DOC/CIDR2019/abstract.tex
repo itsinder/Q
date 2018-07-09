@@ -1,0 +1,20 @@
+\begin{abstract}
+The unspoken secret of ``big data'' is that while data warehouses are
+exploding in size, the actual amount of data needed for many analytics and
+machine learning problems is better characterized as ``medium data''. We define
+``medium data'' as data large enough that one must be cognizant of performance but small
+enough that a single machine is adequate. This realization has motivated the
+design and development of Q, an analytical database. Q can be thought of as both
+a programming language and a storage engine. The language is inspired by
+Ousterhout's dichotomy, using a scripting language (Lua) with a fast interpreter
+(LuaJIT) as the front-end and a compiled language (C) for the back-end.
+A fundamental realization that has influenced Q's design is that data
+practitioners often build up tremendous intuition about the data sets that they
+are working with. Q encourages the use of this intuition to gain performance.
+Q exposes its software architecture to the more
+adventurous programmer, providing performance gains to the programmer willing to
+invest more time in relatively simple tweaks.
+By using a simple data model that is accessible to the programmer, Q makes it
+easy to integrate high performance custom code when necessary.
+
+\end{abstract}
