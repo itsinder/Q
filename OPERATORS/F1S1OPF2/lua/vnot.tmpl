@@ -42,7 +42,7 @@ ${fn}(
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
-// TODO #pragma omp parallel for 
+#pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < loop_count; i++ ) {
     //TODO: Do not modify unused bits from last 64 bits
     out[i] = ~ in[i];

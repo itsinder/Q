@@ -1,6 +1,14 @@
 #include <math.h>
 #include "q_incs.h"
 #include "calc_vote_per_g.h"
+static uint64_t RDTSC(
+    void
+    )
+{
+  unsigned int lo, hi;
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+}
 
 int 
 calc_vote_per_g(
@@ -13,11 +21,14 @@ calc_vote_per_g(
     )
 {
   int status = 0;
+  // uint64_t t_start = RDTSC();
+#pragma omp simd 
   for ( int j = 0; j < n_test; j++ ) { 
     o_test[j] = 0;
   }
 
   float exponent = 4.0; // TODO FIX P1
+#pragma omp parallel for 
   for ( int j = 0; j < n_test; j++ ) { 
     for ( int k = 0; k < n_train; k++ ) { 
       float vote_k;
@@ -36,6 +47,7 @@ calc_vote_per_g(
       o_test[j] += vote_k;
     }
   }
+  // printf("%lf \n", (double)(RDTSC()-t_start));
 BYE:
   return status;
 }

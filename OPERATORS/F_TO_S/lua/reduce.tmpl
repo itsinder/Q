@@ -54,7 +54,7 @@ ${fn}(
 
   ${reduce_ctype} ${op}_val = ${initial_val};
   uint64_t block_size = nR / num_threads;
-// TODO #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
   for ( uint32_t t = 0; t < num_threads; t++ ) { 
     uint64_t lb = t * block_size;
     uint64_t ub = lb + block_size;
@@ -70,7 +70,7 @@ ${fn}(
         index = i + idx;
       }
     }
-// TODO #pragma omp critical (_${fn})
+#pragma omp critical (_${fn})
     {
     ${op}_val = ${t_reducer}(curr_val, lval);
     if (${op}_val != curr_val){
