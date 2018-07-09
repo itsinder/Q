@@ -54,7 +54,7 @@ ${fn}(
   if ( nR == 0 ) { go_BYE(-1); }
   ${scalar_ctype} sval = *ptr_sval;
 
-// TODO #pragma omp parallel for 
+// #pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < nR; i++ ) { 
     inv = in[i];
     __operation(inv, sval, &outv);
