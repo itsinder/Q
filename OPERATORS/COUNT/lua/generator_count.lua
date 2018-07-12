@@ -7,7 +7,7 @@
 
   local qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
 
-  local sp_fn = require 'Q/OPERATORS/F_TO_S/lua/count_specialize'
+  local sp_fn = require 'Q/OPERATORS/COUNT/lua/count_specialize'
   local num_produced = 0
 
   for _, qtype in ipairs(qtypes) do

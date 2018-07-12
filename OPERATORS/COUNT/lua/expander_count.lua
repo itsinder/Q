@@ -8,7 +8,7 @@ local record_time = require 'Q/UTILS/lua/record_time'
 local to_scalar   = require 'Q/UTILS/lua/to_scalar'
 
 return function (a, x, y, optargs )
-  local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
+  local sp_fn_name = "Q/OPERATORS/COUNT/lua/" .. a .. "_specialize"
   local spfn = assert(require(sp_fn_name),
   "Specializer missing " .. sp_fn_name)
   assert(type(x) == "lVector", "input x should be a lVector")

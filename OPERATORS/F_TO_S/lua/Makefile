@@ -26,7 +26,6 @@ clean :
 
 libf_to_s.so : 
 	luajit generator.lua operators.lua
-	luajit generator_count.lua
 	gcc ../src/*.c ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf_to_s.so 
 	test -d ${Q_BUILD_DIR}
 	cp ../src/*.c ${Q_BUILD_DIR}/src/

@@ -10,7 +10,7 @@ local function count(x, y)
   -- 2) value  : number or Scalar value
   
   assert(type(x) == "lVector", "input must be of type lVector")
-  local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_count')
+  local expander = assert(require 'Q/OPERATORS/COUNT/lua/expander_count')
   local status, z = pcall(expander, "count", x, y)
   if ( not status ) then print(z) end
   assert(status, "Could not execute count")
