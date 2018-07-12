@@ -3,7 +3,7 @@ local Q = require 'Q'
 local utils = require 'Q/UTILS/lua/utils'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local timer = require 'posix.time'
-local to_scalar = require 'Q/UTILS/lua/to_scalar'
+local Scalar = require 'libsclr'
 
 local tests = {}
 -- testing Q.index() to return index of value (num_elements < chunk_size)
@@ -11,7 +11,7 @@ tests.t1 = function()
   local tbl = {10,20,30,40,50,60,70,80,90,100}
   local qtype = "I4"
   local vec = utils.table_to_vector(tbl, qtype)
-  local value = to_scalar(50, "I4")
+  local value = Scalar.new(50, "I4")
   local ind = Q.index(vec, value)
   assert(ind == 4, "wrong index returned")
   print("index of 50 is " .. ind)
@@ -31,7 +31,7 @@ tests.t2 = function()
   end
   tbl[327679] = 9
   local vec = Q.mk_col(tbl, qtype)
-  local value = to_scalar(9, "I4")
+  local value = Scalar.new(9, "I4")
   
   local start_time = timer.clock_gettime(0)
   local ind = Q.index(vec, value)
@@ -46,7 +46,7 @@ end
 tests.t3 = function()
   local tbl = {10,20,30,40,50,60,70,80,90,100}
   local qtype = "I4"
-  local value = to_scalar(110, "I4")
+  local value = Scalar.new(110, "I4")
   
   local vec = utils.table_to_vector(tbl, qtype)
   local ind = Q.index(vec, value)
@@ -64,7 +64,7 @@ tests.t4 = function()
     tbl[#tbl+1] = ( i * 10 ) % qconsts.qtypes[qtype].max
   end
   tbl[65541] = 9
-  local value = to_scalar(9, "I4")
+  local value = Scalar.new(9, "I4")
   local vec = Q.mk_col(tbl, qtype)
   local ind = Q.index(vec, value)
   assert(ind == 65541-1, "wrong index returned")
