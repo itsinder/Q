@@ -2,13 +2,15 @@
 \label{vectors}
 
 A vector is essentially a map \(f(i)\) such that given \(i, 0 \leq i < n\), it
-returns a value of a given type. Q currently supports the following types
-\be
-\item I1, 1 byte signed integer
-\item I2, 2 byte signed integer
-\item I4, 4 byte signed integer
-\item I8, 8 byte signed integer
-\item F4, single precision floating point
-\item F8, double precision floating point
-\item B1, bit vector
-\ee
+returns a value of a given type. The main types that \Q\ supports four variants
+of integers (1, 2, 4, and 8 byte) and two variations of floating point (single
+and double precision). In addition, it supports bit vectors, constant length
+strings. There is limited support for variable length strings, which are used
+primarily as dictionaries.
+
+\input{scalars}
+
+\input{reducers}
+
+\input{glossary}
+
