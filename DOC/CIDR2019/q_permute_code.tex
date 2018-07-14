@@ -11,7 +11,7 @@ permute = function(val_vec, idx_vec, mode)
   -- allocate space for output vector
   local val_width = qconsts.qtypes[val_qtype].width
   local out = ffi.malloc(val_width * val_n)
-  -- call Terra function
+  -- get Terra function for given types, and invoke it
   t_permute(val_ttype, idx_ttype)(
     val_vec, idx_vec, out, val_n, mode)
   -- create output Vector and write to it
