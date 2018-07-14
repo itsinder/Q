@@ -1,21 +1,17 @@
-\newpage
 \subsection{k-Nearest Neighbors}
 \label{knn}
 
-This ML workhorse doesn't need much introduction \cite{XXXX}. A key subroutine
-is presented in Figure~\ref{knn_core}, where we are looking for the class labels of the
+A key subroutine of the knn algorithm is finding the class labels of the
 \(k\) points closest to the point \(x\) being classified. 
 We assume that we have \(n\) points in \(m\)-dimensional space, represented as a
 Lua table, \(T\), of \(m\) Vectors of length \(n\)
 
-We would like to draw the
-reader's attention to the ordering of operations, which are performed in column
-order rather than row order. Row ordering would have meant computing the
+Note that the operations are performed in column
+order rather than the more intuitive row order. Row ordering means computing the
 distance from \(x\) to a point in \(T\) completely before proceeding to the next
-point.
-It is true that column ordering is not as intuitive as row ordering. Our claim
-is that the performance gains that come from being
-aware of data layout are substantial and that the programming burden is not onerous.
+point. We invite the reader to judge from Figure~\ref{knn_core} whether 
+our claim is that the programming burden of being aware of data layout and
+operation ordering is not onerous.
 
 Given Q's lazy evaluation in chunks, note that the operation is actually
 performed in batches. In other words, had we written 

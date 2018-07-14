@@ -1,0 +1,126 @@
+\subsection{Logistic Regression}
+
+A key subroutine in logistic regression \cite{XXX} is improving the 
+estimates of the
+coefficients, \(\beta\), using the Newton-Raphson algorithm.
+Our particular implementation requires computation of 
+\(\frac{1}{1 + e^{-x}}\) and 
+\(\frac{1}{(1 + e^{-x})^2}\), where \(x\) is \TBC 
+We now discuss a sequence of increasingly sophisticated way of implementing
+these operators in Q.
+
+\subsubsection{The Lua implementation}
+The ``quick and dirty'' way is to implement it in Lua. An example is 
+in Figure~\ref{logit_in_lua}.
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{logit.lua}
+\caption{Using LuaJIT FFI to map C data to Lua}
+\label{logit_in_lua}
+\end{minipage}
+}
+\end{figure}
+
+\subsubsection{The C implementation}
+Figure~\ref{logit_in_lua} indicates that precisely one line is specific to the
+operator in question, the rest is necessary boiler plate. Therefore, the design
+of the run time has been around providing machinery to move data and leaving
+the actual operator as a template that can be provided by the user. All the operator
+writer needs to (1) pick a template --- in this case it is {\tt v1s1opv2}, indicating that a
+vector v1 and an optional scalar s1 are used to produce another vector v2.
+(2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )}.
+
+\subsubsection{Eliminating common sub-expressions}
+However, one quickly recognizes that creating separate operators for those 2
+functions would lead to 
+redundant computations, which can be eliminated as in Figure~\ref{XX}
+\begin{verbatim}
+t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
+t2 = Q.exp(t1):memo(false)
+t3 = Q.incr(t2):memo(false)
+t4 = Q.sqr(t3):memo(false)
+y  = Q.reciprocal(t3)
+z  = Q.reciprocal(t4)
+\end{verbatim}
+
+\subsubsection{Lock step evaluation}
+However, notice that using the above code introduces a subtle but
+critical bug when the number of elements in \(x\) exceeds the chunk
+size.  If we were to call {\tt eval()} on \(y\), then we would
+end up consuming sucessive chunks of \(t_3\). Now, if we were to call
+{\tt eval()} on \(z\), we would fail when requesting the first
+chunk of \(t_3\), since it has {\bf not} been memo-ized. One solution
+is to ensure that \(y\) and \(z\) are evaluated in lock-step, after they have
+been created, as shown below.
+\begin{verbatim} 
+  cidx = 0  -- chunk index
+  repeat 
+    ly = y:chunk(cidx)
+    lz = z:chunk(cidx)
+    cidx = cidx + 1
+  until ( ly == 0 )
+\end{verbatim}
+
+The problem with this solution is that the burden of lock-step evaluation falls
+on the Q programmer. This is remedied by the {\tt conjoin} function.
+
+\begin{verbatim}
+y:set_memo(false); z:set_memo(false);  -- no memo-izing needed
+conjoin({y, z}) -- indicate that they need to be evaluated together
+assert(z:is_eov() == false) -- z not fully evaluated
+y:eval() -- evaluate y when needed
+assert(z:is_eov() == true) -- z fully evaluated as a consequence of y eval
+\end{verbatim}
+
+Need performance numbers \TBC
+\be
+\item Lua versus C
+\item separate operators versus eliminating common sub expr
+\ee
+
+\subsubsection{Custom Operators}
+
+As part of the \(\beta\) calculation step, we need to perform \(A \leftarrow x^T
+W x\) where (1) 
+\(x\) is a \(m \times m\) matrix and (2) \(W\) is a \(n \times n\) matrix where
+non-diagonal elements are 0 and can be represented as a vector, \(w\) of legnth
+\(n\).
+The straight-forward Q code is as follows
+\begin{verbatim}
+for i, X_i in ipairs(X) do
+  for j, X_j in ipairs(X) do
+    A[i][j] = Q.sum( Q.vvmul(X_i, Q.vvmul(w, X_j))):eval()
+  end
+end
+\end{verbatim}
+
+However, with a little more effort, we created custom operator, {\tt
+Q.sumprod2}, a simplified sketch of which is provided below. For \(n = XX, m =
+YY\), we get a performance gain of ZZ \TBC What we hope to illustrate is that a
+simple data model allows us to move along the performance versus simplicity
+continuum as desired.
+\begin{verbatim}
+_sum(float *x, int n) {
+  float sum = 0;
+  for ( i = 0; i < n; i++ ) { 
+    sum += x[i];
+  }
+  return sum;
+}
+_vvmul(float *x, float *y, float *z, int n) {
+  for ( i = 0; i < n; i++ ) { 
+    z[i] = x[i] * w[i];
+  }
+}
+for ( i = 0; i < m; i++ ) { 
+  _vvmul(X[i], w, temp, n);
+  for ( j = i; j < m; j++ ) { 
+    _vvmul(X[j], temp, temp);
+    A[i][j] = _sum(temp, n);
+  }
+}
+\end{verbatim}
+
