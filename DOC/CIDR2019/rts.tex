@@ -1,11 +1,34 @@
 \section{Q's Run Time System}
 
-Q has just two primitive data structures, vectors (Section~\ref{vectors}) 
-and scalars (Section~\ref{scalars}).
+Q is a high-performance ``almost-relational'' 
+analytical, single-node, column-store database. 
+\be
+\item 
+By ``analytical'' we mean that data changes at the user's behest (e.g.,
+loading a data set) but is not subject to external events.
+\item 
+By ``almost-relational'' we mean that it would more correctly
+be called a ``tabular model'' \cite{Codd1982}. As Codd states, ``Tables are
+at a lower level of abstraction than relations, since they give
+the impression that positional (array-type) addressing is applicable
+(which is not true of \(n\)-ary relations), and they fail to
+show that the information content of a table is independent
+of row order. Nevertheless, even with these minor 
+aws,
+tables are the most important conceptual representation of
+relations, because they are universally understood.''
+\item By ``single-node'', we mean that Q does not distribute computation across
+  machines. The flow of execution is inherently single-threaded. However,
+  pthreads and OpenMP are heavily used {\em within} individual operations so as
+  to exploit multi-core systems as well as GPUs (Section~\ref{end}).
+\item By ``column-store'', we mean that 
+Q provides the Lua programmer with the Vector type, each
+individual element of which is a Scalar. A database table is modeled as a Lua
+table of Vectors (Section~\ref{vectors_versus_tables}.
+
+\ee
 
 \input{vectors}
-
-\input{scalars}
 
 \input{reducers}
 

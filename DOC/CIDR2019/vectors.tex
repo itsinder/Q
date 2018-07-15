@@ -1,11 +1,77 @@
-\subsection{Vectors}
-\label{vectors}
-
 A vector is essentially a map \(f(i)\) such that given \(i, 0 \leq i < n\), it
-returns a value of a given type. The main types that \Q\ supports four variants
+returns a value of a given type. The main types that \Q\ supports are four variants
 of integers (1, 2, 4, and 8 byte) and two variations of floating point (single
 and double precision). In addition, it supports bit vectors, constant length
 strings. There is limited support for variable length strings, which are used
-primarily as dictionaries.
+primarily as dictionaries. 
 
-Need to discuss memo \TBC
+Note that Q has 6 types of numbers, in contrast with Lua which uses a 
+single type {\tt number}, internally a double precision floating point.
+This is because data bandwidth plays a significant role in determining
+performance, as illustrated by Nvidia's
+introduction of half precision floating point  \cite{nvidia2017}. The user is
+encouraged (but not required) to use the smallest type that suppors the actual
+dynamic range required. It is eye-opening to realize that this is often  less
+than one expects. For example, while analyzing LinkedIn's endorsement feature
+(e.g., A endorses B's proficiency in "distributed databases"), 
+the number of unique endorsements that captured more than 99\% of the traffic
+was less than 32K, making a 2-byte integer adequate for the task at hand.
+
+It is relatively easy to add other types to Q, as long as these 
+are fixed width types. The real cost is in making sure that all relevant
+operators interpret that data meaningfully. For example, currently, {\tt add}
+accepts on all combinations of number types, but we do not 
+support adding a bit to a double.
+
+We
+encourage ``inexact'' types where justified. For example, a common use case is
+to trace a user's activity through a web session. This requires joining on a
+user ID across different logs, imported into the DWH.  The user ID is
+often provided as a long alphanumeric string. While Q could represent this as a
+constant length string, it is better represented as an unsigned 64-bit integer
+containing the hash of the string, since join requires only equality comparisons.
+The number of distinct keys being hashed is often less than \(2^{32}\). When
+hashed to a \(2^{64}\) space, the probability of collisions is vanishingly
+small. Most business analyses are insensitive to this level of imprecision.
+
+When a vector is created, we specify its type. It can be populated in one of two
+ways. We can either provide a generator function or ``put'' the data later on.
+
+Vectors are evaluated lazily. Hence, a statement like 
+{\tt x = Q.const(\{len = 10, qtype = 'I4', val = 0\})} does not actually create 10
+4-byte integers with value 0 as one might suspect. Data is populated only when
+the vector is explicitly {\tt eval}'d or implicitly required e.g., {\tt
+Q.print\_csv(x)}
+
+Vectors are not mutable (with one exception discussed later)
+and must be produced sequentially. In other words, the \(i^{th}\) element must
+be produced before the \({i+1}^{th}\). To minimize memory consumption, Vectors
+operate in ``chunks'' of a fixed size. Let us say that the chunk size is 64K and
+that we have produced 65K elements. In that case, the current chunk would have
+only 1K elements. Whether one can get access to an element in the previous chunk
+depends on whether the vector has been ``memo-ized''. The default behavior, with
+a concomitant performance hit, is to memo-ize. However, when the programmer is
+aware that the vector will be consumed in a streaming fashion, they set memo
+to false.
+
+A vector has been fully materialized when either an ``eov'' is explicitly
+signalled to it or its generator produces fewer elements than the chunk size. 
+
+Memo-izing is done by appending previous chunks in binary format to a file.
+Subsequent reads of this vector are done by mmap-ing the file. Not all
+algorithms are readily transformed into streaming operations e.g., sort. There
+are a few cases where we support modifying a vector after it has been fully
+materialized by opening it in write mode and mmap-ing it.
+
+\subsection{Vectors versus Tables}
+\label{vectors_versus_tables}
+
+A deliberate choice in Q's design was that Vectors, not tables, were the basic
+data type. It is a design choice that we were (and continue to be) conflicted with. On the one hand,
+it led to simplicity and performance. On the other hand, it put the burden of
+table semantics on the programmer. In particular, consider a 
+Lua table \(\{f, g\}\) containing 2 Vectors \(f, g\). Maintaining table
+semantics means that \(T(i) = (f(i), g(i))\). Note that careless operations
+can break this e.g., sorting \(f\) and not applying the same permutation on
+\(g\).
+

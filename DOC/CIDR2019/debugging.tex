@@ -12,12 +12,12 @@ addressed.
 Since \Q\ is implemented as a Lua package, the CLION IDE from IntelliJ 
 with the Lua plugin allows interactive debugging sessions. 
 \item Sharing sessions. When working in teams, it is often useful to invite
-colleagues to see what one is doing, suggest changes and even make those changes
+colleagues to ``look over one's shoulder'' and even make changes
 directly. To do so, we have embedded Q in an HTTP server and have provided a command
 line interface (CLI). When the CLI starts up, one provides the server and port
 to which it should connect. As long as the appropriate ports are open, two
-developers could issue commands to the server, which are serialized at the
-server. Note that they are interacting with the same LuaJIT instance.
+developers could issue commands to the server, the commands being serialized at the
+server. 
 \item Save and Restore. Data scientists often need to multiplex between projects
 and most development projects are not small enough to be solved in a single
 session. The functions {\tt save} and {\tt restore} are handy in this case. {\tt
@@ -38,9 +38,11 @@ then intermediate results (like count of unique values) discarded.
 \item Modifying state. In addition to inspecting variables, it is often useful
   to modify them so as to continue the debugging session without having to
   start over. For example, say that we hit a breakpoint and discover  
-  that we had forgotten to sort a vector or load a table. We {\tt Save} from the
-  IDE, {\tt Restore} in a parallel session, perform the modifications, {\tt
-  Save} and quit the session and then have the IDE ``eval'' the {\tt Restore}
-  function.
+  that we had forgotten to sort a vector or load a table. We 
+  (i) {\tt Save} from the IDE
+  (ii) {\tt Restore} in a parallel session 
+  (iii) perform the modifications in that session 
+  (iv) {\tt Save} and quit the session 
+  (v) lastly, {\tt Restore} in the IDE.
 
 \ee
