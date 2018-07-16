@@ -1,4 +1,5 @@
-\subsection{Exploiting Slowly Changing Summary Statistics}
+\subsection{Exploiting Data Intuitions}
+\subsubsection{Slowly Changing Summary Statistics}
 
 In many analytical tasks, one repeatedly performs very similar operations on slowly
 changing data. In these cases, 
@@ -45,25 +46,10 @@ fall back to the sequential sort in the small probability that our estimates are
 
 To support this, the {\tt Q.sort} operator accepts ``hints'' in the form of
 optional arguments. In this case, the hint is a Vector whose length is the
-number of bins and each element is the upper bound of that bin. We report
-performance numbers in Table~\ref{XXX}
+number of bins and each element is the upper bound of that bin. For large dats
+sets (XXXX), we obtained linear speedup on an Intel Core i7 
 
-\begin{table}
-\centering
-\begin{tabular}{|l|l|l|l|l|} \hline \hline
-  {\bf n} & {\bf Speedup} \\ \hline \hline
-  \(2^{27}\) & X \\ \hline
-  \(2^{28}\) & X \\ \hline
-  \(2^{29}\) & X \\ \hline
-  \(2^{30}\) & X \\ \hline
-  \(2^{31}\) & X \\ \hline
-  \hline
-\end{tabular}
-\caption{Speedup obtained with parallel sort}
-\label{tbl_sort_speedup}
-\end{table}
-
-\subsection{Exploiting meta data}
+\subsubsection{Meta Data}
 
 To quote George Santayana, ``those who don't remember the past are condemned to
 repeat it''.  \Q\ minimizes re-work in several ways
