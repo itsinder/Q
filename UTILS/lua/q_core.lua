@@ -22,6 +22,7 @@ ffi.cdef(plfile.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
+local lib_table = {}
 
 ----- Init Lookup ----
 local function add_libs()
@@ -31,17 +32,17 @@ local function add_libs()
     local file = h_files[file_id]
     file = file:match('[^/]*$')
     assert(#file > 0, "filename must be valid")
-    local lib_name, subs = file:gsub("%.h$", "")
+    local function_name, subs = file:gsub("%.h$", "")
     assert(subs == 1, "Should be only one extension")
-    local so_name = "lib" .. lib_name .. ".so"
+    local so_name = "lib" .. function_name .. ".so"
     if so_name ~= "libq_core.so" then
       local status, msg = pcall(ffi.cdef, plfile.read(h_files[file_id]))
       if status then
         local status, q_tmp = pcall(ffi.load, so_name)
         if status then
-          assert(function_lookup[lib_name] == nil,
-          "Library name is already declared: " .. lib_name)
-          function_lookup[lib_name] = q_tmp[lib_name]
+          assert(function_lookup[function_name] == nil,
+          "Library name is already declared: " .. function_name)
+          function_lookup[function_name] = q_tmp[function_name]
         else
           print("Unable to load lib " .. so_name, q_tmp)
         end
@@ -56,27 +57,26 @@ local function get_qc_val(val)
   return qc[val]
 end
 
-local function q_add(doth, dotc, lib_name)
+local function q_add(doth, dotc, function_name)
   -- the lib is absent or the doth is missing compile it
-  if type(doth) == "table" then -- means this is subs and tmpl
+ assert(function_lookup[function_name] == nil and qt[function_name] == nil,
+    "Function is already registered")
+ if type(doth) == "table" then -- means this is subs and tmpl
     local subs, tmpl = doth, dotc
     doth = gen_code.doth(subs, tmpl)
     dotc = gen_code.dotc(subs, tmpl)
   end
 
-  if  function_lookup[lib_name] == nil and qt[lib_name] == nil then
-    local h_path = inc_dir .. lib_name .. ".h"
-    local so_path = lib_dir .. "lib" .. lib_name .. ".so"
+  -- TODO document function_lookup
+    local h_path = inc_dir .. function_name .. ".h"
+    local so_path = lib_dir .. "lib" .. function_name .. ".so"
     if plpath.isfile(h_path) == false or plpath.isfile(so_path) == false then
-      compile(doth, h_path, dotc, so_path, lib_name)
+      compile(doth, h_path, dotc, so_path, function_name)
     end
     ffi.cdef(plfile.read(h_path))
-    local q_tmp = ffi.load("lib" .. lib_name .. ".so")
-    function_lookup[lib_name] = q_tmp[lib_name]
-    return true
-  else
-    return false
-  end
+    local q_tmp = ffi.load("lib" .. function_name .. ".so")
+    function_lookup[function_name] = q_tmp[function_name]
+    lib_table[#lib_table + 1] = q_tmp
 end
 
 local function wrap(func, name)
