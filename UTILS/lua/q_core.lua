@@ -22,7 +22,6 @@ ffi.cdef(plfile.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
-local lib_table = {}
 
 ----- Init Lookup ----
 local function add_libs()
@@ -76,8 +75,11 @@ local function q_add(doth, dotc, function_name)
     end
     ffi.cdef(plfile.read(h_path))
     local q_tmp = ffi.load("lib" .. function_name .. ".so")
-    function_lookup[function_name] = q_tmp[function_name]
-    lib_table[#lib_table + 1] = q_tmp
+    
+    function_lookup[function_name] = q_tmp
+
+    -- function_lookup[function_name] = q_tmp[function_name]
+    -- lib_table[#lib_table + 1] = q_tmp
 end
 
 local function wrap(func, name)
@@ -111,7 +113,7 @@ local qc_mt = {
     if key == "q_add" then return q_add end
     local func = function_lookup[key]
     if func ~= nil then
-      return wrap(func, key)
+      return wrap(func[key], key) -- two layers of lookup as we are caching the whole c lib
     else
       local status, fun = pcall(get_qc_val, key)
       if status == true then
