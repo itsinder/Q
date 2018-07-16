@@ -9,7 +9,7 @@ local inc_dir = Q_ROOT .. "/include/"
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local gen_code = require 'Q/UTILS/lua/gen_code'
 local Logger = require 'Q/UTILS/lua/logger'
-local lib_dir = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$')) .. "/"
+local lib_dir = Q_ROOT .. "/lib/"
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local pldir = require 'pl.dir'
@@ -69,7 +69,8 @@ local function q_add(doth, dotc, function_name)
 
   -- TODO document function_lookup
     local h_path = inc_dir .. function_name .. ".h"
-    local so_path = lib_dir .. "lib" .. function_name .. ".so"
+    local so_path = lib_dir  .. "lib" .. function_name .. ".so"
+    -- print("so path", so_path)
     if plpath.isfile(h_path) == false or plpath.isfile(so_path) == false then
       compile(doth, h_path, dotc, so_path, function_name)
     end
