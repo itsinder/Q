@@ -1,4 +1,5 @@
 \section{Operator polymorphism in Q}
+\label{polymorphism}
 
 Vectorized operators in Q are intrinsically overloaded i.e. the same Q operator (Lua function) can be invoked with vectors of any of the supported Q data-types [\ref{vectors}].
 Overloading is achieved as follows.
@@ -18,21 +19,32 @@ Overloading is achieved as follows.
   are the .so files and the .h files kept and cdef'd}
 
 \item we define a function for a particular combination of data types
-  dynamically, in a strongly typed language, that can bind seamlessly
-  with the host language (Lua, in our case). 
-  {\bf SRINATH to explain above in more detail.}
-  This was done using the Terra
-  language, details in Section \ref{Terra} 
+  dynamically, in a strongly typed (low-level) language, that can bind seamlessly
+  with the host language (Lua, in our case). The low-level language should ideally support templating so we can define templatized functions that can be compiled on-demand within the host-language's runtime.
+  We found that the Terra language seemed to satisfy our precise wishlist for the low-level language; details in Section \ref{Terra} 
   \ee
 
 \subsection{Terra} 
 \label{Terra} 
+
 Terra is ``a low-level system programming language that is embedded in and
 meta-programmed by the Lua programming language'' \cite{devito15xx}
-Terra offered the best of both worlds, the performance of compiled code
-with the dynamic typing of a scripting language.
-To evaluate Terra in context of Q, we implemented the {\tt permute()} operator, described below, using Terra.
+Some of the key features of the Lua/Terra combination that we benefit 
+from are:
+\be
+\item Lua/Terra interoperability does not require glue code since Terra type and function declarations are first-class Lua statements, providing bindings between the two languages automatically. Lua code can call Terra functions directly.
 
+\item Terra functions include type annotations and are statically typed in the sense that types are checked at compile time, but Terra functions are compiled during the execution of the Lua program, which gives us the ability to meta-program their behavior.
+
+\item Compilation of Terra itself occurs dynamically as the Lua program executes. Though Terra programs/functions are embedded inside Lua and share a lexical runtime, the two languages have compartmentalized runtimes. One way to think of this design is that the Terra compiler
+is part of the Lua runtime.
+
+\item Terra entities (e.g., types, functions, expressions, symbols) are all first class values in Lua.
+They can be held in Lua variables and passed through Lua functions. In particular, there are Lua variables {\tt int, double} etc. representing the primitive Terra types.
+
+\ee
+
+We now describe how we implemented the {\tt permute()} operator using Terra.
 The \(permute\) operator applies an index \(\mathrm{idx}\) vector to an input vector \(x\)
 to produce a permuted variant \(y\) of \(x\). 
 If \(y = \mathrm{Q.permute}(x, \mathrm{idx}, \mathrm{mode})\) and \(x = \{10, 20, 30\}\) and
@@ -46,7 +58,7 @@ Scatter: \(y[\mathrm{idx}[i]] \leftarrow x[i]\)
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{12 cm}
+\begin{minipage}{14 cm}
 \centering
 \verbatiminput{terra_code}
 \caption{Terra code for gather/scatter variations of permute}
@@ -56,12 +68,16 @@ Scatter: \(y[\mathrm{idx}[i]] \leftarrow x[i]\)
 \end{figure}
 
 Figure~\ref{permute_in_terra} shows the Terra function used to implement it.
-Note the memoization of the function definition; thus given the combination of requisite data types, the Terra function is defined on-demand (lazily) and memoized for future usage.
+\bi
+\item The Terra function is defined at (2) in templatized fashion, and the body of the function (3) is Terra code; the input array data types are effectively templatized e.g. {\tt src: \&elemtyp}
+\item Note that the Lua function defined at (1) is wrapped with a memoizer at (4); thus given the combination of requisite data types, the Terra function is defined on-demand (lazily) and memoized for future usage.
+\item The Terra function thus returned from (2) can be directly invoked from Lua code, as illustrated in Figure~\ref{permute_in_Q}.
+\ei
 
-In order to invoke the Terra function (Figure\ref{permute_in_terra} from Q, we
+In order to invoke the Terra function (Figure\ref{permute_in_terra}) from Q, we
 need to map Q's data types to Terra. This is done with a simple global 
 array, \verb+q_to_terra+ such that, for example, 
-\verb+q_to_terra['I4'] = int32_t+
+\verb+q_to_terra['I4'] = int32+  where {\tt int32} is the Lua variable representing the Terra type.
 
 Q's permute operator, which uses the Terra function of
 Figure~\ref{permute_in_terra} 
@@ -82,8 +98,9 @@ The code has been heavily edited in the interest of brevity.
 }
 \end{figure}
 
-In conclusion,
-the combination of Terra and Lua enables a powerful programming paradigm for dynamically compiled function definitions, and has potential for significantly improving the implementation-speed and maintainability of the operator implementations. 
+We found that 
+the combination of Terra and Lua enabled a powerful programming paradigm for
+dynamically compiled function definitions. It has the potential for significantly improving the implementation-speed and maintainability of the operator implementations. 
 However, it is
 still an immature technology. Using it within the Lua runtime causes sever
 performance degradation. Simply including the statement 

@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
-#include <time.h>
 #include "q_macros.h"
 #include "_mix_UI4.h"
 //STOP_INCLUDES
