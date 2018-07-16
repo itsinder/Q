@@ -19,6 +19,7 @@ require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3"
 require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2"
 require "Q/OPERATORS/S_TO_F/lua/_s_to_f"
 require "Q/OPERATORS/F_TO_S/lua/_f_to_s"
+require "Q/OPERATORS/COUNT/lua/count"
 require "Q/OPERATORS/AINB/lua/ainb"
 require "Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez"
 require "Q/OPERATORS/DROP_NULLS/lua/drop_nulls"
@@ -39,6 +40,7 @@ require 'Q/QTILS/lua/vvseq'
 require 'Q/QTILS/lua/vvpromote'
 require 'Q/QTILS/lua/fold'
 require 'Q/QTILS/lua/average'
+require 'Q/QTILS/lua/is_sorted'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 _G['g_time'] = {}
 _G['g_ctr']  = {}

@@ -716,7 +716,7 @@ function lVector:chunk(chunk_num)
     assert(type(self._gen) == "function")
     local buf_size, base_data, nn_data = self._gen(chunk_num, self)
     if ( buf_size < qconsts.chunk_size ) then
-      if ( buf_size > 0 ) then
+      if ( buf_size > 0 and base_data ) then
         self:put_chunk(base_data, nn_data, buf_size)
       end
       self:eov()
@@ -727,8 +727,8 @@ function lVector:chunk(chunk_num)
         self:put_chunk(base_data, nn_data, buf_size)
       else
         -- this is the advanced case of using the Vector's buffer.
-        local chk =  self:chunk_num()
-        assert(chk == l_chunk_num)
+        -- local chk =  self:chunk_num()
+        -- assert(chk == l_chunk_num)
       end
     end
     if ( qconsts.debug ) then self:check() end

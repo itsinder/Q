@@ -14,7 +14,7 @@ ${fn}(
       uint64_t *ptr_cidx,
       ${a_ctype} * last_unq_element,
       uint64_t idx,
-      uint64_t *cnt_in_C,
+      int64_t *cnt_in_C,
       bool *brk_n_write
       );
    ]],
@@ -32,7 +32,7 @@ ${fn}(
       uint64_t *ptr_cidx,   // number of elements written to C
       ${a_ctype} * last_unq_element,    // storing last visited unique value
       uint64_t idx,   // chunk number
-      uint64_t *cnt_in_C,    // count buffer [nC]
+      int64_t *cnt_in_C,    // count buffer [nC]
       bool *brk_n_write   // flag which indicates when to flush output buffer
       )
 {

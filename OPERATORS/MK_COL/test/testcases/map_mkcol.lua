@@ -65,10 +65,10 @@ return {
 --  { testcase_no = 12, name = "minimum lua number", input = {-9007199254740991}, qtype = "I8", category= "category2"},
 
   { testcase_no = 13, name = "maximum lua number", input = {9007199254740992}, qtype = "I8", 
-    category= "category1", output_regex = "sclr_new." },
+    category= "category1", output_regex = "bad value for Scalar" },
   
   { testcase_no = 14, name = "minimum lua number", input = {-9007199254740992}, qtype = "I8", 
-    category= "category1", output_regex = "sclr_new." },
+    category= "category1", output_regex = "bad value for Scalar" },
 
 -- border I8 values given to mk_col
   { testcase_no = 15, name = "border I8 values", input = { "9223372036854775807"}, qtype = "I8",
@@ -79,39 +79,39 @@ return {
   
   -- Overflow I1 values given to mk_col
   { testcase_no = 17, name = "Overflow I1 values", input = { 128 }, qtype = "I1", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- Overflow I1 values given to mk_col
   { testcase_no = 18, name = "Overflow I1 values", input = { -129 }, qtype = "I1", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- Overflow I2 values given to mk_col
   { testcase_no = 19, name = "Overflow I2 values", input = { 32768 }, qtype = "I2", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- Overflow I2 values given to mk_col
   { testcase_no = 20, name = "Overflow I2 values", input = { -32769 }, qtype = "I2", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- Overflow I4 values given to mk_col
   { testcase_no = 21, name = "Overflow I4 values", input = { 2147483648 }, qtype = "I4", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- Overflow I4 values given to mk_col
   { testcase_no = 22, name = "Overflow I4 values", input = { -2147483649 }, qtype = "I4", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
 
   -- Overflow I8 values given to mk_col
   { testcase_no = 23, name = "border I8 values", input = { "9223372036854775808"}, qtype = "I8",
-    category= "category1", output_regex = "sclr_new." },
+    category= "category1", output_regex = "bad value for Scalar" },
 
   { testcase_no = 24, name = "border I8 values", input = { "-9223372036854775809"}, qtype = "I8",
-    category= "category1", output_regex = "sclr_new." },
+    category= "category1", output_regex = "bad value for Scalar" },
 
   -- Overflow I4 values given to mk_col
   -- mk_col should validate inputs should be of B1 type ( 0 or 1 )
   { testcase_no = 25, name = "Invalid B1 values", input = { 2 }, qtype = "B1", category= "category1",
-    output_regex = "sclr_new." },
+    output_regex = "bad value for Scalar" },
   
   -- testcase for testing elements(rows) > chunk_size
   -- I4 qtype values

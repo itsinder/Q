@@ -4,6 +4,7 @@ local lVector = require 'Q/RUNTIME/lua/lVector'
 local Scalar  = require 'libsclr'
 local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
 local MAXIMUM_LUA_NUMBER = 9007199254740991
 local MINIMUM_LUA_NUMBER = -9007199254740991
@@ -46,13 +47,7 @@ local mk_col = function (input, qtype, nn_input)
     
   for k, v in ipairs(input) do
     local v_nn = nil
-    if ( type(v) == "Scalar" ) then 
-      -- all is well. Nothing more to do 
-    elseif ( type(v) == "number" ) or ( type(v) == "boolean" ) or ( type(v) == "string" ) then
-      v = assert(Scalar.new(v, qtype))
-    else 
-      assert(nil, "Error in index " .. k .. " - " .. err.INVALID_DATA_ERROR)
-    end
+    v = assert(to_scalar(v, qtype))
      if ( nn_input ) then 
        local v = nn_input[k]
        assert(type(v) == "boolean")

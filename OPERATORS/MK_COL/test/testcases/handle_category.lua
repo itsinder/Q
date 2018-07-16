@@ -46,12 +46,13 @@ fns.category1 = function (index, v, status, ret)
     return false
   end
   
-  local a, b, c, err = plstring.splitv(ret,':')
+  local a, b, err = plstring.splitv(ret,':')
   err = plstring.strip(err) 
   
   -- trimming whitespace
   local error_msg = plstring.strip(v.output_regex) -- check it can be used from utils.
   local count = plstring.count(err, error_msg)
+
   if count > 0 then
     return true
   else
