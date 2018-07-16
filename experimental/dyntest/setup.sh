@@ -37,7 +37,9 @@ cd ../../../
 # Note that the make here is modified to have fPIC in luajit a dyncall
 # requirement
 tar -xvzf LuaJIT-2.1.0-beta3.tar.gz
-cd LuaJIT-2.1.0-beta3
+cd LuaJIT-2.1.0-beta3/
+make
+cd ../bindings/luajit/luadc/
 make
 cd testFuncs
 echo "*********Luajit with dyncall*****"
