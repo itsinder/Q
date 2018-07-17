@@ -16,7 +16,7 @@ branches:
   only:
     - dev
     - dev_ramesh
-    - dev-inder
+    - dev_inder
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
