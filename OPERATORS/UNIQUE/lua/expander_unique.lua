@@ -49,7 +49,8 @@ local function expander_unique(op, a)
       a:set_meta( "sort_order", order)
     end
   end
-  
+  -- getting updated sort_order meta value if sort_order was nil
+  sort_order = a:get_meta( "sort_order" )
   assert( (sort_order == "asc") or ( sort_order == "dsc" ),
       "input vector not sorted")
 
@@ -105,8 +106,7 @@ local function expander_unique(op, a)
       local casted_in_chunk = ffi.cast( subs.in_ctype .. "*",  get_ptr(in_chunk))
       local casted_unq_buf = ffi.cast( subs.in_ctype .. "*",  get_ptr(out_buf))
       local casted_cnt_buf = ffi.cast( "int64_t *",  get_ptr(cnt_buf))
-      local status = qc[func_name](casted_in_chunk, in_len, in_idx, casted_unq_buf, sz_out, unq_idx, casted_cnt_buf
-        last_unq_element, in_chunk_idx, brk_n_write )
+      local status = qc[func_name](casted_in_chunk, in_len, in_idx, casted_unq_buf, sz_out, unq_idx,casted_cnt_buf, last_unq_element, in_chunk_idx, brk_n_write )
       assert(status == 0, "C error in UNIQUE")
 
       if ( tonumber(in_idx[0]) == in_len ) then
