@@ -4,6 +4,7 @@ return require 'Q/UTILS/lua/code_gen' {
 
 #include "q_incs.h"
 #include "_get_bit_u64.h"
+
 extern int
 ${fn}(
       const ${in_ctype} * restrict ptr_in,
@@ -30,9 +31,9 @@ ${fn}(
       ${in_ctype} *ptr_unq,    // output buffer [unq_len]
       uint64_t unq_len,    // size of ptr_unq
       uint64_t *ptr_unq_idx,   // number of elements written to ptr_unq
+      int64_t *ptr_cnt,    // count buffer [unq_len]
       ${in_ctype} * ptr_last_unq_element,    // storing last visited unique value
       uint64_t idx,   // chunk number
-      int64_t *ptr_cnt,    // count buffer [unq_len]
       bool *brk_n_write   // flag which indicates when to flush output buffer
       )
 {
