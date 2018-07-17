@@ -18,8 +18,9 @@ tests.t1 = function()
   print("successfully executed t1")
 end
 
--- Q.pack to return vector 
--- test-case for num_elements > chunk_size
+-- negative test-case:
+-- Q.pack to return error as max_limit is crossed
+-- by requesting num_elements to be more than 1024
 tests.t2 = function()
   local chunk_size =  qconsts.chunk_size
   local num_elements = chunk_size + 4
@@ -28,12 +29,10 @@ tests.t2 = function()
   for i = 1, num_elements do
     tbl[#tbl+1] = i
   end
-  local vec = Q.pack(tbl , qtype)
-  assert( type(vec) == "lVector" )
-  assert( vec:length() == num_elements)
-  for i = 0, #tbl-1 do
-    assert(vec:get_one(i):to_num() == tbl[i+1])
-  end
+  local vec = pcall(Q.pack, tbl , qtype)
+  assert(vec == false)
+  print("successfully executed t2")
+
   print("successfully executed t2")
 end
 
