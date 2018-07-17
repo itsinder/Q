@@ -1,13 +1,13 @@
 local T = {}
 
--- Q.un_pack(x) : gives table of scalars
+-- Q.unpack(x) : gives table of scalars
             -- Return value:
               -- table of scalar values
 
--- Convention: Q.un_pack(vector)
+-- Convention: Q.unpack(vector)
 -- 1) vector : a vector
 
-local function un_pack(x)
+local function unpack(x)
   assert(x and type(x) == "lVector", "input must be of type lVector")
   -- Check the vector for eval(), if not then call eval()
   if not x:is_eov() then
@@ -23,7 +23,7 @@ local function un_pack(x)
   return tbl_of_sclr
 end
 
-T.un_pack = un_pack
-require('Q/q_export').export('un_pack', un_pack)
+T.unpack = unpack
+require('Q/q_export').export('unpack', unpack)
 
 return T

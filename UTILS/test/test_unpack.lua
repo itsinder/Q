@@ -4,10 +4,10 @@ local qconsts		= require 'Q/UTILS/lua/q_consts'
 
 local tests = {}
 
--- Q.un_pack to return table of scalar value
+-- Q.unpack to return table of scalar value
 tests.t1 = function()
   local vec = Q.mk_col({10,20,30,40,50}, "I1")
-  local tbl = Q.un_pack(vec)
+  local tbl = Q.unpack(vec)
   assert( type(tbl) == "table" )
   assert( #tbl == 5 )
   for i = 1 , #tbl do
@@ -17,13 +17,13 @@ tests.t1 = function()
   print("successfully executed t1")
 end
 
--- Q.un_pack to evaluate vector internally 
+-- Q.unpack to evaluate vector internally 
 -- test-case for num_elements > chunk_size
 tests.t2 = function()
   local chunk_size =  qconsts.chunk_size
   local num_elements = chunk_size + 4
   local vec = Q.seq({ start = 1, by = 1, len = num_elements , qtype = "I4"})
-  local tbl = Q.un_pack(vec)
+  local tbl = Q.unpack(vec)
   assert( type(tbl) == "table" )
   assert( #tbl == num_elements)
   for i = 1 , #tbl do
