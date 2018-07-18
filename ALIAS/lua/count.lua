@@ -28,7 +28,7 @@ local function count(x, y, optargs)
   end
 
   local status, ret_1, ret_2 = pcall(expander, op, x, y, optargs)
-  if ( not status ) then print(col) end
+  if ( not status ) then print(ret_1) end
   --print(status)
   assert(status, "Could not execute count")
   return ret_1, ret_1
