@@ -36,6 +36,8 @@ require 'Q/OPERATORS/UNIQUE/lua/unique'
 require 'Q/OPERATORS/GETK/lua/getk'
 -- alias wrappers
 require 'Q/ALIAS/lua/add'
+require 'Q/ALIAS/lua/sub'
+require 'Q/ALIAS/lua/mul'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'
