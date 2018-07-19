@@ -4,17 +4,13 @@ return require 'Q/UTILS/lua/code_gen' {
 
 #include "q_incs.h"
 
-typedef struct _reduce_${op}_${qtype}_args {
-  uint64_t count; // no. of occurences of a given value in input vector
-  } REDUCE_${op}_${qtype}_ARGS;
-  
 ${includes}
 extern int
 ${fn}(  
       const ${ctype} * restrict in,  
       uint64_t nR,
       ${ctype} value,
-      void *ptr_in_args
+      uint64_t *ptr_count
       ) 
 ;
 
@@ -28,19 +24,18 @@ ${fn}(
       const ${ctype} * restrict in, // input vector [nR]
       uint64_t nR,
       ${ctype} value, // value of which occurrences is to be found
-      void *ptr_in_args
+      uint64_t *ptr_count // no. of occurences of a given value in input vector
       )
 
 {
   int status = 0;
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
-  if ( ptr_in_args == NULL ) { go_BYE(-1); }
+  if ( ptr_count == NULL ) { go_BYE(-1); }
 
   uint64_t counter = 0;
   ${ctype} inv;
-  REDUCE_${op}_${qtype}_ARGS *ptr_args;
-  ptr_args = (REDUCE_${op}_${qtype}_ARGS *) ptr_in_args;
+  uint64_t count = *ptr_count;
 
   for ( uint64_t i  = 0; i < nR; i++ ) {  
     inv = in[i];
@@ -48,7 +43,7 @@ ${fn}(
       counter++;
     }
   }
-  ptr_args->count = ptr_args->count + counter;  
+  *ptr_count = count + counter;  
 BYE:
   return status;
 }

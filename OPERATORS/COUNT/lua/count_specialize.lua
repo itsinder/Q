@@ -8,11 +8,6 @@ local cmem    = require 'libcmem'
 return function (
   qtype
   )
-  local hdr = [[
-typedef struct _reduce_count_<<qtype>>_args {
-  uint64_t count; // count of input value
-} REDUCE_count_<<qtype>>_ARGS;
-  ]]
     local tmpl = 'count.tmpl'
     local subs = {}
     if ( qtype == "B1" ) then
@@ -26,22 +21,19 @@ typedef struct _reduce_count_<<qtype>>_args {
       subs.qtype = qtype
       subs.reduce_ctype = subs.ctype
       subs.reduce_qtype = qtype
-      hdr = string.gsub(hdr,"<<qtype>>", qtype)
-      hdr = string.gsub(hdr,"<<reduce_ctype>>",  subs.reduce_ctype)
-      pcall(ffi.cdef, hdr)
 
       --==============================
-      -- Set c_mem using info from args
-      local sz_c_mem = ffi.sizeof("REDUCE_count_" .. qtype .. "_ARGS")
-      local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
-      local c_mem_ptr = ffi.cast("REDUCE_count_" .. qtype .. "_ARGS *", get_ptr(c_mem))
-      c_mem_ptr.count = 0
-      subs.c_mem = c_mem
-      subs.c_mem_type = "REDUCE_count_" .. qtype .. "_ARGS *"
+      -- TODO: is it right place to malloc for count variable
+      local count_size = ffi.sizeof("uint64_t")
+      local count = assert(cmem.new(count_size))
+      count = ffi.cast('uint64_t *' , get_ptr(count))
+      -- initializing count to 0
+      count[0] = 0
+      -- subs.count_ctype = 'uint64_t *'
+      subs.count = count
     --==============================
       subs.getter = function (x) 
-        local y = ffi.cast("REDUCE_count_" .. qtype .. "_ARGS *", get_ptr(c_mem))
-        return Scalar.new(tonumber(y[0].count), "I8")
+        return Scalar.new(tonumber(count[0]), "I8")
       end
     --==============================
     end

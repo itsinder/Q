@@ -21,6 +21,8 @@ However, this necessitates several scans over the vector \(w\). It is more
 efficient to evaluate the vector \(w\) a chunk at a time, perform all the
 reductions on the chunk, store the partial results and then repeat over
 successive chunks. So, we can re-write the above as 
+
+%% TODO will have to materialize w otherwise
 \begin{verbatim}
 x, y, z = Q.fold({ "sum", "min", "max" }, w)
 \end{verbatim}

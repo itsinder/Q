@@ -34,8 +34,9 @@ The number of distinct keys being hashed is often less than \(2^{32}\). When
 hashed to a \(2^{64}\) space, the probability of collisions is vanishingly
 small. Most business analyses are insensitive to this level of imprecision.
 
-When a vector is created, we specify its type. It can be populated in one of two
-ways. We can either provide a generator function or ``put'' the data later on.
+When a vector is created, we need to specify only its type and whether it has
+null values. A vector is populated either by 
+(1) providing a generator function or (2) streaming in the data 
 
 Vectors are evaluated lazily. Hence, a statement like 
 {\tt x = Q.const(\{len = 10, qtype = 'I4', val = 0\})} does not actually create 10
@@ -62,6 +63,8 @@ Subsequent reads of this vector are done by mmap-ing the file. Not all
 algorithms are readily transformed into streaming operations e.g., sort. There
 are a few cases where we support modifying a vector after it has been fully
 materialized by opening it in write mode and mmap-ing it.
+
+Add why we chose mmap and binary files
 
 \subsection{Vectors versus Tables}
 \label{vectors_versus_tables}

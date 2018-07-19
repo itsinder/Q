@@ -15,7 +15,7 @@ operation ordering is not onerous.
 
 Given Q's lazy evaluation in chunks, note that the operation is actually
 performed in batches. In other words, had we written 
-{\tt d1, g1 = Q.mink(d, g, k)} and then done {\tt g1:chunk()} instead  of {\tt
+{\tt d1, g1 = Q.mink(d, g, k)} and then done {\tt g1:next()} instead  of {\tt
 g1:eval()}, 
 we would have gotten the class labels of the \(k\) points
 closest to \(x\) from the first \(n_C\) points of \(T\). 
