@@ -37,7 +37,7 @@ local function compile(doth, h_path, dotc, so_path, libname)
   local tmp_h = string.format("/tmp/_%s.h", libname)
   write_to_file(dotc, tmp_c)
   write_to_file(doth, tmp_h)
-  local incs = string.format("-I /tmp/ -I %s ", q_src_root .. "/UTILS/inc")
+  local incs = string.format("-I /tmp/ -I %s -I %s ", q_src_root .. "/UTILS/inc", q_src_root .. "/UTILS/gen_inc")
   local q_cmd = string.format("gcc %s %s %s %s -o %s", 
        QC_FLAGS, tmp_c, incs, Q_LINK_FLAGS, so_path)
   local status = os.execute(q_cmd)
