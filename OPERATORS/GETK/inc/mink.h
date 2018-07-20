@@ -1,23 +1,16 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<stdbool.h>
-#include<inttypes.h>
-#include "q_macros.h"
-
+#include "q_incs.h"
 
 typedef struct _reduce_mink_args {
-    int32_t *dist_k;
-    int32_t *goal_k;
-    int32_t max;
-    int32_t num_in_dist_k;
+    int32_t *val; // [k] 
+    int32_t *drag; // [k] 
+    int32_t n; // actual occupancy
+    int32_t k; // max occupancy
   } REDUCE_mink_ARGS;
 
 extern int
 mink(
-   const int32_t * restrict ptr_dist, // distance vector
-   uint64_t dist_len, // size of distance vector
-   const int32_t * restrict ptr_goal, // goal vector
-   int32_t k, // count of min values to maintain,
+   const int32_t * restrict val, // distance vector [n] 
+   uint64_t n, // size of distance vector
+   const int32_t * restrict drag, // goal vector [n]
    void *ptr_in_args // structure maintaining k min distances and respective goals
    );
