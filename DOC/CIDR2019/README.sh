@@ -1,4 +1,5 @@
 #!/bin/bash
+# sudo apt-get install texlive-full
 set -e 
 paper=cidr2019
 touch .meta
