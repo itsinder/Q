@@ -22,7 +22,7 @@ We compare many ffi implementations, namely:
 \begin{figure}[h]
 \caption{Measuring FFI performance}
 \centering
-\includegraphics{figs/luac_timeE}
+\includegraphics{figs/luac_time.pdf}
 \label{ffi_fig}
 \end{figure} 
 
@@ -35,10 +35,11 @@ By performing no-ops we risk thejust in time(JIT) compiler optimizing out that L
 Lastly measuring the start and end times of the test also introduce a point of uncertainity. To minimize this, we measure the time taken by $1$ million transitions between the Lua and C code, where the results of the code is being accumulated and printed at the end of the process.
 We present our results in Table~\ref{ffi_bench}. Note that the results are presented as speedup factors instead of absolute numbers (the devision of the absolute number by the baseline). The baseline is se to {\bf lua + luaFFI}.
 
-\begin{tabular}{ l | c | r }
+\begin{tabular}{|l|l|l|l|l|l|l} \hline \hline
 \label{ffi_bench}
 lua + Lua C API & Luajit + Lua C API & lua + luaffi & luajit & lua + dyncall & luajit + dyncall \\
 1.85 & 4.35 & 1.00 & 52.08 & 0.47 & 0.70 \\
+\hline
 \end{tabular}
 % to rebuild these results go to experimental/dyntest and exec ./setup.sh
 Based on Table~\ref{ffi_bench} we picked luajit's native ffi routine as our choice. 

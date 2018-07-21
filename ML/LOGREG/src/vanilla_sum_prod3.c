@@ -1,5 +1,5 @@
 #include <time.h>
-#include "sum_prod3.h"
+#include "vanilla_sum_prod3.h"
 
 extern uint64_t num_ops;
 
@@ -35,7 +35,7 @@ _sum(
 }
  
 int
-sum_prod3(
+vanilla_sum_prod3(
     float **X, /* M vectors of length N */
     uint64_t M,
     uint64_t N,

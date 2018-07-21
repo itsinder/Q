@@ -1,4 +1,5 @@
 #include "sum_prod3.h"
+#include "vanilla_sum_prod3.h"
 #include "_rdtsc.h"
 
 uint64_t num_ops;
@@ -7,8 +8,8 @@ main(
     )
 {
   int status = 0;
-  uint64_t N = 4 * 1024 * 1024;
-  uint64_t M = 256;
+  uint64_t N = 256 * 65536; // 4 * 1024 * 1024;
+  uint64_t M = 32;
   double **A = NULL;
   float **X = NULL;
   double *w = NULL;
@@ -35,7 +36,8 @@ main(
   }
 
   uint64_t start_t = RDTSC();
-  status = sum_prod3(X, M, N, w, A);
+  status = vanilla_sum_prod3(X, M, N, w, A);
+  // status = sum_prod3(X, M, N, w, A);
   uint64_t delta = RDTSC() - start_t;
   system("date");
   fprintf(stderr, "Num clocks = %" PRIu64 "\n", delta);

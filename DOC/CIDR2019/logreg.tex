@@ -98,12 +98,17 @@ for i, X_i in ipairs(X) do
 end
 \end{verbatim}
 
-However, with a little more effort, we created custom operator, {\tt
-Q.sumprod2}, a simplified sketch of which is provided below. The actual code
+However, with a little more effort, we created custom operator, 
+a simplified sketch of which is provided below. The actual code
 uses blocking to avoid writing out to the entire temp array before reading it
-back in.
-For \(n = XX, m =
-YY\), we get a performance gain of ZZ \TBC What we hope to illustrate is that a
+back in. Setting \(m=32\), we varied \(n\) from \(2^{16}\) to \(2^{24}\). With
+blocking, performance increases as we increase \(n\) but saturates after
+\(2^{20}\). Without blocking, performance peaks at \(n=2^{18}\) and steadily
+declines after that, to about a third of peak performance.
+The regular Q code described above gets about
+\(\frac{1}{XX}\) the performance of the custom operator. 
+
+What we hope to illustrate is that a
 simple data model allows us to move along the performance versus simplicity
 continuum as desired.
 \begin{verbatim}
@@ -128,3 +133,18 @@ for ( i = 0; i < m; i++ ) {
 }
 \end{verbatim}
 
+This in turn raised the question: could we have used the same ``chunking'' trick
+in Q itself, without resorting to a custom operator. In this case, the code
+consists of 2 blocks. In the first, we set up the reducers --- no actual
+computation happens. This is exactly as before, except that there is no call to
+{\tt eval()}. In the second block, we evaluate the reducer in chunks, stopping
+when the input vectors have no more data.
+\begin{verbatim}
+repeat 
+  for i, X_i in ipairs(X) do
+    for j, X_j in ipairs(X) do
+      A[i][j]:next()
+    end
+  end
+until done 
+\end{verbatim}
