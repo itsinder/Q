@@ -25,8 +25,8 @@ local function check_args(a, val, drag, k, optargs)
   -- and NOT a Scalar
   assert(k)
   assert(type(k) == "number")
-  assert( (k > 0 ) and ( k < qconsts.chunk_size ) )
-  -- TODO: Should it be k <= qconsts.chunk_size ?
+  -- decided to have k less than 128
+  assert( (k > 0 ) and ( k < 128 ) )
 
   if ( optargs ) then
     assert(type(optargs) == "table")
