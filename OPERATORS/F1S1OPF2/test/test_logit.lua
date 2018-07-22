@@ -1,6 +1,7 @@
 -- FUNCTIONAL STRESS
 require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
+local qc	= require 'Q/UTILS/lua/q_core'
 local Scalar = require 'libsclr'
 
 local tests = {}
@@ -25,5 +26,15 @@ tests.t1 = function()
   print(Q.vvdiv(Q.exp(x), Q.vsadd(Q.exp(x), 1)))
 --]]
   assert(Q.vvseq(Q.logit(x), Q.vvdiv(Q.exp(x), Q.vsadd(Q.exp(x), Scalar.new(1, "F8"))), 0.01))
+  print("Test t1 succeeded")
+end
+tests.t2 = function() 
+  len = 1 * 1000000
+  local x = Q.rand({ lb = 0.01, ub = 0.09, qtype = 'F4', len = len }):eval()
+  local start = qc.RDTSC()
+  local y = Q.logit(x):eval()
+  local stop = qc.RDTSC()
+  print(stop - start)
+  print("Test t2 succeeded")
 end
 return tests
