@@ -45,3 +45,9 @@ gslab@gs-1576:~/krushna/Q/experimental/fold_performance_test$ luajit -e "require
 test_sum_min_max        362933478ULL
 Test t1 succeeded
 
+===================
+Ramesh's results
+
+test_fold_memo_true   965339383 / 10^6 =  965
+test_fold_memo_false 1411348134 / 10^6 = 1411
+test_sum_min_max     5661288779 / 10^6 = 5661
