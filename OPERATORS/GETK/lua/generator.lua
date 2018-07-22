@@ -12,17 +12,21 @@
   local num_produced = 0
   
   for _, op in ipairs(operations) do
-    local sp_fn_name = 'Q/OPERATORS/GETK/lua/' .. op .. '_specialize'
-    sp_fn = assert(require(sp_fn_name))
+    local sp_fn1_name = 'Q/OPERATORS/GETK/lua/' .. op .. '_specialize'
+    local sp_fn2_name = 'Q/OPERATORS/GETK/lua/' .. op .. '_specialize_reducer'
+    sp_fn1 = assert(require(sp_fn1_name))
+    sp_fn2 = assert(require(sp_fn2_name))
     for _, qtype in ipairs(qtypes) do
-      local status, subs, tmpl = pcall(sp_fn, qtype)
-      if ( status ) then
-        gen_code.doth(subs, tmpl, incdir)
-        gen_code.dotc(subs, tmpl, srcdir)
-        print("Generated ", subs.fn)
-        num_produced = num_produced + 1
-      else
-        print(subs)
+      for _, sp_fn in pairs({sp_fn1, sp_fn2}) do
+        local status, subs, tmpl = pcall(sp_fn, qtype, 4)
+        if ( status ) then
+          gen_code.doth(subs, tmpl, incdir)
+          gen_code.dotc(subs, tmpl, srcdir)
+          print("Generated ", subs.fn)
+          num_produced = num_produced + 1
+        else
+          print(subs)
+        end
       end
     end
   end
