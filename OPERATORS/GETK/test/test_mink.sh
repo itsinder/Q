@@ -1,6 +1,6 @@
 #/bin/bash
 set -e 
-gcc -g  $QC_FLAGS test_mink.c ../src/mink.c \
+gcc -g -std=c99 $QC_FLAGS test_mink.c ../src/mink.c \
   -I../inc/ -I../../../UTILS/inc/ \
   -o test_mink
 VG="valgrind --leak-check=full" 
