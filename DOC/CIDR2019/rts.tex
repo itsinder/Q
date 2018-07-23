@@ -23,15 +23,20 @@ relations, because they are universally understood.''
 \item By ``column-store'', we mean that 
 Q provides the Lua programmer with the Vector type, each
 individual element of which is a Scalar. A table in Q is a Lua
-table of Vectors (Section~\ref{vectors_versus_tables}), where a Lua table is equivalent
-to a Python dictionary.
+table of Vectors (Section~\ref{vectors_versus_tables}), where a Lua table is an
+associative array, like a Python dictionary.
 
 \ee
 
 \subsection{Q as a Lua extension}
 
-While it is useful to think of Q as a functional language, 
-it is more accurately described as a C library, embedded within an interpreted
+
+It is useful to think of Q as a domain specific language, targeted for data
+manipulation. In this sense alone, it is similar to the 
+effort to develop a persistent functional language,
+and implement a relational database system inside
+this language  \cite{Wevers2014}.
+More accurately, Q is a C library, embedded within an interpreted
 language.
 We chose to embed within an existing language for two reasons. One is that we did not have to
 write a custom compiler. More importantly, is that it allowed us to leverage a rich eco-system of libraries, debuggers
@@ -47,13 +52,32 @@ We experimented with several approaches to invoking C from Lua. These included
 FFI. Taking the native Lua C API as the baseline, dyncall was (surprisingly) the worst (twice
 as slow) and LuaJIT was (unsurprisingly) the fastest (50 times as fast!).
 
-Data is either stored in memory and, when necessary, persisted (uncompressed) in
+Data is stored in memory and, when necessary, persisted (uncompressed) in
 binary format to the file system. This allows us to quickly access data by
-mmapp-ing the file. This alllows one to save and restore a session across a
-reboot of the server.
+mmapp-ing the file.  Like kdb+ \cite{Borror2015}, one can think of Q as 
+an in-memory database with persistent backing to the file system.
+
+How efficient is the combination of Lua and C? On representative code samples,
+XX\% of the time is spent in the C code that does the real work, YY\% of the
+time is spent in the core run time system, with the Lua glue code accounting for
+the rest. 
+%% TODO FILL IN THE XX and YY
+
+Q's software architecture consists of the following four layers. As we go from
+bottom to top, the rate of change increases and the complexity decreases.
+\be
+\item The core run time system --- Vectors, Scalars, Reducers
+\item operators --- provides core functionality (using C, OpenMP, pthreads) on
+  top of run time
+\item Q library developers --- use Q and Lua to create higher level functions on
+  top of core operators
+\item Q programmers --- use Q much the way  Python programmer uses scikit-learn.
+  \ee
 
 \input{vectors}
 
 \input{reducers}
 
-\input{glossary}
+\input{polymorphism}
+
+% \input{glossary}

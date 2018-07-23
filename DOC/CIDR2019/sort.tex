@@ -8,18 +8,15 @@ a table, {\tt E}, with 2 columns, {\tt from} and {\tt to}. Q supports the
 creation of auxiliary data structures to enable fast access but, in keeping with
 our minimalist philosophy, does not prvoide them out of the box.
 \be
-\item Assume {\tt E} is sorted, {\tt from} as primary key and {\tt to} as
-  secondary key (Section~\ref{par_sort}). Efficient parallel sort is discussed
-  in Section~\ref{par_sort}.
-\item 
-  {\tt E.idx = Q.sequence({start = 0, incr = 1, qtype = I4})}
-creates a Vector with values \(0, 1, \ldots\) 
-\item {\tt V.m = Q.unique(E.from)} creates a Vector of 
+\item {\tt f, t = Q.sort2(E.from, E.to, "ascending")}, sorts {\tt E}
+with {\tt from} as primary key and {\tt to} as
+secondary key (Section~\ref{par_sort})
+\item {\tt V.m = Q.unique(f)} creates a Vector of 
 member IDs, sorted ascending. 
-\item {\tt V.lb = Q.join(E.from, E.idx, V.m, min)}
-and {\tt V.ub = Q.join(E.from, E.idx, V.m, max)}
-allow us to quickly identify the contiguous edges of a given member. Member
-{\tt m = V.m[i]} is connected to members {\tt E.to[V.lb[i] \ldots E.to[V.ub[i]}
+\item For each member in {\tt V.m}, we determine the contiguous edges out of it by {\tt V.lb = Q.join(f, V.m, min\_index)}
+and {\tt V.ub = Q.join(f, V.m, max\_index)}
+Now, we can assert that member
+{\tt m = V.m[i]} is connected to members {\tt t[V.lb[i] .. V.ub[i]]}
 \ee
 
 
@@ -34,8 +31,9 @@ Vector \(x\). Then a simple parallel sort consists of
 (2) sorting each bin in parallel
 (3) copying each bin into the right place. Probabilistic guarantees
 of the form \(P[n(b) \geq (1+\beta) \times(n/n_B)] \leq \epsilon\) 
-allow us to allocate slightly more space than absoutely necessary and to 
-fall back to the sequential sort in the small probability that our estimates are off.
+allow us to allocate slightly more space (specified by \(\beta\)) than absoutely necessary and to 
+fall back to the sequential sort in the small probability (specified by
+\(\epsilon\))  that our estimates are off.
 
 To support this, the {\tt Q.sort} operator accepts ``hints'' in the form of
 optional arguments. In this case, the hint is a Vector whose length is the
@@ -48,13 +46,15 @@ repeat it''.  \Q\ minimizes re-work in several ways
 \item 
 Remembering basic statistics such as min, max, sum, average, whenever the
 corresponding operators are invoked. 
+Such meta-data is often the by product of other operators.
 \item the sorted-ness of a vector is
-stored as one of (a) unknown (b) ascending (c) descending (d) not sorted. \Q\
+stored as one of (a) unknown (b) ascending (c) descending (d) not sorted. 
+\Q\
 uses sort heavily to simplify other operators by converting them into linear
 scans. For example, consider {\tt x, y  = Q.count(z)} where \(x\) contains the
 unique values of \(z\) and \(y\) the number of occurrences. If \(z\) is not
 sorted, then the count operator internally (a) creates a copy, \(z'\), of \(z\)
-(b) sorts \(z'\) (c) passes \(z'\) to the count sub-routine and (d) \(z'\) gets
+(b) sorts \(z'\) (c) passes \(z'\) to the core {\tt count} code and (d) \(z'\) gets
 garbage collected when the count operator returns. Of course, if \(z\) is
 sorted, then this overhead is eliminated.
 

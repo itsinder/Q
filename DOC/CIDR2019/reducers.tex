@@ -2,7 +2,10 @@
 \label{reducers}
 
 A Reducer is a construct that takes one or more Vectors as input and produces
-one or more Scalars as output. The simplest Reducers are those for {\tt min},
+one or more Scalars as output. In that sense, this is similar to ``Builders ---
+declarative objects for producing result e.g., compute a sum'' \cite{Weld2017}.
+
+The simplest Reducers are those for {\tt min},
 {\tt max}, {\tt sum} and other associative functions. 
 In this case, the Reducer takes 1 Vector as input and 
 returns 2 Scalars, one
@@ -12,7 +15,7 @@ non-null values observed.
 An example of a more advanced Reducer is {\tt minK}. 
 Given 2 Vectors, \(d\) and \(g\), minK returns 2
 Lua tables of Scalars, \(d'\) and \(g'\) such that \(d'\) contains the \(k\)
-smallest values of \(d\) and \(g'\) contains the corresponding values of \(d\).
+smallest values of \(d\) and \(g'\) contains the corresponding values of \(g\).
 See Section~\ref{knn} for a use case.
 
 A few notes about Reducers: (a) 

@@ -1,7 +1,7 @@
 \subsection{k-Nearest Neighbors}
 \label{knn}
 
-A key subroutine of the knn algorithm \cite{Hastie2009} is finding the class labels of the
+A key subroutine of the {\tt knn} algorithm \cite{Hastie2009} is finding the class labels of the
 \(k\) points closest to the point \(x\) being classified. 
 We assume that we have \(n\) points in \(m\)-dimensional space, represented as a
 Lua table, \(T\), of \(m\) Vectors of length \(n\)
@@ -19,7 +19,9 @@ g1:eval()},
 we would have gotten the class labels of the \(k\) points
 closest to \(x\) from the first \(n_C\) points of \(T\). 
 
-% Comparing our implementation with \url{http://scikit-learn.org/}, \TBC
+%% TODO  
+
+%% TODO Comparing our implementation with \url{http://scikit-learn.org/}, \TBC
 
 \begin{figure}[hbtp]
 \centering
@@ -27,6 +29,7 @@ closest to \(x\) from the first \(n_C\) points of \(T\).
 \begin{minipage}{14 cm}
 \centering
 \verbatiminput{../../ML/KNN/lua/knn.lua}
+%% TODO Change mink_reducer to mink in final paper
 \caption{core of k-nn algorithm in Lua}
 \label{knn_core}
 \end{minipage}

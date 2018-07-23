@@ -3,7 +3,7 @@
 A vector is essentially a map \(f(i)\) such that given \(i, 0 \leq i < n\), it
 returns a value of a given type. The main types that \Q\ supports are four variants
 of integers (1, 2, 4, and 8 byte) and two variations of floating point (single
-and double precision). In addition, it supports bit vectors, constant length
+and double precision). In addition, it supports bit vectors and constant length
 strings. There is limited support for variable length strings, which are used
 primarily as dictionaries. 
 
@@ -22,7 +22,7 @@ was less than 32K, making a 2-byte integer adequate for the task at hand.
 It is relatively easy to add other types to Q, as long as these 
 are fixed width types. The real cost is in making sure that all relevant
 operators interpret that data meaningfully. For example, currently, {\tt add}
-accepts on all combinations of number types, but we do not (yet)
+accepts all combinations of number types, but we do not (yet)
 support adding a bit to a double.
 
 We
@@ -38,22 +38,28 @@ small. Most business analyses are insensitive to this level of imprecision.
 
 When a vector is created, we need to specify only its type and whether it has
 null values. A vector is populated in one of two ways. We can ``push'' data to
-it, much like writing to a file in append mode. Or we can provide a function,
+it, much like writing to a file in append mode. Or we can provide a generator function,
 which is invoked with the chunk index, \(i\), as parameter and which knows how to
 generate the \(i^{th}\) chunk.
 
 Vectors are evaluated lazily. Hence, a statement like 
-{\tt x = Q.const(\{len = 10, qtype = I4, val = 0\})} does not actually create 10
+{\tt x = Q.const(\{len = 10, qtype = I4, val = 0\})} does not actually create
+ten
 4-byte integers with value 0 as one might suspect. Data is populated only when
-the vector is explicitly {\tt eval}'d or implicitly required e.g., {\tt
-Q.print\_csv(x)}
+the {\tt eval()} is explicity invoked on the vector or the data is 
+implicitly required by some other operator e.g., {\tt Q.print\_csv(x)}
 
-Vectors are processed in chunks. Consider an expression  lie \(a + b\times c\).
-When  evaluated, computation bounces back and forth between the \(+\) operator
+Vectors are processed in chunks. Consider an expression  like \(\sum (a + b\times
+c)\), written in Q as {\tt d = Q.sum(Q.add(Q.mul(b,c), a))}.
+When {\tt d} is eval'd, computation alternates between the \(+\) operator
 and the \(\times\) operator, processing chunks of data at a time until there are
-no more. We had originally chosen co-routines to effect the {\tt resume} and
+no more.
+We had originally chosen co-routines to effect the {\tt resume} and
 {\tt yield} capabilities needed. However, Lua's support of closures allowed for
 a simpler implementation.
+The chunk size is chosen large enough that it is amenable to
+vectorization and parallelization and small enough that its memory consumption
+is low.
 
 Vectors are not mutable (with few exceptions)
 and must be produced sequentially. In other words, the \(i^{th}\) element must
@@ -64,13 +70,11 @@ only 1K elements. Whether one can get access to an element in the previous chunk
 depends on whether the vector has been ``memo-ized''. The default behavior, with
 a concomitant performance hit, is to memo-ize. However, when the programmer is
 aware that the vector will be consumed in a streaming fashion, they set memo
-to false. The chunk size is chosen large enough that it is amenable to
-vectorization and parallelization and small enough that its memory consumption
-is low.
+to false. 
 
-A vector has been fully materialized when either an ``eov'' is explicitly
-signalled to it or its generator produces fewer elements than the chunk size. 
-
+A vector is fully materialized in one of two ways (1) If it was setup with a a generator function and invocation of the function produces 
+fewer elements than the chunk size (2) it was set up for streaming and {\tt
+eov()} was explicitly signaled.
 
 Memo-izing is done by appending previous chunks in binary format to a file.
 Subsequent reads of this vector are done by mmap-ing the file. Not all
@@ -83,7 +87,7 @@ incoporate algorithms and libraries that have not been written with streaming in
 mind. For example, we have used this to call functions in the GNU Scientific
 Library and LAPACK from Q.
 
-Q's run time is an alternate approach to the problem of ``stream fusion''
+Q's run time is an alternate approach to ``stream fusion''
 \cite{Mainland2017}. In
 that paper, the authors identify this as a technique that allows a compiler to
 `` cope with boxed numeric types, handle lazy evaluation, and
@@ -102,10 +106,9 @@ operation like {\tt Q.sort(T.f)} would destroy that contract. Q
 provides higher level functions which are invoked when the entire table needs to
 be sorted e.g., {\tt Q.sort(T, f, "ascending")} which is implemented as follows
 \begin{verbatim}
-n = T.f:length()
-idx = Q.sequence({start = 0, increment = 1, len = n, qtype = I4}
--- Create Vector idx representing the permutation implied by sorting f
-Q.sort(T.f, idx, "ascending", "dragalong")
+-- g is f sorted in ascending order
+-- idx is the permutation implied by the sort
+g, idx = Q.sort(T.f, "ascending")
 -- permute all other vectors in the Lua table, other than f
 for k, v in pairs(T) do 
   if ( v ~= f ) then 
@@ -113,3 +116,4 @@ for k, v in pairs(T) do
   end
 end
 \end{verbatim}
+%% TODO make sure permute is consistent with Terra code
