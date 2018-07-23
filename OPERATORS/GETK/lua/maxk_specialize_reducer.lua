@@ -2,6 +2,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local cmem    = require 'libcmem'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
+local Scalar  = require 'libsclr'
 
 local function maxk_specialize(fldtype)
 
@@ -52,7 +53,7 @@ local function maxk_specialize(fldtype)
     local y = ffi.cast(struct_type .. " *", get_ptr(c_mem))
     local vals = {}
     local drag = {}
-    for i = 0, y[0].n do
+    for i = 0, tonumber(y[0].n)-1 do
       vals[#vals+1] = Scalar.new(y[0].val[i], qtype)
       drag[#drag+1] = Scalar.new(y[0].drag[i], qtype)
     end

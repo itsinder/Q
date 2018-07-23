@@ -53,8 +53,7 @@ local function mink_specialize(fldtype)
     local y = ffi.cast(struct_type .. " *", get_ptr(c_mem))
     local vals = {}
     local drag = {}
-    for i = 0, tonumber(y[0].k) do
-      print(tonumber(y[0].val[i]), tonumber(y[0].drag[i]))
+    for i = 0, tonumber(y[0].n)-1 do
       vals[#vals+1] = Scalar.new(y[0].val[i], qtype)
       drag[#drag+1] = Scalar.new(y[0].drag[i], qtype)
     end
