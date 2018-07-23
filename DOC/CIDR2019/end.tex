@@ -1,9 +1,15 @@
-\section{Conclusions and Future Work}
+\section{Conclusion}
 \label{end}
 
-We have started porting Q to CUDA. \TBC
+The development of Q has been motivated by (i) 
+Stonebraker's ``one size does not fit all'' dictum and (ii) the
+understanding, as data science practitioners, of what is truly needed to be
+effective. We posit that engaging the user, rather than shielding them from
+system internals, makes for simple, performant code. 
+Following Fred Brooks' ``form is liberating'', the single machine,
+single-threaded nature of Q's run time still present many interesting research
+problems. 
 
-Currently, memory mapped files serve two purposes --- to provide the illusion of
-a linear address space and to ``memo-ize'' a Vector so that any chunk of it, not
-just the current one, can be recalled. We are investigating 
-alternative storage strategies.
+Lastly, and most provocatively, we wonder whether one day we will look at
+systems like Hadoop the way we look at plastic bags --- seductively simple,
+largely unnecessary and, in the final analysis, ecologically destructive.

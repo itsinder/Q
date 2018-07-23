@@ -13,20 +13,44 @@ at a lower level of abstraction than relations, since they give
 the impression that positional (array-type) addressing is applicable
 (which is not true of \(n\)-ary relations), and they fail to
 show that the information content of a table is independent
-of row order. Nevertheless, even with these minor 
-aws,
+of row order. Nevertheless, even with these minor flaws,
 tables are the most important conceptual representation of
 relations, because they are universally understood.''
 \item By ``single-node'', we mean that Q does not distribute computation across
   machines. The flow of execution is inherently single-threaded. However,
   pthreads and OpenMP are heavily used {\em within} individual operations so as
-  to exploit multi-core systems as well as GPUs (Section~\ref{end}).
+  to exploit multi-core systems as well as GPUs.
 \item By ``column-store'', we mean that 
 Q provides the Lua programmer with the Vector type, each
-individual element of which is a Scalar. A database table is modeled as a Lua
-table of Vectors (Section~\ref{vectors_versus_tables}.
+individual element of which is a Scalar. A table in Q is a Lua
+table of Vectors (Section~\ref{vectors_versus_tables}), where a Lua table is equivalent
+to a Python dictionary.
 
 \ee
+
+\subsection{Q as a Lua extension}
+
+While it is useful to think of Q as a functional language, 
+it is more accurately described as a C library, embedded within an interpreted
+language.
+We chose to embed within an existing language for two reasons. One is that we did not have to
+write a custom compiler. More importantly, is that it allowed us to leverage a rich eco-system of libraries, debuggers
+\ldots
+yet seamlessly move between that world and the high performance capabilities of
+Q. 
+
+We chose Lua
+because it was designed specifically as both an embedding and embedded language
+\cite{Lua2011} and it had a wickedly fast interpreter, LuaJIT.
+We experimented with several approaches to invoking C from Lua. These included
+(a) dyncall \cite{Adler2013} (b) the native Lua C API (c) LuaFFI (d) LuaJIT's
+FFI. Taking the native Lua C API as the baseline, dyncall was (surprisingly) the worst (twice
+as slow) and LuaJIT was (unsurprisingly) the fastest (50 times as fast!).
+
+Data is either stored in memory and, when necessary, persisted (uncompressed) in
+binary format to the file system. This allows us to quickly access data by
+mmapp-ing the file. This alllows one to save and restore a session across a
+reboot of the server.
 
 \input{vectors}
 

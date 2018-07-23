@@ -1,22 +1,26 @@
 \section{Operator polymorphism in Q}
 \label{polymorphism}
 
-Vectorized operators in Q are intrinsically overloaded i.e. the same Q operator (Lua function) can be invoked with vectors of any of the supported Q data-types [\ref{vectors}].
+Vectorized operators in Q are intrinsically overloaded i.e. the same Q operator
+(Lua function) can be invoked with vectors of any of the supported Q data-types,
+Section~\ref{Vectors}.
 Overloading is achieved as follows.
 \be
 \item static compilation: In this case, the operator writer implements
   templatized C-like code. At build time, the template is fleshed out for all
-  relevant combinations of data types to generate the \verb+.c+ and \verb+.h+
-  files, which are then compiled into a single \verb+.so+.
+  relevant combinations of data types to generate the {\tt .c} and {\tt +.h}
+  files, which are then compiled into a single {\tt .so}. The {\tt .h} files
+  are passed to LuaJIT using the {\tt cdef} function to allow FFI.
 \item dynamic compilation: 
   In this case too, we require the existence of templates. 
   The server starts up with a minimal set of core functionality. 
   However, the generation of the source file, compiling and loading
   are done on demand. The results are cached
   so that subsequent calls to the same operator do not incur this overhead.
+  This approach is refered to as  ``multi-stage programming''
 
-  {\em Need to talk about what happens when  the server starts up again. Where
-  are the .so files and the .h files kept and cdef'd}
+%% TODO   {\em Need to talk about what happens when  the server starts up again. Where
+%% TODO   are the .so files and the .h files kept and cdef'd}
 
 \item we define a function for a particular combination of data types
   dynamically, in a strongly typed (low-level) language, that can bind seamlessly
@@ -28,7 +32,7 @@ Overloading is achieved as follows.
 \label{Terra} 
 
 Terra is ``a low-level system programming language that is embedded in and
-meta-programmed by the Lua programming language'' \cite{devito15xx}
+meta-programmed by the Lua programming language'' \cite{devito2015}
 Some of the key features of the Lua/Terra combination that we benefit 
 from are:
 \be
@@ -75,9 +79,8 @@ Figure~\ref{permute_in_terra} shows the Terra function used to implement it.
 \ei
 
 In order to invoke the Terra function (Figure\ref{permute_in_terra}) from Q, we
-need to map Q's data types to Terra. This is done with a simple global 
-array, \verb+q_to_terra+ such that, for example, 
-\verb+q_to_terra['I4'] = int32+  where {\tt int32} is the Lua variable representing the Terra type.
+need to map Q's data types to Terra e.g., 
+{\tt q\_to\_terra['I4'] = int32}  where {\tt int32} is the Lua variable representing the Terra type.
 
 Q's permute operator, which uses the Terra function of
 Figure~\ref{permute_in_terra} 

@@ -10,31 +10,19 @@ efficient to evaluate the vector \(w\) a chunk at a time, perform all the
 reductions on the chunk, store the partial results and then repeat over
 successive chunks. So, we can re-write the above as 
 {\tt x, y, z = Q.fold({ "sum", "min", "max" }, w)}
-where the fold operator is 
-\begin{verbatim}
--- f_to_s is a table consisting of all reducers registered with Q
-local f_to_s = require 'Q/OPERATORS/F_TO_S/lua/_f_to_s'
-local function fold( fns, vec)
-  local status
-  -- setup reducers for each input 
-  local gens = {} 
-  for i, v in ipairs(fns) do 
-    gens[i] = f_to_s[v](vec) 
-  end
-  -- for each chunk, evaluate reducer on that chunk
-  repeat 
-    for i, v in ipairs(fns) do 
-      status = gens[i]:next() 
-    end 
-  until not status
-  -- return results for each reducer in return_vals
-  local return_vals = {}
-  for i, v in ipairs(gens) do 
-    return_vals[i] = gens[i]:eval() 
-  end
-  return unpack(return_vals)
-end
-\end{verbatim}
+where the fold operator is in Figure~\ref{fig_fold}
+
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{fold.lua}
+\caption{The ``fold'' operator}
+\label{fig_fold}
+\end{minipage}
+}
+\end{figure}
 We try to avoid memo-izing vectors when we don't have to because 
 of the cost of flushing to disk. In our experiments, for \(n > 2^{25}\), 
 memo-izing the input \(w\) and computing min/max/sum sequentially 
