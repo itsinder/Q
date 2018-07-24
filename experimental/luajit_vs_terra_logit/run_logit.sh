@@ -6,10 +6,6 @@ then
   exit 1
 fi
 
-echo "--------------------------------------------"
-echo "Running Performance Test for logit"
-echo "--------------------------------------------"
-
 compiler=$(echo $1 | tr '[:upper:]' '[:lower:]')
 
 if [ ! \( \( $compiler == "luajit-2.1.0-beta3" \) -o \( $compiler == "luajit-2.0.4" \) \) ]
