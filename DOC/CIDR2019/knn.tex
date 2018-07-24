@@ -9,8 +9,7 @@ Lua table, \(T\), of \(m\) Vectors of length \(n\)
 Note that the operations are performed in column
 order rather than the more intuitive row order. Row ordering means computing the
 distance from \(x\) to a point in \(T\) completely before proceeding to the next
-point. We invite the reader to judge from Figure~\ref{knn_core} whether 
-our claim is that the programming burden of being aware of data layout and
+point. We invite the reader to judge from Figure~\ref{knn_core} the merits of our claim that the programming burden of being aware of data layout and
 operation ordering is not onerous.
 
 Given Q's lazy evaluation in chunks, note that the operation is actually
@@ -20,8 +19,7 @@ g1:eval()},
 we would have gotten the class labels of the \(k\) points
 closest to \(x\) from the first \(n_C\) points of \(T\). 
 
-
-Comparing our implementation with \url{http://scikit-learn.org/}, \TBC
+% Comparing our implementation with \url{http://scikit-learn.org/}, \TBC
 
 \begin{figure}[hbtp]
 \centering

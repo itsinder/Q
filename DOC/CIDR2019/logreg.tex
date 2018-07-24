@@ -3,15 +3,16 @@
 A key subroutine in logistic regression \cite{Hastie2009} is improving the 
 estimates of the
 coefficients, \(\beta\), using the Newton-Raphson algorithm.
-Our particular implementation requires computation of 
+In the course of this, we need to compute
 \(\frac{1}{1 + e^{-x}}\) and 
-\(\frac{1}{(1 + e^{-x})^2}\), where \(x\) is \TBC 
+\(\frac{1}{(1 + e^{-x})^2}\).
 We now discuss a sequence of increasingly sophisticated way of implementing
 these operators in Q.
 
 \subsubsection{The Lua implementation}
 The ``quick and dirty'' way is to implement it in Lua. An example is 
-in Figure~\ref{logit_in_lua}.
+in Figure~\ref{logit_in_lua}. We take advantage of the {\tt ffi.cast}
+functionality to access C data from Lua without any format conversions.
 \begin{figure}
 \centering
 \fbox{
@@ -32,20 +33,27 @@ the actual operator as a template that can be provided by the user. All the oper
 % NOTE ACTUALLY this is f1s1opf2 not v1s1opv2
 writer needs to (1) pick a template --- in this case it is {\tt v1s1opv2}, indicating that a
 vector v1 and an optional scalar s1 are used to produce another vector v2.
-(2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )}.
+(2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )} (3)
+guard against improper usage e.g, we wouldn't apply this function to a string.
+
 
 \subsubsection{Eliminating common sub-expressions}
 However, one quickly recognizes that creating separate operators for those 2
 functions would lead to 
-redundant computations, which can be eliminated as shown below.
-\begin{verbatim}
-t1 = Q.vsmul(x, Scalar.new(-1, fldtype)):memo(false)
-t2 = Q.exp(t1):memo(false)
-t3 = Q.incr(t2):memo(false)
-t4 = Q.sqr(t3):memo(false)
-y  = Q.reciprocal(t3)
-z  = Q.reciprocal(t4)
-\end{verbatim}
+redundant computations, which can be eliminated as in Figure~\ref{sub_expr}
+
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{sub_expr.lua}
+\caption{Common sub-expression elimination}
+\label{sub_expr}
+\end{minipage}
+}
+\end{figure}
+
 
 \subsubsection{Lock step evaluation}
 However, notice that using the above code introduces a subtle but
@@ -66,21 +74,26 @@ been created, as shown below.
 \end{verbatim}
 
 The problem with this solution is that the burden of lock-step evaluation falls
-on the Q programmer. This is remedied by the {\tt conjoin} function.
+on the Q programmer. This is remedied by the {\tt conjoin} function
+(Figure~\ref{conjoin})
 
-\begin{verbatim}
-y:set_memo(false); z:set_memo(false);  -- no memo-izing needed
-conjoin({y, z}) -- indicate that they need to be evaluated together
-assert(z:is_eov() == false) -- z not fully evaluated
-y:eval() -- evaluate y when needed
-assert(z:is_eov() == true) -- z fully evaluated as a consequence of y eval
-\end{verbatim}
-
-Need performance numbers \TBC
-\be
-\item Lua versus C
-\item separate operators versus eliminating common sub expr
-\ee
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{conjoin.lua}
+\caption{Conjoined Vectors}
+\label{conjoin}
+\end{minipage}
+}
+\end{figure}
+%% TODO 
+%% TODO %% TODO Need performance numbers \TBC
+%% TODO \be
+%% TODO \item Lua versus C
+%% TODO \item separate operators versus eliminating common sub expr
+%% TODO \ee
 
 \subsubsection{Custom Operators}
 
@@ -99,7 +112,7 @@ end
 \end{verbatim}
 
 However, with a little more effort, we created custom operator, 
-a simplified sketch of which is provided below. The actual code
+a simplified sketch of which is provided in Figure~\ref{sum_prod_c}. The actual code
 uses blocking to avoid writing out to the entire temp array before reading it
 back in. Setting \(m=32\), we varied \(n\) from \(2^{16}\) to \(2^{24}\). With
 blocking, performance increases as we increase \(n\) but saturates after
@@ -111,31 +124,22 @@ The regular Q code described above gets about
 What we hope to illustrate is that a
 simple data model allows us to move along the performance versus simplicity
 continuum as desired.
-\begin{verbatim}
-_sum(float *x, int n) {
-  float sum = 0;
-  for ( i = 0; i < n; i++ ) { 
-    sum += x[i];
-  }
-  return sum;
-}
-_vvmul(float *x, float *y, float *z, int n) {
-  for ( i = 0; i < n; i++ ) { 
-    z[i] = x[i] * w[i];
-  }
-}
-for ( i = 0; i < m; i++ ) { 
-  _vvmul(X[i], w, temp, n);
-  for ( j = i; j < m; j++ ) { 
-    _vvmul(X[j], temp, temp);
-    A[i][j] = _sum(temp, n);
-  }
-}
-\end{verbatim}
 
-This in turn raised the question: could we have used the same ``chunking'' trick
-in Q itself, without resorting to a custom operator. In this case, the code
-consists of 2 blocks. In the first, we set up the reducers --- no actual
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{sum_prod3.c}
+\caption{Custom operator for \(x^T W x\)}
+\label{sum_prod_c}
+\end{minipage}
+}
+\end{figure}
+
+This in turn raised the question: could we have ``chunked'' the computation 
+without resorting to a custom operator? It turns out to be possible. 
+In the first, we simply set up the reducers --- no actual
 computation happens. This is exactly as before, except that there is no call to
 {\tt eval()}. In the second block, we evaluate the reducer in chunks, stopping
 when the input vectors have no more data.
@@ -143,8 +147,8 @@ when the input vectors have no more data.
 repeat 
   for i, X_i in ipairs(X) do
     for j, X_j in ipairs(X) do
-      A[i][j]:next()
+      status = A[i][j]:next()
     end
   end
-until done 
+until not status
 \end{verbatim}

@@ -14,9 +14,12 @@ local function logit(v)
   local cidx = 0 -- chunk index
   while true do 
     local n1, d1 = v:chunk(cidx)
-    if ( n1 == 0 ) then break end -- quit when no more input
-    local cd1 = ffi.cast(qconsts.qtypes[qtype].ctype .. "*", get_ptr(d1)) -- access data of input
-    for i = 0, n1 do -- the core operation is as follows
+    -- quit when no more input
+    if ( n1 == 0 ) then break end 
+    local ctype = qconsts.qtypes[qtype].ctype
+    -- access data of input
+    local cd1 = ffi.cast(ctype .. "*", get_ptr(d1)) 
+    for i = 0, n1 do -- core operation is as follows
       cd2[i] = 1.0 / (1.0 + math.exp(-1 * cd1[i]))
     end
     v2:put_chunk(d2, nil, n1) -- pass buffer to output vector
