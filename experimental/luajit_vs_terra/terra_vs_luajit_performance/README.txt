@@ -52,6 +52,7 @@ Run Performance Test
     - terra : run performance test with 'terra' interpreter
     - luajit : run performance test with 'luajit' interpreter
     - luaterra : run performance test with 'luajit' interpreter and terra library (i.e with "require 'terra'" statement in lua file)
+    Note: The <input_csv_path> should exists
 
 Example
     $ bash run_performance_test.sh terra input_files/10000_rows.csv
