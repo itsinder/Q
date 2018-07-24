@@ -8,14 +8,11 @@ local function knn(
   )
   local n = g:length()
   local m = #T
-  local d = {}
-  d[0] = Q.const({val = 0, qtype = "F4", len = n})
+  local d = Q.const({val = 0, qtype = "F4", len = n})
   for i = 1, m do -- for each attribute
-    -- d[i] = Q.vvadd(d[i-1], Q.sqr(Q.vssub(T[i], x[i])))
-    d[0] = Q.vvadd(d[0], Q.sqr(Q.vssub(T[i], x[i])))
+    d = Q.vvadd(d, Q.sqr(Q.vssub(T[i], x[i])))
   end
-  -- commented the above line as other table values i.e vectors are not of any use
-  return Q.mink_reducer(d[0], g, k)
+  return Q.mink_reducer(d, g, k)
 end
 
 return knn
