@@ -8,6 +8,7 @@ local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
 local q_data_dir = os.getenv("Q_DATA_DIR")
+q_data_dir = q_data_dir .. "/"
 
 local M
 local is_memo

@@ -7,6 +7,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
 local q_data_dir = os.getenv("Q_DATA_DIR")
+q_data_dir = q_data_dir .. "/"
 
 local M
 local chunk_size = qconsts.chunk_size
