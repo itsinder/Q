@@ -20,11 +20,13 @@ Q.count() : performs occurrence count of input vector
 local function count(x, y, optargs)
   local expander, op 
   if type(x) == "lVector" and y then
-    expander = require 'Q/OPERATORS/COUNT/lua/expander_count'
-    op = "count"
+    expander = require 'Q/OPERATORS/COUNT/lua/expander_counts'
+    op = "counts"
   elseif type(x) == "lVector" then
     expander = require 'Q/OPERATORS/UNIQUE/lua/expander_unique'
     op = "unique"
+  else
+    assert(nil, "Invalid arguments")
   end
 
   local status, ret_1, ret_2 = pcall(expander, op, x, y, optargs)

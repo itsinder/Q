@@ -15,6 +15,8 @@ local function sub(x, y, optargs)
   elseif type(x) == "lVector" then
     expander = require 'Q/OPERATORS/F1S1OPF2/lua/expander_f1s1opf2'
     op = "vssub"
+  else
+    assert(nil, "Invalid arguments")
   end
   
   local status, col = pcall(expander, op, x, y, optargs)

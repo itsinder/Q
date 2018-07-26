@@ -11,7 +11,7 @@ tests.t1 = function()
   local qtype = "I1"
   local value = 100
   local vec = Q.mk_col(tbl, qtype)
-  local result = Q.count(vec, value)
+  local result = Q.counts(vec, value)
   assert(result:eval():to_num() == 1)
   print("Successfully completed test t1")
 end
@@ -22,7 +22,7 @@ tests.t2 = function()
   local qtype = "I1"
   local value = 45
   local vec = Q.mk_col(tbl, qtype)
-  local result = Q.count(vec, value)
+  local result = Q.counts(vec, value)
   assert(result:eval():to_num() == 0)
   print("Successfully completed test t2")
 end
@@ -32,7 +32,7 @@ end
 -- from input vector where num_elements < chunk_size
 tests.t3 = function()
   local input_vec = Q.period({start = 1, by = 1, period = 10, len = 50000, qtype = "I2"}):eval()
-  local result = Q.count(input_vec, 10)
+  local result = Q.counts(input_vec, 10)
   assert(result:eval():to_num() == 5000)
   print("Successfully completed test t3")
 end
@@ -41,7 +41,7 @@ end
 -- from input vector where num_elements > chunk_size
 tests.t4 = function()
   local input_vec = Q.period({start = 1, by = 1, period = 10, len = 65536*2, qtype = "I2"}):eval()
-  local result = Q.count(input_vec, 10)
+  local result = Q.counts(input_vec, 10)
   assert(result:eval():to_num() == 13107)
   print("Successfully completed test t4")
 end
@@ -53,7 +53,7 @@ tests.t5 = function()
   local qtype = "I2"
   local input_vec = Q.period({start = 1, by = 1, period = 10, len = 65536*2, qtype = qtype}):eval()
   local s_val = Scalar.new(10, qtype) 
-  local result = Q.count(input_vec, s_val)
+  local result = Q.counts(input_vec, s_val)
   assert(result:eval():to_num() == 13107)
   print("Successfully completed test t5")
 end
@@ -66,7 +66,7 @@ tests.t6 = function()
   local value = 128
   local vec = Q.mk_col(tbl, qtype)
   print("START: Deliberate error attempt")
-  local status, reason = pcall(Q.count,vec, value)
+  local status, reason = pcall(Q.counts,vec, value)
   print(status, reason)
   print("STOP: Deliberate error attempt")
   assert(status == false)
