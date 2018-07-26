@@ -8,14 +8,14 @@ local cmem    = require 'libcmem'
 return function (
   qtype
   )
-    local tmpl = 'count.tmpl'
+    local tmpl = 'counts.tmpl'
     local subs = {}
     if ( qtype == "B1" ) then
       assert(nil, "TODO")
       subs.reduce_qtype = "I1"
     else
       assert(is_base_qtype(qtype), "qtype must be base type")
-      subs.op = "count"
+      subs.op = "counts"
       subs.fn = subs.op .. "_" .. qtype 
       subs.ctype = qconsts.qtypes[qtype].ctype
       subs.qtype = qtype
