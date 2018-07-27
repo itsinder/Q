@@ -16,7 +16,7 @@ gslab@gs-1576:~/krushna/Q/experimental/fold_performance_test$
 
 
 
-## fold with memo=false, input is eval'ed before use
+## fold with memo=true, input is eval'ed before use
 ========================
 gslab@gs-1576:~/krushna/Q/experimental/fold_performance_test$ luajit -e "require 'test_fold_memo_true'['t1']()"
 test_fold_memo_true     345373455ULL
