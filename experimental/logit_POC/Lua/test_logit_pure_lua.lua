@@ -8,7 +8,7 @@ local function logit(in_buf, num_elements, out_buf)
   return out_buf
 end
 
-local num_elements = 100000000
+local num_elements = 10000000
 local in_buf = {}
 local out_buf = {}
 
@@ -19,7 +19,9 @@ end
 
 
 local start_time = timer.clock_gettime(0)
-local res = logit(in_buf, num_elements, out_buf )
+for i = 1, 100 do
+  local res = logit(in_buf, num_elements, out_buf )
+end
 local stop_time = timer.clock_gettime(0)
 local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
 

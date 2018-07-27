@@ -10,7 +10,7 @@ ffi.cdef([[
 ffi.cdef(plfile.read(header_file))
 local qc = ffi.load('liblogit_I8.so')
 
-local num_elements = 100000000
+local num_elements = 10000000
 
 local function logit()
   local in_buf, nn_in_buf, out_buf, nn_out_buf
@@ -31,7 +31,9 @@ local function logit()
   end
   
   local start_time = timer.clock_gettime(0)
-  qc[func_name](in_buf, nil, num_elements, nil, out_buf, nil)
+  for i = 1, 100 do
+    qc[func_name](in_buf, nil, num_elements, nil, out_buf, nil)
+  end
   local stop_time = timer.clock_gettime(0)
   local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
 
@@ -45,6 +47,7 @@ local function logit()
   end
 
   print("DONE")
+  os.exit()
 end
 
 logit()
