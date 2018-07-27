@@ -11,7 +11,7 @@ function sum_prod(X, w)
     SA[i] = {}
     A[i] = {}
     temp[i] = Q.vvmul(X[i], w) -- :memo(false)
-    for j = 1, M do
+    for j = i, M do
       SA[i][j] = Q.sum(Q.vvmul(X[j], temp[i])) -- :memo(false))
     end
   end
@@ -23,13 +23,13 @@ function sum_prod(X, w)
   for c = 1, nC do
     for i = 1, M do
       temp[i]:chunk(c-1) -- get this chunk evaluated
-      for j = 1, M do
+      for j = i, M do
         SA[i][j]:next() -- get this chunk evaluated
       end
     end
   end
   for i = 1, M do
-    for j = 1, M do
+    for j = i, M do
       A[i][j] = SA[i][j]:value() -- get the value evaluated
     end
   end

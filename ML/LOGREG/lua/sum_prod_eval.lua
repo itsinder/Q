@@ -4,11 +4,11 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 function sum_prod_eval(X, w)
   local A = {}
 
-  for i, X_i in pairs(X) do
+  for i = 1, #X do
     A[i] = {}
-    local temp = Q.vvmul(X_i, w)
-    for j, X_j in pairs(X) do
-      A[i][j] = Q.sum(Q.vvmul(X_j, temp)):eval()
+    local temp = Q.vvmul(X[i], w)
+    for j = i, #X do
+      A[i][j] = Q.sum(Q.vvmul(X[j], temp)):eval()
     end
   end
 
