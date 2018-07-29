@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local tests = {}
 
@@ -46,6 +47,36 @@ tests.t4 = function()
   local sum = Q.sum(Q.vveq(res, exp_col)):eval()
   assert(sum:to_num() == exp_col:length())
   print("successfully completed t4")
+end
+
+-- test maxk_reducer for num_elements > chunk_size
+-- where max values are in second chunk
+tests.t6 = function()
+  local chunk_size = qconsts.chunk_size
+  local input_tbl_val = {}
+  local input_tbl_drag = {}
+  for i = 1, chunk_size do 
+    input_tbl_val[i] = i*10
+    input_tbl_drag[i] = i
+  end
+  for i = chunk_size+1, chunk_size+10 do
+    input_tbl_val[i] = i%chunk_size
+    input_tbl_drag[i] = i
+  end
+
+  local val = Q.mk_col(input_tbl_val, "I4")
+  local drag = Q.mk_col(input_tbl_drag, "I4")
+  local res = Q.maxk_reducer(val, drag, 3)
+  local val_k, drag_k = res:eval()
+  print("========================")
+  for i, v in ipairs(val_k) do
+    print(val_k[i], drag_k[i])
+  end
+  os.exit()
+  local exp_col = Q.mk_col({1, 2, 3}, "I8")
+  local sum = Q.sum(Q.vveq(res, exp_col)):eval()
+  assert(sum:to_num() == exp_col:length())
+  print("successfully completed t6")
 end
 
 return tests

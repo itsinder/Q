@@ -15,7 +15,6 @@ function sum_prod(X, w)
       SA[i][j] = Q.sum(Q.vvmul(X[j], temp[i])) -- :memo(false))
     end
   end
-
   local len = w:length()
   local chunk_size = qconsts.chunk_size
 
@@ -29,7 +28,6 @@ function sum_prod(X, w)
       end
     end
   end
-
   for i = 1, M do
     for j = i, M do
       A[i][j] = SA[i][j]:value() -- get the value evaluated

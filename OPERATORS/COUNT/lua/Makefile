@@ -10,7 +10,7 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libcount.so  
+all : libcounts.so  
 	
 #AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 
@@ -24,27 +24,27 @@ clean :
 	rm -f _*
 	rm -f *.so
 
-libcount.so : ${GEN_FILES} \
-	count.tmpl
-	luajit generator_count.lua
-	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libcount.so
+libcounts.so : ${GEN_FILES} \
+	counts.tmpl
+	luajit generator_counts.lua
+	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libcounts.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
-test_q : libcount.so
+test_q : libcounts.so
 	echo "TODO"
 
-test_c :  libcount.so
+test_c :  libcounts.so
 	echo "TODO"
 
 test : test_q test_c
 
 GEN_FILES = \
-	../gen_src/_count_F4.c \
-	../gen_src/_count_F8.c \
-	../gen_src/_count_I1.c \
-	../gen_src/_count_I2.c \
-	../gen_src/_count_I4.c \
-	../gen_src/_count_I8.c \
+	../gen_src/_counts_F4.c \
+	../gen_src/_counts_F8.c \
+	../gen_src/_counts_I1.c \
+	../gen_src/_counts_I2.c \
+	../gen_src/_counts_I4.c \
+	../gen_src/_counts_I8.c \
   

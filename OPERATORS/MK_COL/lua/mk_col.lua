@@ -6,10 +6,6 @@ local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
-local MAXIMUM_LUA_NUMBER = 9007199254740991
-local MINIMUM_LUA_NUMBER = -9007199254740991
-
-
 local mk_col = function (input, qtype, nn_input)
   assert(input,  err.INPUT_NOT_TABLE)
   assert(type(input) == "table", err.INPUT_NOT_TABLE)

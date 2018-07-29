@@ -15,11 +15,13 @@ require "Q/UTILS/lua/restore"
 require "Q/UTILS/lua/set_memo"
 require "Q/UTILS/lua/q_shutdown"
 require "Q/UTILS/lua/view_meta"
+require "Q/UTILS/lua/pack"
+require "Q/UTILS/lua/unpack"
 require "Q/OPERATORS/F1F2OPF3/lua/_f1f2opf3"
 require "Q/OPERATORS/F1S1OPF2/lua/_f1s1opf2"
 require "Q/OPERATORS/S_TO_F/lua/_s_to_f"
 require "Q/OPERATORS/F_TO_S/lua/_f_to_s"
-require "Q/OPERATORS/COUNT/lua/count"
+require "Q/OPERATORS/COUNT/lua/counts"
 require "Q/OPERATORS/AINB/lua/ainb"
 require "Q/OPERATORS/IFXTHENYELSEZ/lua/ifxthenyelsez"
 require "Q/OPERATORS/DROP_NULLS/lua/drop_nulls"
@@ -34,6 +36,11 @@ require 'Q/OPERATORS/GROUPBY/lua/groupby'
 require 'Q/OPERATORS/INDEX/lua/indexing'
 require 'Q/OPERATORS/UNIQUE/lua/unique'
 require 'Q/OPERATORS/GETK/lua/getk'
+-- alias wrappers
+require 'Q/ALIAS/lua/add'
+require 'Q/ALIAS/lua/sub'
+require 'Q/ALIAS/lua/mul'
+require 'Q/ALIAS/lua/count'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'

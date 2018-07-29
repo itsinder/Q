@@ -619,7 +619,6 @@ function lVector:eval()
       -- for conjoined vectors
       if self.siblings then
         for k, v in pairs(self.siblings) do
-          print("Getting chunk for conjoined vector " .. k)
           v:chunk(chunk_num)
         end
       end

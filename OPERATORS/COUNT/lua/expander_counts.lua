@@ -21,7 +21,7 @@ return function (a, x, y, optargs )
   assert(status, "Failure of specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Function does not exist " .. func_name)
-  local reduce_struct = assert(subs.c_mem)
+  local count = assert(subs.count)
   local getter = assert(subs.getter)
   assert(type(getter) == "function")
   --==================
@@ -36,14 +36,13 @@ return function (a, x, y, optargs )
     chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) then
       local casted_x_chunk = ffi.cast( subs.ctype .. "*",  get_ptr(x_chunk))
-      local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
       local start_time = qc.RDTSC()
-      qc[func_name](casted_x_chunk, x_len, bval, casted_struct)
+      qc[func_name](casted_x_chunk, x_len, bval, count)
       record_time(start_time, func_name)
-      
-      return reduce_struct
+
+      return count[0]
     end
   end
-  local s =  Reducer ( { gen = lgen, func = getter, value = reduce_struct} )
+  local s =  Reducer ( { gen = lgen, func = getter, value = count[0]} )
   return s
 end
