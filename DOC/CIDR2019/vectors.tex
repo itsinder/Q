@@ -15,7 +15,7 @@ introduction of half precision floating point  \cite{nvidia2017}. The user is
 encouraged (but not required) to use the smallest type that supports the actual
 dynamic range required. It is eye-opening to realize that this is often  less
 than one expects. For example, while analyzing LinkedIn's endorsement feature
-(e.g., User A endorses User B's proficiency in Java),
+(e.g. User A endorses User B's proficiency in Java),
 the number of unique endorsements that captured more than 99\% of the traffic
 was less than 32K, making a 2-byte integer adequate for the task at hand.
 
@@ -47,7 +47,7 @@ Vectors are evaluated lazily. Hence, a statement like
 ten
 4-byte integers with value 0 as one might suspect. Data is populated only when
 the {\tt eval()} is explicity invoked on the vector or the data is 
-implicitly required by some other operator e.g., {\tt Q.print\_csv(x)}
+implicitly required by some other operator e.g. {\tt Q.print\_csv(x)}
 
 Vectors are processed in chunks. Consider an expression  like \(\sum (a + b\times
 c)\), written in Q as {\tt d = Q.sum(Q.add(Q.mul(b,c), a))}.
@@ -78,7 +78,7 @@ eov()} was explicitly signaled.
 
 Memo-izing is done by appending previous chunks in binary format to a file.
 Subsequent reads of this vector are done by mmap-ing the file. Not all
-algorithms are readily transformed into streaming operations e.g., sort. There
+algorithms are readily transformed into streaming operations e.g. sort. There
 are a few cases where we support modifying a vector after it has been fully
 materialized by opening it in write mode and mmap-ing it.
 
@@ -104,7 +104,7 @@ semantics means that \(T(i) = (f(i), g(i))\)  i.e., the \(i^{th}\) element of
 the table is the \(i^{th}\) element of \(f\) and \(g\). An 
 operation like {\tt Q.sort(T.f)} would destroy that contract. Q
 provides higher level functions which are invoked when the entire table needs to
-be sorted e.g., {\tt Q.sort(T, f, "ascending")} which is implemented as follows
+be sorted e.g. {\tt Q.sort(T, f, "ascending")} which is implemented as follows
 \begin{verbatim}
 -- g is f sorted in ascending order
 -- idx is the permutation implied by the sort
