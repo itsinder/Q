@@ -51,7 +51,9 @@ Such meta-data is often the by product of other operators.
 stored as one of (a) unknown (b) ascending (c) descending (d) not sorted. 
 \Q\
 uses sort heavily to simplify other operators by converting them into linear
-scans. For example, consider {\tt x, y  = Q.count(z)} where \(x\) contains the
+scans. 
+%% explain difference between unknown and not sorted
+For example, consider {\tt x, y  = Q.count(z)} where \(x\) contains the
 unique values of \(z\) and \(y\) the number of occurrences. If \(z\) is not
 sorted, then the count operator internally (a) creates a copy, \(z'\), of \(z\)
 (b) sorts \(z'\) (c) passes \(z'\) to the core {\tt count} code and (d) \(z'\) gets

@@ -14,7 +14,7 @@ performance, as illustrated by Nvidia's
 introduction of half precision floating point  \cite{nvidia2017}. The user is
 encouraged (but not required) to use the smallest type that supports the actual
 dynamic range required. It is eye-opening to realize that this is often  less
-than one expects. For example, while analyzing LinkedIn's endorsement feature
+than what one expects. For example, while analyzing LinkedIn's endorsement feature
 (e.g. User A endorses User B's proficiency in Java),
 the number of unique endorsements that captured more than 99\% of the traffic
 was less than 32K, making a 2-byte integer adequate for the task at hand.
