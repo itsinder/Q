@@ -12,8 +12,8 @@ these operators in Q.
 \subsubsection{The Lua implementation}
 \label{Logit_Lua}
 The ``quick and dirty'' way is to implement it in Lua. An example is 
-in Figure~\ref{logit_in_lua}. We take advantage of the {\tt ffi.cast}
-functionality to access C data from Lua without any format conversions.
+in Figure~\ref{logit_in_lua}. We take advantage of {\tt ffi.cast}
+to directly access C data from Lua.
 \begin{figure}
 \centering
 \fbox{
@@ -59,22 +59,25 @@ redundant computations, which can be eliminated as in Figure~\ref{sub_expr}
 
 
 \subsubsection{Lock step evaluation}
-However, notice that using the above code introduces a subtle but
+However, the code in Figure~\ref{sub_expr} has a subtle but
 critical bug when the number of elements in \(x\) exceeds the chunk
 size.  If we were to call {\tt eval()} on \(y\), then we would
 end up consuming sucessive chunks of \(t_3\). Now, if we were to call
 {\tt eval()} on \(z\), we would fail when requesting the first
 chunk of \(t_3\), since it has {\bf not} been memo-ized. One solution
 is to ensure that \(y\) and \(z\) are evaluated in lock-step, after they have
-been created, as shown below.
-\begin{verbatim} 
-  cidx = 0  -- chunk index
-  repeat 
-    ly = y:chunk(cidx)
-    lz = z:chunk(cidx)
-    cidx = cidx + 1
-  until ( ly == 0 )
-\end{verbatim}
+been created, as in Figure~\ref{lock_step}.
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{lock_step.lua}
+\caption{Lock step evaluation}
+\label{lock_step}
+\end{minipage}
+}
+\end{figure}
 
 The problem with this solution is that the burden of lock-step evaluation falls
 on the Q programmer. This is remedied by the {\tt conjoin} function
