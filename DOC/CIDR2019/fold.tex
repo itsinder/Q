@@ -1,4 +1,4 @@
-\subsection{Fold}
+\subsection{Sharing the read cost}
 \label{fold}
 Consider the case where we want to perform many different reductions (e.g. min,
 max, sum, \ldots) over the same vector. The simple way to do this is
@@ -10,7 +10,7 @@ efficient to evaluate the vector \(w\) a chunk at a time, perform all the
 reductions on the chunk, store the partial results and then repeat over
 successive chunks. So, we can re-write the above as 
 {\tt x, y, z = Q.fold({ "sum", "min", "max" }, w)}
-where the fold operator is in Figure~\ref{fig_fold}
+where {\tt Q.fold} is described in Figure~\ref{fig_fold}
 
 \begin{figure}
 \centering
