@@ -8,7 +8,7 @@ main(
     )
 {
   int status = 0;
-  uint64_t N = 256 * 65536; // 4 * 1024 * 1024;
+  uint64_t N = 256 * 65; // 4 * 1024 * 1024;
   uint64_t M = 32;
   double **A = NULL;
   float **X = NULL;
