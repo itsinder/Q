@@ -10,22 +10,25 @@ We now discuss a sequence of increasingly sophisticated way of implementing
 these operators in Q.
 
 \subsubsection{The Lua implementation}
+\label{Logit_Lua}
 The ``quick and dirty'' way is to implement it in Lua. An example is 
-in Figure~\ref{logit_in_lua}. We take advantage of the {\tt ffi.cast}
-functionality to access C data from Lua without any format conversions.
+in Figure~\ref{logit_in_lua}. We take advantage of {\tt ffi.cast}
+to directly access C data from Lua.
 \begin{figure}
 \centering
 \fbox{
 \begin{minipage}{14 cm}
 \centering
 \verbatiminput{logit.lua}
+%% TODO HEAVILY EDIT THIS FOR FINAL PAPER
 \caption{Using LuaJIT FFI to map C data to Lua}
 \label{logit_in_lua}
 \end{minipage}
 }
 \end{figure}
 
-\subsubsection{The C implementation}
+\subsubsection{The templatized implementation}
+\label{Logit_template}
 Figure~\ref{logit_in_lua} indicates that precisely one line is specific to the
 operator in question, the rest is necessary boiler plate. Therefore, the design
 of the run time has been around providing machinery to move data and leaving
@@ -56,22 +59,25 @@ redundant computations, which can be eliminated as in Figure~\ref{sub_expr}
 
 
 \subsubsection{Lock step evaluation}
-However, notice that using the above code introduces a subtle but
+However, the code in Figure~\ref{sub_expr} has a subtle but
 critical bug when the number of elements in \(x\) exceeds the chunk
 size.  If we were to call {\tt eval()} on \(y\), then we would
 end up consuming sucessive chunks of \(t_3\). Now, if we were to call
 {\tt eval()} on \(z\), we would fail when requesting the first
 chunk of \(t_3\), since it has {\bf not} been memo-ized. One solution
 is to ensure that \(y\) and \(z\) are evaluated in lock-step, after they have
-been created, as shown below.
-\begin{verbatim} 
-  cidx = 0  -- chunk index
-  repeat 
-    ly = y:chunk(cidx)
-    lz = z:chunk(cidx)
-    cidx = cidx + 1
-  until ( ly == 0 )
-\end{verbatim}
+been created, as in Figure~\ref{lock_step}.
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{lock_step.lua}
+\caption{Lock step evaluation}
+\label{lock_step}
+\end{minipage}
+}
+\end{figure}
 
 The problem with this solution is that the burden of lock-step evaluation falls
 on the Q programmer. This is remedied by the {\tt conjoin} function
@@ -88,28 +94,33 @@ on the Q programmer. This is remedied by the {\tt conjoin} function
 \end{minipage}
 }
 \end{figure}
-%% TODO 
-%% TODO %% TODO Need performance numbers \TBC
+
+%% TODO Normalizing the 
 %% TODO \be
-%% TODO \item Lua versus C
+%% TODO \item Lua versus C (single  threaded)
+%% TODO \item Lua versus C (multi threaded)
 %% TODO \item separate operators versus eliminating common sub expr
 %% TODO \ee
 
 \subsubsection{Custom Operators}
 
-As part of the \(\beta\) calculation step, we need to perform \(A \leftarrow x^T
-W x\) where (1) 
-\(x\) is a \(m \times m\) matrix and (2) \(W\) is a \(n \times n\) matrix where
+As part of the \(\beta\) calculation step, we need to compute an \(m \times m\)
+matrix \(A\) as  \(x^T W x\) where (1) 
+\(x\) is a \(n \times m\) matrix and (2) \(W\) is a \(n \times n\) matrix where
 non-diagonal elements are 0 and can be represented as a vector, \(w\) of legnth
-\(n\).
-The straight-forward Q code is as follows
-\begin{verbatim}
-for i, X_i in ipairs(X) do
-  for j, X_j in ipairs(X) do
-    A[i][j] = Q.sum( Q.vvmul(X_i, Q.vvmul(w, X_j))):eval()
-  end
-end
-\end{verbatim}
+\(n\). 
+The straight-forward Q code is in Figure~\ref{compute_A_Lua_basic}
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{compute_A_Lua_basic.lua}
+\caption{Q code for \(x^T W x\)}
+\label{compute_A_Lua_basic}
+\end{minipage}
+}
+\end{figure}
 
 However, with a little more effort, we created custom operator, 
 a simplified sketch of which is provided in Figure~\ref{sum_prod_c}. The actual code
@@ -138,17 +149,31 @@ continuum as desired.
 \end{figure}
 
 This in turn raised the question: could we have ``chunked'' the computation 
-without resorting to a custom operator? It turns out to be possible. 
-In the first, we simply set up the reducers --- no actual
-computation happens. This is exactly as before, except that there is no call to
-{\tt eval()}. In the second block, we evaluate the reducer in chunks, stopping
-when the input vectors have no more data.
-\begin{verbatim}
-repeat 
-  for i, X_i in ipairs(X) do
-    for j, X_j in ipairs(X) do
-      status = A[i][j]:next()
-    end
-  end
-until not status
-\end{verbatim}
+without resorting to a custom operator? To do so, (1)
+we first set up the reducers --- no actual
+computation happens. This is exactly as in Figure~\ref{compute_A_Lua_basic}, except that there is no call to
+{\tt eval()}. (2) We evaluate the reducer in chunks, stopping
+when the input vectors have no more data as in
+Figure~\ref{compute_A_Lua_chunked}.
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{14 cm}
+\centering
+\verbatiminput{compute_A_Lua_chunked.lua}
+\caption{Chunked Q code for \(x^T W x\)}
+\label{compute_A_Lua_chunked}
+\end{minipage}
+}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{|l|l|l|} \hline \hline
+    {\bf Chunking used?}    & {\bf Q} & {\bf Custom Operator} \\ \hline \hline
+    {\bf Yes} & TODO & TODO \\ \hline
+    {\bf No} & TODO & TODO \\ \hline
+    \hline
+  \end{tabular}
+  \caption{Rlative times for different computational strategies}
+\end{table}

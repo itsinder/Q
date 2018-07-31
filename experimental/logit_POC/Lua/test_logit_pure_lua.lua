@@ -1,5 +1,5 @@
 local qconsts	= require 'Q/UTILS/lua/q_consts'
-local timer = require 'posix.time'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local function logit(in_buf, num_elements, out_buf)
   for i = 1, num_elements do -- core operation is as follows
@@ -18,12 +18,12 @@ for i = 1, num_elements do
 end
 
 
-local start_time = timer.clock_gettime(0)
+local start_time = qc.RDTSC()
 for i = 1, 100 do
   local res = logit(in_buf, num_elements, out_buf )
 end
-local stop_time = timer.clock_gettime(0)
-local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
+local stop_time = qc.RDTSC()
+local time = stop_time - start_time
 
 print("Time required for pure lua execution is = " .. tostring(time))
 

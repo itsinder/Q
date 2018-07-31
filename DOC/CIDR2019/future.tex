@@ -10,4 +10,10 @@ versa. We would like to generalize Q's streaming computations to writing
 programs as directed acylic graphs, where data is
 pumped through on every ``clock''.
 
-We have started porting Q to CUDA. \TBC
+Our work in porting Q to CUDA has been greatly simplified by CUDA's support for
+Unified Memory. By replacing {\tt malloc()} with {\tt  cudaMallocManaged()} and
+by introducing templates for CUDA code, we were able to create operators that
+run on the GPU instead of the CPU. The Q run time checks for the existence of
+the symbol for CUDA code and defaults to CPU code if that is not found. While
+basic capability has been established, we have but scratched the surface.
+
