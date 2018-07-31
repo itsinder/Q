@@ -112,14 +112,15 @@ local function run_isolated_sh_tests(suite_name, isolated)
 	local pass = {}
 	local fail = {}
   local no_of_tests = 0
+  local k = 1
 	local test_str = string.format(base_str, suite_name_mod.. ".sh")
   local status = os.execute(test_str)
   -- print("Cmd status is " .. tostring(status))
   if status == 0 then
-    table.insert(pass, no_of_tests)
+    table.insert(pass, k)
     no_of_tests = no_of_tests + 1
   else
-    table.insert(fail, no_of_tests)
+    table.insert(fail, k)
     no_of_tests = no_of_tests + 1
 	end
 	return pass, fail
@@ -215,7 +216,7 @@ elseif test_type:match("^l") ~= nil then
 	test_res.all = {}
 	test_res.all.pass, test_res.all.fail = run_longterm_tests(long_files, duration, nil)
 elseif test_type == "c" then
-  files = get_files(path, "run_", ".sh") -- only the prefix is needed 
+  files = get_files(path, "test_", ".sh") -- only the prefix is needed 
 	for _,f in pairs(files) do
 		test_res[f] = {}
 		test_res[f].pass, test_res[f].fail = run_isolated_sh_tests(f)
