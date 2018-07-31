@@ -10,10 +10,10 @@ test.t1 = function ()
   local X = {}
 
   for i = 1, M do
-    X[i] = Q.rand({lb = 0, ub = 10, qtype = "I1", len = N}):eval()
+    X[i] = Q.rand({lb = 0, ub = 10, qtype = "F4", len = N}):eval()
   end
 
-  local w = Q.rand({lb = 0, ub = 1, qtype = "I1", len = N}):eval()
+  local w = Q.rand({lb = 0, ub = 1, qtype = "F4", len = N}):eval()
 
   local start_time = qc.RDTSC()
   local A = sum_prod(X, w)
@@ -37,10 +37,10 @@ test.t2 = function ()
   local X = {}
 
   for i = 1, M do
-    X[i] = Q.rand({lb = 0, ub = 10, qtype = "I1", len = N}):eval()
+    X[i] = Q.rand({lb = 0, ub = 10, qtype = "F4", len = N}):eval()
   end
 
-  local w = Q.rand({lb = 0, ub = 1, qtype = "I1", len = N}):eval()
+  local w = Q.rand({lb = 0, ub = 1, qtype = "F4", len = N}):eval()
 
   local start_time = qc.RDTSC()
   local A = sum_prod(X, w)
