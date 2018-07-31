@@ -27,7 +27,7 @@ local function is_file_exception(file)
   return ignore_files[sub_filename] == true or ignore_files[file] == true
 end
 
-local function exclude_non_test_files(files, tests_pattern)
+local function exclude_non_test_files(files, tests_pattern, file_type)
   local xfiles = {}
   tests_pattern = tests_pattern or "test_"
   if ( files and #files > 0 ) then
@@ -41,8 +41,11 @@ local function exclude_non_test_files(files, tests_pattern)
         is_excl = true
         reason = 1
       end
-      start, stop = string.find(base_name, ".lua")
-      -- print(base_name, start, stop)
+
+      if file_type ~= ".lua" and file_type ~= ".sh" then
+        assert(nil, file_type .. " not supported")
+      end
+      start, stop = string.find(base_name, file_type)
       if ( stop == nil ) or ( stop ~= string.len(base_name) ) then
         is_excl = true
         reason = 2
@@ -71,11 +74,12 @@ local function append_dirs(dest, src)
   return dest
 end
 
-local function find_test_files(directory,  tests_pattern)
+local function find_test_files(directory,  tests_pattern, file_type)
   -- convert 'directory' path to absolute path so that blacklisting feature will work
   directory = plpath.abspath(directory)
   local iter_list, next_iter_list = {}, {}
-  local pattern = "*.lua" -- removed as args as *.lua is embedded in other parts of the code
+  --local pattern = "*.lua" -- removed as args as *.lua is embedded in other parts of the code
+  local pattern = "*" .. file_type
   iter_list[1] = directory
   local list = {}
   repeat
@@ -88,7 +92,7 @@ local function find_test_files(directory,  tests_pattern)
       end
       if ( not exclude ) then
         local files = pldir.getfiles(dir, pattern)
-        local xfiles = exclude_non_test_files(files, tests_pattern)
+        local xfiles = exclude_non_test_files(files, tests_pattern, file_type)
         local dirs = pldir.getdirectories(dir)
         next_iter_list = append_dirs(next_iter_list, dirs)
         for j=1,#xfiles do

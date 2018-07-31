@@ -97,6 +97,34 @@ local function run_isolated_tests(suite_name, isolated)
 	return pass, fail
 end
 
+-- function to run .sh scripts with bash cmd
+local function run_isolated_sh_tests(suite_name, isolated)
+	calls = calls + 1
+  if calls == 20 then
+    calls = 0
+  end
+  io.write(".")
+  local base_str =  [[
+	bash %s ]]
+	local suite_name_mod, subs = suite_name:gsub("%.sh$", "")
+	assert(subs == 1, suite_name .. " should end with .sh")
+
+	local pass = {}
+	local fail = {}
+  local no_of_tests = 0
+	local test_str = string.format(base_str, suite_name_mod.. ".sh")
+  local status = os.execute(test_str)
+  -- print("Cmd status is " .. tostring(status))
+  if status == 0 then
+    table.insert(pass, no_of_tests)
+    no_of_tests = no_of_tests + 1
+  else
+    table.insert(fail, no_of_tests)
+    no_of_tests = no_of_tests + 1
+	end
+	return pass, fail
+end
+
 local function run_longterm_tests(files, duration, log_path)
 	local start_time =  os.time()
 	local fail, pass = {}, {}
@@ -138,9 +166,10 @@ local usage = function()
   print("\t l for long running tests amd requires a time param for the number of seconds the tests should run. Eg l 5")
   print("\t i for isolated tests")
 	print("\t s for stress tests")
+	print("\t c for bash (.sh) tests")
 end
 
-local function get_files(path, pattern)
+local function get_files(path, pattern, file_type)
 	local files = {}
 	if (path and plpath.isfile(path)) then
 		files[#files + 1] = path
@@ -151,7 +180,7 @@ local function get_files(path, pattern)
 			usage()
 			os.exit()
 		end
-    return find_all_files(path, pattern)
+    return find_all_files(path, pattern, file_type)
 	end
 
 end
@@ -163,13 +192,13 @@ args = nil
 local test_res = {}
 local files = {}
 if test_type == "i" then
-	files = get_files(path,"test_") -- only the prefix is needed 
+	files = get_files(path, "test_", ".lua") -- only the prefix is needed 
 	for _,f in pairs(files) do
 		test_res[f] = {}
 		test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
 	end
 elseif test_type == "s" then
-	files = get_files(path, "stress_test_") -- only the prefix is needed 
+	files = get_files(path, "stress_test_", ".lua") -- only the prefix is needed 
 	for _,f in pairs(files) do
 		test_res[f] = {}
 		test_res[f].pass, test_res[f].fail = run_isolated_tests(f)
@@ -185,6 +214,12 @@ elseif test_type:match("^l") ~= nil then
 	end
 	test_res.all = {}
 	test_res.all.pass, test_res.all.fail = run_longterm_tests(long_files, duration, nil)
+elseif test_type == "c" then
+  files = get_files(path, "run_", ".sh") -- only the prefix is needed 
+	for _,f in pairs(files) do
+		test_res[f] = {}
+		test_res[f].pass, test_res[f].fail = run_isolated_sh_tests(f)
+	end
 else
   usage()
 end
