@@ -37,7 +37,7 @@ hashed to a \(2^{64}\) space, the probability of collisions is vanishingly
 small. Most business analyses are insensitive to this level of imprecision.
 
 When a vector is created, we need to specify (i) its type (ii) whether it has
-null values (iii) how it will be populuate. We can either (a) ''push'' data to
+null values (iii) how it will be populuated. We can either (a) ''push'' data to
 it, much like writing to a file in append mode or (b) we can provide a generator function,
 which is invoked with the chunk index, \(i\), as parameter and which knows how to
 generate the \(i^{th}\) chunk.
@@ -52,8 +52,9 @@ implicitly required by some other operator e.g. {\tt Q.print\_csv(x)}
 
 Vectors are processed in chunks. Consider an expression  like \(\sum (a + b\times
 c)\), written in Q as {\tt d = Q.sum(Q.add(Q.mul(b,c), a))}.
-When {\tt d} is eval'd, computation alternates between the \(+\) operator
-and the \(\times\) operator, processing chunks of data at a time until there are
+When {\tt d} is eval'd, computation alternates between the {\tt mul, add, sum}
+operators
+processing chunks of data at a time until there are
 no more.
 We had originally chosen co-routines to effect the {\tt resume} and
 {\tt yield} capabilities needed. However, Lua's support of closures allowed for

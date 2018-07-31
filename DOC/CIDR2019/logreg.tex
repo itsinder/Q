@@ -39,11 +39,16 @@ vector v1 and an optional scalar s1 are used to produce another vector v2.
 (2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )} (3)
 guard against improper usage e.g, we wouldn't apply this function to a string.
 
+In our experiments, 
+JIT compilation makes the Lua code 25\% faster than single-threaded C code,
+although 3 times slower than the multi-threaded C code which shows almost linear
+speedup.
 
 \subsubsection{Eliminating common sub-expressions}
 However, one quickly recognizes that creating separate operators for those 2
 functions would lead to 
-redundant computations, which can be eliminated as in Figure~\ref{sub_expr}
+redundant computations, which can be eliminated as in Figure~\ref{sub_expr}.
+This cuts the time by half.
 
 \begin{figure}
 \centering
@@ -129,9 +134,6 @@ back in. Setting \(m=32\), we varied \(n\) from \(2^{16}\) to \(2^{24}\). With
 blocking, performance increases as we increase \(n\) but saturates after
 \(2^{20}\). Without blocking, performance peaks at \(n=2^{18}\) and steadily
 declines after that, to about a third of peak performance.
-The regular Q code described above gets about
-\(\frac{1}{XX}\) the performance of the custom operator. 
-
 What we hope to illustrate is that a
 simple data model allows us to move along the performance versus simplicity
 continuum as desired.
@@ -167,13 +169,13 @@ Figure~\ref{compute_A_Lua_chunked}.
 }
 \end{figure}
 
-\begin{table}
-  \centering
-  \begin{tabular}{|l|l|l|} \hline \hline
-    {\bf Chunking used?}    & {\bf Q} & {\bf Custom Operator} \\ \hline \hline
-    {\bf Yes} & TODO & TODO \\ \hline
-    {\bf No} & TODO & TODO \\ \hline
-    \hline
-  \end{tabular}
-  \caption{Rlative times for different computational strategies}
-\end{table}
+%% \begin{table}
+%%   \centering
+%%   \begin{tabular}{|l|l|l|} \hline \hline
+%%     {\bf Chunking used?}    & {\bf Q} & {\bf Custom Operator} \\ \hline \hline
+%%     {\bf Yes} & TODO & TODO \\ \hline
+%%     {\bf No} & TODO & TODO \\ \hline
+%%     \hline
+%%   \end{tabular}
+%%   \caption{Rlative times for different computational strategies}
+%% \end{table}
