@@ -31,6 +31,9 @@ vvadd total execution time : 79789154190
 =========================
 0,vvadd_I4_I4_I4,20000,73405899604
 
+C business logic contribution - ~92%
+Runtime contribution - 1.35%
+
 ==========================================================================================================
 
 #### Chunk Size = 512 * 1024
@@ -58,6 +61,9 @@ print timers
 vvadd total execution time : 34397648620
 =========================
 0,vvadd_I4_I4_I4,20000,30535793705
+
+C business logic contribution - 88.77%
+Runtime contribution - 1.02%
 
 ==========================================================================================================
 
@@ -87,6 +93,9 @@ vvadd total execution time : 13121814583
 =========================
 0,vvadd_I4_I4_I4,20000,10782728160
 
+C business logic contribution - 82.17%
+Runtime contribution - 1.7%
+
 ==========================================================================================================
 
 #### Chunk Size = 128 * 1024
@@ -115,6 +124,9 @@ vvadd total execution time : 5788735215
 =========================
 0,vvadd_I4_I4_I4,20000,4007139851
 
+C business logic contribution - 69.22%
+Runtime contribution - 2.40%
+
 ==========================================================================================================
 
 #### Chunk Size = 64 * 1024
@@ -142,3 +154,7 @@ print timers
 vvadd total execution time : 3585475152
 =========================
 0,vvadd_I4_I4_I4,20000,1895672302
+
+C business logic contribution - 52.87%
+Runtime contribution - 3.24%
+
