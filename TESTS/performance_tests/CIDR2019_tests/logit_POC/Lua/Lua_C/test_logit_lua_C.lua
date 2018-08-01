@@ -1,14 +1,17 @@
 local ffi = require 'ffi'
 local plfile = require 'pl.file'
-local qc = require 'Q/UTILS/lua/q_core'
+local plpath = require 'pl.path'
+local qcore = require 'Q/UTILS/lua/q_core'
+local path_to_here = os.getenv("Q_SRC_ROOT") .. "/TESTS/performance_tests/CIDR2019_tests/logit_POC/Lua/Lua_C/"
+assert(plpath.isdir(path_to_here))
 
-local header_file = "logit_I8.h"
+local header_file = path_to_here .. "logit_I8.h"
 ffi.cdef([[
   void * malloc(size_t size);
   void free(void *ptr);
   ]])
 ffi.cdef(plfile.read(header_file))
-local qc = ffi.load('liblogit_I8.so')
+local qc = ffi.load(path_to_here .. 'liblogit_I8.so')
 
 local num_elements = 10000000
 
@@ -30,11 +33,11 @@ local function logit()
     in_buf[i-1] = 2
   end
   
-  local start_time = qc.RDTSC()
+  local start_time = qcore.RDTSC()
   for i = 1, 100 do
     qc[func_name](in_buf, nil, num_elements, nil, out_buf, nil)
   end
-  local stop_time = qc.RDTSC()
+  local stop_time = qcore.RDTSC()
   local time = stop_time - start_time
 
   print("Time required for C execution is = " .. tostring(time))
