@@ -1,0 +1,17 @@
+Logit implementation performance testing results:
+For num_elements 10M and for loop of 100
+
+1) C test:
+
+  Pragma omp enabled   =    7352012.8
+  Pragma omp disabled  =   24091691.8
+
+2) Lua - C test:
+
+  Pragma omp enabled   =   7.37408355
+  Pragma omp disabled  =  25.45294585
+
+3) Lua (with ffi.cast) =  20.54579195
+
+4) Lua(with tables)    =   20.1122071
+
