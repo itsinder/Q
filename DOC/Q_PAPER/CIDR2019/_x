@@ -1,0 +1,5 @@
+rm sigconf.aux
+rm sigconf.blg
+rm sigconf.log
+rm sigconf.out
+rm sigconf.pdf
