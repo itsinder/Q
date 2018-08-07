@@ -11,21 +11,13 @@ these operators in Q.
 
 \subsubsection{The Lua implementation}
 \label{Logit_Lua}
-The ``quick and dirty'' way is to implement it in Lua. An example is 
-in Figure~\ref{logit_in_lua}. We take advantage of {\tt ffi.cast}
-to directly access C data from Lua.
-\begin{figure}
-\centering
-\fbox{
-\begin{minipage}{14 cm}
-\centering
-\verbatiminput{logit.lua}
-%% TODO HEAVILY EDIT THIS FOR FINAL PAPER
-\caption{Using LuaJIT FFI to map C data to Lua}
-\label{logit_in_lua}
-\end{minipage}
-}
-\end{figure}
+The ``quick and dirty'' way is to implement it in Lua. To do so, we 
+(i) use the Vector's {\tt get\_chunk} method to access data, 
+(ii) use LuaJIT 's {\tt ffi.cast} to directly access C data from Lua 
+(iii) write the core operation in Lua as
+\begin{verbatim}
+for i = 0, n1 do cd2[i] = 1.0 / (1.0 + math.exp(-1 * cd1[i])) end
+\end{verbatim}
 
 \subsubsection{The templatized implementation}
 \label{Logit_template}
@@ -39,16 +31,21 @@ vector v1 and an optional scalar s1 are used to produce another vector v2.
 (2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )} (3)
 guard against improper usage e.g, we wouldn't apply this function to a string.
 
+In our experiments, 
+JIT compilation makes the Lua code 25\% faster than single-threaded C code,
+although 3 times slower than the multi-threaded C code which shows almost linear
+speedup.
 
 \subsubsection{Eliminating common sub-expressions}
 However, one quickly recognizes that creating separate operators for those 2
 functions would lead to 
-redundant computations, which can be eliminated as in Figure~\ref{sub_expr}
+redundant computations, which can be eliminated as in Figure~\ref{sub_expr}.
+This cuts the time by half.
 
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{14 cm}
+\begin{minipage}{8 cm}
 \centering
 \verbatiminput{sub_expr.lua}
 \caption{Common sub-expression elimination}
@@ -70,7 +67,7 @@ been created, as in Figure~\ref{lock_step}.
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{14 cm}
+\begin{minipage}{8 cm}
 \centering
 \verbatiminput{lock_step.lua}
 \caption{Lock step evaluation}
@@ -86,7 +83,7 @@ on the Q programmer. This is remedied by the {\tt conjoin} function
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{14 cm}
+\begin{minipage}{8 cm}
 \centering
 \verbatiminput{conjoin.lua}
 \caption{Conjoined Vectors}
@@ -113,7 +110,7 @@ The straight-forward Q code is in Figure~\ref{compute_A_Lua_basic}
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{14 cm}
+\begin{minipage}{8 cm}
 \centering
 \verbatiminput{compute_A_Lua_basic.lua}
 \caption{Q code for \(x^T W x\)}
@@ -122,31 +119,17 @@ The straight-forward Q code is in Figure~\ref{compute_A_Lua_basic}
 }
 \end{figure}
 
-However, with a little more effort, we created custom operator, 
-a simplified sketch of which is provided in Figure~\ref{sum_prod_c}. The actual code
-uses blocking to avoid writing out to the entire temp array before reading it
+However, with a little more effort, we created custom operator in C.
+The custom code uses
+chunking to avoid writing out to the entire temp array before reading it
 back in. Setting \(m=32\), we varied \(n\) from \(2^{16}\) to \(2^{24}\). With
-blocking, performance increases as we increase \(n\) but saturates after
-\(2^{20}\). Without blocking, performance peaks at \(n=2^{18}\) and steadily
+chunking, performance increases as we increase \(n\) but saturates after
+\(2^{20}\). Without chunking, performance peaks at \(n=2^{18}\) and steadily
 declines after that, to about a third of peak performance.
-The regular Q code described above gets about
-\(\frac{1}{XX}\) the performance of the custom operator. 
-
 What we hope to illustrate is that a
 simple data model allows us to move along the performance versus simplicity
 continuum as desired.
 
-\begin{figure}
-\centering
-\fbox{
-\begin{minipage}{14 cm}
-\centering
-\verbatiminput{sum_prod3.c}
-\caption{Custom operator for \(x^T W x\)}
-\label{sum_prod_c}
-\end{minipage}
-}
-\end{figure}
 
 This in turn raised the question: could we have ``chunked'' the computation 
 without resorting to a custom operator? To do so, (1)
@@ -158,7 +141,7 @@ Figure~\ref{compute_A_Lua_chunked}.
 \begin{figure}
 \centering
 \fbox{
-\begin{minipage}{14 cm}
+\begin{minipage}{8 cm}
 \centering
 \verbatiminput{compute_A_Lua_chunked.lua}
 \caption{Chunked Q code for \(x^T W x\)}
@@ -167,13 +150,13 @@ Figure~\ref{compute_A_Lua_chunked}.
 }
 \end{figure}
 
-\begin{table}
-  \centering
-  \begin{tabular}{|l|l|l|} \hline \hline
-    {\bf Chunking used?}    & {\bf Q} & {\bf Custom Operator} \\ \hline \hline
-    {\bf Yes} & TODO & TODO \\ \hline
-    {\bf No} & TODO & TODO \\ \hline
-    \hline
-  \end{tabular}
-  \caption{Rlative times for different computational strategies}
-\end{table}
+%% \begin{table}
+%%   \centering
+%%   \begin{tabular}{|l|l|l|} \hline \hline
+%%     {\bf Chunking used?}    & {\bf Q} & {\bf Custom Operator} \\ \hline \hline
+%%     {\bf Yes} & TODO & TODO \\ \hline
+%%     {\bf No} & TODO & TODO \\ \hline
+%%     \hline
+%%   \end{tabular}
+%%   \caption{Rlative times for different computational strategies}
+%% \end{table}

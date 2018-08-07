@@ -1,6 +1,6 @@
 -- f_to_s is a table consisting of all reducers registered with Q
 local f_to_s = require 'Q/OPERATORS/F_TO_S/lua/_f_to_s'
-local function fold( fns, vec)
+local function reduce( fns, vec)
   local status
   -- setup reducers for each input 
   local gens = {} 

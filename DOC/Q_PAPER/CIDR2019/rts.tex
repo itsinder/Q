@@ -32,17 +32,17 @@ associative array, like a Python dictionary.
 
 
 It is useful to think of Q as a domain specific language, targeted for data
-manipulation. In contrast with \cite{Wevers2014} work on
+manipulation. In contrast with Wevers' work \cite{Wevers2014} on
 developing a persistent functional language with
 a relational database system inside, Q works within the context of Lua, while
-inspired by many attractive features of functional languages.
+inspired by functional programming ideas like memo-ization, lazy evaluation,
+etc.
 More accurately, Q is a C library, embedded within an interpreted
 language.
-We chose to embed within an existing language for two reasons. One is that we did not have to
-write a custom compiler. More importantly, is that it allowed us to leverage a rich eco-system of libraries, debuggers
-\ldots
-yet seamlessly move between that world and the high performance capabilities of
-Q. 
+We chose to embed within an existing language because (i) we did not have to
+write a custom compiler (ii) it allowed us to leverage a rich eco-system of
+libraries, debuggers, web development environments, allowing the programmer to
+blur the distinction between application logic and database programming.
 
 We chose Lua
 because it was designed specifically as both an embedding and embedded language
@@ -57,11 +57,13 @@ binary format to the file system. This allows us to quickly access data by
 mmapp-ing the file.  Like kdb+ \cite{Borror2015}, one can think of Q as 
 an in-memory database with persistent backing to the file system.
 
-How efficient is the combination of Lua and C? On representative code samples,
-XX\% of the time is spent in the C code that does the real work, YY\% of the
-time is spent in the core run time system, with the Lua glue code accounting for
-the rest. 
-%% TODO FILL IN THE XX and YY
+How efficient is the combination of Lua and C? 
+On a sample workload, when the chunk size 
+(discussed in Section~\ref{Vectors})
+is set to 1M, the C code that does the real work
+accounts for 92\% of the time, the run time takes 1\%, the balance attributable to Lua as glue logic 
+When the chunk size drops to 64K, C takes 52\%, the run time takes 2\% and Lau
+the rest.
 
 Q's software architecture consists of the following four layers. From bottom to
 top with decreasing complexity, they are:
