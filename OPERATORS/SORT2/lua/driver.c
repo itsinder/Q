@@ -1,4 +1,5 @@
 #include "qsort2.h"
+#include "qsort2_asc_I4.h"
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -20,7 +21,8 @@ int main()
     printf("%d\t%d\n", X[i], Y[i]);
   }
 
-  int status = qsort2(X, Y, N);
+  //int status = qsort2(X, Y, N);
+  int status = qsort_asc_I4(X, Y, N);
   printf("\nstatus = %d\n", status);
 
   printf("\nAfter sort\n==============\n");
