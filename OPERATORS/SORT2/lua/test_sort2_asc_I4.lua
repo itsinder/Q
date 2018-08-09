@@ -17,7 +17,7 @@ qsort2_asc_I4 (
 	    );  
 ]])
 
-os.execute("cd " .. so_dir_path .. "; bash run_sort2_asc.sh")
+os.execute("cd " .. so_dir_path .. "; bash run_sort2_asc_I4.sh")
 print(so_dir_path)
 local qc_sort = ffi.load(so_dir_path .. 'qsort2_asc_I4.so')
 
@@ -33,10 +33,8 @@ tests.t1 = function ()
 
   local a_len, a_chunk, a_nn_chunk = input_col:chunk(0)
   local b_len, b_chunk, b_nn_chunk = input_drag_col:chunk(0)
-  print(a_len, b_len)
   local casted_a_chunk = ffi.cast("void *",  get_ptr(a_chunk))
   local casted_b_chunk = ffi.cast("int32_t *",  get_ptr(b_chunk))
-  print(casted_a_chunk, casted_b_chunk, a_len)
   local status = qc_sort["qsort2_asc_I4"](casted_a_chunk, casted_b_chunk, a_len)
   assert(status == 0, "C error in QSORT2_ASC")
   -- Validate the result
