@@ -85,7 +85,7 @@ typedef struct
 
 // START FUNC DECL
 int
-qsort_asc_I4 (
+qsort2_asc_I4 (
 	    void *const pbase,
             int32_t *drag,
 	    size_t total_elems
@@ -282,4 +282,7 @@ qsort_asc_I4 (
     }
   }
   return 1;
+}
+int main()
+{
 }
