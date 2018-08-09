@@ -6,7 +6,7 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local q_src_root = os.getenv("Q_SRC_ROOT")
-local so_dir_path = q_src_root .. "/OPERATORS/SORT2/lua/"
+local so_dir_path = q_src_root .. "/OPERATORS/SORT2/src/"
 
 ffi.cdef([[
 int
