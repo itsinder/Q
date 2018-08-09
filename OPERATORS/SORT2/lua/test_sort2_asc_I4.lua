@@ -18,7 +18,6 @@ qsort2_asc_I4 (
 ]])
 
 os.execute("cd " .. so_dir_path .. "; bash run_sort2_asc_I4.sh")
-print(so_dir_path)
 local qc_sort = ffi.load(so_dir_path .. 'qsort2_asc_I4.so')
 
 -- lua test to check the working of SORT2_ASC operator only for I4 qtype
@@ -36,7 +35,7 @@ tests.t1 = function ()
   local casted_a_chunk = ffi.cast("void *",  get_ptr(a_chunk))
   local casted_b_chunk = ffi.cast("int32_t *",  get_ptr(b_chunk))
   local status = qc_sort["qsort2_asc_I4"](casted_a_chunk, casted_b_chunk, a_len)
-  assert(status == 0, "C error in QSORT2_ASC")
+  assert(status == 1, "C error in QSORT2_ASC")
   -- Validate the result
   casted_b_chunk = ffi.cast("int32_t *", casted_b_chunk)
   for i = 1, a_len do
