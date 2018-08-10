@@ -51,3 +51,31 @@ Ramesh's results
 test_fold_memo_true   965339383 / 10^6 =  965
 test_fold_memo_false 1411348134 / 10^6 = 1411
 test_sum_min_max     5661288779 / 10^6 = 5661
+
+
+
+=================================================================================================================================================
+
+From shared doc - performance numbers
+
+Fold operator performance test
+=============================
+
+FOLD operator performance test is present at location "Q/experimental/fold_performance_test".
+It contains three tests
+fold with memo true - test_fold_memo_true.lua
+fold with memo false (input is eval'ed before use) - test_fold_memo_false.lua
+without fold (input is eval'ed before use) - test_without_fold.lua
+
+Command to run test:
+$ luajit -e "require 'test_fold_memo_true'['t1']()"
+$ luajit -e "require 'test_fold_memo_false'['t1']()"
+$ luajit -e "require 'test_without_fold'['t1']()"
+
+Execution time
+Test_fold_memo_false :    618706951.67 / 10^6 = 618.71
+Test_fold_memo_true :    364132549.33 / 10^6 = 364.13
+Test_sum_min_max :        371916459.3 / 10^6 = 371.92
+
+TODO: Ramesh to re-run these tests. See Results.txt in corresponding folder
+
