@@ -1,4 +1,4 @@
-local function qsort2_asc(x, y, ordr)
+local function qsort2(x, y, ordr)
   local Q       = require 'Q/q_export'
   local qc = require 'Q/UTILS/lua/q_core'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
@@ -15,7 +15,7 @@ local function qsort2_asc(x, y, ordr)
   assert(type(ordr) == "string")
   if ( ordr == "ascending" ) then ordr = "asc" end 
   if ( ordr == "descending" ) then assert(nil, "TODO") end 
-  local spfn = require("Q/OPERATORS/SORT2/lua/qsort2_asc_specialize" )
+  local spfn = require("Q/OPERATORS/SORT2/lua/qsort2_specialize" )
   local status, subs, tmpl = pcall(spfn, x:fldtype(), ordr)
   assert(status, "error in call to sort2_asc_specialize")
   assert(type(subs) == "table", "error in call to sort2_asc_specialize")
@@ -37,4 +37,4 @@ local function qsort2_asc(x, y, ordr)
   return x
 
 end
-return require('Q/q_export').export('qsort2_asc', qsort2_asc)
+return require('Q/q_export').export('qsort2', qsort2)

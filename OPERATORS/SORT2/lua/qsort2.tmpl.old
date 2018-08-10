@@ -1,31 +1,32 @@
 
-return require 'Q/UTILS/lua/code_gen' {
+return require 'code_gen' {
 
    declaration = [[
-   
-/* Order size using quicksort.  This implementation incorporates
-   four optimizations discussed in Sedgewick:
 
-   1. Non-recursive, using an explicit stack of pointer that store the
-   next array partition to sort.  To save time, this maximum amount
-   of space required to store an array of SIZE_MAX is allocated on the
-   stack.  Assuming a 32-bit (64 bit) integer for size_t, this needs
-   only 32 * sizeof(stack_node) == 256 bytes (for 64 bit: 1024 bytes).
-   Pretty cheap, actually.
+/* http://www.umcs.maine.edu/~chaw/200801/capstone/n/qsort.c */
 
-   2. Chose the pivot element using a median-of-three decision tree.
-   This reduces the probability of selecting a bad pivot value and
-   eliminates certain extraneous comparisons.
+/* Copyright (C) 1991,1992,1996,1997,1999,2004 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+   Written by Douglas C. Schmidt (schmidt@ics.uci.edu).
 
-   3. Only quicksorts TOTAL_ELEMS / MAX_THRESH partitions, leaving
-   insertion sort to order the MAX_THRESH items within each partition.
-   This is a big win, since insertion sort is faster for small, mostly
-   sorted array segments.
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-   4. The larger of the two sub-partitions is always pushed onto the
-   stack first, with the algorithm then concentrating on the
-   smaller partition.  This *guarantees* no more than log (total_elems)
-   stack size is needed (actually O(1) in this case)!  */
+   The GNU C Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with the GNU C Library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307 USA.  */
+
+/* If you consider tuning this algorithm, you should consult first:
+   Engineering a sort function; Jon Bentley and M. Douglas McIlroy;
+   Software - Practice and Experience; Vol. 23 (11), 1249-1265, 1993.  */
 
 #include <alloca.h>
 #include <limits.h>
@@ -34,46 +35,20 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <inttypes.h>
 
 extern void
-${fn} (
-    void *const pbase,
-          ${FLDTYPE} *drag,
-    size_t total_elems
-    );
+qsort_${SORT_ORDER}_${FLDTYPE} (
+	    ${FLDTYPE} f1, 
+	    size_t total_elems
+	    );
 ]],
 definition = [[
 
-#include "_${fn}.h"
-#define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__); }
+#include "_${NAME}.h"
 
-/* Byte-wise swap two items of size SIZE. */
-/*
-#define SWAP(a, b, size)			\
-  do						\
-    {						\
-      register size_t __size = (size);		\
-      register char *__a = (a), *__b = (b);	\
-      do					\
-	{					\
-	  char __tmp = *__a;			\
-	  *__a++ = *__b;			\
-	  *__b++ = __tmp;			\
-	} while (--__size > 0);			\
-    } while (0)
-
-    */
-#define SWAP(a, b, size) \
+#define SWAP(a, b) \
 { \
   ${FLDTYPE} *ia = (${FLDTYPE} *)a; \
   ${FLDTYPE} *ib = (${FLDTYPE} *)b; \
   ${FLDTYPE} itmp = *ia; \
-  aidx = ((char *)a - (char *)pbase) / size;                            \
-  bidx = ((char *)b - (char *)pbase) / size;                            \
-  if ( ( aidx < 0 ) || ( aidx >= total_elems ) ) { go_BYE(-1);  } \
-  if ( ( bidx < 0 ) || ( bidx >= total_elems ) ) { go_BYE(-1);  } \
-  aval = drag[aidx];                                                \
-  bval = drag[bidx];                                                \
-  drag[aidx] = bval;                                                \
-  drag[bidx] = aval;						\
   *ia = *ib; \
   *ib = itmp; \
 }
@@ -100,38 +75,58 @@ typedef struct
 #define  POP(low, high)  ((void) (--top, (low = top->lo), (high = top->hi)))
 #define  STACK_NOT_EMPTY  (stack < top)
 
+
+/* Order size using quicksort.  This implementation incorporates
+   four optimizations discussed in Sedgewick:
+
+   1. Non-recursive, using an explicit stack of pointer that store the
+   next array partition to sort.  To save time, this maximum amount
+   of space required to store an array of SIZE_MAX is allocated on the
+   stack.  Assuming a 32-bit (64 bit) integer for size_t, this needs
+   only 32 * sizeof(stack_node) == 256 bytes (for 64 bit: 1024 bytes).
+   Pretty cheap, actually.
+
+   2. Chose the pivot element using a median-of-three decision tree.
+   This reduces the probability of selecting a bad pivot value and
+   eliminates certain extraneous comparisons.
+
+   3. Only quicksorts TOTAL_ELEMS / MAX_THRESH partitions, leaving
+   insertion sort to order the MAX_THRESH items within each partition.
+   This is a big win, since insertion sort is faster for small, mostly
+   sorted array segments.
+
+   4. The larger of the two sub-partitions is always pushed onto the
+   stack first, with the algorithm then concentrating on the
+   smaller partition.  This *guarantees* no more than log (total_elems)
+   stack size is needed (actually O(1) in this case)!  */
+
 // START FUNC DECL
 void
-${fn} (
-	    void *const pbase,
-            ${FLDTYPE} *drag,
+${NAME} ( 
+	    ${FLDTYPE} *f1,
 	    size_t total_elems
 	    )
 // STOP FUNC DECL
 {
-  register char *base_ptr = (char *) pbase;
-  long long aidx, bidx;
-  int aval, bval;
-
   int size = sizeof(${FLDTYPE});
   const size_t max_thresh = MAX_THRESH * size; 
 
   if (total_elems == 0) {
     /* Avoid lossage with unsigned arithmetic below.  */
-    go_BYE(-1);
+    return;
   }
 
   if ( total_elems > MAX_THRESH ) {
-    char *lo = base_ptr;
-    char *hi = &lo[size * (total_elems - 1)];
+    ${FLDTYPE} *lo = f1;
+    ${FLDTYPE} *hi = f1 + (total_elems-1);
     stack_node stack[STACK_SIZE];
     stack_node *top = stack;
 
     PUSH (NULL, NULL);
 
     while (STACK_NOT_EMPTY) {
-      char *left_ptr;
-      char *right_ptr;
+      ${FLDTYPE} *left_ptr;
+      ${FLDTYPE} *right_ptr;
 
       /* Select median value from among LO, MID, and HI. Rearrange
 	 LO and HI so the three values are sorted. This lowers the
@@ -139,44 +134,44 @@ ${fn} (
 	 skips a comparison for both the LEFT_PTR and RIGHT_PTR in
 	 the while loops. */
 
-      char *mid = lo + size * ((hi - lo) / size >> 1);
+     ${FLDTYPE} *mid = (lo+hi)>>1;
 
-      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) < *((${FLDTYPE} *)lo) ) {
-	SWAP (mid, lo, size);
+      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) then 
+      if ( *mid ${COMPARATOR} *lo ) {
+	SWAP (mid, lo);
       }
-      // if ( (*cmp) ((void *) hi, (void *) mid) < 0) {
-      if ( *((${FLDTYPE} *)hi) < *((${FLDTYPE} *)mid) ) {
-	SWAP (mid, hi, size);
+      // if ( (*cmp) ((void *) hi, (void *) mid) < 0) then
+      if ( *hi ${COMPARATOR} *mid ) {
+	SWAP (mid, hi);
       }
       else {
 	goto jump_over;
       }
-      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) < *((${FLDTYPE} *)lo) ) {
-	SWAP (mid, lo, size);
+      // if ( (*cmp) ((void *) mid, (void *) lo) < 0) then
+      if ( *mid ${COMPARATOR} *lo ) {
+	SWAP (mid, lo);
       }
     jump_over:;
 
-      left_ptr  = lo + size;
-      right_ptr = hi - size;
+      left_ptr  = lo+1;
+      right_ptr = hi-1;
 
       /* Here's the famous ``collapse the walls'' section of quicksort.
 	 Gotta like those tight inner loops!  They are the main reason
 	 that this algorithm runs much faster than others. */
       do {
-	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) {
-	while ( *((${FLDTYPE} *)left_ptr) < *((${FLDTYPE} *)mid) ) {
+	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) do
+	while ( *((${FLDTYPE} *)left_ptr) ${COMPARATOR} *((${FLDTYPE} *)mid) ) {
 	  left_ptr += size;
 	}
 
 	// while ((*cmp) ((void *) mid, (void *) right_ptr) < 0) {
-	while ( *((${FLDTYPE} *)mid) < *((${FLDTYPE} *)right_ptr) ) {
+	while ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)right_ptr) ) {
 	  right_ptr -= size;
 	}
 
 	if (left_ptr < right_ptr) {
-	  SWAP (left_ptr, right_ptr, size);
+	  SWAP (left_ptr, right_ptr);
 	  if (mid == left_ptr) {
 	    mid = right_ptr;
 	  }
@@ -244,27 +239,23 @@ ${fn} (
        and the operation speeds up insertion sort's inner loop. */
 
     for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
-      // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      if (  *((${FLDTYPE} *)run_ptr) < *((${FLDTYPE} *) tmp_ptr) ) {
+      // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) then
+      if (  *((${FLDTYPE} *)run_ptr) ${COMPARATOR} *((${FLDTYPE} *) tmp_ptr) ) {
         tmp_ptr = run_ptr;
       }
     }
 
     if (tmp_ptr != base_ptr) {
-      SWAP (tmp_ptr, base_ptr, size);
+      SWAP (tmp_ptr, base_ptr);
     }
 
     /* Insertion sort, running from left-hand-side up to right-hand-side.  */
 
     run_ptr = base_ptr + size;
     while ((run_ptr += size) <= end_ptr) {
-      int pos, pos_hi, pos_lo, sve_idx;
       tmp_ptr = run_ptr - size;
-      pos = ( ( (char *)tmp_ptr - (char *)base_ptr) / size ) + 1;
-      sve_idx = drag[pos];
-
       // while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      while ( *((${FLDTYPE} *)run_ptr) < *((${FLDTYPE} *)tmp_ptr) ) {
+      while ( *((${FLDTYPE} *)run_ptr) ${COMPARATOR} *((${FLDTYPE} *)tmp_ptr) ) {
 	tmp_ptr -= size;
       }
 
@@ -273,27 +264,14 @@ ${fn} (
 	char *trav;
 
 	trav = run_ptr + size;
-        long long pass = 1;
 	while (--trav >= run_ptr) {
 	  char c = *trav;
 	  char *hi, *lo;
 
 	  for (hi = lo = trav; (lo -= size) >= tmp_ptr; hi = lo) {
 	    *hi = *lo;
-            if ( pass == 1 ) {
-              pos_hi = ( ( (char *)hi - (char *)base_ptr) / size );
-              pos_lo = ( ( (char *)lo - (char *)base_ptr) / size );
-              drag[pos_hi] = drag[pos_lo];
-            }
-            // Everybody moves one to the right
-
 	  }
 	  *hi = c;
-          if ( pass == 1 ) {
-            pos = ( ( (char *)hi - (char *)base_ptr) / size );
-            drag[pos] = sve_idx;
-          }
-          pass++;
 	}
       }
     }

@@ -10,7 +10,7 @@ local so_dir_path = q_src_root .. "/OPERATORS/SORT2/src/"
 
 ffi.cdef([[
 int
-qsort2_asc_I4 (
+qsort2_asc_I4_basic (
 	    void *const pbase,
       int32_t *drag,
 	    size_t total_elems
@@ -18,7 +18,7 @@ qsort2_asc_I4 (
 ]])
 
 os.execute("cd " .. so_dir_path .. "; bash run_sort2_asc_I4.sh")
-local qc_sort = ffi.load(so_dir_path .. 'qsort2_asc_I4.so')
+local qc_sort = ffi.load(so_dir_path .. 'qsort2_asc_I4_basic.so')
 
 -- lua test to check the working of SORT2_ASC operator only for I4 qtype
 local tests = {}
@@ -34,7 +34,7 @@ tests.t1 = function ()
   local b_len, b_chunk, b_nn_chunk = input_drag_col:chunk(0)
   local casted_a_chunk = ffi.cast("void *",  get_ptr(a_chunk))
   local casted_b_chunk = ffi.cast("int32_t *",  get_ptr(b_chunk))
-  local status = qc_sort["qsort2_asc_I4"](casted_a_chunk, casted_b_chunk, a_len)
+  local status = qc_sort["qsort2_asc_I4_basic"](casted_a_chunk, casted_b_chunk, a_len)
   assert(status == 1, "C error in QSORT2_ASC")
   -- Validate the result
   casted_b_chunk = ffi.cast("int32_t *", casted_b_chunk)

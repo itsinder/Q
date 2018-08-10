@@ -19,17 +19,9 @@ clean :
 	rm -f _* *.so
 		
 
-libsort2_asc.so : ${SRC_FILES}
+libsort2_asc.so :
 	luajit generator.lua 
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libsort2_asc.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
-
-SRC_FILES = \
-	_qsort2_asc_F4.c \
-	_qsort2_asc_F8.c \
-	_qsort2_asc_I1.c \
-	_qsort2_asc_I2.c \
-	_qsort2_asc_I4.c \
-	_qsort2_asc_I8.c \
