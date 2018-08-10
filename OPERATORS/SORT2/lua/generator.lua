@@ -6,11 +6,11 @@ if ( not plpath.isdir(srcdir) ) then plpath.mkdir(srcdir) end
 if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 local gen_code = require 'Q/UTILS/lua/gen_code'
 
-local order = { 'asc' }
+local order = { 'asc', 'dsc' }
 local qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
 local num_produced = 0
-local spfn = require 'qsort2_asc_specialize'
+local spfn = require 'qsort2_specialize'
 for i, o in ipairs(order) do 
   for k, f in ipairs(qtypes) do 
     local status, subs, tmpl = pcall(spfn, f, o)
