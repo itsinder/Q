@@ -1,5 +1,5 @@
 
-#include "qsort2_asc_I4.h"
+#include "qsort2_asc_I4_basic.h"
 
 #define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__); }
 
@@ -85,7 +85,7 @@ typedef struct
 
 // START FUNC DECL
 int
-qsort2_asc_I4 (
+qsort2_asc_I4_basic (
 	    void *const pbase,
             int32_t *drag,
 	    size_t total_elems
@@ -97,7 +97,7 @@ qsort2_asc_I4 (
   int aval, bval;
 
   int size = sizeof(int32_t);
-  const size_t max_thresh = MAX_THRESH * size; 
+  const size_t max_thresh = MAX_THRESH * size;
 
   if (total_elems == 0) {
     /* Avoid lossage with unsigned arithmetic below.  */
