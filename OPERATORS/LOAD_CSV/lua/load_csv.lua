@@ -23,8 +23,8 @@ local function load_csv(
   M,  -- metadata (table)
   opt_args
   )
-  assert( infile ~= nil and plpath.isfile(infile),err.INPUT_FILE_NOT_FOUND)
-  assert(plpath.getsize(infile) > 0, err.INPUT_FILE_EMPTY)
+  assert( infile ~= nil and qc["file_exists"](infile),err.INPUT_FILE_NOT_FOUND)
+  assert(tonumber(qc["get_file_size"](infile)) > 0, err.INPUT_FILE_EMPTY)
 
   validate_meta(M) -- Validate Metadata
   local use_accelerator, is_hdr = process_opt_args(opt_args)
@@ -145,7 +145,7 @@ local function load_csv(
         -- Drop the null column, get the nn_file_name from metadata
         local null_file = cols[i]:meta().nn.file_name
         cols[i]:drop_nulls()
-        -- assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
+        -- assert(qc["delete_file"](null_file),err.INPUT_FILE_NOT_FOUND)
       end
       cols[i]:set_meta("num_nulls", M[i].num_nulls)
       cols_to_return[M[i].name] = cols[i]
