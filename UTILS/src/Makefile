@@ -16,6 +16,9 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_delete_file.h :
 	lua ../lua/cli_extract_func_decl.lua delete_file.c ${INCDIR}
 
+../gen_inc/_make_dir.h :
+	lua ../lua/cli_extract_func_decl.lua make_dir.c ${INCDIR}
+
 ../gen_inc/_trim.h : 
 	lua ../lua/cli_extract_func_decl.lua trim.c ${INCDIR}
 
@@ -117,6 +120,7 @@ hdr_files = \
         ../gen_inc/_isfile.h  \
         ../gen_inc/_isdir.h  \
   ../gen_inc/_delete_file.h  \
+  ../gen_inc/_make_dir.h  \
 	../gen_inc/_trim.h  \
 	../gen_inc/_c_copy.h  \
 	../gen_inc/_c_free.h  \
@@ -148,6 +152,7 @@ SRC_FILES=  \
         isfile.c \
         isdir.c \
   delete_file.c \
+  make_dir.c \
 	trim.c \
 	c_copy.c \
 	c_free.c \
