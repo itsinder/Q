@@ -4,7 +4,6 @@ local ffi           = require 'Q/UTILS/lua/q_ffi'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
-local plpath        = require 'pl.path'
 local cmem          = require 'libcmem'
 local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
@@ -45,8 +44,8 @@ local function load_csv_fast_C(M, infile, is_hdr)
   n_str_for_lua = ffi.cast("int *", n_str_for_lua)
   n_str_for_lua[0] = 0
 
-  assert(plpath.isdir(data_dir))
-  assert(plpath.isfile(infile))
+  assert(qc["isdir"](data_dir))
+  assert(qc["isfile"](infile))
 
   -- assert(nil, "premature") -- call to the load_csv_fast function
   local status = qc["load_csv_fast"](data_dir, infile, nC, nR, fldtypes,

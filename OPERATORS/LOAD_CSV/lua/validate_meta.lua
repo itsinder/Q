@@ -1,14 +1,13 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
-local pl      = require 'pl'
-local plpath  = require 'pl.path'
+local qc            = require 'Q/UTILS/lua/q_core'
   
 return function (
   M -- meta data table 
 )
   assert(type(M) == "table", err.METADATA_TYPE_TABLE)
 -- Sri: this should be ensured by library loading; trust our own
---  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), err.Q_META_DATA_DIR_INCORRECT)
+--  assert(qc["isdir"](_G["Q_META_DATA_DIR"]), err.Q_META_DATA_DIR_INCORRECT)
   
   local col_names = {}
   -- now look at fields of metadata
@@ -17,6 +16,7 @@ return function (
     local col = "Column " .. midx .. "-"
     assert(type(fld_M) == "table", col .. err.COLUMN_DESC_ERROR)
     assert(fld_M.name,  col .. err.METADATA_NAME_NULL)
+    assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
     if fld_M.has_nulls ~= nil then 
