@@ -22,6 +22,12 @@ tests.t1 = function()
   local qc_del_val = qc["delete_file"]("tests2.txt")
   assert(qc_del_val == false)
   
+  local pl_mk_dir = plpath.mkdir(path_to_here .. "/dummy_pl_dir/")
+  local qc_mk_dir = qc["make_dir"](path_to_here .. "/dummy_qc_dir/")
+  print(pl_mk_dir, qc_mk_dir)
+  -- deleting after usage
+  qc["delete_file"](path_to_here .. "/dummy_pl_dir/")
+  qc["delete_file"](path_to_here .. "/dummy_qc_dir/")
 end
 
 return tests
