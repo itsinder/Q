@@ -28,8 +28,8 @@ tests.t1 = function ()
   local col = Q.hash(ret['empid'])
   -- validating row 1 and 7, row 2 and 8
   -- should return same hash for the same SC value
-  assert(c_to_txt(col, 1), c_to_txt(col,7))
-  assert(c_to_txt(col, 2), c_to_txt(col,8))
+  assert(c_to_txt(col, 1) ==  c_to_txt(col,7))
+  assert(c_to_txt(col, 2) == c_to_txt(col,8))
   print("Successfully completed test t1")
 end
 
