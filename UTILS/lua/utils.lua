@@ -190,7 +190,7 @@ end
  
 -- function to find an entry(value) in table
 -- which returns index of value
-fns.find = function(tbl, entry)
+fns.table_find = function(tbl, entry)
   assert(type(tbl) == "table", "input type is not table")
   assert(#tbl>0, "table should have values")
   for i = 1, #tbl do

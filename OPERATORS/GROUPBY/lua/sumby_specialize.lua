@@ -7,8 +7,8 @@ return function (
   local utils = require 'Q/UTILS/lua/utils'
   local val_qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
   local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-  assert(utils.find(val_qtypes, val_qtype))
-  assert(utils.find(grpby_qtypes, grpby_qtype))
+  assert(utils.table_find(val_qtypes, val_qtype))
+  assert(utils.table_find(grpby_qtypes, grpby_qtype))
   local out_qtype
   if ( ( val_qtype == "F4" ) or ( val_qtype == "F8" ) ) then 
     out_qtype = "F8"
