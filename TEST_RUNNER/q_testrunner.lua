@@ -15,13 +15,12 @@ Run luajit q_testrunner.lua to see its usage.
 ]]
 
 package.path = "/?.lua;" .. package.path
-local pldir = require 'pl.dir'
-local plpath = require 'pl.path'
+local qc = require 'Q/UTILS/lua/q_core'
 local plpretty = require "pl.pretty"
 local q_root = assert(os.getenv("Q_ROOT"))
 local find_all_files = require 'Q/TEST_RUNNER/q_test_discovery'
-assert(plpath.isdir(q_root))
-assert(plpath.isdir(q_root .. "/data/"))
+assert(qc["isdir"](q_root))
+assert(qc["isdir"](q_root .. "/data/"))
 os.execute("rm -r -f " .. q_root .. "/data/*")
 require('Q/UTILS/lua/cleanup')()
 
@@ -172,12 +171,12 @@ end
 
 local function get_files(path, pattern, file_type)
 	local files = {}
-	if (path and plpath.isfile(path)) then
+	if (path and qc["isfile"](path)) then
 		files[#files + 1] = path
     return files
 	else
 		-- run all tests in a DIR, either custom or default Q_SRC_ROOT
-		if not (path and plpath.isdir(path)) then
+		if not (path and qc["isdir"](path)) then
 			usage()
 			os.exit()
 		end
