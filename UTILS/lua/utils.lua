@@ -187,5 +187,18 @@ fns.RDTSC = function(cpu_cycles)
   local time = cpu_cycles / (cpu_frequency * 1000000)
   return time
 end
+ 
+-- function to find an entry(value) in table
+-- which returns index of value
+fns.find = function(tbl, entry)
+  assert(type(tbl) == "table", "input type is not table")
+  assert(#tbl>0, "table should have values")
+  for i = 1, #tbl do
+    if (tbl[i] == entry) then
+      return i
+    end
+  end
+  return nil
+end
 
 return fns

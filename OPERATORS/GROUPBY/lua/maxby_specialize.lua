@@ -4,11 +4,11 @@ return function (
   grpby_qtype
   )
   local qconsts = require 'Q/UTILS/lua/q_consts'
-  local pltable = require 'pl.tablex'
+  local utils = require 'Q/UTILS/lua/utils'
   local val_qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
   local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-  assert(pltable.find(val_qtypes, val_qtype))
-  assert(pltable.find(grpby_qtypes, grpby_qtype))
+  assert(utils.find(val_qtypes, val_qtype))
+  assert(utils.find(grpby_qtypes, grpby_qtype))
   local tmpl = 'maxby_minby.tmpl'
   local subs = {};
   subs.fn = "maxby_" .. val_qtype .. "_" .. grpby_qtype .. "_" .. val_qtype

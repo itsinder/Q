@@ -4,9 +4,9 @@ return function (
   is_safe
   )
   local qconsts = require 'Q/UTILS/lua/q_consts'
-  local pltable = require 'pl.tablex'
+  local utils = require 'Q/UTILS/lua/utils'
   local in_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-  assert(pltable.find(in_qtypes, in_qtype))
+  assert(utils.find(in_qtypes, in_qtype))
   local tmpl = 'numby.tmpl'
   local subs = {};
 
