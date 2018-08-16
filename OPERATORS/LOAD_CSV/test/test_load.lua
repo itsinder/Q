@@ -30,7 +30,7 @@ tests.t1 = function ()
   --dir.makepath(_G["Q_META_DATA_DIR"])
 
   -- call load function to load the data
-  local status, ret = pcall(load_csv, csv_file_path, M )
+  local status, ret = pcall(load_csv, csv_file_path, M, { use_accelerator = false } )
   assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ") 
 
   log.info("All is well")

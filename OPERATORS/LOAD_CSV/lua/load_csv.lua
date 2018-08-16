@@ -15,6 +15,7 @@ local update_out_buf   = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
 local flush_bufs    = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
 local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
 local cmem          = require 'libcmem'
+local hash          = require 'Q/OPERATORS/LOAD_CSV/lua/hash'
  --======================================
 local function load_csv(
   infile,   -- input file to read (string)
@@ -147,6 +148,13 @@ local function load_csv(
       end
       cols[i]:set_meta("num_nulls", M[i].num_nulls)
       cols_to_return[M[i].name] = cols[i]
+      if M[i].qtype == "SC" then
+        local hash_col_for_sc = hash(cols[i])
+        hash_col_for_sc:eov()
+        hash_col_for_sc:set_meta("has_nulls", cols[i]:get_meta('has_nulls'))
+        hash_col_for_sc:set_meta("num_nulls", cols[i]:get_meta('num_nulls'))
+        cols_to_return[M[i].name .. "_I8"] = hash_col_for_sc
+      end
     end
   end
   return cols_to_return
