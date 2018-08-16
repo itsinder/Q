@@ -6,7 +6,7 @@ return function (
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local utils = require 'Q/UTILS/lua/utils'
   local in_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-  assert(utils.find(in_qtypes, in_qtype))
+  assert(utils.table_find(in_qtypes, in_qtype))
   local tmpl = 'numby.tmpl'
   local subs = {};
 
