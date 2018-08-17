@@ -38,7 +38,14 @@ return function (
     end
     if fld_M.qtype == "SC" then 
       assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
-      assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC ) 
+      assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC )
+      if fld_M.convert_sc ~= nil then
+          assert((fld_M.convert_sc == true or fld_M.convert_sc == false),
+          "convert_sc meta field not of type boolean" )
+      else
+        -- TODO: default value for convert_sc
+        fld_M.convert_sc = false
+      end
     end
     if fld_M.qtype == "SV" then
       --print(fld_M.max)
