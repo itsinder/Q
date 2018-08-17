@@ -161,7 +161,7 @@ end
 -- function to get table of vector values
 fns.vector_to_table = function(vector)
   assert(type(vector) == "lVector", "must be of lVector")
-  assert(vector:num_elements() < 1000000, "max limit is upto 1 million")
+  assert(vector:num_elements() < 1024, "max limit is upto 1024")
   local tbl = {} 
   
   for i = 1, vector:num_elements() do
