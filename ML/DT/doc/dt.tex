@@ -189,5 +189,36 @@ which is \(
  = (40 \times  \frac{4}{6}) -15 - 20 + (25 \times \frac{6}{4} )
  = 29 \frac{1}{6}\)
 
+\section{Categorical Attributes}
+We deal with categorical attributes as follows. Let \(X\) be a categorical
+attribute that takes on values \(\{x_1, x_2, \ldots x_M\}\), where \(M\) is
+typically small. We can assume less than 100 values.
+
+Let \(Y = \{(x_i, g_i)\}\) be the data set, where \(i = 1, \ldots N\). 
+By this we ean
+that the \(i^{th}\) point has value \(x_i \in X\) and its goal attribute has
+value \(g_i \in \{0, 1\}\). 
+\(Y\) may have other features but for now we are concentrating on \(X\).
+
+Create a table, \(Z\), of vectors \(N, P, \rho\) of length \(M\) as follows.  
+\begin{enumerate}
+\item 
+\(n_j = \sum_{i=1}^{i=N} z(i, j)\) where 
+\(z_j = 1 \) if \(x_i = x_j \) and \(g_i = 0\)
+\item 
+\(p_j = \sum_{i=1}^{i=N} z(i, j)\) where 
+\(z_j = 1 \) if \(x_i = x_j \) and \(g_i = 1\)
+\item 
+\(rho_j = \frac{p_j}{p_j+n_j}\)
+\end{enumerate}
+Sort \(Z\) on \(rho\). Create vectors, \(N', P'\) of length \(M\) as follows
+\be
+\item 
+\ee
+
+
+
+
+
 \bibliographystyle{alpha}
 \bibliography{ref}
