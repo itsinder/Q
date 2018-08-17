@@ -1,5 +1,6 @@
 local plpath        = require 'pl.path'
 local plfile        = require 'pl.file'
+local plstring = require 'pl.stringx'
 local qc            = require 'Q/UTILS/lua/q_core'
 
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/UTILS/test/"
@@ -28,6 +29,10 @@ tests.t1 = function()
   -- deleting after usage
   qc["delete_file"](path_to_here .. "/dummy_pl_dir/")
   qc["delete_file"](path_to_here .. "/dummy_qc_dir/")
+  
+  local pl_endswith = plstring.endswith("home/pragati/WORK/Q/", "/")
+  local qc_endswith = qc['endswith']("home/pragati/WORK/Q/", "/")
+  assert(pl_endswith == qc_endswith)
 end
 
 return tests
