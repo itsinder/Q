@@ -10,7 +10,7 @@ local order = { 'asc', 'dsc' }
 local qtypes = { "I1", "I2", "I4", "I8", "F4", "F8" }
 
 local num_produced = 0
-local spfn = require 'qsort2_specialize'
+local spfn = require 'sort2_specialize'
 for i, o in ipairs(order) do 
   for k, f in ipairs(qtypes) do 
     local status, subs, tmpl = pcall(spfn, f, o)

@@ -4,10 +4,10 @@ return function(in_qtype, ordr)
   assert( ( ( ordr == "asc") or ( ordr == "dsc") ),
   "Sort order should be asc or dsc")
   local subs = {}
-  local tmpl = 'qsort2.tmpl'
+  local tmpl = 'sort2.tmpl'
   subs.SORT_ORDER = ordr
   subs.QTYPE = in_qtype
-  subs.fn = "qsort2_" .. ordr .. "_" .. in_qtype
+  subs.fn = "sort2_" .. ordr .. "_" .. in_qtype
   subs.FLDTYPE = qconsts.qtypes[in_qtype].ctype
   subs.in_qtype = in_qtype
   -- TODO Check below is correct order/comparator combo
