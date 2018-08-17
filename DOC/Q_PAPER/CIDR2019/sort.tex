@@ -39,10 +39,10 @@ allow us to allocate slightly more space (specified by \(\beta\)) than absoutely
 fall back to the sequential sort in the small probability (specified by
 \(\epsilon\))  that our estimates are off.
 
-But where do these bins come from? As in the social graph example above, while
+But where do these bins come from? As in the social graph example above, where
 new connections are being created and deleted all the time, the change in these
-overall distribution is much, much slower and can be updated monthly while
-retaining enough accuracy for the purpose at hand --- load balancing.
+overall distribution is much, much slower. Each sort uses the previous estimates
+and produces a new estimate, good enough for load balancing.
 {\tt Q.sort} operator accepts ``hints'' in the form of
 optional arguments. In this case, the hint is a Vector whose length is the
 number of bins and each element is the upper bound of that bin. For Vectors of
