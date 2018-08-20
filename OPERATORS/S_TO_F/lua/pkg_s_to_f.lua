@@ -1,5 +1,4 @@
 
-local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x)
   local expander = require 'Q/OPERATORS/S_TO_F/lua/expander_s_to_f'

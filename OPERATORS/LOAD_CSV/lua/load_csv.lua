@@ -4,7 +4,6 @@ local err           = require 'Q/UTILS/lua/error_code'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
-local plpath        = require 'pl.path'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
@@ -14,17 +13,17 @@ local init_buffers  = require "Q/OPERATORS/LOAD_CSV/lua/init_buffers"
 local load_csv_fast_C  = require "Q/OPERATORS/LOAD_CSV/lua/load_csv_fast_C"
 local update_out_buf   = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
 local flush_bufs    = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
-local plfile        = require 'pl.file'
 local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
 local cmem          = require 'libcmem'
+local hash          = require 'Q/OPERATORS/LOAD_CSV/lua/hash'
  --======================================
 local function load_csv(
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   opt_args
   )
-  assert( infile ~= nil and plpath.isfile(infile),err.INPUT_FILE_NOT_FOUND)
-  assert(plpath.getsize(infile) > 0, err.INPUT_FILE_EMPTY)
+  assert( infile ~= nil and qc["file_exists"](infile),err.INPUT_FILE_NOT_FOUND)
+  assert(tonumber(qc["get_file_size"](infile)) > 0, err.INPUT_FILE_EMPTY)
 
   validate_meta(M) -- Validate Metadata
   local use_accelerator, is_hdr = process_opt_args(opt_args)
@@ -145,10 +144,19 @@ local function load_csv(
         -- Drop the null column, get the nn_file_name from metadata
         local null_file = cols[i]:meta().nn.file_name
         cols[i]:drop_nulls()
-        -- assert(plfile.delete(null_file),err.INPUT_FILE_NOT_FOUND)
+        -- assert(qc["delete_file"](null_file),err.INPUT_FILE_NOT_FOUND)
       end
       cols[i]:set_meta("num_nulls", M[i].num_nulls)
       cols_to_return[M[i].name] = cols[i]
+      if M[i].qtype == "SC" and M[i].convert_sc and M[i].convert_sc == true then
+        local hash_col_for_sc = hash(cols[i])
+        hash_col_for_sc:eov()
+        hash_col_for_sc:set_meta("has_nulls", cols[i]:get_meta('has_nulls'))
+        hash_col_for_sc:set_meta("num_nulls", cols[i]:get_meta('num_nulls'))
+        cols_to_return[M[i].name .. "_I8"] = hash_col_for_sc
+      else
+        -- convert_sc field is set to false, not converting 'SC' to 'hash'
+      end
     end
   end
   return cols_to_return

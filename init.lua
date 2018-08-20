@@ -6,7 +6,7 @@ require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"
 require "Q/OPERATORS/SORT/lua/sort"
-require "Q/OPERATORS/SORT2/lua/qsort2"
+require "Q/OPERATORS/SORT2/lua/sort2"
 require "Q/OPERATORS/CLONE/lua/clone"
 require "Q/OPERATORS/CAT/lua/cat"
 require "Q/OPERATORS/IDX_SORT/lua/idx_sort"
@@ -37,6 +37,7 @@ require 'Q/OPERATORS/GROUPBY/lua/groupby'
 require 'Q/OPERATORS/INDEX/lua/indexing'
 require 'Q/OPERATORS/UNIQUE/lua/unique'
 require 'Q/OPERATORS/GETK/lua/getk'
+require 'Q/OPERATORS/LOAD_CSV/lua/hash'
 -- alias wrappers
 require 'Q/ALIAS/lua/add'
 require 'Q/ALIAS/lua/sub'

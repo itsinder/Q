@@ -1,5 +1,4 @@
 
-local plfile = require 'pl.file'
 local s = [===[
 local function <<operator>>(x, y)
   assert(type(x) == "lVector", "input must be of type lVector")

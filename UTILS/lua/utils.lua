@@ -161,7 +161,7 @@ end
 -- function to get table of vector values
 fns.vector_to_table = function(vector)
   assert(type(vector) == "lVector", "must be of lVector")
-  assert(vector:num_elements() < 1000000, "max limit is upto 1 million")
+  assert(vector:num_elements() < 1024, "max limit is upto 1024")
   local tbl = {} 
   
   for i = 1, vector:num_elements() do
@@ -186,6 +186,19 @@ fns.RDTSC = function(cpu_cycles)
   -- as cpu_frequency is in MHz so * by 1000000
   local time = cpu_cycles / (cpu_frequency * 1000000)
   return time
+end
+ 
+-- function to find an entry(value) in table
+-- which returns index of value
+fns.table_find = function(tbl, entry)
+  assert(type(tbl) == "table", "input type is not table")
+  assert(#tbl>0, "table should have values")
+  for i = 1, #tbl do
+    if (tbl[i] == entry) then
+      return i
+    end
+  end
+  return nil
 end
 
 return fns
