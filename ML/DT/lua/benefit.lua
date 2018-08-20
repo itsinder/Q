@@ -66,3 +66,4 @@ local function calc_benefit(
   return benefit, split_point
 end
 
+return calc_benefit

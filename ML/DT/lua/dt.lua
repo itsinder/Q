@@ -1,5 +1,9 @@
 local Q = require 'Q'
+local utils = require 'Q/UTILS/lua/util'
+local calc_benefit = require 'Q/ML/DT/lua/benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
+
+local dt = {}
 
 local function make_dt(
   T, -- table of m lvectors of length n
@@ -39,4 +43,38 @@ local function make_dt(
   return D
 end
 
-return make_dt
+
+local function predict(
+  D -- prepared decision tree
+  X -- a table with test samples
+  )
+  assert(type(D) == 'table')
+  assert(type(X) == 'table')
+
+  local predicted_value = {}
+  local n = utils.table_length(X)
+
+  for i = 1, n do
+    local x = X[i]
+    while true do:
+      if D.left == nil and D.right == nil then
+        local decision = if D.n_P > D.n_N then 1 else 0 end
+        predicted_value[i] = decision
+        break
+      elseif x[D.feature] > D.threshold then
+        print("Right Subtree")
+        D = D.right
+      else
+        print("Left Subtree")
+        D = D.left
+      end
+    end
+  end
+  
+  return predicted_value
+end
+
+dt.make_dt = make_dt
+dt.predict = predict
+
+return dt
