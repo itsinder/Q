@@ -24,6 +24,8 @@ local function make_dt(
       best_k = k
     end
   end
+  D.n_N = n_N
+  D.n_P = n_P
   if ( best_bf > alpha ) then 
     local x = Q.vsleq(T[best_k], best_sf)
     local T_L = {}
@@ -31,14 +33,13 @@ local function make_dt(
     D.feature = best_k
     D.threshold = best_sp
     for k, f in pairs(T) do 
-      T_L[k] = Q.where(T[k], x)
-      T_R[k] = Q.where(T[k], Q.vnot(x))
+      T_L[k] = Q.where(f, x)
+      T_R[k] = Q.where(f, Q.vnot(x))
     end
+    g_L = Q.where(g, x)
+    g_R = Q.where(g, Q.vnot(x))
     D.left  = make_dt(T_L, g_L, alpha)
     D.right = make_dt(T_R, g_R, alpha)
-  else
-    D.n_N = n_N
-    D.n_P = n_P
   end
   return D
 end
