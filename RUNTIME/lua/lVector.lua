@@ -615,12 +615,6 @@ function lVector:eval()
     repeat
       -- print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
-      -- for conjoined vectors
-      if self.siblings then
-        for k, v in pairs(self.siblings) do
-          v:chunk(chunk_num)
-        end
-      end
       chunk_num = chunk_num + 1 
     until ( base_len ~= qconsts.chunk_size )
     -- if ( self:length() > 0 ) then self:eov() end
@@ -730,6 +724,12 @@ function lVector:chunk(chunk_num)
       end
     end
     if ( qconsts.debug ) then self:check() end
+    -- for conjoined vectors
+    if self.siblings then
+      for k, v in pairs(self.siblings) do
+        v:chunk(l_chunk_num)
+      end
+    end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
