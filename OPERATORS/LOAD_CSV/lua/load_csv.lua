@@ -148,12 +148,14 @@ local function load_csv(
       end
       cols[i]:set_meta("num_nulls", M[i].num_nulls)
       cols_to_return[M[i].name] = cols[i]
-      if M[i].qtype == "SC" then
+      if M[i].qtype == "SC" and M[i].convert_sc and M[i].convert_sc == true then
         local hash_col_for_sc = hash(cols[i])
         hash_col_for_sc:eov()
         hash_col_for_sc:set_meta("has_nulls", cols[i]:get_meta('has_nulls'))
         hash_col_for_sc:set_meta("num_nulls", cols[i]:get_meta('num_nulls'))
         cols_to_return[M[i].name .. "_I8"] = hash_col_for_sc
+      else
+        -- convert_sc field is set to false, not converting 'SC' to 'hash'
       end
     end
   end
