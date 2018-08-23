@@ -1,5 +1,6 @@
 local Q = require 'Q'
 local qc        = require 'Q/UTILS/lua/q_core'
+local Vector = require 'libvec'
 
 local test = {}
 
@@ -16,7 +17,9 @@ test.t1 = function ()
   local w = Q.rand({lb = 0, ub = 1, qtype = "F4", len = N}):eval()
 
   local start_time = qc.RDTSC()
+  Vector.reset_timers()
   local A = sum_prod(X, w)
+  Vector.print_timers()
   local stop_time = qc.RDTSC()
   print("sum_prod eval = ", stop_time-start_time)
   --[[
@@ -55,7 +58,9 @@ test.t2 = function ()
   local w = Q.rand({lb = 0, ub = 1, qtype = "F4", len = N}):eval()
 
   local start_time = qc.RDTSC()
+  Vector.reset_timers()
   local A = sum_prod(X, w)
+  Vector.print_timers()
   local stop_time = qc.RDTSC()
   print("sum_prod chunk = ", stop_time-start_time)
   --[[
