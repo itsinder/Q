@@ -15,7 +15,7 @@ tests.t1 = function ()
   
   local qtype = "I4"
   local input_col = Q.mk_col({10, 9, 8, 7, 6, 5, 4, 3, 2, 1}, "I4")
-  local input_drag_col = Q.mk_col({100, 90, 80, 70, 60, 50, 10, 20, 30, 40}, "I4")
+  local input_drag_col = Q.mk_col({100, 90, 80, 70, 60, 50, 10, 20, 30, 40}, "F4")
 
   local status = Q.sort2(input_col, input_drag_col, "asc")
 

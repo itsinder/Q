@@ -14,9 +14,9 @@ local function sort2(x, y, ordr)
   end  
   assert(type(ordr) == "string")
   if ( ordr == "ascending" ) then ordr = "asc" end 
-  if ( ordr == "descending" ) then assert(nil, "TODO") end 
+  if ( ordr == "descending" ) then ordr = "dsc" end
   local spfn = require("Q/OPERATORS/SORT2/lua/sort2_specialize" )
-  local status, subs, tmpl = pcall(spfn, x:fldtype(), ordr)
+  local status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype(), ordr)
   assert(status, "error in call to sort2_asc_specialize")
   assert(type(subs) == "table", "error in call to sort2_asc_specialize")
   local func_name = assert(subs.fn)

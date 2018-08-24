@@ -36,7 +36,7 @@ return require 'Q/UTILS/lua/code_gen' {
 extern void
 ${fn} (
     void *const pbase,
-          ${FLDTYPE} *drag,
+          ${F2_FLDTYPE} *drag,
     size_t total_elems
     );
 ]],
@@ -63,9 +63,9 @@ definition = [[
     */
 #define SWAP(a, b, size) \
 { \
-  ${FLDTYPE} *ia = (${FLDTYPE} *)a; \
-  ${FLDTYPE} *ib = (${FLDTYPE} *)b; \
-  ${FLDTYPE} itmp = *ia; \
+  ${F1_FLDTYPE} *ia = (${F1_FLDTYPE} *)a; \
+  ${F1_FLDTYPE} *ib = (${F1_FLDTYPE} *)b; \
+  ${F1_FLDTYPE} itmp = *ia; \
   aidx = ((char *)a - (char *)pbase) / size;                            \
   bidx = ((char *)b - (char *)pbase) / size;                            \
   if ( ( aidx < 0 ) || ( aidx >= total_elems ) ) { go_BYE(-1);  } \
@@ -104,7 +104,7 @@ typedef struct
 void
 ${fn} (
 	    void *const pbase,
-            ${FLDTYPE} *drag,
+            ${F2_FLDTYPE} *drag,
 	    size_t total_elems
 	    )
 // STOP FUNC DECL
@@ -113,7 +113,7 @@ ${fn} (
   long long aidx, bidx;
   int aval, bval;
 
-  int size = sizeof(${FLDTYPE});
+  int size = sizeof(${F1_FLDTYPE});
   const size_t max_thresh = MAX_THRESH * size; 
 
   if (total_elems == 0) {
@@ -142,18 +142,18 @@ ${fn} (
       char *mid = lo + size * ((hi - lo) / size >> 1);
 
       // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)lo) ) {
+      if ( *((${F1_FLDTYPE} *)mid) ${COMPARATOR} *((${F1_FLDTYPE} *)lo) ) {
 	SWAP (mid, lo, size);
       }
       // if ( (*cmp) ((void *) hi, (void *) mid) < 0) {
-      if ( *((${FLDTYPE} *)hi) ${COMPARATOR} *((${FLDTYPE} *)mid) ) {
+      if ( *((${F1_FLDTYPE} *)hi) ${COMPARATOR} *((${F1_FLDTYPE} *)mid) ) {
 	SWAP (mid, hi, size);
       }
       else {
 	goto jump_over;
       }
       // if ( (*cmp) ((void *) mid, (void *) lo) < 0) {
-      if ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)lo) ) {
+      if ( *((${F1_FLDTYPE} *)mid) ${COMPARATOR} *((${F1_FLDTYPE} *)lo) ) {
 	SWAP (mid, lo, size);
       }
     jump_over:;
@@ -166,12 +166,12 @@ ${fn} (
 	 that this algorithm runs much faster than others. */
       do {
 	// while ((*cmp) ((void *) left_ptr, (void *) mid) < 0) {
-	while ( *((${FLDTYPE} *)left_ptr) ${COMPARATOR} *((${FLDTYPE} *)mid) ) {
+	while ( *((${F1_FLDTYPE} *)left_ptr) ${COMPARATOR} *((${F1_FLDTYPE} *)mid) ) {
 	  left_ptr += size;
 	}
 
 	// while ((*cmp) ((void *) mid, (void *) right_ptr) < 0) {
-	while ( *((${FLDTYPE} *)mid) ${COMPARATOR} *((${FLDTYPE} *)right_ptr) ) {
+	while ( *((${F1_FLDTYPE} *)mid) ${COMPARATOR} *((${F1_FLDTYPE} *)right_ptr) ) {
 	  right_ptr -= size;
 	}
 
@@ -245,7 +245,7 @@ ${fn} (
 
     for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
       // if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      if (  *((${FLDTYPE} *)run_ptr) ${COMPARATOR} *((${FLDTYPE} *) tmp_ptr) ) {
+      if (  *((${F1_FLDTYPE} *)run_ptr) ${COMPARATOR} *((${F1_FLDTYPE} *) tmp_ptr) ) {
         tmp_ptr = run_ptr;
       }
     }
@@ -264,7 +264,7 @@ ${fn} (
       sve_idx = drag[pos];
 
       // while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0) {
-      while ( *((${FLDTYPE} *)run_ptr) ${COMPARATOR} *((${FLDTYPE} *)tmp_ptr) ) {
+      while ( *((${F1_FLDTYPE} *)run_ptr) ${COMPARATOR} *((${F1_FLDTYPE} *)tmp_ptr) ) {
 	tmp_ptr -= size;
       }
 
