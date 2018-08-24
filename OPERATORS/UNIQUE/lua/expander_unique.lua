@@ -41,7 +41,7 @@ local function expander_unique(op, a)
     -- if input vector is not sorted, cloning and sorting that cloned vector
     if status == false and order == nil then
       local a_clone = a:clone()
-      a_clone = sort(a_clone, "asc")
+      sort(a_clone, "asc")
       a = a_clone
     else
       assert( status == true, "is_sorted utility failed")
