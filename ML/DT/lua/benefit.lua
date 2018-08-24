@@ -1,5 +1,15 @@
 local Q = require 'Q'
 
+--[[
+
+variable explanation
+n_N     - number of instances classified as negative in goal/target vector
+n_P     - number of instances classified as positive in goal/target vector
+n_N_L	- number of negatives on left
+n_P_L	- number of positives on left
+
+]]
+
 local function weighted_benefit(
   n_N_L,
   n_P_L,
@@ -16,6 +26,16 @@ local function weighted_benefit(
   local wt_benefit = ( n_L / ( n_N + n_P ) ) * x + ( n_R / ( n_N + n_P ) ) * y
   return wt_benefit
 end
+
+--[[
+
+variable explanation
+f	- feature vector (type lVector)
+g	- target/goal feature (type lVector)
+n_N     - number of instances classified as negative in goal/target vector
+n_P     - number of instances classified as positive in goal/target vector
+
+]]
 
 local function calc_benefit(
   f,
@@ -36,7 +56,10 @@ local function calc_benefit(
   local split_point = nil
 
   -- sort f in ascending order and g in drag along
-  Q.sort2(f, g)
+  -- before sort, clone the vectors
+  local f_clone = f:clone()
+  local g_clone = g:clone()
+  Q.sort2(f_clone, g_clone)
 
   -- counters for goal values
   local C = {}
@@ -44,13 +67,13 @@ local function calc_benefit(
   C[1] = 0
 
   for i = 0, (n_N + n_P) do
-    local f_val = f:get_one(i)
-    local g_val = g:get_one(i)
+    local f_val = f_clone:get_one(i)
+    local g_val = g_clone:get_one(i)
     C[g_val] = C[g_val] + 1
     i = i + 1
     while i < (n_N + n_P)  do
-      local fi_val = f:get_one(i)
-      local gi_val = g:get_one(i)
+      local fi_val = f_clone:get_one(i)
+      local gi_val = g_clone:get_one(i)
       if fi_val ~= f_val then
         break
       end

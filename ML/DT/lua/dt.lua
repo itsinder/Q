@@ -5,6 +5,32 @@ local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
 
+--[[
+
+variable description
+T	- table of m lVectors of length n, representing m features
+g	- goal/target lVector of length n
+alpha	- minimum benefit value of type Scalar 
+n_N	- number of instances classified as negative in goal/target vector
+n_P	- number of instances classified as positive in goal/target vector
+best_k	- index of the feature f' in T for which maximum benefit is observed
+best_sf - feature point from f' where maximun benefit is observed
+best_bf - maximum benefit value
+bf	- benefit value for each feature f
+sf	- feature point from f for which benefit value bf is observed
+
+D	- Decision Tree Table having below fields
+{ 
+  n_N,		-- number of negative instances
+  n_P,		-- number of positive instances
+  feature,	-- feature index for the split
+  threshold,	-- feature point/value for the split
+  left,		-- left decision tree
+  right 	-- right decision tree
+}
+
+]]
+
 local function make_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
@@ -31,7 +57,7 @@ local function make_dt(
     local T_L = {}
     local T_R = {}
     D.feature = best_k
-    D.threshold = best_sp
+    D.threshold = best_sf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x)
       T_R[k] = Q.where(f, Q.vnot(x))
@@ -45,24 +71,29 @@ local function make_dt(
 end
 
 
+local function check_dt(
+  D	-- prepared decision tree
+  )
+  -- Verify the decision tree
+  local status = true
+
+  return status
+end
+
+
 local function predict(
-  D -- prepared decision tree
-  X -- a table with test samples
+  D	-- prepared decision tree
+  x	-- a lVector with test features
   )
   assert(type(D) == 'table')
-  assert(type(X) == 'table')
+  assert(type(x) == 'lVector')
 
-  local predicted_value = {}
-  local n = utils.table_length(X)
-
-  for i = 1, n do
-    local x = X[i]
-    while true do:
-      if D.left == nil and D.right == nil then
-        local decision = if D.n_P > D.n_N then 1 else 0 end
-        predicted_value[i] = decision
-        break
-      elseif x[D.feature] > D.threshold then
+  while true do:
+    if D.left == nil and D.right == nil then
+      return D.n_P, D.n_N
+    else
+      local val = x:get_one(D.feature-1)
+      if val > D.threshold then
         print("Right Subtree")
         D = D.right
       else
@@ -71,11 +102,10 @@ local function predict(
       end
     end
   end
-  
-  return predicted_value
 end
 
 dt.make_dt = make_dt
 dt.predict = predict
+dt.check_dt = check_dt
 
 return dt

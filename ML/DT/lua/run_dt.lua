@@ -2,6 +2,7 @@ local Q = require 'Q'
 local utils = require 'Q/UTILS/lua/utils'
 local make_dt = require 'Q/ML/DT/lua/dt'['make_dt']
 local predict = require 'Q/ML/DT/lua/dt'['predict']
+local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
@@ -42,12 +43,22 @@ local function run_dt(args)
     local max_g, _ = Q.max(g_train):eval()
     assert(max_g:to_num() == 1)
 
-    -- prepare decision tree
     -- TODO: how to get value of alpha (minimum benefit value)
     local alpha = 3
+    local predicted_value = {}
+
+    -- prepare decision tree
     local tree = make_dt(train, g_train, alpha)
+
+    -- verify the decision tree
+    assert(check_dt(tree))
+
     -- predict for test samples
-    local predicted_values = predict(tree, test)
+    for i = 1, m_test do
+      local n_P, n_N = predict(tree, test[i])
+      local decision = if n_P > n_N then 1 else 0 end
+      predicted_value[#predicted_values+1] = decision
+    end
     local actual_values = utils.vector_to_table(g_test)
     local acr = ml_utils.get_accuracy(actual_values, predicted_values)
     -- print("Accuracy: " .. tostring(acr))
