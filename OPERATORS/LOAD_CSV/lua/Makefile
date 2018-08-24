@@ -64,6 +64,7 @@ SRC_FILES =  \
 	../src/txt_to_SC.c \
 	../src/txt_to_B1.c \
 	../src/load_csv_fast.c \
+	../src/spooky_hash.c \
 
 AUX_FILES = \
 	../../../UTILS/src/is_valid_chars_for_num.c 
@@ -89,6 +90,7 @@ libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES}
 	cp ../gen_inc/_txt_to_SC.h ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_txt_to_B1.h ${Q_BUILD_DIR}/include/
 	cp ../inc/load_csv_fast.h ${Q_BUILD_DIR}/include/
+	cp ../inc/spooky_hash.h ${Q_BUILD_DIR}/include/
 
 test_q : libload_csv.so
 	echo "TODO"
