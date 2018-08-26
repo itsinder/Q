@@ -6,7 +6,7 @@ coefficients, \(\beta\), using the Newton-Raphson algorithm.
 In the course of this, we need to compute
 \(\frac{1}{1 + e^{-x}}\) and 
 \(\frac{1}{(1 + e^{-x})^2}\).
-We now discuss a sequence of increasingly sophisticated way of implementing
+We now discuss a sequence of increasingly sophisticated ways of implementing
 these operators in Q.
 
 \subsubsection{The Lua implementation}
@@ -16,19 +16,18 @@ The ``quick and dirty'' way is to implement it in Lua. To do so, we
 (ii) use LuaJIT 's {\tt ffi.cast} to directly access C data from Lua 
 (iii) write the core operation in Lua as
 \begin{verbatim}
-for i = 0, n1 do cd2[i] = 1.0 / (1.0 + math.exp(-1 * cd1[i])) end
+for i=0,n1 do cd2[i]=1/(1+math.exp(-1*cd1[i])) end
 \end{verbatim}
 
 \subsubsection{The templatized implementation}
 \label{Logit_template}
-Figure~\ref{logit_in_lua} indicates that precisely one line is specific to the
-operator in question, the rest is necessary boiler plate. Therefore, the design
+The design
 of the run time has been around providing machinery to move data and leaving
 the actual operator as a template that can be provided by the user. All the operator
 % NOTE ACTUALLY this is f1s1opf2 not v1s1opv2
 writer needs to (1) pick a template --- in this case it is {\tt v1s1opv2}, indicating that a
-vector v1 and an optional scalar s1 are used to produce another vector v2.
-(2) provide the code fragment {\tt  v2 = 1.0 / ( 1.0 + exp(-1.0 * v1)); )} (3)
+vector v1 and an optional scalar s1 are used to produce another vector v2
+(2) provide the code fragment {\tt  v2 = 1/(1+exp(-1*v1)); )} (3)
 guard against improper usage e.g, we wouldn't apply this function to a string.
 
 In our experiments, 
