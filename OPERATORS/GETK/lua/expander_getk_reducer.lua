@@ -43,15 +43,20 @@ local function expander_getk_reducer(a, val, drag, k, optargs)
   local sp_fn_name = "Q/OPERATORS/GETK/lua/" .. a .. "_specialize_reducer"
   local spfn = assert(require(sp_fn_name))
 
-  local status, subs, tmpl = pcall(spfn, val:qtype())
+  local status, subs, tmpl = pcall(spfn, val:qtype(), drag:qtype())
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func = assert(subs.fn)
   assert(qc[func], "Symbol not available" .. func)
 
-  local qtype = assert(subs.qtype)
-  local ctype = assert(subs.ctype)
-  local width = assert(subs.width)
+  local v_qtype = assert(subs.v_qtype)
+  local v_ctype = assert(subs.v_ctype)
+  local v_width = assert(subs.v_width)
+
+  local d_qtype = assert(subs.d_qtype)
+  local d_ctype = assert(subs.d_ctype)
+  local d_width = assert(subs.d_width)
+
   local reduce_struct = assert(subs.c_mem)
   local cst_reduce_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
   local getter = assert(subs.getter)
@@ -69,7 +74,7 @@ local function expander_getk_reducer(a, val, drag, k, optargs)
       cst_reduce_struct[0].n = 0
       cst_reduce_struct[0].k = k
 
-      local val_cmem = cmem.new(k * ffi.sizeof(ctype), qtype)
+      local val_cmem = cmem.new(k * ffi.sizeof(v_ctype), v_qtype)
       if a == "mink" then
         val_cmem:set_max()
       elseif a == "maxk" then
@@ -77,11 +82,11 @@ local function expander_getk_reducer(a, val, drag, k, optargs)
       else
         assert(nil)
       end
-      cst_reduce_struct[0].val = ffi.cast(subs.ctype .. "*", get_ptr(val_cmem))
+      cst_reduce_struct[0].val = ffi.cast(subs.v_ctype .. "*", get_ptr(val_cmem))
 
-      local drag_cmem = cmem.new(k * ffi.sizeof(ctype), qtype)
+      local drag_cmem = cmem.new(k * ffi.sizeof(d_ctype), d_qtype)
       drag_cmem:zero()
-      cst_reduce_struct[0].drag = ffi.cast(subs.ctype .. "*", get_ptr(drag_cmem))
+      cst_reduce_struct[0].drag = ffi.cast(subs.d_ctype .. "*", get_ptr(drag_cmem))
 
       first_call = false
     end
@@ -89,8 +94,8 @@ local function expander_getk_reducer(a, val, drag, k, optargs)
     val_len, val_chunk, val_nn_chunk = val:chunk(chunk_idx)
     drag_len, drag_chunk, drag_nn_chunk = drag:chunk(chunk_idx)
     if val_len and val_len > 0 then
-      cst_val_chunk = ffi.cast(ctype .. "*",  get_ptr(val_chunk))
-      cst_drag_chunk = ffi.cast(ctype .. "*",  get_ptr(drag_chunk))
+      cst_val_chunk = ffi.cast(v_ctype .. "*",  get_ptr(val_chunk))
+      cst_drag_chunk = ffi.cast(d_ctype .. "*",  get_ptr(drag_chunk))
       local start_time = qc.RDTSC()
       qc[func](cst_val_chunk, val_len, cst_drag_chunk, cst_reduce_struct)
       record_time(start_time, func)
