@@ -61,7 +61,6 @@ tests.t5 = function()
   for i, v in ipairs(val_k) do
     print(val_k[i], drag_k[i])
   end
-  os.exit()
   local exp_col = Q.mk_col({1, 2, 3}, "I8")
   local sum = Q.sum(Q.vveq(res, exp_col)):eval()
   assert(sum:to_num() == exp_col:length())
