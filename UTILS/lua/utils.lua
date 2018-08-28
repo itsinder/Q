@@ -150,7 +150,7 @@ end
 -- function to get vector from table of values
 fns.table_to_vector = function(tbl, qtype)
   assert(type(tbl) == "table", "must of type table")
-  assert(#tbl < 1000000, "max limit is upto 1 million")
+  assert(#tbl < 1024, "max limit is upto 1024")
   -- In case of qtype 'B1' ?
   assert(type(qtype) == "string" and base_qtype(qtype))
   
