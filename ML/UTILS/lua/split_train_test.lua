@@ -53,7 +53,7 @@ local function split (
   local random_vec_bool = Q.vsleq(random_vec, split_ratio)
   local n1, n2 = Q.sum(random_vec_bool):eval()
   -- TODO P2: Should not need to convert number to scalar for comparison
-  assert(( n1 > Scalar.new(0, "I8") ), "cannot return null Vectors")
+  assert(( n1:to_num() > 0 ), "cannot return null Vectors")
   assert(( n1 ~= n2 ), "cannot return null Vectors")
   --=======================================
   local T_train = {}

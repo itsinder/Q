@@ -2,25 +2,32 @@ local Q = require 'Q'
 local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
 
+local chk_fns = {}
+
+local function chk_test_sample(
+  x -- table of length m
+  )
+  local nx = 0
+  assert(type(x) == "table")
+  for k, v in pairs(x) do
+    assert(type(v) == "Scalar")
+    assert(v:fldtype() == "F4")
+    nx = nx + 1
+  end
+  assert(#x == nx)
+  return true
+end
+
 local function chk_params(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
-  x, -- lVector of length m
-  exponent, -- Scalar
-  alpha -- table of m Scalars (scale for different attributes)
+  k  -- a number of scalar
   )
   -- START: Checking
   local nT = 0
-  local nx = 0
-  local nalpha = 0
   local n
 
-  local sone = Scalar.new(1, "F4")
   --==============================================
-  assert(type(exponent) == "Scalar")
-  assert(exponent:fldtype() == "F4")
-  assert(exponent >= sone)
-  --=====================================
   assert(type(T) == "table")
   for k, v in pairs(T) do
     n = v:length()
@@ -28,30 +35,13 @@ local function chk_params(
   end
   for k, v in pairs(T) do
     assert(type(v) == "lVector")
-    assert(v:fldtype() == "F4")
+    assert(v:fldtype() == "F4", "ERROR = " .. v:fldtype())
     assert(n == v:length())
     nT = nT + 1
   end
   assert(utils.table_length(T) == nT)
   --=====================================
-  assert(type(alpha) == "table")
-  for k, v in pairs(alpha) do
-    assert(type(v) == "Scalar")
-    assert(v:fldtype() == "F4")
-    nalpha = nalpha + 1
-  end
-  assert(#alpha == nalpha)
-  --=====================================
-  assert(type(x) == "table")
-  for k, v in pairs(x) do 
-    assert(type(v) == "Scalar")
-    assert(v:fldtype() == "F4")
-    nx = nx + 1
-  end
-  assert(#x == nx)
-  --=====================================
-  assert(nx == nT)
-  assert(nalpha == nx)
+  assert(type(k) == "number" or type(k) == "Scalar")
   --=====================================
   assert(g:length() == n)
   assert(g:fldtype() == "I4")
@@ -66,4 +56,7 @@ local function chk_params(
   return nT, n, ng
 end
 
-return chk_params
+chk_fns.chk_params = chk_params
+chk_fns.chk_test_sample = chk_test_sample
+
+return chk_fns
