@@ -1,12 +1,11 @@
 local Q = require 'Q'
-local utils = require 'Q/UTILS/lua/util'
+local utils = require 'Q/UTILS/lua/utils'
 local calc_benefit = require 'Q/ML/DT/lua/benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
 
 --[[
-
 variable description
 T	- table of m lVectors of length n, representing m features
 g	- goal/target lVector of length n
@@ -28,9 +27,7 @@ D	- Decision Tree Table having below fields
   left,		-- left decision tree
   right 	-- right decision tree
 }
-
 ]]
-
 local function make_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
@@ -52,7 +49,7 @@ local function make_dt(
   end
   D.n_N = n_N
   D.n_P = n_P
-  if ( best_bf > alpha ) then 
+  if ( best_bf > alpha:to_num() ) then 
     local x = Q.vsleq(T[best_k], best_sf)
     local T_L = {}
     local T_R = {}
@@ -82,17 +79,17 @@ end
 
 
 local function predict(
-  D	-- prepared decision tree
-  x	-- a lVector with test features
+  D,	-- prepared decision tree
+  x	-- a table with test features
   )
   assert(type(D) == 'table')
-  assert(type(x) == 'lVector')
+  assert(type(x) == 'table')
 
-  while true do:
+  while true do
     if D.left == nil and D.right == nil then
       return D.n_P, D.n_N
     else
-      local val = x:get_one(D.feature-1)
+      local val = x[D.feature]
       if val > D.threshold then
         print("Right Subtree")
         D = D.right

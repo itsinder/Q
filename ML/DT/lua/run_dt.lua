@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
 local make_dt = require 'Q/ML/DT/lua/dt'['make_dt']
 local predict = require 'Q/ML/DT/lua/dt'['predict']
@@ -6,6 +7,7 @@ local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
+
 
 local function run_dt(args)
   local meta_data_file = assert(args.meta_data_file)
@@ -27,13 +29,19 @@ local function run_dt(args)
   end
   assert(split_ratio < 1 and split_ratio > 0)
 
+  local feature_of_interest
+  if args.feature_of_interest then
+    assert(type(args.feature_of_interest) == "table")
+    feature_of_interest = args.feature_of_interest
+  end
+
   -- load the data
   local T = Q.load_csv(data_file, dofile(meta_data_file))
 
   local accuracy = {}
   for i = 1, iterations do
     -- break into a training set and a testing set
-    local Train, Test = split_train_test(T, split_ratio)
+    local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
     local train, g_train, m_train, n_train = extract_goal(Train, goal)
     local test,  g_test,  m_test,  n_test  = extract_goal(Test,  goal)
 
@@ -44,8 +52,8 @@ local function run_dt(args)
     assert(max_g:to_num() == 1)
 
     -- TODO: how to get value of alpha (minimum benefit value)
-    local alpha = 3
-    local predicted_value = {}
+    local alpha = Scalar.new(3, "F4")
+    local predicted_values = {}
 
     -- prepare decision tree
     local tree = make_dt(train, g_train, alpha)
@@ -54,17 +62,32 @@ local function run_dt(args)
     assert(check_dt(tree))
 
     -- predict for test samples
-    for i = 1, m_test do
-      local n_P, n_N = predict(tree, test[i])
-      local decision = if n_P > n_N then 1 else 0 end
-      predicted_value[#predicted_values+1] = decision
+    for i = 1, n_test do
+      local x = {}
+      for k = 1, m_test do
+        x[k] = test[k]:get_one(i-1)
+      end
+      local n_P, n_N = predict(tree, x)
+      local decision
+      if n_P > n_N then
+        decision = 1 
+      else
+        decision = 0
+      end
+      predicted_values[#predicted_values+1] = decision
     end
-    local actual_values = utils.vector_to_table(g_test)
-    local acr = ml_utils.get_accuracy(actual_values, predicted_values)
+
+    -- prepare table of actual goal values
+    local actual_values = {}
+    for k = 1, n_test do
+      actual_values[k] = g_test:get_one(k-1):to_num()
+    end
+
+    local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
     -- print("Accuracy: " .. tostring(acr))
     accuracy[#accuracy + 1] = acr
   end
-  return ml_utils.get_average(accuracy), accuracy
+  return ml_utils.calc_average(accuracy), accuracy
 end
 
 return run_dt
