@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local Vector = require 'libvec'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 
@@ -12,8 +13,25 @@ tests.t1 = function()
   args.data_file = data_file
   args.goal = "occupy_status"
 
+  Vector.reset_timers()
+  start_time = qc.RDTSC()
   local average_acr, accuracy_table = run_dt(args)
-  print(average_acr)
+  stop_time = qc.RDTSC()
+  --Vector.print_timers()
+  print("================================================")
+  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
+  print("================================================")
+  --[[
+  if _G['g_time'] then
+    for k, v in pairs(_G['g_time']) do
+      local niters  = _G['g_ctr'][k] or "unknown"
+      local ncycles = tonumber(v)
+      print("0," .. k .. "," .. niters .. "," .. ncycles)
+    end
+  end
+  print("================================================")
+  ]]
+  print("Accuracy = " .. tostring(average_acr))
 end
 
 
