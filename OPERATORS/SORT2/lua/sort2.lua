@@ -11,7 +11,7 @@ local function sort2(x, y, ordr)
   end
   if not y:is_eov() then
     y:eval()
-  end  
+  end
   assert(type(ordr) == "string")
   if ( ordr == "ascending" ) then ordr = "asc" end 
   if ( ordr == "descending" ) then ordr = "dsc" end
@@ -20,7 +20,6 @@ local function sort2(x, y, ordr)
   assert(status, "error in call to sort2_asc_specialize")
   assert(type(subs) == "table", "error in call to sort2_asc_specialize")
   local func_name = assert(subs.fn)
-  print(func_name)
   -- TODO Check is already sorted correct way and don't repeat
   local x_len, x_chunk, nn_x_chunk = x:start_write()
   local y_len, y_chunk, nn_y_chunk = y:start_write()
