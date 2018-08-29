@@ -74,7 +74,7 @@ a concomitant performance hit, is to memo-ize. However, when the programmer is
 aware that the vector will be consumed in a streaming fashion, they set memo
 to false. 
 
-A vector is fully materialized in one of two ways (1) If it was setup with a a generator function and invocation of the function produces 
+A vector is fully materialized in one of two ways (1) if it was setup with a a generator function and invocation of the function produces 
 fewer elements than the chunk size (2) it was set up for streaming and {\tt
 eov()} was explicitly signaled.
 
@@ -101,7 +101,7 @@ A deliberate choice in Q's design was that Vectors, not tables, were the basic
 data type. It is a design choice that we were (and continue to be) conflicted with. On the one hand,
 it led to simplicity and performance. On the other hand, it put the burden of
 table semantics on the programmer. In particular, consider a 
-Lua table \(\{f, g\}\) containing 2 Vectors \(f, g\). Maintaining table
+Lua table \(T = \{f, g\}\) containing 2 Vectors \(f, g\). Maintaining table
 semantics means that \(T(i) = (f(i), g(i))\)  i.e., the \(i^{th}\) element of
 the table is the \(i^{th}\) element of \(f\) and the \(i^{th}\) element of \(g\). An 
 operation like {\tt Q.sort(T.f)} would destroy that contract. Q

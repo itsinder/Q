@@ -51,6 +51,8 @@ We experimented with several approaches to invoking C from Lua. These included
 (a) dyncall \cite{Adler2013} (b) the native Lua C API (c) LuaFFI (d) LuaJIT's
 FFI. Taking the native Lua C API as the baseline, dyncall was (surprisingly) the worst (twice
 as slow) and LuaJIT was (unsurprisingly) the fastest (50 times as fast!).
+Lua also provides automatic memory management, although custom garbage
+collection routines had to be written.
 
 Data is stored in memory and, when necessary, is persisted (uncompressed) in
 binary format to the file system. This allows us to quickly access data by
@@ -61,7 +63,8 @@ How efficient is the combination of Lua and C?
 On a sample workload, when the chunk size 
 (discussed in Section~\ref{Vectors})
 is set to 1M, the C code that does the real work
-accounts for 92\% of the time, the run time takes 1\%, the balance attributable to Lua as glue logic 
+accounts for 92\% of the time, the run time takes 1\%, the balance attributable
+to Lua as glue logic.
 When the chunk size drops to 64K, C takes 52\%, the run time takes 2\% and Lua
 the rest.
 
