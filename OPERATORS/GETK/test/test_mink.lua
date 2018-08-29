@@ -53,7 +53,7 @@ end
 
 -- test mink_reducer
 tests.t5 = function()
-  local val = Q.mk_col({1, 5, 4, 2, 3, 7, 9}, "I4")
+  local val = Q.mk_col({1, 5, 4, 2, 3, 7, 9}, "F4")
   local drag = Q.mk_col({0, 1, 1, 1, 0, 0, 0}, "I4")
   local res = Q.mink_reducer(val, drag, 3)
   local val_k, drag_k = res:eval()
@@ -61,10 +61,6 @@ tests.t5 = function()
   for i, v in ipairs(val_k) do
     print(val_k[i], drag_k[i])
   end
-  os.exit()
-  local exp_col = Q.mk_col({1, 2, 3}, "I8")
-  local sum = Q.sum(Q.vveq(res, exp_col)):eval()
-  assert(sum:to_num() == exp_col:length())
   print("successfully completed t5")
 end
 

@@ -4,19 +4,19 @@ declaration = [[
 
 #include "q_incs.h"
 
-typedef struct _reduce_${op}_${qtype}_args {
-  ${reduce_ctype} *val; // [k]
-  ${reduce_ctype} *drag; // [k]
+typedef struct _reduce_${op}_${v_qtype}_${d_qtype}_args {
+  ${reduce_v_ctype} *val; // [k]
+  ${reduce_d_ctype} *drag; // [k]
   uint64_t n; // actual occupancy
   uint64_t k; // max occupancy
-  } REDUCE_${op}_${qtype}_ARGS;
+  } REDUCE_${op}_${v_qtype}_${d_qtype}_ARGS;
 
 ${includes}
 extern int
 ${fn}(
-    const ${ctype} * restrict vals, // distance vector [n]
+    const ${v_ctype} * restrict vals, // distance vector [n]
     uint64_t n, // size of distance/goal vectors
-    const ${ctype} * restrict drags, // goal vector [n]
+    const ${d_ctype} * restrict drags, // goal vector [n]
     void *ptr_in_args // structure maintaining k min/max distances and respective goals
    );
 
@@ -26,9 +26,9 @@ definition = [[
 #include "_${fn}.h"
 int
 ${fn}(
-    const ${ctype} * restrict vals, // distance vector [n]
+    const ${v_ctype} * restrict vals, // distance vector [n]
     uint64_t n, // size of distance/goal vectors
-    const ${ctype} * restrict drags, // goal vector [n]
+    const ${d_ctype} * restrict drags, // goal vector [n]
     void *ptr_in_args // structure maintaining k min/max distances and respective goals
    )
 
@@ -48,8 +48,8 @@ ${fn}(
   int k = args->k; if ( k < 1 ) { go_BYE(-1); }
 
   for ( uint64_t i = 0; i < n; i++ ) {
-    ${ctype} val  = vals[i];
-    ${ctype} drag = drags[i];
+    ${v_ctype} val  = vals[i];
+    ${d_ctype} drag = drags[i];
 
     // first guy in gets a free pass
     if ( args->n == 0 ) {

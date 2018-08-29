@@ -1,137 +1,99 @@
 local Q = require 'Q'
-local Scalar = require 'libsclr'
-local classify = require 'Q/ML/KNN/lua/classify_conv'
 local utils = require 'Q/UTILS/lua/utils'
-local Vector = require 'libvec'
+local knn = require 'Q/ML/KNN/lua/knn'
+local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
+local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
+local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
+local chk_params = require 'Q/ML/KNN/lua/chk_params'['chk_params']
+local chk_test_sample = require 'Q/ML/KNN/lua/chk_params'['chk_test_sample']
 
-local get_train_test_split = function(split_ratio, T, feature_column_indices)
-  local Train = {}
-  local Test = {}
-  local total_length
-  for i, v in pairs(T) do
-    total_length = v:length()
-    break
+
+function validate_args(args)
+  assert(args.meta_data_file)
+  assert(args.data_file)
+  assert(args.goal)
+
+  if args.iterations then
+    assert(type(args.iterations == "number"))
+  else
+    args.iterations = 1
   end
-  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = total_length}):eval()
-  local random_vec_bool = Q.vsleq(random_vec, Scalar.new(split_ratio, "F4")):eval()
-  if not feature_column_indices then
-    local column_indices = {}
-    for i, _ in pairs(T) do
-      column_indices[#column_indices + 1] = i
-    end
-    feature_column_indices = column_indices
+  assert(args.iterations > 0)
+
+  if args.split_ratio then
+    assert(type(args.split_ratio) == "number")
+    assert(args.split_ratio < 1 and args.split_ratio > 0)
+  else
+    args.split_ratio = 0.7
   end
-  assert(feature_column_indices)
-  for _, v in pairs(feature_column_indices) do
-    Train[v] = Q.where(T[v], random_vec_bool):eval()
-    Test[v] = Q.where(T[v], Q.vnot(random_vec_bool)):eval()
-  end
-  return Train, Test
-end
+  assert(args.split_ratio < 1 and args.split_ratio > 0)
 
-local get_accuracy = function(expected_val, predicted_val)
-  assert(type(expected_val) == "table")
-  assert(type(predicted_val) == "table")
-  assert(#expected_val == #predicted_val)
-  local correct = 0
-  for i = 1, #expected_val do
-    if expected_val[i] == predicted_val[i] then
-      correct = correct + 1
-    end
-  end
-  return (correct/#expected_val)*100
-end
-
-local get_average = function(accuracy_list)
-  local average = 0
-  for i = 1, #accuracy_list do
-    average = average + accuracy_list[i]
-  end
-  average = average / #accuracy_list
-  return average
-end
-
--- TODO: Think of interface for production mode where input_sample, alpha will be given,
--- you need  to predict the goal value (assuming data is already loaded)
-local run_knn = function(optargs)
-  -- It's assumed that data is already loaded into 'T' variable
-  -- 'T' will be a table having vectors as it's elements
-
-  local accuracy = {}
-
-  assert(type(optargs) == "table")
-
-  local iterations = 1
-  if optargs.iterations then
-    assert(type(optargs.iterations == "number"))
-    iterations = optargs.iterations
-    -- setting unused fields to nil to avoid the pollution of 'optargs' table
-    optargs.iterations = nil
-  end
-  assert(iterations > 0)
-
-  local split_ratio = 0.8
-  if optargs.split_ratio then
-    assert(type(optargs.split_ratio) == "number")
-    assert(optargs.split_ratio < 1 and optargs.split_ratio > 0)
-    split_ratio = optargs.split_ratio
-    optargs.split_ratio = nil
+  if args.feature_of_interest then
+    assert(type(args.feature_of_interest) == "table")
   end
     
-  local goal_column_index = optargs.goal_column_index
-  assert(goal_column_index)
-  optargs.goal_column_index = nil
-
-  local feature_column_indices
-  if optargs.column_indices then
-    assert(type(optargs.column_indices) == "table")
-    feature_column_indices = optargs.column_indices
-    optargs.column_indices = nil
+  -- number of neighbors we care about
+  if args.k then
+    assert(type(args.k) == "number")
+  else
+    args.k = 5
   end
 
-  for itr = 1, iterations do
-    local Train, Test = get_train_test_split(split_ratio, T, feature_column_indices)
+  return args
+end
 
-    local g_vec_train = Train[goal_column_index]
-    Train[goal_column_index] = nil
+function run_knn(args)
+  -- validate args
+  local args = validate_args(args)
 
-    local g_vec_test = Test[goal_column_index]
-    Test[goal_column_index] = nil
+  local meta_data_file	= args.meta_data_file
+  local data_file	= args.data_file
+  local goal		= args.goal
+  local iterations	= args.iterations
+  local split_ratio	= args.split_ratio
+  local k		= args.k
+  local feature_of_interest = args.feature_of_interest
 
-    -- Prepare test table
-    local test_sample_count = g_vec_test:length()
-    local val, nn_val
-    local X = {}
-    local expected_predict_value = {}
-    local actual_predict_value = {}
-    for len = 1, test_sample_count do
+  -- load the data
+  local T = Q.load_csv(data_file, dofile(meta_data_file))
+
+  local accuracy = {}
+  for i = 1, iterations do
+    -- break into a training set and a testing set
+    local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
+    local train, g_train, m_train, n_train = extract_goal(Train, goal)
+    local test,  g_test,  m_test,  n_test  = extract_goal(Test,  goal)
+
+    -- validate parameters
+    local nT, n, ng = chk_params(train, g_train, k)
+
+    -- predict for the test samples
+    local predicted_values = {}
+    for j = 1, n_test do
       local x = {}
-      for _, v in pairs(Test) do
-        val, nn_val = v:get_one(len-1)
-        x[#x+1] = Scalar.new(val:to_num(), "F4")
+      for k = 1, m_test do
+        x[k] = test[k]:get_one(j-1)
       end
-      expected_predict_value[len] = g_vec_test:get_one(len-1):to_num()
-      X[len] = x
+      -- validate test sample
+      assert(chk_test_sample(x))
+      local result = knn(train, g_train, x, k)
+      local k_val, k_goal = result:eval()
+
+      local _, _, index = Q.max(Q.numby(utils.table_to_vector(k_goal, g_test:fldtype()), ng)):eval()
+      predicted_values[j] = index:to_num()
     end
-    local result
-    local max
-    local index
-    Vector.reset_timers()
-    for i = 1, test_sample_count do
-      -- predict for inputs
-      result = classify(Train, g_vec_train, X[i], optargs)
-      assert(type(result) == "lVector")
-      max, num_val, index = Q.max(result):eval()
-      actual_predict_value[i] = index:to_num()
-      -- TODO: remove this collectgarbage() call once the rest of Q stabilizes
-      --collectgarbage()
+
+    -- prepare table of actual goal values
+    local actual_values = {}
+    for k = 1, n_test do
+      actual_values[k] = g_test:get_one(k-1):to_num()
     end
-    Vector.print_timers()
-    local acr = get_accuracy(expected_predict_value, actual_predict_value)
-    -- print("Accuracy: " .. tostring(acr))
-    accuracy[#accuracy + 1] = acr
+
+    -- calculate accuracy
+    local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
+    accuracy[#accuracy + 1] = acr 
   end
-  return get_average(accuracy), accuracy
+  return ml_utils.calc_average(accuracy), accuracy
 end
 
 return run_knn
