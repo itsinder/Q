@@ -101,8 +101,22 @@ local function predict(
   end
 end
 
+
+local function print_dt(
+  D	-- prepared decision tree
+  )
+  if not D then
+    return
+  end
+  print(D.feature, D.threshold, D.n_P, D.n_N)
+  print_dt(D.left)
+  print_dt(D.right)
+end
+
+
 dt.make_dt = make_dt
 dt.predict = predict
 dt.check_dt = check_dt
+dt.print_dt = print_dt
 
 return dt

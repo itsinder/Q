@@ -4,6 +4,7 @@ local utils = require 'Q/UTILS/lua/utils'
 local make_dt = require 'Q/ML/DT/lua/dt'['make_dt']
 local predict = require 'Q/ML/DT/lua/dt'['predict']
 local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
+local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
@@ -52,7 +53,7 @@ local function run_dt(args)
     assert(max_g:to_num() == 1)
 
     -- TODO: how to get value of alpha (minimum benefit value)
-    local alpha = Scalar.new(3, "F4")
+    local alpha = Scalar.new(1, "F4")
     local predicted_values = {}
 
     -- prepare decision tree
@@ -60,6 +61,9 @@ local function run_dt(args)
 
     -- verify the decision tree
     assert(check_dt(tree))
+
+    -- print decision tree
+    print_dt(tree)
 
     -- predict for test samples
     for i = 1, n_test do
