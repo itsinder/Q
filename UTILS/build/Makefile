@@ -13,6 +13,7 @@ clean:
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/HASH/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
@@ -102,6 +103,9 @@ count:
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
 
+hash:
+	make -C ${BASE_PATH}/OPERATORS/HASH/lua/
+
 print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
@@ -162,6 +166,7 @@ q_operators: f1f2opf3 \
 	index \
 	unique \
 	count \
-	getk
+	getk \
+	hash
 	echo "all done for operators"
 

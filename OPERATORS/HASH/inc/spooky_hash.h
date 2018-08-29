@@ -43,7 +43,7 @@ size_t m_length;
 unsigned char m_remainder;
 } spooky_state;
 
-void spooky_shorthash
+extern void spooky_shorthash
 (
 const void *message,
 size_t length,
@@ -51,21 +51,21 @@ uint64_t *hash1,
 uint64_t *hash2
 );
 
-void spooky_init
+extern void spooky_init
 (
 struct spooky_state *state,
 uint64_t hash1,
 uint64_t hash2
 );
 
-void spooky_update
+extern void spooky_update
 (
 struct spooky_state *state,
 const void *msg,
 size_t len
 );
 
-void spooky_final
+extern void spooky_final
 (
 struct spooky_state *state,
 uint64_t *hash1,
@@ -73,7 +73,7 @@ uint64_t *hash2
 );
 
 //hash1/2 doubles as input parameter for seed1/2 and output for hash1/2
-void spooky_hash128
+extern void spooky_hash128
 (
 const void *message,
 size_t length,
@@ -81,14 +81,14 @@ uint64_t *hash1,
 uint64_t *hash2
 );
 
-uint64_t spooky_hash64
+extern uint64_t spooky_hash64
 (
 const void *message,
 size_t len,
 uint64_t seed
 );
 
-uint32_t spooky_hash32
+extern uint32_t spooky_hash32
 (
 const void *message,
 size_t len,

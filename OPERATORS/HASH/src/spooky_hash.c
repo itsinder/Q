@@ -11,9 +11,9 @@
 // Apr 27 2012: C version updated by Ziga Zupanec ziga.zupanec@gmail.com (agiz@github)
 
 // Assumes little endian ness. Caller has to check this case.
-
+//START_INCLUDES
 #include <memory.h>
-
+//STOP_INCLUDES
 #include "spooky_hash.h"
 
 #if defined(__i386__) || defined(__x86_64__) // add more architectures here

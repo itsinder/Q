@@ -15,7 +15,7 @@ local update_out_buf   = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
 local flush_bufs    = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
 local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
 local cmem          = require 'libcmem'
-local hash          = require 'Q/OPERATORS/LOAD_CSV/lua/hash'
+local hash          = require 'Q/OPERATORS/HASH/lua/hash'
  --======================================
 local function load_csv(
   infile,   -- input file to read (string)
