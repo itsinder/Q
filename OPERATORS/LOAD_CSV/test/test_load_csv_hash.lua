@@ -11,8 +11,9 @@ local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test"
 
 local tests = {}
 
--- checking of the Q.hash operator to accept vector as input(of type "SC") 
--- and return hash value vector as output(of type "I8") 
+-- checking of the Q.load_csv operator to create a new hash column('I8') 
+-- for the respective SC column
+-- load_csv should return 2 vectors (SC and hash column of it)
 tests.t1 = function ()
   local metadata_file_path = script_dir .."/meta_hash.lua" 
   local csv_file_path = script_dir .."/test_hash.csv"
