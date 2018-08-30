@@ -198,7 +198,7 @@ jump_over:
        and the operation speeds up insertion sort's inner loop. */
 
     for (run_ptr = tmp_ptr + 1; run_ptr <= thresh; run_ptr++ ) {
-      if ( *run_ptr < *tmp_ptr) < 0) {
+      if ( (*run_ptr < *tmp_ptr) < 0) {
         tmp_ptr = run_ptr;
       }
     }
