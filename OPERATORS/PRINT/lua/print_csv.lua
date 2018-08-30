@@ -2,11 +2,11 @@ local err	= require 'Q/UTILS/lua/error_code'
 local qc	= require 'Q/UTILS/lua/q_core'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local qconsts	= require 'Q/UTILS/lua/q_consts'
-local plstring	= require 'pl.stringx'
 local utils	= require 'Q/UTILS/lua/utils'
 local cmem	= require 'libcmem'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
+local trim = require 'Q/UTILS/lua/trim'
 
 local buf_size = 1024
 local buf = nil
@@ -167,7 +167,7 @@ local print_csv = function (vec_list, opt_args)
   local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
   -- trimming whitespace if any
   if opfile then
-    opfile = plstring.strip(opfile)
+    opfile = trim(opfile)
   end
   assert(((type(vector_list) == "table") or 
           (type(vector_list) == "lVector")), err.INPUT_NOT_TABLE)
