@@ -98,16 +98,21 @@ main(
   int num_changed = -1; // just to get in the first tome
   for ( int iter = 0; num_changed != 0; iter++ ) { 
     num_changed = 0;
-#pragma omp parallel for 
+#pragma omp parallel for schedule(static)
     for ( uint64_t i = 0; i < n; i++ ) {
+      int l_num_changed = 0;
       if ( ub[i] <= lb[i] ) { continue; }
       NODE_TYPE minval = lbl[i];
       for ( uint64_t j = lb[i]; j < ub[i]; j++ ) {
         minval = mcr_min(minval, lbl[conn[j]]);
       }
       if ( lbl[i] != minval ) { 
-        num_changed++;
+        l_num_changed++;
         lbl[i] = minval;
+      }
+#pragma omp critical (_some_uq_lbl)
+      {
+        num_changed += l_num_changed;
       }
     }
     fprintf(stderr, "Pass %d, num_changed = %d \n", iter, num_changed);
