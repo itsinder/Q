@@ -73,7 +73,25 @@ local function check_dt(
   )
   -- Verify the decision tree
   local status = true
-  -- TODO: implementation pending
+
+  if D.left then
+    assert(D.right)
+  else
+    assert(D.right == nil)
+  end
+
+  if D.left == nil and D.right == nil then
+    assert(D.feature == nil)
+    assert(D.threshold == nil)
+    assert(D.n_N ~= nil)
+    assert(D.n_P ~= nil)
+  end
+
+  if D.left and D.right then
+    assert(D.n_N = D.left.n_N + D.right.n_N)
+    assert(D.n_P = D.left.n_P + D.right.n_P)
+  end
+  -- TODO: Add more checks
   return status
 end
 
