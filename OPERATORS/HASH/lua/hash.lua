@@ -30,9 +30,11 @@ local function hash(input_vec)
     for idx = 0, len-1 do 
       local chunk_idx = (idx) % qconsts.chunk_size
       local val = ffi.string(casted + chunk_idx * input_vec:field_width())
-      local hash_val = qc["spooky_hash32"](val, #val , SEED_1)
-      --hash_val = tostring(ffi.cast("uint64_t", hash_val))
-      --hash_val = string.sub(hash_val,1,-4)
+      local hash_val = qc["spooky_hash64"](val, #val , SEED_1)
+      hash_val = tostring(ffi.cast("int64_t", hash_val))
+      if type(hash_val) == "string" and string.match(hash_val,'LL') == 'LL' then
+        hash_val = string.sub(hash_val,1,-3)
+      end
       output_tbl[#output_tbl+1] = hash_val
     end
   end
