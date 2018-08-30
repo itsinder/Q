@@ -5,7 +5,6 @@ local plpath		= require "pl.path"
 local cmem		= require 'libcmem'
 local Scalar		= require 'libsclr'
 local Vector		= require 'libvec'
-local plstring		= require 'pl.stringx'
 local register_type	= require 'Q/UTILS/lua/q_types'
 local is_base_qtype	= require 'Q/UTILS/lua/is_base_qtype'
 local chk_chunk_return	= require 'Q/UTILS/lua/chk_chunk'
@@ -199,7 +198,7 @@ function lVector.new(arg)
   assert(plpath.isdir(q_data_dir))
   
   -- Check if q_data_dir path ends with '/', if not append it
-  if not plstring.endswith(q_data_dir, "/") then
+  if not qc["endswith"](q_data_dir, "/") then
     q_data_dir = q_data_dir .. "/"
   end
  
@@ -574,7 +573,7 @@ function lVector:clone(optargs)
   assert(plpath.isdir(q_data_dir))
 
   -- Check if q_data_dir path ends with '/', if not append it
-  if not plstring.endswith(q_data_dir, "/") then
+  if not qc["endswith"](q_data_dir, "/") then
     q_data_dir = q_data_dir .. "/"
   end
 
@@ -616,12 +615,6 @@ function lVector:eval()
     repeat
       -- print("Requesting chunk " .. chunk_num .. " for " .. self:get_name())
       base_len, base_addr, nn_addr = self:chunk(chunk_num)
-      -- for conjoined vectors
-      if self.siblings then
-        for k, v in pairs(self.siblings) do
-          v:chunk(chunk_num)
-        end
-      end
       chunk_num = chunk_num + 1 
     until ( base_len ~= qconsts.chunk_size )
     -- if ( self:length() > 0 ) then self:eov() end
@@ -731,6 +724,12 @@ function lVector:chunk(chunk_num)
       end
     end
     if ( qconsts.debug ) then self:check() end
+    -- for conjoined vectors
+    if self.siblings then
+      for k, v in pairs(self.siblings) do
+        v:chunk(l_chunk_num)
+      end
+    end
     return self:chunk(l_chunk_num)
     -- NOTE: Could also do return chunk_size, base_data, nn_data
     --[[
