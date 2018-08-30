@@ -18,9 +18,14 @@ clean :
 	rm -r -f ../gen_inc; 
 	rm -f _*
 	rm -f *.so
+	rm maxk_specialize.lua
+	rm mink_specialize.lua
+	rm maxk_specialize_reducer.lua
+	rm mink_specialize_reducer.lua
 
 libgetk.so : getk.tmpl \
 	merge1.tmpl
+	luajit gen_specializers.lua
 	luajit generator.lua
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libgetk.so
 	test -d ${Q_BUILD_DIR}
