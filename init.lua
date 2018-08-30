@@ -43,6 +43,8 @@ require 'Q/ALIAS/lua/add'
 require 'Q/ALIAS/lua/sub'
 require 'Q/ALIAS/lua/mul'
 require 'Q/ALIAS/lua/count'
+require 'Q/ALIAS/lua/mink'
+require 'Q/ALIAS/lua/maxk'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'

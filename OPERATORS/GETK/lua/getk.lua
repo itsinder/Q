@@ -1,8 +1,9 @@
 local T = {} 
 
-local function mink(fval, k, fopt,  optargs)
+local function mink_vector(fval, k, fopt,  optargs)
   local expander
-  if ( fopt ) then 
+  if ( fopt ) then
+    -- TODO: currently not implemented
     expander = require 'Q/OPERATORS/GETK/lua/expander_getk2'
   else
     expander = require 'Q/OPERATORS/GETK/lua/expander_getk'
@@ -13,12 +14,13 @@ local function mink(fval, k, fopt,  optargs)
   assert(status, "Could not execute mink")
   return col1, col2
 end
-T.mink = mink
-require('Q/q_export').export('mink', mink)
+T.mink_vector = mink_vector
+require('Q/q_export').export('mink_vector', mink_vector)
 
-local function maxk(fval, k, fopt,  optargs)
+local function maxk_vector(fval, k, fopt,  optargs)
   local expander
   if ( fopt ) then
+    -- TODO: currently not implemented
     expander = require 'Q/OPERATORS/GETK/lua/expander_getk2'
   else
     expander = require 'Q/OPERATORS/GETK/lua/expander_getk'
@@ -28,8 +30,8 @@ local function maxk(fval, k, fopt,  optargs)
   assert(status, "Could not execute maxk")
   return col1, col2
 end
-T.maxk = maxk
-require('Q/q_export').export('maxk', maxk)
+T.maxk_vector = maxk_vector
+require('Q/q_export').export('maxk_vector', maxk_vector)
 
 local function mink_reducer(val, drag, k, fopt,  optargs)
   local expander = require 'Q/OPERATORS/GETK/lua/expander_getk_reducer'
