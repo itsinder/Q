@@ -11,7 +11,7 @@ tests.t1 = function()
   local y = Q.logit(x):eval()
   local stop_time = qc.RDTSC()
   local z, w = Q.sum(y):eval()
-  print(z, w)
+  --print(z, w)
   print("logit (C  ) = ", stop_time-start_time)
 end
 
@@ -23,7 +23,7 @@ tests.t2 = function()
   local y = logit(x)
   local stop_time = qc.RDTSC()
   local z, w = Q.sum(y):eval()
-  print(z, w)
+  --print(z, w)
   print("logit (Lua) = ", stop_time-start_time)
 end
 
