@@ -1,6 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
-local function mink_specialize(fldtype)
+local function <<operator>>_specialize(fldtype)
   local subs = {}
 
   local qtype = fldtype
@@ -12,12 +12,10 @@ local function mink_specialize(fldtype)
   subs.width = width
 
   local tmpl = "merge1.tmpl"
-  subs.fn = "merge_max_" .. qtype
-  subs.min_or_max = "max"
-  subs.comparator = ">"
-  subs.sort_fn = "qsort_dsc_" .. subs.qtype
-  subs.merge_fn = "merge_max"
-
+  subs.fn = "merge_<<operation>>_" .. qtype
+  subs.min_or_max = "<<operation>>"
+  subs.comparator = "<<comparator>>"
+  subs.sort_fn = "qsort_<<sort_ordr>>_" .. subs.qtype
   return subs, tmpl
 end
-return mink_specialize
+return <<operator>>_specialize

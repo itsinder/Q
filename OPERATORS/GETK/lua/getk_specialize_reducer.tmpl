@@ -4,15 +4,15 @@ local cmem    = require 'libcmem'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local Scalar  = require 'libsclr'
 
-local function mink_specialize(val_fldtype, drag_fldtype)
+local function <<operator>>_specialize(val_fldtype, drag_fldtype)
 
   local hdr = [[
-  typedef struct _reduce_mink_<<v_qtype>>_<<d_qtype>>_args {
+  typedef struct _reduce_<<operator>>_<<v_qtype>>_<<d_qtype>>_args {
   <<reduce_v_ctype>> *val; // [k]
   <<reduce_d_ctype>> *drag; // [k]
   uint64_t n; // actual occupancy
   uint64_t k; // max occupancy
-  } REDUCE_mink_<<v_qtype>>_<<d_qtype>>_ARGS;
+  } REDUCE_<<operator>>_<<v_qtype>>_<<d_qtype>>_ARGS;
   ]]
 
   if ( val_fldtype == "B1" ) then
@@ -29,7 +29,7 @@ local function mink_specialize(val_fldtype, drag_fldtype)
   local d_ctype = qconsts.qtypes[d_qtype].ctype
   local d_width = qconsts.qtypes[d_qtype].width
 
-  local struct_type = "REDUCE_mink_" .. v_qtype .. "_" .. d_qtype .. "_ARGS"
+  local struct_type = "REDUCE_<<operator>>_" .. v_qtype .. "_" .. d_qtype .. "_ARGS"
   subs.v_qtype = v_qtype
   subs.v_ctype = v_ctype
   subs.v_width = v_width
@@ -55,12 +55,12 @@ local function mink_specialize(val_fldtype, drag_fldtype)
   local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
   -- c_mem initialization will happen in expander as we are not aware of value of k here
   subs.c_mem = c_mem
-  subs.c_mem_type = "REDUCE_mink_" .. v_qtype .. "_" .. d_qtype .. "_ARGS *"
+  subs.c_mem_type = "REDUCE_<<operator>>_" .. v_qtype .. "_" .. d_qtype .. "_ARGS *"
 
   local tmpl = "getk.tmpl"
-  subs.fn = "mink_" .. v_qtype .. "_" .. d_qtype
-  subs.comparator = "<"
-  subs.op = "mink"
+  subs.fn = "<<operator>>_" .. v_qtype .. "_" .. d_qtype
+  subs.comparator = "<<comparator>>"
+  subs.op = "<<operator>>"
 
   subs.getter = function (x)
     local y = ffi.cast(struct_type .. " *", get_ptr(c_mem))
@@ -75,4 +75,4 @@ local function mink_specialize(val_fldtype, drag_fldtype)
   
   return subs, tmpl
 end
-return mink_specialize
+return <<operator>>_specialize
