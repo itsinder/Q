@@ -1,10 +1,11 @@
 local Q = require 'Q'
+local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
 local calc_benefit = require 'Q/ML/DT/lua/benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
-
+local count = 0
 --[[
 variable description
 T	- table of m lVectors of length n, representing m features
@@ -33,34 +34,51 @@ local function make_dt(
   g, -- lVector of length n
   alpha -- Scalar, minimum benefit
   )
+  count = count + 1
+  print("========================================")
+  print("COUNT = " .. tostring(count))
   local m, n, ng = chk_params(T, g, alpha)
   local D = {} 
   local cnts = Q.numby(g, ng):eval()
-  local n_N = cnts:get_one(0)
-  local n_P = cnts:get_one(1)
+  local n_N, n_P
+  n_N = cnts:get_one(0)
+  if ng == 1 then
+    n_P = Scalar.new(0, "I8")
+    --n_P = 0
+  else
+    n_P = cnts:get_one(1)
+  end
+  D.n_N = n_N
+  D.n_P = n_P
+  if n_N:to_num() == 0 or n_P:to_num() == 0 then
+    return D
+  end
   local best_bf, best_sf, best_k
-  for k, f in pairs(T) do 
+  print("Benefit for each feature is")
+  for k, f in pairs(T) do
     local bf, sf = calc_benefit(f, g, n_N, n_P)
+    print(bf .. "\t" .. sf .. "\t" .. k)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
       best_k = k
     end
   end
-  D.n_N = n_N
-  D.n_P = n_P
+  print("Max benefit and respecitve feature is ")
+  print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
   if ( best_bf > alpha:to_num() ) then 
-    local x = Q.vsleq(T[best_k], best_sf)
+    local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
     local T_R = {}
     D.feature = best_k
     D.threshold = best_sf
     for k, f in pairs(T) do 
-      T_L[k] = Q.where(f, x)
-      T_R[k] = Q.where(f, Q.vnot(x))
+      T_L[k] = Q.where(f, x):eval()
+      T_R[k] = Q.where(f, Q.vnot(x)):eval()
     end
-    g_L = Q.where(g, x)
-    g_R = Q.where(g, Q.vnot(x))
+    g_L = Q.where(g, x):eval()
+    g_R = Q.where(g, Q.vnot(x)):eval()
+    print("recursive call " .. tostring(g_L:length()) .. " " .. tostring(T_L[1]:length()) .. " " .. tostring(g_R:length()) .. " " .. tostring(T_R[1]:length()))
     D.left  = make_dt(T_L, g_L, alpha)
     D.right = make_dt(T_R, g_R, alpha)
   end
@@ -88,8 +106,8 @@ local function check_dt(
   end
 
   if D.left and D.right then
-    assert(D.n_N = D.left.n_N + D.right.n_N)
-    assert(D.n_P = D.left.n_P + D.right.n_P)
+    assert(D.n_N == D.left.n_N + D.right.n_N)
+    assert(D.n_P == D.left.n_P + D.right.n_P)
   end
   -- TODO: Add more checks
   return status
@@ -108,11 +126,11 @@ local function predict(
       return D.n_P, D.n_N
     else
       local val = x[D.feature]
-      if val > D.threshold then
-        print("Right Subtree")
+      if val:to_num() > D.threshold then
+        --print("Right Subtree")
         D = D.right
       else
-        print("Left Subtree")
+        --print("Left Subtree")
         D = D.left
       end
     end

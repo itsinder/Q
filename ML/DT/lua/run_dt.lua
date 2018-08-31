@@ -57,6 +57,7 @@ local function run_dt(args)
 
     -- prepare decision tree
     local tree = make_dt(train, g_train, alpha)
+    assert(tree)
 
     -- verify the decision tree
     assert(check_dt(tree))

@@ -8,7 +8,7 @@ local tests = {}
 tests.t1 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy_meta.lua"
-  local alpha = Scalar.new(1, "F4")
+  local alpha = Scalar.new(1.26, "F4")
 
   local args = {}
   args.meta_data_file = metadata_file
