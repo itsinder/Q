@@ -16,7 +16,9 @@ ${fn}(
       int64_t *ptr_cnt,
       ${in_ctype} * ptr_last_unq_element,
       uint64_t idx,
-      bool *brk_n_write
+      bool *brk_n_write,
+      const uint64_t * restrict ptr_in_B1,
+      int64_t *ptr_sum
       );
    ]],
    definition = [[
@@ -34,7 +36,9 @@ ${fn}(
       int64_t *ptr_cnt,    // count buffer [unq_len]
       ${in_ctype} * ptr_last_unq_element,    // storing last visited unique value
       uint64_t idx,   // chunk number
-      bool *brk_n_write   // flag which indicates when to flush output buffer
+      bool *brk_n_write,   // flag which indicates when to flush output buffer
+      const uint64_t * restrict ptr_in_B1,   // input B1 buffer [in_len]
+      int64_t *ptr_sum   // sum buffer [unq_len]
       )
 {
   int status = 0;
@@ -65,6 +69,9 @@ ${fn}(
       }
       else {
         ptr_cnt[num_in_unq-1] = ptr_cnt[num_in_unq-1] + 1;
+        if ( ptr_in_B1 != NULL ) {
+          ptr_sum[num_in_unq-1] = ptr_sum[num_in_unq-1] + get_bit_u64(ptr_in_B1, in_idx);
+        }
       }
     }
     // if no unique value found then 
@@ -79,15 +86,24 @@ ${fn}(
     if ( num_in_unq == unq_len ) { break; }
     if ( ptr_in[in_idx] != ptr_in[in_idx+1] ) {
       ptr_cnt[num_in_unq] = ptr_cnt[num_in_unq] + 1;
+      if ( ptr_in_B1 != NULL ) {
+        ptr_sum[num_in_unq-1] = ptr_sum[num_in_unq-1] + get_bit_u64(ptr_in_B1, in_idx);
+      }
       ptr_unq[num_in_unq++] = ptr_in[in_idx];
     }
     else {
       ptr_cnt[num_in_unq] = ptr_cnt[num_in_unq] + 1;
+      if ( ptr_in_B1 != NULL ) {
+        ptr_sum[num_in_unq] = ptr_sum[num_in_unq] + get_bit_u64(ptr_in_B1, in_idx);
+      }
     }
   }
   
   // Include last element in out_buf, as comparing values adjacently
   ptr_cnt[num_in_unq] = ptr_cnt[num_in_unq] + 1;
+  if ( ptr_in_B1 != NULL ) {
+    ptr_sum[num_in_unq] = ptr_sum[num_in_unq] + get_bit_u64(ptr_in_B1, in_len-1);
+  }
   ptr_unq[num_in_unq++] = ptr_in[in_len-1];
   
   *ptr_unq_idx = num_in_unq;

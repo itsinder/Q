@@ -457,4 +457,31 @@ tests.t14 = function()
   print("Test t14 succeeded")
 end
 
+tests.t15 = function ()
+  local out_table = {10, 20, 30}
+  local cnt_table = {4, 2, 3}
+  local sum_table = {2, 1, 3}
+  local a = Q.mk_col({10, 10, 10, 10, 20, 20, 30, 30, 30}, "I4")
+  local a_B1 = Q.mk_col({1, 0, 1, 0, 1, 0, 1, 1, 1}, "B1")
+  local c, d, e = Q.unique(a, a_B1)
+  c:eval()
+  assert(d:is_eov() == true)
+  assert(c:length() == #out_table)
+  assert(d:length() == #cnt_table)
+  Q.print_csv({c, d, e})
+  for i = 1, c:length() do
+    local value = c_to_txt(c, i)
+    assert(value == out_table[i])
+
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
+
+    value = c_to_txt(e, i)
+    assert(value == sum_table[i])
+  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t15 succeeded")
+end
+
 return tests
