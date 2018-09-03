@@ -87,7 +87,7 @@ ${fn}(
     if ( ptr_in[in_idx] != ptr_in[in_idx+1] ) {
       ptr_cnt[num_in_unq] = ptr_cnt[num_in_unq] + 1;
       if ( ptr_in_B1 != NULL ) {
-        ptr_sum[num_in_unq-1] = ptr_sum[num_in_unq-1] + get_bit_u64(ptr_in_B1, in_idx);
+        ptr_sum[num_in_unq] = ptr_sum[num_in_unq] + get_bit_u64(ptr_in_B1, in_idx);
       }
       ptr_unq[num_in_unq++] = ptr_in[in_idx];
     }
