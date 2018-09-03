@@ -33,7 +33,7 @@ local function sort2(x, y, ordr)
   y:end_write()
   x:set_meta("sort_order", ordr)
   --TODO for y sort_order???
-  return x
+  return x, y
 
 end
 return require('Q/q_export').export('sort2', sort2)
