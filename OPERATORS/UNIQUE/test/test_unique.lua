@@ -3,6 +3,7 @@ require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local utils = require 'Q/UTILS/lua/utils'
 local plpath  = require 'pl.path'
 local plfile  = require 'pl.file'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/OPERATORS/UNIQUE/test/"
@@ -455,6 +456,76 @@ tests.t14 = function()
   end
   Q.print_csv(unique_vec)
   print("Test t14 succeeded")
+end
+
+tests.t15 = function ()
+  local out_table = {10, 20, 30}
+  local cnt_table = {4, 2, 3}
+  local sum_table = {2, 1, 3}
+  local a = Q.mk_col({10, 10, 10, 10, 20, 20, 30, 30, 30}, "I4")
+  local a_B1 = Q.mk_col({1, 0, 1, 0, 1, 0, 1, 1, 1}, "B1")
+  local c, d, e = Q.unique(a, a_B1)
+  c:eval()
+  assert(d:is_eov() == true)
+  assert(c:length() == #out_table)
+  assert(d:length() == #cnt_table)
+  Q.print_csv({c, d, e})
+  for i = 1, c:length() do
+    local value = c_to_txt(c, i)
+    assert(value == out_table[i])
+
+    value = c_to_txt(d, i)
+    assert(value == cnt_table[i])
+
+    value = c_to_txt(e, i)
+    assert(value == sum_table[i])
+  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t15 succeeded")
+end
+
+tests.t16 = function()
+  local num_elements = qconsts.chunk_size * 2 + 105
+  -- generating value vector
+  local input_col = Q.period( { start = 0, by = 1, period = 5, qtype = "I4", len = num_elements }):eval()
+  -- sorting value vector for serving it to unique operator
+  input_col =  Q.sort(input_col, "asc")
+  local B1_tbl = {}
+  for i = 1, num_elements do
+    B1_tbl[#B1_tbl + 1] = i % 2
+  end
+  local B1_vec = Q.mk_col(B1_tbl, "B1")
+  -- calling unique(value_vec, B1_vec) returns 3 vectors(unq_vec, cnt_vec, sum_vec)
+  local unq, cnt, sum = Q.unique(input_col, B1_vec)
+  unq:eval()
+  -- checking for valid length returned
+  assert(unq:length() == 5 and cnt:length() == 5 and sum:length() == 5)
+  
+  -- storing the index of each unique value
+  local index_tbl = {}
+  for i = 1, unq:length() do
+    index_tbl[#index_tbl + 1] = Q.index(input_col, i)
+  end
+  
+  -- getting sum of 1's for each unique value
+  local sum_values = 0
+  local sum_of_1 = {}
+  for i = 1, num_elements do
+    if utils.table_find(index_tbl, i-1) then
+      sum_of_1[#sum_of_1 +1] = sum_values
+      sum_values = 0
+    end
+    sum_values = sum_values + B1_vec:get_one(i-1):to_num()
+  end
+  sum_of_1[#sum_of_1 +1] = sum_values
+  
+  -- validating sum_vec returned by Q.unique()
+  for i=1, unq:length() do
+    assert(sum:get_one(i-1):to_num() == sum_of_1[i])
+  end
+  Q.print_csv({unq, cnt, sum})
+  print("Test t16 succeeded")
 end
 
 return tests

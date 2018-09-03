@@ -29,13 +29,20 @@ local function chk_params(
   --=====================================
   assert(type(alpha) == "Scalar")
   --=====================================
-  assert(g:length() == n)
+  assert(g:length() == n, tostring(g:length()) .. ", " .. tostring(n))
   assert(g:fldtype() == "I4")
   local minval, numval = Q.min(g):eval()
-  assert(minval == Scalar.new(0, "I4"))
+  -- TODO: do we require below assert - discuss with Ramesh
+  -- assert(minval == Scalar.new(0, "I4"))
   local maxval, numval = Q.max(g):eval()
-  local ng = maxval:to_num() - minval:to_num() + 1 -- number of values of goal attr
-  assert(ng > 1)
+  local ng
+  if maxval > minval then
+    ng = maxval:to_num() - minval:to_num() + 1 -- number of values of goal attr
+  else
+    ng = maxval:to_num() + 1
+  end
+  -- TODO: do we require below assert
+  --assert(ng > 1)
   assert(ng <= 4) -- arbitary limit for now 
   --=====================================
   -- STOP : Checking

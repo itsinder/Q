@@ -29,7 +29,8 @@ end
 tests.t2 = function()
   -- negative testcase:
   -- minby test in safe mode by setting is_safe to true
-  -- group by column exceeds limit
+  -- group_by column exceeds limit
+  -- NOTE: if you run below test in unsafe mode then you might face seg-fault
   local a = Q.mk_col({1, 2, 4, 5, 6, 7, 8, 9}, "I4")
   local b = Q.mk_col({0, 1, 4, 1, 1, 2, 0, 2}, "I2")
   local nb = 3

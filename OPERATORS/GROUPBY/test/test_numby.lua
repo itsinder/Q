@@ -8,6 +8,49 @@ require 'Q/UTILS/lua/strict'
 
 local tests = {}
 
+tests.t0 = function()
+  local nb = 2
+  local col = Q.mk_col({0, 1, 0, 0, 1, 1, 1, 0, 1}, "I1")
+  local res = Q.numby(col, nb):eval()
+  assert(res:length() == nb)
+  assert(res:get_one(0):to_num() == 4)
+  assert(res:get_one(1):to_num() == 5)
+  print("Test t0 completed")
+end
+
+tests.t0_1 = function()
+  -- negative test
+  -- input column exceeds limit i.e value >= nb
+  local nb = 2
+  local col = Q.mk_col({0, 1, 0, 0, 1, 1, 1, 2, 1}, "I1")
+  local res = Q.numby(col, nb)
+  local status, res = pcall(res.eval, res)
+  assert(status == false)
+  print("Test t0_1 completed")
+end
+
+tests.t0_2 = function()
+  -- input column has all 1's
+  local nb = 2
+  local col = Q.mk_col({1, 1, 1, 1, 1, 1, 1, 1, 1}, "I1")
+  local res = Q.numby(col, nb):eval()
+  assert(res:length() == nb)
+  assert(res:get_one(0):to_num() == 0)
+  assert(res:get_one(1):to_num() == 9)
+  print("Test t0_2 completed")
+end
+
+tests.t0_3 = function()
+  -- input column has all 0's
+  local nb = 2
+  local col = Q.mk_col({0, 0, 0, 0, 0, 0, 0, 0, 0}, "I1")
+  local res = Q.numby(col, nb):eval()
+  assert(res:length() == nb)
+  assert(res:get_one(0):to_num() == 9)
+  assert(res:get_one(1):to_num() == 0)
+  print("Test t0_3 completed")
+end
+
 tests.t1 = function()
   local len = 2*qconsts.chunk_size + 1
   local period = 3

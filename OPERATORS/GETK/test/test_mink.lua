@@ -5,7 +5,7 @@ local tests = {}
 
 tests.t1 = function()
   local col = Q.mk_col({1, 5, 4, 2, 3, 7, 9}, "I4")
-  local res = Q.mink(col, 3)
+  local res = Q.mink_vector(col, 3)
   local exp_col = Q.mk_col({1, 2, 3}, "I8")
   local sum = Q.sum(Q.vveq(res, exp_col)):eval()
   assert(sum:to_num() == exp_col:length())
@@ -16,7 +16,7 @@ tests.t2 = function()
   -- vector with more than chunk size values
   local len = 65536*2 + 45
   local col = Q.rand( { lb = 100, ub = 200, qtype = "I4", len = len })
-  local res = Q.mink(col, 3)
+  local res = Q.mink_vector(col, 3)
   Q.print_csv(res)
   print("successfully completed t2")
 end
@@ -24,7 +24,7 @@ end
 tests.t3 = function()
   -- vector having repeated min values
   local col = Q.mk_col({1, 2, 4, 2, 3, 7, 9}, "I4")
-  local res = Q.mink(col, 3)
+  local res = Q.mink_vector(col, 3)
   local exp_col = Q.mk_col({1, 2, 2}, "I8")
   local sum = Q.sum(Q.vveq(res, exp_col)):eval()
   assert(sum:to_num() == exp_col:length())
@@ -43,7 +43,7 @@ tests.t4 = function()
   in_table[3] = 567
 
   local col = Q.mk_col(in_table, "I4")
-  local res = Q.mink(col, 3)
+  local res = Q.mink_vector(col, 3)
   Q.print_csv(res)
   local exp_col = Q.mk_col({1, 2, 3}, "I8")
   local sum = Q.sum(Q.vveq(res, exp_col)):eval()
