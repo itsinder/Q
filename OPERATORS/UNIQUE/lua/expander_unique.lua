@@ -37,7 +37,7 @@ local function expander_unique(op, a, b)
   local last_unq_element = 0
   local brk_n_write
   
-  local a = sort_utility(a)
+  a = sort_utility(a)
   
   local unique_vec = lVector( { gen = true, has_nulls = false, qtype = a:qtype() } )
   local cnt_vec    = lVector( { gen = true, has_nulls = false, qtype = "I8" } )
