@@ -11,6 +11,7 @@ local function extract_goal(
   assert(type(T) == "table")
   assert(type(goal) == "string")
   local t = {}
+  local t_name = {}
   local g = nil
   local qtype = nil
   local m = 0
@@ -29,6 +30,7 @@ local function extract_goal(
         assert(n     == v:length())
       end
       t[#t+1] = v
+      t_name[#t_name+1] = k
       m = m + 1
     end
   end
@@ -38,6 +40,6 @@ local function extract_goal(
   assert(qtype)
   assert(type(g) == "lVector")
   assert(type(t) == "table")
-  return t, g, m, n
+  return t, g, m, n, t_name
 end
 return extract_goal
