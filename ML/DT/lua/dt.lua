@@ -5,7 +5,6 @@ local calc_benefit = require 'Q/ML/DT/lua/benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
-local count = 0
 --[[
 variable description
 T	- table of m lVectors of length n, representing m features
@@ -34,9 +33,13 @@ local function make_dt(
   g, -- lVector of length n
   alpha -- Scalar, minimum benefit
   )
-  count = count + 1
-  print("========================================")
-  print("COUNT = " .. tostring(count))
+  --[[
+  print("===================INFO START================")
+  print("Input table length = " .. tostring(#T))
+  print("Feature length = " .. tostring(T[1]:length()))
+  print("Length of target/goal = " .. tostring(g:length()))
+  print("===================INFO END================")
+  ]]
   local m, n, ng = chk_params(T, g, alpha)
   local D = {} 
   local cnts = Q.numby(g, ng):eval()
@@ -54,18 +57,18 @@ local function make_dt(
     return D
   end
   local best_bf, best_sf, best_k
-  print("Benefit for each feature is")
+  --print("Benefit for each feature is")
   for k, f in pairs(T) do
     local bf, sf = calc_benefit(f, g, n_N, n_P)
-    print(bf .. "\t" .. sf .. "\t" .. k)
+    --print(bf .. "\t" .. sf .. "\t" .. k)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
       best_k = k
     end
   end
-  print("Max benefit and respecitve feature is ")
-  print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
+  --print("Max benefit and respecitve feature is ")
+  --print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
   if ( best_bf > alpha:to_num() ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
@@ -77,9 +80,8 @@ local function make_dt(
       T_R[k] = Q.where(f, Q.vnot(x)):eval()
     end
     g_L = Q.where(g, x):eval()
-    g_R = Q.where(g, Q.vnot(x)):eval()
-    print("recursive call " .. tostring(g_L:length()) .. " " .. tostring(T_L[1]:length()) .. " " .. tostring(g_R:length()) .. " " .. tostring(T_R[1]:length()))
     D.left  = make_dt(T_L, g_L, alpha)
+    g_R = Q.where(g, Q.vnot(x)):eval()
     D.right = make_dt(T_R, g_R, alpha)
   end
   return D
@@ -139,14 +141,37 @@ end
 
 
 local function print_dt(
-  D	-- prepared decision tree
+  D,		-- prepared decision tree
+  f,		-- file_descriptor
+  col_name	-- table of column names of train dataset
   )
   if not D then
     return
   end
-  print(D.feature, D.threshold, D.n_P, D.n_N)
-  print_dt(D.left)
-  print_dt(D.right)
+  local label = "\"n_N=" .. tostring(D.n_N) .. ", n_P=" .. tostring(D.n_P)
+  --print(D.feature, D.threshold, D.n_P, D.n_N)
+  if D.left and D.right then
+    label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\""
+    local left_label = "\"n_N=" .. tostring(D.left.n_N) .. ", n_P=" .. tostring(D.left.n_P)
+    local right_label = "\"n_N=" .. tostring(D.right.n_N) .. ", n_P=" .. tostring(D.right.n_P)
+    if D.left.feature then
+      left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold
+    end
+    left_label = left_label .. "\""
+    if D.right.feature then
+      right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold
+    end
+    right_label = right_label .. "\""
+    f:write(label .. " -> " .. left_label .. "\n")
+    --print(label .. " -> " .. left_label)
+    f:write(label .. " -> " .. right_label .. "\n")
+    --print(label .. " -> " .. right_label)
+
+    print_dt(D.left, f, col_name)
+    print_dt(D.right, f, col_name)
+  else
+    -- No tree available
+  end
 end
 
 

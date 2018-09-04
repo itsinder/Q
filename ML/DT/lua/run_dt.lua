@@ -44,8 +44,8 @@ local function run_dt(args)
   for i = 1, iterations do
     -- break into a training set and a testing set
     local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
-    local train, g_train, m_train, n_train = extract_goal(Train, goal)
-    local test,  g_test,  m_test,  n_test  = extract_goal(Test,  goal)
+    local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
+    local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
     -- Current implementation assumes 2 values of goal as 0, 1
     local min_g, _ = Q.min(g_train):eval()
@@ -63,7 +63,11 @@ local function run_dt(args)
     assert(check_dt(tree))
 
     -- print decision tree
-    print_dt(tree)
+    local f = io.open("graphviz.txt", "a")
+    f:write("digraph {\n")
+    print_dt(tree, f, train_col_name)
+    f:write("}\n")
+    f:close()
 
     -- predict for test samples
     for i = 1, n_test do
