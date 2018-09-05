@@ -8,6 +8,12 @@ gcc -g $QC_FLAGS conn_comp.c \
   -I$HOME/WORK/Q/UTILS/inc/ \
   -I$HOME/WORK/Q/UTILS/gen_inc/ -o conn_comp
 
+# CUDA file compilation
+#nvcc -g -DDEBUG -Xcompiler -fPIC conn_comp_cuda.cu \
+#  $HOME/WORK/Q/UTILS/src/mmap.c \
+#  -I$HOME/WORK/Q/UTILS/inc/ \
+#  -I$HOME/WORK/Q/UTILS/gen_inc/ -o conn_comp_cuda
+
 datafile=$HOME/ukgraph-5
 test -f $datafile
 ./a.out $datafile out y
