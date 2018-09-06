@@ -47,8 +47,9 @@ local function calc_benefit(
   C[1] = 0
 
   local n = (n_N + n_P):to_num()
+  local i = 0
 
-  for i = 0, n-1 do
+  while i < n do
     local f_val = f_clone:get_one(i):to_num()
     local g_val = g_clone:get_one(i):to_num()
     C[g_val] = C[g_val] + 1

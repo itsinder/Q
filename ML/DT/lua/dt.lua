@@ -67,14 +67,15 @@ local function make_dt(
       best_k = k
     end
   end
-  --print("Max benefit and respecitve feature is ")
-  --print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
+  print("Max benefit and respecitve feature is ")
+  print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
   if ( best_bf > alpha:to_num() ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
     local T_R = {}
     D.feature = best_k
     D.threshold = best_sf
+    D.benefit = best_bf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x):eval()
       T_R[k] = Q.where(f, Q.vnot(x)):eval()
@@ -151,15 +152,15 @@ local function print_dt(
   local label = "\"n_N=" .. tostring(D.n_N) .. ", n_P=" .. tostring(D.n_P)
   --print(D.feature, D.threshold, D.n_P, D.n_N)
   if D.left and D.right then
-    label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\""
+    label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\\n" .. "benefit=" .. D.benefit .. "\""
     local left_label = "\"n_N=" .. tostring(D.left.n_N) .. ", n_P=" .. tostring(D.left.n_P)
     local right_label = "\"n_N=" .. tostring(D.right.n_N) .. ", n_P=" .. tostring(D.right.n_P)
     if D.left.feature then
-      left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold
+      left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
     end
     left_label = left_label .. "\""
     if D.right.feature then
-      right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold
+      right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
     end
     right_label = right_label .. "\""
     f:write(label .. " -> " .. left_label .. "\n")
