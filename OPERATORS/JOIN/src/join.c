@@ -23,6 +23,12 @@ void operation(const int32_t *s_lnk, const int32_t *s_fld, int64_t start_idx, in
       else if (strcmp(op, "max_idx") == 0) {
         d_fld[d_idx] = i;
       }
+      else if (strcmp(op, "and") == 0) {
+        d_fld[d_idx] = d_fld[d_idx] & s_fld[i];
+      }
+      else if (strcmp(op, "or") == 0) {
+        d_fld[d_idx] = d_fld[d_idx] | s_fld[i];
+      }
       else {
         printf("op not supported");
       }
@@ -102,44 +108,47 @@ int main() {
 int status = 0;
 int src_size = 7;
 int dst_size = 3;
-int32_t *src_val, *src_drag;
-int32_t *dst_val, *dst_drag;
+int32_t *src_lnk, *src_fld;
+int32_t *dst_lnk, *dst_fld;
 uint64_t *num_in_out, *aidx;
 char *join_type = "max_idx";
 // Allocate memory for
-src_val = malloc(src_size * sizeof("int32_t"));
-src_drag = malloc(src_size * sizeof("int32_t"));
-dst_val = malloc(dst_size * sizeof("int32_t"));
-dst_drag = malloc(dst_size * sizeof("int32_t"));
+src_lnk = malloc(src_size * sizeof("int32_t"));
+src_fld = malloc(src_size * sizeof("int32_t"));
+dst_lnk = malloc(dst_size * sizeof("int32_t"));
+dst_fld = malloc(dst_size * sizeof("int32_t"));
 
 // Initialize inputs and desired buffers
-src_val[0]=10; src_val[1]=10; src_val[2]=10; src_val[3]=10;
-src_val[4]=20; src_val[5]=20 ; src_val[6]=30;
+src_lnk[0]=10; src_lnk[1]=10; src_lnk[2]=10; src_lnk[3]=10;
+src_lnk[4]=20; src_lnk[5]=20 ; src_lnk[6]=30;
 
-src_drag[0]=1; src_drag[1]=2; src_drag[2]=2; src_drag[3]=1;
-src_drag[4]=3; src_drag[5]=2; src_drag[6]=1;
+src_fld[0]=1; src_fld[1]=3; src_fld[2]=5; src_fld[3]=3;
+src_fld[4]=3; src_fld[5]=2; src_fld[6]=1;
 
-dst_val[0]=10; dst_val[1]=20; dst_val[2]=30;
+dst_lnk[0]=10; dst_lnk[1]=20; dst_lnk[2]=30;
 
 // default value initialization
 if (strcmp(join_type, "sum") == 0) {  
-  dst_drag[0]=0; dst_drag[1]=0; dst_drag[2]=0;
+  dst_fld[0]=0; dst_fld[1]=0; dst_fld[2]=0;
 }
 else if(strcmp(join_type, "min") == 0) {  
-  dst_drag[0]=127; dst_drag[1]=127; dst_drag[2]=127;
+  dst_fld[0]=127; dst_fld[1]=127; dst_fld[2]=127;
 }
 else if (strcmp(join_type, "max") == 0) {  
-  dst_drag[0]=-1; dst_drag[1]=-1; dst_drag[2]=-1;
+  dst_fld[0]=-1; dst_fld[1]=-1; dst_fld[2]=-1;
 }
-else {
-  dst_drag[0]=-1; dst_drag[1]=-1; dst_drag[2]=-1;
+else if (strcmp(join_type, "min_idx") == 0  || strcmp(join_type, "max_idx") ==0 || strcmp(join_type, "and") ==0 ) {
+  dst_fld[0]=-1; dst_fld[1]=-1; dst_fld[2]=-1;
+}
+else if (strcmp(join_type, "or") ==0 ) {
+  dst_fld[0]=0; dst_fld[1]=0; dst_fld[2]=0;
 }
 // Call to join
-status = join(src_val, src_drag, src_size, dst_val, dst_drag, dst_size, join_type);
+status = join(src_lnk, src_fld, src_size, dst_lnk, dst_fld, dst_size, join_type);
 printf("\n==================================\n");
 int64_t i;
 for ( i = 0; i < dst_size; i++ ) {
-  printf("%d\n", dst_drag[i]);
+  printf("%d\n", dst_fld[i]);
 }
 return status;
 }
