@@ -33,9 +33,9 @@ any_change(
     }
 
     if ( ( l_is_any_change ) && ( *is_any_change == false ) ) {
+      // printf("Changed the global is_any_change\n");
       *is_any_change = true;
     }
-
   }
 }
 
@@ -51,6 +51,7 @@ main(
   NODE_TYPE *lb = NULL;
   NODE_TYPE *ub = NULL;
   NODE_TYPE *to = NULL;
+  bool *is_any_change = NULL;
   char *lb_X = NULL; size_t lb_nX = 0;
   char *ub_X = NULL; size_t ub_nX = 0;
   char *to_X = NULL; size_t to_nX = 0;
@@ -71,29 +72,36 @@ main(
   cudaMallocManaged(&lb, lb_nX);
   cudaMallocManaged(&ub, ub_nX);
   cudaMallocManaged(&to, to_nX);
+  cudaMallocManaged(&is_any_change, sizeof(bool));
 
-  if ( lbl == NULL ) { printf("Failed cuda malloc lbl\n"); return -1; }
-  if ( lb == NULL ) { printf("Failed cuda malloc lb\n"); return -1; }
-  if ( ub == NULL ) { printf("Failed cuda malloc ub\n"); return -1; }
-  if ( to == NULL ) { printf("Failed cuda malloc to\n"); return -1; }
+  if ( lbl == NULL ) { printf("cuda malloc failed for lbl\n"); return -1; }
+  if ( lb == NULL ) { printf("cuda malloc failed for lb\n"); return -1; }
+  if ( ub == NULL ) { printf("cuda malloc failed for ub\n"); return -1; }
+  if ( to == NULL ) { printf("cuda malloc failed for to\n"); return -1; }
+  if ( is_any_change == NULL ) { printf("cuda malloc failed for is_any_change\n"); return -1; }
 
   printf("Memory allocation done\n");
 
-  // Initialize lbl, lb, ub, to
+  // Initialize lbl, lb, ub, to, is_any_change
   for ( unsigned int i = 0; i < n_nodes; i++ ) {
     lbl[i] = i;
   }
   memcpy(lb, lb_X, lb_nX);
   memcpy(ub, ub_X, ub_nX);
   memcpy(to, to_X, to_nX);
+  *is_any_change = true; // just to get in the first tome
 
   uint64_t blockSize = 256;
   uint64_t numBlocks = (n_nodes + 256 - 1) / blockSize;
 
-  bool is_any_change = true; // just to get in the first tome
-  for ( int iter = 0; is_any_change == true; iter++ ) {
-    printf("######################\n");
-    any_change<<<numBlocks, blockSize>>>(lb, ub, to, lbl, n_nodes, &is_any_change);
+  for ( int iter = 0; *is_any_change == true; iter++ ) {
+    // any_change<<<numBlocks, blockSize>>>(lb, ub, to, lbl, n_nodes, &is_any_change);
+    for ( int i = 0; i < n_nodes; i++ ) {
+      printf("%d\t", lbl[i]);
+    }
+    printf("\n");
+    *is_any_change = false;
+    any_change<<<1, 1>>>(lb, ub, to, lbl, n_nodes, is_any_change);
     cudaDeviceSynchronize();
     fprintf(stderr, "Pass %d \n", iter);
   }
@@ -102,6 +110,7 @@ main(
   cudaFree(lb);
   cudaFree(ub);
   cudaFree(to);
+  cudaFree(is_any_change);
   return status;
 
 }
