@@ -7,6 +7,23 @@ extern "C" {
 #define NODE_TYPE int32_t
 #define MAXLINE 65535
 
+/*
+static __device__ __inline__ uint32_t __mysmid(){
+  uint32_t smid;
+  asm volatile("mov.u32 %0, %%smid;" : "=r"(smid));
+  return smid;}
+
+static __device__ __inline__ uint32_t __mywarpid(){
+  uint32_t warpid;
+  asm volatile("mov.u32 %0, %%warpid;" : "=r"(warpid));
+  return warpid;}
+
+static __device__ __inline__ uint32_t __mylaneid(){
+  uint32_t laneid;
+  asm volatile("mov.u32 %0, %%laneid;" : "=r"(laneid));
+  return laneid;}
+*/
+
 __global__
 static void
 any_change(
@@ -21,6 +38,7 @@ any_change(
   uint64_t index = blockIdx.x * blockDim.x + threadIdx.x;
   uint64_t stride = blockDim.x * gridDim.x;
   for (uint64_t i = index; i < n_nodes; i += stride) {
+    // printf("I am thread %d, my SM ID is %d, my warp ID is %d, and my warp lane is %d\n", i, __mysmid(), __mywarpid(), __mylaneid());
     bool l_is_any_change = false;
     if ( ub[i] <= lb[i] ) { continue; }
     NODE_TYPE minval = lbl[i];
@@ -101,7 +119,7 @@ main(
     }
     printf("\n");
     *is_any_change = false;
-    any_change<<<1, 1>>>(lb, ub, to, lbl, n_nodes, is_any_change);
+    any_change<<<1, 3>>>(lb, ub, to, lbl, n_nodes, is_any_change);
     cudaDeviceSynchronize();
     fprintf(stderr, "Pass %d \n", iter);
   }
