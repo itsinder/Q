@@ -38,6 +38,7 @@ require 'Q/OPERATORS/INDEX/lua/indexing'
 require 'Q/OPERATORS/UNIQUE/lua/unique'
 require 'Q/OPERATORS/GETK/lua/getk'
 require 'Q/OPERATORS/HASH/lua/hash'
+require 'Q/OPERATORS/JOIN/lua/join'
 -- alias wrappers
 require 'Q/ALIAS/lua/add'
 require 'Q/ALIAS/lua/sub'

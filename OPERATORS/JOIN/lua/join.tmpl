@@ -1,12 +1,149 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+#include "_get_bit_u64.h"
+
+extern int
+${fn}(
+      const ${src_lnk_ctype} * src_lnk,
+      const ${src_fld_ctype} * src_fld,
+      uint64_t src_nR,
+      uint64_t *aidx,
+      const ${dst_lnk_ctype} * dst_lnk,
+      ${dst_fld_ctype} * dst_fld,
+      uint64_t dst_nR,
+      const char *join_type,
+      uint64_t nC, // chunksize
+      uint64_t *ptr_num_in_C
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+#define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
+#define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
+
+void 
+operation(
+      const ${src_lnk_ctype} *s_lnk,
+      const ${src_fld_ctype} *s_fld,
+      int64_t start_idx,
+      int64_t s_size,
+      ${dst_lnk_ctype} d_lnk_val,
+      ${dst_fld_ctype} *d_fld,
+      uint64_t d_idx,
+      const char *op
+      )
+{
+  int64_t i;
+  for (i = start_idx; i < s_size; i++) { 
+    if(s_lnk[i] == d_lnk_val) { 
+      if (strcmp(op, "sum") == 0) {
+        d_fld[d_idx] = d_fld[d_idx] + s_fld[i];
+      }
+      else if (strcmp(op, "max") == 0) {
+        d_fld[d_idx] = mcr_max(d_fld[d_idx], s_fld[i]);
+      }
+      else if (strcmp(op, "min") == 0) {
+        d_fld[d_idx] = mcr_min(d_fld[d_idx], s_fld[i]);
+      }
+      else if (strcmp(op, "max_idx") == 0) {
+        d_fld[d_idx] = i;
+      }
+      else if (strcmp(op, "and") == 0) {
+        d_fld[d_idx] = d_fld[d_idx] & s_fld[i];
+      }
+      else if (strcmp(op, "or") == 0) {
+        d_fld[d_idx] = d_fld[d_idx] | s_fld[i];
+      }
+      else {
+        printf("op not supported");
+      }
+    }
+    else {
+      break;
+    }
+    //printf("\n$$$%ld %d\n", i, d_lnk_val);
+  }
+}
+
+int get_index(
+      const ${src_lnk_ctype} *src_link,
+      uint64_t src_size,
+      ${dst_fld_ctype} dst_lnk_search 
+      )
+{ 
+  //printf("\nchecking last element%d\n", src_link[src_size-1]);
+  int64_t idx = -1;
+  if(src_link[src_size-1] < dst_lnk_search || src_link[src_size-src_size] > dst_lnk_search) {
+    return idx;
+  }
+  int64_t low, high, mid;
+	low = 0;
+	high = src_size-1;
+	while(low <= high) {
+		mid = (low+high)/2;
+		if(src_link[mid]<dst_lnk_search) {
+    // move to right
+      low = mid+1;
+    }
+		else if(src_link[mid]>dst_lnk_search) {
+    // move to left
+			high = mid-1; 
+    }
+		else if(src_link[mid]==dst_lnk_search) {
+		 	idx = mid; 
+      high = mid-1;
+      //printf("\n%ld\n", high);
+    }
+	}
+	return idx; 
+}
 
 int
-join(
-  int *src_val,
-  int *src_lnk,
-  uint64_t nR_src,
-  int *dst_val,
-  int *dst_lnk,
-  uint64_t nR_dst
-  )
-  {
+${fn}(
+      const ${src_lnk_ctype} * src_lnk,
+      const ${src_fld_ctype} * src_fld,
+      uint64_t src_nR,
+      uint64_t *aidx,
+      const ${dst_lnk_ctype} * dst_lnk,
+      ${dst_fld_ctype} * dst_fld,
+      uint64_t dst_nR,
+      const char *join_type,
+      uint64_t nC, // chunksize
+      uint64_t *ptr_num_in_C
+      )
+{
+  int status = 0;
+  if ( src_lnk == NULL ) { go_BYE(-1); }
+  if ( strcmp(join_type, "sum") == 0 || strcmp(join_type, "min") == 0 || strcmp(join_type, "max") == 0 ){ 
+    if ( src_fld == NULL ) { go_BYE(-1); }
   }
+  if ( src_nR == 0 ) { go_BYE(-1); }
+  if ( dst_lnk == NULL ) { go_BYE(-1); }
+  if ( dst_fld == NULL ) { go_BYE(-1); }
+  if ( dst_nR == 0 ) { go_BYE(-1); }
+  uint64_t i;
+  for ( i = 0; i < dst_nR; i++ ) {
+    int64_t start_idx = get_index(src_lnk, src_nR, dst_lnk[i]);
+    printf("\n processing %d found at index%ld\n", dst_lnk[i], start_idx);
+    //printf("%ld\n", start_idx);
+    if ( start_idx != -1 ) {
+      if (strcmp(join_type, "min_idx") ==0) {
+        dst_fld[i] = start_idx;
+      }
+      else { 
+        operation(src_lnk, src_fld, start_idx, src_nR, dst_lnk[i], dst_fld, i, join_type);
+      }
+    }
+    else if( start_idx == -1) {
+      //dst_fld[i] = 0; // default value of respective operation
+    }
+  }
+BYE:
+  return status;
+}
+   ]]
+}
