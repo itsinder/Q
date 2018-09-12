@@ -50,7 +50,7 @@ local function split (
   end
   assert(num_features > 0)
   --=======================================
-  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = n})
+  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = n, seed = 100})
   local random_vec_bool = Q.vsleq(random_vec, split_ratio)
   local n1, n2 = Q.sum(random_vec_bool):eval()
   -- TODO P2: Should not need to convert number to scalar for comparison
