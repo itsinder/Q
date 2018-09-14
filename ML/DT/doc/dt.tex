@@ -274,9 +274,38 @@ Sort \(Z\) on \(rho\). Create vectors, \(N', P'\) of length \(M\) as follows
 \item 
 \ee
 
+\section{Evaluating a decision tree}
+We feed every element of the training set to the decision tree, thereby
+assigning each of them to a leaf. Now, for each leaf, we have
+\be
+\item \(n^H_1, n^T_1\) which is the number of testing samples assigned 
+to the leaf that were labeled heads and tails respectively
+\item \(n^H_0, n^T_0\) same as above but for the training samples
+\ee
 
+We model the testing process as adversarial. The house uses 
+\(n^H_0, n^T_0\) to set the odds.
+The ``true'' probability of heads, \(\rho\), is assumed to be 
+\(\frac{n^H_1}{n^H_1+ n^T_1}\) 
+The adversary uses \(\rho\) to 
+decide whether to bet heads or tails.
 
+Consider three examples, in all of which \(n^H_0, n^T_0 = 60, 40\).
+\be
+\item \(\rho = 0.8\). The adversary would bet heads and would
+expect to make \(0.8 \times \frac{40}{60} + 0.2 \times -1 = \frac{1}{3}\) per
+trial.
+\item \(\rho = 0.6\). If the adversary bet heads, they would
+expect to make \(0.6 \times \frac{40}{60} + 0.4 \times -1 = 0\) per
+trial.
+If the adversary bet tails, they would
+expect to make \(0.6 \times -1 + 0.4 \times \frac{60}{40} = 0\).
+\item \(n^H_1, n^T_1 = 0.4\). The adversary would bet tails and would
+expect to make \(0.4 \times -1 + 0.6 \times \frac{60}{40} = \frac{1}{3}\) per
+trial.
+\ee
 
+The total gain made by the adversary is the sum over all leaves of 
 
 \bibliographystyle{alpha}
-\bibliography{ref}
+\bibliography{../../../DOC/ref.bib}
