@@ -94,6 +94,9 @@ local function check_dt(
   )
   -- Verify the decision tree
   local status = true
+  if not D then
+    return status
+  end
 
   if D.left then
     assert(D.right)
@@ -112,8 +115,11 @@ local function check_dt(
     assert(D.n_N == D.left.n_N + D.right.n_N)
     assert(D.n_P == D.left.n_P + D.right.n_P)
   end
+
   -- TODO: Add more checks
-  return status
+
+  check_dt(D.left)
+  check_dt(D.right)
 end
 
 

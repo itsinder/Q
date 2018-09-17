@@ -60,7 +60,7 @@ local function run_dt(args)
     assert(tree)
 
     -- verify the decision tree
-    assert(check_dt(tree))
+    check_dt(tree)
 
     -- print decision tree
     local f = io.open("graphviz.txt", "a")
