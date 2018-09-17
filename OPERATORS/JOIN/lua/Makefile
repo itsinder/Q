@@ -27,7 +27,7 @@ clean :
 libjoin.so : ${GEN_FILES} \
 	join.tmpl
 	luajit generator.lua
-	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libjoin.so
+	gcc ../gen_src/*.c ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libjoin.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
@@ -39,6 +39,3 @@ test_c :  libjoin.so
 	echo "TODO"
 
 test : test_q test_c
-
-GEN_FILES = \
-	../gen_src/_join_I8_I8_I8.c \
