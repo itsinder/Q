@@ -180,4 +180,48 @@ tests.t5 = function()
   print("================================================")
 end
 
+tests.t6 = function()
+  -- Test alpha calculation
+  local data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248.csv"
+  local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
+
+  local args = {}
+  args.meta_data_file = metadata_file
+  args.data_file = data_file
+  args.goal = "class"
+  args.iterations = 3
+  args.min_alpha = 0.2
+  args.max_alpha = 0.5
+  args.step_alpha = 0.1
+
+  Vector.reset_timers()
+  start_time = qc.RDTSC()
+  local accuracy_table, cost_table = calculate_alpha(args)
+  stop_time = qc.RDTSC()
+  --Vector.print_timers()
+  print("================================================")
+  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
+  print("================================================")
+  --[[
+  if _G['g_time'] then
+    for k, v in pairs(_G['g_time']) do
+      local niters  = _G['g_ctr'][k] or "unknown"
+      local ncycles = tonumber(v)
+      print("0," .. k .. "," .. niters .. "," .. ncycles)
+    end
+  end
+  print("================================================")
+  ]]
+  print("alpha & cost table")
+  for i, v in pairs(cost_table) do
+    print(i, v)
+  end
+  print("================================================")
+  print("alpha & acr table")
+  for i, v in pairs(accuracy_table) do
+    print(i, v)
+  end
+  print("================================================")
+end
+
 return tests
