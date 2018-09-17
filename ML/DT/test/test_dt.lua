@@ -40,7 +40,7 @@ end
 tests.t2 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_data.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
-  local alpha = Scalar.new(0.75, "F4")
+  local alpha = Scalar.new(0.3, "F4")
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -72,7 +72,7 @@ end
 tests.t3 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_meta.lua"
-  local alpha = Scalar.new(0.4, "F4")
+  local alpha = Scalar.new(0.3, "F4")
 
   local args = {}
   args.meta_data_file = metadata_file
