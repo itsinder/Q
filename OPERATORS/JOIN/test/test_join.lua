@@ -37,4 +37,54 @@ tests.t1 = function ()
   -- Q.print_csv(c, opt_args)
   print("Test t1 succeeded")
 end
+
+-- test for num_elements > chunk_size
+tests.t2 = function ()
+  local src_lnk_tbl = {}
+  local src_fld_tbl = {}
+  for i = 1, qconsts.chunk_size do
+    if i%2 == 0 then
+      src_lnk_tbl[#src_lnk_tbl+1] = 10
+      src_fld_tbl[#src_fld_tbl+1] = 1
+    else
+      src_lnk_tbl[#src_lnk_tbl+1] = 20
+      src_fld_tbl[#src_fld_tbl+1] = 2
+    end
+  end
+  for i = qconsts.chunk_size+1, (qconsts.chunk_size + (qconsts.chunk_size/2)) do
+    if i%2 == 0 then
+      src_lnk_tbl[#src_lnk_tbl+1] = 20
+      src_fld_tbl[#src_fld_tbl+1] = 2
+    else
+      src_lnk_tbl[#src_lnk_tbl+1] = 30
+      src_fld_tbl[#src_fld_tbl+1] = 3
+    end
+  end
+  local dst_lnk_tbl = {10,20}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I4")
+  local src_fld = Q.mk_col(src_fld_tbl, "I4")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I4")
+  Q.sort(src_lnk, "asc"):eval()
+  Q.sort(src_fld, "asc"):eval()
+  Q.sort(dst_lnk, "asc"):eval()
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "max_idx")
+  c:eval()
+  Q.print_csv(c)
+  print(c:fldtype())
+  print(c:length())
+  local unq, cnt = Q.unique(src_lnk)
+  unq:eval()
+  Q.print_csv({unq, cnt})
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t2 succeeded")
+end
+
 return tests

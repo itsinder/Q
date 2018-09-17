@@ -7,11 +7,12 @@ local gen_code =  require("Q/UTILS/lua/gen_code")
 
 local qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
 -- TODO: add left operations in below table
-local join_type = {"sum", "min", "max", "min_idx", "max_idx", "count", "and", "or"}
+local join_type = {"sum", "min", "max", "min_idx", "max_idx", "count"}
+-- local join_type = {"sum", "min", "max", "min_idx", "max_idx", "count", "and", "or"}
 
 local num_produced = 0
-local status
-local sp_fn = assert(require("join_specialize"))
+local status, reason
+local sp_fn = assert(require("Q/OPERATORS/JOIN/lua/join_specialize"))
 
 local function generate_files(src_lnk_qtype, src_fld_qtype, out_qtype, join_type, args)
   local status, subs, tmpl = pcall(sp_fn, src_lnk_qtype, src_fld_qtype, out_qtype, join_type, args)
@@ -27,11 +28,11 @@ local function generate_files(src_lnk_qtype, src_fld_qtype, out_qtype, join_type
   return true
 end
 
-for _, src_lnk_qtype in ipairs(qtypes) do 
-  for _, src_fld_qtype in ipairs(qtypes) do
-    for _, op in ipairs(join_type) do
+for _, op in ipairs(join_type) do
+  for _, src_lnk_qtype in ipairs(qtypes) do
+    for _, src_fld_qtype in ipairs(qtypes) do
       local out_qtype
-      if op == "sum" then
+      if op == "sum" or op == "and" or op == "or" then
         if ( ( src_fld_qtype == "I1" ) or ( src_fld_qtype == "I2" ) or 
           ( src_fld_qtype == "I4" ) or ( src_fld_qtype == "I8" ) ) then
           out_qtype = "I8" 
@@ -40,14 +41,15 @@ for _, src_lnk_qtype in ipairs(qtypes) do
         end
       elseif op == "min" or op == "max" then
         out_qtype = src_fld_qtype
-      elseif op == "min_idx" or op == "max_idx" or op == "count" or op == "and" or op == "or" then
+      elseif op == "min_idx" or op == "max_idx" or op == "count" then
         out_qtype = "I8"
       else
+        -- op == "and" or op == "or" then
         -- TODO : for arbitary abd exists?
       end
-      status = pcall(generate_files, src_lnk_qtype, src_fld_qtype, out_qtype, op )
+      status, reason = pcall(generate_files, src_lnk_qtype, src_fld_qtype, src_lnk_qtype ,out_qtype, op )
       assert(status, 
-     "Failed to generate files for safe mode" .. src_lnk_qtype .. src_fld_qtype .. out_qtype)
+     "Failed to generate files" .. src_lnk_qtype .. src_fld_qtype .. src_lnk_qtype .. out_qtype)
     end
   end
 end
