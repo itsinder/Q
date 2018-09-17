@@ -67,8 +67,8 @@ local function make_dt(
       best_k = k
     end
   end
-  print("Max benefit and respecitve feature is ")
-  print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
+  -- print("Max benefit and respecitve feature is ")
+  -- print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
   if ( best_bf > alpha:to_num() ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
@@ -152,9 +152,6 @@ local function print_dt(
   f,		-- file_descriptor
   col_name	-- table of column names of train dataset
   )
-  if not D then
-    return
-  end
   local label = "\"n_N=" .. tostring(D.n_N) .. ", n_P=" .. tostring(D.n_P)
   --print(D.feature, D.threshold, D.n_P, D.n_N)
   if D.left and D.right then
