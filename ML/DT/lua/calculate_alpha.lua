@@ -44,11 +44,12 @@ local function run_dt(args)
   -- load the data
   local T = Q.load_csv(data_file, dofile(meta_data_file))
 
-  local accuracy = {}
   local alpha_cost_val = {}
+  local alpha_acr = {}
 
   while min_alpha <= max_alpha do
     local cost = 0
+    local accuracy = {}
     for i = 1, iterations do
       -- break into a training set and a testing set
       local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
@@ -110,9 +111,10 @@ local function run_dt(args)
       accuracy[#accuracy + 1] = acr
     end
     alpha_cost_val[min_alpha] = ( cost / iterations )
+    alpha_acr[min_alpha] = ml_utils.calc_average(accuracy)
     min_alpha = min_alpha + step_alpha
   end
-  return ml_utils.calc_average(accuracy), accuracy, alpha_cost_val
+  return alpha_acr, alpha_cost_val
 end
 
 return run_dt

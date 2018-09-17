@@ -14,15 +14,15 @@ local function evaluate_dt_cost(
   local ng = 2
   local cnts = Q.numby(g, ng):eval()
   local n_N, n_P
-  n_N = cnts:get_one(0)         -- number of negatives in training dataset
-  n_P = cnts:get_one(1)         --number of positives in training dataset
+  n_N = cnts:get_one(0):to_num()         -- number of negatives in training dataset
+  n_P = cnts:get_one(1):to_num()         -- number of positives in training dataset
 
   local w_N = ( n_N / ( n_N + n_P ) )   -- weight of negatives in training dataset
   local w_P = ( n_P / ( n_N + n_P ) )   -- weight of positives in training dataset
 
   local l_benefit = {}  -- will contain benefit at each leaf node (using testing data)
   local l_weight = {}   -- will contain weight at each leaf node (using testing data)
-  fns.calc_leaf_wt_benefit(D, l_benefit, l_weight, w_N:to_num(), w_P:to_num())
+  fns.calc_leaf_wt_benefit(D, l_benefit, l_weight, w_N, w_P)
 
   assert(#l_benefit > 0)
   assert(#l_weight > 0)
@@ -36,6 +36,7 @@ local function evaluate_dt_cost(
     total_wt = ( total_wt + l_weight[i] )
   end
   local cost = ( total_benefit / total_wt )
+
   return cost
 end
 
@@ -47,6 +48,7 @@ local function calc_leaf_wt_benefit(
   w_N,          -- weight of negatives in training sample
   w_P           -- weight of positives in training sample
   )
+  -- print(w_N, w_P)
   if D.left and D.right then
     calc_leaf_wt_benefit(D.left, l_benefit, l_weight, w_N, w_P)
     calc_leaf_wt_benefit(D.right, l_benefit, l_weight, w_N, w_P)
@@ -61,9 +63,12 @@ local function calc_leaf_wt_benefit(
 
     local b = math.max(b_P, b_N)
     local w = D.n_P1:to_num() + D.n_N1:to_num()
-
-    l_benefit[#l_benefit+1] = b
-    l_weight[#l_weight+1] = w
+    
+    if w > 0 then
+      l_benefit[#l_benefit+1] = b
+      l_weight[#l_weight+1] = w
+      -- print(w, b)
+    end
   end
 end
 
