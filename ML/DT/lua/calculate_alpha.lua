@@ -8,7 +8,7 @@ local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 local predict = require 'Q/ML/DT/lua/dt_cost_evaluation'['predict']
-local evaluate_dt_cost = require 'Q/ML/DT/lua/dt_cost_evaluation'['evaluate_dt_cost']
+local evaluate_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['evaluate_dt']
 local preprocess_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['preprocess_dt']
 
 
@@ -44,10 +44,12 @@ local function run_dt(args)
   -- load the data
   local T = Q.load_csv(data_file, dofile(meta_data_file))
 
+  local alpha_gain = {}
   local alpha_cost = {}
   local alpha_accuracy = {}
 
   while min_alpha <= max_alpha do
+    local gain = 0
     local cost = 0
     local accuracy = {}
     for i = 1, iterations do
@@ -105,17 +107,20 @@ local function run_dt(args)
       end
 
       -- calculate dt cost
-      cost = cost + evaluate_dt_cost(tree, g_train)
+      local g, c = evaluate_dt(tree, g_train)
+      gain = gain + g
+      cost = cost + c
 
       local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
       -- print("Accuracy: " .. tostring(accuracy))
       accuracy[#accuracy + 1] = acr
     end
+    alpha_gain[min_alpha] = ( gain / iterations )
     alpha_cost[min_alpha] = ( cost / iterations )
     alpha_accuracy[min_alpha] = ml_utils.calc_average(accuracy)
     min_alpha = min_alpha + step_alpha
   end
-  return alpha_accuracy, alpha_cost
+  return alpha_accuracy, alpha_gain, alpha_cost
 end
 
 return run_dt

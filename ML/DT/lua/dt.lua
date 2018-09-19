@@ -34,12 +34,12 @@ local function make_dt(
   alpha -- Scalar, minimum benefit
   )
   local m, n, ng = chk_params(T, g, alpha)
-  local D = {} 
+  local D = {}
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
   n_T = cnts:get_one(0)
   if ng == 1 then
-    n_H = Scalar.new(0, "I8")
+    n_H = Scalar.new(0, "I4")
   else
     n_H = cnts:get_one(1)
   end

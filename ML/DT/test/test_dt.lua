@@ -152,7 +152,7 @@ tests.t5 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local accuracy_table, cost_table = calculate_alpha(args)
+  local accuracy_table, gain_table, cost_table = calculate_alpha(args)
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -168,6 +168,12 @@ tests.t5 = function()
   end
   print("================================================")
   ]]
+
+  print("alpha & gain table")
+  for i, v in pairs(gain_table) do
+    print(i, v)
+  end
+  print("================================================")
   print("alpha & cost table")
   for i, v in pairs(cost_table) do
     print(i, v)
@@ -196,7 +202,7 @@ tests.t6 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local accuracy_table, cost_table = calculate_alpha(args)
+  local accuracy_table, gain_table, cost_table = calculate_alpha(args)
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -212,6 +218,12 @@ tests.t6 = function()
   end
   print("================================================")
   ]]
+
+  print("alpha & gain table")
+  for i, v in pairs(gain_table) do
+    print(i, v)
+  end
+  print("================================================")
   print("alpha & cost table")
   for i, v in pairs(cost_table) do
     print(i, v)
