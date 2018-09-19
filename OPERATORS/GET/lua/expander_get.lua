@@ -50,21 +50,20 @@ local function expander(a, x, y, optargs)
       myvec:flush_buffer() -- tell the vector to flush its buffer
     end
     assert(f3_buf)
-    local f1_len, f1_chunk, nn_f1_chunk
-    local f2_len, f2_chunk, nn_f2_chunk
-    f1_len, f1_chunk, nn_f1_chunk = x:chunk(chunk_idx)
-    f2_len, f2_chunk, nn_f2_chunk = y:chunk(chunk_idx)
-    local f1_cast_as = subs.in1_ctype .. "*"
-    local f2_cast_as = subs.in2_ctype .. "*"
     local f3_cast_as = subs.out_ctype .. "*"
-    assert(f1_len == f2_len)
+
+    local f2_len, f2_ptr = y:get_all()
+
+    local f1_len, f1_chunk, nn_f1_chunk
+    f1_len, f1_chunk, nn_f1_chunk = x:chunk(chunk_idx)
+    local f1_cast_as = subs.in1_ctype .. "*"
+
     if f1_len > 0 then
       local chunk1 = ffi.cast(f1_cast_as,  get_ptr(f1_chunk))
-      local chunk2 = ffi.cast(f2_cast_as,  get_ptr(f2_chunk))
       local chunk3 = ffi.cast(f3_cast_as,  get_ptr(f3_buf))
       local start_time = qc.RDTSC()
-      qc[func_name](chunk1, chunk2, f1_len, f2_len, null_val, chunk3)
-      record_time(start_time, func_name)
+      qc[func_name](chunk1, f2_ptr, f1_len, f2_len, null_val, chunk3)
+      -- TODO record_time(start_time, func_name)
     else
       f3_buf = nil
     end
