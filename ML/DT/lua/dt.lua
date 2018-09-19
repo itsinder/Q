@@ -10,8 +10,8 @@ variable description
 T	- table of m lVectors of length n, representing m features
 g	- goal/target lVector of length n
 alpha	- minimum benefit value of type Scalar 
-n_N	- number of instances classified as negative in goal/target vector
-n_P	- number of instances classified as positive in goal/target vector
+n_T	- number of instances classified as negative (tails) in goal/target vector
+n_H	- number of instances classified as positive (heads) in goal/target vector
 best_k	- index of the feature f' in T for which maximum benefit is observed
 best_sf - feature point from f' where maximun benefit is observed
 best_bf - maximum benefit value
@@ -20,8 +20,8 @@ sf	- feature point from f for which benefit value bf is observed
 
 D	- Decision Tree Table having below fields
 { 
-  n_N,		-- number of negative instances
-  n_P,		-- number of positive instances
+  n_T,		-- number of negative (tails) instances
+  n_H,		-- number of positive (heads) instances
   feature,	-- feature index for the split
   threshold,	-- feature point/value for the split
   left,		-- left decision tree
@@ -33,34 +33,24 @@ local function make_dt(
   g, -- lVector of length n
   alpha -- Scalar, minimum benefit
   )
-  --[[
-  print("===================INFO START================")
-  print("Input table length = " .. tostring(#T))
-  print("Feature length = " .. tostring(T[1]:length()))
-  print("Length of target/goal = " .. tostring(g:length()))
-  print("===================INFO END================")
-  ]]
   local m, n, ng = chk_params(T, g, alpha)
   local D = {} 
   local cnts = Q.numby(g, ng):eval()
-  local n_N, n_P
-  n_N = cnts:get_one(0)
+  local n_T, n_H
+  n_T = cnts:get_one(0)
   if ng == 1 then
-    n_P = Scalar.new(0, "I8")
-    --n_P = 0
+    n_H = Scalar.new(0, "I8")
   else
-    n_P = cnts:get_one(1)
+    n_H = cnts:get_one(1)
   end
-  D.n_N = n_N
-  D.n_P = n_P
-  if n_N:to_num() == 0 or n_P:to_num() == 0 then
+  D.n_T = n_T
+  D.n_H = n_H
+  if n_T:to_num() == 0 or n_H:to_num() == 0 then
     return D
   end
   local best_bf, best_sf, best_k
-  --print("Benefit for each feature is")
   for k, f in pairs(T) do
-    local bf, sf = calc_benefit(f, g, n_N, n_P)
-    --print(bf .. "\t" .. sf .. "\t" .. k)
+    local bf, sf = calc_benefit(f, g, n_T, n_H)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
@@ -107,13 +97,13 @@ local function check_dt(
   if D.left == nil and D.right == nil then
     assert(D.feature == nil)
     assert(D.threshold == nil)
-    assert(D.n_N ~= nil)
-    assert(D.n_P ~= nil)
+    assert(D.n_T ~= nil)
+    assert(D.n_H ~= nil)
   end
 
   if D.left and D.right then
-    assert(D.n_N == D.left.n_N + D.right.n_N)
-    assert(D.n_P == D.left.n_P + D.right.n_P)
+    assert(D.n_T == D.left.n_T + D.right.n_T)
+    assert(D.n_H == D.left.n_H + D.right.n_H)
   end
 
   -- TODO: Add more checks
@@ -132,7 +122,7 @@ local function predict(
 
   while true do
     if D.left == nil and D.right == nil then
-      return D.n_P, D.n_N
+      return D.n_H, D.n_T
     else
       local val = x[D.feature]
       if val:to_num() > D.threshold then
@@ -152,12 +142,12 @@ local function print_dt(
   f,		-- file_descriptor
   col_name	-- table of column names of train dataset
   )
-  local label = "\"n_N=" .. tostring(D.n_N) .. ", n_P=" .. tostring(D.n_P)
-  --print(D.feature, D.threshold, D.n_P, D.n_N)
+  local label = "\"n_T=" .. tostring(D.n_T) .. ", n_H=" .. tostring(D.n_H)
+  --print(D.feature, D.threshold, D.n_H, D.n_T)
   if D.left and D.right then
     label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\\n" .. "benefit=" .. D.benefit .. "\""
-    local left_label = "\"n_N=" .. tostring(D.left.n_N) .. ", n_P=" .. tostring(D.left.n_P)
-    local right_label = "\"n_N=" .. tostring(D.right.n_N) .. ", n_P=" .. tostring(D.right.n_P)
+    local left_label = "\"n_T=" .. tostring(D.left.n_T) .. ", n_H=" .. tostring(D.left.n_H)
+    local right_label = "\"n_T=" .. tostring(D.right.n_T) .. ", n_H=" .. tostring(D.right.n_H)
     if D.left.feature then
       left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
     end

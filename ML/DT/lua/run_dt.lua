@@ -75,9 +75,9 @@ local function run_dt(args)
       for k = 1, m_test do
         x[k] = test[k]:get_one(i-1)
       end
-      local n_P, n_N = predict(tree, x)
+      local n_H, n_T = predict(tree, x)
       local decision
-      if n_P > n_N then
+      if n_H > n_T then
         decision = 1 
       else
         decision = 0

@@ -9,7 +9,7 @@ local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 local predict = require 'Q/ML/DT/lua/dt_cost_evaluation'['predict']
 local evaluate_dt_cost = require 'Q/ML/DT/lua/dt_cost_evaluation'['evaluate_dt_cost']
-local cost_calc_preprocess = require 'Q/ML/DT/lua/dt_cost_evaluation'['cost_calc_preprocess']
+local preprocess_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['preprocess_dt']
 
 
 local function run_dt(args)
@@ -44,8 +44,8 @@ local function run_dt(args)
   -- load the data
   local T = Q.load_csv(data_file, dofile(meta_data_file))
 
-  local alpha_cost_val = {}
-  local alpha_acr = {}
+  local alpha_cost = {}
+  local alpha_accuracy = {}
 
   while min_alpha <= max_alpha do
     local cost = 0
@@ -84,7 +84,8 @@ local function run_dt(args)
       --============== Decision Tree Cost Evaluation ==============
 
       -- perform the preprocess activity
-      cost_calc_preprocess(tree)
+      -- initializes n_H1 and n_T1 to zero
+      preprocess_dt(tree)
 
       -- predict for test samples
       for i = 1, n_test do
@@ -92,9 +93,9 @@ local function run_dt(args)
         for k = 1, m_test do
           x[k] = test[k]:get_one(i-1)
         end
-        local n_P, n_N = predict(tree, x)
+        local n_H, n_T = predict(tree, x)
         local decision
-        if n_P > n_N then
+        if n_H > n_T then
           decision = 1 
         else
           decision = 0
@@ -107,14 +108,14 @@ local function run_dt(args)
       cost = cost + evaluate_dt_cost(tree, g_train)
 
       local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
-      -- print("Accuracy: " .. tostring(acr))
+      -- print("Accuracy: " .. tostring(accuracy))
       accuracy[#accuracy + 1] = acr
     end
-    alpha_cost_val[min_alpha] = ( cost / iterations )
-    alpha_acr[min_alpha] = ml_utils.calc_average(accuracy)
+    alpha_cost[min_alpha] = ( cost / iterations )
+    alpha_accuracy[min_alpha] = ml_utils.calc_average(accuracy)
     min_alpha = min_alpha + step_alpha
   end
-  return alpha_acr, alpha_cost_val
+  return alpha_accuracy, alpha_cost
 end
 
 return run_dt

@@ -6,20 +6,20 @@ local wt_benefit = require 'Q/ML/DT/lua/wt_benefit'
 variable explanation
 f	- feature vector (type lVector)
 g	- target/goal feature (type lVector)
-n_N     - number of instances classified as negative in goal/target vector
-n_P     - number of instances classified as positive in goal/target vector
+n_T     - number of instances classified as negative (tails) in goal/target vector
+n_H     - number of instances classified as positive (heads) in goal/target vector
 ]]
 local function calc_benefit(
   f,
   g,
-  n_N,
-  n_P
+  n_T,
+  n_H
   )
   -- START: Check parameters
-  assert(type(n_N) == "Scalar")
-  assert(type(n_P) == "Scalar", "######$$$$$$$$$$$$$$$$$#")
-  assert(n_N:to_num() >= 0)
-  assert(n_P:to_num() >= 0)
+  assert(type(n_T) == "Scalar")
+  assert(type(n_H) == "Scalar")
+  assert(n_T:to_num() >= 0)
+  assert(n_H:to_num() >= 0)
   assert(type(g) == "lVector")
   assert(type(f) == "lVector")
   -- STOP: Check parameters
@@ -27,7 +27,7 @@ local function calc_benefit(
   --[[
   TODO: steps to follow in benefit calculation
   1. count intervals --> f', h0, h1 = Q.cntinterval(f, g)
-  2. calculate benefit --> b = Q.wtbnfit(h0, h1, n_N, n_P)
+  2. calculate benefit --> b = Q.wtbnfit(h0, h1, n_T, n_H)
   3. get max benefit --> b', _, i = Q.max(b)
   return b', f[i]
   ]]
@@ -46,7 +46,7 @@ local function calc_benefit(
   C[0] = 0
   C[1] = 0
 
-  local n = (n_N + n_P):to_num()
+  local n = (n_T + n_H):to_num()
   local i = 0
 
   while i < n do
@@ -63,7 +63,7 @@ local function calc_benefit(
       C[gi_val] = C[gi_val] + 1
       i = i + 1
     end
-    local f_val_benefit = wt_benefit(C[0], C[1], (n_N:to_num() - C[0]), (n_P:to_num() - C[1]))
+    local f_val_benefit = wt_benefit(C[0], C[1], (n_T:to_num() - C[0]), (n_H:to_num() - C[1]))
     if f_val_benefit > benefit then
       benefit = f_val_benefit
       split_point = f_val

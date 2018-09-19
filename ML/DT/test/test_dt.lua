@@ -173,7 +173,7 @@ tests.t5 = function()
     print(i, v)
   end
   print("================================================")
-  print("alpha & acr table")
+  print("alpha & accuracy table")
   for i, v in pairs(accuracy_table) do
     print(i, v)
   end
@@ -217,7 +217,7 @@ tests.t6 = function()
     print(i, v)
   end
   print("================================================")
-  print("alpha & acr table")
+  print("alpha & accuracy table")
   for i, v in pairs(accuracy_table) do
     print(i, v)
   end
