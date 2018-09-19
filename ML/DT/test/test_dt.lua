@@ -152,7 +152,20 @@ tests.t5 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local accuracy_table, gain_table, cost_table = calculate_alpha(args)
+
+  local result = calculate_alpha(args)
+
+  for i, v in pairs(result) do
+    print(i, v)
+  end
+
+  local accuracy = result['accuracy']
+  local accuracy_std_deviation = result['accuracy_std_deviation']
+  local gain = result['gain']
+  local gain_std_deviation = result['gain_std_deviation']
+  local cost = result['cost']
+  local cost_std_deviation = result['cost_std_deviation']
+  
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -170,20 +183,36 @@ tests.t5 = function()
   ]]
 
   print("alpha & gain table")
-  for i, v in pairs(gain_table) do
+  for i, v in pairs(gain) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost table")
-  for i, v in pairs(cost_table) do
+  for i, v in pairs(cost) do
     print(i, v)
   end
   print("================================================")
   print("alpha & accuracy table")
-  for i, v in pairs(accuracy_table) do
+  for i, v in pairs(accuracy) do
     print(i, v)
   end
   print("================================================")
+  print("alpha & accuracy_std_deviation table")
+  for i, v in pairs(accuracy_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+  print("alpha & gain_std_deviation table")
+  for i, v in pairs(gain_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+  print("alpha & cost_std_deviation table")
+  for i, v in pairs(cost_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+
 end
 
 tests.t6 = function()
@@ -202,7 +231,14 @@ tests.t6 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local accuracy_table, gain_table, cost_table = calculate_alpha(args)
+
+  local accuracy = result['accuracy']
+  local accuracy_std_deviation = result['accuracy_std_deviation']
+  local gain = result['gain']
+  local gain_std_deviation = result['gain_std_deviation']
+  local cost = result['cost']
+  local cost_std_deviation = result['cost_std_deviation']
+
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -220,20 +256,37 @@ tests.t6 = function()
   ]]
 
   print("alpha & gain table")
-  for i, v in pairs(gain_table) do
+  for i, v in pairs(gain) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost table")
-  for i, v in pairs(cost_table) do
+  for i, v in pairs(cost) do
     print(i, v)
   end
   print("================================================")
   print("alpha & accuracy table")
-  for i, v in pairs(accuracy_table) do
+  for i, v in pairs(accuracy) do
     print(i, v)
   end
   print("================================================")
+  --[[
+  print("alpha & accuracy_std_deviation table")
+  for i, v in pairs(accuracy_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+  print("alpha & gain_std_deviation table")
+  for i, v in pairs(gain_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+  print("alpha & cost_std_deviation table")
+  for i, v in pairs(cost_std_deviation) do
+    print(i, v)
+  end
+  print("================================================")
+  ]]
 end
 
 return tests

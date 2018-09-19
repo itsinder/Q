@@ -47,10 +47,13 @@ local function run_dt(args)
   local alpha_gain = {}
   local alpha_cost = {}
   local alpha_accuracy = {}
+  local accuracy_std_deviation = {}
+  local gain_std_deviation = {}
+  local cost_std_deviation = {}
 
   while min_alpha <= max_alpha do
-    local gain = 0
-    local cost = 0
+    local gain = {}
+    local cost = {}
     local accuracy = {}
     for i = 1, iterations do
       -- break into a training set and a testing set
@@ -108,19 +111,30 @@ local function run_dt(args)
 
       -- calculate dt cost
       local g, c = evaluate_dt(tree, g_train)
-      gain = gain + g
-      cost = cost + c
+      gain[#gain+1] = g
+      cost[#cost+1] = c
 
+      -- calculate accuracy
       local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
       -- print("Accuracy: " .. tostring(accuracy))
       accuracy[#accuracy + 1] = acr
     end
-    alpha_gain[min_alpha] = ( gain / iterations )
-    alpha_cost[min_alpha] = ( cost / iterations )
+    alpha_gain[min_alpha] = ml_utils.calc_average(gain)
+    gain_std_deviation[min_alpha] = ml_utils.calc_std_deviation(gain)
+    alpha_cost[min_alpha] = ml_utils.calc_average(cost)
+    cost_std_deviation[min_alpha] = ml_utils.calc_std_deviation(cost)
     alpha_accuracy[min_alpha] = ml_utils.calc_average(accuracy)
+    accuracy_std_deviation[min_alpha] = ml_utils.calc_std_deviation(accuracy)
     min_alpha = min_alpha + step_alpha
   end
-  return alpha_accuracy, alpha_gain, alpha_cost
+  local result = {}
+  result['accuracy'] = alpha_accuracy
+  result['gain'] = alpha_gain
+  result['cost'] = alpha_cost
+  result['accuracy_std_deviation'] = accuracy_std_deviation
+  result['gain_std_deviation'] = gain_std_deviation
+  result['cost_std_deviation'] = cost_std_deviation
+  return result
 end
 
 return run_dt

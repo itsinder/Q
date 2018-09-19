@@ -13,18 +13,31 @@ local calc_accuracy = function(actual_val, predicted_val)
   return (correct/#actual_val)*100
 end
 
-utils.calc_accuracy = calc_accuracy
 
-local calc_average = function(accuracy_list)
+local calc_average = function(in_list)
   local average = 0
-  for i = 1, #accuracy_list do
-    average = average + accuracy_list[i]
+  for i = 1, #in_list do
+    average = average + in_list[i]
   end
-  average = average / #accuracy_list
+  average = average / #in_list
   return average
 end
 
+
+local calc_std_deviation = function(in_list)
+  local mean = calc_average(in_list)
+  local mean_squared_dst = 0
+  for i = 1, #in_list do
+    mean_squared_dst = mean_squared_dst + ( ( in_list[i] - mean ) * ( in_list[i] - mean ) )
+  end
+  local std_deviation = math.sqrt(mean_squared_dst / #in_list)
+  return std_deviation
+end
+
+
+utils.calc_accuracy = calc_accuracy
 utils.calc_average = calc_average
+utils.calc_std_deviation = calc_std_deviation
 
 return utils
 
