@@ -14,7 +14,11 @@ ${fn}(
       ${dst_fld_ctype} *dst_fld,
       uint64_t *nn_dst_fld,
       ${dst_lnk_ctype} *dst_lnk,
-      uint64_t nR_dst
+      uint64_t nR_dst,
+      uint64_t *ptr_didx,
+      uint64_t nC,
+      bool *brk_n_write,
+      uint64_t idx
       );
    ]],
    definition = [[
@@ -42,7 +46,11 @@ ${fn}(
       ${dst_fld_ctype} *dst_fld,
       uint64_t *nn_dst_fld, // for exists join_type
       ${dst_lnk_ctype} *dst_lnk, // cannot have a nn field
-      uint64_t nR_dst
+      uint64_t nR_dst,
+      uint64_t *ptr_didx,
+      uint64_t nC,
+      bool *brk_n_write,
+      uint64_t idx
       )
 {
   int status = 0;
@@ -50,8 +58,8 @@ ${fn}(
   //uint64_t dst_idx = 0;
   //int32_t sval = src_fld[src_idx];
   //int32_t dval = dst_fld[dst_idx];
-  uint64_t lb = 0;
-  uint64_t ub = nR_dst-1;
+  uint64_t lb = *ptr_didx;
+  uint64_t ub = nR_dst;
   if ( src_fld == NULL ) { go_BYE(-1); }
   if ( src_lnk == NULL ) { go_BYE(-1); }
   if ( strcmp(join_type_op, "exists") == 0 ) { 
@@ -89,11 +97,12 @@ ${fn}(
     //  i++;
     //  continue;
     //}
+    if ( i == nC ) { break; }
     for ( ; j < nR_src; ) {
       // if dst_lnk's i th value is greater than src_lnk's nR_src(last index) 
       // i.e. dst_lnk's i th value do not exists in whole src_lnk
       if ( dst_lnk[i] > src_lnk[nR_src-1] ) {
-        i++;
+        i = i + nR_src-1;
         break;
       }
       if ( src_lnk[j] < dst_lnk[i] ) {
@@ -103,17 +112,18 @@ ${fn}(
         nn_dst_fld[i] = 1;
         if ( first ) {
           if ( ( join_type == MIN_IDX ) || ( join_type == MAX_IDX ) ) {
-            dst_fld[i] = j;
+            // already got the max or min idx
+            if ( dst_fld[i] == -1 ) {
+              dst_fld[i] = idx + j;
+            }
             //dst_fld[i] = offset + j;
           }
           else {
             dst_fld[i] = src_fld[j];
           }
-          //printf("\ni = %ld first value =%ld\n",i, dst_fld[i]);
           first = false;
         }
         else {
-          //printf("\nI= %ld second call%ld",i, src_fld[j]);
           if ( join_type == MIN ) {
             dst_fld[i] = mcr_min(dst_fld[i], src_fld[j]);
           }
@@ -121,11 +131,8 @@ ${fn}(
             dst_fld[i] = mcr_max(dst_fld[i], src_fld[j]);
           }
           else if ( join_type == SUM ) {
-            //printf("\n$$$=%ld", dst_fld[i]);
-            //printf("\n###=%ld", src_fld[j]);
             ${dst_fld_ctype} sum_res = dst_fld[i] + src_fld[j];
             dst_fld[i] =  sum_res;
-            //printf("\n%ld sum %ld for dst value %ld", sum_res, dst_fld[i], i );
           }
           //else if ( join_type == AND ) {
           //  dst_fld[i] = dst_fld[i] & src_fld[j];
@@ -134,8 +141,10 @@ ${fn}(
           //  dst_fld[i] = dst_fld[i] | src_fld[j];
           //}
           else if ( join_type == MAX_IDX ) {
-            dst_fld[i] = j;
-            //dst_fld[i] = offset + j;
+            if ( dst_fld[i] == -1 ) {
+              dst_fld[i] = idx + j;
+              //dst_fld[i] = offset + j;
+            }
           }
         }
         j++;
@@ -144,10 +153,14 @@ ${fn}(
         i++;
         //setting "first" flag to true for each i th dst_lnk value
         first = true;
+        break;
       }
     }
+    if(j == nR_src) { break; }
   }
+  if(*ptr_aidx == j) { *brk_n_write = true; *ptr_aidx = j; goto BYE; }
   *ptr_aidx = j;
+  *ptr_didx = i;
 BYE:
   return status;
 }
