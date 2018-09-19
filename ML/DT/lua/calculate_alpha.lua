@@ -6,10 +6,10 @@ local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
-local predict = require 'Q/ML/DT/lua/dt_cost_evaluation'['predict']
-local print_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['print_dt']
-local evaluate_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['evaluate_dt']
-local preprocess_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['preprocess_dt']
+local predict = require 'Q/ML/DT/lua/evaluate_dt'['predict']
+local print_dt = require 'Q/ML/DT/lua/evaluate_dt'['print_dt']
+local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
+local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
 
 
 local function run_dt(args)

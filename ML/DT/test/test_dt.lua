@@ -1,5 +1,6 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
+local tablex = require 'pl.tablex'
 local Scalar = require 'libsclr'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
 local calculate_alpha = require 'Q/ML/DT/lua/calculate_alpha'
@@ -145,19 +146,16 @@ tests.t5 = function()
   args.meta_data_file = metadata_file
   args.data_file = data_file
   args.goal = "Survived"
-  args.iterations = 3
+  args.iterations = 10
   args.min_alpha = 0.2
   args.max_alpha = 0.5
-  args.step_alpha = 0.1
+  args.step_alpha = 0.05
+  args.split_ratio = 0.5
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
 
   local result = calculate_alpha(args)
-
-  for i, v in pairs(result) do
-    print(i, v)
-  end
 
   local accuracy = result['accuracy']
   local accuracy_std_deviation = result['accuracy_std_deviation']
@@ -183,32 +181,32 @@ tests.t5 = function()
   ]]
 
   print("alpha & gain table")
-  for i, v in pairs(gain) do
+  for i, v in tablex.sort(gain) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost table")
-  for i, v in pairs(cost) do
+  for i, v in tablex.sort(cost) do
     print(i, v)
   end
   print("================================================")
   print("alpha & accuracy table")
-  for i, v in pairs(accuracy) do
+  for i, v in tablex.sort(accuracy) do
     print(i, v)
   end
   print("================================================")
   print("alpha & accuracy_std_deviation table")
-  for i, v in pairs(accuracy_std_deviation) do
+  for i, v in tablex.sort(accuracy_std_deviation) do
     print(i, v)
   end
   print("================================================")
   print("alpha & gain_std_deviation table")
-  for i, v in pairs(gain_std_deviation) do
+  for i, v in tablex.sort(gain_std_deviation) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost_std_deviation table")
-  for i, v in pairs(cost_std_deviation) do
+  for i, v in tablex.sort(cost_std_deviation) do
     print(i, v)
   end
   print("================================================")
@@ -224,13 +222,16 @@ tests.t6 = function()
   args.meta_data_file = metadata_file
   args.data_file = data_file
   args.goal = "class"
-  args.iterations = 3
+  args.iterations = 10
   args.min_alpha = 0.2
   args.max_alpha = 0.5
-  args.step_alpha = 0.1
+  args.step_alpha = 0.01
+  args.split_ratio = 0.5
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
+
+  local result = calculate_alpha(args)
 
   local accuracy = result['accuracy']
   local accuracy_std_deviation = result['accuracy_std_deviation']
@@ -256,33 +257,33 @@ tests.t6 = function()
   ]]
 
   print("alpha & gain table")
-  for i, v in pairs(gain) do
+  for i, v in tablex.sort(gain) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost table")
-  for i, v in pairs(cost) do
+  for i, v in tablex.sort(cost) do
     print(i, v)
   end
   print("================================================")
   print("alpha & accuracy table")
-  for i, v in pairs(accuracy) do
+  for i, v in tablex.sort(accuracy) do
     print(i, v)
   end
   print("================================================")
   --[[
   print("alpha & accuracy_std_deviation table")
-  for i, v in pairs(accuracy_std_deviation) do
+  for i, v in tablex.sort(accuracy_std_deviation) do
     print(i, v)
   end
   print("================================================")
   print("alpha & gain_std_deviation table")
-  for i, v in pairs(gain_std_deviation) do
+  for i, v in tablex.sort(gain_std_deviation) do
     print(i, v)
   end
   print("================================================")
   print("alpha & cost_std_deviation table")
-  for i, v in pairs(cost_std_deviation) do
+  for i, v in tablex.sort(cost_std_deviation) do
     print(i, v)
   end
   print("================================================")
