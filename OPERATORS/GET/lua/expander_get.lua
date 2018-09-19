@@ -18,13 +18,14 @@ local function expander(a, x, y, optargs)
   if ( optargs ) then 
     assert(type(optargs) == "table") 
     if ( optargs.null_val ) then
-      local null_val = optargs.null_val
+      null_val = optargs.null_val
     end
   end
   local status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype(), 
     null_val, optargs)
   if not status then print(subs) end
-  local null_val = assert(subs.null_val)
+  null_val = assert(subs.null_val)
+
   assert(type(null_val) == "Scalar")
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
@@ -53,6 +54,10 @@ local function expander(a, x, y, optargs)
     local f3_cast_as = subs.out_ctype .. "*"
 
     local f2_len, f2_ptr = y:get_all()
+    local f2_cast_as = subs.in2_ctype .. "*"
+    local ptr2 = ffi.cast(f2_cast_as,  get_ptr(f2_ptr))
+
+    local  ptr_null_val = ffi.cast(f2_cast_as,  get_ptr(null_val:to_cmem()))
 
     local f1_len, f1_chunk, nn_f1_chunk
     f1_len, f1_chunk, nn_f1_chunk = x:chunk(chunk_idx)
@@ -62,7 +67,7 @@ local function expander(a, x, y, optargs)
       local chunk1 = ffi.cast(f1_cast_as,  get_ptr(f1_chunk))
       local chunk3 = ffi.cast(f3_cast_as,  get_ptr(f3_buf))
       local start_time = qc.RDTSC()
-      qc[func_name](chunk1, f2_ptr, f1_len, f2_len, null_val, chunk3)
+      qc[func_name](chunk1, ptr2, f1_len, f2_len, ptr_null_val, chunk3)
       -- TODO record_time(start_time, func_name)
     else
       f3_buf = nil

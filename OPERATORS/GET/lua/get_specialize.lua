@@ -2,7 +2,8 @@
 return function (
   in1_qtype, 
   in2_qtype,
-  null_val
+  null_val,
+  optargs
   )
   local to_scalar = require 'Q/UTILS/lua/to_scalar'
   local qconsts = require 'Q/UTILS/lua/q_consts'

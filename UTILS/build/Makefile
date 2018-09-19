@@ -145,6 +145,7 @@ corrm: q_basic
 q_operators: f1f2opf3 \
 	f1s1opf2 \
 	sort \
+	get \
 	idx_sort \
 	s_to_f \
 	f_to_s \
