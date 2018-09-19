@@ -19,6 +19,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/GET/lua clean
 	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua clean
 	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua clean
@@ -113,6 +114,9 @@ f1s1opf2: q_basic
 
 sort: q_basic
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+
+get: q_basic
+	make -C ${BASE_PATH}/OPERATORS/GET/lua
 
 idx_sort: q_basic
 	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
