@@ -56,6 +56,9 @@ local function calc_gain_and_cost(
     l_gain[#l_gain+1] = g
     l_cost[#l_cost+1] = c
     l_weight[#l_weight+1] = w
+
+    D.cost = c
+    D.gain = g
   end
 end
 
@@ -142,9 +145,48 @@ local function predict(
 end
 
 
+local function print_dt(
+  D,            -- prepared decision tree
+  f,            -- file_descriptor
+  col_name      -- table of column names of train dataset
+  )
+  local label = "\"n_T0=" .. tostring(D.n_T) .. ", n_H0=" .. tostring(D.n_H)
+  --print(D.feature, D.threshold, D.n_H, D.n_T)
+  if D.left and D.right then
+    label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\\n" .. "benefit=" .. D.benefit .. "\""
+    local left_label = "\"n_T0=" .. tostring(D.left.n_T) .. ", n_H0=" .. tostring(D.left.n_H)
+    local right_label = "\"n_T0=" .. tostring(D.right.n_T) .. ", n_H0=" .. tostring(D.right.n_H)
+    if D.left.feature then
+      left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
+    else
+      left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
+      left_label = left_label .. "\\n" .. "cost=" .. tostring(D.left.cost) .. ", gain=" .. tostring(D.left.gain)
+      -- leaf node
+    end
+    left_label = left_label .. "\""
+    if D.right.feature then
+      right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
+    else
+      right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
+      right_label = right_label .. "\\n" .. "cost=" .. tostring(D.right.cost) .. ", gain=" .. tostring(D.right.gain)
+    end
+    right_label = right_label .. "\""
+    f:write(label .. " -> " .. left_label .. "\n")
+    --print(label .. " -> " .. left_label)
+    f:write(label .. " -> " .. right_label .. "\n")
+    --print(label .. " -> " .. right_label)
+
+    print_dt(D.left, f, col_name)
+    print_dt(D.right, f, col_name)
+  else
+    -- nothing to do
+  end
+end
+
+
 fns.predict = predict
 fns.preprocess_dt = preprocess_dt
 fns.evaluate_dt = evaluate_dt
-
+fns.print_dt = print_dt
 
 return fns

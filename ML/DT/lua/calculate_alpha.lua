@@ -3,11 +3,11 @@ local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
 local make_dt = require 'Q/ML/DT/lua/dt'['make_dt']
 local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
-local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 local predict = require 'Q/ML/DT/lua/dt_cost_evaluation'['predict']
+local print_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['print_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['evaluate_dt']
 local preprocess_dt = require 'Q/ML/DT/lua/dt_cost_evaluation'['preprocess_dt']
 
@@ -55,9 +55,10 @@ local function run_dt(args)
     local gain = {}
     local cost = {}
     local accuracy = {}
+    local is_first = true
     for i = 1, iterations do
       -- break into a training set and a testing set
-      local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
+      local Train, Test = split_train_test(T, split_ratio, feature_of_interesti, i*100)
       local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
       local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
@@ -76,15 +77,6 @@ local function run_dt(args)
 
       -- verify the decision tree
       check_dt(tree)
-
-      -- print decision tree
-      --[[
-      local f = io.open("graphviz.txt", "a")
-      f:write("digraph {\n")
-      print_dt(tree, f, train_col_name)
-      f:write("}\n")
-      f:close()
-      ]]
 
       --============== Decision Tree Cost Evaluation ==============
 
@@ -113,6 +105,17 @@ local function run_dt(args)
       local g, c = evaluate_dt(tree, g_train)
       gain[#gain+1] = g
       cost[#cost+1] = c
+
+      -- print decision tree
+      if is_first then
+        local file_name = tostring(min_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
+        local f = io.open(file_name, "a")
+        f:write("digraph {\n")
+        print_dt(tree, f, train_col_name)
+        f:write("}\n")
+        f:close()
+        is_first = false
+      end
 
       -- calculate accuracy
       local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
