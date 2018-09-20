@@ -36,11 +36,21 @@ local function chk_params(
   -- assert(minval == Scalar.new(0, "I4"))
   local maxval, numval = Q.max(g):eval()
   local ng
+
+  -- currently assuming g values to be 0 and 1
+  local sum = Q.sum(g):eval()
+  if sum:to_num() > 0 then
+    ng = 2
+  else
+    ng = 1
+  end
+  --[[
   if maxval > minval then
     ng = maxval:to_num() - minval:to_num() + 1 -- number of values of goal attr
   else
     ng = maxval:to_num() + 1
   end
+  ]]
   -- TODO: do we require below assert
   --assert(ng > 1)
   assert(ng <= 4) -- arbitary limit for now 

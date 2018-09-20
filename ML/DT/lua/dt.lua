@@ -35,6 +35,34 @@ local function make_dt(
   )
   local m, n, ng = chk_params(T, g, alpha)
   local D = {}
+
+  --[[
+  local ng_verify
+  local sum = Q.sum(g):eval()
+  if sum:to_num() > 0 then
+    ng_verify = 2
+  else
+    ng_verify = 1
+  end
+
+  local minval, _, _ = Q.min(g):eval()
+  local maxval, _, _ = Q.max(g):eval()
+  if maxval > minval then
+    ng_verify = maxval:to_num() - minval:to_num() + 1
+  elseif maxval == minval then
+    ng_verify = maxval:to_num() + 1
+  end
+  if ng_verify ~= ng then
+    print(Q.sum(g):eval())
+    print(ng_verify, ng)
+    print(minval, maxval)
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    Q.print_csv(g)
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+  end
+  assert(ng_verify == ng)
+  ]]
+
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
   n_T = cnts:get_one(0)
@@ -68,10 +96,12 @@ local function make_dt(
     D.benefit = best_bf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x):eval()
-      T_R[k] = Q.where(f, Q.vnot(x)):eval()
     end
     g_L = Q.where(g, x):eval()
     D.left  = make_dt(T_L, g_L, alpha)
+    for k, f in pairs(T) do
+      T_R[k] = Q.where(f, Q.vnot(x)):eval()
+    end
     g_R = Q.where(g, Q.vnot(x)):eval()
     D.right = make_dt(T_R, g_R, alpha)
   end
