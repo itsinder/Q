@@ -149,7 +149,7 @@ tests.t5 = function()
   args.iterations = 10
   args.min_alpha = 0.2
   args.max_alpha = 0.5
-  args.step_alpha = 0.05
+  args.step_alpha = 0.01
   args.split_ratio = 0.5
 
   Vector.reset_timers()

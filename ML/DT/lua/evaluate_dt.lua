@@ -20,6 +20,7 @@ local function calc_gain_and_cost(
   else
     local w = D.n_H1:to_num() + D.n_T1:to_num() -- weight at leaf node
     if w == 0 then
+      -- maintain the count here, how many times this situation is occured for debugging
       return
     end
 
@@ -40,11 +41,14 @@ local function calc_gain_and_cost(
     local o_H_g = ( n_T / n_H ) -- odds of betting head (used in gain calcuation)
     local o_T_g = ( n_H / n_T ) -- odds of betting tail (used in gain calcuation)
 
+    local w_H0 = ( D.n_H / ( D.n_H + D.n_T ) ):to_num() -- weight of positives (heads) from training samples at visited leaf node
+    local w_T0 = ( D.n_T / ( D.n_H + D.n_T ) ):to_num() -- weight of negatives (tails) from training samples at visited leaf node
+
     local w_H1 = ( D.n_H1 / ( D.n_H1 + D.n_T1 ) ):to_num() -- weight of positives (heads) from testing samples at visited leaf node
     local w_T1 = ( D.n_T1 / ( D.n_H1 + D.n_T1 ) ):to_num() -- weight of negatives (tails) from testing samples at visited leaf node
 
-    local g_H = ( w_H1 * o_H_g ) + ( w_T1 * (-1) ) -- gain with betting head
-    local g_T = ( w_H1 * o_T_g ) + ( w_H1 * (-1) ) -- gain with betting tail
+    local g_H = ( w_H0 * o_H_g ) + ( w_T0 * (-1) ) -- gain with betting head
+    local g_T = ( w_T0 * o_T_g ) + ( w_H0 * (-1) ) -- gain with betting tail
 
     local g = math.max(g_H, g_T) -- gain at leaf node
 
