@@ -65,8 +65,6 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   assert(type(subs) == "table")
-  local pl = require 'pl.pretty'
-  pl.dump(subs)
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
   
@@ -79,13 +77,14 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   local a_chunk_idx = 0
   local nn_dst_fld
   local brk_n_write
+  local first
   
   local function join_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == a_chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
-      dst_fld = assert(cmem.new(sz_dst_in_bytes))
+      dst_fld = assert(cmem.new(sz_dst_in_bytes, subs.dst_fld_qtype))
       aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
@@ -98,6 +97,9 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
       brk_n_write = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
       brk_n_write = ffi.cast("bool *", brk_n_write)
       
+      first = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
+      first = ffi.cast("bool *", first)
+
       first_call = false
     end
     
@@ -106,18 +108,16 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
       dst_fld:set_min()
     elseif join_type == "min" then
       dst_fld:set_max()
---    elseif join_type == "max_idx" or join_type == "min_idx" then
---      --initialize dst_fld to -1
---      dst_fld = ffi.cast(qconsts.qtypes[subs.dst_fld_qtype].ctype .. "*", get_ptr(dst_fld))
---      for i = 0, dst_lnk:length() do
---        dst_fld[i] = -1
---      end
+    elseif join_type == "max_idx" or join_type == "min_idx" then
+      -- initialize dst_fld to -1
+      dst_fld:set_min()
     else
       dst_fld:zero()
     end
     nn_dst_fld:zero()
     
     brk_n_write[0] = false
+    first[0] = true
     
     repeat
       local c_chunk_idx = math.floor(tonumber(didx[0])/qconsts.chunk_size)
@@ -142,18 +142,16 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
       local casted_c_buf   = ffi.cast( qconsts.qtypes[dst_lnk:fldtype()].ctype .. "*",  get_ptr(c_chunk))
       local casted_out_buf = ffi.cast( qconsts.qtypes[subs.dst_fld_qtype].ctype .. "*",  get_ptr(dst_fld))
       local casted_out_nn_buf = ffi.cast( "uint64_t *",  get_ptr(nn_dst_fld))
-      print(func_name)
       
-      local status = qc[func_name](join_type, casted_b_chunk, casted_a_chunk, aidx, a_len, casted_out_buf, casted_out_nn_buf, casted_c_buf, c_len, didx, sz_out, brk_n_write, vec_pos)
+      local status = qc[func_name](join_type, casted_b_chunk, casted_a_chunk, aidx, a_len, casted_out_buf, casted_out_nn_buf, casted_c_buf, c_len, didx, sz_out, brk_n_write, vec_pos, first)
       assert(status == 0, "C error in JOIN")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
       end
-      print("didx", didx[0])
       --TODO: need to handle dst_fld:length() > chunk_size
       -- if didx is above chunk_size
-    until ( tonumber(didx[0]) == c_len and brk_n_write[0] == true)
+    until ( tonumber(didx[0]) == c_len  and brk_n_write[0] == true)
     return dst_lnk:length(), dst_fld, nil
   end
   return lVector( { gen = join_gen, has_nulls = false, qtype = subs.dst_fld_qtype } )

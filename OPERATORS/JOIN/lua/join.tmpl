@@ -18,7 +18,8 @@ ${fn}(
       uint64_t *ptr_didx,
       uint64_t nC,
       bool *brk_n_write,
-      uint64_t idx
+      uint64_t idx,
+      bool *first_dst
       );
    ]],
    definition = [[
@@ -50,7 +51,8 @@ ${fn}(
       uint64_t *ptr_didx,
       uint64_t nC,
       bool *brk_n_write,
-      uint64_t idx
+      uint64_t idx,
+      bool *first_dst
       )
 {
   int status = 0;
@@ -58,6 +60,7 @@ ${fn}(
   //uint64_t dst_idx = 0;
   //int32_t sval = src_fld[src_idx];
   //int32_t dval = dst_fld[dst_idx];
+  bool first = *first_dst;
   uint64_t lb = *ptr_didx;
   uint64_t ub = nR_dst;
   if ( src_fld == NULL ) { go_BYE(-1); }
@@ -86,7 +89,6 @@ ${fn}(
   uint64_t i;
   uint64_t j = *ptr_aidx;
   for ( i = lb; i < ub; ) {
-    bool first = true;
     nn_dst_fld[i] = 0;
     // If current value same as previous, re-use earlier result
     //if ( ( i > 0 ) && ( dst_fld[i] == dst_fld[i-1] ) ) {
@@ -112,8 +114,9 @@ ${fn}(
         nn_dst_fld[i] = 1;
         if ( first ) {
           if ( ( join_type == MIN_IDX ) || ( join_type == MAX_IDX ) ) {
-            // already got the max or min idx
-            if ( dst_fld[i] == -1 ) {
+            // check if already got the max or min idx
+            if ( dst_fld[i] == ${initial_val} ) {
+              //TODO: indexing to start from 1?
               dst_fld[i] = idx + j;
             }
             //dst_fld[i] = offset + j;
@@ -141,10 +144,8 @@ ${fn}(
           //  dst_fld[i] = dst_fld[i] | src_fld[j];
           //}
           else if ( join_type == MAX_IDX ) {
-            if ( dst_fld[i] == -1 ) {
               dst_fld[i] = idx + j;
               //dst_fld[i] = offset + j;
-            }
           }
         }
         j++;
@@ -161,6 +162,7 @@ ${fn}(
   if(*ptr_aidx == j) { *brk_n_write = true; *ptr_aidx = j; goto BYE; }
   *ptr_aidx = j;
   *ptr_didx = i;
+  *first_dst = first;
 BYE:
   return status;
 }

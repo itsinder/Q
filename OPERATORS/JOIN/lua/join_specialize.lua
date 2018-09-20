@@ -22,5 +22,15 @@ return function (
   subs.dst_fld_ctype = qconsts.qtypes[dst_fld_type].ctype
   subs.fn = "join" .. op .. "_" .. src_lnk_type .. "_" .. src_fld_type .. "_" .. 
   dst_lnk_type .. "_".. dst_fld_type
+  if ( dst_fld_type == "I1" ) then subs.initial_val = "INT8_MIN" end
+  if ( dst_fld_type == "I2" ) then subs.initial_val = "INT16_MIN" end
+  if ( dst_fld_type == "I4" ) then subs.initial_val = "INT32_MIN" end
+  if ( dst_fld_type == "I8" ) then subs.initial_val = "INT64_MIN" end
+  -- Updated the initial val for F4 and F8
+  -- FLT_MIN and DBL_MIN have minimum, normalized, positive value of float and double
+  -- so for negative values in input vector, these are not appropriate initial values
+  if ( dst_fld_type == "F4" ) then subs.initial_val = "-FLT_MAX-1" end
+  if ( dst_fld_type == "F8" ) then subs.initial_val = "-DBL_MAX-1" end
+  assert(subs.initial_val)
   return subs, tmpl
 end
