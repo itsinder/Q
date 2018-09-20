@@ -1,82 +1,80 @@
-local function expander(a, x, y, optargs)
-  local lVector     = require 'Q/RUNTIME/lua/lVector'
-  local base_qtype  = require 'Q/UTILS/lua/is_base_qtype'
-  local qconsts     = require 'Q/UTILS/lua/q_consts'
-  local ffi         = require 'Q/UTILS/lua/q_ffi'
-  local get_ptr     = require 'Q/UTILS/lua/get_ptr'
-  local cmem        = require 'libcmem'
-  local Scalar      = require 'libsclr'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
+local lVector = require 'Q/RUNTIME/lua/lVector'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc      = require 'Q/UTILS/lua/q_core'
+local cmem    = require 'libcmem'
+local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local qtils = require 'Q/QTILS/lua/is_sorted'
+local sort = require 'Q/OPERATORS/SORT/lua/sort'
 
-  assert(a and type(a) == "string")
-  assert(x and type(x) == "lVector", "x must be a Vector")
-  assert(y and type(y) == "lVector", "y must be a Vector")
-  assert(y:is_eov(), "y must be materialized")
-
-  local sp_fn_name = "Q/OPERATORS/GET/lua/" .. a .. "_specialize"
+local function expander_f1opf2f3(op, x)
+  -- Verification
+  assert(op == "split")
+  assert(type(x) == "lVector", "a must be a lVector ")
+  
+  local sp_fn_name = "Q/OPERATORS/F1OPF2F3/lua/split_specialize"
   local spfn = assert(require(sp_fn_name))
-  local null_val
-  if ( optargs ) then 
-    assert(type(optargs) == "table") 
-    if ( optargs.null_val ) then
-      null_val = optargs.null_val
-    end
-  end
-  local status, subs, tmpl = pcall(spfn, x:fldtype(), y:fldtype(), 
-    null_val, optargs)
+
+  local status, subs, tmpl = pcall(spfn, x:fldtype())
   if not status then print(subs) end
-  null_val = assert(subs.null_val)
-
-  assert(type(null_val) == "Scalar")
-  assert(status, "Error in specializer " .. sp_fn_name)
+  assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
-  assert(qc[func_name], "Symbol not available" .. func_name)
-
-  local f3_qtype = assert(subs.out_qtype)
-  local f3_width = qconsts.qtypes[f3_qtype].width
-  local buf_sz = qconsts.chunk_size * f3_width
-  local f3_buf = nil
-
+  assert(qc[func_name], "Symbol not defined " .. func_name)
+  
+  local shift = subs.shift
+  assert(type(shift) == "number")
+  assert(shift > 0)
+  local sz_out          = qconsts.chunk_size 
+  local out_qtype = subs.out_qtype
+  local sz_out_in_bytes = sz_out * qconsts.qtypes[out_qtype].width
+  local out1_buf = nil
+  local out2_buf = nil
   local first_call = true
+  
+  local out1_vec = lVector({gen=true, has_nulls=false, qtype=out_qtype} )
+  local out2_vec = lVector({gen=true, has_nulls=false, qtype=out_qtype} )
+
   local chunk_idx = 0
-  local myvec 
-  local f3_gen = function(chunk_num)
-    -- Adding assert on chunk_idx to have sync between expected 
-    -- chunk_num and generator's chunk_idx state
+  local function f1opf2f3_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
     if ( first_call ) then 
+      -- allocate buffer for output
+      out1_buf = assert(cmem.new(sz_out_in_bytes))
+      out2_buf = assert(cmem.new(sz_out_in_bytes))
       first_call = false
-      f3_buf = assert(cmem.new(buf_sz, f3_qtype))
-      myvec:no_memcpy(f3_buf) -- hand control of this f3_buf to the vector 
-    else
-      myvec:flush_buffer() -- tell the vector to flush its buffer
     end
-    assert(f3_buf)
-    local f3_cast_as = subs.out_ctype .. "*"
-
-    local f2_len, f2_ptr = y:get_all()
-    local f2_cast_as = subs.in2_ctype .. "*"
-    local ptr2 = ffi.cast(f2_cast_as,  get_ptr(f2_ptr))
-
-    local  ptr_null_val = ffi.cast(f2_cast_as,  get_ptr(null_val:to_cmem()))
-
-    local f1_len, f1_chunk, nn_f1_chunk
-    f1_len, f1_chunk, nn_f1_chunk = x:chunk(chunk_idx)
-    local f1_cast_as = subs.in1_ctype .. "*"
-
-    if f1_len > 0 then
-      local chunk1 = ffi.cast(f1_cast_as,  get_ptr(f1_chunk))
-      local chunk3 = ffi.cast(f3_cast_as,  get_ptr(f3_buf))
-      local start_time = qc.RDTSC()
-      qc[func_name](chunk1, ptr2, f1_len, f2_len, ptr_null_val, chunk3)
-      -- TODO record_time(start_time, func_name)
-    else
-      f3_buf = nil
+    
+    local in_len, in_chunk, in_nn_chunk = x:chunk(chunk_idx)
+    if ( in_len == 0 ) then 
+      out1_vec:eov()
+      out2_vec:eov()
+      return nil
     end
-    chunk_idx = chunk_idx + 1
-    return f1_len, f3_buf
+    assert(in_nn_chunk == nil, "nulls not supported as yet")
+    
+    local in_cast_as  = subs.in_ctype  .. "*"
+    local out_cast_as = subs.out_ctype .. "*"
+    local cst_in_chunk = ffi.cast(in_cast_as,  get_ptr(in_chunk))
+    local cst_out1_buf = ffi.cast(out_cast_as, get_ptr(out1_buf))
+    local cst_out2_buf = ffi.cast(out_cast_as, get_ptr(out2_buf))
+
+    local start_time = qc.RDTSC()
+    local status = qc[func_name](cst_in_chunk, in_len, shift,
+      cst_out1_buf, cst_out2_buf)
+    -- TODO record_time(start_time, func_name)
+    assert(status == 0, "C error in split")
+
+    -- Write values to vector
+    out1_vec:put_chunk(out1_buf, nil, in_len)
+    out2_vec:put_chunk(out2_buf, nil, in_len)
+    local is_put_chunk = true
+    return nil, nil, nil, is_put_chunk
+    -- TODO P1 What do we return here?
   end
-  myvec = lVector{gen=f3_gen, nn=false, qtype=f3_qtype, has_nulls=false}
-  return myvec
+  out1_vec:set_generator(f1opf2f3_gen)
+  out2_vec:set_generator(f1opf2f3_gen)
+  return out1_vec, out2_vec
 end
 
-return expander
+return expander_f1opf2f3

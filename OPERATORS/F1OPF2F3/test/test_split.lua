@@ -1,39 +1,32 @@
 local Q         = require 'Q'
-local qconsts	= require 'Q/UTILS/lua/q_consts'
-local get_ptr	= require 'Q/UTILS/lua/get_ptr'
-local Scalar    = require 'libsclr'
-
 require 'Q/UTILS/lua/strict'
-
 local tests = {}
 
 tests.t1 = function()
-  local x_length = 65
-  local y_length = 80
+  local n = 65
 
-  local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
-  local y = Q.seq( {start = 2, by = 2, qtype = "I4", len = y_length} )
-  local exp_z = Q.seq( {start = 4, by = 2, qtype = "I4", len = x_length} )
-  y:eval()
+  local x = Q.seq( {start = 0, by = 1, qtype = "I4", len = n} )
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = n} )
+  local z = Q.concat(x, y)
+  local x1, y1 = Q.split(z)
+  x1:eval()
+  y1:eval() -- TODO Why is this needed? Should not be
 
-  local z = Q.get(x, y)
-  -- Q.print_csv({x, z, exp_z})
-  local n1, n2 = Q.sum(Q.vveq(z, exp_z)):eval()
-  assert(n1:to_num() == x_length)
-  assert(n2:to_num() == x_length)
+  assert(x1:fldtype() == x:fldtype())
+  assert(y1:fldtype() == y:fldtype())
+
+  assert(x1:length() == x:length())
+  assert(y1:length() == y:length())
+
+  -- Q.print_csv({x, y, z, x1, y1})
+
+  local n1, n2 = Q.sum(Q.vveq(x, x1)):eval()
+  assert(n1:to_num() == n)
+  assert(n2:to_num() == n)
+  local n1, n2 = Q.sum(Q.vveq(y, y1)):eval()
+  assert(n1:to_num() == n)
+  assert(n2:to_num() == n)
+
   print("Successfully completed t1")
-end
-tests.t2 = function()
-  local x_length = 65
-  local y_length = 30
-
-  local x = Q.seq( {start = 0, by = 1, qtype = "I4", len = x_length} )
-  local y = Q.seq( {start = 2, by = 2, qtype = "I4", len = y_length} )
-  y:eval()
-
-  local null_val = Scalar.new(1000, "I4")
-  local z = Q.get(x, y, { null_val = null_val})
-  -- TODO Write invariant for test Q.print_csv({x, z})
-  print("Successfully completed t2")
 end
 return tests
