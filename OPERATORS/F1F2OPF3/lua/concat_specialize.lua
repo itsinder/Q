@@ -5,7 +5,11 @@ return function (
   optargs
   )
     local plfile = require "pl.file"
-    local out_qtype = optargs.out_qtype -- okay for out_qtype to be nil
+    local out_qtype 
+    if ( optargs ) then
+      assert(type(optargs) == "table")
+      out_qtype = optargs.out_qtype -- okay for out_qtype to be nil
+    end
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_out_qtypes = { I2 = true, I4 = true, I8 = true }
 
