@@ -33,6 +33,7 @@ ${fn}(
 #define MAX_IDX 6
 #define AND 7
 #define OR 8
+#define ANY 9
 #define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
 #define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
 #define mcr_sum(X, Y)  ((X) + (Y))
@@ -83,6 +84,7 @@ ${fn}(
   else if ( strcmp(join_type_op, "sum") == 0 )  { join_type = SUM; }
   else if ( strcmp(join_type_op, "min_idx") == 0 )  { join_type = MIN_IDX; }
   else if ( strcmp(join_type_op, "max_idx") == 0 )  { join_type = MAX_IDX; }
+  else if ( strcmp(join_type_op, "any") == 0 )  { join_type = ANY; }
   //else if ( strcmp(join_type_op, "and") == 0 )  { join_type = AND; }
   //else if ( strcmp(join_type_op, "or") == 0 )  { join_type = OR; }
   else { go_BYE(-1); }
@@ -136,6 +138,12 @@ ${fn}(
           else if ( join_type == SUM ) {
             ${dst_fld_ctype} sum_res = dst_fld[i] + src_fld[j];
             dst_fld[i] =  sum_res;
+          }
+          else if ( join_type == ANY ) {
+            dst_fld[i] = src_fld[j];
+            i++;
+            first = true;
+            break;
           }
           //else if ( join_type == AND ) {
           //  dst_fld[i] = dst_fld[i] & src_fld[j];

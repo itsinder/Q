@@ -87,4 +87,53 @@ tests.t2 = function ()
   print("Test t2 succeeded")
 end
 
+
+tests.t3 = function ()
+  local src_lnk_tbl = {10,10,10,10,20,20,30}
+  local src_fld_tbl = {1,21,12,11,3,-1,23}
+  local dst_lnk_tbl = {10,20,30,40}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I1")
+  local src_fld = Q.mk_col(src_fld_tbl, "I1")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I1")
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "any")
+  c:eval()
+  Q.print_csv(c)
+
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t3 succeeded")
+end
+
+tests.t4 = function ()
+  local src_lnk_tbl = {10,20,30,50,60}
+  local src_fld_tbl = {1,21,12,7,9}
+  local dst_lnk_tbl = {10,20,30,40}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I2")
+  local src_fld = Q.mk_col(src_fld_tbl, "I1")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I2")
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "any")
+  c:eval()
+  Q.print_csv(c)
+
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t4 succeeded")
+end
+
+
+
 return tests

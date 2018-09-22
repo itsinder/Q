@@ -10,7 +10,7 @@ local function join(x, y, z, op, optargs)
   assert(type(x) == "lVector", "arg x must be a lVector")
   assert(type(z) == "lVector", "arg z must be a lVector")
   assert(type(op) == "string", "Join type must be a string")
-  if ( op == "sum" or op == "min" or op == "max" or op == "and" or op == "or") then
+  if ( op == "sum" or op == "min" or op == "max" or op == "and" or op == "or" or op == "any") then
     assert(y, "no arg y to join")
     assert(type(y)== "lVector", "arg y must be a lVector")
   end
