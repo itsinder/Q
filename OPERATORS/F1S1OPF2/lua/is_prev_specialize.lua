@@ -11,6 +11,7 @@ return function (
   optargs
   )
   local default_val 
+  local tmpl = 'is_prev.tmpl'
   if ( optargs ) then 
     assert(type(optargs) == "table")
     if ( optargs.default_val ) then 
@@ -19,21 +20,23 @@ return function (
       assert( ( default_val == 1 ) or ( default_val == 0 ) ) 
     end
   end
+  if ( not default_val ) then default_val = 1 end
+  assert(default_val)
   local subs = {}
   --== check the comparison 
   assert(is_base_qtype(qtype))
   if ( comparison == "gt" ) then
-    subs.comparison_operator = " <= " 
+    subs.cmp_op = " <= " 
   elseif ( comparison == "lt" ) then
-    subs.comparison_operator = " >= " 
+    subs.cmp_op = " >= " 
   elseif ( comparison == "geq" ) then
-    subs.comparison_operator = " < " 
+    subs.cmp_op = " < " 
   elseif ( comparison == "leq" ) then
-    subs.comparison_operator = " > " 
+    subs.cmp_op = " > " 
   elseif ( comparison == "eq" ) then
-    subs.comparison_operator = " == " 
+    subs.cmp_op = " == " 
   elseif ( comparison == "neq" ) then
-    subs.comparison_operator = " != " 
+    subs.cmp_op = " != " 
   else
     assert(nil, "invalid comparison" .. comparison)
   end
@@ -41,7 +44,7 @@ return function (
   subs.qtype = qtype
   subs.ctype = qconsts.qtypes[qtype].ctype
   subs.fn = "is_prev_" .. comparison .. "_" .. qtype
-  subs.tmpl = 'is_prev.tmpl'
+  subs.tmpl = tmpl
   subs.default_val = default_val
   --==============================
   return subs, tmpl

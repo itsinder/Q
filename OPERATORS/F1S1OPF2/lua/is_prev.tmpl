@@ -44,12 +44,12 @@ ${fn}(
     set_bit_u64(out, 0, default_val);
   }
   else {
-    set_bit_u64(out, 0, (*ptr_last_val_prev_chunk == in[0]);
+    set_bit_u64(out, 0, (*ptr_last_val_prev_chunk == in[0]));
   }
   for ( uint64_t i = 1; i < nR; i++ ) { 
-    set_bit_u64(out, 0, (in[i] == in[i-1]);
+    set_bit_u64(out, i, (in[i] ${cmp_op} in[i-1]));
   }
-  *last_val_prev_chunk = in[nR-1];
+  *ptr_last_val_prev_chunk = in[nR-1];
 BYE:
   return status;
 }

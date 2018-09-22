@@ -16,8 +16,7 @@
     local status, subs, tmpl = pcall(sp_fn, qtype, comparison, optargs)
       if ( status ) then 
         assert(type(subs) == "table")
-        for k, v in pairs(subs) do print(k,v) end 
-        gen_code.doth(subs,tmpl, incdir)
+        gen_code.doth(subs, tmpl, incdir)
         gen_code.dotc(subs, tmpl, srcdir)
         print("Produced ", subs.fn)
         num_produced = num_produced + 1
