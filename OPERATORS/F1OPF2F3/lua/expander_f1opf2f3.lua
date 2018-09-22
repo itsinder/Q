@@ -37,7 +37,8 @@ local function expander_f1opf2f3(op, x)
   local chunk_idx = 0
   local function f1opf2f3_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
-    assert(chunk_num == chunk_idx)
+    assert(chunk_num == chunk_idx, "chunk_num = " .. chunk_num 
+      .. " chunk_idx = " .. chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       out1_buf = assert(cmem.new(sz_out_in_bytes))
@@ -46,11 +47,9 @@ local function expander_f1opf2f3(op, x)
     end
     
     local in_len, in_chunk, in_nn_chunk = x:chunk(chunk_idx)
-    if ( in_len == 0 ) then 
-      out1_vec:eov()
-      out2_vec:eov()
-      return nil
-    end
+    -- TODO DISCUSS FOLLOWING WITH KRUSHNAKANT
+    if ( in_len == 0 ) then return nil end
+    if ( first_call ) then  assert(in_len > 0) end 
     assert(in_nn_chunk == nil, "nulls not supported as yet")
     
     local in_cast_as  = subs.in_ctype  .. "*"
@@ -69,6 +68,11 @@ local function expander_f1opf2f3(op, x)
     out1_vec:put_chunk(out1_buf, nil, in_len)
     out2_vec:put_chunk(out2_buf, nil, in_len)
     local is_put_chunk = true
+    chunk_idx = chunk_idx + 1
+    if ( in_len < qconsts.chunk_size ) then 
+      out1_vec:eov()
+      out2_vec:eov()
+    end
     return nil, nil, nil, is_put_chunk
     -- TODO P1 What do we return here?
   end

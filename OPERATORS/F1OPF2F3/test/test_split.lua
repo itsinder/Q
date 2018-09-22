@@ -10,7 +10,7 @@ tests.t1 = function()
   local z = Q.concat(x, y)
   local x1, y1 = Q.split(z)
   x1:eval()
-  y1:eval() -- TODO Why is this needed? Should not be
+  -- y1:eval() -- TODO Why is this needed? Should not be
 
   assert(x1:fldtype() == x:fldtype())
   assert(y1:fldtype() == y:fldtype())
