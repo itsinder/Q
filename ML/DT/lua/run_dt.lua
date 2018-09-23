@@ -43,7 +43,7 @@ local function run_dt(args)
   local accuracy = {}
   for i = 1, iterations do
     -- break into a training set and a testing set
-    local Train, Test = split_train_test(T, split_ratio, feature_of_interest)
+    local Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
     local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
     local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
