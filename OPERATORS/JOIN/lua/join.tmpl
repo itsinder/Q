@@ -1,12 +1,178 @@
+return require 'Q/UTILS/lua/code_gen' {
+
+   declaration = [[
+
+#include "q_incs.h"
+
+extern int
+${fn}(
+      const char *join_type_op,
+      ${src_fld_ctype} *src_fld,
+      ${src_lnk_ctype} *src_lnk,
+      uint64_t *ptr_aidx,
+      uint64_t nR_src,
+      ${dst_fld_ctype} *dst_fld,
+      uint64_t *nn_dst_fld,
+      ${dst_lnk_ctype} *dst_lnk,
+      uint64_t nR_dst,
+      uint64_t *ptr_didx,
+      uint64_t nC,
+      bool *brk_n_write,
+      uint64_t idx,
+      bool *first_dst
+      );
+   ]],
+   definition = [[
+
+#include "_${fn}.h"
+#define EXISTS 1
+#define MIN 2
+#define MAX 3
+#define SUM 4
+#define MIN_IDX 5
+#define MAX_IDX 6
+#define AND 7
+#define OR 8
+#define ANY 9
+#define mcr_max(X, Y)  ((X) > (Y) ? (X) : (Y))
+#define mcr_min(X, Y)  ((X) < (Y) ? (X) : (Y))
+#define mcr_sum(X, Y)  ((X) + (Y))
 
 int
-join(
-  int *src_val,
-  int *src_lnk,
-  uint64_t nR_src,
-  int *dst_val,
-  int *dst_lnk,
-  uint64_t nR_dst
-  )
-  {
+${fn}(
+      const char *join_type_op,
+      ${src_fld_ctype} *src_fld,
+      ${src_lnk_ctype} *src_lnk, // cannot have a nn field
+      uint64_t *ptr_aidx,
+      uint64_t nR_src,
+      ${dst_fld_ctype} *dst_fld,
+      uint64_t *nn_dst_fld, // for exists join_type
+      ${dst_lnk_ctype} *dst_lnk, // cannot have a nn field
+      uint64_t nR_dst,
+      uint64_t *ptr_didx,
+      uint64_t nC,
+      bool *brk_n_write,
+      uint64_t idx,
+      bool *first_dst
+      )
+{
+  int status = 0;
+  //uint64_t src_idx = 0;
+  //uint64_t dst_idx = 0;
+  //int32_t sval = src_fld[src_idx];
+  //int32_t dval = dst_fld[dst_idx];
+  bool first = *first_dst;
+  uint64_t lb = *ptr_didx;
+  uint64_t ub = nR_dst;
+  if ( src_fld == NULL ) { go_BYE(-1); }
+  if ( src_lnk == NULL ) { go_BYE(-1); }
+  if ( strcmp(join_type_op, "exists") == 0 ) { 
+    if ( dst_fld != NULL ) { go_BYE(-1); }
   }
+  else {
+    if ( dst_fld == NULL ) { go_BYE(-1); }
+  }
+  if ( dst_lnk == NULL ) { go_BYE(-1); }
+  if ( nn_dst_fld == NULL ) { go_BYE(-1); }
+  if ( nR_src == 0 ) { go_BYE(-1); }
+  if ( nR_dst == 0 ) { go_BYE(-1); }
+  if ( ptr_aidx == NULL ) { go_BYE(-1); }
+  uint16_t join_type = 0;
+  if ( strcmp(join_type_op, "exists") == 0 ) { join_type = EXISTS; }
+  else if ( strcmp(join_type_op, "min") == 0 )  { join_type = MIN; }
+  else if ( strcmp(join_type_op, "max") == 0 )  { join_type = MAX; }
+  else if ( strcmp(join_type_op, "sum") == 0 )  { join_type = SUM; }
+  else if ( strcmp(join_type_op, "min_idx") == 0 )  { join_type = MIN_IDX; }
+  else if ( strcmp(join_type_op, "max_idx") == 0 )  { join_type = MAX_IDX; }
+  else if ( strcmp(join_type_op, "any") == 0 )  { join_type = ANY; }
+  //else if ( strcmp(join_type_op, "and") == 0 )  { join_type = AND; }
+  //else if ( strcmp(join_type_op, "or") == 0 )  { join_type = OR; }
+  else { go_BYE(-1); }
+  uint64_t i;
+  uint64_t j = *ptr_aidx;
+  for ( i = lb; i < ub; ) {
+    nn_dst_fld[i] = 0;
+    // If current value same as previous, re-use earlier result
+    //if ( ( i > 0 ) && ( dst_fld[i] == dst_fld[i-1] ) ) {
+    //  nn_dst_fld[i] = nn_dst_fld[i-1];
+    //  if ( dst_fld != NULL ) { 
+    //    dst_fld[i] = dst_fld[i-1];
+    //  }
+    //  i++;
+    //  continue;
+    //}
+    if ( i == nC ) { break; }
+    for ( ; j < nR_src; ) {
+      // if dst_lnk's i th value is greater than src_lnk's nR_src(last index) 
+      // i.e. dst_lnk's i th value do not exists in whole src_lnk
+      if ( dst_lnk[i] > src_lnk[nR_src-1] ) {
+        i = i + nR_src-1;
+        break;
+      }
+      if ( src_lnk[j] < dst_lnk[i] ) {
+        j++;
+      }
+      else if ( src_lnk[j] == dst_lnk[i] ) {
+        nn_dst_fld[i] = 1;
+        if ( first ) {
+          if ( ( join_type == MIN_IDX ) || ( join_type == MAX_IDX ) ) {
+            // check if already got the max or min idx
+            if ( dst_fld[i] == ${initial_val} ) {
+              //TODO: indexing to start from 1?
+              dst_fld[i] = idx + j;
+            }
+            //dst_fld[i] = offset + j;
+          }
+          else {
+            dst_fld[i] = src_fld[j];
+          }
+          first = false;
+        }
+        else {
+          if ( join_type == MIN ) {
+            dst_fld[i] = mcr_min(dst_fld[i], src_fld[j]);
+          }
+          else if ( join_type == MAX ) {
+            dst_fld[i] = mcr_max(dst_fld[i], src_fld[j]);
+          }
+          else if ( join_type == SUM ) {
+            ${dst_fld_ctype} sum_res = dst_fld[i] + src_fld[j];
+            dst_fld[i] =  sum_res;
+          }
+          else if ( join_type == ANY ) {
+            dst_fld[i] = src_fld[j];
+            i++;
+            first = true;
+            break;
+          }
+          //else if ( join_type == AND ) {
+          //  dst_fld[i] = dst_fld[i] & src_fld[j];
+          //}
+          //else if ( join_type == OR ) {
+          //  dst_fld[i] = dst_fld[i] | src_fld[j];
+          //}
+          else if ( join_type == MAX_IDX ) {
+              dst_fld[i] = idx + j;
+              //dst_fld[i] = offset + j;
+          }
+        }
+        j++;
+      }
+      else {
+        i++;
+        //setting "first" flag to true for each i th dst_lnk value
+        first = true;
+        break;
+      }
+    }
+    if(j == nR_src) { break; }
+  }
+  if(*ptr_aidx == j) { *brk_n_write = true; *ptr_aidx = j; goto BYE; }
+  *ptr_aidx = j;
+  *ptr_didx = i;
+  *first_dst = first;
+BYE:
+  return status;
+}
+   ]]
+}
