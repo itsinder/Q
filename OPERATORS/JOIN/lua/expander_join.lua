@@ -22,16 +22,8 @@ local function chk_params(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   assert(type(src_fld) == "lVector", "src_fld must be a lVector")
   assert(type(dst_lnk) == "lVector", "dst_lnk must be a lVector")
 
-  -- TODO: verify whether below checks are required
-  --[[
-  assert(src_lnk:is_eov(), "src_lnk must be materialized")
-  assert(src_fld:is_eov(), "src_fld must be materialized")
-  assert(dst_lnk:is_eov(), "dst_lnk must be materialized")
-  ]]
-
   assert(src_lnk:length() == src_fld:length(),
   "src_lnk and src_fld must have same number of rows")
-  -- TODO: check this assert
   assert(src_lnk:fldtype() == dst_lnk:fldtype(),
   "src_lnk and dst_lnk must have same qtype")
 
@@ -75,8 +67,7 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   local didx  = nil
   local a_chunk_idx = 0
   local nn_dst_fld
-  local brk_n_write
-  local first
+  local is_first
   
   local function join_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
@@ -91,16 +82,15 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
       nn_dst_fld = assert(cmem.new(sz_out))
       didx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       didx = ffi.cast("uint64_t *", didx)
-      didx[0] = 0
       
-      brk_n_write = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
-      brk_n_write = ffi.cast("bool *", brk_n_write)
-      
-      first = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
-      first = ffi.cast("bool *", first)
+      is_first = assert(get_ptr(cmem.new(ffi.sizeof("bool"))))
+      is_first = ffi.cast("bool *", is_first)
+      is_first[0] = true
 
       first_call = false
     end
+
+    didx[0] = 0
     
     -- Initialize to its value
     if join_type == "max" or join_type == "any" then
@@ -115,16 +105,13 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
     end
     nn_dst_fld:zero()
     
-    brk_n_write[0] = false
-    first[0] = true
-    
     repeat
       local c_chunk_idx = math.floor(tonumber(didx[0])/qconsts.chunk_size)
       local a_len, a_chunk, a_nn_chunk = src_lnk:chunk(a_chunk_idx)
       local b_len, b_chunk, b_nn_chunk = src_fld:chunk(a_chunk_idx)
       local c_len, c_chunk, c_nn_chunk = dst_lnk:chunk(c_chunk_idx)
       if a_len == 0 or c_len == 0 then
-        return dst_lnk:length(), dst_fld, nil
+        return tonumber(didx[0]), dst_fld, nil
       end
       assert(a_len == b_len)
       --TODO: null to be supported?
@@ -138,16 +125,14 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
       local casted_c_buf   = ffi.cast( subs.dst_lnk_ctype .. "*",  get_ptr(c_chunk))
       local casted_out_buf = ffi.cast( subs.dst_fld_ctype .. "*",  get_ptr(dst_fld))
       local casted_out_nn_buf = ffi.cast( "uint64_t *",  get_ptr(nn_dst_fld))
-      local status = qc[func_name](join_type, casted_b_chunk, casted_a_chunk, aidx, a_len, casted_out_buf, casted_out_nn_buf, casted_c_buf, c_len, didx, sz_out, brk_n_write, vec_pos, first)
+      local status = qc[func_name](join_type, casted_a_chunk, casted_b_chunk, aidx, a_len, casted_c_buf, casted_out_buf, casted_out_nn_buf, c_len, didx, sz_out, vec_pos, is_first)
       assert(status == 0, "C error in JOIN")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
       end
-      --TODO: need to handle dst_fld:length() > chunk_size
-      -- if didx is above chunk_size
-    until ( tonumber(didx[0]) == c_len  and brk_n_write[0] == true )
-    return dst_lnk:length(), dst_fld, nil
+    until ( tonumber(didx[0]) == c_len and is_first[0] == true )
+    return tonumber(didx[0]), dst_fld, nil
   end
   return lVector( { gen = join_gen, has_nulls = false, qtype = subs.dst_fld_qtype } )
 end

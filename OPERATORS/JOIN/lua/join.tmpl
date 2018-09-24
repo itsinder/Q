@@ -79,7 +79,7 @@ ${fn}(
   uint64_t i;
   uint64_t j = *ptr_aidx;
   for ( i = lb; i < ub; ) {
-    nn_dst_fld[i] = 0;
+    //set_bit_u64(&nn_dst_fld, i, 0);
     for ( ; j < nR_src; ) {
       // if dst_lnk's i th value is greater than src_lnk's nR_src(last index) 
       // i.e. dst_lnk's i th value do not exists in whole src_lnk
@@ -91,7 +91,8 @@ ${fn}(
         j++;
       }
       else if ( src_lnk[j] == dst_lnk[i] ) {
-        nn_dst_fld[i] = 1;
+        // TODO: set nn_dst_fld for exists join_type
+        //set_bit_u64(&nn_dst_fld, i, 1);
         if ( is_first ) {
           if ( ( join_type == MIN_IDX ) || ( join_type == MAX_IDX ) ) {
             //TODO: indexing to start from 1?
