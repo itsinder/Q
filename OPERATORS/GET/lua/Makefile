@@ -22,11 +22,11 @@ clean :
 ../gen_src/_get_val_F4_by_idx_I1.c : get_val_by_idx.tmpl get_val_by_idx_specialize.lua
 	luajit generator.lua operators.lua
 		
-# ../gen_src/_get_idx_by_val_I1_F4.c : get_idx_by_val.tmpl get_idx_by_val_specialize.lua
-#	luajit generator.lua operators.lua
+../gen_src/_set_sclr_val_F4_by_idx_I1.c : set_sclr_val_by_idx.tmpl set_sclr_val_by_idx_specialize.lua
+	luajit generator.lua operators.lua
 		
-	# ../gen_src/_get_idx_by_val_I1_F4.c 
-libget.so : ../gen_src/_get_val_F4_by_idx_I1.c 
+libget.so : ../gen_src/_get_val_F4_by_idx_I1.c \
+	../gen_src/_set_sclr_val_F4_by_idx_I1.c 
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libget.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/

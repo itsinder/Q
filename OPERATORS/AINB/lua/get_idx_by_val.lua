@@ -9,6 +9,7 @@ local Scalar      = require 'libsclr'
 local function get_idx_by_val(x, y, optargs)
   assert(x and type(x) == "lVector", "x must be a Vector")
   assert(y and type(y) == "lVector", "y must be a Vector")
+  if ( not y:is_eov() ) then y:eval() end 
   assert(y:is_eov(), "y must be materialized")
 
   local sp_fn_name = "Q/OPERATORS/AINB/lua/get_idx_by_val_specialize"

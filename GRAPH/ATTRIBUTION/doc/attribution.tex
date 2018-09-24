@@ -156,9 +156,7 @@ See Figure~\ref{algo}
 \(T_{k+1} = \mathbf{Q.extend}(T_k.x, T_k.y, T_0.y)\) \\
 {\bf if} \(T_{k+1} = \bot\) {\bf then break else} \(k_ = k+1\) {\bf end}\\
 --- Update max depth of referral chain ending in each person \\
-\(T_0.v = \mathbf{Q.ainb}(T_0.x, T_{k+1}.x)\) \\
-  {\bf Q.ainb} fast because \(T_0, T_k\) sorted ascending on \(x\) \\
-\(T_0.d = \mathbf{Q.ifxthenyelsez}(T_0.v, k+1, T_0.d)\) \- \\
+\(T_0.v = \mathbf{Q.set\_sclr_val\_by\_idx}(T_{k+1}.x, T0.d)\) \\
 {\bf until} --- not possible to extend any further \\
 \(d_{max} = k\) \\
 --- Compute attribution for each hop and add it to responsible person \\

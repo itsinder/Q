@@ -1,5 +1,23 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
+
+local function extend(inT, y0)
+  assert(type(inT) == "table")
+  local xk = inT.x
+  local yk = inT.y
+  assert(type(xk) == "lVector")
+  assert(type(yk) == "lVector")
+  assert(type(y0) == "lVector")
+  local z = Q.get_val_by_idx(yk, y0)
+  local w = Q.vsgeq(z, 0)
+  local xnew = Q.where(xk, w)
+  local ynew = Q.where(z, w)
+  local T = {}
+  T.x = xnew:eval()
+  T.y = ynew:eval()
+  return T
+end
+
 -- load data as (referee, referer)
 -- T = Q.load_csv("../data/
 -- we know that data is sorted on referee
@@ -18,6 +36,7 @@ local datafile = "../data/1.csv"
 tmp = Q.load_csv(datafile, M); 
 x = tmp.x
 y = tmp.y
+
 -- w = Q.v_isnextneq(x)
 -- x = Q.where(x, w)
 -- y = Q.where(y, w)
@@ -40,15 +59,44 @@ assert(n1:to_num() == 0, n1)
 n1, n2 = Q.sum(Q.vseq(y, null_val)):eval()
 assert(n1:to_num() > 0)
 assert(Q.is_next(x, "geq"):eval() == true)
-Q.print_csv({x,y}, { opfile = "_1.csv"})
+-- Q.print_csv({x,y}, { opfile = "_1.csv"})
 --=====
 z = Q.is_prev(x, "neq", {default_val = 1})
-x = Q.where(x, z)
-y = Q.where(y, z)
-Q.print_csv({x,y}, { opfile = "_2.csv"})
---===================
+xlbl = Q.where(x, z)
+ylbl = Q.where(y, z)
+y = Q.get_idx_by_val(ylbl, xlbl)
+x = Q.seq( { start = 0, by = 1, qtype = "I4", len = xlbl:length()})
 
+-- Q.print_csv({x, y, xidx, yidx}, { opfile = "_2.csv"})
+-- prepare T0
+T0 = {}
+T0.x = x
+T0.y = y
+T0.xlbl = xlbl
+ylbl = nil
+Q.print_csv({T0.x, T0.y}, { opfile = "_T0.csv"})
+-- T0.y = y, we do not need this guy
+--===================
+-- prepare T1
+c = Q.vsneq(T0.y, -1)
+T0.d = Q.ifxthenyelsez(c, Scalar.new(1, "I4"),Scalar.new(0, "I4"))
+T1 = {}
+T1.x = Q.where(T0.x, c)
+T1.y = Q.where(T0.y, c)
+Q.print_csv({T1.x, T1.y}, { opfile = "_T1.csv"})
+
+T2 = extend(T1, T0.y)
+Q.print_csv({T2.x, T2.y}, { opfile = "_T2.csv"})
+Q.set_sclr_val_by_idx(T2.x, T0.d, {sclr_val = 2})
+local rslt = Q.numby(T0.d, 2+1)
+print("===============")
+Q.print_csv(rslt)
+print("===============")
+
+T3 = extend(T2, T0.y)
+Q.print_csv({T3.x, T3.y}, { opfile = "_T3.csv"})
 assert(nil, "PREMATURE")
+
 
 
 len = T.referee:length()

@@ -13,7 +13,7 @@
 
   local opt_args = {}
   opt_args.null_val = -1
-  opt_args.nR2      = 1048576
+  opt_args.sclr_val = 1
   local num_produced = 0
     for i, operator in ipairs(operators) do
       print("Working on operator " .. operator)
