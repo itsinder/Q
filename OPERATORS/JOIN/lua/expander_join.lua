@@ -18,16 +18,16 @@ local function chk_params(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
           ( join_type == "count" ) or ( join_type == "any" ),
           "Invalid join type " .. join_type)
 
-  -- TODO: verify whether below checks are required
-  --[[
   assert(type(src_lnk) == "lVector", "src_lnk must be a lVector")
   assert(type(src_fld) == "lVector", "src_fld must be a lVector")
   assert(type(dst_lnk) == "lVector", "dst_lnk must be a lVector")
-  ]]
 
+  -- TODO: verify whether below checks are required
+  --[[
   assert(src_lnk:is_eov(), "src_lnk must be materialized")
   assert(src_fld:is_eov(), "src_fld must be materialized")
   assert(dst_lnk:is_eov(), "dst_lnk must be materialized")
+  ]]
 
   assert(src_lnk:length() == src_fld:length(),
   "src_lnk and src_fld must have same number of rows")
