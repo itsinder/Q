@@ -56,7 +56,6 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   assert(status, "Specializer failed " .. sp_fn_name)
   assert(type(subs) == "table")
   local func_name = assert(subs.fn)
-  print(func_name)
   assert(qc[func_name], "Symbol not defined " .. func_name)
   
   local sz_out = qconsts.chunk_size
