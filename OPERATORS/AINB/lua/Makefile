@@ -17,10 +17,13 @@ AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 ../../../UTILS/gen_inc/_bytes_to_bits.h :
 	make -C ../../../UTILS/src/
 
-../gen_src/_ainb_F4_F4.c :
-	luajit generator.lua # TODO: Should be more specific
-../gen_src/_ainb_I4_I4.c :
-	luajit generator.lua I4 I4 
+
+../gen_src/_ainb_F4_F4.c : simple_ainb.tmpl 
+	luajit generator.lua 
+../gen_src/_ainb_I4_I4.c : bin_search_ainb.tmpl  
+	luajit generator.lua 
+../gen_src/bin_search_get_idx_I8_by_val_I4.c : bin_search_get_idx_by_val.tmpl  
+	luajit generator_get_idx_by_val.lua
 #----------------------------------
 clean :
 	rm -r -f ../gen_src; 
@@ -31,7 +34,8 @@ clean :
 libainb.so : ${GEN_FILES} ${AUX_FILES} \
 	bin_search_ainb.tmpl simple_ainb.tmpl \
 	../../../UTILS/gen_inc/_bytes_to_bits.h
-	luajit generator.lua # TODO This should not be here. Hack
+	luajit generator.lua 
+	luajit generator_get_idx_by_val.lua 
 	gcc ${GEN_FILES} ${AUX_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libainb.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
@@ -82,3 +86,28 @@ GEN_FILES = \
 	../gen_src/_simple_ainb_I8_I2.c \
 	../gen_src/_simple_ainb_I8_I4.c \
 	../gen_src/_simple_ainb_I8_I8.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_F4.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_F8.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_I1.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_I2.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_I4.c \
+	../gen_src/_bin_search_get_idx_I1_by_val_I8.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_F4.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_F8.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_I1.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_I2.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_I4.c \
+	../gen_src/_bin_search_get_idx_I2_by_val_I8.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_F4.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_F8.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_I1.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_I2.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_I4.c \
+	../gen_src/_bin_search_get_idx_I4_by_val_I8.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_F4.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_F8.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_I1.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_I2.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_I4.c \
+	../gen_src/_bin_search_get_idx_I8_by_val_I8.c \
+

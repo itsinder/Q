@@ -40,12 +40,12 @@ assert(n1:to_num() == 0, n1)
 n1, n2 = Q.sum(Q.vseq(y, null_val)):eval()
 assert(n1:to_num() > 0)
 assert(Q.is_next(x, "geq"):eval() == true)
-Q.print_csv({x,y}, { opfile = "_x.csv"})
+Q.print_csv({x,y}, { opfile = "_1.csv"})
 --=====
-z = Q.is_prev_eq(y, {default = 1})
-z = Q.vvnot(z)
+z = Q.is_prev(x, "neq", {default_val = 1})
 x = Q.where(x, z)
 y = Q.where(y, z)
+Q.print_csv({x,y}, { opfile = "_2.csv"})
 --===================
 
 assert(nil, "PREMATURE")

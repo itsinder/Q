@@ -10,7 +10,7 @@ local function do_replacements(tmpl, subs)
     T = assert(dofile(tmpl))
   else 
     local filename = q_tmpl_dir .. tmpl
-    assert(plpath.isfile(filename))
+    assert(plpath.isfile(filename), "File not found " .. filename)
     T = dofile(filename)
   end
    for k,v in pairs(subs) do
