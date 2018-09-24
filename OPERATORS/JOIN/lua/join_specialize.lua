@@ -38,8 +38,7 @@ return function (
   subs.dst_fld_ctype = qconsts.qtypes[dst_fld_type].ctype
   --TODO: modify the function name, src_lnk_type and dst_lnk_type are same
   -- so one of them needs to be part of function name
-  subs.fn = "join_" .. op .. "_" .. src_lnk_type .. "_" .. src_fld_type .. "_" .. 
-  dst_lnk_type .. "_".. dst_fld_type
+  subs.fn = "join_" .. op .. "_" .. src_lnk_type .. "_" .. src_fld_type 
   if ( dst_fld_type == "I1" ) then subs.initial_val = "INT8_MIN" end
   if ( dst_fld_type == "I2" ) then subs.initial_val = "INT16_MIN" end
   if ( dst_fld_type == "I4" ) then subs.initial_val = "INT32_MIN" end

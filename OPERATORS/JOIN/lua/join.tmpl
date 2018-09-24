@@ -7,19 +7,18 @@ return require 'Q/UTILS/lua/code_gen' {
 extern int
 ${fn}(
       const char *join_type_op,
-      ${src_fld_ctype} *src_fld,
       ${src_lnk_ctype} *src_lnk,
+      ${src_fld_ctype} *src_fld,
       uint64_t *ptr_aidx,
       uint64_t nR_src,
+      ${dst_lnk_ctype} *dst_lnk,
       ${dst_fld_ctype} *dst_fld,
       uint64_t *nn_dst_fld,
-      ${dst_lnk_ctype} *dst_lnk,
       uint64_t nR_dst,
       uint64_t *ptr_didx,
-      uint64_t nC,
-      bool *brk_n_write,
+      uint64_t chunk_size,
       uint64_t idx,
-      bool *first_dst
+      bool *ptr_is_first
       );
    ]],
    definition = [[
@@ -41,37 +40,24 @@ ${fn}(
 int
 ${fn}(
       const char *join_type_op,
+      ${src_lnk_ctype} *src_lnk,
       ${src_fld_ctype} *src_fld,
-      ${src_lnk_ctype} *src_lnk, // cannot have a nn field
       uint64_t *ptr_aidx,
       uint64_t nR_src,
+      ${dst_lnk_ctype} *dst_lnk,
       ${dst_fld_ctype} *dst_fld,
-      uint64_t *nn_dst_fld, // for exists join_type
-      ${dst_lnk_ctype} *dst_lnk, // cannot have a nn field
+      uint64_t *nn_dst_fld,
       uint64_t nR_dst,
       uint64_t *ptr_didx,
-      uint64_t nC,
-      bool *brk_n_write,
+      uint64_t chunk_size,
       uint64_t idx,
-      bool *first_dst
+      bool *ptr_is_first
       )
 {
   int status = 0;
-  //uint64_t src_idx = 0;
-  //uint64_t dst_idx = 0;
-  //int32_t sval = src_fld[src_idx];
-  //int32_t dval = dst_fld[dst_idx];
-  bool first = *first_dst;
-  uint64_t lb = *ptr_didx;
-  uint64_t ub = nR_dst;
-  if ( src_fld == NULL ) { go_BYE(-1); }
+  bool is_first = *ptr_is_first;
+  if ( src_fld == NULL ) { go_BYE(-1); } // not appropriate for operations like "exists", "count" etc
   if ( src_lnk == NULL ) { go_BYE(-1); }
-  if ( strcmp(join_type_op, "exists") == 0 ) { 
-    if ( dst_fld != NULL ) { go_BYE(-1); }
-  }
-  else {
-    if ( dst_fld == NULL ) { go_BYE(-1); }
-  }
   if ( dst_lnk == NULL ) { go_BYE(-1); }
   if ( nn_dst_fld == NULL ) { go_BYE(-1); }
   if ( nR_src == 0 ) { go_BYE(-1); }
@@ -88,25 +74,17 @@ ${fn}(
   //else if ( strcmp(join_type_op, "and") == 0 )  { join_type = AND; }
   //else if ( strcmp(join_type_op, "or") == 0 )  { join_type = OR; }
   else { go_BYE(-1); }
+  uint64_t lb = *ptr_didx;
+  uint64_t ub = nR_dst;
   uint64_t i;
   uint64_t j = *ptr_aidx;
   for ( i = lb; i < ub; ) {
     nn_dst_fld[i] = 0;
-    // If current value same as previous, re-use earlier result
-    //if ( ( i > 0 ) && ( dst_fld[i] == dst_fld[i-1] ) ) {
-    //  nn_dst_fld[i] = nn_dst_fld[i-1];
-    //  if ( dst_fld != NULL ) { 
-    //    dst_fld[i] = dst_fld[i-1];
-    //  }
-    //  i++;
-    //  continue;
-    //}
-    if ( i == nC ) { break; }
     for ( ; j < nR_src; ) {
       // if dst_lnk's i th value is greater than src_lnk's nR_src(last index) 
       // i.e. dst_lnk's i th value do not exists in whole src_lnk
       if ( dst_lnk[i] > src_lnk[nR_src-1] ) {
-        i = i + nR_src-1;
+        j = nR_src;
         break;
       }
       if ( src_lnk[j] < dst_lnk[i] ) {
@@ -114,19 +92,15 @@ ${fn}(
       }
       else if ( src_lnk[j] == dst_lnk[i] ) {
         nn_dst_fld[i] = 1;
-        if ( first ) {
+        if ( is_first ) {
           if ( ( join_type == MIN_IDX ) || ( join_type == MAX_IDX ) ) {
-            // check if already got the max or min idx
-            if ( dst_fld[i] == ${initial_val} ) {
-              //TODO: indexing to start from 1?
-              dst_fld[i] = idx + j;
-            }
-            //dst_fld[i] = offset + j;
+            //TODO: indexing to start from 1?
+            dst_fld[i] = idx + j;
           }
           else {
             dst_fld[i] = src_fld[j];
           }
-          first = false;
+          is_first = false;
         }
         else {
           if ( join_type == MIN ) {
@@ -141,7 +115,7 @@ ${fn}(
           }
           else if ( join_type == ANY ) {
             i++;
-            first = true;
+            is_first = true;
             break;
           }
           //else if ( join_type == AND ) {
@@ -159,17 +133,16 @@ ${fn}(
       }
       else {
         i++;
-        //setting "first" flag to true for each i th dst_lnk value
-        first = true;
+        //setting "is_first" flag to true for each i th dst_lnk value
+        is_first = true;
         break;
       }
     }
-    if(j == nR_src) { break; }
+    if( ( j == nR_src ) || ( i == chunk_size ) ) { break; }
   }
-  if(*ptr_aidx == j) { *brk_n_write = true; *ptr_aidx = j; goto BYE; }
   *ptr_aidx = j;
   *ptr_didx = i;
-  *first_dst = first;
+  *ptr_is_first = is_first;
 BYE:
   return status;
 }

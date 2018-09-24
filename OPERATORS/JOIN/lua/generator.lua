@@ -6,7 +6,6 @@ if ( not plpath.isdir(incdir) ) then plpath.mkdir(incdir) end
 local gen_code =  require("Q/UTILS/lua/gen_code")
 
 local qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
--- TODO: add left operations in below table
 local join_type = {"sum", "min", "max", "min_idx", "max_idx", "count", "any"}
 -- local join_type = {"sum", "min", "max", "min_idx", "max_idx", "count", "and", "or"}
 
@@ -28,6 +27,7 @@ local function generate_files(src_lnk_qtype, src_fld_qtype, join_type, args)
   return true
 end
 
+--TODO: For (min, max, any) or (min_idx, max_idx, count), generated files are same for same qtype, avoid redundancy
 for _, op in ipairs(join_type) do
   for _, src_lnk_qtype in ipairs(qtypes) do
     for _, src_fld_qtype in ipairs(qtypes) do
