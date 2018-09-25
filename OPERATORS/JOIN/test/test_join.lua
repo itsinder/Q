@@ -191,6 +191,8 @@ tests.t7 = function ()
   optargs.default_val = -1
   local c = Q.join(src_lnk, src_fld, dst_lnk, "any", optargs)
   c:eval()
+  local val, _ = c:get_one(c:length()-1)
+  assert(val:to_num() == optargs.default_val)
   Q.print_csv(c)
 
 --  for i = 1, c:length() do
@@ -202,7 +204,7 @@ tests.t7 = function ()
 --  end
   -- local opt_args = { opfile = "" }
   -- Q.print_csv(c, opt_args)
-  print("Test t4 succeeded")
+  print("Test t7 succeeded")
 end
 
 return tests
