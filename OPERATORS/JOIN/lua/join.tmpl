@@ -79,6 +79,15 @@ ${fn}(
   uint64_t i;
   uint64_t j = *ptr_aidx;
   for ( i = lb; i < ub; ) {
+    // If dst_lnk current value is same as previous, re-use earlier result
+    if ( ( i > 0 ) && ( dst_lnk[i] == dst_lnk[i-1] ) ) {
+      //uint64_t nn_val = get_bit_u64(&nn_dst_fld, i-1);
+      //set_bit_u64(&nn_dst_fld, i, nn_val);
+      dst_fld[i] = dst_fld[i-1];
+      is_first = true;
+      i++;
+      continue;
+    }
     //set_bit_u64(&nn_dst_fld, i, 0);
     for ( ; j < nR_src; ) {
       // if dst_lnk's i th value is greater than src_lnk's nR_src(last index) 
@@ -139,8 +148,9 @@ ${fn}(
         break;
       }
     }
-    if( ( j == nR_src ) || ( i == chunk_size ) ) { break; }
+    if( j == nR_src ) { break; }
   }
+  if ( i == ub ) { i = i - 1; }
   *ptr_aidx = j;
   *ptr_didx = i;
   *ptr_is_first = is_first;

@@ -149,14 +149,60 @@ tests.t5 =  function()
   -- validating the values
   for i = 1, len do
     if i <= 10 then
-      print(dst_fld:get_one(i-1):to_num(), i*2)
-      assert(dst_fld:get_one(i-1):to_num(), i*2)
+      --print(dst_fld:get_one(i-1):to_num(), i*2)
+      assert(dst_fld:get_one(i-1):to_num() == i*2)
+    elseif i <= qconsts.chunk_size then
+      --print(dst_fld:get_one(i-1):to_num(), i)
+      assert(dst_fld:get_one(i-1):to_num() == i)
     else
-      print(dst_fld:get_one(i-1):to_num(), i)
-      assert(dst_fld:get_one(i-1):to_num(), i)
+      --print(dst_fld:get_one(i-1):to_num(), 0)
+      assert(dst_fld:get_one(i-1):to_num() == 0)
     end
   end
+  print("Successfully completed t5")
+end
 
+
+tests.t6 = function ()
+  local src_lnk_tbl = {10,10,20,20,30,30}
+  local src_fld_tbl = {1,1,1,1,1,1}
+  local dst_lnk_tbl = {10,20,30,10}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I4")
+  local src_fld = Q.mk_col(src_fld_tbl, "I4")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I4")
+  Q.sort(src_lnk, "asc")
+  Q.sort(src_fld, "asc")
+  Q.sort(dst_lnk, "asc")
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "sum"):eval()
+  assert(dst_lnk:length() == c:length())
+  Q.print_csv(c)
+
+  print("Test t6 succeeded")
+end
+
+tests.t7 = function ()
+  local src_lnk_tbl = {10,20,30,50,60}
+  local src_fld_tbl = {1,21,12,7,9}
+  local dst_lnk_tbl = {10,20,30,40}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I2")
+  local src_fld = Q.mk_col(src_fld_tbl, "I1")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I2")
+  local optargs = {}
+  optargs.default_val = -1
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "any", optargs)
+  c:eval()
+  Q.print_csv(c)
+
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t4 succeeded")
 end
 
 return tests

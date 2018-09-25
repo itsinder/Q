@@ -9,6 +9,7 @@ local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
 
 local function chk_params(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
+  assert(optargs)
   assert(op == "join")
   assert(type(join_type) == "string", "Join type must be a string")
   assert( ( join_type == "min" ) or ( join_type == "max" ) or
@@ -57,27 +58,26 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   assert(type(subs) == "table")
   local func_name = assert(subs.fn)
   assert(qc[func_name], "Symbol not defined " .. func_name)
-  
   local sz_out = qconsts.chunk_size
   local sz_dst = sz_out * qconsts.qtypes[subs.dst_fld_qtype].width
   local dst_fld = nil
   local first_call = true
   local aidx  = nil
   local didx  = nil
-  local a_chunk_idx = 0
+  local a_chunk_idx = 0  -- chunk idx for src_lnk & src_fld
   local nn_dst_fld
   local is_first
-  
+  local c_chunk_idx = 0  -- chunk idx for dst_lnk
+
   local function join_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
-    assert(chunk_num == a_chunk_idx)
+    assert(chunk_num == c_chunk_idx)
     if ( first_call ) then 
       -- allocate buffer for output
       dst_fld = assert(cmem.new(sz_dst, subs.dst_fld_qtype))
       aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
-      -- TODO sz_out * nn dst fld width?
       nn_dst_fld = assert(cmem.new(sz_out))
       didx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
       didx = ffi.cast("uint64_t *", didx)
@@ -92,7 +92,9 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
     didx[0] = 0
     
     -- Initialize to its value
-    if join_type == "max" or join_type == "any" then
+    if optargs and optargs.default_val then
+      dst_fld:set_default(optargs.default_val)
+    elseif join_type == "max" or join_type == "any" then
       dst_fld:set_min()
     elseif join_type == "min" then
       dst_fld:set_max()
@@ -105,12 +107,31 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
     nn_dst_fld:zero()
     
     repeat
-      local c_chunk_idx = math.floor(tonumber(didx[0])/qconsts.chunk_size)
       local a_len, a_chunk, a_nn_chunk = src_lnk:chunk(a_chunk_idx)
       local b_len, b_chunk, b_nn_chunk = src_fld:chunk(a_chunk_idx)
       local c_len, c_chunk, c_nn_chunk = dst_lnk:chunk(c_chunk_idx)
-      if a_len == 0 or c_len == 0 then
-        return tonumber(didx[0]), dst_fld, nil
+      if c_len == 0 then
+        break
+      end
+      local casted_c_buf   = ffi.cast( subs.dst_lnk_ctype .. "*",  get_ptr(c_chunk))
+      local casted_out_buf = ffi.cast( subs.dst_fld_ctype .. "*",  get_ptr(dst_fld))
+      local casted_out_nn_buf = ffi.cast( "uint64_t *",  get_ptr(nn_dst_fld))
+      if a_len == 0 then
+        -- there is no src chunk to process but dst is not yet processed
+        -- process dst_lnk
+        local lb = tonumber(didx[0]) + 1
+        local ub = c_len-1
+        for i = lb, ub do
+          if i > 0 and casted_c_buf[i] == casted_c_buf[i-1] then
+            casted_out_buf[i] = casted_out_buf[i-1]
+            -- TODO: update respective nn buf
+          else
+            didx[0] = ub
+            break
+          end
+        end
+        assert(tonumber(didx[0])+1 == c_len)
+        break
       end
       assert(a_len == b_len)
       --TODO: null to be supported?
@@ -121,17 +142,15 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
 
       local casted_a_chunk = ffi.cast( subs.src_lnk_ctype .. "*",  get_ptr(a_chunk))
       local casted_b_chunk = ffi.cast( subs.src_fld_ctype .. "*",  get_ptr(b_chunk))
-      local casted_c_buf   = ffi.cast( subs.dst_lnk_ctype .. "*",  get_ptr(c_chunk))
-      local casted_out_buf = ffi.cast( subs.dst_fld_ctype .. "*",  get_ptr(dst_fld))
-      local casted_out_nn_buf = ffi.cast( "uint64_t *",  get_ptr(nn_dst_fld))
       local status = qc[func_name](join_type, casted_a_chunk, casted_b_chunk, aidx, a_len, casted_c_buf, casted_out_buf, casted_out_nn_buf, c_len, didx, sz_out, vec_pos, is_first)
       assert(status == 0, "C error in JOIN")
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
       end
-    until ( tonumber(didx[0]) == c_len and is_first[0] == true )
-    return tonumber(didx[0]), dst_fld, nil
+    until ( tonumber(didx[0]) + 1 == c_len and is_first[0] == true )
+    c_chunk_idx = c_chunk_idx + 1
+    return tonumber(didx[0]) + 1, dst_fld, nil
   end
   return lVector( { gen = join_gen, has_nulls = false, qtype = subs.dst_fld_qtype } )
 end
