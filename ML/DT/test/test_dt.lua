@@ -52,6 +52,14 @@ tests.t2 = function()
   args.split_ratio = 0.5
   args.iterations = 10
 
+  -- If you want to provide train and test csv file explicitly,
+  -- then don't provide "args.data_file" argument
+  --[[
+  args.data_file = nil
+  args.train_csv = "b_cancer_train.csv"
+  args.test_csv = "b_cancer_test.csv"
+  ]]
+
   Vector.reset_timers()
   start_time = qc.RDTSC()
   local average_acr, accuracy_table = run_dt(args)

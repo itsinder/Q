@@ -11,10 +11,12 @@ local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
-  local data_file	= assert(args.data_file)
+  local data_file	= args.data_file
   local goal		= assert(args.goal)
   -- TODO: how to get value of alpha (minimum benefit value)
   local alpha		= assert(args.alpha)
+  local train_csv	= args.train_csv
+  local test_csv	= args.test_csv
 
   local iterations = 1
   if args.iterations then
@@ -38,12 +40,24 @@ local function run_dt(args)
   end
 
   -- load the data
-  local T = Q.load_csv(data_file, dofile(meta_data_file))
+  local T
+  if data_file then
+    T = Q.load_csv(data_file, dofile(meta_data_file))
+  end
 
   local accuracy = {}
   for i = 1, iterations do
     -- break into a training set and a testing set
-    local Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
+    local Train, Test
+    if data_file then
+      Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
+    else
+      assert(train_csv)
+      assert(test_csv)
+      Train = Q.load_csv(train_csv, dofile(meta_data_file))
+      Test = Q.load_csv(test_csv, dofile(meta_data_file))
+    end
+
     local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
     local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
