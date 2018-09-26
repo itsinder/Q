@@ -1,0 +1,245 @@
+\startreport{Network Influence Score}
+\reportauthor{Ramesh Subramonian}
+\section{Introduction}
+
+\TBC
+
+\section{Data Structures}
+\subsection{T0}
+
+\(T_0\) has the following columns, where each row refers to a person.
+\be
+\item \(x\) --- a sequence \(0, 1, \ldots\)
+\item \(y\), person who did the referring. 
+\item id, original ID 
+\item \(r\), dollar amount spent 
+\item \(s\), dollar amount attributed, {\em created by algorithm}
+\item \(d\), max depth of referral chain ending in this person, {\em created by algorithm}
+\ee
+Notes:
+\bi
+\item \(y[i] = j \Rightarrow\) \(i\) was referred by \(j\). 
+We also say that \(y\) is the 1-parent of \(i\)
+\item 
+Assume that \(y[i] = j\) and \(y[j] < 0\). 
+This implies that \(i\) was referred by \(j\) but nobody referred \(j\)
+\item a person can be referred by at most one person 
+\ei
+
+\subsection{T1}
+
+\(T_1\) is \(T_0\) restricted to persons who were refered. Specifically,
+\bi
+\item \(v = \mathbf{Q.vsgeq}(T_0.y, 0)\)
+\item \(T_1.x = \mathbf{Q.where}(T_0.x, v)\)
+\item \(T_1.y = \mathbf{Q.where}(T_0.y, v)\)
+%% DELETE \item \(T_1.r = \mathbf{Q.where}(T_0.r, v)\)
+%% DELETE \item \(T_1.d = \mathbf{Q.const}(1)\) 
+%% DELETE --- initial assumption on depth of chain ending in \(x\)
+\ei
+
+\subsection{Tk}
+
+Tables \(T_k\) for \(k =  2, \ldots\) have the following columns
+\be
+\item \(x\), person who was referred
+\item \(y\), person who did the referring at a distance of \(k\)
+\ee
+
+Note that if \(a\) referred \(b\) and \(b\) referred \(c\), then table \(T_2\)
+would have a row of the form \((c, a)\)
+
+\subsection{Sample Data}
+An example is in Table~\ref{example_extend}. 
+\begin{table}[hp]
+\centering
+\begin{tabular} {|l|l|l|l|l|} \\ \hline \hline
+{\bf k} & {\bf x} & {\bf y} & {\bf z} & {\bf w} \\ \hline
+0 & 0 & 1  & --- & --- \\ \hline
+0 & 1 & 2  & --- & --- \\ \hline
+0 & 2 & 3  & --- & --- \\ \hline
+0 & 3 & 4  & --- & --- \\ \hline
+0 & 4 & -1 & --- & --- \\\hline
+0 & 5 & 6  &  --- & --- \\\hline
+0 & 6 & 7  &  --- & --- \\\hline
+0 & 7 & -1 &  --- & --- \\\hline
+0 & 8 & -1 &  --- & --- \\\hline
+\hline  \hline
+1 & 0 & 1  & 2  & 1 \\ \hline
+1 & 1 & 2  & 3  & 1 \\ \hline
+1 & 2 & 3  & 4  & 1 \\ \hline
+1 & 3 & 4  & -1 & 0 \\ \hline
+1 & 5 & 6  & 2  & 1 \\ \hline
+1 & 6 & 7  & -1 & 0 \\ \hline
+\hline  \hline
+2 & 0 & 2 & 3 & 1 \\ \hline
+2 & 1 & 3 & 4 & 1 \\ \hline
+2 & 2 & 4 & -1 & 0 \\ \hline
+2 & 5 & 7 & -1 & 0 \\ \hline
+\hline  \hline
+3 & 0 & 2 & 4 & 1 \\ \hline
+3 & 1 & 3 & -1 & 0 \\ \hline
+\hline  \hline
+4 & 0 & 2 & -1 & 0 \\ \hline
+\end{tabular}
+\caption{Sample data}
+\label{example_extend}
+\end{table}
+
+
+\section{Sub-routines}
+
+Useful sub-routines are in 
+\be
+\item Figure~\ref{extend}
+\item Table~\ref{attenuate}
+\ee
+
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{12 cm}
+\centering
+\begin{tabbing} 
+\hspace*{0.25in} \= \hspace*{0.25in} \= \hspace*{0.25in} \= \kill
+Inputs: \+ \\
+\(T_k.x\) \\
+\(T_k.y\) \\
+\(T_0.y\) \-\\
+Operation:  \+ \\
+Let \(T_k.x[i] = x', T_k.y[i] = y'\).  \\
+Let \(f' = T_0.y[y']\).  \\
+If \(f' \geq 0\), add \((x', f')\) to output; else, do nothing \- \\
+Implementation in Q:  \+ \\
+\(z = \mathbf{Q.get}(T_k.y, T_0.y)\) \\
+\(w = \mathbf{Q.vsgeq}(T_k.y, 0)\) \\
+\(T_{k+1}.x = \mathbf{Q.where}(T_k.x, w)\) \\
+\(T_{k+1}.y = \mathbf{Q.where}(T_k.z, w)\) \- \\
+\end{tabbing}
+\caption{extend}
+\label{extend}
+\end{minipage}
+}
+\end{figure}
+
+
+\begin{table}[hp]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|l|} \hline \hline
+\(d_{max}\) & \(\alpha_1\)  & \(\alpha_2\)  & \(\alpha_3\)  & \(\alpha_4\)
+\\ \hline
+1 & 1 & --- & --- & --- \\ \hline
+2 & 2/3 & 1/3 & --- & --- \\ \hline
+3 & 4/7 & 2/7 & 1/7 & --- \\ \hline
+4 & 8/15 & 4/15 & 2/15 & 1/15 \\ \hline
+\hline
+\end{tabular}
+\caption{Attenuation Factors for different \(d, d_{max}\)}
+\label{attenuate}
+\end{table}
+
+\section{Algorithm}
+See Figure~\ref{algo}
+
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{12 cm}
+\centering
+\begin{tabbing} 
+\hspace*{0.25in} \= \hspace*{0.25in} \= \hspace*{0.25in} \= \kill
+
+\(T_0.d = \mathrm{Q.const}(1)\) --- initialize max depth to 1 \\
+\(T_0.s = \mathrm{Q.cosnt}(0)\) --- initialize attributed revenue to 0 \\
+\(k = 1\) \\
+{\bf repeat } \+ \\
+\(T_{k+1} = \mathbf{Q.extend}(T_k.x, T_k.y, T_0.y)\) \\
+{\bf if} \(T_{k+1} = \bot\) {\bf then break else} \(k_ = k+1\) {\bf end}\\
+--- Update max depth of referral chain ending in each person \\
+\(T_0.v = \mathbf{Q.set\_sclr_val\_by\_idx}(T_{k+1}.x, T0.d)\) \\
+{\bf until} --- not possible to extend any further \\
+\(d_{max} = k\) \\
+--- Compute attribution for each hop and add it to responsible person \\
+{\bf for} \(k = 1, \ldots k_{max}\) {\bf do} \+ \\
+  \(T_k.d       = \mathbf{Q.get}(T_k.x, T_0.d)\)  \\
+  \(T_k.r       = \mathbf{Q.get}(T_k.x, T_0.r)\)  \\
+  \(T_k.\alpha  = \mathbf{attenuate}(T_k.d, T_k.d_{max})\) %
+  See Table~\ref{attenuate} \\ 
+  \(T_k.b       = T_k.r \times T_k.\alpha\) \\
+  \(\mathbf{Q.put\_add}(T_k.b, T_k.x, T_0.s)\) \- \\
+{\bf endfor} \\
+\end{tabbing}
+\caption{Pseudo-code}
+\label{algo}
+  \end{minipage}
+}
+\end{figure}
+
+\section{Q Operators}
+
+\subsection{Get}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), Vector
+
+\item Outputs: \(z\), Vector, same length as \(x\)
+
+\item Operation: \(z[i] \leftarrow y[x_i]\)
+\ei
+
+\subsection{Put Add}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), Vector, same length
+
+\item Modified: \(z\), Vector \(\forall i: 0 \leq y[i] \leq z:\mathrm{length}() - 1\)
+
+\item Operation: \(y[i] = j \Rightarrow z[j] \leftarrow z[j] + x[i]\)
+\ei
+
+
+\subsection{vsleq}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), Scalar
+
+\item Outputs: \(z\), bit-Vector, same length as \(x\)
+
+\item Operation: \(x[i] \leq y \Rightarrow z[i] = 1\); else, \(z[i] = 0\)
+\ei
+
+\subsection{ainb}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), Vector
+
+\item Outputs: \(z\), bit-Vector of same length as \(x\)
+
+\item Operation: \(z[i] = 1\) if \(\exists j: x[i] = y[j]\); else, 0
+
+\ei
+
+\subsection{ifxthenyelsez}
+\bi
+\item Inputs: (1) \(x\), bit-Vector (2) \(y\), Scalar (3) \(z\), Vector, all of
+the same length
+
+\item Outputs: \(w\) Vector of same length and type as \(y\)
+
+\item Operation: \(x[i] = 1 \Rightarrow w[i] \leftarrow y\); else, \(w[i]
+\leftarrow z[i]\)
+
+\ei
+
+
+\subsection{where}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), bit-Vector, same length as \(x\)
+
+\item Outputs: \(z\), Vector of same type as \(x\)
+
+\item Operation: \(z\) contains \(x[i]\) only if
+\(y[i] = 1\). Order of elements in  \(z\) same as \(x\)
+
+\ei
+
+\appendix
+Some bogus reference to make bibtex not complain \cite{Hastie2009}.
+\bibliographystyle{alpha}
+\bibliography{../../../DOC/ref}

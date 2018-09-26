@@ -8,5 +8,5 @@ return {
   "logit2",
   "reciprocal",
   "abs",
-  "sqr"
+  "sqr",
 }
