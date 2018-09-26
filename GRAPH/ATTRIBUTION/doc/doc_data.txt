@@ -1,0 +1,131 @@
+InfoBegin
+InfoKey: ModDate
+InfoValue: D:20180918004802-07'00'
+InfoBegin
+InfoKey: PTEX.Fullbanner
+InfoValue: This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) kpathsea version 6.1.1
+InfoBegin
+InfoKey: CreationDate
+InfoValue: D:20180918004802-07'00'
+InfoBegin
+InfoKey: Creator
+InfoValue: LaTeX with hyperref package
+InfoBegin
+InfoKey: Producer
+InfoValue: pdfTeX-1.40.14
+PdfID0: cf8f1e16cbc7b38575bf1ab9b23212e3
+PdfID1: cf8f1e16cbc7b38575bf1ab9b23212e3
+NumberOfPages: 9
+BookmarkBegin
+BookmarkTitle: Network Influence Score
+BookmarkLevel: 1
+BookmarkPageNumber: 3
+BookmarkBegin
+BookmarkTitle: Introduction
+BookmarkLevel: 2
+BookmarkPageNumber: 3
+BookmarkBegin
+BookmarkTitle: Data Structures
+BookmarkLevel: 2
+BookmarkPageNumber: 3
+BookmarkBegin
+BookmarkTitle: T0
+BookmarkLevel: 3
+BookmarkPageNumber: 3
+BookmarkBegin
+BookmarkTitle: T1
+BookmarkLevel: 3
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Tk
+BookmarkLevel: 3
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Sample Data
+BookmarkLevel: 3
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Sub-routines
+BookmarkLevel: 2
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Algorithm
+BookmarkLevel: 2
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Q Operators
+BookmarkLevel: 2
+BookmarkPageNumber: 7
+BookmarkBegin
+BookmarkTitle: Get
+BookmarkLevel: 3
+BookmarkPageNumber: 7
+BookmarkBegin
+BookmarkTitle: vsleq
+BookmarkLevel: 3
+BookmarkPageNumber: 7
+BookmarkBegin
+BookmarkTitle: ainb
+BookmarkLevel: 3
+BookmarkPageNumber: 7
+BookmarkBegin
+BookmarkTitle: ifxthenyelsez
+BookmarkLevel: 3
+BookmarkPageNumber: 7
+BookmarkBegin
+BookmarkTitle: where
+BookmarkLevel: 3
+BookmarkPageNumber: 7
+PageMediaBegin
+PageMediaNumber: 1
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 2
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 3
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 4
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 5
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 6
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 7
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 8
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageMediaBegin
+PageMediaNumber: 9
+PageMediaRotation: 0
+PageMediaRect: 0 0 612 792
+PageMediaDimensions: 612 792
+PageLabelBegin
+PageLabelNewIndex: 1
+PageLabelStart: 1
+PageLabelNumStyle: DecimalArabicNumerals
+PageLabelBegin
+PageLabelNewIndex: 2
+PageLabelStart: 1
+PageLabelNumStyle: DecimalArabicNumerals

@@ -172,6 +172,82 @@ static int l_cmem_name( lua_State *L) {
   return 1;
 }
 
+static int set_default(
+    CMEM_REC_TYPE *ptr_cmem,
+    lua_Number val
+    )
+{
+  int width;
+  if ( ptr_cmem == NULL ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->size <= 0 ) { WHEREAMI; return -1; }
+  if ( ptr_cmem->data == NULL ) { WHEREAMI; return -1; }
+  if ( strcmp(ptr_cmem->field_type, "I1") == 0 ) {
+    int8_t val; int8_t *x = (int8_t *)(ptr_cmem->data);
+    width = sizeof(int8_t);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I2") == 0 ) {
+    int8_t val; int16_t *x = (int16_t *)(ptr_cmem->data);
+    width = sizeof(int16_t);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I4") == 0 ) {
+    int8_t val; int32_t *x = (int32_t *)(ptr_cmem->data);
+    width = sizeof(int32_t);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "I8") == 0 ) {
+    int8_t val; int64_t *x = (int64_t *)(ptr_cmem->data);
+    width = sizeof(int64_t);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "F4") == 0 ) {
+    int8_t val; float *x = (float *)(ptr_cmem->data);
+    width = sizeof(float);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else if ( strcmp(ptr_cmem->field_type, "F8") == 0 ) {
+    int8_t val; double *x = (double *)(ptr_cmem->data);
+    width = sizeof(double);
+    int n = ptr_cmem->size / width;
+    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+  }
+  else {
+    WHEREAMI; return -1;
+  }
+  //---------------------------------
+  if ( ( ptr_cmem->size % width ) != 0 ) { WHEREAMI; return -1; }
+  return 0;
+}
+
+static int l_cmem_set_default( lua_State *L)
+{
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 1, "CMEM");
+  lua_Number val = 0;
+  if ( lua_isnumber(L, 2) ) {
+    val    = luaL_checknumber(L, 2);
+  }
+  else { WHEREAMI; goto BYE; }
+
+  int status = set_default(ptr_cmem, val);
+  if ( status < 0 ) {
+    lua_pushboolean(L, true);
+  }
+  else {
+    lua_pushboolean(L, false);
+  }
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: cmem:set_default. ");
+  return 2;
+}
+
 static int cmem_set_min_max(
     CMEM_REC_TYPE *ptr_cmem,
     int mode 
@@ -568,6 +644,7 @@ static const struct luaL_Reg cmem_methods[] = {
     { "is_foreign",     l_cmem_is_foreign },
     { "dupe",     l_cmem_dupe },
     { "name",     l_cmem_name },
+    { "set_default", l_cmem_set_default },
     { NULL,          NULL               },
 };
  
@@ -586,6 +663,7 @@ static const struct luaL_Reg cmem_functions[] = {
     { "name",     l_cmem_name },
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
+    { "set_default", l_cmem_set_default },
     { NULL,  NULL         }
 };
  

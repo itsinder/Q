@@ -117,11 +117,19 @@ logit_specialize.lua  : f1opf2_specialize.tmpl
 logit2_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 
-libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files _vnot_files
+libf1s1opf2.so : _arith_files  \
+	_cmp_files \
+	_f1opf2_files \
+	_convert_files \
+	_vnot_files \
+	_is_prev_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
+
+_is_prev_files : is_prev_specialize.lua is_prev.tmpl
+	luajit generator_is_prev.lua
 
 _convert_files : convert_specialize.lua
 	luajit generator_conv.lua
