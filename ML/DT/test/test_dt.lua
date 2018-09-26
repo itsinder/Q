@@ -56,8 +56,8 @@ tests.t2 = function()
   -- then don't provide "args.data_file" argument
   --[[
   args.data_file = nil
-  args.train_csv = "b_cancer_train.csv"
-  args.test_csv = "b_cancer_test.csv"
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_test.csv"
   ]]
 
   Vector.reset_timers()
@@ -95,6 +95,15 @@ tests.t3 = function()
   args.data_file = data_file
   args.goal = "Survived"
   args.alpha = alpha
+  args.split_ratio = 0.5
+
+  -- If you want to provide train and test csv file explicitly,
+  -- then don't provide "args.data_file" argument
+  --[[
+  args.data_file = nil
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_test.csv"
+  ]]
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
@@ -128,6 +137,15 @@ tests.t4 = function()
   args.data_file = data_file
   args.goal = "class"
   args.alpha = alpha
+  args.split_ratio = 0.5
+
+  -- If you want to provide train and test csv file explicitly,
+  -- then don't provide "args.data_file" argument
+  --[[
+  args.data_file = nil
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_test.csv"
+  ]]
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
