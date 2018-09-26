@@ -236,7 +236,7 @@ static int l_cmem_set_default( lua_State *L)
 
   int status = set_default(ptr_cmem, val);
   if ( status < 0 ) {
-    lua_pushboolean(L, false);
+    goto BYE;
   }
   else {
     lua_pushboolean(L, true);
