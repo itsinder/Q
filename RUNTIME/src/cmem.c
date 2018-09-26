@@ -182,40 +182,40 @@ static int set_default(
   if ( ptr_cmem->size <= 0 ) { WHEREAMI; return -1; }
   if ( ptr_cmem->data == NULL ) { WHEREAMI; return -1; }
   if ( strcmp(ptr_cmem->field_type, "I1") == 0 ) {
-    int8_t val; int8_t *x = (int8_t *)(ptr_cmem->data);
+    int8_t *x = (int8_t *)(ptr_cmem->data);
     width = sizeof(int8_t);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (int8_t)val; }
   }
   else if ( strcmp(ptr_cmem->field_type, "I2") == 0 ) {
-    int8_t val; int16_t *x = (int16_t *)(ptr_cmem->data);
+    int16_t *x = (int16_t *)(ptr_cmem->data);
     width = sizeof(int16_t);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (int16_t)val; }
   }
   else if ( strcmp(ptr_cmem->field_type, "I4") == 0 ) {
-    int8_t val; int32_t *x = (int32_t *)(ptr_cmem->data);
+    int32_t *x = (int32_t *)(ptr_cmem->data);
     width = sizeof(int32_t);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (int32_t)val; }
   }
   else if ( strcmp(ptr_cmem->field_type, "I8") == 0 ) {
-    int8_t val; int64_t *x = (int64_t *)(ptr_cmem->data);
+    int64_t *x = (int64_t *)(ptr_cmem->data);
     width = sizeof(int64_t);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (int64_t)val; }
   }
   else if ( strcmp(ptr_cmem->field_type, "F4") == 0 ) {
-    int8_t val; float *x = (float *)(ptr_cmem->data);
+    float *x = (float *)(ptr_cmem->data);
     width = sizeof(float);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (float)val; }
   }
   else if ( strcmp(ptr_cmem->field_type, "F8") == 0 ) {
-    int8_t val; double *x = (double *)(ptr_cmem->data);
+    double *x = (double *)(ptr_cmem->data);
     width = sizeof(double);
     int n = ptr_cmem->size / width;
-    for ( int i = 0; i  < n; i++ ) { x[i] = val; }
+    for ( int i = 0; i  < n; i++ ) { x[i] = (double)val; }
   }
   else {
     WHEREAMI; return -1;
@@ -236,10 +236,10 @@ static int l_cmem_set_default( lua_State *L)
 
   int status = set_default(ptr_cmem, val);
   if ( status < 0 ) {
-    lua_pushboolean(L, true);
+    goto BYE;
   }
   else {
-    lua_pushboolean(L, false);
+    lua_pushboolean(L, true);
   }
   return 1;
 BYE:
