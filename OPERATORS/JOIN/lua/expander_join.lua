@@ -9,7 +9,6 @@ local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
 
 local function chk_params(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
-  assert(optargs)
   assert(op == "join")
   assert(type(join_type) == "string", "Join type must be a string")
   assert( ( join_type == "min" ) or ( join_type == "max" ) or
