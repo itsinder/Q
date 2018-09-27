@@ -6,6 +6,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local utils = require 'Q/UTILS/lua/utils'
 local plpath  = require 'pl.path'
 local plfile  = require 'pl.file'
+local Scalar = require 'libsclr'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/OPERATORS/UNIQUE/test/"
 assert(plpath.isdir(path_to_here))
 
@@ -180,6 +181,7 @@ tests.t6 = function ()
   print("Test t6 succeeded")
 end
 
+-- passing optargs.default_val as type 'number'
 tests.t7 = function ()
   local src_lnk_tbl = {10,20,30,50,60}
   local src_fld_tbl = {1,21,12,7,9}
@@ -205,6 +207,58 @@ tests.t7 = function ()
   -- local opt_args = { opfile = "" }
   -- Q.print_csv(c, opt_args)
   print("Test t7 succeeded")
+end
+
+-- passing optargs.default_val as type 'Scalar'
+tests.t8 = function ()
+  local src_lnk_tbl = {10,20,30,50,60}
+  local src_fld_tbl = {1,21,12,7,9}
+  local dst_lnk_tbl = {10,20,30,40}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I2")
+  local src_fld = Q.mk_col(src_fld_tbl, "I1")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I2")
+  local optargs = {}
+  optargs.default_val = Scalar.new(100, "I1")
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "any", optargs)
+  c:eval()
+  local val, _ = c:get_one(c:length()-1)
+  assert(val:to_num() == optargs.default_val)
+  Q.print_csv(c)
+
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t8 succeeded")
+end
+
+-- passing non sorted vectors as input
+tests.t9 = function ()
+  local src_lnk_tbl = {60,50,40,30,20,10}
+  local src_fld_tbl = {1,21,12,15,7,9}
+  local dst_lnk_tbl = {10,20,30,40,50}
+  local src_lnk = Q.mk_col(src_lnk_tbl, "I2")
+  local src_fld = Q.mk_col(src_fld_tbl, "I1")
+  local dst_lnk = Q.mk_col(dst_lnk_tbl, "I2")
+  local c = Q.join(src_lnk, src_fld, dst_lnk, "any")
+  c:eval()
+  Q.print_csv(c)
+
+--  for i = 1, c:length() do
+--    local value = c_to_txt(c, i)
+--    assert(value == out_table[i])
+
+--    value = c_to_txt(d, i)
+--    assert(value == cnt_table[i])
+--  end
+  -- local opt_args = { opfile = "" }
+  -- Q.print_csv(c, opt_args)
+  print("Test t8 succeeded")
 end
 
 return tests
