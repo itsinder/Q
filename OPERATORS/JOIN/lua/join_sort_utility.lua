@@ -5,7 +5,7 @@ local sort2 = require "Q/OPERATORS/SORT2/lua/sort2"
 local sort_vector = function(a, drag_along)
   local a_clone = a
   local drag_clone = drag_along
-  -- NOTE: For unique operator, input vector needs to be sorted(asc/dsc)  
+  -- NOTE: For join operator, input vector needs to be sorted(asc)
   local sort_order = a:get_meta("sort_order")
   -- if sort_order field is nil then check the input vector for sort order
   if ( sort_order == nil ) then
