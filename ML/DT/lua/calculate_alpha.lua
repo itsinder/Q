@@ -110,7 +110,9 @@ local function run_dt(args)
       if is_first then
         local file_name = tostring(min_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
         local f = io.open(file_name, "a")
-        f:write("digraph {\n")
+        f:write("digraph Tree {\n")
+        f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+        f:write("edge [fontname=helvetica] ;\n")
         print_dt(tree, f, train_col_name)
         f:write("}\n")
         f:close()

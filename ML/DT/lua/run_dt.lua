@@ -78,7 +78,9 @@ local function run_dt(args)
 
     -- print decision tree
     local f = io.open("graphviz.txt", "a")
-    f:write("digraph {\n")
+    f:write("digraph Tree {\n")
+    f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+    f:write("edge [fontname=helvetica] ;\n")
     print_dt(tree, f, train_col_name)
     f:write("}\n")
     f:close()
