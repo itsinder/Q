@@ -143,8 +143,8 @@ tests.t4 = function()
   -- then don't provide "args.data_file" argument
   --[[
   args.data_file = nil
-  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_train.csv"
-  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_test.csv"
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248_test.csv"
   ]]
 
   Vector.reset_timers()
