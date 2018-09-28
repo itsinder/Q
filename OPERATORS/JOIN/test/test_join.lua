@@ -261,4 +261,38 @@ tests.t9 = function ()
   print("Test t8 succeeded")
 end
 
+-- checking for num_elements > chunk_size
+tests.t10 = function()
+  local num_elements = qconsts.chunk_size + 3
+  local src_lnk = Q.const( { val = 3, qtype = "I4", len = num_elements }):eval()
+  local src_fld = Q.seq( { start = 1, by = 1, qtype = "I4", len = num_elements }):eval()
+  local dst_lnk = Q.mk_col({ 3 }, "I4")
+  local dst_fld = Q.join(src_lnk, src_fld, dst_lnk, "sum")
+  dst_fld:eval()
+  local sum = Q.sum(src_fld):eval()
+  for i = 1, dst_fld:length() do
+    local value = c_to_txt(dst_fld, i)
+    assert(sum:to_num() == value)
+  end
+end
+
+-- checking for num_elements > chunk_size
+-- and same dst_fld value occuring twice 
+-- should not calculate the output twice for same dst_fld value
+-- instead should just copy it for second same value. for eg below: (value 4) 
+tests.t11 = function()
+  local num_elements = qconsts.chunk_size
+  local src_lnk = Q.period( { len = num_elements, start = 3, by = 1, period = 2, qtype = "I4"}):eval()
+  local src_fld = Q.period( { len = num_elements, start = 10, by = 10, period = 2, qtype = "I4"}):eval()
+  local dst_lnk = Q.mk_col({ 3, 4, 4, 5 }, "I4")
+  local expected_dst_fld = {327680, 655360, 655360, 0}
+  local dst_fld = Q.join(src_lnk, src_fld, dst_lnk, "sum")
+  dst_fld:eval()
+  local sum = Q.sum(src_fld):eval()
+  for i = 1, dst_fld:length() do
+    local value = c_to_txt(dst_fld, i)
+    assert(value == expected_dst_fld[i])
+  end
+end
+
 return tests
