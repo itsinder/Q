@@ -2,6 +2,7 @@ local cmem = require 'libcmem' ;
 local ffi = require 'ffi'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local tests = {}
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 ffi.cdef([[
 char *strncpy(char *dest, const char *src, size_t n);
@@ -18,6 +19,7 @@ tests.t0 = function()
   buf:prbuf(4)
   print("test 0 passed")
 end
+
 tests.t1 = function()
   -- basic test 
   local buf = cmem.new(128, "I4")
@@ -191,5 +193,35 @@ tests.t10 = function()
   -- TODO P3 Visual inspection shows this test passes. Automate it.
   print("test t10 passed")
 end
+
+tests.t11 = function()
+  local num_elements = 10
+  local qtype = "I4"
+  local buf = cmem.new((num_elements * 4), qtype)
+  local iptr = get_ptr(buf, qtype)
+  
+  buf:set_min()
+  -- verify min values
+  for i = 1, num_elements do
+    assert(iptr[i-1] == qconsts.qtypes[qtype].min)
+  end
+
+  buf:set_max()
+  -- verify min values
+  for i = 1, num_elements do
+    assert(iptr[i-1] == qconsts.qtypes[qtype].max)
+  end
+
+  local val = -1
+  buf:set_default(val)
+  -- verify min values
+  for i = 1, num_elements do
+    assert(iptr[i-1] == val)
+  end
+
+  --=======================
+  print("test t11 passed")
+end
+
   
 return tests

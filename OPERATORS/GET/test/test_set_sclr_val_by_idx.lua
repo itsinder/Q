@@ -25,4 +25,24 @@ tests.t1 = function()
   --]]
   print("Successfully completed t1")
 end
+
+tests.t2 = function()
+  local idx_len = qconsts.chunk_size + 2
+  local x_len   = qconsts.chunk_size * 2
+  -- odd indices(idx) to be set(by 10000 value) in x value vector
+  local idx = Q.seq( {start = 1, by = 2, qtype = "I4", len = idx_len} )
+  local x   = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_len} )
+  local sclr_value = 10000
+  Q.set_sclr_val_by_idx(idx, x, { sclr_val = sclr_value })
+  -- validating the returned values
+  for i = 1, idx_len do
+    if i % 2 == 0 then
+      assert(x:get_one(i-1):to_num() == sclr_value)
+    else
+      assert(x:get_one(i-1):to_num() == i)
+    end
+  end
+  print("Successfully completed t2")
+end
+
 return tests

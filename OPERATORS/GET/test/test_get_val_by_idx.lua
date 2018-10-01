@@ -36,4 +36,50 @@ tests.t2 = function()
   -- TODO Write invariant for test Q.print_csv({x, z})
   print("Successfully completed t2")
 end
+
+-- Positive Test-case: checking for num_elements > chunk_size
+tests.t3 = function()
+  local x_length = qconsts.chunk_size + 2
+  local y_length = qconsts.chunk_size * 4
+
+  local x = Q.seq( {start = 3, by = 3, qtype = "I4", len = x_length} ):eval()
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} ):eval()
+  local z = Q.get_val_by_idx(x, y)
+  z:eval()
+  assert(z:length() == x:length())
+  print("Successfully completed test t3")
+end
+
+-- Positive Test-case: checking for num_elements > chunk_size
+-- passing opt_args null_val as type 'Scalar'
+tests.t4 = function()
+  local x_length = qconsts.chunk_size + 2
+  local y_length = qconsts.chunk_size * 3
+
+  local x = Q.seq( {start = 3, by = 3, qtype = "I4", len = x_length} ):eval()
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} ):eval()
+  local null_value = Scalar.new(1000, "I4")
+  local z = Q.get_val_by_idx(x, y, {null_val = null_value})
+  z:eval()
+  assert(z:length() == x:length())
+  print("Successfully completed test t4")
+end
+
+-- Positive Test-case: checking for num_elements > chunk_size
+-- passing opt_args null_val as type 'number'
+tests.t5 = function()
+  local x_length = qconsts.chunk_size + 2
+  local y_length = qconsts.chunk_size * 3
+
+  local x = Q.seq( {start = 3, by = 3, qtype = "I4", len = x_length} ):eval()
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} ):eval()
+  -- providing 1000 as 'number' to be returned as value in z
+  -- where if y vector does not have value for x idx entry
+  local null_value = 1000
+  local z = Q.get_val_by_idx(x, y)
+  z:eval()
+  assert(z:length() == x:length())
+  print("Successfully completed test t5")
+end
+
 return tests
