@@ -4,6 +4,36 @@
 
 \TBC
 
+\subsection{Selected Q operators}
+See Table~\ref{tbl_q_ops}.
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|l|l|} \hline \hline
+{\bf operator} & {\bf explanation} & {\bf reference} \\ \hline \hline
+get\_val\_by\_idx & get value by index & 
+Section~\ref{get_val_by_idx} \\ \hline
+
+set\_sclr\_val\_by\_idx & set scalar value by index & 
+Section~\ref{set_sclr_val_by_idx} \\ \hline
+
+add\_vec\_val\_by\_idx & Accumulate vector value by index & 
+Section~\ref{add_vec_val_by_idx} \\ \hline
+
+vvmul & vector-vector multiply & Section~\ref{vvmul} \\ \hline
+
+vsleq & vector-scalar \(\leq\) comparison & Section~\ref{vsleq} \\ \hline
+
+ifxthenyelsez & ternary operator \verb+ x ? y : z+ & 
+Section~\ref{ifxthenyelsez} \\ \hline
+
+where & select rows where condition is true & 
+Section~\ref{where} \\ \hline
+\hline
+\end{tabular}
+\caption{Selected Q operators}
+\label{tbl_q_ops}
+\end{table}
+
 \section{Data Structures}
 \subsection{T0}
 
@@ -22,7 +52,7 @@ Notes:
 We also say that \(y\) is the 1-parent of \(i\)
 \item 
 Assume that \(y[i] = j\) and \(y[j] < 0\). 
-This implies that \(i\) was referred by \(j\) but nobody referred \(j\)
+This implies \(i\) was referred by \(j\) but nobody referred \(j\)
 \item a person can be referred by at most one person 
 \ei
 
@@ -53,7 +83,7 @@ would have a row of the form \((c, a)\)
 An example is in Table~\ref{example_extend}. 
 \begin{table}[hp]
 \centering
-\begin{tabular} {|l|l|l|l|l|} \\ \hline \hline
+\begin{tabular} {|l|l|l|l|l|} \hline \hline
 {\bf k} & {\bf x} & {\bf y} & {\bf z} & {\bf w} \\ \hline
 0 & 0 & 1  & --- & --- \\ \hline
 0 & 1 & 2  & --- & --- \\ \hline
@@ -87,13 +117,17 @@ An example is in Table~\ref{example_extend}.
 \end{table}
 
 
-\section{Sub-routines}
+\section{Algorithm}
 
-Useful sub-routines are in 
-\be
-\item Figure~\ref{extend}
-\item Table~\ref{attenuate}
-\ee
+The algorithm is presented in Figure~\ref{algo}. Some useful routines in
+Section~\ref{aux_algo}
+\subsection{Sub-routines}
+\label{aux_algo}
+
+\bi
+\item The function {\bf Q.extend} is in Figure~\ref{extend}
+\item The way the attribution diminishes with distance is in Table~\ref{attenuate}
+\ei
 
 \begin{figure}
 \centering
@@ -138,8 +172,6 @@ Implementation in Q:  \+ \\
 \label{attenuate}
 \end{table}
 
-\section{Algorithm}
-See Figure~\ref{algo}
 
 \begin{figure}
 \centering
@@ -150,23 +182,22 @@ See Figure~\ref{algo}
 \hspace*{0.25in} \= \hspace*{0.25in} \= \hspace*{0.25in} \= \kill
 
 \(T_0.d = \mathrm{Q.const}(1)\) --- initialize max depth to 1 \\
-\(T_0.s = \mathrm{Q.cosnt}(0)\) --- initialize attributed revenue to 0 \\
+\(T_0.s = \mathrm{Q.const}(0)\) --- initialize attributed revenue to 0 \\
 \(k = 1\) \\
 {\bf repeat } \+ \\
-\(T_{k+1} = \mathbf{Q.extend}(T_k.x, T_k.y, T_0.y)\) \\
-{\bf if} \(T_{k+1} = \bot\) {\bf then break else} \(k_ = k+1\) {\bf end}\\
+\(T_{k+1} = \mathbf{Q.extend}(T_k.x, T_k.y, T_0.y)\) (Figure~\ref{extend})\\
+{\bf if} \(T_{k+1} = \bot\) {\bf then break else} \(k = k+1\) {\bf end}\\
 --- Update max depth of referral chain ending in each person \\
-\(T_0.v = \mathbf{Q.set\_sclr_val\_by\_idx}(T_{k+1}.x, T0.d)\) \\
+\(\mathbf{Q.set\_sclr\_val\_by\_idx}(T_{k+1}.x, T0.d)\) \- \\
 {\bf until} --- not possible to extend any further \\
 \(d_{max} = k\) \\
---- Compute attribution for each hop and add it to responsible person \\
+Load \(alpha\) which contains attribution coefficients (Table~\ref{attenuate}\\
 {\bf for} \(k = 1, \ldots k_{max}\) {\bf do} \+ \\
   \(T_k.d       = \mathbf{Q.get}(T_k.x, T_0.d)\)  \\
   \(T_k.r       = \mathbf{Q.get}(T_k.x, T_0.r)\)  \\
-  \(T_k.\alpha  = \mathbf{attenuate}(T_k.d, T_k.d_{max})\) %
-  See Table~\ref{attenuate} \\ 
-  \(T_k.b       = T_k.r \times T_k.\alpha\) \\
-  \(\mathbf{Q.put\_add}(T_k.b, T_k.x, T_0.s)\) \- \\
+  \(T_k.\alpha  = \mathbf{Q.get\_val\_by\_idx}(T_k.d, \alpha[k])\) \\
+  \(s           = \mathbf{Q.vvadd}(T[k].r, T[k].\alpha)\) \\
+  \(\mathbf{Q.add\_vec\_val\_by\_idx}(s, T_k.y, T0.s)\) \- \\
 {\bf endfor} \\
 \end{tabbing}
 \caption{Pseudo-code}
@@ -175,9 +206,11 @@ See Figure~\ref{algo}
 }
 \end{figure}
 
-\section{Q Operators}
+\section{Details of Q Operators}
+\label{Q_ops}
 
-\subsection{Get}
+\subsection{get\_val\_by\_idx}
+\label{get_val_by_idx}
 \bi
 \item Inputs: (1) \(x\), Vector  (2) \(y\), Vector
 
@@ -186,17 +219,39 @@ See Figure~\ref{algo}
 \item Operation: \(z[i] \leftarrow y[x_i]\)
 \ei
 
-\subsection{Put Add}
+\subsection{set\_sclr\_val\_by\_idx}
+\label{set_sclr_val_by_idx}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(s\), Scalar
+
+\item Modified: \(z\), Vector
+
+\item Operation: \(x[i] = j \Rightarrow z[j] \leftarrow s\)
+\ei
+
+\subsection{add\_vec\_val\_by\_idx}
+\label{add_vec_val_by_idx}
 \bi
 \item Inputs: (1) \(x\), Vector  (2) \(y\), Vector, same length
 
 \item Modified: \(z\), Vector \(\forall i: 0 \leq y[i] \leq z:\mathrm{length}() - 1\)
 
-\item Operation: \(y[i] = j \Rightarrow z[j] \leftarrow z[j] + x[i]\)
+\item Operation: \(x[i] = j \Rightarrow z[j] \leftarrow z[j] + y[i]\)
 \ei
 
 
+\subsection{vvmul}
+\label{vvmul}
+\bi
+\item Inputs: (1) \(x\), Vector  (2) \(y\), Vector, same length as \(x\)
+
+\item Outputs: \(z\), Vector, same length as \(x\)
+
+\item Operation: \(z[i] \leq x[i] + y[i]\)
+\ei
+
 \subsection{vsleq}
+\label{vsleq}
 \bi
 \item Inputs: (1) \(x\), Vector  (2) \(y\), Scalar
 
@@ -205,17 +260,18 @@ See Figure~\ref{algo}
 \item Operation: \(x[i] \leq y \Rightarrow z[i] = 1\); else, \(z[i] = 0\)
 \ei
 
-\subsection{ainb}
-\bi
-\item Inputs: (1) \(x\), Vector  (2) \(y\), Vector
-
-\item Outputs: \(z\), bit-Vector of same length as \(x\)
-
-\item Operation: \(z[i] = 1\) if \(\exists j: x[i] = y[j]\); else, 0
-
-\ei
+%% \subsection{ainb}
+%% \bi
+%% \item Inputs: (1) \(x\), Vector  (2) \(y\), Vector
+%% 
+%% \item Outputs: \(z\), bit-Vector of same length as \(x\)
+%% 
+%% \item Operation: \(z[i] = 1\) if \(\exists j: x[i] = y[j]\); else, 0
+%% 
+%% \ei
 
 \subsection{ifxthenyelsez}
+\label{ifxthenyelsez}
 \bi
 \item Inputs: (1) \(x\), bit-Vector (2) \(y\), Scalar (3) \(z\), Vector, all of
 the same length
@@ -229,6 +285,7 @@ the same length
 
 
 \subsection{where}
+\label{where}
 \bi
 \item Inputs: (1) \(x\), Vector  (2) \(y\), bit-Vector, same length as \(x\)
 

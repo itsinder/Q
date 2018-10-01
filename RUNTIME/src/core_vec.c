@@ -1319,7 +1319,15 @@ vec_start_write(
     go_BYE(-1);
   }
   if ( ! ptr_vec->is_virtual ) {
-    if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
+    // TODO DISCUSS WITH KRUSHNAKANT
+    // I am going to allow open in write even if opened in read
+    // but this needs more thought 
+    if ( ptr_vec->open_mode == 0 ) {
+      /* this situation is fine */
+    }
+    else if ( ptr_vec->open_mode == 1 ) {
+      mcr_rs_munmap(ptr_vec->map_addr, ptr_vec->map_len);
+    }
     if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
   }
