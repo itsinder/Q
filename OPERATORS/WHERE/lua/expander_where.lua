@@ -48,8 +48,10 @@ local function expander_where(op, a, b)
   local function where_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected 
     -- chunk_num and generator's chunk_idx state
+    --[[ OKAY TO TAKE THIS OUT????
     assert(chunk_num == a_chunk_idx, 
       "chunk_num/idx = " .. chunk_num .. " ==> " .. a_chunk_idx)
+      --]]
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
@@ -80,15 +82,18 @@ local function expander_where(op, a, b)
       local cst_a_chunk = ffi.cast(cst_a_as, get_ptr(a_chunk))
       local cst_b_chunk = ffi.cast(cst_b_as, get_ptr(b_chunk))
       local cst_out_buf = ffi.cast(cst_out_as, get_ptr(out_buf))
-      local status = qc[func_name](cst_a_chunk, cst_b_chunk, idx, 
+      local status = qc[func_name](cst_a_chunk, cst_b_chunk, aidx, 
         a_len, cst_out_buf, sz_out, n_out)
       assert(status == 0, "C error in WHERE")
+      assert(tonumber(n_out[0]) <= sz_out)
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
-        print("a_chunk_idx = ", a_chunk_idx)
         aidx[0] = 0
       end
-      print("dbg_iter = ", dbg_iter)
+      --[[
+      print("dbg_iter/a_chunk_idx/aidx/a_len/sz_out/n_out/ = ", 
+      dbg_iter, a_chunk_idx, aidx, a_len, sz_out, n_out)
+      --]]
       dbg_iter = dbg_iter + 1 -- for debugging
     until ( tonumber(n_out[0]) == sz_out )
     return tonumber(n_out[0]), out_buf, nil
