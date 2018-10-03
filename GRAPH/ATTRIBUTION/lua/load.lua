@@ -1,5 +1,7 @@
+require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local Scalar = require 'libsclr'
+local Vector = require 'libvec'
 local load_alpha = require 'load_alpha'
 local extend = require 'extend'
 
@@ -8,7 +10,7 @@ local M = {
    { name = "x", has_nulls = false, qtype = "I4", is_load = true }, 
    { name = "y", has_nulls = false, qtype = "I4", is_load = true }, 
  }
-local datafile = "../data/2.csv"
+local datafile = "../data/3.csv"
 tmp = Q.load_csv(datafile, M); 
 x = tmp.x
 y = tmp.y
@@ -32,6 +34,7 @@ assert(n1:to_num() > 0)
 assert(Q.is_next(x, "geq"):eval() == true)
 --=====
 z = Q.is_prev(x, "neq", {default_val = 1}):eval()
+print("======== where starting ===========")
 xlbl = Q.where(x, z):eval()
 ylbl = Q.where(y, z):eval()
 y = Q.get_idx_by_val(ylbl, xlbl)

@@ -46,6 +46,7 @@ static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
 static uint64_t t_memcpy;            static uint32_t n_memcpy;
 static uint64_t t_memset;            static uint32_t n_memset;
 static uint64_t t_malloc;            static uint32_t n_malloc;
+static uint64_t sz_malloc;           // number of bytes allocated
 
 extern luaL_Buffer g_errbuf;
 
@@ -79,6 +80,8 @@ l_malloc(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
+  sz_malloc += n;
+  fprintf(stdout, "++ sz_malloc = %" PRIu64 "\n", sz_malloc);
   void *x = malloc(n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
   return x;
@@ -108,6 +111,7 @@ vec_reset_timers(
   t_memcpy = 0;             n_memcpy = 0;
   t_memset = 0;             n_memset = 0;
   t_malloc = 0;             n_malloc = 0;
+  sz_malloc = 0;
 }
 
 void
@@ -134,6 +138,7 @@ vec_print_timers(
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
   fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
+  fprintf(stdout, "2,sz_malloc,0,%" PRIu64 "\n", sz_malloc);
 }
 
 
@@ -485,6 +490,8 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
+    sz_malloc -= ptr_vec->chunk_sz;
+    fprintf(stdout, "-- sz_malloc = %" PRIu64 "\n", sz_malloc);
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }

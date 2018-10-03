@@ -32,15 +32,22 @@ ${fn}(
 {
   int status = 0;
   
+  // START: Basic checks on input parameters
   if ( A == NULL ) { go_BYE(-1); }
   if ( B == NULL ) { go_BYE(-1); }
+  if ( C == NULL ) { go_BYE(-1); }
   if ( nA == 0 ) { go_BYE(-1); }
+  if ( nC == 0 ) { go_BYE(-1); }
   if ( ptr_num_in_C == NULL ) { go_BYE(-1); }
   if ( ptr_aidx == NULL ) { go_BYE(-1); }
-
   uint64_t num_in_C = *ptr_num_in_C;
   uint64_t aidx = *ptr_aidx;
-  if ( num_in_C > nC ) { go_BYE(-1); }
+  if ( num_in_C > nC ) { 
+    fprintf(stderr, "num_in_C,  nC = %llu, %llu \n", num_in_C, nC);
+    go_BYE(-1); 
+  }
+  if ( aidx >= nA ) { go_BYE(-1); }
+  //-------------------------------
   
   for ( ; aidx < nA; aidx++ ) { 
     int b = get_bit_u64(B, aidx);
@@ -52,6 +59,9 @@ ${fn}(
   }
   *ptr_num_in_C = num_in_C;
   *ptr_aidx     = aidx;
+  if ( num_in_C > nC ) { go_BYE(-1); }
+  if ( aidx > nA ) { go_BYE(-1); }
+  //-------------------------------
 BYE:
   return status;
 }
