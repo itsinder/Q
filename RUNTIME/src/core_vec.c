@@ -70,18 +70,25 @@ l_memset(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_memset++;
-  void *x = memset(s, c, n);
+  memset(s, c, n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
 }
 
 static inline void *
 l_malloc(
-    size_t n
+    size_t n,
+    VEC_REC_TYPE *ptr_vec // TODO DELETE later just for debugging
     )
 {
-  uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
+  fprintf(stderr, "1 ++ sz_malloc = %" PRIu64 ", %lu, ", sz_malloc, n);
+  if ( *ptr_vec->name == '\0' ) {
+    fprintf(stderr, "NULL\n");
+  }
+  else {
+    fprintf(stderr, "%s\n", ptr_vec->name);
+  }
   sz_malloc += n;
-  fprintf(stdout, "++ sz_malloc = %" PRIu64 "\n", sz_malloc);
+  uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
   void *x = malloc(n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
   return x;
@@ -243,7 +250,7 @@ vec_get_buf(
   char *chunk = NULL;
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
       l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
@@ -490,8 +497,21 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
+    if ( ptr_vec->chunk_sz > 4*1048576 ) { 
+      printf("hello world\n");
+    }
+    if ( ptr_vec->chunk_sz > sz_malloc ) { 
+      printf("hello world\n");
+    }
+    fprintf(stderr, "1 -- sz_malloc = %" PRIu64 ", %u, ", 
+        sz_malloc, ptr_vec->chunk_sz);
+    if ( *ptr_vec->name == '\0' ) { 
+      fprintf(stderr, "NULL\n");
+    }
+    else {
+      fprintf(stderr, "%s\n", ptr_vec->name);
+    }
     sz_malloc -= ptr_vec->chunk_sz;
-    fprintf(stdout, "-- sz_malloc = %" PRIu64 "\n", sz_malloc);
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
   }
@@ -579,7 +599,7 @@ vec_clone(
   memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
-    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz);
+    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz, ptr_new_vec);
     return_if_malloc_failed(ptr_new_vec->chunk); 
     l_memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
@@ -851,22 +871,28 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       go_BYE(-1);
       break;
   }
+#ifdef TODO
+  Curently this is commented out need to think more
   // Cannot have vector with 0 elements. 
   if ( ptr_vec->is_eov == true ) {
-    return status;
-    /* TODO P1 Think about how to handle this if it happens
     if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
-    */
+  }
+#endif
+  if ( ptr_vec->is_eov == true ) {
+    return status;
   }
   // when map_len > 0, must match file_size 
   // It is possible for map_len == 0 and file_size > 0
-  if ( ptr_vec->map_len > 0 ) { 
+  if ( ptr_vec->map_len > 0 ) {
     if ( ptr_vec->file_size != ptr_vec->map_len ) { 
       go_BYE(-1); 
     }
     if (get_file_size(ptr_vec->file_name) != (int64_t)ptr_vec->file_size){ 
       go_BYE(-1); 
     }
+  }
+  else {
+    if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
   }
   /* When is_eov and is_memo, 
      Backup file should exist and have space for num_elements in it */
@@ -912,7 +938,8 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
     if ( ptr_vec->num_in_chunk == 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        == NULL ) { go_BYE(-1); }
     // May be only 1 chunk if ( ptr_vec->chunk_num    == 0    ) { go_BYE(-1); }
-    if ( ptr_vec->open_mode    != 0 ) { go_BYE(-1); }
+    if ( ptr_vec->open_mode    != 0 ) { 
+      go_BYE(-1); }
     if ( ptr_vec->map_addr     != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len      != 0    ) { go_BYE(-1); }
   }
@@ -1176,7 +1203,7 @@ vec_add_B1(
 {
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -1277,7 +1304,7 @@ vec_add(
   //---------------------------------------
 
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -1333,7 +1360,11 @@ vec_start_write(
       /* this situation is fine */
     }
     else if ( ptr_vec->open_mode == 1 ) {
-      mcr_rs_munmap(ptr_vec->map_addr, ptr_vec->map_len);
+      if ( ptr_vec->map_addr != NULL ) { 
+        munmap(ptr_vec->map_addr, ptr_vec->map_len);
+        ptr_vec->map_addr = NULL;
+        ptr_vec->map_len = 0;
+      }
     }
     if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }

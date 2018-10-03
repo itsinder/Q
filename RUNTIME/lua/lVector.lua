@@ -713,25 +713,23 @@ function lVector:chunk(chunk_num)
   else
     assert(self._gen)
     assert(type(self._gen) == "function")
-    local buf_size, base_data, nn_data, is_put_chunk = 
-      self._gen(chunk_num, self)
-      -- TODO DISCUSS following if with KRUSHNAKANT
-    if ( not is_put_chunk ) then 
-      if ( buf_size < qconsts.chunk_size ) then
-        if ( buf_size > 0 and base_data ) then
-          self:put_chunk(base_data, nn_data, buf_size)
-        end
-        self:eov()
-        --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+    local buf_size, base_data, nn_data = self._gen(chunk_num, self)
+    assert(type(buf_size) == "number") -- THINK TODO 
+    -- TODO DISCUSS following if with KRUSHNAKANT
+    if ( buf_size < qconsts.chunk_size ) then
+      if ( buf_size > 0 and base_data ) then
+        self:put_chunk(base_data, nn_data, buf_size)
+      end
+      self:eov()
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+    else
+      if ( base_data ) then 
+        -- this is the simpler case where generator malloc's
+        self:put_chunk(base_data, nn_data, buf_size)
       else
-        if ( base_data ) then 
-          -- this is the simpler case where generator malloc's
-          self:put_chunk(base_data, nn_data, buf_size)
-        else
-          -- this is the advanced case of using the Vector's buffer.
-          -- local chk =  self:chunk_num()
-          -- assert(chk == l_chunk_num)
-        end
+        -- this is the advanced case of using the Vector's buffer.
+        -- local chk =  self:chunk_num()
+        -- assert(chk == l_chunk_num)
       end
     end
     if ( qconsts.debug ) then self:check() end

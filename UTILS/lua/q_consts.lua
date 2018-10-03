@@ -1,7 +1,7 @@
 local qconsts = {}
 --===========================  
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
-  qconsts.debug = true -- set to TRUE only if you want debugging
+  qconsts.debug = false -- set to TRUE only if you want debugging
   qconsts.is_memo = true -- Vector code will refer memo value from this place
   qconsts.qc_trace = false -- set to FALSE if performance logging of qc is to be turned off
   qconsts.default_meta_file = os.getenv("HOME") .. "/local/Q/meta/saved.meta"

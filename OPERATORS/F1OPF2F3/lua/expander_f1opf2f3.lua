@@ -48,7 +48,14 @@ local function expander_f1opf2f3(op, x)
     
     local in_len, in_chunk, in_nn_chunk = x:chunk(chunk_idx)
     -- TODO DISCUSS FOLLOWING WITH KRUSHNAKANT
-    if ( in_len == 0 ) then return nil end
+    if ( in_len == 0 ) then 
+      return 0
+      --[[
+      out1_vec:eov()
+      out2_vec:eov()
+      return nil, nil, nil, true -- indicating put chunk done
+      --]]
+    end
     if ( first_call ) then  assert(in_len > 0) end 
     assert(in_nn_chunk == nil, "nulls not supported as yet")
     
@@ -73,8 +80,7 @@ local function expander_f1opf2f3(op, x)
       out1_vec:eov()
       out2_vec:eov()
     end
-    return nil, nil, nil, is_put_chunk
-    -- TODO P1 What do we return here?
+    return in_len, nil, nil
   end
   out1_vec:set_generator(f1opf2f3_gen)
   out2_vec:set_generator(f1opf2f3_gen)

@@ -69,19 +69,18 @@ local function expander_where(op, a, b)
     n_out[0] = 0 -- Initialize to zero
     
     local dbg_iter = 1 -- for debugging
-    Vector.print_timers()
     repeat
-      if ( a_chunk_idx > 1000 ) then 
-        print("Y: a_chunk_idx, n_out = ", a_chunk_idx, tonumber(n_out[0]))
-      end
-      assert(tonumber(aidx[0]) <= 65536) -- TODO DELETE
+      assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
+      assert(tonumber(aidx[0]) <= qconsts.chunk_size, tonumber(aidx[0]))
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
+      assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
+      assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
       local b_len, b_chunk, b_nn_chunk = b:chunk(a_chunk_idx)
       if ( a_len == 0 ) then
         return tonumber(n_out[0]), out_buf, nil 
       end
-      assert(tonumber(n_out[0]) <= sz_out) -- TODO DELETE
-      assert(tonumber(aidx[0]) <= a_len) -- TODO DELETE
+      assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
+      assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
 
       assert(a_len == b_len)
       assert(a_nn_chunk == nil, "Null is not supported")
@@ -91,14 +90,13 @@ local function expander_where(op, a, b)
       local cst_b_chunk = ffi.cast(cst_b_as, get_ptr(b_chunk))
       local cst_out_buf = ffi.cast(cst_a_as, get_ptr(out_buf))
       -- TODO delete following 2 
-      assert(tonumber(n_out[0]) <= sz_out, 
-        tonumber(n_out[0]) .. " <= " ..  sz_out)
-      assert(tonumber(aidx[0]) <= a_len) -- TODO DELETE
+      assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
+      assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
       local status = qc[func_name](cst_a_chunk, cst_b_chunk, aidx, 
         a_len, cst_out_buf, sz_out, n_out)
       assert(status == 0, "C error in WHERE")
-      assert(tonumber(n_out[0]) <= sz_out)
-      assert(tonumber(aidx[0]) <= a_len)
+      assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
+      assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
       if ( tonumber(aidx[0]) == a_len ) then
         a_chunk_idx = a_chunk_idx + 1
         aidx[0] = 0
