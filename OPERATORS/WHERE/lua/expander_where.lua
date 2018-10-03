@@ -45,12 +45,6 @@ local function expander_where(op, a, b)
   local cst_b_as   = "uint64_t *" -- this is a bit vector 
   
   local function where_gen(chunk_num)
-    -- Adding assert on chunk_idx to have sync between expected 
-    -- chunk_num and generator's chunk_idx state
-    --[[ OKAY TO TAKE THIS OUT????
-    assert(chunk_num == a_chunk_idx, 
-      "chunk_num/idx = " .. chunk_num .. " ==> " .. a_chunk_idx)
-      --]]
     if ( first_call ) then 
       -- allocate buffer for output
       local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
