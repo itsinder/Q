@@ -506,9 +506,33 @@ vec_free(
       // printf("NOT Deleting %s \n", ptr_vec->file_name); 
     }
   }
+  memset(ptr_vec->field_type, '\0', 3+1);
+  memset(ptr_vec->name, '\0', 31+1); //TODO: Discuss with Ramesh
+
   // Don't do this in C. Lua will do it: free(ptr_vec);
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_free += delta; }
+  return status;
+}
+
+int
+vec_delete(
+    VEC_REC_TYPE *ptr_vec
+    )
+{
+  int status = 0;
+  if ( ptr_vec == NULL ) { go_BYE(-1); }
+  status = vec_free(ptr_vec); cBYE(status);
+  // Set vector fields to it's default
+  ptr_vec->field_size = 0;
+  ptr_vec->chunk_size = 0;
+  ptr_vec->num_elements = 0;
+  ptr_vec->num_in_chunk = 0;
+  ptr_vec->chunk_num = 0;
+  ptr_vec->file_size = 0;
+  ptr_vec->chunk_sz = 0;
+  ptr_vec->is_eov = true; //TODO: do we need this? Discuss with Ramesh
+BYE:
   return status;
 }
 

@@ -562,6 +562,22 @@ function lVector:put_chunk(base_addr, nn_addr, len)
   if ( qconsts.debug ) then self:check() end
 end
 
+function lVector:delete()
+  -- This method free up all vector resources
+  assert(self._base_vec)
+  local status = Vector.delete(self._base_vec)
+  assert(status)
+
+  -- Check for nulls
+  if ( self:has_nulls() ) then
+    status = Vector.delete(self._nn_vec)
+    assert(status)
+  end
+
+  return status
+  -- if ( qconsts.debug ) then self:check() end
+end
+
 function lVector:clone(optargs)
   assert(self._base_vec)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
