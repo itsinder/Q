@@ -6,7 +6,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
-
+local sort_utility = require 'Q/OPERATORS/JOIN/lua/join_sort_utility'
 
 local function chk_params(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   assert(op == "join")
@@ -68,6 +68,10 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   local is_first
   local c_chunk_idx = 0  -- chunk idx for dst_lnk
 
+  -- sorting the src_lnk and dst_lnk if not sorted
+  src_lnk, src_fld = sort_utility(src_lnk, src_fld)
+  dst_lnk = sort_utility(dst_lnk)
+
   local function join_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == c_chunk_idx)
@@ -92,6 +96,14 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
     
     -- Initialize to its value
     if optargs and optargs.default_val then
+      assert(type(optargs.default_val) == "number" or type(optargs.default_val) == "Scalar",
+        "optargs.default_val must be of type number or Scalar")
+      if type(optargs.default_val) ==  "Scalar" then
+        assert(optargs.default_val:fldtype() == subs.dst_fld_qtype,
+          "optargs.default_val Scalar value and src_fld must be same of same qtype")
+        -- converting scalar to number
+        optargs.default_val = optargs.default_val:to_num()
+      end
       dst_fld:set_default(optargs.default_val)
     elseif join_type == "max" or join_type == "any" then
       dst_fld:set_min()
