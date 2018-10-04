@@ -13,6 +13,8 @@
 
 #include "lauxlib.h"
 
+#undef MALLOC_DETAILS
+
 static uint64_t
 RDTSC(
     )
@@ -80,14 +82,15 @@ l_malloc(
     VEC_REC_TYPE *ptr_vec // TODO DELETE later just for debugging
     )
 {
-  uint64_t curr_sz_malloc = sz_malloc;
-  sz_malloc += n;
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
   void *x = malloc(n);
   ptr_vec->uqid = t_start; // set a unique ID for debugging
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
 
+#ifdef MALLOC_DETAILS
   // TODO START Delete later
+  uint64_t curr_sz_malloc = sz_malloc;
+  sz_malloc += n;
   fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
       ptr_vec->uqid, curr_sz_malloc, n, sz_malloc);
   if ( *ptr_vec->name == '\0' ) {
@@ -97,6 +100,8 @@ l_malloc(
     fprintf(stderr, "%s\n", ptr_vec->name);
   }
   // TODO STOP Delete later
+#endif
+
   return x;
 }
 
@@ -488,7 +493,6 @@ vec_free(
     )
 {
   int status = 0;
-  uint64_t curr_sz_malloc = sz_malloc;
   uint64_t delta = 0, t_start = RDTSC(); n_l_vec_free++;
   if ( ptr_vec == NULL ) {  go_BYE(-1); }
   if ( ptr_vec->is_virtual ) {
@@ -504,11 +508,15 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
-    if ( ptr_vec->chunk_sz > sz_malloc ) { 
+
+#ifdef MALLOC_DETAILS
+    // TODO START Delete later
+    uint64_t curr_sz_malloc = sz_malloc;
+    if ( ptr_vec->chunk_sz > sz_malloc ) {
       printf("hello world\n");
     }
     sz_malloc -= ptr_vec->chunk_sz;
-    // TODO START Delete later
+
     fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
         ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
     if ( *ptr_vec->name == '\0' ) {
@@ -518,6 +526,8 @@ vec_free(
       fprintf(stderr, "%s\n", ptr_vec->name);
     }
     // TODO STOP Delete later
+#endif
+
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
     ptr_vec->chunk_sz = 0;
@@ -998,12 +1008,12 @@ vec_clean_chunk(
 )
 {
   int status = 0;
-  uint64_t curr_sz_malloc = sz_malloc;
   if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
-    // Clean the chunk and chunk metadata
-    sz_malloc -= ptr_vec->chunk_sz;
+#ifdef MALLOC_DETAILS
     // TODO START Delete later
+    uint64_t curr_sz_malloc = sz_malloc;
+    sz_malloc -= ptr_vec->chunk_sz;
     fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
         ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
     if ( *ptr_vec->name == '\0' ) {
@@ -1013,6 +1023,9 @@ vec_clean_chunk(
       fprintf(stderr, "%s\n", ptr_vec->name);
     }
     // TODO STOP Delete later
+#endif
+
+    // Clean the chunk and chunk metadata
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
     ptr_vec->chunk_sz = 0;
@@ -1534,7 +1547,6 @@ vec_no_memcpy(
     )
 {
   int status = 0;
-  uint64_t curr_sz_malloc = sz_malloc;
   if ( ptr_vec->chunk != NULL ) { go_BYE(-1); }
   if ( ptr_vec->is_eov ) { go_BYE(-1); }
   if ( ptr_vec->file_size != 0 ) { go_BYE(-1); }
@@ -1546,8 +1558,11 @@ vec_no_memcpy(
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_no_memcpy = true;
   ptr_cmem->is_foreign = true;
-  sz_malloc += ptr_cmem->size;
+
+#ifdef MALLOC_DETAILS
   // TODO START Delete later
+  uint64_t curr_sz_malloc = sz_malloc;
+  sz_malloc += ptr_cmem->size;
   fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
       ptr_vec->uqid, curr_sz_malloc, ptr_cmem->size, sz_malloc);
   if ( *ptr_vec->name == '\0' ) {
@@ -1557,6 +1572,8 @@ vec_no_memcpy(
     fprintf(stderr, "%s\n", ptr_vec->name);
   }
   // TODO STOP Delete later
+#endif
+
 BYE:
   return status;
 
