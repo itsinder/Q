@@ -7,6 +7,7 @@ local function get_val_by_idx(x, y, optargs)
   local qc          = require 'Q/UTILS/lua/q_core'
   local cmem        = require 'libcmem'
   local Scalar      = require 'libsclr'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   assert(x and type(x) == "lVector", "x must be a Vector")
   assert(y and type(y) == "lVector", "y must be a Vector")
@@ -64,7 +65,7 @@ local function get_val_by_idx(x, y, optargs)
       local chunk3 = ffi.cast(f3_cast_as,  get_ptr(f3_buf))
       local start_time = qc.RDTSC()
       qc[func_name](chunk1, ptr2, f1_len, nR2, ptr_null_val, chunk3)
-      -- TODO record_time(start_time, func_name)
+      record_time(start_time, func_name)
     else
       f3_buf = nil
     end

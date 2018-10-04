@@ -5,12 +5,15 @@ local function cat(X, optargs)
   local ffi         = require 'Q/UTILS/lua/q_ffi'
   local get_ptr     = require 'Q/UTILS/lua/get_ptr'
   local cmem        = require 'libcmem'
+  local qc          = require 'Q/UTILS/lua/q_core'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   assert(X and type(X) == "table", "X must be a table")
   local qtype 
   local has_nulls
   local chunk_size = qconsts.chunk_size
-  
+ 
+  local start_time = qc.RDTSC()
   for k, vec in pairs(X) do 
     assert(type(vec) == "lVector", "each element of X must be a vector")
     if ( k == 1 ) then
@@ -51,7 +54,8 @@ local function cat(X, optargs)
   -- EOV the output vector 
   z:eov()
   assert(z:length() == total_len)
-
+  local func_name = "cat"
+  record_time(start_time, func_name)
   return z
 end
 return require('Q/q_export').export('cat', cat)

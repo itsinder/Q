@@ -6,6 +6,7 @@ local function vs_ifxthenyelsez(x, y, z)
   local lVector = require 'Q/RUNTIME/lua/lVector'
   local cmem    = require 'libcmem'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   assert(type(x) == "lVector", "error")
   assert(type(y) == "lVector", "error")
@@ -41,7 +42,9 @@ local function vs_ifxthenyelsez(x, y, z)
     local casted_yptr = ffi.cast(qconsts.qtypes[y:fldtype()].ctype .. "*", get_ptr(yptr))
     local casted_zptr = ffi.cast(qconsts.qtypes[z:fldtype()].ctype .. "*", get_ptr(zptr))
     local casted_wbuf = ffi.cast(qconsts.qtypes[y:fldtype()].ctype .. "*", get_ptr(wbuf))
+    local start_time = qc.RDTSC()
     local status = qc[func_name](casted_xptr, casted_yptr, casted_zptr, casted_wbuf, ylen)
+    record_time(start_time, func_name)
     assert(status == 0, "C error in ifxthenyelsez") 
     chunk_idx = chunk_idx + 1
     return ylen, wbuf, nil

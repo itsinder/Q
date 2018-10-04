@@ -6,6 +6,7 @@ local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local qtils = require 'Q/QTILS/lua/is_sorted'
 local sort = require 'Q/OPERATORS/SORT/lua/sort'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 local function expander_f1opf2f3(op, x, optargs)
   -- Verification
@@ -68,7 +69,7 @@ local function expander_f1opf2f3(op, x, optargs)
     local start_time = qc.RDTSC()
     local status = qc[func_name](cst_in_chunk, in_len, shift,
       cst_out1_buf, cst_out2_buf)
-    -- TODO record_time(start_time, func_name)
+    record_time(start_time, func_name)
     assert(status == 0, "C error in split")
 
     -- Write values to vector

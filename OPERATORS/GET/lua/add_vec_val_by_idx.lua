@@ -4,7 +4,9 @@ local qconsts     = require 'Q/UTILS/lua/q_consts'
 local ffi         = require 'Q/UTILS/lua/q_ffi'
 local get_ptr     = require 'Q/UTILS/lua/get_ptr'
 local cmem        = require 'libcmem'
+local qc          = require 'Q/UTILS/lua/q_core'
 local Scalar      = require 'libsclr'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 local function add_vec_val_by_idx(idx, src, dst, optargs)
   assert(idx and type(idx) == "lVector", "idx must be a Vector")
@@ -48,7 +50,7 @@ local function add_vec_val_by_idx(idx, src, dst, optargs)
 
     local start_time = qc.RDTSC()
     qc[func_name](idx_chunk, idx_len, src_chunk, cst_dst_ptr, nR_dst)
-    -- TODO record_time(start_time, func_name)
+    record_time(start_time, func_name)
     chunk_idx = chunk_idx + 1
   end
   dst:end_write()

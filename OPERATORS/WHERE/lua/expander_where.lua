@@ -5,6 +5,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local Vector  = require 'libvec'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 local function expander_where(op, a, b)
   -- Verification
@@ -92,8 +93,10 @@ local function expander_where(op, a, b)
       assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
       -- print("PRE  n_out = " .. x_n_out:to_str("I8"))
       -- print("PRE  aidx  = " .. x_aidx:to_str("I8"))
+      local start_time = qc.RDTSC()
       local status = qc[func_name](cst_a_chunk, cst_b_chunk, aidx, 
         a_len, cst_out_buf, sz_out, n_out)
+      record_time(start_time, func_name)
       -- print("POST n_out = " .. x_n_out:to_str("I8"))
       -- print("POST aidx  = " .. x_aidx:to_str("I8"))
       assert(status == 0, "C error in WHERE")

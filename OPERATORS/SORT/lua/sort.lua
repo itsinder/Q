@@ -2,6 +2,7 @@ local function sort(x, ordr)
   local Q       = require 'Q/q_export'
   local qc = require 'Q/UTILS/lua/q_core'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   assert(type(x) == "lVector", "error")
   -- Check the vector x for eval(), if not then call eval()
@@ -21,8 +22,10 @@ local function sort(x, ordr)
   local x_len, x_chunk, nn_x_chunk = x:start_write()
   assert(x_len > 0, "Cannot sort null vector")
   assert(not nn_x_chunk, "Cannot sort with null values")
+  local start_time = qc.RDTSC()
   assert(qc[func_name], "Unknown function " .. func_name)
   qc[func_name](get_ptr(x_chunk), x_len)
+  record_time(start_time, func_name)
   x:end_write()
   x:set_meta("sort_order", ordr)
   return x
