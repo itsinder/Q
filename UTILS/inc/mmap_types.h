@@ -32,6 +32,7 @@ typedef struct _vec_rec_type {
   bool is_memo;
   bool is_eov;
   int open_mode; // 0 = unopened, 1 = read, 2 = write
+  uint64_t uqid; // used for matching chunk free with malloc
   char *chunk;
   uint32_t chunk_sz; // number of bytes allocated for chunk
   bool is_virtual; // indicates whether vector is virtual or not

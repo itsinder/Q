@@ -10,38 +10,42 @@ local M = {
    { name = "x", has_nulls = false, qtype = "I4", is_load = true }, 
    { name = "y", has_nulls = false, qtype = "I4", is_load = true }, 
  }
-local datafile = "../data/1.csv"
+local datafile = "../data/37M.csv"
+-- local datafile = "../data/1M.csv"
 tmp = Q.load_csv(datafile, M); 
 x = tmp.x
 y = tmp.y
+print("Loaded data, # rows = ", x:length())
 
 null_val = Scalar.new(1000000000, "I4")
 
 z1 = Q.concat(x, y):set_name("z1")
 w  = Q.const({val = null_val, len = x:length(), qtype = "I4"}):set_name("w")
 z2 = Q.concat(y, w):set_name("z2")
-z = Q.cat({z1, z2}):set_name("z")
-assert(z:length() == z1:length() + z2:length())
-Q.sort(z, "ascending")
-x, y = Q.split(z)
-x:set_name("x"):eval()
-y:set_name("y"):eval()
-print("==========================")
-y:eov()
-x:eov()
-print("==========================")
+z1z2 = Q.cat({z1, z2}, { name = "z1z2" } )
+assert(z1z2:length() == z1:length() + z2:length())
+z1z2:check()
+
+Q.sort(z1z2, "ascending")
+x, y = Q.split(z1z2, { names = { "x", "y"} })
+x:eval()
+y:eval()
 -- basic test on concat/split
-local n1, n2 = Q.sum(Q.vseq(x, null_val)):eval()
+local n1, n2 = Q.sum(Q.vseq(x, null_val):set_name("dbg0")):eval()
 assert(n1:to_num() == 0, n1)
-n1, n2 = Q.sum(Q.vseq(y, null_val)):eval()
+n1, n2 = Q.sum(Q.vseq(y, null_val):set_name("dbg1")):eval()
 assert(n1:to_num() > 0)
 assert(Q.is_next(x, "geq"):eval() == true)
 --=====
 z = Q.is_prev(x, "neq", {default_val = 1}):set_name("z"):eval()
+x:check()
+y:check()
+z:check()
 print("======== where starting ===========")
 xlbl = Q.where(x, z):set_name("xlbl"):eval()
 ylbl = Q.where(y, z):set_name("ylbl"):eval()
-y = Q.get_idx_by_val(ylbl, xlbl)
+print("======== where stopping  ===========")
+y = Q.get_idx_by_val(ylbl,xlbl)
 local n0 = xlbl:length()
 -- Q.print_csv({xlbl,ylbl,y}, { opfile = "_1.csv"})
 x = Q.seq( { start = 0, by = 1, qtype = "I4", len = n0})
@@ -67,7 +71,7 @@ T[#T].x = Q.where(T0.x, c)
 T[#T].y = Q.where(T0.y, c)
 Q.print_csv({T[#T].x, T[#T].y}, { opfile = "_T1.csv"})
 
-local max_d = 8
+local max_d = 4
 local alpha = load_alpha()
 while true do 
   print("--------------")

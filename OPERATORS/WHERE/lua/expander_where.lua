@@ -37,7 +37,9 @@ local function expander_where(op, a, b)
   local out_buf = nil
   local first_call = true
   local n_out = nil
+  local x_n_out
   local aidx  = nil
+  local x_aidx
   local a_chunk_idx = 0
   local sz_out = qconsts.chunk_size 
 
@@ -50,10 +52,12 @@ local function expander_where(op, a, b)
       local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
       out_buf = assert(cmem.new(sz_out_in_bytes))
 
-      n_out = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
+      x_n_out = assert(cmem.new(ffi.sizeof("uint64_t")))
+      n_out = assert(get_ptr(x_n_out))
       n_out = ffi.cast("uint64_t *", n_out)
 
-      aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
+      x_aidx = assert(cmem.new(ffi.sizeof("uint64_t")))
+      aidx = assert(get_ptr(x_aidx))
       aidx = ffi.cast("uint64_t *", aidx)
       aidx[0] = 0
       
@@ -86,8 +90,12 @@ local function expander_where(op, a, b)
       -- TODO delete following 2 
       assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
       assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))
+      -- print("PRE  n_out = " .. x_n_out:to_str("I8"))
+      -- print("PRE  aidx  = " .. x_aidx:to_str("I8"))
       local status = qc[func_name](cst_a_chunk, cst_b_chunk, aidx, 
         a_len, cst_out_buf, sz_out, n_out)
+      -- print("POST n_out = " .. x_n_out:to_str("I8"))
+      -- print("POST aidx  = " .. x_aidx:to_str("I8"))
       assert(status == 0, "C error in WHERE")
       assert(tonumber(n_out[0]) <= sz_out, tonumber(n_out[0]))
       assert(tonumber(aidx[0]) <= a_len, tonumber(aidx[0]))

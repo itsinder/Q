@@ -7,7 +7,7 @@ local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local qtils = require 'Q/QTILS/lua/is_sorted'
 local sort = require 'Q/OPERATORS/SORT/lua/sort'
 
-local function expander_f1opf2f3(op, x)
+local function expander_f1opf2f3(op, x, optargs)
   -- Verification
   assert(op == "split")
   assert(type(x) == "lVector", "a must be a lVector ")
@@ -84,6 +84,18 @@ local function expander_f1opf2f3(op, x)
   end
   out1_vec:set_generator(f1opf2f3_gen)
   out2_vec:set_generator(f1opf2f3_gen)
+  if ( optargs ) then 
+    assert(type(optargs) == "table")
+    if ( optargs.names ) then
+      assert(type(optargs.names) == "table") 
+      assert(optargs.names[1] and type(optargs.names[1] == "string"))
+      assert(optargs.names[2] and type(optargs.names[2] == "string"))
+      assert(optargs.names[1] ~= optargs.names[2])
+      out1_vec:set_name(optargs.names[1])
+      out1_vec:set_name(optargs.names[2])
+    end
+  end
+
   return out1_vec, out2_vec
 end
 
