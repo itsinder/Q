@@ -70,7 +70,7 @@ ylbl = nil
 --===================
 -- prepare T1
 c = Q.vsneq(T0.y, -1)
-T0.d = Q.ifxthenyelsez(c, Scalar.new(1, "I4"),Scalar.new(0, "I4")):eval()
+T0.d = Q.convert(c, "I1"):eval()
 T0.r = Q.rand({ lb = 0, ub = 1000, seed = 1234, qtype = "F4", len = n0 }):eval()
 T0.s = Q.const({ val = 0, qtype = "F4", len = n0 }):eval()
 T = {}
