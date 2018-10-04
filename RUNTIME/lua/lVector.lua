@@ -782,6 +782,11 @@ function lVector:reincarnate()
     T[#T+1] = "\", "
   end
 
+  if ( self:fldtype() == "B1" ) then
+    T[#T+1] = "num_elements = "
+    T[#T+1] = self:num_elements()
+  end
+
   T[#T+1] = " } ) "
   if ( qconsts.debug ) then self:check() end
   return table.concat(T, '')
