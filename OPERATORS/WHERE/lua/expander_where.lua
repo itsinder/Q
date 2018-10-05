@@ -48,6 +48,7 @@ local function expander_where(op, a, b)
   local cst_b_as   = "uint64_t *" -- this is a bit vector 
   
   local function where_gen(chunk_num)
+      print("WHERE: chunk_num = " .. chunk_num .. " name = " .. x:get_name())
     if ( first_call ) then 
       -- allocate buffer for output
       local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width

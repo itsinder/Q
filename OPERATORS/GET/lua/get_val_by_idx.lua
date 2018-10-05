@@ -39,12 +39,16 @@ local function get_val_by_idx(x, y, optargs)
   local chunk_idx = 0
   local myvec 
   local f3_gen = function(chunk_num)
+    print("GET_VAL: chunk_num = " .. chunk_num  .. "chunk_idx = " .. chunk_idx)
+    
     -- Adding assert on chunk_idx to have sync between expected 
     -- chunk_num and generator's chunk_idx state
-    assert(chunk_num == chunk_idx)
+    assert(chunk_num == chunk_idx, 
+      "chunk_num = " .. chunk_num  .. "chunk_idx = " .. chunk_idx)
     if ( first_call ) then 
       first_call = false
       f3_buf = assert(cmem.new(buf_sz, f3_qtype))
+      print("myvec = ", myvec)
       myvec:no_memcpy(f3_buf) -- hand control of this f3_buf to the vector 
     else
       myvec:flush_buffer() -- tell the vector to flush its buffer
