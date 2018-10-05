@@ -13,7 +13,7 @@ local M = {
    { name = "x", has_nulls = false, qtype = "I4", is_load = true }, 
    { name = "y", has_nulls = false, qtype = "I4", is_load = true }, 
  }
-local datafile = "../data/1.csv"
+local datafile = "../data/5M.csv"
 -- local datafile = "../data/1M.csv"
 local l_start_time = qc.RDTSC()
 tmp = Q.load_csv(datafile, M); 
@@ -113,10 +113,10 @@ while true do
 end
 for k = 1, #T do
   -- print(" k = ", k)
-  T[k].d = Q.get_val_by_idx(T[k].x, T0.d)
-  T[k].r = Q.get_val_by_idx(T[k].x, T0.r)
-  T[k].alpha = Q.get_val_by_idx(T[k].d, alpha[k])
-  local s = Q.vvmul(T[k].r, T[k].alpha)
+  T[k].d = Q.get_val_by_idx(T[k].x, T0.d):memo(false)
+  T[k].r = Q.get_val_by_idx(T[k].x, T0.r):memo(false)
+  T[k].alpha = Q.get_val_by_idx(T[k].d, alpha[k]):memo(false)
+  local s = Q.vvmul(T[k].r, T[k].alpha):memo(false)
   Q.add_vec_val_by_idx(T[k].y, s, T0.s)
 end
 -- Q.print_csv({T0.x,T0.y, T0.d, T0.r, T0.s}, { opfile = "_final.csv"})

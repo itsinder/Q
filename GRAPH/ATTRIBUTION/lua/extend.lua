@@ -6,15 +6,14 @@ local function extend(inT, y0)
   assert(type(xk) == "lVector")
   assert(type(yk) == "lVector")
   assert(type(y0) == "lVector")
-  local z = Q.get_val_by_idx(yk, y0)
-  local w = Q.vsgeq(z, 0)
-  local n_w = Q.sum(w):eval()
-  if ( n_w == 0 ) then return nil end 
-  local xnew = Q.where(xk, w)
-  local ynew = Q.where(z, w)
+  --========================================
+  local z = Q.get_val_by_idx(yk, y0):memo(false)
+  local w = Q.vsgeq(z, 0):memo(false)
   local T = {}
-  T.x = xnew:eval()
-  T.y = ynew:eval()
+  T.x = Q.where(xk, w):eval()
+  -- TODO Check what where returns when no elements to return
+  if ( not T.x ) then return nil end 
+  T.y = Q.where(z, w):eval()
   return T
 end
 return extend

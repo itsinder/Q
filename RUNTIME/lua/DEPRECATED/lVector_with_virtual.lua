@@ -155,6 +155,29 @@ function lVector:flush_buffer()
   return self
 end
 
+
+
+function lVector.virtual_new(arg)
+  local vector = setmetatable({}, lVector)
+  -- for meta data stored in vector
+  vector._meta = {}
+
+  local qtype
+  local num_elements
+  local map_addr
+
+  assert(type(arg) == "table", "lVector construction requires table as arg")
+
+  qtype = assert(arg.qtype, "virtual vector needs qtype to be specified")
+  num_elements = assert(arg.num_elements, "virtual vector needs num_elements to be specified")
+  map_addr = assert(arg.map_addr, "virtual vector needs mmap address to be specified")
+
+  vector._base_vec = Vector.virtual(map_addr, qtype, num_elements)
+  assert(vector._base_vec)
+
+  return vector
+end
+
 function lVector.new(arg)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector

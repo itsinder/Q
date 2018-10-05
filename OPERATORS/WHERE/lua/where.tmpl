@@ -50,6 +50,7 @@ ${fn}(
   //-------------------------------
   
   for ( ; aidx < nA; aidx++ ) { 
+    // TODO P2 Use bit shifting to avoid call to get_bit_u64
     int b = get_bit_u64(B, aidx);
     if ( b == 1 ) {
       if ( num_in_C == nC ) { break; }

@@ -1,0 +1,11 @@
+
+Save
+- Add Q.save() statement at the end of your script ("load.lua", I have added and checked in to git)
+- Before running your script, make sure that, Q_METADATA_DIR env variable is set
+- After running the "load.lua", all your globals (table, lVector etc) will be saved to file (displayed on console)
+
+Restore
+- Run "bash Q/setup.sh -f" to set all required environment variable
+- set Q_METADATA_FILE env variable as below to point to saved file
+export Q_METADATA_FILE="/root/local/Q/meta/saved.meta"
+- CLI session will load all your contents for you

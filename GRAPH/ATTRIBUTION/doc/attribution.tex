@@ -110,10 +110,10 @@ An example is in Table~\ref{example_extend}.
 2 & 2 & 4 & -1 & 0 \\ \hline
 2 & 5 & 7 & -1 & 0 \\ \hline
 \hline  \hline
-3 & 0 & 2 & 4 & 1 \\ \hline
-3 & 1 & 3 & -1 & 0 \\ \hline
+3 & 0 & 3 & 4 & 1 \\ \hline
+3 & 1 & 4 & -1 & 0 \\ \hline
 \hline  \hline
-4 & 0 & 2 & -1 & 0 \\ \hline
+4 & 0 & 4 & -1 & 0 \\ \hline
 \end{tabular}
 \caption{Sample data}
 \label{example_extend}
@@ -191,13 +191,13 @@ Implementation in Q:  \+ \\
 \(T_{k+1} = \mathbf{Q.extend}(T_k.x, T_k.y, T_0.y)\) (Figure~\ref{extend})\\
 {\bf if} \(T_{k+1} = \bot\) {\bf then break else} \(k = k+1\) {\bf end}\\
 --- Update max depth of referral chain \\
-\(\mathbf{Q.set\_sclr\_val\_by\_idx}(T_{k+1}.x, T_0.d)\) \- \\
+\(\mathbf{Q.set\_sclr\_val\_by\_idx}(T_{k+1}.x, T_0.d, k+1)\) \- \\
 {\bf until} --- not possible to extend any further \\
 \(d_{max} = k\) \\
 Load \(\alpha\) which contains attribution coefficients (Table~\ref{attenuate})\\
 {\bf for} \(k = 1, \ldots k_{max}\) {\bf do} \+ \\
-  \(T_k.d       = \mathbf{Q.get}(T_k.x, T_0.d)\)  \\
-  \(T_k.r       = \mathbf{Q.get}(T_k.x, T_0.r)\)  \\
+  \(T_k.d       = \mathbf{Q.get\_val\_by\_idx}(T_k.x, T_0.d)\)  \\
+  \(T_k.r       = \mathbf{Q.get\_val\_by\_idx}(T_k.x, T_0.r)\)  \\
   \(T_k.\alpha  = \mathbf{Q.get\_val\_by\_idx}(T_k.d, \alpha[k])\) \\
   \(s           = \mathbf{Q.vvadd}(T[k].r, T[k].\alpha)\) \\
   \(\mathbf{Q.add\_vec\_val\_by\_idx}(s, T_k.y, T_0.s)\) \- \\

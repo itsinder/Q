@@ -1,0 +1,20 @@
+if ( ( chunk == current chunk ) and ( current chunk not NULL ) ) then
+  serve from current chunk
+else if ( nascent == false ) and ( eov == true ) and (chunk < current chunk)
+   to do so something
+   serve from file 
+   XXXX error occurring here
+else 
+  if ( chunk < current chunk ) then 
+    if ( is_memo ) then 
+      open file and copy relevant stuff and close file
+    else
+      return error = -2
+    end
+  else
+    asking for a block too far out 
+    return error = -2
+  endif
+  return addr
+endif
+
