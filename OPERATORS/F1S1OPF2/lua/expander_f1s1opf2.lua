@@ -47,7 +47,6 @@
     local chunk_idx = 0
     --============================================
     local f2_gen = function(chunk_num)
-      print("VSGEQ: chunk_num = " .. chunk_num  .. "chunk_idx = " .. chunk_idx)
       -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
       assert(chunk_num == chunk_idx)
       f2_buf = f2_buf or cmem.new(buf_sz, f2_qtype)

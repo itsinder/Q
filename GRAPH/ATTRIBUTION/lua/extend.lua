@@ -7,8 +7,8 @@ local function extend(inT, y0)
   assert(type(yk) == "lVector")
   assert(type(y0) == "lVector")
   --========================================
-  local z = Q.get_val_by_idx(yk, y0):memo(false)
-  local w = Q.vsgeq(z, 0):memo(false)
+  local z = Q.get_val_by_idx(yk, y0)
+  local w = Q.vsgeq(z, 0)
   local T = {}
   T.x = Q.where(xk, w):eval()
   -- TODO Check what where returns when no elements to return

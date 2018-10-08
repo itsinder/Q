@@ -33,6 +33,8 @@ Section~\ref{ifxthenyelsez} \\ \hline
 
 where & select rows where condition is true & 
 Section~\ref{where} \\ \hline
+
+const & create constant vector Section~\ref{const} \\ \hline
 \hline
 \end{tabular}
 \caption{Selected Q operators}
@@ -195,7 +197,8 @@ Implementation in Q:  \+ \\
 {\bf until} --- not possible to extend any further \\
 \(d_{max} = k\) \\
 Load \(\alpha\) which contains attribution coefficients (Table~\ref{attenuate})\\
-{\bf for} \(k = 1, \ldots k_{max}\) {\bf do} \+ \\
+{\bf for} \(k = 1, \ldots d_{max}\) {\bf do} \+ \\
+% {\bf for} \(k = 1, \ldots k\) {\bf do} \+ \\
   \(T_k.d       = \mathbf{Q.get\_val\_by\_idx}(T_k.x, T_0.d)\)  \\
   \(T_k.r       = \mathbf{Q.get\_val\_by\_idx}(T_k.x, T_0.r)\)  \\
   \(T_k.\alpha  = \mathbf{Q.get\_val\_by\_idx}(T_k.d, \alpha[k])\) \\
@@ -298,6 +301,17 @@ the same length
 
 \item Operation: \(z\) contains \(x[i]\) only if
 \(y[i] = 1\). Order of elements in  \(z\) same as \(x\)
+
+\ei
+
+\subsection{const}
+\label{const}
+\bi
+\item Inputs: (1) \(s\), Scalar 
+
+\item Outputs: \(x\), Vector of same type as \(s\)
+
+\item Operation: \(x[i] = s\)
 
 \ei
 
