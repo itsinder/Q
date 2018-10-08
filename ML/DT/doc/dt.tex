@@ -1,9 +1,33 @@
-\startreport{Decision Trees in Q}
+\startreport{Gambling on Decision Trees}
 \reportauthor{Ramesh Subramonian}
 
 \section{Introduction}
 
-See \cite{Hastie2009}.
+Decision trees are a well understood statistical technique \cite{Hastie2009}.
+In constructing a decision tree, we need to answer two fundamental questions
+\be
+\item what is the decision to be made at a given node? Example, age \(\leq 40\)
+means that we have chosen the feature ``age'' and the split point 40
+\item when do we stop splitting i.e., the decision made is to not split at all
+\ee
+There are other questions that need to be answered as well e.g.,
+\be
+\item how does one deal with unknown values, both while training and while
+testing
+\item what ``decision'' does the decision tree really make? For example, if the
+evaluation of the tree leaves us at a node which had 
+\(n_H\) instances of class ``Heads'' and 
+\(n_T\) instances of class ``Tails'' at training time, what statement are we
+making?
+\ee
+Random forests force us to answer yet another question
+\be
+\item given the results of several decision trees, how do we combine these into
+a single decision to be returned to the user
+\ee
+
+In this paper, we use the principles of gambling to answer these questions.
+In particular, we are m
 
 \subsection{Notations}
 
