@@ -2,10 +2,6 @@ require 'Q/UTILS/lua/strict'
 local Q = require 'Q'
 local qc = require 'Q/UTILS/lua/q_core'
 local Scalar = require 'libsclr'
-local Vector = require 'libvec'
-local load_alpha = require 'load_alpha'
--- local extend = require 'extend'
-local extend = require 'extend2'
 local record_time = require 'Q/UTILS/lua/record_time'
 
 local t_start_time = qc.RDTSC()
