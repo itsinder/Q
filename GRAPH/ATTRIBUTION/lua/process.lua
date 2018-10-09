@@ -31,7 +31,7 @@ while true do
   Q.set_sclr_val_by_idx(T[#T].x, T0.d, {sclr_val = #T})
   -- print("#T = ",  #T )
   if ( #T >= max_d ) then break end
-  Q.print_csv(Q.numby(T0.d, #T+1):eval())
+  -- Q.print_csv(Q.numby(T0.d, #T+1):eval())
 end
 for k = 1, #T do
   -- print(" k = ", k)

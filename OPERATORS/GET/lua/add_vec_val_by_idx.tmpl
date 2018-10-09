@@ -32,7 +32,7 @@ ${fn}(
   if ( nR_src == 0 ) { go_BYE(-1); }
   if ( nR_dst == 0 ) { go_BYE(-1); }
 
-// TODO #pragma omp parallel for schedule(static, 1024)
+#pragma omp parallel for schedule(static, 1024)
   for ( uint64_t i = 0; i < nR_src; i++ ) {  
     ${idx_ctype} lidx = idx[i]; 
     if ( ( lidx < 0 ) || ( lidx >= (int64_t)nR_dst ) ) {

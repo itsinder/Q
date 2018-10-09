@@ -144,13 +144,13 @@ Section~\ref{aux_algo}
 Inputs: \+ \\
 \(T_k.x\) \\
 \(T_k.y\) \\
-\(T_0.y\) \-\\
+\(T_0.y\) \- \\
 Operation:  \+ \\
 Let \(T_k.x[i] = x', T_k.y[i] = y'\).  \\
 Let \(f' = T_0.y[y']\).  \\
 If \(z' \geq 0\), add \((x', z')\) to output; else, do nothing \- \\
 Implementation in Q:  \+ \\
-\(z = \mathbf{Q.get}(T_k.y, T_0.y)\) \\
+\(z = \mathbf{Q.get\_val\_by\_idx}(T_k.y, T_0.y)\) \\
 \(w = \mathbf{Q.vsgeq}(z, 0)\) \\
 \(T_{k+1}.x = \mathbf{Q.where}(T_k.x, w)\) \\
 \(T_{k+1}.y = \mathbf{Q.where}(T_k.z, w)\) \- \\

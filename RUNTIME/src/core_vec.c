@@ -10,6 +10,7 @@
 #include "_copy_file.h"
 #include "_isfile.h"
 #include "_isdir.h"
+#include "_get_time_usec.h"
 
 #include "lauxlib.h"
 
