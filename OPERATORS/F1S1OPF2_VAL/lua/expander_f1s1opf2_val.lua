@@ -9,10 +9,12 @@ local sort = require 'Q/OPERATORS/SORT/lua/sort'
 local record_time = require 'Q/UTILS/lua/record_time'
 
 local function chk_params(op, a, s, optargs)
-  assert( op == "vsgeq" or
-          op == "vsgt" or
-          op == "vsleq" or
-          op == "vslt"
+  assert( op == "vsgeq_val" or
+          op == "vsgt_val" or
+          op == "vsleq_val" or
+          op == "vslt_val" or
+          op == "vseq_val" or
+          op == "vsneq_val"
         )
   assert(type(a) == "lVector", "'a' must be a lVector ")
   assert(type(s) == "Scalar" or type(s) == "number", "s must be a Scalar/number ")
