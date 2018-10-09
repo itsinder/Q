@@ -37,6 +37,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua clean
 	make -C ${BASE_PATH}/OPERATORS/COUNT/lua clean
 	make -C ${BASE_PATH}/OPERATORS/JOIN/lua clean
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua clean
 
 install: uninstall 
 	cd ../../;\
@@ -120,6 +121,9 @@ f1f2opf3: q_basic
 f1s1opf2: q_basic
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
 
+f1s1opf2_val: q_basic
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua
+
 sort: q_basic
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua
 
@@ -153,6 +157,7 @@ corrm: q_basic
 q_operators: f1f2opf3 \
   	f1opf2f3 \
 	f1s1opf2 \
+	f1s1opf2_val \
 	sort \
 	get \
 	idx_sort \
