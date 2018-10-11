@@ -40,8 +40,11 @@ end
 -- where num_elements are greater than chunk_size 
 tests.t2 = function ()
   local out_table = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-  local cnt_table = {26215, 26215, 26215, 26215, 26215, 26215, 26214, 26214, 26214, 26214}
-  local input = Q.period({ len = chunk_size*4+2, start = 1, by = 1, period = 10, qtype = "I4"}):persist(true):eval()
+  local period = 10
+  local cnt_1 = math.ceil((chunk_size*4+2)/period)
+  local cnt_2 = math.floor((chunk_size*4+2)/period)
+  local cnt_table = {cnt_1, cnt_1, cnt_1, cnt_1, cnt_1, cnt_1, cnt_2, cnt_2, cnt_2, cnt_2}
+  local input = Q.period({ len = chunk_size*4+2, start = 1, by = 1, period = period, qtype = "I4"}):persist(true):eval()
   
   local input_col = Q.sort(input, "asc")
   -- Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t2.csv"})
@@ -63,7 +66,9 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 3, 3, 3, 3, 3, 3, ... 3 ]
 tests.t3 = function ()
   local expected_values = {1, 2, 3}
-  local cnt_table = {32767, 32768, 65537}
+  local cnt_1 = (qconsts.chunk_size/2)-1
+  local cnt_2 = qconsts.chunk_size/2
+  local cnt_table = {cnt_1, cnt_2, qconsts.chunk_size+1}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -103,7 +108,8 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3 ... 3 (half the length of second chunk)]
 tests.t4 = function ()
   local expected_values = {1, 2, 3}
-  local cnt_table = {32767, 32768, 32769}
+  local cnt_1 = qconsts.chunk_size/2
+  local cnt_table = {cnt_1-1 , cnt_1, cnt_1+1}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
@@ -143,8 +149,8 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 4, 4, ... 5, 5 ]
 tests.t5 = function ()
   local expected_values = {1, 2, 3, 4, 5}
-  local cnt_table = {32767, 32768, 3, 32767, 32767}
   local chunk_size = qconsts.chunk_size
+  local cnt_table = {(chunk_size/2)-1, chunk_size/2, 3, (chunk_size/2)-1, (chunk_size/2)-1}
   
   local input_tbl = {}
   for i = 1, chunk_size-1 do
@@ -189,7 +195,10 @@ end
 -- [ 1, 1, .. 2, 2, 3 ] [ 3, 3, 3, 3 ... 3 ] [ 3, 3, 4, 4, ... 5, 5 ]
 tests.t6 = function ()
   local expected_values = {1, 2, 3, 4, 5}
-  local cnt_table = {32767, 32768, 65539, 32767, 32767}
+  local cnt_1 = (qconsts.chunk_size/2)-1
+  local cnt_2 = (qconsts.chunk_size/2)
+  local cnt_3 = qconsts.chunk_size+3
+  local cnt_table = {cnt_1, cnt_2, cnt_3, cnt_1, cnt_1}
   local chunk_size = qconsts.chunk_size
   
   local input_tbl = {}
