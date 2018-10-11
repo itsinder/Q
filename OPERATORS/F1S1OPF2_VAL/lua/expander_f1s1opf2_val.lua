@@ -35,6 +35,7 @@ local function expander_f1s1opf2_val(op, a, s, optargs)
 
   local s_cmem		= s:to_cmem()
   local out_buf		= nil
+  local idx_buf		= nil
   local first_call	= true
   local cmem_a_idx	= nil
   local a_idx		= nil
@@ -43,15 +44,21 @@ local function expander_f1s1opf2_val(op, a, s, optargs)
   local a_chunk_idx	= 0
   local chunk_size      = qconsts.chunk_size
   local sz_out          = chunk_size * qconsts.qtypes[subs.out_qtype].width
+  local sz_idx		= chunk_size * ffi.sizeof("uint64_t")
 
   local cst_a_as	= subs.a_ctype .. " *"
   local cst_s_as	= subs.s_ctype .. " *"
   local cst_out_as	= subs.out_ctype .. " *"
+  local cst_idx_buf_as	= "int64_t *"
+
+  local rslt_vec = lVector( { gen = true, has_nulls = false, qtype = a:qtype() } )
+  local idx_vec = lVector( { gen = true, has_nulls = false, qtype = "I8" } )
 
   local function f1s1opf2_val_gen()
     if ( first_call ) then
       -- allocate memory for output buffer, a_idx, out_idx
       out_buf = assert(cmem.new(sz_out))
+      idx_buf = assert(cmem.new(sz_idx))
 
       cmem_a_idx = assert(cmem.new(ffi.sizeof("uint64_t")))
       cmem_a_idx:zero()
@@ -70,17 +77,26 @@ local function expander_f1s1opf2_val(op, a, s, optargs)
     repeat
       local a_len, a_chunk, a_nn_chunk = a:chunk(a_chunk_idx)
       if ( a_len == 0 ) then
-        return tonumber(out_idx[0]), out_buf, nil
+        if tonumber(out_idx[0]) > 0 then
+          rslt_vec:put_chunk(out_buf, nil, tonumber(out_idx[0]))
+          idx_vec:put_chunk(idx_buf, nil, tonumber(out_idx[0]))
+        end
+        if tonumber(out_idx[0]) < qconsts.chunk_size then
+          rslt_vec:eov()
+          idx_vec:eov()
+        end
+        return tonumber(out_idx[0]), nil, nil
       end
       assert(a_nn_chunk == nil, "Null is not supported")
 
       local cst_a_chunk = ffi.cast(cst_a_as, get_ptr(a_chunk))
       local cst_s_val = ffi.cast(cst_s_as, get_ptr(s_cmem))
       local cst_out_buf = ffi.cast(cst_out_as, get_ptr(out_buf))
+      local cst_idx_buf = ffi.cast(cst_idx_buf_as, get_ptr(idx_buf))
 
       local start_time = qc.RDTSC()
       local status = qc[func_name](cst_a_chunk, cst_s_val, a_len,
-        a_idx, cst_out_buf, chunk_size, out_idx)
+        a_idx, cst_out_buf, cst_idx_buf, chunk_size, out_idx)
       record_time(start_time, func_name)
       assert(status == 0, "C error in F1S1OPF2_VAL")
       if ( tonumber(a_idx[0]) == a_len ) then
@@ -88,9 +104,19 @@ local function expander_f1s1opf2_val(op, a, s, optargs)
         cmem_a_idx:zero()
       end
     until ( tonumber(out_idx[0]) == chunk_size )
-    return tonumber(out_idx[0]), out_buf, nil
+
+    -- Write values to vector
+    rslt_vec:put_chunk(out_buf, nil, tonumber(out_idx[0]))
+    idx_vec:put_chunk(idx_buf, nil, tonumber(out_idx[0]))
+    if tonumber(out_idx[0]) < qconsts.chunk_size then
+      rslt_vec:eov()
+      idx_vec:eov()
+    end
+    return tonumber(out_idx[0]), nil, nil
   end
-  return lVector( { gen = f1s1opf2_val_gen, has_nulls = false, qtype = a:qtype() } )
+  rslt_vec:set_generator(f1s1opf2_val_gen)
+  idx_vec:set_generator(f1s1opf2_val_gen)
+  return rslt_vec, idx_vec
 end
 
 return expander_f1s1opf2_val
