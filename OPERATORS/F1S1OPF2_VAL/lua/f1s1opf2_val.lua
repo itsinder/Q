@@ -74,11 +74,11 @@ end
 require('Q/q_export').export('vsneq_val', vsneq_val)
 
 
-T.vsgeq_val = vsgeq
-T.vsgt_val = vsgt
-T.vsleq_val = vsleq
-T.vslt_val = vslt
-T.vseq_val = vseq
-T.vsneq_val = vsneq
+T.vsgeq_val = vsgeq_val
+T.vsgt_val = vsgt_val
+T.vsleq_val = vsleq_val
+T.vslt_val = vslt_val
+T.vseq_val = vseq_val
+T.vsneq_val = vsneq_val
 
 return T
