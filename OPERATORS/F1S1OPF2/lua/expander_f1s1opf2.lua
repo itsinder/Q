@@ -23,6 +23,8 @@
       -- expecting y of type scalar, if not converting to scalar
       y = assert(to_scalar(y, f1:fldtype()), "y should be a Scalar or number")
     end
+    -- following useful for cum_count
+    if ( f1:is_eov() ) then optargs.in_nR = f1:length() end
     --==   Special case of no-op for convert 
     if ( ( a == "convert" ) and ( f1:fldtype() == y ) ) then
       return f1

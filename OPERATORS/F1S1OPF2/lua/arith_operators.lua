@@ -7,5 +7,5 @@ return {
 "vsand", 
 "vsor",  
 "vsxor",
-"pow"
+"pow",
 }
