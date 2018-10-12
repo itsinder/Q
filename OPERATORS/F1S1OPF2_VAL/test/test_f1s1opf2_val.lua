@@ -57,28 +57,4 @@ tests.t4 = function()
   print("Successfully executed t4")
 end
 
-tests.t5 = function()
-  -- vsgeq_val test, more than chunk size values
-  --local csv_file = os.getenv("Q_SRC_ROOT") .. "/GRAPH/ATTRIBUTION/lua/z.extend.csv"
-  --res = Q.load_csv(csv_file, {{name = "data", qtype = "I4"}})
-  --print(type(res))
-  --Q.save("/root/local/Q/meta/saved.meta.load")
-  Q.restore("/root/local/Q/meta/saved.meta.load")
-  local s = Scalar.new(0, "I4")
-  local res_col = Q.vsgeq_val(res.data, s):eval()
-  print("====================================")
-  print(res.data:length())
-  print(res_col:length())
-  --[[
-  local col = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
-  local s = Scalar.new(qconsts.chunk_size+1, "I4")
-  local res = Q.vsgeq_val(col, s):eval()
-  print(res:length())
-  assert(res:length() == 500)
-  local exp_col = Q.seq( {start = qconsts.chunk_size+1, by = 1, qtype = "I4", len = 500} ):eval()
-  assert(Q.sum(Q.vvneq(res, exp_col)):eval():to_num() == 0)
-  ]]
-  print("Successfully executed t5")
-end
-
 return tests
