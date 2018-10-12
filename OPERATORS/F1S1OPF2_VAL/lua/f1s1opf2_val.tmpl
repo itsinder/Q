@@ -10,7 +10,8 @@ ${fn}(
       ${s_ctype} *ptr_sval,
       uint64_t nX,
       uint64_t *ptr_a_idx,
-      ${out_ctype} *restrict out,
+      ${out_ctype} * restrict out,
+      uint64_t * restrict idx_buf,
       uint64_t out_size,
       uint64_t *ptr_out_idx
       )
@@ -24,7 +25,8 @@ ${fn}(
       ${s_ctype} *ptr_sval,
       uint64_t nX,
       uint64_t *ptr_a_idx,
-      ${out_ctype} *restrict out,
+      ${out_ctype} * restrict out,
+      uint64_t * restrict idx_buf,
       uint64_t out_size,
       uint64_t *ptr_out_idx
       )
@@ -32,6 +34,7 @@ ${fn}(
   int status = 0;
   if ( X == NULL ) { go_BYE(-1); }
   if ( out == NULL ) { go_BYE(-1); }
+  if ( idx_buf == NULL ) { go_BYE(-1); }
   if ( ptr_sval == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
   if ( out_size == 0 ) { go_BYE(-1); }
@@ -51,11 +54,12 @@ ${fn}(
   if ( a_idx >= nX ) { go_BYE(-1); }
 
   for ( ; a_idx < nX; a_idx++ ) {
+    if ( out_idx == out_size ) { break; }
     ${a_ctype} inval = X[a_idx];
     if ( inval ${comparison} sval ) {
-      out[out_idx++] = inval;
+      out[out_idx] = inval;
+      idx_buf[out_idx++] = a_idx;
     }
-    if ( out_idx == out_size ) { break; }
   }
 
   *ptr_out_idx = out_idx;

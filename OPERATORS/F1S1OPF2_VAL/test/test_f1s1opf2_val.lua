@@ -6,14 +6,14 @@ local tests = {}
 
 tests.t1 = function()
   -- vsgeq_val test
-  local in_table = {1, 2, 3, 4, 5, 6, -1, -2, -3}
+  local in_table = {1, 2, 3, 4, 5, 6, -1, -2, -1}
   local qtype = "I4"
   local col = Q.mk_col(in_table, qtype)
-  local s = Scalar.new(0, qtype)
-  local res = Q.vsgeq_val(col, s):eval()
-
+  local s = Scalar.new(-1, qtype)
+  local res, idx = Q.vsgeq_val(col, s)
+  Q.print_csv({res, idx})
   -- verification
-  local exp_table = {1, 2, 3, 4, 5, 6}
+  local exp_table = {1, 2, 3, 4, 5, 6, -1, -1}
   local exp_col = Q.mk_col(exp_table, qtype)
   local cmp_res = Q.vveq(res, exp_col)
   local sum, _ = Q.sum(cmp_res):eval()
@@ -56,6 +56,5 @@ tests.t4 = function()
   assert(Q.sum(Q.vvneq(res, exp_col)):eval():to_num() == 0)
   print("Successfully executed t4")
 end
-
 
 return tests

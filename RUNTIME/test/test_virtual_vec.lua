@@ -5,7 +5,7 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 
 local tests = {}
-
+--[[
 tests.t1 = function()
   local col1 = Q.mk_col({1, 2, 3, 4}, "I4")
   local nX, X, nn_X = col1:start_write()
@@ -66,21 +66,18 @@ tests.t1 = function()
   print("field size", virtual_vec:field_width())
   virtual_vec:check()
 
-  --[[
+ 
   -- check is_nascent (not supported at lVector)
-  print("is_nascent", virtual_vec:is_nascent())
-  virtual_vec:check()
-  ]]
+  --print("is_nascent", virtual_vec:is_nascent())
+  --virtual_vec:check()
 
   -- check is_eov
   print("is_eov", virtual_vec:is_eov())
   virtual_vec:check()
 
-  --[[
   -- check is_virtual
-  print("is_virtual", virtual_vec:is_virtual()
-  virtual_vec:check()
-  ]]
+  --print("is_virtual", virtual_vec:is_virtual()
+  --virtual_vec:check()
 
   -- check is_memo
   print("is_memo", virtual_vec:is_memo())
@@ -131,18 +128,17 @@ tests.t2 = function()
     assert(val:to_num() == 65537 + i, "Mismatch vir_vec1, expected = " .. tostring(65537 + i) .. ", actual = " .. tostring(val:to_num()))
   end
 
-  --[[
-  print("Virtual Vector 1")
-  print(vir_vec1:get_one(0))
-  print(vir_vec1:get_one(vir_vec1:length()-1))
+  --print("Virtual Vector 1")
+  --print(vir_vec1:get_one(0))
+  --print(vir_vec1:get_one(vir_vec1:length()-1))
 
-  print("Virtual Vector 2")
-  print(vir_vec2:get_one(0))
-  print(vir_vec2:get_one(vir_vec2:length()-1))
+  --print("Virtual Vector 2")
+  --print(vir_vec2:get_one(0))
+  --print(vir_vec2:get_one(vir_vec2:length()-1))
 
-  print("Total length")
-  print(vir_vec1:length() + vir_vec2:length())
-  ]]
+  --print("Total length")
+  --print(vir_vec1:length() + vir_vec2:length())
+
 
   -- create virtual vector vir_vec11 from vir_vec1
   nX, X, nn_X = vir_vec1:start_write()
@@ -239,5 +235,5 @@ end
 tests.t3 = function()
   -- Test modification in virtual vector, it should affect parent vector
 end
-
+--]]
 return tests

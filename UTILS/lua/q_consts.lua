@@ -16,7 +16,7 @@ local qconsts = {}
    --===========================
     qconsts.sz_str_for_lua = 1048576 -- TODO Should be much bigger
    --===================================
-    qconsts.chunk_size = 1024 * 1024
+    qconsts.chunk_size = 64 * 1024
     --===========================
     local base_types = {}
     base_types["I1"] = true;

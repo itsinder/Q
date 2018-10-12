@@ -59,9 +59,12 @@ end
 tests.t4 = function()
   -- Length of input vector more than chunk size
   local len = qconsts.chunk_size * 2 + 655
+  local period = 3
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
-  local b = Q.period({ len = len, start = 0, by = 1, period = 3, qtype = "I4"})
-  local exp_val = {2891978467, 2892022376, 2892066285}
+  local b = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
+  local value = len/period
+  local exp_sum = period*(value*(value+1)/2)
+  local exp_val = {exp_sum-(value+value), exp_sum-value, exp_sum}
   local nb = 3
 
   local res = Q.sumby(a, b, nb)
