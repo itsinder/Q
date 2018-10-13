@@ -35,22 +35,29 @@ local confusion_matrix = function(actual_val, predicted_val)
       end
     end
   end
-  return { TP, FN, FP, TN }
-end
-
-local classification_report = function(actual_val, predicted_val)
-  --TODO: Complete implementation
-end
-
-local f1_score = function(actual_val, predicted_val)
-  --TODO: Complete implementation
+  return { TP = TP, FN = FN, FP = FP, TN = TN }
 end
 
 local precision_score = function(actual_val, predicted_val)
-  --TODO: Complete implementation
+  local conf_matrix = confusion_matrix(actual_val, predicted_val)
+  local precision = ( conf_matrix.TP / ( conf_matrix.TP + conf_matrix.FP ) )
+  return precison
 end
 
 local recall_score = function(actual_val, predicted_val)
+  local conf_matrix = confusion_matrix(actual_val, predicted_val)
+  local recall = ( conf_matrix.TP / ( conf_matrix.TP + conf_matrix.FN ) )
+  return recall
+end
+
+local f1_score = function(actual_val, predicted_val)
+  local precision = precision_score(actual_val, predicted_val)
+  local recall = recall_score(actual_val, predicted_val)
+  local f1 = ( ( 2 * precision * recall ) / ( precision + recall ) )
+  return f1
+end
+
+local classification_report = function(actual_val, predicted_val)
   --TODO: Complete implementation
 end
 
