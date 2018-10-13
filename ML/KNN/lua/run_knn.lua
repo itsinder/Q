@@ -90,10 +90,10 @@ function run_knn(args)
     end
 
     -- calculate accuracy
-    local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
+    local acr = ml_utils.accuracy_score(actual_values, predicted_values)
     accuracy[#accuracy + 1] = acr 
   end
-  return ml_utils.calc_average(accuracy), accuracy
+  return ml_utils.average_score(accuracy), accuracy
 end
 
 return run_knn

@@ -120,16 +120,16 @@ local function run_dt(args)
       end
 
       -- calculate accuracy
-      local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
+      local acr = ml_utils.accuracy_score(actual_values, predicted_values)
       -- print("Accuracy: " .. tostring(accuracy))
       accuracy[#accuracy + 1] = acr
     end
-    alpha_gain[min_alpha] = ml_utils.calc_average(gain)
-    gain_std_deviation[min_alpha] = ml_utils.calc_std_deviation(gain)
-    alpha_cost[min_alpha] = ml_utils.calc_average(cost)
-    cost_std_deviation[min_alpha] = ml_utils.calc_std_deviation(cost)
-    alpha_accuracy[min_alpha] = ml_utils.calc_average(accuracy)
-    accuracy_std_deviation[min_alpha] = ml_utils.calc_std_deviation(accuracy)
+    alpha_gain[min_alpha] = ml_utils.average_score(gain)
+    gain_std_deviation[min_alpha] = ml_utils.std_deviation_score(gain)
+    alpha_cost[min_alpha] = ml_utils.average_score(cost)
+    cost_std_deviation[min_alpha] = ml_utils.std_deviation_score(cost)
+    alpha_accuracy[min_alpha] = ml_utils.average_score(accuracy)
+    accuracy_std_deviation[min_alpha] = ml_utils.std_deviation_score(accuracy)
     min_alpha = min_alpha + step_alpha
   end
   local result = {}

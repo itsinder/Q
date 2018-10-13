@@ -107,11 +107,11 @@ local function run_dt(args)
       actual_values[k] = g_test:get_one(k-1):to_num()
     end
 
-    local acr = ml_utils.calc_accuracy(actual_values, predicted_values)
+    local acr = ml_utils.accuracy_score(actual_values, predicted_values)
     -- print("Accuracy: " .. tostring(acr))
     accuracy[#accuracy + 1] = acr
   end
-  return ml_utils.calc_average(accuracy), accuracy
+  return ml_utils.average_score(accuracy), accuracy
 end
 
 return run_dt
