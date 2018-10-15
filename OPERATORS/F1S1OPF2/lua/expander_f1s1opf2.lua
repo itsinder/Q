@@ -60,14 +60,19 @@
       end
       -- print(sp_fn_name .. " requesting " .. chunk_idx)
       local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
+      local cst_as_B1 = "uint64_t *"
+      local cst_f1_as = qconsts.qtypes[subs.in_qtype].ctype .. "*" 
+      local cst_f2_as = qconsts.qtypes[subs.out_qtype].ctype .. "*" 
+      local cst_args_as = subs.args_ctype .. "*" 
       if f1_len > 0 then  
-        local casted_f1_chunk = ffi.cast(qconsts.qtypes[subs.in_qtype].ctype .. "*" ,get_ptr(f1_chunk))
-        local casted_nn_f1_chunk = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f1_chunk))
-        local casted_ptr_sval = ffi.cast(qconsts.qtypes[f1:fldtype()].ctype .. "*" ,get_ptr(subs.c_mem))
-        local casted_f2_buf = ffi.cast(qconsts.qtypes[subs.out_qtype].ctype .. "*", get_ptr(f2_buf))
-        local casted_nn_f2_buf = ffi.cast(qconsts.qtypes['B1'].ctype .. "*", get_ptr(nn_f2_buf))
+        local cst_f1_chunk    = ffi.cast(cst_f1_as, get_ptr(f1_chunk))
+        local cst_nn_f1_chunk = ffi.cast(cst_as_B1, get_ptr(nn_f1_chunk))
+        local cst_ptr_args    = ffi.cast(cst_args_as, get_ptr(subs.args))
+        local cst_f2_buf      = ffi.cast(cst_f2_as, get_ptr(f2_buf))
+        local cst_nn_f2_buf   = ffi.cast(cst_as_B1, get_ptr(nn_f2_buf))
         local start_time = qc.RDTSC()
-        qc[func_name](casted_f1_chunk, casted_nn_f1_chunk, f1_len, casted_ptr_sval, casted_f2_buf, casted_nn_f2_buf)
+        qc[func_name](cst_f1_chunk, cst_nn_f1_chunk, f1_len, 
+          cst_ptr_args, cst_f2_buf, cst_nn_f2_buf)
         record_time(start_time, func_name)
       end
       chunk_idx = chunk_idx + 1
