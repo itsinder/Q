@@ -47,14 +47,23 @@ local function run_dt(args)
   local alpha_gain = {}
   local alpha_cost = {}
   local alpha_accuracy = {}
+  local alpha_precision = {}
+  local alpha_recall = {}
+  local alpha_f1_score = {}
   local accuracy_std_deviation = {}
   local gain_std_deviation = {}
   local cost_std_deviation = {}
+  local precision_std_deviation = {}
+  local recall_std_deviation = {}
+  local f1_score_std_deviation = {}
 
   while min_alpha <= max_alpha do
     local gain = {}
     local cost = {}
     local accuracy = {}
+    local precision = {}
+    local recall = {}
+    local f1_score = {}
     local is_first = true
     for i = 1, iterations do
       -- break into a training set and a testing set
@@ -106,6 +115,7 @@ local function run_dt(args)
       gain[#gain+1] = g
       cost[#cost+1] = c
 
+      --[[
       -- print decision tree
       if is_first then
         local file_name = tostring(min_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
@@ -118,18 +128,33 @@ local function run_dt(args)
         f:close()
         is_first = false
       end
+      ]]
 
-      -- calculate accuracy
-      local acr = ml_utils.accuracy_score(actual_values, predicted_values)
-      -- print("Accuracy: " .. tostring(accuracy))
-      accuracy[#accuracy + 1] = acr
+      -- get classification_report
+      local report = ml_utils.classification_report(actual_values, predicted_values)
+      accuracy[#accuracy + 1] = report["accuracy_score"]
+      precision[#precision + 1] = report["precision_score"]
+      recall[#recall + 1] = report["recall_score"]
+      f1_score[#f1_score + 1] = report["f1_score"]
     end
     alpha_gain[min_alpha] = ml_utils.average_score(gain)
     gain_std_deviation[min_alpha] = ml_utils.std_deviation_score(gain)
+
     alpha_cost[min_alpha] = ml_utils.average_score(cost)
     cost_std_deviation[min_alpha] = ml_utils.std_deviation_score(cost)
+
     alpha_accuracy[min_alpha] = ml_utils.average_score(accuracy)
     accuracy_std_deviation[min_alpha] = ml_utils.std_deviation_score(accuracy)
+
+    alpha_precision[min_alpha] = ml_utils.average_score(precision)
+    precision_std_deviation[min_alpha] = ml_utils.std_deviation_score(precision)
+
+    alpha_recall[min_alpha] = ml_utils.average_score(recall)
+    recall_std_deviation[min_alpha] = ml_utils.std_deviation_score(recall)
+
+    alpha_f1_score[min_alpha] = ml_utils.average_score(f1_score)
+    f1_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(f1_score)
+
     min_alpha = min_alpha + step_alpha
   end
   local result = {}
@@ -139,6 +164,13 @@ local function run_dt(args)
   result['accuracy_std_deviation'] = accuracy_std_deviation
   result['gain_std_deviation'] = gain_std_deviation
   result['cost_std_deviation'] = cost_std_deviation
+  result['precision'] = alpha_precision
+  result['recall'] = alpha_recall
+  result['f1_score'] = alpha_f1_score
+  result['precision_std_deviation'] = precision_std_deviation
+  result['recall_std_deviation'] = recall_std_deviation
+  result['f1_score_std_deviation'] = f1_score_std_deviation
+
   return result
 end
 
