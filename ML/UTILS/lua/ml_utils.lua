@@ -38,27 +38,42 @@ local confusion_matrix = function(actual_val, predicted_val)
   return { TP = TP, FN = FN, FP = FP, TN = TN }
 end
 
-local precision_score = function(actual_val, predicted_val)
-  local conf_matrix = confusion_matrix(actual_val, predicted_val)
+local precision_score = function(actual_val, predicted_val, conf_matrix=nil)
+  if not conf_matrix then
+    conf_matrix = confusion_matrix(actual_val, predicted_val)
+  end
   local precision = ( conf_matrix.TP / ( conf_matrix.TP + conf_matrix.FP ) )
   return precison
 end
 
-local recall_score = function(actual_val, predicted_val)
-  local conf_matrix = confusion_matrix(actual_val, predicted_val)
+local recall_score = function(actual_val, predicted_val, conf_matrix=nil)
+  if not conf_matrix then
+    conf_matrix = confusion_matrix(actual_val, predicted_val)
+  end
   local recall = ( conf_matrix.TP / ( conf_matrix.TP + conf_matrix.FN ) )
   return recall
 end
 
-local f1_score = function(actual_val, predicted_val)
-  local precision = precision_score(actual_val, predicted_val)
-  local recall = recall_score(actual_val, predicted_val)
+local f1_score = function(actual_val, predicted_val, conf_matrix=nil)
+  local precision = precision_score(actual_val, predicted_val, conf_matrix)
+  local recall = recall_score(actual_val, predicted_val, conf_matrix)
   local f1 = ( ( 2 * precision * recall ) / ( precision + recall ) )
   return f1
 end
 
 local classification_report = function(actual_val, predicted_val)
-  --TODO: Complete implementation
+  local accuracy = accuracy_score(actual_val, predicted_val)
+  local conf_matrix = confusion_matrix(actual_val, predicted_val)
+  local precision = precision_score(actual_val, predicted_val, conf_matrix)
+  local recall = recall_score(actual_val, predicted_val, conf_matrix)
+  local f1 = f1_score(actual_val, predicted_val, conf_matrix)
+  local result = {}
+  result["accuracy_score"] = accuracy
+  result["confusion_matrix"] = conf_matrix
+  result["precision_score"] = precision
+  result["recall_score"] = recall
+  result["f1_score"] = f1
+  return result
 end
 
 local cross_val_score = function()
