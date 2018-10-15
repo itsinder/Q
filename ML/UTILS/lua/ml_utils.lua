@@ -38,15 +38,15 @@ local confusion_matrix = function(actual_val, predicted_val)
   return { TP = TP, FN = FN, FP = FP, TN = TN }
 end
 
-local precision_score = function(actual_val, predicted_val, conf_matrix=nil)
+local precision_score = function(actual_val, predicted_val, conf_matrix)
   if not conf_matrix then
     conf_matrix = confusion_matrix(actual_val, predicted_val)
   end
   local precision = ( conf_matrix.TP / ( conf_matrix.TP + conf_matrix.FP ) )
-  return precison
+  return precision
 end
 
-local recall_score = function(actual_val, predicted_val, conf_matrix=nil)
+local recall_score = function(actual_val, predicted_val, conf_matrix)
   if not conf_matrix then
     conf_matrix = confusion_matrix(actual_val, predicted_val)
   end
@@ -54,7 +54,7 @@ local recall_score = function(actual_val, predicted_val, conf_matrix=nil)
   return recall
 end
 
-local f1_score = function(actual_val, predicted_val, conf_matrix=nil)
+local f1_score = function(actual_val, predicted_val, conf_matrix)
   local precision = precision_score(actual_val, predicted_val, conf_matrix)
   local recall = recall_score(actual_val, predicted_val, conf_matrix)
   local f1 = ( ( 2 * precision * recall ) / ( precision + recall ) )
@@ -99,7 +99,7 @@ end
 
 
 local std_deviation_score = function(in_list)
-  local mean = calc_average(in_list)
+  local mean = average_score(in_list)
   local mean_squared_dst = 0
   for i = 1, #in_list do
     mean_squared_dst = mean_squared_dst + ( ( in_list[i] - mean ) * ( in_list[i] - mean ) )
