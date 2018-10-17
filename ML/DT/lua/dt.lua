@@ -109,6 +109,20 @@ local function make_dt(
 end
 
 
+local function node_count(
+  D
+  )
+  local n_count = 1
+  if D.left then
+    n_count = n_count + node_count(D.left)
+  end
+  if D.right then
+    n_count = n_count + node_count(D.right)
+  end
+  return n_count
+end
+
+
 local function check_dt(
   D	-- prepared decision tree
   )
@@ -203,5 +217,6 @@ dt.make_dt = make_dt
 dt.predict = predict
 dt.check_dt = check_dt
 dt.print_dt = print_dt
+dt.node_count = node_count
 
 return dt
