@@ -40,7 +40,7 @@ local function run_dt(args)
   end
 
   -- load the data
-  local T
+  local T = nil
   if data_file then
     T = Q.load_csv(data_file, dofile(meta_data_file))
   end
@@ -49,7 +49,7 @@ local function run_dt(args)
   for i = 1, iterations do
     -- break into a training set and a testing set
     local Train, Test
-    if data_file then
+    if T then
       Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
     else
       assert(train_csv)
