@@ -20,7 +20,7 @@ local function calc_gain_and_cost(
   else
     local w = D.n_H1:to_num() + D.n_T1:to_num() -- weight at leaf node
     if w == 0 then
-      -- maintain the count here, how many times this situation is occured for debugging
+      -- TODO: maintain the count here, how many times this situation is occured for debugging
       return
     end
 
@@ -34,6 +34,8 @@ local function calc_gain_and_cost(
     -- odds of betting tail = ( n_H0 / n_T0 ) = ( 10 / 0 ) -- division by zero
     -- with the addition of w_T and w_H
     -- odds of betting tail = ( n_H0 + w_H ) / ( n_T0 + w_T ) -- avoid division by zero
+
+    -- Here, n_H0 and n_T0 are represented by D.n_H and D.n_T respectively
 
     local o_H_c = ( ( D.n_T:to_num() + w_T  ) / ( D.n_H:to_num() + w_H ) ) -- odds of betting head (used in cost calcuation)
     local o_T_c = ( ( D.n_H:to_num() + w_H  ) / ( D.n_T:to_num() + w_T ) ) -- odds of betting tail (used in cost calcuation)
