@@ -106,8 +106,8 @@ local function run_dt(args)
         else
           decision = 0
         end
-        predicted_values[#predicted_values+1] = decision
-        actual_values[#actual_values+1] = g_test:get_one(i-1):to_num()
+        predicted_values[i] = decision
+        actual_values[i] = g_test:get_one(i-1):to_num()
       end
 
       -- calculate dt cost

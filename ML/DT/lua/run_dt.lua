@@ -68,7 +68,7 @@ local function run_dt(args)
     assert(max_g:to_num() == 1)
 
     local predicted_values = {}
-
+    local actual_values = {}
     -- prepare decision tree
     local tree = make_dt(train, g_train, alpha)
     assert(tree)
@@ -98,13 +98,8 @@ local function run_dt(args)
       else
         decision = 0
       end
-      predicted_values[#predicted_values+1] = decision
-    end
-
-    -- prepare table of actual goal values
-    local actual_values = {}
-    for k = 1, n_test do
-      actual_values[k] = g_test:get_one(k-1):to_num()
+      predicted_values[i] = decision
+      actual_values[i] = g_test:get_one(i-1):to_num()
     end
 
     local acr = ml_utils.accuracy_score(actual_values, predicted_values)
