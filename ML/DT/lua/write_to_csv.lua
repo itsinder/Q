@@ -19,12 +19,15 @@ local write_to_csv = function(result, csv_file_path, sep)
   local recall_std_deviation = result['recall_std_deviation']
   local f1_score = result['f1_score']
   local f1_score_std_deviation = result['f1_score_std_deviation']
+  local c_d_score = result['c_d_score']
+  local c_d_score_std_deviation = result['c_d_score_std_deviation']
+  local n_nodes = result['n_nodes']
 
   local file = assert(io.open(csv_file_path, "w"))
 
-  file:write("alpha,accuracy,precision,recall,f1_score,gain,cost\n")
+  file:write("alpha,accuracy,precision,recall,f1_score,c_d_score,gain,cost,nodes\n")
   for i, v in tablex.sort(accuracy) do
-    file:write(i .. "," .. accuracy[i] .. "," .. precision[i] .. "," .. recall[i] .. "," .. f1_score[i] .. "," .. gain[i] .. "," .. cost[i])
+    file:write(i .. "," .. accuracy[i] .. "," .. precision[i] .. "," .. recall[i] .. "," .. f1_score[i] .. "," .. c_d_score[i] .. "," .. gain[i] .. "," .. cost[i] .. "," .. n_nodes[i])
     file:write('\n')
   end
 
