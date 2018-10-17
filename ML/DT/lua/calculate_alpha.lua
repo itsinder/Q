@@ -3,6 +3,7 @@ local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
 local make_dt = require 'Q/ML/DT/lua/dt'['make_dt']
 local check_dt = require 'Q/ML/DT/lua/dt'['check_dt']
+local node_count = require 'Q/ML/DT/lua/dt'['node_count']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
@@ -50,12 +51,15 @@ local function run_dt(args)
   local alpha_precision = {}
   local alpha_recall = {}
   local alpha_f1_score = {}
+  local alpha_c_d_score = {}
+  local alpha_n_nodes = {}
   local accuracy_std_deviation = {}
   local gain_std_deviation = {}
   local cost_std_deviation = {}
   local precision_std_deviation = {}
   local recall_std_deviation = {}
   local f1_score_std_deviation = {}
+  local c_d_score_std_deviation = {}
 
   while min_alpha <= max_alpha do
     local gain = {}
@@ -64,8 +68,13 @@ local function run_dt(args)
     local precision = {}
     local recall = {}
     local f1_score = {}
+    local c_d_score = {}
+    local n_nodes = {}
     local is_first = true
     for i = 1, iterations do
+      local credit_val = 0
+      local debit_val = 0
+
       -- break into a training set and a testing set
       local Train, Test = split_train_test(T, split_ratio, feature_of_interesti, i*100)
       local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
@@ -108,14 +117,41 @@ local function run_dt(args)
         end
         predicted_values[i] = decision
         actual_values[i] = g_test:get_one(i-1):to_num()
+
+        -- Calculate the credit and debit value
+        n_H_prob = ( n_H / ( n_H + n_T ) ):to_num()
+        n_T_prob = ( n_T / ( n_H + n_T ) ):to_num()
+        if actual_values[i] == 1 then
+          if actual_values[i] == predicted_values[i] then
+            credit_val = credit_val + n_H_prob
+            debit_val = debit_val + n_T_prob
+          else
+            credit_val = credit_val + n_T_prob
+            debit_val = debit_val + n_H_prob
+          end
+        else
+          if actual_values[i] == predicted_values[i] then
+            credit_val = credit_val + n_T_prob
+            debit_val = debit_val + n_H_prob
+          else
+            credit_val = credit_val + n_H_prob
+            debit_val = debit_val + n_T_prob
+          end
+        end
       end
+
+      -- get node count
+      local n_count = node_count(tree)
+      n_nodes[#n_nodes+1] = n_count
+
+      -- calculate credit-debit score
+      c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
       -- calculate dt cost
       local g, c = evaluate_dt(tree, g_train)
       gain[#gain+1] = g
       cost[#cost+1] = c
 
-      --[[
       -- print decision tree
       if is_first then
         local file_name = tostring(min_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
@@ -128,7 +164,6 @@ local function run_dt(args)
         f:close()
         is_first = false
       end
-      ]]
 
       -- get classification_report
       local report = ml_utils.classification_report(actual_values, predicted_values)
@@ -155,8 +190,14 @@ local function run_dt(args)
     alpha_f1_score[min_alpha] = ml_utils.average_score(f1_score)
     f1_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(f1_score)
 
+    alpha_c_d_score[min_alpha] = ml_utils.average_score(c_d_score)
+    c_d_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(c_d_score)
+
+    alpha_n_nodes[min_alpha] = ml_utils.average_score(n_nodes)
+
     min_alpha = min_alpha + step_alpha
   end
+
   local result = {}
   result['accuracy'] = alpha_accuracy
   result['gain'] = alpha_gain
@@ -170,6 +211,9 @@ local function run_dt(args)
   result['precision_std_deviation'] = precision_std_deviation
   result['recall_std_deviation'] = recall_std_deviation
   result['f1_score_std_deviation'] = f1_score_std_deviation
+  result['c_d_score'] = alpha_c_d_score
+  result['c_d_score_std_deviation'] = c_d_score_std_deviation
+  result['n_nodes'] = alpha_n_nodes
 
   return result
 end
