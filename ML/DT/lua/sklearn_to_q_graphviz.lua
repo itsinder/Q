@@ -60,6 +60,12 @@ local function get_condition(condition)
   return feature_threshold
 end
 
+local function get_benefit(label)
+  local key, value
+  key, value = plstring.splitv(label, "= ")
+  return value
+end
+
 local function get_required_fields(label_tbl)
   local q_field_labels = {}
   for i=1, #label_tbl do
@@ -67,8 +73,8 @@ local function get_required_fields(label_tbl)
     if l4 ~= nil then
       l4 = value_to_n_T_n_H(l4)
       l1 = get_condition(l1)
-      -- TODO: source of benefit value to be decided
-      local str = l4 .. "\\n" .. l1 .. "\\n" .. "benefit=0.5"
+      l2 = get_benefit(l2)
+      local str = l4 .. "\\n" .. l1 .. "\\n" .. "benefit=" ..l2
       q_field_labels[#q_field_labels + 1] = str
     else
       l3 = value_to_n_T_n_H(l3)
