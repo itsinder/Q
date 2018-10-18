@@ -18,6 +18,7 @@ return function (
     subs.in_qtype = in_qtype 
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
-    subs.c_mem = scalar:to_cmem()
+    subs.args = scalar:to_cmem()
+    subs.args_ctype = subs.in_ctype
     return subs, tmpl
 end

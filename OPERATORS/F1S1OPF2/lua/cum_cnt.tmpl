@@ -7,6 +7,8 @@ return require 'Q/UTILS/lua/code_gen' {
 typedef struct _cum_cnt_${val_qtype}_${cnt_qtype}_args {
   ${val_ctype} prev_val;
   ${cnt_ctype} prev_cnt;
+  ${val_ctype} max_val;
+  ${cnt_ctype} max_cnt;
   } CUM_CNT_${val_qtype}_${cnt_qtype}_ARGS;
   
 extern int
@@ -55,7 +57,7 @@ ${fn}(
       cnt[0] = prev_cnt + 1;
     }
     else {
-      cnt[0] = 0;
+      cnt[0] = 1;
     }
   }
   prev_val = val[0];

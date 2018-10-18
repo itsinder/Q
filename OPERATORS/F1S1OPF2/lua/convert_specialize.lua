@@ -4,13 +4,13 @@ local qconsts       = require 'Q/UTILS/lua/q_consts'
 return function (
   in_qtype,
   out_qtype,
-  args
+  optargs
   )
-  local is_safe   = nil
-  if ( args ) then 
-    assert(type(args) == "table" )
-    if ( args.is_safe ) then 
-      is_safe = args.is_safe
+  local is_safe = false
+  if ( optargs ) then 
+    assert(type(optargs) == "table" )
+    if ( optargs.is_safe ) then 
+      is_safe = optargs.is_safe
       assert(type(is_safe) == "boolean")
     end
   end
@@ -31,7 +31,6 @@ return function (
   -- TODO We should not need to do this. Will delete when fixed in q_consts
   if ( in_qtype  == "B1" ) then subs.in_ctype = "uint64_t" end
   if ( out_qtype == "B1" ) then subs.out_ctype = "uint64_t" end
-  subs.c_mem = nil  
   
   if is_safe then
     tmpl = 'safe_f1opf2.tmpl'

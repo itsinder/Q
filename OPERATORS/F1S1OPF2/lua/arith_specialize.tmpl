@@ -13,7 +13,8 @@ return function (
   subs.fn = "<<operator>>_" .. in_qtype .. "_" .. in_qtype
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype
   subs.c_code_for_operator = "<<c_code>>;"
-  subs.c_mem        = scalar:to_cmem()
+  subs.args        = scalar:to_cmem()
+  subs.args_ctype  = subs.in_ctype
   subs.in_qtype = in_qtype
   subs.out_qtype    = in_qtype
   subs.out_ctype    = qconsts.qtypes[subs.out_qtype].ctype

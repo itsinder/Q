@@ -6,14 +6,15 @@ local cmem    = require 'libcmem'
 
 return function (
   val_qtype,
-  scalar_val, -- dummy in this case
   optargs
   )
   local hdr = [[
-typedef struct _cum_cnt_<<qtype>>_args {
-  <<ctype>> prev_val;
-  int64_t prev_cnt; 
-} CUM_CNT_<<qtype>>_ARGS;
+typedef struct _cum_cnt_<<val_qtype>>_<<cnt_qtype>>_args {
+  <<val_ctype>> prev_val;
+  <<cnt_ctype>> prev_cnt;
+  <<val_ctype>> max_val;
+  <<cnt_ctype>> max_cnt;
+} CUM_CNT_<<val_qtype>>_<<cnt_qtype>>_ARGS;
   ]]
   assert(is_base_qtype(val_qtype))
 
@@ -22,10 +23,6 @@ typedef struct _cum_cnt_<<qtype>>_args {
   local subs = {}; 
   subs.val_qtype = val_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype
-  --===============
-  hdr = string.gsub(hdr,"<<qtype>>", subs.val_qtype)
-  hdr = string.gsub(hdr,"<<ctype>>", subs.val_ctype)
-  pcall(ffi.cdef, hdr)
   --===============
   local cnt_qtype = "I8"
   if ( optargs ) then
@@ -51,6 +48,14 @@ typedef struct _cum_cnt_<<qtype>>_args {
       end
     end
   end
+  --===============
+  local cnt_ctype = qconsts.qtypes[cnt_qtype].ctype
+  local val_ctype = qconsts.qtypes[val_qtype].ctype
+  hdr = string.gsub(hdr,"<<val_qtype>>", val_qtype)
+  hdr = string.gsub(hdr,"<<val_ctype>>", val_ctype)
+  hdr = string.gsub(hdr,"<<cnt_qtype>>", cnt_qtype)
+  hdr = string.gsub(hdr,"<<cnt_ctype>>", cnt_ctype)
+  pcall(ffi.cdef, hdr)
   --===============
   -- Set args 
   local args_ctype = "CUM_CNT_" .. val_qtype .. "_" .. cnt_qtype .. "_ARGS"

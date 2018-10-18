@@ -9,6 +9,7 @@ local record_time = require 'Q/UTILS/lua/record_time'
 local function expander_numby(a, nb, optargs)
   -- Verification
   assert(type(a) == "lVector", "a must be a lVector ")
+  if ( type(nb) == "Scalar") then nb = nb:to_num() end 
   assert(type(nb) == "number")
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/numby_specialize"

@@ -17,13 +17,15 @@
     assert(f1:has_nulls() == false, "Not set up for nulls as yet")
     if ( optargs ) then 
       assert(type(optargs) == "table")
+    else
+      optargs = {}
     end
     if ( y ) and type(y) ~= "string" then 
       --y not defined if no scalar like in incr, decr, exp, log
       -- expecting y of type scalar, if not converting to scalar
       y = assert(to_scalar(y, f1:fldtype()), "y should be a Scalar or number")
     end
-    -- following useful for cum_count
+    -- following useful for cum_cnt
     if ( f1:is_eov() ) then optargs.in_nR = f1:length() end
     --==   Special case of no-op for convert 
     if ( ( a == "convert" ) and ( f1:fldtype() == y ) ) then
@@ -63,11 +65,15 @@
       local cst_as_B1 = "uint64_t *"
       local cst_f1_as = qconsts.qtypes[subs.in_qtype].ctype .. "*" 
       local cst_f2_as = qconsts.qtypes[subs.out_qtype].ctype .. "*" 
-      local cst_args_as = subs.args_ctype .. "*" 
+      local cst_args_as
+      if ( subs.args ) then cst_args_as = subs.args_ctype .. "*" end
       if f1_len > 0 then  
         local cst_f1_chunk    = ffi.cast(cst_f1_as, get_ptr(f1_chunk))
         local cst_nn_f1_chunk = ffi.cast(cst_as_B1, get_ptr(nn_f1_chunk))
-        local cst_ptr_args    = ffi.cast(cst_args_as, get_ptr(subs.args))
+        local cst_ptr_args
+        if ( subs.args ) then 
+          cst_ptr_args    = ffi.cast(cst_args_as, get_ptr(subs.args))
+        end
         local cst_f2_buf      = ffi.cast(cst_f2_as, get_ptr(f2_buf))
         local cst_nn_f2_buf   = ffi.cast(cst_as_B1, get_ptr(nn_f2_buf))
         local start_time = qc.RDTSC()
