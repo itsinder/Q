@@ -1,5 +1,5 @@
 local fns = {}
-local function load_csv_col_seq(col_names)
+local function load_csv_col_seq(col_names, goal_feature)
   local col_names_load = {}
   for i = 1, #col_names do 
     col_names_load[col_names[i]] = i 
@@ -17,7 +17,9 @@ local function load_csv_col_seq(col_names)
   
   local T = {} 
   for idx, value in pairs(col_upd_copy) do
-    T[#T+1] = idx
+    if idx ~= goal_feature then
+      T[#T+1] = idx
+    end
   end
   
   return T
