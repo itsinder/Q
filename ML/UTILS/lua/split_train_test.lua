@@ -8,9 +8,9 @@ local function split (
   )
   assert(T)
   assert(type(T) == "table")
-  if ( type(split_ratio) == "number" ) then 
+  if ( type(split_ratio) == "number" ) then
     split_ratio = assert(Scalar.new(split_ratio, "F4"))
-  elseif ( type(split_ration) == "Scalar" ) then 
+  elseif ( type(split_ratio) == "Scalar" ) then
     assert(split_ratio:fldtype() == "F4")
   end
   assert(Scalar.gt(split_ratio, 0)) -- TODO Improve P3

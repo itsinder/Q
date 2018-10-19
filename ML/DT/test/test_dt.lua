@@ -201,4 +201,37 @@ tests.t5 = function()
   ]]
   print("Accuracy = " .. tostring(average_acr))
 end
+
+tests.t6 = function()
+  local data_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/after_opr_lifespan.csv"
+  local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/lifespan_metadata.lua"
+  local split = require 'Q/ML/UTILS/lua/split_csv_to_train_test'
+  local split_csv_args = {}
+  split_csv_args.is_hdr = true
+
+  split(data_file, metadata_file, split_csv_args)
+
+  local alpha = Scalar.new(0.2, "F4")
+  -- If you want to provide train and test csv file explicitly,
+  -- then don't provide "args.data_file" argument
+  local args = {}
+  args.data_file = nil
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/train_data.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/test_data.csv"
+  args.meta_data_file = metadata_file
+  args.is_hdr = true
+  args.goal = "survival_status"
+  args.alpha = alpha
+
+  Vector.reset_timers()
+  start_time = qc.RDTSC()
+  local average_acr, accuracy_table = run_dt(args)
+  stop_time = qc.RDTSC()
+  --Vector.print_timers()
+  print("================================================")
+  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
+  print("================================================")
+  print("Accuracy = " .. tostring(average_acr))
+end
+
 return tests
