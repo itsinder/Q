@@ -43,7 +43,7 @@ local function run_dt(args)
   end
 
   -- load the data
-  local T = Q.load_csv(data_file, dofile(meta_data_file))
+  local T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
 
   local alpha_gain = {}
   local alpha_cost = {}

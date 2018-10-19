@@ -22,6 +22,7 @@ tests.t1 = function()
   args.max_alpha = 0.7
   args.step_alpha = 0.01
   args.split_ratio = 0.5
+  args.is_hdr = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
@@ -106,6 +107,7 @@ tests.t2 = function()
   args.max_alpha = 0.7
   args.step_alpha = 0.01
   args.split_ratio = 0.5
+  args.is_hdr = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
@@ -191,6 +193,7 @@ tests.t3 = function()
   args.max_alpha = 0.7
   args.step_alpha = 0.01
   args.split_ratio = 0.5
+  args.is_hdr = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()

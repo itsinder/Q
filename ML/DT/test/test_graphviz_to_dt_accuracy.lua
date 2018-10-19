@@ -1,9 +1,5 @@
 local Q = require 'Q'
-local Vector = require 'libvec'
 local Scalar = require 'libsclr'
-local qc      = require 'Q/UTILS/lua/q_core'
-local run_dt = require 'Q/ML/DT/lua/run_dt'
-local calculate_alpha = require 'Q/ML/DT/lua/calculate_alpha'
 local graphviz_to_D = require 'Q/ML/DT/lua/graphviz_to_q_dt'['graphviz_to_D']
 local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
 local load_csv_col_seq = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
