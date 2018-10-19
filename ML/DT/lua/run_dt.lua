@@ -42,7 +42,7 @@ local function run_dt(args)
   -- load the data
   local T = nil
   if data_file then
-    T = Q.load_csv(data_file, dofile(meta_data_file))
+    T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
   end
 
   local accuracy = {}
