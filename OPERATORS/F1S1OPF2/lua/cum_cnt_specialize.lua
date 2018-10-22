@@ -3,9 +3,18 @@ local ffi     = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local cmem    = require 'libcmem'
+--[[
+The input Vector * be sorted but I am deliberately not going to enforce 
+that as a check. This is one of those "caveat emptor" kind of situations 
+i.e., "let the buyer beware" or in this case the Q user.  It makes most 
+sense to use cum_cnt when the input is sorted but I am not yet convinced 
+that it is the *ONLY* case where it would be useful.
+
+--]]
 
 return function (
   val_qtype,
+  dummy, -- to be consistent with f1s1opf2 paradigm
   optargs
   )
   local hdr = [[

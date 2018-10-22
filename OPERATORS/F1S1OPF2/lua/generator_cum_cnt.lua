@@ -17,7 +17,7 @@ for i, operator in ipairs(operators) do
     for j, cnt_qtype in ipairs(cnt_qtypes) do
       local optargs = {}; 
       optargs.cnt_qtype = cnt_qtype
-      status, subs, tmpl = pcall(sp_fn, val_qtype, optargs)
+      status, subs, tmpl = pcall(sp_fn, val_qtype, nil, optargs)
       if ( status ) then 
         assert(type(subs) == "table")
         assert(type(tmpl) == "string")
