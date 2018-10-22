@@ -40,7 +40,7 @@ local function expander_f1f2opf3(a, f1 , f2, optargs )
 
   local first_call = true
   local chunk_idx = 0
-  local myvec 
+  local myvec  -- see note expander_f1f2opf3.txt
   local f3_gen = function(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected 
     -- chunk_num and generator's chunk_idx state

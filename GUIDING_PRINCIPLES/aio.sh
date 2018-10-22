@@ -243,4 +243,4 @@ fi
 build_q
 run_q_tests
 #
-#
+echo "Successfully completed $0 in $PWD"
