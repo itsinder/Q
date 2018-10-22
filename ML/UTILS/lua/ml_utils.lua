@@ -61,18 +61,34 @@ local f1_score = function(actual_val, predicted_val, conf_matrix)
   return f1
 end
 
+local matthews_corrcoef = function(actual_val, predicted_val, conf_matrix)
+  if not conf_matrix then
+    conf_matrix = confusion_matrix(actual_val, predicted_val)
+  end
+  local numerator = ( ( conf_matrix.TP * conf_matrix.TN ) - ( conf_matrix.FP * conf_matrix.FN ) )
+  local observed_positives = conf_matrix.TP + conf_matrix.FP
+  local observed_negatives = conf_matrix.TN + conf_matrix.FN
+  local actual_positives = conf_matrix.TP + conf_matrix.FN
+  local actual_negatives = conf_matrix.TN + conf_matrix.FP
+  local denominator = ( observed_positives * actual_positives * actual_negatives * observed_negatives)
+  local mcc = ( numerator / denominator )
+  return mcc
+end
+
 local classification_report = function(actual_val, predicted_val)
   local accuracy = accuracy_score(actual_val, predicted_val)
   local conf_matrix = confusion_matrix(actual_val, predicted_val)
   local precision = precision_score(actual_val, predicted_val, conf_matrix)
   local recall = recall_score(actual_val, predicted_val, conf_matrix)
   local f1 = f1_score(actual_val, predicted_val, conf_matrix)
+  local mcc = matthews_corrcoef(actual_val, predicted_val, conf_matrix)
   local result = {}
   result["accuracy_score"] = accuracy
   result["confusion_matrix"] = conf_matrix
   result["precision_score"] = precision
   result["recall_score"] = recall
   result["f1_score"] = f1
+  result["mcc"] = mcc
   return result
 end
 
@@ -97,7 +113,6 @@ local average_score = function(in_list)
   return average
 end
 
-
 local std_deviation_score = function(in_list)
   local mean = average_score(in_list)
   local mean_squared_dst = 0
@@ -119,6 +134,7 @@ utils.precision_score = precision_score
 utils.f1_score = f1_score
 utils.classification_report = classification_report
 utils.confusion_matrix = confusion_matrix
+utils.matthews_corrcoef = matthews_corrcoef
 
 return utils
 

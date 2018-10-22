@@ -53,6 +53,7 @@ local function run_dt(args)
   local alpha_f1_score = {}
   local alpha_c_d_score = {}
   local alpha_n_nodes = {}
+  local alpha_mcc = {}
   local accuracy_std_deviation = {}
   local gain_std_deviation = {}
   local cost_std_deviation = {}
@@ -70,6 +71,7 @@ local function run_dt(args)
     local f1_score = {}
     local c_d_score = {}
     local n_nodes = {}
+    local mcc = {}
     local is_first = true
     for i = 1, iterations do
       local credit_val = 0
@@ -171,6 +173,7 @@ local function run_dt(args)
       precision[#precision + 1] = report["precision_score"]
       recall[#recall + 1] = report["recall_score"]
       f1_score[#f1_score + 1] = report["f1_score"]
+      mcc[#mcc + 1] = report["mcc"]
     end
     alpha_gain[min_alpha] = ml_utils.average_score(gain)
     gain_std_deviation[min_alpha] = ml_utils.std_deviation_score(gain)
@@ -194,6 +197,7 @@ local function run_dt(args)
     c_d_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(c_d_score)
 
     alpha_n_nodes[min_alpha] = ml_utils.average_score(n_nodes)
+    alpha_mcc[min_alpha] = ml_utils.average_score(mcc)
 
     min_alpha = min_alpha + step_alpha
   end
@@ -214,6 +218,7 @@ local function run_dt(args)
   result['c_d_score'] = alpha_c_d_score
   result['c_d_score_std_deviation'] = c_d_score_std_deviation
   result['n_nodes'] = alpha_n_nodes
+  result['mcc'] = alpha_mcc
 
   return result
 end
