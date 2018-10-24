@@ -123,7 +123,7 @@ local function run_dt(args)
         -- Calculate the credit and debit value
         n_H_prob = ( n_H / ( n_H + n_T ) ):to_num()
         n_T_prob = ( n_T / ( n_H + n_T ) ):to_num()
-        if actual_values[i] == 1 then
+        if predicted_values[i] == 1 then
           if actual_values[i] == predicted_values[i] then
             credit_val = credit_val + n_H_prob
             debit_val = debit_val + n_T_prob
