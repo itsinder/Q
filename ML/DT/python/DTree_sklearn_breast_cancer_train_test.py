@@ -17,8 +17,8 @@ q_src_dir = os.getenv('Q_SRC_ROOT')
 if not q_src_dir:
     print("'Q_SRC_ROOT' is not set")
     exit(-1)
-train_csv_file_path = "%s/ML/KNN/data/cancer/b_cancer/b_cancer_train.csv"  % q_src_dir
-test_csv_file_path = "%s/ML/KNN/data/cancer/b_cancer/b_cancer_test.csv"  % q_src_dir
+train_csv_file_path = "%s/ML/KNN/data/cancer/b_cancer/cancer_data_train.csv"  % q_src_dir
+test_csv_file_path = "%s/ML/KNN/data/cancer/b_cancer/cancer_data_test.csv"  % q_src_dir
 graphviz_gini = "graphviz_gini.txt"
 graphviz_entropy = "graphviz_entropy.txt"
 goal_col_name = "diagnosis"
@@ -37,12 +37,7 @@ test_data = utils.import_data(test_csv_file_path)
 
 
 X, Y, X_train, temp_X_train, y_train, temp_y_train = utils.split_dataset(train_data, goal_col_name, 1)
-X_train = pd.concat([X_train, temp_X_train])
-y_train = pd.concat([y_train, temp_y_train])
 X, Y, X_test, temp_X_test, y_test, temp_y_test = utils.split_dataset(test_data, goal_col_name, 1)
-X_test = pd.concat([X_test, temp_X_test])
-y_test = pd.concat([y_test, temp_y_test])
-
 
 # In[13]:
 

@@ -6,10 +6,18 @@ local accuracy_score = function(actual_val, predicted_val)
   assert(#actual_val == #predicted_val)
   local len = #actual_val
   local correct = 0
+  -- local wrong = 0
   for i = 1, len do
     if actual_val[i] == predicted_val[i] then
       correct = correct + 1
     end
+    --[[
+    if actual_val[i] ~= predicted_val[i] then
+      wrong = wrong + 1
+      print(wrong, i, actual_val[i], predicted_val[i])
+    end
+    ]]
+
   end
   return (correct/#actual_val)*100
 end

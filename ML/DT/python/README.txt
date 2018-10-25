@@ -11,7 +11,7 @@ Here, you need to specify the csv file path in script.
 
 Command to run the python code
 $ cd Q/ML/DT/python
-$ python python -Wignore <file_name>
+$ python -Wignore <file_name>
 
 Example:
 $ python -Wignore DTree_sklearn_breast_cancer.py

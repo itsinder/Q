@@ -32,6 +32,8 @@ def split_dataset(data, goal_index, split_ratio, random_state=None):
     data = data.drop([goal_index], axis=1)
     X = data
 
+    if split_ratio >= 1:
+        return X, Y, X, None, Y, None
     # Spliting the dataset into train and test
     X_train, X_test, y_train, y_test = train_test_split(
     X, Y, test_size = split_ratio, random_state=random_state)
@@ -69,14 +71,23 @@ def prediction(X_test, clf_object):
 
     # Predicton on test with giniIndex
     y_pred = clf_object.predict(X_test)
-    # print("Predicted values:")
-    # print(y_pred)
     return y_pred
 
 
 # Function to calculate accuracy
 def cal_accuracy(y_test, y_pred):
 
+    """
+    y_test = y_test.tolist()
+    y_pred = y_pred.tolist()
+    mis_match = 0
+    for i in range(len(y_test)):
+        if i == 14 or i == 93:
+            print("mismatch", i, y_test[i], y_pred[i])
+        if y_test[i] != y_pred[i]:
+            mis_match += 1
+            print(mis_match, i, y_test[i], y_pred[i])
+    """
     print("=================================================")
     print("\nConfusion Matrix:")
     print(confusion_matrix(y_test, y_pred))

@@ -37,11 +37,7 @@ test_data = utils.import_data(test_csv_file_path)
 
 
 X, Y, X_train, temp_X_train, y_train, temp_y_train = utils.split_dataset(train_data, goal_col_name, 1)
-X_train = pd.concat([X_train, temp_X_train])
-y_train = pd.concat([y_train, temp_y_train])
 X, Y, X_test, temp_X_test, y_test, temp_y_test = utils.split_dataset(test_data, goal_col_name, 1)
-X_test = pd.concat([X_test, temp_X_test])
-y_test = pd.concat([y_test, temp_y_test])
 
 
 # In[16]:
