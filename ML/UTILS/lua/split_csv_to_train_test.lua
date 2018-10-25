@@ -9,7 +9,7 @@ local function split_csv(data_file, meta_data_file, args)
   
   assert(data_file, "csv file not provided")
   assert(meta_data_file, "metadata file not provided")
-  local split_ratio = 0.7
+  local split_ratio = 0.5
   if args.split_ratio then
     assert(type(args.split_ratio) == "number")
     assert(args.split_ratio < 1 and args.split_ratio > 0)
@@ -24,7 +24,6 @@ local function split_csv(data_file, meta_data_file, args)
   end
   
   local seed = 100
-  
   -- loading the input csv datafile
   local T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
   
@@ -33,8 +32,16 @@ local function split_csv(data_file, meta_data_file, args)
   
   -- printing the train & test data into separate csv files
   local path = Q_SRC_ROOT .. "/ML/KNN/data/"
-  Q.print_csv(Train, {opfile = path .. "train_data.csv"})
-  Q.print_csv(Test, {opfile = path .. "test_data.csv"})
+  -- getting the print_csv opt_args 'print_order' field from metadata file
+  local print_order = {}
+  local M = dofile(meta_data_file)
+  for i=1,#M do
+    print_order[#print_order+1] = M[i].name
+  end
+  local dest_path, file_name = plpath.splitpath(data_file)
+  local file_n = plpath.splitext(file_name)
+  Q.print_csv(Train, {opfile = dest_path .. "/" .. file_n .. "_train.csv", print_order = print_order })
+  Q.print_csv(Test, {opfile = dest_path .. "/" .. file_n .. "_test.csv", print_order = print_order })
 end
 
 return split_csv
