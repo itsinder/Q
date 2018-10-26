@@ -65,6 +65,8 @@ X, Y, X_test, temp_X_test, y_test, temp_y_test = utils.split_dataset(test_data, 
 
 # Train using gini
 clf_gini = utils.train_using_gini(X_train, y_train)
+#pickle_path = "dt_gini.pkl"
+#utils.save(clf_gini, pickle_path)
 # print(X_train[1])
 export_graphviz(clf_gini, out_file=graphviz_gini, filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
 

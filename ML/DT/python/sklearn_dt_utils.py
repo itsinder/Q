@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 # from sklearn.cross_validation import train_test_split, cross_val_score
 from sklearn.model_selection import cross_validate, train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -8,6 +9,28 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.tree import export_graphviz
 
+
+# Serialize model
+def save(clf, pickle_path=None):
+    pickle_dump = pickle.dumps(clf)
+    if not pickle_path:
+        return pickle_dump
+    with open(pickle_path, "w") as f:
+        f.write(pickle_dump)
+
+
+# Deserialize model with pickle dump
+def restore_dump(pickle_dump):
+    return pickle.loads(pickle_dump)
+
+
+# Deserialize model with pickle file path
+def restore(pickle_path):
+    pickle_dump = None
+    with open(pickle_path, "r") as f:
+        pickle_dump = f.read()
+    clf = restore_dump(pickle_dump)
+    return clf
 
 # Function importing Dataset
 def import_data(csv_file):
@@ -76,7 +99,6 @@ def prediction(X_test, clf_object):
 
 # Function to calculate accuracy
 def cal_accuracy(y_test, y_pred):
-
     """
     y_test = y_test.tolist()
     y_pred = y_pred.tolist()
