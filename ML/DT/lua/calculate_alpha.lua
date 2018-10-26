@@ -15,7 +15,7 @@ local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
-  local data_file	= assert(args.data_file)
+  local data_file	= args.data_file
   local goal		= assert(args.goal)
   local min_alpha	= assert(args.min_alpha)
   local max_alpha	= assert(args.max_alpha)
@@ -43,7 +43,10 @@ local function run_dt(args)
   end
 
   -- load the data
-  local T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
+  local T
+  if data_file then:
+    T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
+  end
 
   local alpha_gain = {}
   local alpha_cost = {}
@@ -78,8 +81,16 @@ local function run_dt(args)
       local debit_val = 0
 
       -- break into a training set and a testing set
-      local Train, Test = split_train_test(T, split_ratio, feature_of_interesti, i*100)
-      local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
+      local Train, Test
+      if T then
+        Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
+      else
+        assert(train_csv)
+        assert(test_csv)
+        Train = Q.load_csv(train_csv, dofile(meta_data_file))
+        Test = Q.load_csv(test_csv, dofile(meta_data_file))
+      end
+
       local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
       -- Current implementation assumes 2 values of goal as 0, 1
