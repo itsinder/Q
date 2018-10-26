@@ -1,5 +1,9 @@
 local plstring = require 'pl.stringx'
 local utils = require 'Q/UTILS/lua/utils'
+local plpath = require 'pl.path'
+local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local path_to_here = Q_SRC_ROOT .. "/ML/DT/lua/"
+assert(plpath.isdir(path_to_here))
 local fns = {}
 
 -- see if the file exists
@@ -87,7 +91,7 @@ end
 
 local function print_to_file(links, labels)
   -- print q format to graphviz file
-  local f = io.open("gini_to_q_graphviz.txt", "w")
+  local f = io.open(path_to_here .."gini_to_q_graphviz.txt", "w")
   f:write("digraph Tree {\n")
   f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   f:write("edge [fontname=helvetica] ;\n")
@@ -108,7 +112,8 @@ local function gini_to_q_graphviz(file)
   local label_tbl, links_tbl = split_labels_n_links(lines_tbl)
   label_tbl = get_required_fields(label_tbl)
   print_to_file(links_tbl, label_tbl)
-  print("Outputted the q format to gini_to_q_graphviz.txt file")
+  print("Outputted the q format to " .. path_to_here .."gini_to_q_graphviz.txt" )
+  return path_to_here .."gini_to_q_graphviz.txt"
 end
 
 fns.gini_to_q_graphviz = gini_to_q_graphviz
