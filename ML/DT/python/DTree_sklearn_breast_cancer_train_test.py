@@ -62,6 +62,24 @@ X, Y, X_test, temp_X_test, y_test, temp_y_test = utils.split_dataset(test_data, 
 
 # In[8]:
 
+#calling gridsearchcv
+grid = utils.grid_search_cv(X_train, y_train, scoring_method="accuracy")
+"""
+print(grid.cv_results_)
+print("============================")
+print(grid.best_estimator_)
+print("============================")
+print(grid.best_score_)
+print("============================")
+print(grid.best_params_)
+print("============================")
+"""
+# Prediction using gini
+y_pred_gini = utils.prediction(X_test, grid.best_estimator_)
+print("Results for gini algo")
+utils.cal_accuracy(y_test, y_pred_gini)
+
+export_graphviz(grid.best_estimator_, out_file="best_fit_graphviz_b_cancer.txt", filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
 
 # Train using gini
 clf_gini = utils.train_using_gini(X_train, y_train)

@@ -20,6 +20,8 @@ local function run_dt(args)
   local min_alpha	= assert(args.min_alpha)
   local max_alpha	= assert(args.max_alpha)
   local step_alpha	= assert(args.step_alpha)
+  local train_csv   = args.train_csv
+  local test_csv    = args.test_csv
 
   local iterations = 1
   if args.iterations then

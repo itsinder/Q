@@ -8,6 +8,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.tree import export_graphviz
+from sklearn.model_selection import GridSearchCV
 
 
 # Serialize model
@@ -156,6 +157,22 @@ def cross_validate_dt_new(x, y):
         print(val)
     print("=================================================")
 
+# GridSearchCV
+def grid_search_cv(X_train, y_train, param_grid=None, clf=None, cv=10, scoring_method="accuracy"):
+    if not clf:
+        clf = DecisionTreeClassifier(random_state=100)
+    if not param_grid:
+        param_grid = { "max_depth" : [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 ],
+        "min_samples_split" : [ 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 ],
+        "min_samples_leaf" : [ 1, 2, 3, 4, 5],
+        "criterion" : ['gini','entropy'] }
+
+    # instantiate the grid
+    grid = GridSearchCV(clf, param_grid, cv=cv, scoring=scoring_method)
+
+    # fit the grid with data
+    grid.fit(X_train, y_train)
+    return grid
 
 if __name__ == "__main__":
     data = import_data(csv_file_path)
