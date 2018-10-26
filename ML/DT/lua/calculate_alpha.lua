@@ -91,6 +91,7 @@ local function run_dt(args)
         Test = Q.load_csv(test_csv, dofile(meta_data_file))
       end
 
+      local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
       local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
 
       -- Current implementation assumes 2 values of goal as 0, 1
