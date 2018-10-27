@@ -1,0 +1,23 @@
+Things to verify
+1) run the Q/Python code through a standard Python debugger?
+2) run the Q/Python code through Jupyter Notebooks
+3) execute individual lVector methods like set_name(), eval(), ...
+4) When running through debugger, 
+  set breakpoint, 
+  execute Q.save(), 
+  start CLI, 
+  restore meta data in CLI, 
+  execute Q.save() again, 
+  exit CLI, 
+  resume IDE and
+  see effect of CLI changes if any
+5) Restoring an earlier session
+  a) start IDE
+  b) do some stuff
+  c) execute Q.restore(...)
+  d) verify that you can access things in saved session
+6) Concatenate operators e.g.,
+  x = Q.add(Q.sub(Q.mul(Q.const, {})))
+6) Concatenate lVector methods
+  x = Q.const, {}):set_name("xxx"):eval()
+7) What about creating pScalar to match up with Scalar?
