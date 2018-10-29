@@ -19,18 +19,26 @@ def mk_col(in_vals, qtype):
     return PVector(result)
 
 
-def print_csv(vec):
+def print_csv(vec, opfile=None):
     """print the vector contents"""
-    assert(isinstance(vec, PVector))
+    if not (isinstance(vec, PVector) or type(vec) == list):
+        assert(False)  # Raise exception
 
     func_str = \
         """
-        function(vec)
-            return Q.print_csv({vec}, {opfile = ""})
+        function(vec, opfile)
+            return Q.print_csv(vec, {opfile = opfile})
         end
         """
+
+    # if input is list, convert it to table
+    if type(vec) == list:
+        vec = [ x.get_base_vec() for x in vec ]
+        vec = utils.to_lua_table(vec)
+    else:
+        vec = vec.get_base_vec()
     func = executor.eval(func_str)
-    result = func(vec.get_base_vec())
+    result = func(vec, opfile)
     return result
 
 
@@ -61,3 +69,52 @@ def vvadd(vec1, vec2):
     func = executor.eval(func_str)
     result = func(vec1.get_base_vec(), vec2.get_base_vec())
     return PVector(result)
+
+
+def vvadd(vec1, vec2):
+    """add two vectors"""
+    assert(isinstance(vec1, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vvadd(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
+
+def vvsub(vec1, vec2):
+    """subtract two vectors"""
+    assert(isinstance(vec1, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vvsub(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
+
+def vveq(vec1, vec2):
+    """returns comparison of vector"""
+    assert(isinstance(vec2, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vveq(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
