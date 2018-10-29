@@ -21,3 +21,38 @@ Things to verify
 6) Concatenate lVector methods
   x = Q.const, {}):set_name("xxx"):eval()
 7) What about creating pScalar to match up with Scalar?
+8) What about arguments that could have more than one type?
+  Q.print_csv(x) and Q.print_csv({x, y})
+9) What about null arguments 
+  Q.print_csv(x, nil)
+  versus 
+  Q.print_csv(x, opt_args)
+  or
+  Q.cum_cnt(c1, nil, { cnt_qtype = cnt_qtype } ):eval()
+10) Can we re-write the test runner to run from Python instead of from LuaJIT?
+
+11) Consider being influenced by numpy. For example, we are currently 
+using I1, I2, ... whereas numpy uses int8, int16, int32, int64, ...
+
+12) You have
+sys.stdout.write(Q.print_csv(vec, opfile=""))
+why does the following not work?
+Q.print_csv(vec, opfile="")
+
+13) As another example, 
+x = np.array([1, 2, 3]) -- one can provide a dtype or data type
+type(x) = numpy.ndarray
+
+in contrast with 
+x = Q.mk_col([1,2, 3], "I1")
+type(x) == pVector
+
+
+14) Can we overload operators (low priority)
+
+x = y + 2
+versus
+Q.vsadd(y, 2)
+
+
+x == (x - ( x + y ) )
