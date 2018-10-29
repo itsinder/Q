@@ -61,3 +61,52 @@ def vvadd(vec1, vec2):
     func = executor.eval(func_str)
     result = func(vec1.get_base_vec(), vec2.get_base_vec())
     return PVector(result)
+
+
+def vvadd(vec1, vec2):
+    """add two vectors"""
+    assert(isinstance(vec1, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vvadd(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
+
+def vvsub(vec1, vec2):
+    """subtract two vectors"""
+    assert(isinstance(vec1, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vvsub(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
+
+def vveq(vec1, vec2):
+    """returns comparison of vector"""
+    assert(isinstance(vec2, PVector))
+    assert(isinstance(vec2, PVector))
+
+    func_str = \
+        """
+        function(vec1, vec2)
+            return Q.vveq(vec1, vec2)
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(vec1.get_base_vec(), vec2.get_base_vec())
+    return PVector(result)
+
