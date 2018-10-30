@@ -56,3 +56,17 @@ Q.vsadd(y, 2)
 
 
 x == (x - ( x + y ) )
+
+15) Garbage collection
+>>> From the experiment that I tried, it looks like lua garbage collector is taking care of performing the cleanup activity (deleting vector files when python scope is over) for the vectors that get created from python.
+Experiment:
+- created two vectors, performed operations like add, sub etc
+- when out vector is eval'ed, files were generated in Q data dir
+- after completion of the test, those get deleted
+
+In that case, create a stress test as follows. loop of 1M iterations. In each iteration create a big vector of say 1M elements and eval it. But the vector is local to the loop and hence should get destroyed on the next iteration. Look at some of our stress*lua examples in RUNTIME/test/
+
+16) Pip install Q (Q1 2019)
+ Break down aio.sh into smaller parts, convert to Lua
+
+17) Convert to and from Pandas dataframe
