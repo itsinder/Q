@@ -1,3 +1,4 @@
+PassengerId,Survived,Pclass,Sex,Age,SibSp,Parch,Fare,Embarked
 892,3,0,34.5,0,0,7.8292,2
 893,3,1,47.0,1,0,7.0,0
 894,2,0,62.0,0,0,9.6875,2

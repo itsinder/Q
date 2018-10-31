@@ -1,5 +1,6 @@
 local plstring = require 'pl.stringx'
 local utils = require 'Q/UTILS/lua/utils'
+local Scalar = require 'libsclr'
 local fns = {}
 
 -- see if the file exists
@@ -75,16 +76,16 @@ local function modify(D, a, b, features)
   
   if D.label == nil then
     D.label = a
-    D[p_n_T_key] = tonumber(p_n_T_value)
-    D[p_n_H_key] = tonumber(p_n_H_value)
+    D[p_n_T_key] = Scalar.new(p_n_T_value, "I4")
+    D[p_n_H_key] = Scalar.new(p_n_H_value, "I4")
     D.feature =  p_feature_key
     D.threshold = tonumber(p_feature_value)
     D[p_benefit_key] = tonumber(p_benefit_value)
     
     D.left = {}
     D.left.label = b
-    D.left[c_n_T_key] = tonumber(c_n_T_value)
-    D.left[c_n_H_key] = tonumber(c_n_H_value)
+    D.left[c_n_T_key] = Scalar.new(c_n_T_value, "I4")
+    D.left[c_n_H_key] = Scalar.new(c_n_H_value, "I4")
     if flag == true then
       D.left.feature = c_feature_key
       D.left.threshold = c_feature_value
@@ -94,8 +95,8 @@ local function modify(D, a, b, features)
   elseif  D.label == a and D.left == nil then
     D.left = {}
     D.left.label = b
-    D.left[c_n_T_key] = tonumber(c_n_T_value)
-    D.left[c_n_H_key] = tonumber(c_n_H_value)
+    D.left[c_n_T_key] = Scalar.new(c_n_T_value, "I4")
+    D.left[c_n_H_key] = Scalar.new(c_n_H_value, "I4")
     if flag == true then
       D.left.feature = c_feature_key
       D.left.threshold = c_feature_value
@@ -104,8 +105,8 @@ local function modify(D, a, b, features)
   elseif  D.label == a and D.right == nil then
     D.right = {}
     D.right.label = b
-    D.right[c_n_T_key] = tonumber(c_n_T_value)
-    D.right[c_n_H_key] = tonumber(c_n_H_value)
+    D.right[c_n_T_key] = Scalar.new(c_n_T_value, "I4")
+    D.right[c_n_H_key] = Scalar.new(c_n_H_value, "I4")
     if flag == true then
       D.right.feature = c_feature_key
       D.right.threshold = c_feature_value

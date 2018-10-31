@@ -9,7 +9,6 @@ local plpath = require 'pl.path'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local path_to_here = Q_SRC_ROOT .. "/ML/DT/test/"
 assert(plpath.isdir(path_to_here))
-local fns = {}
 
 -- graphviz_to_q() converts sklearn's graphviz file to Q dt structure
 
