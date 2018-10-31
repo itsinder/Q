@@ -26,13 +26,6 @@ def call_lua_op(op_name, *args):
     return PVector(result)
 
 
-def mk_col(in_vals, qtype):
-    """create a vector with specified elements"""
-    assert(type(in_vals) == list)
-    assert(type(qtype) == str)
-    return call_lua_op("mk_col", in_vals, qtype)
-
-
 def print_csv(vec, opfile=None):
     """print the vector contents"""
     if not (isinstance(vec, PVector) or type(vec) == list):
@@ -54,31 +47,3 @@ def print_csv(vec, opfile=None):
     func = executor.eval(func_str)
     result = func(vec, opfile)
     return result
-
-
-def const(val, qtype, length):
-    """create a constant vector"""
-    input = { 'val' : val, 'qtype' : qtype, 'len' : length }
-    return call_lua_op("const", input)
-
-
-def vvadd(vec1, vec2):
-    """add two vectors"""
-    assert(isinstance(vec1, PVector))
-    assert(isinstance(vec2, PVector))
-    return call_lua_op("vvadd", vec1.get_base_vec(), vec2.get_base_vec())
-
-
-def vvsub(vec1, vec2):
-    """subtract two vectors"""
-    assert(isinstance(vec1, PVector))
-    assert(isinstance(vec2, PVector))
-    return call_lua_op("vvsub", vec1.get_base_vec(), vec2.get_base_vec())
-
-
-def vveq(vec1, vec2):
-    """returns comparison of vector"""
-    assert(isinstance(vec2, PVector))
-    assert(isinstance(vec2, PVector))
-    return call_lua_op("vveq", vec1.get_base_vec(), vec2.get_base_vec())
-

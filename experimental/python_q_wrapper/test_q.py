@@ -69,9 +69,8 @@ def test_const():
     It creates a constant vector with specified value and length"""
 
     length = 6
-    val = 5
-    qtype = Q.I1
-    vec = Q.const(val=val, length=length, qtype=qtype)
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : length }
+    vec = Q.const(input)
     assert(isinstance(vec, PVector))
     assert(vec.num_elements() == 0)
     vec.eval()
@@ -86,7 +85,8 @@ def test_vec_add():
 
     in_vals = [1, 2, 3, 4, 5]
     vec1 = Q.mk_col(in_vals, Q.I1)
-    vec2 = Q.const(val=5, length=len(in_vals), qtype=Q.I1)
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(input)
     out = Q.vvadd(vec1, vec2)
     assert(out.num_elements() == 0)
     out.eval()
@@ -98,7 +98,8 @@ def test_vec_add():
 def test_vec_concat():
     """Test the vector methods concatenation"""
 
-    vec1 = Q.const(val=5, length=5, qtype=Q.I1).set_name("new_vec").eval()
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(input).set_name("new_vec").eval()
     assert(isinstance(vec1, PVector))
     Q.print_csv(vec1)
     assert(vec1.get_name() == "new_vec")
@@ -108,8 +109,10 @@ def test_vec_concat():
 def test_op_concat():
     """Test the Q operator concatenation"""
 
-    vec1 = Q.const(val=5, length=5, qtype=Q.I1)
-    vec2 = Q.const(val=25, length=5, qtype=Q.I1)
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(input)
+    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(input)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2), vec2), vec1).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)
@@ -118,8 +121,11 @@ def test_op_concat():
 
 def test_op_concat_memo():
     """Test the Q operator concatenation with setting memo to false"""
-    vec1 = Q.const(val=5, length=5, qtype=Q.I1).memo(False)
-    vec2 = Q.const(val=25, length=5, qtype=Q.I1).memo(False)
+
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(input).memo(False)
+    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(input).memo(False)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2).memo(False), vec2).memo(False), vec1).memo(False).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)
@@ -129,8 +135,10 @@ def test_op_concat_memo():
 def test_vec_persist():
     """Test the vec persist method"""
 
-    vec1 = Q.const(val=5, length=5, qtype=Q.I1)
-    vec2 = Q.const(val=25, length=5, qtype=Q.I1)
+    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(input)
+    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(input)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2), vec2), vec1).persist(True).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)

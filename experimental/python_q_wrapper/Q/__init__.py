@@ -22,6 +22,10 @@ def foo(opname):
 
 globals()['vvadd'] = foo('vvadd')
 """
+from wrapper import op_wrapper
+from wrapper import q_operators
+for op_name in q_operators:
+    globals()[op_name] = op_wrapper(op_name)
 
 
 from q_helper import *
