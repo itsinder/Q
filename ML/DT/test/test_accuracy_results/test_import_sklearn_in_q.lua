@@ -15,6 +15,7 @@ tests.t1 = function()
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
+  local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
 
   local features_list = { "id", "diagnosis", "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean","compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst","texture_worst", "perimeter_worst", "area_worst", "smoothness_worst","compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst", "fractal_dimension_worst" }
   local goal_feature = "diagnosis"
@@ -61,13 +62,17 @@ tests.t1 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(args.tree)
+
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
       x[k] = test[k]:get_one(i-1)
     end
-    local n_H, n_T = predict(D, x)
+    local n_H, n_T = predict(args.tree, x)
     --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
@@ -155,6 +160,7 @@ tests.t2 = function()
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
+  local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
 
   local features_list = { "PassengerId","Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked" }
   local goal_feature = "Survived"
@@ -201,13 +207,17 @@ tests.t2 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(args.tree)
+  
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
       x[k] = test[k]:get_one(i-1)
     end
-    local n_H, n_T = predict(D, x)
+    local n_H, n_T = predict(args.tree, x)
     --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
@@ -295,6 +305,7 @@ tests.t3 = function()
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
+  local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
 
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
@@ -341,13 +352,17 @@ tests.t3 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(args.tree)
+  
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
       x[k] = test[k]:get_one(i-1)
     end
-    local n_H, n_T = predict(D, x)
+    local n_H, n_T = predict(args.tree, x)
     --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
