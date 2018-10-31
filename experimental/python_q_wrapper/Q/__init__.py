@@ -1,5 +1,5 @@
-from lupa import LuaRuntime
-lua = LuaRuntime(unpack_returned_tuples=True)
+import lupa
+lua = lupa.LuaRuntime(unpack_returned_tuples=True)
 lua.execute("Q = require 'Q'")
 
 
@@ -11,7 +11,17 @@ from utils import Utils
 utils = Utils()
 
 
-from q_helper import *
-
-
 from constants import *
+
+
+"""
+from p_vector import PVector
+
+def foo(opname):
+    return lambda *x: PVector(call_lua_op(opname, *x))
+
+globals()['vvadd'] = foo('vvadd')
+"""
+
+
+from q_helper import *

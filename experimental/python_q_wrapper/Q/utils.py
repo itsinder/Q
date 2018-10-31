@@ -1,5 +1,5 @@
 from Q import executor
-
+from Q import lupa
 
 class Utils:
     def __init__(self):
@@ -10,8 +10,8 @@ class Utils:
         table_str = "{%s}" % table_str
         return table_str
 
-    def to_lua_table(self, in_list):
-        func_str = \
+    def to_lua_table(self, input):
+        func_list_to_table = \
             """
             function(items)
                 local t = {}
@@ -21,5 +21,23 @@ class Utils:
                 return t
             end
             """
-        func = executor.eval(func_str)
-        return func(in_list)
+
+        func_dict_to_table = \
+            """
+            function(d)
+                local t = {}
+                for key, value in python.iterex(d.items()) do
+                    t[ key ] = value
+                end
+                return t
+            end
+            """
+
+        if type(input) == list:
+            func = executor.eval(func_list_to_table)
+        elif type(input) == dict:
+            func = executor.eval(func_dict_to_table)
+            input = lupa.as_attrgetter(input)
+        else:
+            print("Error")
+        return func(input)

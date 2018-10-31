@@ -138,7 +138,7 @@ def test_vec_persist():
 
 
 if __name__ == "__main__":
-    # test_mk_col()
+    test_mk_col()
     print("==========================")
     test_print_csv()
     print("==========================")

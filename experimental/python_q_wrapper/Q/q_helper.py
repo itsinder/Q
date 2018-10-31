@@ -2,21 +2,35 @@ from Q import utils, executor
 from p_vector import PVector
 
 
+def call_lua_op(op_name, *args):
+    args_list = []
+    for val in args:
+        if type(val) == list:
+            val = utils.to_lua_table(val)
+        if type(val) == dict:
+            val = utils.to_lua_table(val)
+        if isinstance(val, PVector):
+            val = val.get_base_vec()
+        args_list.append(val)
+
+    args_list = utils.to_lua_table(args_list)
+
+    func_str = \
+        """
+        function(op_name, args)
+            return Q[op_name](unpack(args))
+        end
+        """
+    func = executor.eval(func_str)
+    result = func(op_name, args_list)
+    return PVector(result)
+
+
 def mk_col(in_vals, qtype):
     """create a vector with specified elements"""
     assert(type(in_vals) == list)
     assert(type(qtype) == str)
-
-    func_str = \
-        """
-        function(in_table, qtype)
-            return Q.mk_col(in_table, qtype)
-        end
-        """
-    func = executor.eval(func_str)
-    in_table = utils.to_lua_table(in_vals)
-    result = func(in_table, qtype)
-    return PVector(result)
+    return call_lua_op("mk_col", in_vals, qtype)
 
 
 def print_csv(vec, opfile=None):
@@ -44,77 +58,27 @@ def print_csv(vec, opfile=None):
 
 def const(val, qtype, length):
     """create a constant vector"""
-    func_str = \
-        """
-        function(val, qtype, len)
-            return Q.const( { val = val, qtype = qtype, len = len })
-        end
-        """
-    func = executor.eval(func_str)
-    result = func(val, qtype, length)
-    return PVector(result)
+    input = { 'val' : val, 'qtype' : qtype, 'len' : length }
+    return call_lua_op("const", input)
 
 
 def vvadd(vec1, vec2):
     """add two vectors"""
     assert(isinstance(vec1, PVector))
     assert(isinstance(vec2, PVector))
-
-    func_str = \
-        """
-        function(vec1, vec2)
-            return Q.vvadd(vec1, vec2)
-        end
-        """
-    func = executor.eval(func_str)
-    result = func(vec1.get_base_vec(), vec2.get_base_vec())
-    return PVector(result)
-
-
-def vvadd(vec1, vec2):
-    """add two vectors"""
-    assert(isinstance(vec1, PVector))
-    assert(isinstance(vec2, PVector))
-
-    func_str = \
-        """
-        function(vec1, vec2)
-            return Q.vvadd(vec1, vec2)
-        end
-        """
-    func = executor.eval(func_str)
-    result = func(vec1.get_base_vec(), vec2.get_base_vec())
-    return PVector(result)
+    return call_lua_op("vvadd", vec1.get_base_vec(), vec2.get_base_vec())
 
 
 def vvsub(vec1, vec2):
     """subtract two vectors"""
     assert(isinstance(vec1, PVector))
     assert(isinstance(vec2, PVector))
-
-    func_str = \
-        """
-        function(vec1, vec2)
-            return Q.vvsub(vec1, vec2)
-        end
-        """
-    func = executor.eval(func_str)
-    result = func(vec1.get_base_vec(), vec2.get_base_vec())
-    return PVector(result)
+    return call_lua_op("vvsub", vec1.get_base_vec(), vec2.get_base_vec())
 
 
 def vveq(vec1, vec2):
     """returns comparison of vector"""
     assert(isinstance(vec2, PVector))
     assert(isinstance(vec2, PVector))
-
-    func_str = \
-        """
-        function(vec1, vec2)
-            return Q.vveq(vec1, vec2)
-        end
-        """
-    func = executor.eval(func_str)
-    result = func(vec1.get_base_vec(), vec2.get_base_vec())
-    return PVector(result)
+    return call_lua_op("vveq", vec1.get_base_vec(), vec2.get_base_vec())
 
