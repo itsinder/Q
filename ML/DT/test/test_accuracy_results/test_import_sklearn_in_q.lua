@@ -9,7 +9,7 @@ local tests = {}
 tests.t1 = function()
   local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
-  local predict = require 'Q/ML/DT/lua/dt'['predict']
+  local predict = require 'Q/ML/DT/lua/evaluate_dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
   local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
@@ -21,7 +21,7 @@ tests.t1 = function()
   local goal_feature = "diagnosis"
   local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list, goal_feature)
   -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/t1_imported_graphviz_dt.txt", "w")
+  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_dt.txt", "w")
   fp:write("digraph Tree {\n")
   fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   fp:write("edge [fontname=helvetica] ;\n")
@@ -70,10 +70,11 @@ tests.t1 = function()
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
     local n_H, n_T = predict(args.tree, x)
-    --print(type(n_H), type(n_T))
+    n_H = n_H
+    n_T = n_T
     local decision
     if n_H > n_T then
       decision = 1 
@@ -84,8 +85,9 @@ tests.t1 = function()
     actual_values[i] = g_test:get_one(i-1):to_num()
     --print(( n_H / ( n_H + n_T ) ))
     -- Calculate the credit and debit value
-    n_H_prob = ( n_H / ( n_H + n_T ) ):to_num()
-    n_T_prob = ( n_T / ( n_H + n_T ) ):to_num()
+    n_H_prob = ( n_H / ( n_H + n_T ) )
+    n_T_prob = ( n_T / ( n_H + n_T ) )
+    --print(n_H_prob, n_T_prob)
     if predicted_values[i] == 1 then
       if actual_values[i] == predicted_values[i] then
         credit_val = credit_val + n_H_prob
@@ -154,7 +156,7 @@ tests.t1 = function()
 tests.t2 = function()
   local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
-  local predict = require 'Q/ML/DT/lua/dt'['predict']
+  local predict = require 'Q/ML/DT/lua/evaluate_dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
   local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
@@ -166,7 +168,7 @@ tests.t2 = function()
   local goal_feature = "Survived"
   local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_titanic_accuracy.txt", features_list, goal_feature)
   -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/t2_imported_graphviz_dt.txt", "w")
+  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_graphviz_dt.txt", "w")
   fp:write("digraph Tree {\n")
   fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   fp:write("edge [fontname=helvetica] ;\n")
@@ -215,9 +217,11 @@ tests.t2 = function()
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
     local n_H, n_T = predict(args.tree, x)
+    n_H = n_H
+    n_T = n_T
     --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
@@ -228,8 +232,8 @@ tests.t2 = function()
     predicted_values[i] = decision
     actual_values[i] = g_test:get_one(i-1):to_num()
     -- Calculate the credit and debit value
-    n_H_prob = ( n_H / ( n_H + n_T ) ):to_num()
-    n_T_prob = ( n_T / ( n_H + n_T ) ):to_num()
+    n_H_prob = ( n_H / ( n_H + n_T ) )
+    n_T_prob = ( n_T / ( n_H + n_T ) )
     if predicted_values[i] == 1 then
       if actual_values[i] == predicted_values[i] then
         credit_val = credit_val + n_H_prob
@@ -299,7 +303,7 @@ tests.t2 = function()
 tests.t3 = function()
   local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
-  local predict = require 'Q/ML/DT/lua/dt'['predict']
+  local predict = require 'Q/ML/DT/lua/evaluate_dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
   local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
@@ -311,7 +315,7 @@ tests.t3 = function()
   local goal_feature = "class"
   local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_accuracy.txt", features_list, goal_feature)
   -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/t3_imported_graphviz_dt.txt", "w")
+  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t3_imported_graphviz_dt.txt", "w")
   fp:write("digraph Tree {\n")
   fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   fp:write("edge [fontname=helvetica] ;\n")
@@ -360,9 +364,11 @@ tests.t3 = function()
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
     local n_H, n_T = predict(args.tree, x)
+    n_H = n_H
+    n_T = n_T
     --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
@@ -374,8 +380,8 @@ tests.t3 = function()
     actual_values[i] = g_test:get_one(i-1):to_num()
     --print(( n_H / ( n_H + n_T ) ))
     -- Calculate the credit and debit value
-    n_H_prob = ( n_H / ( n_H + n_T ) ):to_num()
-    n_T_prob = ( n_T / ( n_H + n_T ) ):to_num()
+    n_H_prob = ( n_H / ( n_H + n_T ) )
+    n_T_prob = ( n_T / ( n_H + n_T ) )
     if predicted_values[i] == 1 then
       if actual_values[i] == predicted_values[i] then
         credit_val = credit_val + n_H_prob

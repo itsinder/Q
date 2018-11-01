@@ -65,15 +65,15 @@ local function make_dt(
 
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
-  n_T = cnts:get_one(0)
+  n_T = cnts:get_one(0):to_num()
   if ng == 1 then
-    n_H = Scalar.new(0, "I4")
+    n_H = 0
   else
-    n_H = cnts:get_one(1)
+    n_H = cnts:get_one(1):to_num()
   end
   D.n_T = n_T
   D.n_H = n_H
-  if n_T:to_num() == 0 or n_H:to_num() == 0 then
+  if n_T == 0 or n_H == 0 then
     return D
   end
   local best_bf, best_sf, best_k

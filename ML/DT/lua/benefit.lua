@@ -16,10 +16,10 @@ local function calc_benefit(
   n_H
   )
   -- START: Check parameters
-  assert(type(n_T) == "Scalar")
-  assert(type(n_H) == "Scalar")
-  assert(n_T:to_num() >= 0)
-  assert(n_H:to_num() >= 0)
+  --assert(type(n_T) == "Scalar")
+  --assert(type(n_H) == "Scalar")
+  assert(n_T >= 0)
+  assert(n_H >= 0)
   assert(type(g) == "lVector")
   assert(type(f) == "lVector")
   -- STOP: Check parameters
@@ -46,7 +46,7 @@ local function calc_benefit(
   C[0] = 0
   C[1] = 0
 
-  local n = (n_T + n_H):to_num()
+  local n = (n_T + n_H)
   local i = 0
 
   while i < n do
@@ -63,7 +63,7 @@ local function calc_benefit(
       C[gi_val] = C[gi_val] + 1
       i = i + 1
     end
-    local f_val_benefit = wt_benefit(C[0], C[1], (n_T:to_num() - C[0]), (n_H:to_num() - C[1]))
+    local f_val_benefit = wt_benefit(C[0], C[1], (n_T - C[0]), (n_H - C[1]))
     if f_val_benefit > benefit then
       benefit = f_val_benefit
       split_point = f_val

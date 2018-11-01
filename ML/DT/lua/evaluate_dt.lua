@@ -18,7 +18,7 @@ local function calc_gain_and_cost(
     calc_gain_and_cost(D.left, l_gain, l_cost, l_weight, n_T, n_H)
     calc_gain_and_cost(D.right, l_gain, l_cost, l_weight, n_T, n_H)
   else
-    local w = D.n_H1:to_num() + D.n_T1:to_num() -- weight at leaf node
+    local w = D.n_H1 + D.n_T1 -- weight at leaf node
     if w == 0 then
       -- TODO: maintain the count here, how many times this situation is occured for debugging
       return
@@ -37,17 +37,17 @@ local function calc_gain_and_cost(
 
     -- Here, n_H0 and n_T0 are represented by D.n_H and D.n_T respectively
 
-    local o_H_c = ( ( D.n_T:to_num() + w_T  ) / ( D.n_H:to_num() + w_H ) ) -- odds of betting head (used in cost calcuation)
-    local o_T_c = ( ( D.n_H:to_num() + w_H  ) / ( D.n_T:to_num() + w_T ) ) -- odds of betting tail (used in cost calcuation)
+    local o_H_c = ( ( D.n_T + w_T  ) / ( D.n_H + w_H ) ) -- odds of betting head (used in cost calcuation)
+    local o_T_c = ( ( D.n_H + w_H  ) / ( D.n_T + w_T ) ) -- odds of betting tail (used in cost calcuation)
 
     local o_H_g = ( n_T / n_H ) -- odds of betting head (used in gain calcuation)
     local o_T_g = ( n_H / n_T ) -- odds of betting tail (used in gain calcuation)
 
-    local w_H0 = ( D.n_H / ( D.n_H + D.n_T ) ):to_num() -- weight of positives (heads) from training samples at visited leaf node
-    local w_T0 = ( D.n_T / ( D.n_H + D.n_T ) ):to_num() -- weight of negatives (tails) from training samples at visited leaf node
+    local w_H0 = ( D.n_H / ( D.n_H + D.n_T ) ) -- weight of positives (heads) from training samples at visited leaf node
+    local w_T0 = ( D.n_T / ( D.n_H + D.n_T ) ) -- weight of negatives (tails) from training samples at visited leaf node
 
-    local w_H1 = ( D.n_H1 / ( D.n_H1 + D.n_T1 ) ):to_num() -- weight of positives (heads) from testing samples at visited leaf node
-    local w_T1 = ( D.n_T1 / ( D.n_H1 + D.n_T1 ) ):to_num() -- weight of negatives (tails) from testing samples at visited leaf node
+    local w_H1 = ( D.n_H1 / ( D.n_H1 + D.n_T1 ) ) -- weight of positives (heads) from testing samples at visited leaf node
+    local w_T1 = ( D.n_T1 / ( D.n_H1 + D.n_T1 ) ) -- weight of negatives (tails) from testing samples at visited leaf node
 
     local g_H = ( w_H0 * o_H_g ) + ( w_T0 * (-1) ) -- gain with betting head
     local g_T = ( w_T0 * o_T_g ) + ( w_H0 * (-1) ) -- gain with betting tail
@@ -115,8 +115,8 @@ local function preprocess_dt(
     preprocess_dt(D.left)
     preprocess_dt(D.right)
   else
-    D.n_H1 = szero
-    D.n_T1 = szero
+    D.n_H1 = 0
+    D.n_T1 = 0
   end
 end
 
@@ -132,14 +132,14 @@ local function predict(
   while true do
     if D.left == nil and D.right == nil then
       if g_val == 0 then
-        D.n_T1 = D.n_T1 + sone
+        D.n_T1 = D.n_T1 + 1
       else
-        D.n_H1 = D.n_H1 + sone
+        D.n_H1 = D.n_H1 + 1
       end
       return D.n_H, D.n_T
     else
       local val = x[D.feature]
-      if val:to_num() > D.threshold then
+      if val > D.threshold then
         --print("Right Subtree")
         D = D.right
       else
