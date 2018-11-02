@@ -145,7 +145,7 @@ tests.t1 = function()
   result['n_nodes'] = ml_utils.average_score(n_nodes)
   result['mcc'] = ml_utils.average_score(mcc)
 
-  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/b_cancer_results.csv"
+  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/b_cancer_accuracy_results.csv"
   local plpretty = require 'pl.pretty'
   plpretty.dump(result)
   write_to_csv(result, csv_path)
@@ -291,7 +291,7 @@ tests.t2 = function()
   result['n_nodes'] = ml_utils.average_score(n_nodes)
   result['mcc'] = ml_utils.average_score(mcc)
 
-  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/titanic_results_accuracy.csv"
+  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/titanic_accuracy_results.csv"
   local plpretty = require 'pl.pretty'
   plpretty.dump(result)
   write_to_csv(result, csv_path)
@@ -439,7 +439,7 @@ tests.t3 = function()
   result['n_nodes'] = ml_utils.average_score(n_nodes)
   result['mcc'] = ml_utils.average_score(mcc)
 
-  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/ramesh_f1_results.csv"
+  local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/ramesh_accuracy_results.csv"
   local plpretty = require 'pl.pretty'
   plpretty.dump(result)
   write_to_csv(result, csv_path)
