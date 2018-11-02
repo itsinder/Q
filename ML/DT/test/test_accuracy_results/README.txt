@@ -7,9 +7,9 @@ Following are the three scoring method covered:
 3. f1
 
 Note:
-To enter/edit scoring method in files:
+To enter scoring method in files:
 1. Edit the "scoring method" and the "output graphviz file names"(so that results do not get overridden)in DTree_sklearn_(breast_cancer_train_test|titanic_train_test|ramesh_dataset_train_test).py files.
-2. Edit the "Graphviz file" name as changed in DTree_sklearn_(breast_cancer_train_test|titanic_train_test|ramesh_dataset_train_test).py files
+2. Replace the "Graphviz file name" as changed in above .py files in test_import_sklearn_in_q.lua
 
 Example:
 Steps to run test_import_sklearn_in_q for test-case t1(breast_cancer dataset):
