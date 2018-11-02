@@ -77,3 +77,12 @@ In that case, create a stress test as follows. loop of 1M iterations. In each it
 happens if we just do assert(nil) 
 
 20) where does error message go?
+
+21) what happens with multiple returns from Lua
+
+22) do we handle returns of tables of Vectors 
+Please make a list of all the things that we can return and test for each
+
+23) What about returning Reducers
+
+24) Think about a stub file to enable auto-suggestions of name and signature
