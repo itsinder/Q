@@ -22,3 +22,5 @@ float64 = "F8"
 # operator names
 mk_col = "mk_col"
 const = "const"
+vvadd = "vvadd"
+seq = "seq"
