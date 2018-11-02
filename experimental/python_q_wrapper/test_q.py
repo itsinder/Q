@@ -3,7 +3,6 @@ import sys
 import os
 from Q.p_vector import PVector
 
-
 def test_mk_col():
     """Test the Q.mk_col() functionality
     Input is list, output is PVector"""
@@ -33,7 +32,7 @@ def test_print_csv_str():
 
     in_vals = [1, 2, 3, 4]
     vec = Q.mk_col(in_vals, Q.I1)
-    result = Q.print_csv(vec, opfile="")
+    result = Q.print_csv(vec, {'opfile' : ""})
     sys.stdout.write(result)
     print("Successfully executed Q.print_csv test")
 
@@ -56,7 +55,7 @@ def test_print_csv_to_file():
     file_name = "result.txt"
     vec1 = Q.mk_col(in_vals, Q.I1)
     vec2 = Q.mk_col(in_vals, Q.I1)
-    Q.print_csv([vec1, vec2], opfile=file_name)
+    Q.print_csv([vec1, vec2], {'opfile':file_name})
     assert(os.path.exists(file_name))
     os.system("cat %s" % file_name)
     os.remove(file_name)
@@ -69,8 +68,8 @@ def test_const():
     It creates a constant vector with specified value and length"""
 
     length = 6
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : length }
-    vec = Q.const(input)
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : length }
+    vec = Q.const(in_val)
     assert(isinstance(vec, PVector))
     assert(vec.num_elements() == 0)
     vec.eval()
@@ -85,8 +84,8 @@ def test_vec_add():
 
     in_vals = [1, 2, 3, 4, 5]
     vec1 = Q.mk_col(in_vals, Q.I1)
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
-    vec2 = Q.const(input)
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(in_val)
     out = Q.vvadd(vec1, vec2)
     assert(out.num_elements() == 0)
     out.eval()
@@ -98,8 +97,8 @@ def test_vec_add():
 def test_vec_concat():
     """Test the vector methods concatenation"""
 
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
-    vec1 = Q.const(input).set_name("new_vec").eval()
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(in_val).set_name("new_vec").eval()
     assert(isinstance(vec1, PVector))
     Q.print_csv(vec1)
     assert(vec1.get_name() == "new_vec")
@@ -109,10 +108,10 @@ def test_vec_concat():
 def test_op_concat():
     """Test the Q operator concatenation"""
 
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
-    vec1 = Q.const(input)
-    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
-    vec2 = Q.const(input)
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(in_val)
+    in_val = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(in_val)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2), vec2), vec1).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)
@@ -122,10 +121,10 @@ def test_op_concat():
 def test_op_concat_memo():
     """Test the Q operator concatenation with setting memo to false"""
 
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
-    vec1 = Q.const(input).memo(False)
-    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
-    vec2 = Q.const(input).memo(False)
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(in_val).memo(False)
+    in_val = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(in_val).memo(False)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2).memo(False), vec2).memo(False), vec1).memo(False).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)
@@ -135,10 +134,10 @@ def test_op_concat_memo():
 def test_vec_persist():
     """Test the vec persist method"""
 
-    input = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
-    vec1 = Q.const(input)
-    input = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
-    vec2 = Q.const(input)
+    in_val = { 'val' : 5, 'qtype' : Q.I1, 'len' : 5 }
+    vec1 = Q.const(in_val)
+    in_val = { 'val' : 25, 'qtype' : Q.I1, 'len' : 5 }
+    vec2 = Q.const(in_val)
     result = Q.vveq(Q.vvsub(Q.vvadd(vec1, vec2), vec2), vec1).persist(True).eval()
     assert(isinstance(result, PVector))
     Q.print_csv(result)

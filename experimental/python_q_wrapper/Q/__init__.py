@@ -14,16 +14,8 @@ utils = Utils()
 from constants import *
 
 
-"""
-from p_vector import PVector
-
-def foo(opname):
-    return lambda *x: PVector(call_lua_op(opname, *x))
-
-globals()['vvadd'] = foo('vvadd')
-"""
-from wrapper import op_wrapper
-from wrapper import q_operators
+from q_initializer import op_wrapper
+from q_initializer import q_operators
 for op_name in q_operators:
     globals()[op_name] = op_wrapper(op_name)
 

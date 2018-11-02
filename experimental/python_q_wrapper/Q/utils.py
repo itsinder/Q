@@ -1,6 +1,7 @@
 from Q import executor
 from Q import lupa
 
+
 class Utils:
     def __init__(self):
         pass
@@ -10,7 +11,7 @@ class Utils:
         table_str = "{%s}" % table_str
         return table_str
 
-    def to_lua_table(self, input):
+    def to_lua_table(self, in_val):
         func_list_to_table = \
             """
             function(items)
@@ -33,11 +34,12 @@ class Utils:
             end
             """
 
-        if type(input) == list:
+        func = None
+        if type(in_val) == list:
             func = executor.eval(func_list_to_table)
-        elif type(input) == dict:
+        elif type(in_val) == dict:
             func = executor.eval(func_dict_to_table)
-            input = lupa.as_attrgetter(input)
+            in_val = lupa.as_attrgetter(in_val)
         else:
             print("Error")
-        return func(input)
+        return func(in_val)
