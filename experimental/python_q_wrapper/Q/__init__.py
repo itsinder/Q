@@ -14,8 +14,8 @@ utils = Utils()
 from constants import *
 
 
-from q_initializer import op_wrapper
-from q_initializer import q_operators
+from q_op_loader import op_wrapper
+from q_op_loader import q_operators
 for op_name in q_operators:
     globals()[op_name] = op_wrapper(op_name)
 
