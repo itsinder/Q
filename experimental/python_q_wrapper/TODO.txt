@@ -70,3 +70,10 @@ In that case, create a stress test as follows. loop of 1M iterations. In each it
  Break down aio.sh into smaller parts, convert to Lua
 
 17) Convert to and from Pandas dataframe
+
+18) To extend pVector to handle nn vector as well
+
+19) consider whether we should use pcall from python to lua and also what
+happens if we just do assert(nil) 
+
+20) where does error message go?
