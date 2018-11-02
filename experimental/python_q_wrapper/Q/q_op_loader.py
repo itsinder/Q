@@ -2,12 +2,6 @@ from Q import executor
 from q_helper import call_lua_op
 
 
-non_vec_operators = [
-    "print_csv",
-    "load_csv"
-]
-
-
 q_op_str = \
     """
     local Q = require 'Q'

@@ -1,7 +1,12 @@
 from Q import utils, executor
 from p_vector import PVector
-from q_op_loader import non_vec_operators
 import constants as q_consts
+
+
+non_vec_operators = [
+    "print_csv",
+    "load_csv"
+]
 
 
 def __update_args(val):
@@ -48,15 +53,15 @@ def array(in_vals, dtype=None):
 
     assert((type(in_vals) == list) or (type(in_vals) == tuple))
     if not dtype:
-        val_type = in_vals[0]
+        val_type = type(in_vals[0])
         if val_type == int:
             dtype = q_consts.int64
         elif val_type == float:
             dtype = q_consts.float64
         else:
-            raise("input element type %s is not supported" % val_type)
+            raise Exception("input element type %s is not supported" % val_type)
     if dtype not in q_consts.supported_dtypes:
-        raise("dtype %s is not supported" % dtype)
+        raise Exception("dtype %s is not supported" % dtype)
 
     # convert in_vals to lua table
     in_vals = utils.to_lua_table(in_vals)

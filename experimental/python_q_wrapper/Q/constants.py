@@ -1,4 +1,4 @@
-supported_dtypes = ["I1", "I2", "I3", "I4", "F4", "F8"]
+supported_dtypes = ["I1", "I2", "I4", "I8", "F4", "F8"]
 
 
 # Q data types
