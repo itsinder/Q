@@ -110,10 +110,12 @@ local qc_mt = {
     end
   end,
   __index = function(self, key)
+    -- dbg()
     if key == "q_add" then return q_add end
     local func = function_lookup[key]
+    -- dbg()
     if func ~= nil then
-      return wrap(func[key], key) -- two layers of lookup as we are caching the whole c lib
+      return wrap(func, key) -- two layers of lookup as we are caching the whole c lib
     else
       local status, fun = pcall(get_qc_val, key)
       if status == true then
