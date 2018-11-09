@@ -149,8 +149,8 @@ end
 
 -- function to get vector from table of values
 fns.table_to_vector = function(tbl, qtype)
-  assert(type(tbl) == "table", "must of type lVector")
-  assert(#tbl < 1000000, "max limit is upto 1 million")
+  assert(type(tbl) == "table", "must of type table")
+  assert(#tbl < 1024, "max limit is upto 1024")
   -- In case of qtype 'B1' ?
   assert(type(qtype) == "string" and base_qtype(qtype))
   
@@ -160,7 +160,7 @@ end
 
 -- function to get table of vector values
 fns.vector_to_table = function(vector)
-  assert(type(vector) == "lVector", "must be of lVector type")
+  assert(type(vector) == "lVector", "must be of lVector")
   assert(vector:num_elements() < 1000000, "max limit is upto 1 million")
   local tbl = {} 
   

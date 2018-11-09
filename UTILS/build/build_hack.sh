@@ -29,6 +29,7 @@ prepare_obj_dir(){
     echo "Creating object files for all C files from $tmp_src_dir"
     cd $tmp_obj_dir
     gcc -c $QC_FLAGS $tmp_src_dir/*.c -I $tmp_include_dir
+    echo "gcc -c $QC_FLAGS $tmp_src_dir/*.c -I $tmp_include_dir"
     cd ..
   fi
 }
@@ -66,11 +67,13 @@ cp $file_name $tmp_src_dir
 # Create object file using input file
 echo "Creating object file for input"
 cd $tmp_obj_dir
+echo "gcc -c $QC_FLAGS $tmp_src_dir/$base_file_name -I $tmp_include_dir"
 gcc -c $QC_FLAGS $tmp_src_dir/$base_file_name -I $tmp_include_dir
 cd ..
 
 # Create libq_core.so
 echo "Creating libq_core.so"
+echo "gcc $tmp_obj_dir/*.o $Q_LINK_FLAGS -o $Q_ROOT/lib/libq_core.so"
 gcc $tmp_obj_dir/*.o $Q_LINK_FLAGS -o $Q_ROOT/lib/libq_core.so
 
 exit 0

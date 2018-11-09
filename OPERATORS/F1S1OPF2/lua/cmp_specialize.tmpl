@@ -8,8 +8,10 @@ return function (
     local qconsts = require 'Q/UTILS/lua/q_consts'
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 
-    assert(is_base_qtype(in_qtype))
+    assert(scalar)
+    scalar = assert(to_scalar(scalar, in_qtype))
     assert(type(scalar) == "Scalar") 
+    assert(is_base_qtype(in_qtype))
 
     local tmpl = 'f1s1opf2_cmp.tmpl'
     local subs = {}; 
@@ -18,6 +20,7 @@ return function (
     subs.in_qtype = in_qtype 
     subs.out_qtype = "B1"
     subs.comparison = ' <<comparison>>  '
-    subs.c_mem = scalar:to_cmem()
+    subs.args = scalar:to_cmem()
+    subs.args_ctype = subs.in_ctype
     return subs, tmpl
 end

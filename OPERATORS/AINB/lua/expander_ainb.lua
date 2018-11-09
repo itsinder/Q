@@ -5,6 +5,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local record_time = require 'Q/UTILS/lua/record_time'
 
 local expander_ainb = function(op, a, b)
   -- START: verify inputs
@@ -48,7 +49,9 @@ local expander_ainb = function(op, a, b)
     local casted_aptr = ffi.cast( qconsts.qtypes[subs.a_qtype].ctype .. "*", get_ptr(aptr))
     local casted_bptr = ffi.cast( qconsts.qtypes[subs.b_qtype].ctype .. "*", get_ptr(bptr))
     local casted_cbuf = ffi.cast( qconsts.qtypes['B1'].ctype .. "*", get_ptr(cbuf))
+    local start_time = qc.RDTSC()
     local status = qc[func_name]( casted_aptr, alen, casted_bptr, blen, casted_cbuf)
+    record_time(start_time, func_name)
     assert(status == 0, "C error in ainb")
     chunk_idx = chunk_idx + 1
     return alen, cbuf, nil

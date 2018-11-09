@@ -5,6 +5,7 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 -- for k, v in pairs(vec) do print(k, v) end 
 local q_data_dir = os.getenv("Q_DATA_DIR")
+q_data_dir = q_data_dir .. "/"
 
 local tests = {} 
 local y 

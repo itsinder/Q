@@ -1,9 +1,11 @@
 local Scalar = require 'libsclr'
 local function to_scalar(x, qtype)
-  assert(x, "must provide an input value")
+  if type(x) ~= "boolean" then
+    assert(x, "must provide an input value")
+  end
   assert(qtype, "must provide qtype for Scalar")
   local retval 
-  if ( ( type(x) == "number") or ( type(x) == "string" ) ) then 
+  if ( ( type(x) == "number") or ( type(x) == "string" ) or ( type(x) == "boolean" ) ) then 
     retval = assert(Scalar.new(x, qtype), "bad value for Scalar")
     return retval
   elseif ( type(x) == "Scalar") then 

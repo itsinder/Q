@@ -19,10 +19,10 @@ clean :
 	rm -f _*
 	rm -f *.so
 
-libgetk.so : ${GEN_FILES} \
+libgetk.so : getk.tmpl \
 	merge1.tmpl
 	luajit generator.lua
-	gcc ${GEN_FILES} ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libgetk.so
+	gcc ../gen_src/*.c ${CFLAGS} ${INCS} ${Q_LINK_FLAGS} -o libgetk.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/

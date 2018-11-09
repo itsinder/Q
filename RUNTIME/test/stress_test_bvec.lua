@@ -5,6 +5,8 @@ local cmem = require 'libcmem' ;
 require 'Q/UTILS/lua/strict'
 
 local q_data_dir = os.getenv("Q_DATA_DIR")
+q_data_dir = q_data_dir .. "/"
+
 -- for k, v in pairs(vec) do print(k, v) end 
 local tests = {} 
 -- 

@@ -11,7 +11,7 @@
   local operators = dofile(operator_file)
 
   local types = { 'B1', 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
-  local comparisons = { 'gt', 'geq', 'lt', 'leq', }
+  local comparisons = { 'gt', 'geq', 'lt', 'leq', 'eq', 'neq' }
 
   for i, operator in ipairs(operators) do
     local num_produced = 0

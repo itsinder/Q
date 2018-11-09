@@ -1,27 +1,86 @@
-\startreport{Decision Trees in Q}
+\startreport{Gambling on Decision Trees}
 \reportauthor{Ramesh Subramonian}
 
 \section{Introduction}
 
+Decision trees are a well understood statistical technique \cite{Hastie2009}.
+This paper makes the following contributions:
+\be
+\item proposes a gambling-inspired metric that allows us to answer
+the two fundamental questions associated with building a decision tree:
+\be
+\item what is the decision to be made at a given node e.g., \(x \leq 0.5?\)
+\item when should a node not be split further?
+\ee
+This is in contrast to the well known metrics (i) gini impurity (ii) information
+gain and (iii) variance reduction
+\item a more intuitive way to deal with unknown values, both during 
+training and testing. This approach is particularly useful when
+the fact that the value is null does not have some systemic bias.
+Section~\ref{unknown}
+\item what ``decision'' does the decision tree really make? For example, if the
+evaluation of the tree leaves us at a node which had 
+\(n_H\) instances of class ``Heads'' and 
+\(n_T\) instances of class ``Tails'' at training time, what statement are we
+making?
+\item when using several decision trees to create a random forest, using
+principal component analysis to prune correlated trees
+\item weighting the results of the different decision trees based 
+on their accuracy, instead of simply averaging the results.
+\ee
+
+We believe that these changes to the way decision trees are created and their
+results combined is particularly relevant to the case where relative
+confidences are involved. This is often the case when multiple candidates are
+competing for a limited resource, like screen real estate or user attention. In
+such cases, we need each classifier to predict (with as much accuracy as
+possible) the likelihood that a particular event will occur.
+
+\subsection{Conventions}
+Throughout the paper, we use the data sets listed in Table~\ref{tbl_data_sets}
+for our experiments. 
+\begin{table}
+\centering
+\begin{tabular}{|l|l|l|l|} \hline \hline
+{\bf Data Set Name } & {\bf Rows} & {\bf Columns} & {\bf Location} \\ \hline 
+Breast Cancer & X & X & \\ \hline
+Titanit & X & X & \\ \hline
+\ldots & X & X & \\ \hline
+\end{tabular}
+\label{tbl_data_sets}
+\caption{Data Sets used for experimentation}
+\end{table}
+
 \subsection{Notations}
 
 \bi
-\item Let \(F = \{f_i\}\) be a table of F4 vectors, representing the features.
-\item Let \(g\) be a B1 vector, representing the outcome which we wish to
-predict. We will refer to the value 1 as positive and 0 as negative.
+\item Let \(F = \{f_i\}\) be a table of vectors, representing the features.
+\item Let \(g\) be a vector, representing the outcome which we wish to
+predict. We will refer to the value 1 as heads and 0 as tails.
+\item Restrictions on vectors (for a Q implementation)
+\be
+\item lengths of all vectors must be the same. 
+\item all feature vectors should be either F4, I4 or SV
+\item goal vector should be I4
+\ee
 \ei
 
 A decision tree is a Lua table where each element identifies
 \be
 \item a feature
-\item a threshold, the default comparison is always \(\leq\).
+\item the comparison to be made. 
+\be 
+\item If the feature is ordered (I4 or F4), then the
+comparision is always \(\leq\) and a threshold needs to be provided e.g., age
+\(\leq 45\) 
+\item If the feature is unordered (SV), then the values on the left branch need
+to be provided e.g., State is one of California, Washington, Oregon; the values
+on the right branch being all other values that the feature can assume.
+
+\ee
 \item a left decision tree
 \item a right decision tree
 \ee
-
-\begin{invariant}
-\(forall f \in F, f:length() = g:length()\)
-\end{invariant}
 
 \begin{figure}
 \centering
@@ -29,33 +88,33 @@ A decision tree is a Lua table where each element identifies
 \begin{minipage}{35cm}
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \=
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-Let \(\alpha\) be minimum benefit required to continue branching \\ 
-Let values taken on by goal be 0 (negative), 1 (positive)  \(\Rightarrow n_G = 2\) \\
-Let \(n_N =\) number of instances classified as negative \\ 
-Let \(n_P =\) number of instances classified as positive \\ 
+Let \(\alpha\) be minimum benefit required to continue branching \\
+Let values taken on by goal be 0 (tails), 1 (heads)  \\
+Let \(n_G = 2\) be the number of values of the goal attribute \\
+Let \(n_T =\) number of instances classified as tails \\
+Let \(n_H =\) number of instances classified as heads \\
 Let \(T\) be table of vectors, each vector being an attribute \\
 Initialize, decision tree \(D = \{\}\) \\
 \(F, g\) as described above \\
 {\bf function } MakeDecisionTree(D, T, g) \+ \ \\
-  \(C = Q.\mathrm{numby}(g, n_G);~n_N = C[0];~n_P = C[1]\) \\ 
-  {\bf forall} \(f \in T:~ b(f), s(f) = \mathrm{Benefit}(f, g, n_N, n_P)\) \\ 
+  \(C = Q.\mathrm{numby}(g, n_G);~n_T = C[0];~n_H = C[1]\) \\
+  {\bf forall} \(f \in T:~ b(f), s(f) = \mathrm{Benefit}(f, g, n_T, n_H)\) \\
   Let \(f'\) be feature with maximum benefit. \\
-  {\bf if} \(b(f') \geq \alpha\) {\bf then } \+  \\
-    \(x = Q.vsgt(f', s(f'))\) \\
-    \(n_R, n  = Q.sum(x) \) \\
+  {\bf if} \(b(f') < \alpha\) {\bf then } \+  \\
+    {\bf return} \- \\
+  {\bf endif} \\
+    \(x = \mathrm{Q.vsgt}(f', s(f'))\) \\
     \(F_L = F_R = \{\}\) \\
     {\bf forall} \(f \in F\) {\bf do} \+ \\
-      \(Q.reorder(f, x)\) \\ 
-      \(F_L = F_L \cup Q.vector(f, 0, n_L)\) \\
-      \(F_R = F_L \cup Q.vector(f, n_L, n)\) \- \\
+      \(F_L = F_L \cup \mathrm{Q.where}(f, x)\) \\ 
+      \(F_R = F_L \cup \mathrm{Q.where}(f, \mathrm{Q.not}(x))\) \\ 
     {\bf endfor} \\
     T.feature = \(f'\) \\
     T.threshold = \(b(f')\) \\
-    T.left = \(\{\}\) \\ 
-    T.right = \(\{\}\) \\ 
-    \(DT(F_L, g_L, T_L)\) \\ 
-    \(DT(F_R, g_R, T_R)\) \- \\ 
-  {\bf endif} \- \\
+    T.left = \(\{\}\) \\
+    T.right = \(\{\}\) \\
+    \(DT(F_L, g_L, T_L)\) \\
+    \(DT(F_R, g_R, T_R)\) \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
@@ -70,30 +129,11 @@ Initialize, decision tree \(D = \{\}\) \\
 \begin{minipage}{15cm}
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= 
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{Benefit}(f, g, n_N, n_P)\) \+  \\
-  \(p_{max} = -\infty\) \\
-  \(b_{opt} = \bot\) \\
-  \(f', g' = \mathrm{Q.sort2}(f, g, \) ``A\_'' ) ---
-  Sort \(f,g\) with \(f\) ascending and \(g\) drag along \\
-  \(C = \{\},~C[0] = 0,~C[1] = 0\) --- Counters for goal values \\
-  \(i = 0,~ n = n_N + n_P\) \\ 
-  {\bf while} \(i < n\) {\bf do} \+ \\
-    \(b = f_i\) \\
-    \(C[g_i] = C[g_i] + 1\) \\
-    \(i = i + 1 \) \\
-    {\bf for } ( ; \(i < n\); \(i++\) ) {\bf do} \+ \\
-      {\bf if } \(f_i \neq b\) {\bf then } \+ \\
-        {\bf break} \- \\
-      {\bf endif} \\
-      \(C[g_i] = C[g_i] + 1\) \- \\
-    {\bf endfor} \\
-    \(p = \mathrm{WeightedBenefit}(C[0], C[1], n_N, n_P)\) \\
-    {\bf if } \(p > p_{max}\) {\bf then } \+ \\
-      \(p_{max} = p \)  \\
-      \(b_{opt} = b \) \- \\
-    {\bf endif} \- \\
-  {\bf endwhile} \\
-  {\bf return} \(p_{max}, b_{opt}\) \- \\
+{\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+  \\
+  \(f', h_0, h_1 = CountIntervals(f, g)\) \\
+  \(b = \mathrm{Q.wtbnft}(h_0, h_1, n_T, n_H)\) (Figure~\ref{algo_weighted_benefit}) \\
+  \(b', \_, i = \mathrm{Q.max}(b)\) \\
+  {\bf return} \(b', f'[i]\)  \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
@@ -107,17 +147,44 @@ Initialize, decision tree \(D = \{\}\) \\
 \fbox{
 \begin{minipage}{15cm}
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{WeightedBenefit}(n_N^L, n_P^L, n_N, n_P)\) \+  \\
-  \(n_N^R = n_N - n_N^L\) \\
-  \(n_P^R = n_P - n_P^L\) \\
-  \(n_R = n_N^R  + n_P^R\) \\ 
-  \(n_L = n_N^L  + n_P^L\) \\ 
-  {\bf return} \( \frac{n_L}{n} \times XXX + \frac{n_R}{n} \times YYY \) \- \\
+{\bf function } \(\mathrm{WeightedBenefit}(n_T^L, n_H^L, n_T^R, n_H^R)\) \+  \\
+  \(n_L = n_T^L + n_H^L \) --- number on left \\
+  \(n_R = n_T^R + n_H^R \) --- number on right \\
+
+  \(n = n_T + n_H \) --- total number \\
+
+  \(w_L = \frac{n^L}{n}\)  --- weight on left \\
+  \(w_R = \frac{n^R}{n}\)  --- weight on left \\
+
+  \(o_H^L = \frac{n_T^L}{n_H^L}\) --- odds for heads on left \\
+  \(o_T^L = \frac{n_H^L}{n_T^L}\) --- odds for tails on left \\
+  \(o_H^R = \frac{n_T^R}{n_H^R}\) --- odds for heads on right \\
+  \(o_T^R = \frac{n_H^R}{n_T^R}\) --- odds for tails on tails \\
+
+  \(b_H^L = o_H^L \times \frac{n_H^L}{n_L} +
+            (-1)  \times \frac{n_T^L}{n_L}\) 
+            --- benefit of betting heads on left \\
+  \(b_T^L = o_T^L \times \frac{n_T^L}{n_L} +
+            (-1)  \times \frac{n_H^L}{n_L}\) 
+            --- benefit of betting tails on left \\
+
+  \(b_H^R = o_H^R \times \frac{n_H^R}{n_L} +
+            (-1)  \times \frac{n_T^R}{n_L}\)
+            --- benefit of betting heads on right \\
+  \(b_T^R = o_T^R \times \frac{n_T^R}{n_L} +
+            (-1)  \times \frac{n_H^R}{n_L}\)
+            --- benefit of betting tails on right \\
+
+  \(b_L = \mathrm{max}(b_H^L, b_T^L)\) --- benefit on left \\
+  \(b_R = \mathrm{max}(b_H^R, b_T^R)\) --- benefit on right \\
+
+  \(b = b_L \times w_L + b_R \times w_R\) --- weighted benefit \\
+  {\bf return} \(b\) \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
 }
-\label{compute_weighted_benefit}
+\label{algo_weighted_benefit}
 \caption{Weighted Benefit Computation}
 \end{figure}
 %%-------------------------------------------
@@ -126,23 +193,34 @@ Initialize, decision tree \(D = \{\}\) \\
 \fbox{
 \begin{minipage}{15cm}
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{Benefit}(f, g, n_N, n_P)\) \+ 
-
+{\bf function } \(\mathrm{CountIntervals}(f, g)\) \+  \\
+{\bf Inputs} \+ \\  
+Vector \(f\) of length \(n\) type integer or floating point \\
+Vector \(g\) of length \(n\) type integer with values 0, 1 \- \\
+{\bf Outputs} \+ \\
+Vector \(f'\) of length \(n'\) type integer \\
+Vector \(h_0\) of length \(n'\) type integer  \\
+Vector \(h_1\) of length \(n'\) type integer  \- \\
+\(f'\) is the unique values of \(f\), sorted ascending \\
+Let \(\delta(x)\) = 1 if \(x\) is true and 0 otherwise \\
+\({h_k}_j = \sum_{i=1}^{i=n} \delta(g_i = k \wedge f_i \leq f_j)\) \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
 }
-\label{compute_benefit_boolean}
-\caption{Benefit Computation (boolean attributes)}
+\label{count_intervals}
+\caption{Count Intervals}
 \end{figure}
 %%-------------------------------------------
+
+
 
 \begin{figure}
 \centering
 \fbox{
 \begin{minipage}{15cm}
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{Benefit}(f, g, n_N, n_P)\) \+ 
+{\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+ 
 
 {\bf end} 
 \end{tabbing}
@@ -152,7 +230,53 @@ Initialize, decision tree \(D = \{\}\) \\
 \caption{Benefit Computation (categorical attributes)}
 \end{figure}
 
-\section{Benefit Computation}
+\section{Algorithm}
+
+Since decision trees have been well documented, we focus our attention on the
+salient characteristics of our approach which are
+\be
+\item how does one decide on the comparison to be performed at a node?
+\item how does one decide when to not split a node further, assuming that asplit
+is possible at all.
+\ee
+
+Given the simple recursive nature of decision trees, we focus our 
+decision on what is done at a single node. Without loss of generality, 
+let this be the root node. At this point, we know the number of elements
+classified as Heads and Tails, \(n_H, n_T\) respectively. This allows us to set
+the odds of betting on heads or tails. At each node, we are asked to a single
+question. 
+\bi
+\item For a numeric attribute, it is of the form \(x \leq y\)
+\item For a boolean attribute, it is of the form \(x = y\), where y is true or
+false
+\item For an unordered categorical attribute that can take on values in \(X\),
+it is of the form \(x \in y \subset X\)
+\ei
+We iterate over all possible values of \(y\) for each attribute and find the
+attribute and decision that produces the maximum benefit. If this benefit
+exceeds a pre-defined threshold, we split the data into two, a left branch and a
+right branch and proceed recursively. Else, the expansion of the decision tree
+stops at this point and control returns to the parent node. 
+Figure~\ref{XXX} describes the algorithm at this level. For clarity of 
+exposition, we only describe the treatment of numeric attributes.
+
+
+\subsection{Useful subroutines}
+We list a number of subroutines used to describe the algorthms
+\be
+\item Q.not(x). \(x\) is a boolean Vector. output is y, a boolean vector, the
+negation of \(x\)
+\item Q.vsgt(x, s). \(x\) is a Vector, \(s\) is a scalar. Output is \(y\) a
+boolean vector such that \(x_i \geq s \Rightarrow y_i = \mathrm{true}\) and
+\(y_i\) is false otherwise
+\item Q.sum(x). \(x\) is a Vector. output is a scalar
+\item Q.numby(x, n). \(x\) is a Vector, \(n\) is a positive integer 
+such that \(x_i \in [0, n-1]\). output is a vector \(y\) such that \(y_i\) is
+the number of elements of \(x\) that have value \(i\)
+\ee
+
+\subsection{Benefit Computation}
 It is useful to model this problem as a gambling problem where we are 
 sampling with replacement. 
 \bi
@@ -186,3 +310,135 @@ question is: What is the expected benefit for 100 trials?
 which is \(
  = (40 \times  \frac{4}{6}) -15 - 20 + (25 \times \frac{6}{4} )
  = 29 \frac{1}{6}\)
+
+\subsubsection{Categorical Attributes}
+We deal with categorical attributes as follows. Let \(X\) be a categorical
+attribute that takes on values \(\{x_1, x_2, \ldots x_M\}\), where \(M\) is
+typically small. We can assume less than 100 values.
+
+Let \(Y = \{(x_i, g_i)\}\) be the data set, where \(i = 1, \ldots N\). 
+By this we ean
+that the \(i^{th}\) point has value \(x_i \in X\) and its goal attribute has
+value \(g_i \in \{0, 1\}\). 
+\(Y\) may have other features but for now we are concentrating on \(X\).
+
+Create a table, \(Z\), of vectors \(N, P, \rho\) of length \(M\) as follows.  
+\begin{enumerate}
+\item 
+\(n_j = \sum_{i=1}^{i=N} z(i, j)\) where 
+\(z_j = 1 \) if \(x_i = x_j \) and \(g_i = 0\)
+\item 
+\(p_j = \sum_{i=1}^{i=N} z(i, j)\) where 
+\(z_j = 1 \) if \(x_i = x_j \) and \(g_i = 1\)
+\item 
+\(rho_j = \frac{p_j}{p_j+n_j}\)
+\end{enumerate}
+Sort \(Z\) on \(rho\). Create vectors, \(N', P'\) of length \(M\) as follows
+\be
+\item 
+\ee
+
+\newpage
+\section{Evaluating a decision tree}
+In addition to the standard metrics, such as classification accuracy, we
+evaluate decision trees as follows. Every element of the data set is 
+fed into the decision tree, thereby
+assigning each one to a leaf. Now, for each leaf, we have four numbers.
+\be
+\item \(n^H_1, n^T_1\) which is the number of testing samples assigned 
+to the leaf that were labeled heads and tails respectively. The ``weight'' of a
+leaf is \(n^H_1 + n^T_1\)
+\item \(n^H_0, n^T_0\) same as above but for the training samples
+\ee
+
+These numbers are used follows. Continuing our gambling metaphor,
+the house is given only \(n^H_0, n^T_0\) to set the odds, whereas the gambler
+has access to all four.
+The ``true'' probability of heads, \(\rho\), is assumed to be 
+\(\frac{n^H_1}{n^H_1+ n^T_1}\). 
+
+Consider three examples, in all of which \(n^H_0, n^T_0 = 60, 40\). 
+The benefit, \(b\) that the gambler can expect to make per trial varies
+depending on \(rho\) as follows.
+\be
+\item \(\rho = 0.8\). The adversary would bet heads.
+\(b = 0.8 \times \frac{40}{60} + 0.2 \times -1 = \frac{1}{3}\)
+\item \(\rho = 0.6\). If the adversary bet heads, 
+\(b = 0.6 \times \frac{40}{60} + 0.4 \times -1 = 0\)
+If the adversary bet tails, 
+\(b = 0.6 \times -1 + 0.4 \times \frac{60}{40} = 0\).
+\item \(\rho = 0.4\). The adversary would bet tails.
+\(b = 0.4 \times -1 + 0.6 \times \frac{60}{40} = \frac{1}{2}\) 
+\ee
+
+The weighted benefit of a leaf is simply \(w \times b\).
+The ``cost'' of the decision tree is sum over the 
+weighted benefit, normalized by the weights of all leaves 
+\(= \frac{\sum_l w_l \times b_l}{\sum_l w_l}\)
+
+\subsection{When not to split?}
+
+In Figure~\ref{XXX}, we stated that we stop splitting when the weighted benefit
+is less than a threshold of \(\alpha\). We are now in a position to describe how
+\(\alpha\) is determined. We search the space of possible values of \(\alpha =
+(0, 1)\), evaluating the ``cost'' for each \(\alpha\). A sample on the breast
+cancer data set (reference TODO) is in
+Figure~\ref{fig_breast_cancer_cost_versus_alpha}.
+
+We pick the \(alpha\) which produces the minimum cost. For a variety of data
+sets, the shape of the curve is similar to 
+Figure~\ref{fig_breast_cancer_cost_versus_alpha} but we have not been able to
+establish an analytical proof that the function is U-shaped.
+
+\section{Unknown Values}
+\label{unknowns}
+
+\begin{quote}
+When you come to a fork in the road, take it \footnote{attributed to Yogi Berra}
+\end{quote}
+Assume that we have \(X\) instances of which the fraction which have class
+``Heads'' is \(p_H\) and Tails is \(p_T\).
+Assume that we are considering splitting using
+a feature \(f\) such that \(X' \subseteq X\) of the instances have unknown
+values for this feature. 
+the form \(x \leq y\). 
+
+In terms of the training process, unknown values affect the process 
+as follows.  With each instance \(x_i \in X\) is associated a weight \(w_i\),
+initialized to 1. Let \(X'\) be the instances where the value of the splitting feature is unknown.
+
+\be
+\item Benefit benefit calculation of Section~\ref{XXX}. 
+For all \(x_i \in X'\), we treat it as if it were two instances, one with a class of Heads and a weight of \(w_i \times p_H\) and the other with a class of Tails and a weight of \(w_i \times p_T\)
+\item Partitioning the subsets of the data passed to the left child and right child.  All elements of \(X'\) are passed to the left child with a weight of \(w_i \times p_H\) and to the right child with a weight of \(w_i \times p_T\).  See Figure~\ref{fig_unknown_values}.
+\ee
+
+In terms of the testing process, the change in evaluation is as follows.
+Hitherto, a test instance given to a decision tree ends up at precisely one leaf
+node. The proportion of heads and tails at that leaf is used to make a
+prediction, the simplest being that \(p_H = \frac{n_H}{n_H+n_T}\). Now, if
+decision requires knowing the value of a feature that is unknown, we send the
+instance down to both left and right childs and combine the resulting decision,
+weighted by the proportions of heads and tails at that node. In
+Figure~\ref{fig_unknown_accuracy}, we show how the accuracy of classification
+falls off as the proportion of unknown values in the data set increases. We
+change the proportion of unknown values by randomly selecting instances and
+randomly selecting features to artificially turn to null values. The results are
+reported for the data sets of Table~\ref{tbl_data_sets}.
+
+
+\begin{figure}
+\centering
+\fbox{
+\begin{minipage}{35cm}
+TODO 
+\end{minipage}
+}
+\label{fig_unknown_values}
+\caption{Change in weight of datum when split involves unknown values}
+\end{figure}
+
+
+
+\bibliographystyle{alpha}
+\bibliography{../../../DOC/ref.bib}

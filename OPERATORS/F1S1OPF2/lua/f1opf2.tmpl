@@ -48,7 +48,9 @@ ${fn}(
   if ( in == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
-// #pragma omp parallel for schedule(static)
+  int nT = sysconf(_SC_NPROCESSORS_ONLN);
+  nT = 4; // undo hard coding
+#pragma omp parallel for schedule(static) num_threads(nT)
   for ( uint64_t i = 0; i < nR; i++ ) { 
     ${in_ctype} inv; 
     ${out_ctype} outv; 

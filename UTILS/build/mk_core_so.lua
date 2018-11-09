@@ -18,7 +18,7 @@ local qlflags = assert(os.getenv("Q_LINK_FLAGS"))
 
 local fn_protos = {}
 -- special case for mmap_struct
-file = io.open(src_root .. "/UTILS/inc/mmap_types.h")
+file = assert(io.open(src_root .. "/UTILS/inc/mmap_types.h"))
 for line in file:lines() do
   print(line)
   start, stop = string.find(line, "#")

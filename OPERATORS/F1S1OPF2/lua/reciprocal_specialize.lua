@@ -13,6 +13,5 @@ return function (
   subs.in_qtype = in_qtype
   subs.out_qtype = in_qtype
   subs.out_ctype = qconsts.qtypes[subs.out_qtype].ctype
-  subs.c_mem = nil
   return subs, tmpl
 end

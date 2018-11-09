@@ -30,6 +30,10 @@ return function (
       subs.comparison_operator = " < " 
     elseif ( comparison == "leq" ) then
       subs.comparison_operator = " > " 
+    elseif ( comparison == "eq" ) then
+      subs.comparison_operator = " == " 
+    elseif ( comparison == "neq" ) then
+      subs.comparison_operator = " != " 
     else
       assert(nil, "invalid comparison" .. comparison)
     end

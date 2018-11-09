@@ -57,11 +57,12 @@ local function save(name, value, saved, file)
   if is_l_exception(name, value) then return end
   saved = saved or {}       -- initial value
   file = file or io
-  file:write(name, " = ")
   if ( ( type(value) == "number" ) or ( type(value) == "string" ) or 
          ( type(value) == "boolean" ) ) then
+      file:write(name, " = ")
       file:write(basicSerialize(value), "\n")
   elseif type(value) == "table" then
+    file:write(name, " = ")
     if saved[value] then    -- value already saved?
       file:write(saved[value], "\n")  -- use its previous name
     else
@@ -74,6 +75,7 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "lVector" ) then 
     -- TODO Indrajeet to check
+    file:write(name, " = ")
     local persist_str = value:reincarnate()
     if ( persist_str ) then 
       file:write(persist_str)
@@ -84,6 +86,8 @@ local function save(name, value, saved, file)
     else
       print("Not saving lVector because not eov ", name)
     end
+  elseif ( type(value) == "Scalar" ) then
+    -- Currently not supported
   else
     error("cannot save " .. name .. " of type " .. type(value))
   end

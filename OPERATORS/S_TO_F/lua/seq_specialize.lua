@@ -36,6 +36,7 @@ return function (
   end
   start = assert(to_scalar(start, qtype) )
   --==================================
+  if ( type(len) == "Scalar" ) then len = len:to_num() end
   assert(type(len) == "number")
   assert(len > 0, "vector length must be positive")
   local subs = {};

@@ -5,6 +5,7 @@ local function drop_nulls(x, sval)
   local ffi = require 'Q/UTILS/lua/q_ffi'
   local get_ptr = require 'Q/UTILS/lua/get_ptr'
   local qconsts = require 'Q/UTILS/lua/q_consts'
+  local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
   assert(x)
   assert(type(x) == "lVector")
@@ -17,7 +18,8 @@ local function drop_nulls(x, sval)
   end  
   assert(x:is_eov(), "Vector must be materialized before dropping nulls")
   assert(sval)
-  assert(type(sval) == "Scalar") 
+  -- expecting y of type scalar, if not converting to scalar
+  sval = assert(to_scalar(sval, x:fldtype()), "y should be a Scalar or number") 
   assert(x:fldtype() == sval:fldtype())
   --================================================
   local spfn = require("Q/OPERATORS/DROP_NULLS/lua/drop_nulls_specialize" )

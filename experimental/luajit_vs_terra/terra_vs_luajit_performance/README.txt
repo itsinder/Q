@@ -43,19 +43,23 @@ Run Performance Test
 2. Go to the extracted directory
     $ cd terra_vs_luajit_performance
 
-3. Run the performance script as below
+3. Copy lib/libq_core_so to lib/libq_core.so
+    $ cp lib/libq_core_so lib/libq_core.so
+
+4. Run the performance script as below
     $ bash run_performance_test.sh <terra/luajit/luaterra> <input_csv_path>
     Following is the description about first argument
     - terra : run performance test with 'terra' interpreter
     - luajit : run performance test with 'luajit' interpreter
     - luaterra : run performance test with 'luajit' interpreter and terra library (i.e with "require 'terra'" statement in lua file)
+    Note: The <input_csv_path> should exists
 
 Example
     $ bash run_performance_test.sh terra input_files/10000_rows.csv
     $ bash run_performance_test.sh luajit input_files/10000_rows.csv
     $ bash run_performance_test.sh luaterra input_files/10000_rows.csv
 
-3. After completion of the test, load operation time will be printed on the console
+5. After completion of the test, load operation time will be printed on the console
 
 Note: 
 This performance test program loads the csv file into binary files one per each column.

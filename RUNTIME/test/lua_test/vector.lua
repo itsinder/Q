@@ -1,6 +1,7 @@
 local Vector = require 'libvec'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local q_data_dir = os.getenv("Q_DATA_DIR")
+q_data_dir = q_data_dir .. "/"
 -- input args are in the order below
 -- M - metadata containing qtype, file_name, is_read_only, is_memo, num_elements depending on vector type (nascent / materialized)
 return function( M )

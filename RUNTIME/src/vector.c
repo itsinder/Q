@@ -565,47 +565,6 @@ static int l_vec_free( lua_State *L) {
   return 1;
 }
 //----------------------------------------
-static int l_vec_new_virtual( lua_State *L)
-{
-  int status = 0;
-  VEC_REC_TYPE *ptr_vec = NULL;
-  void * map_addr = NULL;
-  luaL_buffinit(L, &g_errbuf);
-
-  //TODO: Check how to get mmap pointer from stack, stack_location = 1
-  if ( luaL_testudata (L, 1, "CMEM") ) {
-    CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
-    if ( ptr_cmem == NULL ) { go_BYE(-1); }
-    map_addr = ptr_cmem->data;
-  }
-  else {
-    fprintf(stderr, "NOT  CMEM\n");
-    go_BYE(-1);
-  }
- 
-  const char * const qtype = luaL_checkstring(L, 2);
-  int32_t chunk_size;
-  status = get_chunk_size(L, &chunk_size); cBYE(status);
-  int64_t num_elements = luaL_checknumber(L, 3);
-
-  ptr_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
-  return_if_malloc_failed(ptr_vec);
-  memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
-  luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
-  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
-
-  status = vec_new_virtual(ptr_vec, map_addr, qtype, chunk_size, num_elements);
-  cBYE(status);
-
-  luaL_pushresult(&g_errbuf);
-  return 2;
-
-BYE:
-  lua_pushnil(L);
-  lua_pushstring(L, "ERROR: Could not create vector\n");
-  return 2;
-}
-//----------------------------------------
 static int l_vec_new( lua_State *L) 
 {
   int status = 0;
@@ -715,7 +674,6 @@ static const struct luaL_Reg vector_methods[] = {
  
 static const struct luaL_Reg vector_functions[] = {
     { "new", l_vec_new },
-    { "virtual", l_vec_new_virtual },
     { "clone", l_vec_clone },
     { "check", l_vec_check },
     { "meta", l_vec_meta },
