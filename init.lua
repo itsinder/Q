@@ -6,6 +6,7 @@ require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"
 require "Q/OPERATORS/SORT/lua/sort"
+require "Q/OPERATORS/SORT2/lua/sort2"
 require "Q/OPERATORS/GET/lua/get_val_by_idx"
 require "Q/OPERATORS/GET/lua/set_sclr_val_by_idx"
 require "Q/OPERATORS/GET/lua/add_vec_val_by_idx"
@@ -43,12 +44,15 @@ require 'Q/OPERATORS/GROUPBY/lua/groupby'
 require 'Q/OPERATORS/INDEX/lua/indexing'
 require 'Q/OPERATORS/UNIQUE/lua/unique'
 require 'Q/OPERATORS/GETK/lua/getk'
+require 'Q/OPERATORS/HASH/lua/hash'
 require 'Q/OPERATORS/JOIN/lua/join'
 -- alias wrappers
 require 'Q/ALIAS/lua/add'
 require 'Q/ALIAS/lua/sub'
 require 'Q/ALIAS/lua/mul'
 require 'Q/ALIAS/lua/count'
+require 'Q/ALIAS/lua/mink'
+require 'Q/ALIAS/lua/maxk'
 --============== UTILITY FUNCTIONS FOR Q PROGRAMMER
 require 'Q/QTILS/lua/vvmax'
 require 'Q/QTILS/lua/vvseq'

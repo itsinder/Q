@@ -13,6 +13,7 @@ clean:
 	rm -f ${Q_BUILD_DIR}/include/*
 	make -C ${BASE_PATH}/UTILS/src/  clean
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/ clean
+	make -C ${BASE_PATH}/OPERATORS/HASH/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ clean
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/ clean
@@ -20,6 +21,7 @@ clean:
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua clean
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua clean
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua clean
+	make -C ${BASE_PATH}/OPERATORS/SORT2/lua clean
 	make -C ${BASE_PATH}/OPERATORS/GET/lua clean
 	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua clean
 	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua clean
@@ -108,6 +110,9 @@ join:
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
 
+hash:
+	make -C ${BASE_PATH}/OPERATORS/HASH/lua/
+
 print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
@@ -126,6 +131,9 @@ f1s1opf2_val: q_basic
 
 sort: q_basic
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+
+sort2: q_basic
+	make -C ${BASE_PATH}/OPERATORS/SORT2/lua
 
 get: q_basic
 	make -C ${BASE_PATH}/OPERATORS/GET/lua
@@ -159,6 +167,7 @@ q_operators: f1f2opf3 \
 	f1s1opf2 \
 	f1s1opf2_val \
 	sort \
+	sort2 \
 	get \
 	idx_sort \
 	s_to_f \
@@ -176,7 +185,8 @@ q_operators: f1f2opf3 \
 	index \
 	unique \
 	count \
+	join \
 	getk \
-	join
+	hash
 	echo "all done for operators"
 

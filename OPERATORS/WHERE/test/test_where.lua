@@ -22,7 +22,7 @@ tests.t1 = function ()
 end
 --======================================
 tests.t2 = function ()
-  b = Q.mk_col({0, 0, 0, 0, 0}, "B1"):set_name("b")
+  local b = Q.mk_col({0, 0, 0, 0, 0}, "B1"):set_name("b")
   print(a:length())
   print(b:length())
   assert(Q.where(a, b):set_name("c"):eval() == nil)
@@ -30,7 +30,7 @@ tests.t2 = function ()
 end
 --======================================
 tests.t3 = function ()
-  b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
+  local b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
   local out_table = {10, 20, 30, 40, 50}
   local c = Q.where(a, b):eval()
   assert(c:length() == Q.sum(b):eval():to_num(), "Length Mismatch")
@@ -43,7 +43,7 @@ tests.t3 = function ()
 end
 --======================================
 tests.t4 = function ()
-  b = Q.mk_col({0, 0, 0, 0, 0}, "B1")
+  local b = Q.mk_col({0, 0, 0, 0, 0}, "B1")
   b:set_meta("min", 0)
   b:set_meta("max", 0)
   local c = Q.where(a, b)
@@ -51,7 +51,7 @@ tests.t4 = function ()
 end
 --======================================
 tests.t5 = function ()
-  b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
+  local b = Q.mk_col({1, 1, 1, 1, 1}, "B1")
   b:set_meta("min", 1)
   b:set_meta("max", 1)
   local c = Q.where(a, b)

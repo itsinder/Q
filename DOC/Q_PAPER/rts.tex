@@ -32,7 +32,7 @@ associative array, like a Python dictionary.
 
 
 It is useful to think of Q as a domain specific language, targeted for data
-manipulation. In contrast with Wever's work \cite{Wever2014} on
+manipulation. In contrast with Wever's work \cite{Wevers2014} on
 developing a persistent functional language with
 a relational database system inside, Q works within the context of Lua, while
 inspired by functional programming ideas like memo-ization, lazy evaluation,
@@ -62,7 +62,7 @@ On a sample workload, when the chunk size
 (discussed in Section~\ref{Vectors})
 is set to 1M, the C code that does the real work
 accounts for 92\% of the time, the run time takes 1\%, the balance attributable to Lua as glue logic 
-When the chunk size drops to 64K, C takes 52\%, the run time takes 2\% and Lau
+When the chunk size drops to 64K, C takes 52\%, the run time takes 2\% and Lua
 the rest.
 
 Q's software architecture consists of the following four layers. From bottom to

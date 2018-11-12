@@ -3,13 +3,14 @@ local Scalar = require 'libsclr'
 local function split (
   T,  -- table of m lVectors of length n
   split_ratio,  -- Scalar between 0 and 1 
-  features_to_consider
+  features_to_consider,
+  seed
   )
   assert(T)
   assert(type(T) == "table")
-  if ( type(split_ratio) == "number" ) then 
+  if ( type(split_ratio) == "number" ) then
     split_ratio = assert(Scalar.new(split_ratio, "F4"))
-  elseif ( type(split_ration) == "Scalar" ) then 
+  elseif ( type(split_ratio) == "Scalar" ) then
     assert(split_ratio:fldtype() == "F4")
   end
   assert(Scalar.gt(split_ratio, 0)) -- TODO Improve P3
@@ -50,7 +51,7 @@ local function split (
   end
   assert(num_features > 0)
   --=======================================
-  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = n})
+  local random_vec = Q.rand({lb = 0, ub = 1, qtype = "F4", len = n, seed = seed})
   local random_vec_bool = Q.vsleq(random_vec, split_ratio)
   local n1, n2 = Q.sum(random_vec_bool):eval()
   -- TODO P2: Should not need to convert number to scalar for comparison

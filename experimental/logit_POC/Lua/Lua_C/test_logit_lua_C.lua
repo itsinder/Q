@@ -1,6 +1,6 @@
 local ffi = require 'ffi'
 local plfile = require 'pl.file'
-local timer = require 'posix.time'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local header_file = "logit_I8.h"
 ffi.cdef([[
@@ -30,12 +30,12 @@ local function logit()
     in_buf[i-1] = 2
   end
   
-  local start_time = timer.clock_gettime(0)
+  local start_time = qc.RDTSC()
   for i = 1, 100 do
     qc[func_name](in_buf, nil, num_elements, nil, out_buf, nil)
   end
-  local stop_time = timer.clock_gettime(0)
-  local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
+  local stop_time = qc.RDTSC()
+  local time = stop_time - start_time
 
   print("Time required for C execution is = " .. tostring(time))
 

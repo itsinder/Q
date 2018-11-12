@@ -938,6 +938,7 @@ Computing Machinery]
     \gdef\acmConference@shortname{#2}%
   \fi}
 \acmConference[Conference'19]{ACM Conference}{January 2019}{Asilomar, CA,USA}
+\acmConference[]{x}{x}{x}
 % \acmConference[]{}{}{}
 \def\subtitle#1{\def\@subtitle{#1}}
 \subtitle{}

@@ -4,7 +4,7 @@ return function(idx_qtype, val_qtype, ordr)
   assert( ( ( ordr == "asc") or ( ordr == "dsc") ), 
   "Sort order should be asc or dsc")
 
-  good_idx_types = { I1 = true, I2 = true, I4 = true, I8 = true }
+  local good_idx_types = { I1 = true, I2 = true, I4 = true, I8 = true }
   assert(good_idx_types[idx_qtype])
 
   assert(qconsts.base_types[val_qtype])

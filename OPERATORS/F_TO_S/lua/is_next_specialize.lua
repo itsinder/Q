@@ -1,7 +1,6 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local is_base_qtype = require('Q/UTILS/lua/is_base_qtype')
-local plfile = require 'pl.file'
 local Scalar  = require 'libsclr'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local cmem    = require 'libcmem'

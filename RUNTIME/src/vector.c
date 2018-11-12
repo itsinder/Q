@@ -643,6 +643,18 @@ BYE:
   return 2;
 }
 //-----------------------
+static int l_vec_delete( lua_State *L) {
+  int status = 0;
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  status = vec_delete(ptr_vec); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_end_write. ");
+  return 2;
+}
+//-----------------------
 static const struct luaL_Reg vector_methods[] = {
     { "__gc",    l_vec_free   },
     { "eov", l_vec_eov },
@@ -669,6 +681,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "end_write", l_vec_end_write },
     { "no_memcpy", l_vec_no_memcpy },
     { "flush_buffer", l_vec_flush_buffer },
+    { "delete", l_vec_delete },
     { NULL,          NULL               },
 };
  
@@ -702,9 +715,10 @@ static const struct luaL_Reg vector_functions[] = {
     { "end_write", l_vec_end_write },
     { "print_timers", l_print_timers },
     { "reset_timers", l_reset_timers },
-      { "no_memcpy", l_vec_no_memcpy },
-      { "flush_buffer", l_vec_flush_buffer },
-      { NULL,  NULL         }
+    { "no_memcpy", l_vec_no_memcpy },
+    { "flush_buffer", l_vec_flush_buffer },
+    { "delete", l_vec_delete },
+    { NULL,  NULL         }
   };
 
   /*

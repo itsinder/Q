@@ -1,5 +1,7 @@
 -- Coding convention. Local variables start with underscore
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
+local record_time = require 'Q/UTILS/lua/record_time'
 local log = require 'Q/UTILS/lua/log'
 local register_type = require 'Q/UTILS/lua/q_types'
 local plpath = require("pl.path")
@@ -25,6 +27,7 @@ register_type(Reducer, "Reducer")
 -- end
 
 function Reducer.new(arg)
+  local start_time = qc.RDTSC()
   assert(arg.coro == nil, "Migrate code to reducer style, where gen, func, value must be specified")
   assert(type(arg) == "table",
   "Reducer: Constructor needs a table as input argument. Instead got " .. type(arg))
@@ -46,10 +49,12 @@ function Reducer.new(arg)
     reducer._gen = arg.gen
   end
   reducer._index = 0
+  record_time(start_time, "Reducer.new")
   return reducer
 end
 
 function Reducer:next()
+  local start_time = qc.RDTSC()
   if self._gen == nil then return false end
   -- assert(self._gen ~= nil,  'Reducer: The reducer is materialized')
   local val = self._gen(self._index)
@@ -59,6 +64,7 @@ function Reducer:next()
   else
     self._gen = nil
   end
+  record_time(start_time, "Reducer.next")
   return self._gen ~= nil
 end
 
@@ -74,15 +80,19 @@ end
 
 function Reducer:value()
   -- We are allowing user to obtain partial values
+  local start_time = qc.RDTSC()
   assert(self._value ~= nil, "The reducer has not been evaluated yet")
+  record_time(start_time, "Reducer.value")
   return self._func(self._value)
 end
 
 function Reducer:eval()
+  local start_time = qc.RDTSC()
   local status = self._gen ~= nil
   while status == true do
     status = self:next()
   end
+  record_time(start_time, "Reducer.eval")
   return self:value()
 end
 

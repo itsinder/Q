@@ -82,4 +82,20 @@ tests.t5 = function()
   print("Successfully completed test t5")
 end
 
+-- sample testcase for Q.get_val_by_idx() operator
+tests.t6 = function()
+  local x_length = 2
+  local y_length = 5
+
+  local x_idx_vec = Q.mk_col({1,3}, "I1")
+  local y_val_vec = Q.mk_col({1,2,3,4,5}, "I1")
+  -- indexing of get_val_by_idx starts from zero
+  -- following will return idx(x_idx_vec) 1st and 3rd element of value vector(y_val_vec)
+  local z = Q.get_val_by_idx(x_idx_vec, y_val_vec)
+  z:eval()
+  assert(z:length() == x_idx_vec:length())
+  Q.print_csv(z)
+  print("Successfully completed test t5")
+end
+
 return tests
