@@ -11,13 +11,13 @@
 static inline uint64_t RDTSC()
 {
 #ifdef RASPBERRY_PI
-  unsigned int hi, lo;
-    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-  return ((uint64_t)hi << 32) | lo;
-#else
   struct timeval Tps; struct timezone Tpf;
   gettimeofday (&Tps, &Tpf);
   return ((uint64_t )Tps.tv_sec + 1000000* (uint64_t )Tps.tv_usec);
+#else
+  unsigned int hi, lo;
+    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
 #endif
 }
 //START_FUNC_DECL

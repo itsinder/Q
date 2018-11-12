@@ -21,7 +21,7 @@ return function (
   subs.bye = " "
   if ( is_safe ) then 
     subs.fn = subs.fn .. "_safe"
-    subs.checking_code = " if ( ( x < 0 ) || ( (uint32_t)x >= nZ ) ) { go_BYE(-1); }  "
+    subs.checking_code = ' if ( ( x < 0 ) || ( (uint32_t)x >= nZ ) ) { \n printf("hello world"); \n go_BYE(-1); }  '
     subs.bye = "BYE: "
   end
   return subs, tmpl

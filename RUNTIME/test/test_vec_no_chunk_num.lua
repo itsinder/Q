@@ -41,7 +41,7 @@ tests.t1 = function()
     if ( k == "is_persist") then assert(v == true) end 
     if ( k == "is_nascent") then assert(v == false) end 
     if ( k == "is_write") then assert(v == false) end 
-    if ( k == "chunk_size") then assert(v == 65536) end 
+    if ( k == "chunk_size") then assert(v == chunk_size) end
   end
   y = nil
   collectgarbage()
@@ -100,7 +100,7 @@ end
 tests.t4 = function()
   local y = Vector.new('I4', q_data_dir)
   local s = Scalar.new(123, "I4")
-  local chunk_size = 65536  
+  local chunk_size = qconsts.chunk_size
   for i = 1, chunk_size do 
     local status = y:put1(s)
     assert(status)
@@ -212,7 +212,7 @@ tests.t7 = function()
     if ( k == "num_in_chunk" ) then assert(v ==   0) end
     if ( k == "open_mode" )    then assert(v ==  "NOT_OPEN") end
     if ( k == "is_persist" )   then assert(v ==   false) end
-    if ( k == "num_elements" ) then assert(v ==   98304) end
+    if ( k == "num_elements" ) then assert(v ==   (chunk_size + (chunk_size/2))) end
     if ( k == "is_nascent" )   then assert(v ==   false) end
     if ( k == "is_memo" )      then assert(v == true) end
   end

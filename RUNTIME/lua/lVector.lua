@@ -41,7 +41,6 @@ typedef struct _vec_rec_type {
   int open_mode; // 0 = unopened, 1 = read, 2 = write
   char *chunk;
   uint32_t chunk_sz; // number of bytes allocated for chunk
-  bool is_virtual; // indicates whether vector is virtual or not
 } VEC_REC_TYPE;
 ]]
 --]==]
@@ -155,29 +154,6 @@ function lVector:flush_buffer()
   return self
 end
 
-
-
-function lVector.virtual_new(arg)
-  local vector = setmetatable({}, lVector)
-  -- for meta data stored in vector
-  vector._meta = {}
-
-  local qtype
-  local num_elements
-  local map_addr
-
-  assert(type(arg) == "table", "lVector construction requires table as arg")
-
-  qtype = assert(arg.qtype, "virtual vector needs qtype to be specified")
-  num_elements = assert(arg.num_elements, "virtual vector needs num_elements to be specified")
-  map_addr = assert(arg.map_addr, "virtual vector needs mmap address to be specified")
-
-  vector._base_vec = Vector.virtual(map_addr, qtype, num_elements)
-  assert(vector._base_vec)
-
-  return vector
-end
-
 function lVector.new(arg)
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
@@ -193,16 +169,19 @@ function lVector.new(arg)
   local is_memo = qconsts.is_memo -- referring value from qconsts, default to true
   -- Using env variable Q_DATA_DIR
   -- Passing q_data_dir to create the new vector's bin file in q_data_dir
-  local q_data_dir = os.getenv("Q_DATA_DIR")
-  assert(q_data_dir)
-  assert(plpath.isdir(q_data_dir))
+  local q_data_dir = assert(os.getenv("Q_DATA_DIR"), "Q_DATA_DIR not set")
+  --TODO RS Can we do this check in C in core_vec.c instead?
+  assert(plpath.isdir(q_data_dir)) 
   
+  -- TODO RS DISCUSS WITH KRUSHNAKANT: I do not think this is needed
+  -- This is because we do a strcat of a forward slash and an extra
+  -- forward slash does not matter
   -- Check if q_data_dir path ends with '/', if not append it
   if not qc["endswith"](q_data_dir, "/") then
     q_data_dir = q_data_dir .. "/"
   end
  
-  assert(type(arg) == "table", "lVector construction requires table as arg")
+  assert(type(arg) == "table", "Vector constructor requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
     assert(type(arg.is_memo) == "boolean")
@@ -442,7 +421,7 @@ function lVector:nn_file_name()
   local vec_meta = self:meta()
   local nn_file_name = nil
   if vec_meta.nn then
-    nn_file_name = vec_meta.nn.file_name
+    nn_file_name = assert(vec_meta.nn.file_name)
   end
   if ( qconsts.debug ) then self:check() end
   return nn_file_name
@@ -722,25 +701,23 @@ function lVector:chunk(chunk_num)
   else
     assert(self._gen)
     assert(type(self._gen) == "function")
-    local buf_size, base_data, nn_data, is_put_chunk = 
-      self._gen(chunk_num, self)
-      -- TODO DISCUSS following if with KRUSHNAKANT
-    if ( not is_put_chunk ) then 
-      if ( buf_size < qconsts.chunk_size ) then
-        if ( buf_size > 0 and base_data ) then
-          self:put_chunk(base_data, nn_data, buf_size)
-        end
-        self:eov()
-        --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+    local buf_size, base_data, nn_data = self._gen(chunk_num, self)
+    assert(type(buf_size) == "number") -- THINK TODO 
+    -- TODO DISCUSS following if with KRUSHNAKANT
+    if ( buf_size < qconsts.chunk_size ) then
+      if ( buf_size > 0 and base_data ) then
+        self:put_chunk(base_data, nn_data, buf_size)
+      end
+      self:eov()
+      --return buf_size, base_data, nn_data -- DISCUSS WITH KRUSHNAKANT
+    else
+      if ( base_data ) then 
+        -- this is the simpler case where generator malloc's
+        self:put_chunk(base_data, nn_data, buf_size)
       else
-        if ( base_data ) then 
-          -- this is the simpler case where generator malloc's
-          self:put_chunk(base_data, nn_data, buf_size)
-        else
-          -- this is the advanced case of using the Vector's buffer.
-          -- local chk =  self:chunk_num()
-          -- assert(chk == l_chunk_num)
-        end
+        -- this is the advanced case of using the Vector's buffer.
+        -- local chk =  self:chunk_num()
+        -- assert(chk == l_chunk_num)
       end
     end
     if ( qconsts.debug ) then self:check() end
@@ -797,6 +774,11 @@ function lVector:reincarnate()
     T[#T+1] = "nn_file_name = \"" 
     T[#T+1] = self:nn_file_name()
     T[#T+1] = "\", "
+  end
+
+  if ( self:fldtype() == "B1" ) then
+    T[#T+1] = "num_elements = "
+    T[#T+1] = self:num_elements()
   end
 
   T[#T+1] = " } ) "

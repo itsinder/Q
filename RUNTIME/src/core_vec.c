@@ -10,8 +10,11 @@
 #include "_copy_file.h"
 #include "_isfile.h"
 #include "_isdir.h"
+#include "_get_time_usec.h"
 
 #include "lauxlib.h"
+
+#undef MALLOC_DETAILS
 
 static uint64_t
 RDTSC(
@@ -46,6 +49,7 @@ static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
 static uint64_t t_memcpy;            static uint32_t n_memcpy;
 static uint64_t t_memset;            static uint32_t n_memset;
 static uint64_t t_malloc;            static uint32_t n_malloc;
+static uint64_t sz_malloc;           // number of bytes allocated
 
 extern luaL_Buffer g_errbuf;
 
@@ -69,18 +73,36 @@ l_memset(
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_memset++;
-  void *x = memset(s, c, n);
+  memset(s, c, n);
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_memset += delta; }
 }
 
 static inline void *
 l_malloc(
-    size_t n
+    size_t n,
+    VEC_REC_TYPE *ptr_vec // TODO DELETE later just for debugging
     )
 {
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
   void *x = malloc(n);
+  ptr_vec->uqid = t_start; // set a unique ID for debugging
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
+
+#ifdef MALLOC_DETAILS
+  // TODO START Delete later
+  uint64_t curr_sz_malloc = sz_malloc;
+  sz_malloc += n;
+  fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
+      ptr_vec->uqid, curr_sz_malloc, n, sz_malloc);
+  if ( *ptr_vec->name == '\0' ) {
+    fprintf(stderr, "NULL\n");
+  }
+  else {
+    fprintf(stderr, "%s\n", ptr_vec->name);
+  }
+  // TODO STOP Delete later
+#endif
+
   return x;
 }
 
@@ -108,6 +130,7 @@ vec_reset_timers(
   t_memcpy = 0;             n_memcpy = 0;
   t_memset = 0;             n_memset = 0;
   t_malloc = 0;             n_malloc = 0;
+  sz_malloc = 0;
 }
 
 void
@@ -134,6 +157,7 @@ vec_print_timers(
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
   fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
+  fprintf(stdout, "2,sz_malloc,0,%" PRIu64 "\n", sz_malloc);
 }
 
 
@@ -238,7 +262,7 @@ vec_get_buf(
   char *chunk = NULL;
   if ( ptr_vec->is_nascent ) {
     if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
       if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
       l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
     }
@@ -485,8 +509,29 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
+
+#ifdef MALLOC_DETAILS
+    // TODO START Delete later
+    uint64_t curr_sz_malloc = sz_malloc;
+    if ( ptr_vec->chunk_sz > sz_malloc ) {
+      printf("hello world\n");
+    }
+    sz_malloc -= ptr_vec->chunk_sz;
+
+    fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
+        ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
+    if ( *ptr_vec->name == '\0' ) {
+      fprintf(stderr, "NULL\n");
+    }
+    else {
+      fprintf(stderr, "%s\n", ptr_vec->name);
+    }
+    // TODO STOP Delete later
+#endif
+
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
+    ptr_vec->chunk_sz = 0;
   }
   if ( !ptr_vec->is_persist ) {
     if ( isfile(ptr_vec->file_name) ) {
@@ -497,7 +542,7 @@ vec_free(
       }
     }
     /* NOTE Remove can fail because (1) file does not exist 
-      (2) permission to delete not there */
+       (2) permission to delete not there */
     if ( isfile(ptr_vec->file_name) ) { go_BYE(-1); }
     memset(ptr_vec->file_name, '\0', Q_MAX_LEN_FILE_NAME+1);
   }
@@ -596,7 +641,7 @@ vec_clone(
   memset(ptr_new_vec->name, '\0', Q_MAX_LEN_INTERNAL_NAME+1);
 
   if ( ptr_old_vec->chunk != NULL ) { 
-    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz);
+    ptr_new_vec->chunk = l_malloc(ptr_new_vec->chunk_sz, ptr_new_vec);
     return_if_malloc_failed(ptr_new_vec->chunk); 
     l_memcpy(ptr_new_vec->chunk, ptr_old_vec->chunk, ptr_new_vec->chunk_sz);
     // Update num_in_chunk and chunk_num
@@ -868,22 +913,28 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
       go_BYE(-1);
       break;
   }
+#ifdef TODO
+  Curently this is commented out need to think more
   // Cannot have vector with 0 elements. 
   if ( ptr_vec->is_eov == true ) {
-    return status;
-    /* TODO P1 Think about how to handle this if it happens
     if ( ptr_vec->num_elements == 0    ) { go_BYE(-1); }
-    */
+  }
+#endif
+  if ( ptr_vec->is_eov == true ) {
+    return status;
   }
   // when map_len > 0, must match file_size 
   // It is possible for map_len == 0 and file_size > 0
-  if ( ptr_vec->map_len > 0 ) { 
+  if ( ptr_vec->map_len > 0 ) {
     if ( ptr_vec->file_size != ptr_vec->map_len ) { 
       go_BYE(-1); 
     }
     if (get_file_size(ptr_vec->file_name) != (int64_t)ptr_vec->file_size){ 
       go_BYE(-1); 
     }
+  }
+  else {
+    if ( ptr_vec->map_addr != NULL ) { go_BYE(-1); }
   }
   /* When is_eov and is_memo, 
      Backup file should exist and have space for num_elements in it */
@@ -929,7 +980,8 @@ is_nascent = false, is_eov = true (file_mode or start_write call or materialized
     if ( ptr_vec->num_in_chunk == 0    ) { go_BYE(-1); }
     if ( ptr_vec->chunk        == NULL ) { go_BYE(-1); }
     // May be only 1 chunk if ( ptr_vec->chunk_num    == 0    ) { go_BYE(-1); }
-    if ( ptr_vec->open_mode    != 0 ) { go_BYE(-1); }
+    if ( ptr_vec->open_mode    != 0 ) { 
+      go_BYE(-1); }
     if ( ptr_vec->map_addr     != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len      != 0    ) { go_BYE(-1); }
   }
@@ -983,8 +1035,25 @@ vec_clean_chunk(
   int status = 0;
   if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
+#ifdef MALLOC_DETAILS
+    // TODO START Delete later
+    uint64_t curr_sz_malloc = sz_malloc;
+    sz_malloc -= ptr_vec->chunk_sz;
+    fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
+        ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
+    if ( *ptr_vec->name == '\0' ) {
+      fprintf(stderr, "NULL\n");
+    }
+    else {
+      fprintf(stderr, "%s\n", ptr_vec->name);
+    }
+    // TODO STOP Delete later
+#endif
+
     // Clean the chunk and chunk metadata
-    free_if_non_null(ptr_vec->chunk);
+    free(ptr_vec->chunk);
+    ptr_vec->chunk = NULL;
+    ptr_vec->chunk_sz = 0;
     ptr_vec->chunk_num    = 0;
     ptr_vec->num_in_chunk = 0;          
     ptr_vec->is_nascent   = false;          
@@ -1193,7 +1262,7 @@ vec_add_B1(
 {
   int status = 0;
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -1294,7 +1363,7 @@ vec_add(
   //---------------------------------------
 
   if ( ptr_vec->chunk == NULL ) { 
-    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz);
+    ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
     return_if_malloc_failed(ptr_vec->chunk);
     l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
   }
@@ -1343,7 +1412,19 @@ vec_start_write(
     go_BYE(-1);
   }
   if ( ! ptr_vec->is_virtual ) {
-    if ( ptr_vec->open_mode != 0    ) { go_BYE(-1); }
+    // TODO DISCUSS WITH KRUSHNAKANT
+    // I am going to allow open in write even if opened in read
+    // but this needs more thought 
+    if ( ptr_vec->open_mode == 0 ) {
+      /* this situation is fine */
+    }
+    else if ( ptr_vec->open_mode == 1 ) {
+      if ( ptr_vec->map_addr != NULL ) { 
+        munmap(ptr_vec->map_addr, ptr_vec->map_len);
+        ptr_vec->map_addr = NULL;
+        ptr_vec->map_len = 0;
+      }
+    }
     if ( ptr_vec->map_addr  != NULL ) { go_BYE(-1); }
     if ( ptr_vec->map_len   != 0    ) { go_BYE(-1); }
   }
@@ -1496,11 +1577,28 @@ vec_no_memcpy(
   if ( ptr_vec->file_size != 0 ) { go_BYE(-1); }
   // TODO P1 What other checks?
   // TODO Check cmem number of elements
+  ptr_vec->uqid  = RDTSC();
   ptr_vec->chunk = ptr_cmem->data;
   ptr_vec->chunk_sz = ptr_cmem->size;
   ptr_vec->chunk_size = chunk_size; 
   ptr_vec->is_no_memcpy = true;
   ptr_cmem->is_foreign = true;
+
+#ifdef MALLOC_DETAILS
+  // TODO START Delete later
+  uint64_t curr_sz_malloc = sz_malloc;
+  sz_malloc += ptr_cmem->size;
+  fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
+      ptr_vec->uqid, curr_sz_malloc, ptr_cmem->size, sz_malloc);
+  if ( *ptr_vec->name == '\0' ) {
+    fprintf(stderr, "NULL\n");
+  }
+  else {
+    fprintf(stderr, "%s\n", ptr_vec->name);
+  }
+  // TODO STOP Delete later
+#endif
+
 BYE:
   return status;
 

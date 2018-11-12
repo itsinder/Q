@@ -6,6 +6,7 @@ local function set_sclr_val_by_idx(x, y, optargs)
   local get_ptr     = require 'Q/UTILS/lua/get_ptr'
   local cmem        = require 'libcmem'
   local Scalar      = require 'libsclr'
+  local record_time = require 'Q/UTILS/lua/record_time'
 
   assert(x and type(x) == "lVector", "x must be a Vector")
   assert(y and type(y) == "lVector", "y must be a Vector")
@@ -43,7 +44,7 @@ local function set_sclr_val_by_idx(x, y, optargs)
     local chunk1 = ffi.cast(f1_cast_as,  get_ptr(f1_chunk))
     local start_time = qc.RDTSC()
     qc[func_name](chunk1, f1_len, ptr2, nR2, ptr_sclr_val)
-      -- TODO record_time(start_time, func_name)
+    record_time(start_time, func_name)
     chunk_idx = chunk_idx + 1
   end
   y:end_write()

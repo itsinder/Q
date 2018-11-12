@@ -1,6 +1,8 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
  return { base_field_type = "I4",
 base_num_in_chunk = "0",
-base_chunk_size = "65536",
+base_chunk_size = tostring(qconsts.chunk_size),
 base_chunk_num = "0",
 base_file_size = "40",
 base_num_elements = "10",

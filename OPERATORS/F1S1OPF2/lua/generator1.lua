@@ -23,8 +23,15 @@
           -- NOTE: Provide legit scalar_val for each scalar_type
           -- For 6 basic types, 1 is fine but will need to do better
           -- for B1, SC, ...
-          local s = Scalar.new(1, scalar_type)
-          local status, subs, tmpl = pcall(sp_fn, fldtype, s)
+          local status, subs, tmpl
+          if ( operator == "cum_cnt" ) then 
+            local optargs = {}; optargs.in_nR = 1000000
+            status, subs, tmpl = pcall(sp_fn, fldtype, optargs)
+            print(operator, status, subs, tmpl)
+          else 
+            local s = Scalar.new(1, scalar_type)
+            status, subs, tmpl = pcall(sp_fn, fldtype, s)
+          end
           if ( status ) then 
             assert(type(subs) == "table")
             assert(type(tmpl) == "string")

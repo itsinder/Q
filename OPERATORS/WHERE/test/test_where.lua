@@ -174,4 +174,13 @@ tests.t8 = function ()
   print("Test t8 succeeded")
 end
 
+tests.t9 = function ()
+  -- B1 vector with all zeros, should return nil
+  local b = Q.mk_col({0, 0, 0, 0, 0}, "B1")
+  local c = Q.where(a, b):eval()
+  assert(c == nil)
+  print("Test t9 succeeded")
+end
+
+
 return tests

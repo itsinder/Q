@@ -6,8 +6,9 @@ local cmem    = require 'libcmem'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local qtils = require 'Q/QTILS/lua/is_sorted'
 local sort = require 'Q/OPERATORS/SORT/lua/sort'
+local record_time = require 'Q/UTILS/lua/record_time'
 
-local function expander_f1opf2f3(op, x)
+local function expander_f1opf2f3(op, x, optargs)
   -- Verification
   assert(op == "split")
   assert(type(x) == "lVector", "a must be a lVector ")
@@ -48,7 +49,14 @@ local function expander_f1opf2f3(op, x)
     
     local in_len, in_chunk, in_nn_chunk = x:chunk(chunk_idx)
     -- TODO DISCUSS FOLLOWING WITH KRUSHNAKANT
-    if ( in_len == 0 ) then return nil end
+    if ( in_len == 0 ) then 
+      return 0
+      --[[
+      out1_vec:eov()
+      out2_vec:eov()
+      return nil, nil, nil, true -- indicating put chunk done
+      --]]
+    end
     if ( first_call ) then  assert(in_len > 0) end 
     assert(in_nn_chunk == nil, "nulls not supported as yet")
     
@@ -61,7 +69,7 @@ local function expander_f1opf2f3(op, x)
     local start_time = qc.RDTSC()
     local status = qc[func_name](cst_in_chunk, in_len, shift,
       cst_out1_buf, cst_out2_buf)
-    -- TODO record_time(start_time, func_name)
+    record_time(start_time, func_name)
     assert(status == 0, "C error in split")
 
     -- Write values to vector
@@ -73,11 +81,22 @@ local function expander_f1opf2f3(op, x)
       out1_vec:eov()
       out2_vec:eov()
     end
-    return nil, nil, nil, is_put_chunk
-    -- TODO P1 What do we return here?
+    return in_len, nil, nil
   end
   out1_vec:set_generator(f1opf2f3_gen)
   out2_vec:set_generator(f1opf2f3_gen)
+  if ( optargs ) then 
+    assert(type(optargs) == "table")
+    if ( optargs.names ) then
+      assert(type(optargs.names) == "table") 
+      assert(optargs.names[1] and type(optargs.names[1] == "string"))
+      assert(optargs.names[2] and type(optargs.names[2] == "string"))
+      assert(optargs.names[1] ~= optargs.names[2])
+      out1_vec:set_name(optargs.names[1])
+      out1_vec:set_name(optargs.names[2])
+    end
+  end
+
   return out1_vec, out2_vec
 end
 

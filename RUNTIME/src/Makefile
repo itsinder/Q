@@ -35,6 +35,7 @@ libvec.so: libcmem.so
 		../../UTILS/src/file_exists.c \
                 ../../UTILS/src/isfile.c \
                 ../../UTILS/src/isdir.c \
+                ../../UTILS/src/get_time_usec.c \
 		../../OPERATORS/PRINT/src/B1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I1_to_txt.c \
 		../../OPERATORS/PRINT/gen_src/_I2_to_txt.c \

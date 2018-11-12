@@ -16,10 +16,10 @@ tests.t1 = function()
   local x_length = 65
   local y_length = 80
 
-  local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
-  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
+  local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} ):set_name("x")
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} ):set_name("y")
 
-  local z = Q.cat({x, y})
+  local z = Q.cat({x, y}, { name = "z" })
   
   assert(z:length() == (x_length + y_length))
   
@@ -44,8 +44,8 @@ tests.t2 = function()
   local x_length = 65536
   local y_length = 80
 
-  local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} )
-  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} )
+  local x = Q.seq( {start = 1, by = 1, qtype = "I4", len = x_length} ):set_name("x")
+  local y = Q.seq( {start = 1, by = 1, qtype = "I4", len = y_length} ):set_name("y")
 
   local z = Q.cat({x, y})
   
