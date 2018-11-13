@@ -37,7 +37,7 @@ print("Done")
 print("=======================")
 
 in_val = [1, 2, 3, 4]
-res = utils.to_lua_table(in_val)
+res = utils.to_table(in_val)
 print(type(res))
 print(list(res))
 print(dict(res))

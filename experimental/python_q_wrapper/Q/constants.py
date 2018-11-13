@@ -20,7 +20,38 @@ float64 = "F8"
 
 
 # operator names
-mk_col = "mk_col"
-const = "const"
-vvadd = "vvadd"
-seq = "seq"
+MK_COL = "mk_col"
+CONST = "const"
+ADD = "add"
+SEQ = "seq"
+
+
+# scalar function strings
+scalar_arith_func_str = \
+    """
+    function(scalar1, scalar2)
+        return scalar1 {op} scalar2
+    end
+    """
+
+scalar_func_str = \
+    """
+    function(scalar)
+        return scalar:{fn_name}()
+    end
+    """
+
+# vec function strings
+vec_func_str = \
+    """
+    function(vec)
+        return vec:{fn_name}()
+    end
+    """
+
+vec_func_arg_str = \
+    """
+    function(vec, arg_val)
+        return vec:{fn_name}(arg_val)
+    end
+    """
