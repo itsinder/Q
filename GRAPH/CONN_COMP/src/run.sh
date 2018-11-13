@@ -1,20 +1,15 @@
-gcc -g $QC_FLAGS proc_uk_graph.c \
-  $HOME/WORK/Q/UTILS/src/mmap.c \
-  -I$HOME/WORK/Q/UTILS/inc/ \
-  -I$HOME/WORK/Q/UTILS/gen_inc/
-
-gcc -g $QC_FLAGS conn_comp.c \
-  $HOME/WORK/Q/UTILS/src/mmap.c \
-  -I$HOME/WORK/Q/UTILS/inc/ \
-  -I$HOME/WORK/Q/UTILS/gen_inc/ -o conn_comp
-
-# CUDA file compilation
-#nvcc -g -DDEBUG -Xcompiler -fPIC conn_comp_cuda.cu \
-#  $HOME/WORK/Q/UTILS/src/mmap.c \
-#  -I$HOME/WORK/Q/UTILS/inc/ \
-#  -I$HOME/WORK/Q/UTILS/gen_inc/ -o conn_comp_cuda
-
-datafile=$HOME/ukgraph-5
-test -f $datafile
-./a.out $datafile out y
-echo "Successfully completed $0 in $PWD"
+#/bin/bash
+set -e
+# Add -DDEBUG for debugging
+gcc -O4 -std=gnu99 -Wall \
+  degree_histo.c \
+  qsort_asc_I4.c  \
+  ../../../UTILS/src/mmap.c  \
+  ../../../UTILS/src/rdtsc.c  \
+  -I../../../UTILS/inc/  \
+  -I../../../UTILS/gen_inc/ 
+echo "Built"
+maxid=124900000
+echo ./a.out ../data/efile _node_id _degree $maxid
+./a.out ../data/efile _node_id _degree $maxid
+echo "Done"
