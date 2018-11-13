@@ -1,4 +1,5 @@
 from Q import executor
+from Q import utils
 
 
 q_op_str = \
@@ -20,7 +21,6 @@ q_operators = [ str(x) for x in dict(executor.execute(q_op_str)).keys() ]
 func_str = \
     """
     function(a, b)
-        assert(nil)
         return a + b
     end
     """
@@ -28,6 +28,16 @@ func_str = \
 func = executor.eval(func_str)
 try:
     print(func(5, 9))
+    print(func(None, 9))
 except Exception as e:
     print(str(e))
 print("Done")
+
+
+print("=======================")
+
+in_val = [1, 2, 3, 4]
+res = utils.to_lua_table(in_val)
+print(type(res))
+print(list(res))
+print(dict(res))
