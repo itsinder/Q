@@ -1,3 +1,4 @@
+import Q
 from Q import executor
 from constants import *
 
@@ -71,3 +72,7 @@ class PVector:
         func = executor.eval(func_str)
         result = func(self.base_vec, is_persist)
         return self
+
+    def __add__(self, other):
+        """Add two vectors or vector-scalar using '+' operator"""
+        return Q.add(self, other)

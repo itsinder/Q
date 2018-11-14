@@ -7,9 +7,9 @@ def test_scalar_new():
     val = 5
     qtype = Q.I1
     sclr = PScalar(val, qtype)
-    assert(isinstance(sclr, PScalar))
-    assert(sclr.to_num() == val)
-    assert(sclr.qtype() == qtype)
+    assert (isinstance(sclr, PScalar))
+    assert (sclr.to_num() == val)
+    assert (sclr.qtype() == qtype)
     print(sclr)
     print("Successfully executed scalar creation test")
 
@@ -21,17 +21,24 @@ def test_scalar_arith():
     qtype = Q.I1
     sclr1 = PScalar(val1, qtype)
     sclr2 = PScalar(val2, qtype)
-    assert(isinstance(sclr1, PScalar))
-    assert(isinstance(sclr2, PScalar))
-    assert(sclr1.to_num() == val1)
-    assert(sclr1.qtype() == qtype)
-    assert(sclr2.to_num() == val2)
-    assert(sclr2.qtype() == qtype)
+
     # Add scalars
     sclr3 = sclr1 + sclr2
-    assert(isinstance(sclr3, PScalar))
-    assert(sclr3.to_num() == (val1 + val2))
-    print(sclr3.qtype())
+    assert (isinstance(sclr3, PScalar))
+    assert (sclr3.to_num() == (val1 + val2))
+    print(sclr3)
+
+    # Add scalar and number
+    # TODO: not yet supported in Q
+    """
+    sclr4 = sclr1 + val2
+    assert (isinstance(sclr4, PScalar))
+    assert (sclr4.to_num() == (val1 + val2))
+    print(sclr4.qtype())
+
+    result = (sclr3 == sclr4)
+    print(result)
+    """
     print("Successfully executed scalar arithmetic test")
 
 
@@ -40,4 +47,3 @@ if __name__ == "__main__":
     print("==========================")
     test_scalar_arith()
     print("==========================")
-

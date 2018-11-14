@@ -1,5 +1,4 @@
-from Q import executor
-from Q import utils
+from Q import utils, executor
 
 
 q_op_str = \
@@ -13,9 +12,8 @@ q_op_str = \
     """
 q_operators = [ str(x) for x in dict(executor.execute(q_op_str)).keys() ]
 
-#for i in q_operators:
-#    print(i)
-
+# for i in q_operators:
+#     print(i)
 
 
 func_str = \

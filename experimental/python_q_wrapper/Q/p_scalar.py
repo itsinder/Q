@@ -10,6 +10,8 @@ class PScalar:
             if not val or not qtype:
                 raise Exception("Provide appropriate argument to PScalar constructor")
             self.base_scalar = self.new(val, qtype)
+        from Q import utils
+        self.utils = utils
 
     def new(self, val, qtype):
         """create a scalar"""
@@ -81,93 +83,103 @@ class PScalar:
 
     def __add__(self, other):
         """add two scalars"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="+")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
+        result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __sub__(self, other):
         """subtract two scalars"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="-")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
+        result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __mul__(self, other):
         """multiply two scalars"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="*")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
+        result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __div__(self, other):
         """multiply two scalars"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="/")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
+        result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __ne__(self, other):
         """check whether two scalars are not equal"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="~=")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __eq__(self, other):
         """check whether two scalars are equal"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="==")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __ge__(self, other):
         """check whether first scalar is greater than or equal to second scalar"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op=">=")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __gt__(self, other):
         """check whether first scalar is greater than second scalar"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op=">")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __le__(self, other):
         """check whether first scalar is less than or equal to second scalar"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="<=")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __lt__(self, other):
         """check whether first scalar is less than second scalar"""
-        if not isinstance(other, PScalar):
-            raise Exception("Second argument is not of type PScalar")
+        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        other = self.utils.update_args(other)
         func_str = scalar_arith_func_str.format(op="<")
         func = executor.eval(func_str)
-        result = func(self.base_scalar, other.base_scalar)
-        return PScalar(base_scalar=result)
+        result = func(self.base_scalar, other)
+        return result
 
     def __abs__(self):
         return self.abs()

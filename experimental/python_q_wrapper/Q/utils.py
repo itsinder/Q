@@ -1,10 +1,30 @@
 from Q import executor
 from Q import lupa
+from p_vector import PVector
+from p_scalar import PScalar
 
 
 class Utils:
     def __init__(self):
         pass
+
+    def update_args(self, val):
+        if isinstance(val, PVector):
+            return val.get_base_vec()
+        elif isinstance(val, PScalar):
+            return val.get_base_scalar()
+        elif type(val) == list:
+            new_list = []
+            for arg in val:
+                new_list.append(self.update_args(arg))
+            return self.to_table(new_list)
+        elif type(val) == dict:
+            new_dict = {}
+            for i, v in val.items():
+                new_dict[i] = self.update_args(v)
+            return self.to_table(new_dict)
+        else:
+            return val
 
     def to_table(self, in_val):
         func_list_to_table = \

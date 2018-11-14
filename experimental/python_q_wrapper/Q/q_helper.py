@@ -7,22 +7,6 @@ import math
 from q_op_category import *
 
 
-def __update_args(val):
-    if isinstance(val, PVector):
-        return val.get_base_vec()
-    elif type(val) == list:
-        new_list = []
-        for arg in val:
-            new_list.append(__update_args(arg))
-        return utils.to_table(new_list)
-    elif type(val) == dict:
-        new_dict = {}
-        for i, v in val.items():
-            new_dict[i] = __update_args(v)
-        return utils.to_table(new_dict)
-    else:
-        return val
-
 
 def __wrap_output(op_name, result):
     if op_name in number_as_output:
@@ -51,7 +35,7 @@ def __wrap_output(op_name, result):
 def call_lua_op(op_name, *args):
     args_list = []
     for val in args:
-        val = __update_args(val)
+        val = utils.update_args(val)
         args_list.append(val)
     args_list = utils.to_table(args_list)
 
@@ -104,14 +88,14 @@ def array(in_vals, dtype=None):
 
 
 def add(vec1, vec2):
-    """Add two vectors, wrapper around Q.vvadd"""
+    """Add two vectors, wrapper around Q.add"""
 
-    assert(isinstance(vec1, PVector))
-    assert(isinstance(vec2, PVector))
+    if not isinstance(vec1, PVector):
+        raise Exception("First argument is not of type PVector")
 
-    # convert args
-    vec1 = __update_args(vec1)
-    vec2 = __update_args(vec2)
+    if not (isinstance(vec2, PVector) or isinstance(vec2, PScalar)
+            or type(vec2) == int or type(vec2) == float):
+        raise Exception("Second argument type {} is not supported".format(type(vec2)))
 
     # call wrapper function
     return call_lua_op(q_consts.ADD, vec1, vec2)
@@ -134,12 +118,12 @@ def full(shape, fill_value, dtype=None):
 
 def zeros(shape, dtype=None):
     """Create a constant vector with value zero"""
-    return full(shape, 0)
+    return full(shape, 0, dtype)
 
 
 def ones(shape, dtype=None):
     """Create a constant vector with value one"""
-    return full(shape, 1)
+    return full(shape, 1, dtype)
 
 
 def arange(start=0, stop=None, step=1, dtype=None):
