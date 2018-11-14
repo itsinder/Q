@@ -28,7 +28,7 @@ tests.t1 = function()
   split(data_file, metadata_file, split_csv_args, hdr_info)
 
   -- executing the sklearn gini and entropy
-  local cmd = "python -Wignore " .. Q_SRC_ROOT .. "/ML/DT/python/DTree_sklearn_breast_cancer_train_test.py"
+  local cmd = "python3 -Wignore " .. Q_SRC_ROOT .. "/ML/DT/python/DTree_sklearn_breast_cancer_train_test.py"
   os.execute(cmd)
   
   -- converting sklearn gini graphviz to q graphviz format
@@ -61,7 +61,7 @@ tests.t1 = function()
   local args = {}
   args.data_file = nil
   args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_data_test.csv"
-  args.meta_data_file = "/home/pragati/WORK/Q/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
+  args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
   args.is_hdr = true
   args.goal = "diagnosis"
   args.alpha =  Scalar.new(0.2, "F4")
