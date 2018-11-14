@@ -1,11 +1,13 @@
-import Q
 from Q import executor
 from constants import *
+from p_scalar import PScalar
 
 
 class PVector:
     def __init__(self, base_vec):
         self.base_vec = base_vec
+        from q_helper import call_lua_op
+        self.call_lua_op = call_lua_op
 
     def get_base_vec(self):
         return self.base_vec
@@ -75,4 +77,8 @@ class PVector:
 
     def __add__(self, other):
         """Add two vectors or vector-scalar using '+' operator"""
-        return Q.add(self, other)
+        if not (isinstance(other, PVector) or isinstance(other, PScalar)
+                or type(other) == int or type(other) == float):
+            raise Exception("Second argument type {} is not supported".format(type(other)))
+        # call wrapper function
+        return self.call_lua_op(ADD, self, other)
