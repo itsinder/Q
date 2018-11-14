@@ -1,4 +1,4 @@
-local gini_to_q_dt = require 'Q/ML/DT/lua/sklearn_to_q'
+local gini_to_q_dt = require 'Q/ML/DT/lua/sklearn_to_q_dt'
 local plpath       = require 'pl.path'
 local path_to_here = os.getenv("Q_SRC_ROOT") .. "/ML/DT/test/"
 assert(plpath.isdir(path_to_here))
