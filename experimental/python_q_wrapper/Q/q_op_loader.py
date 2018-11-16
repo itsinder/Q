@@ -11,9 +11,9 @@ q_op_str = \
     end
     return t
     """
-q_operators = [ str(x) for x in dict(executor.execute(q_op_str)).keys() ]
+q_operators = [str(x) for x in dict(executor.execute(q_op_str)).keys()]
 
 
 def op_wrapper(op_name):
-    return lambda *x: call_lua_op(op_name, *x)
+    return lambda *y: call_lua_op(op_name, *y)
 

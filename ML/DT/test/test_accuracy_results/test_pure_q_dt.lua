@@ -201,4 +201,42 @@ tests.t3 = function()
 
 end
 
+tests.t4 = function()
+  -- Test alpha calculation
+  --[[
+  local data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248.csv"
+  local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
+
+  local split = require 'Q/ML/UTILS/lua/split_csv_to_train_test'
+  local split_csv_args = {}
+  split_csv_args.is_hdr = true
+  split_csv_args.split_ratio = 0.5
+  local hdr_info = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,class"
+  -- splitting data into 50-50 train test
+  split(data_file, metadata_file, split_csv_args, hdr_info)
+  --]]
+  local args = {}
+  args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
+  args.data_file = nil
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds2_11720_7137_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds2_11720_7137_test.csv"
+  args.is_hdr = true
+  args.goal = "class"
+  args.iterations = 1
+  args.min_alpha = 0.1
+  args.max_alpha = 0.8
+  args.step_alpha = 0.01
+  args.is_hdr = true
+
+  Vector.reset_timers()
+  start_time = qc.RDTSC()
+
+  local result = calculate_alpha(args)
+  local csv_path = "from_ramesh_category2_pure_q_results.csv"
+
+  write_to_csv(result, csv_path)
+  print("Results written to " .. csv_path)
+
+end
+
 return tests
