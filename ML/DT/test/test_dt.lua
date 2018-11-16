@@ -208,16 +208,17 @@ tests.t6 = function()
   local split = require 'Q/ML/UTILS/lua/split_csv_to_train_test'
   local split_csv_args = {}
   split_csv_args.is_hdr = true
+  local hdr_info = "age,yop,no_of_pos_axillary_nodes,survival_status"  
 
-  split(data_file, metadata_file, split_csv_args)
+  split(data_file, metadata_file, split_csv_args, hdr_info)
 
   local alpha = Scalar.new(0.2, "F4")
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
   local args = {}
   args.data_file = nil
-  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/train_data.csv"
-  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/test_data.csv"
+  args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/after_opr_lifespan_train.csv"
+  args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/after_opr_lifespan_test.csv"
   args.meta_data_file = metadata_file
   args.is_hdr = true
   args.goal = "survival_status"

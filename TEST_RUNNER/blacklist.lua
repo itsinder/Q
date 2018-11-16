@@ -22,6 +22,7 @@ local blacklist_files = {
   "OPERATORS/MM/test/test_mv_mul.lua",
   "OPERATORS/PCA/test/test_eigen.lua",
   "OPERATORS/APPROX/QUANTILE/test/test_aq.lua",
+  "ML/DT/test/test_accuracy_results/test_import_sklearn_in_q.lua"
 
 }
 
