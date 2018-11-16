@@ -28,11 +28,13 @@ local function run_kmeans(
     print("Loading data")
     D = Q.load_csv(data_file, M, optargs)
   end
-  local class = kmeans.init(D, nK)
+  local old_class = kmeans.init(D, nK)
   while true do 
-    local means = kmeans.update_step(D, nK, class)
+    local means = kmeans.update_step(D, nK, old_class)
     -- assert(nil, "PREMATURE")
-    class = kmeans.assignment_step(D, nK, means)
+    new_class = kmeans.assignment_step(D, nK, means)
+    is_stop = kmeans.check_termination(old_class, new_class)
+    if ( is_stop ) then break else old_class = new_class end
     n_iter = n_iter + 1 
     if ( n_iter > max_iter ) then print("Exceeded limit") break end
   end

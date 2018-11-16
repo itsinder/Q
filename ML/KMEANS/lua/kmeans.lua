@@ -114,8 +114,15 @@ local function update_step(
   end
 
   return means -- a table of nJ vectors of length nK
---================================
 end
+--================================
+local function check_termination(old, new, nK)
+  assert(chk_class(old, nK))
+  assert(chk_class(new, nK))
+  local num_diff = Q.sum(Q.vvneq(old, new)):eval():to_num()
+  if ( num_diff == 0 ) then return true else return false end 
+end
+--================================
 local function init(D, nK)
   local nI, nJ = assert(chk_data(D))
   local class = Q.rand({len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
@@ -125,5 +132,6 @@ end
 kmeans.assignment_step = assignment_step
 kmeans.update_step = update_step
 kmeans.init = init
+kmeans.check_termination = check_termination
 
 return kmeans
