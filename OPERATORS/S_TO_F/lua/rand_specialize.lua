@@ -68,11 +68,11 @@ return function (
   c_mem_ptr.seed = seed
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 
-    subs.generator = "mrand48"
-    subs.gen_type = "uint64_t"
+    subs.generator = "mrand48_r"
+    subs.gen_type = "int64_t"
     subs.scaling_code = "floor( (( (double) (x - INT_MIN) ) / ( (double) (INT_MAX) - (double)(INT_MIN) ) ) * (range + 1) )"
   elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
-    subs.generator = "drand48"
+    subs.generator = "drand48_r"
     subs.gen_type = "double"
     subs.scaling_code = "range * x"
   else

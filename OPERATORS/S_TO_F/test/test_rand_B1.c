@@ -18,7 +18,7 @@ int main(
   int m = 1048576+3;
   status = rand_B1((uint64_t *)X, m, &args, 0); cBYE(status);
   int actual_cnt = 0;
-  for ( int i = 0; i < n+8; i ++ ) { 
+  for ( int i = 0; i < n; i ++ ) { 
     actual_cnt += __builtin_popcountll(X[i]);
   }
   int theoretical_cnt = (int)(m * args.probability);
@@ -30,5 +30,6 @@ int main(
   }
 
 BYE:
+  free_if_non_null(Y);
   return status;
 }
