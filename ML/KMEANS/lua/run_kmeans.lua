@@ -40,6 +40,17 @@ local function run_kmeans(
   end
   local nI, nJ = assert(check.data(D))
   local old_class = kmeans.init(nI, nJ, nK)
+
+  --[[ TODO: Not working currently. 
+  -- set chunk size to encompass data set (okay for small data sets)
+  local chunk_size = 1024
+  while chunk_size < nI do
+    chunk_size = chunk_size * 2
+  end
+  print("chunk_size set to ", chunk_size)
+  package.loaded['Q/UTILS/lua/q_consts'].chunk_size = chunk_size
+  --]]
+
   local n_iter = 1
   while true do 
     local means = kmeans.update_step(D, nI, nJ, nK, old_class)
