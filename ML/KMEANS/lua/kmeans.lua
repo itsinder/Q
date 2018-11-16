@@ -14,7 +14,8 @@ local function assignment_step(
   nI,
   nJ,
   nK,
-  means -- means is a table of J vectors of length K
+  means, -- means is a table of J vectors of length K
+  num_in_class
   )
   if debug then 
     local nI, nJ = assert(check.data(D))
@@ -23,11 +24,11 @@ local function assignment_step(
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
   for k = 1, nK do 
-    dist[k] = Q.const({val = 0, qtype = "F4", len = nI})
+    dist[k] = Q.const({val = 0, qtype = "F8", len = nI})
     for j, Dj in  pairs(D) do
       -- mu_j_k = value of jth feature for kth mean
       local mu_j_k = means[k][j]
-      dist[k] = Q.vvadd(dist[k], Q.sqr(Q.vssub(Dj, mu_j_k)))
+      dist[k] = Q.add(dist[k], Q.sqr(Q.vssub(Dj, mu_j_k)))
     end
   end
   for k = 1, nK do 
@@ -46,11 +47,11 @@ local function assignment_step(
     best_clss = Q.ifxthenyelsez(x, best_clss, Scalar.new(k, "I4"))
   end
   -- verify that no cluster is empty
-  local chk = Q.numby(best_clss, nK+1):eval()
+  local num_in_class = Q.numby(best_clss, nK+1):eval()
   -- We have the "== 1" in check below because clusters are indexed
   -- from 1, 2, ... and hence nothing assigned to cluster 0
-  assert(Q.sum(Q.vseq(chk, 0)):eval():to_num() == 1 )
-  return best_clss -- vector of length nI
+  assert(Q.sum(Q.vseq(num_in_class, 0)):eval():to_num() == 1 )
+  return best_clss, num_in_class 
 end
 --================================
 local function update_step(
@@ -58,9 +59,12 @@ local function update_step(
   nI,
   nJ,
   nK,
-  class -- Vector of length nI
+  class, -- Vector of length nI
+  num_in_class
   )
   if ( debug ) then 
+    assert(type(num_in_class) == "lVector")
+    assert(num_in_class:length() == nK+1)
     assert(check.class(class, nK))
     local nI, nJ = assert(check.data(D))
     assert(class:length() == nI)
@@ -70,7 +74,8 @@ local function update_step(
     local x = Q.vseq(class, k):eval()
     means[k] = {}
     for j, Dj in pairs(D) do
-      means[k][j] = Q.sum(Q.where(Dj, x)):eval():to_num() / nI
+      means[k][j] = Q.sum(Q.where(Dj, x)):eval():to_num() / 
+         num_in_class:get_one(k):to_num()
       -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
@@ -100,13 +105,10 @@ local function check_termination(
   end 
 end
 --================================
-local function init(nI, nJ, nK)
-  local class = Q.rand({len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
-  --[[ for debugging
-  local chk = Q.numby(class, nK+1) 
-  Q.print_csv(chk) 
-  --]]
-  return class
+local function init(seed, nI, nJ, nK)
+  local class = Q.rand({seed = seed, len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
+  local num_in_class = Q.numby(class, nK+1):eval()
+  return class, num_in_class
 end
 --================================
 kmeans.assignment_step = assignment_step

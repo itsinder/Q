@@ -2,6 +2,7 @@ local qc      = require 'Q/UTILS/lua/q_core'
 local Q       = require 'Q'
 local kmeans  = require 'kmeans'
 local check   = require 'check'
+local Vector  = require 'libvec'
 
 local function run_kmeans(
   args
@@ -26,6 +27,13 @@ local function run_kmeans(
     max_iter = x_max_iter
   end
   
+  local seed = qc.RDTSC()
+  if ( args.seed ) then 
+    local x_seed = args.seed
+    assert((type(x_seed) == "number") and ( x_seed > 0 ))
+    seed = x_seed
+  end
+  
   local data_file = args.data_file
   assert(qc.isfile(data_file), "File not found " .. data_file)
   
@@ -39,9 +47,7 @@ local function run_kmeans(
     D = Q.load_csv(data_file, M, optargs)
   end
   local nI, nJ = assert(check.data(D))
-  local old_class = kmeans.init(nI, nJ, nK)
-
-  --[[ TODO: Not working currently. 
+  
   -- set chunk size to encompass data set (okay for small data sets)
   local chunk_size = 1024
   while chunk_size < nI do
@@ -49,15 +55,18 @@ local function run_kmeans(
   end
   print("chunk_size set to ", chunk_size)
   package.loaded['Q/UTILS/lua/q_consts'].chunk_size = chunk_size
-  --]]
+  Vector.set_chunk_size(chunk_size);
+
+  local old_class, num_in_class = kmeans.init(seed, nI, nJ, nK)
+ 
 
   local n_iter = 1
   while true do 
-    local means = kmeans.update_step(D, nI, nJ, nK, old_class)
-    -- assert(nil, "PREMATURE")
-    new_class = kmeans.assignment_step(D, nI, nJ, nK, means)
+    local means = kmeans.update_step(D, nI, nJ, nK, old_class, num_in_class)
+    local new_class, num_in_class = 
+      kmeans.assignment_step( D, nI, nJ, nK, means)
     is_stop, n_iter = kmeans.check_termination(
-    old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
+      old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
     if ( is_stop ) then break else old_class = new_class end
   end
   print("Success")

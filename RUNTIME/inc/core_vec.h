@@ -161,4 +161,8 @@ vec_no_memcpy(
     CMEM_REC_TYPE *ptr_cmem,
     size_t chunk_size
     );
+extern int
+vec_delete(
+    VEC_REC_TYPE *ptr_vec
+    );
 #endif

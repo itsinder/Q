@@ -5,6 +5,7 @@ debug = true -- set to false once code stabilizes
 local args = {}
 args.k = 3
 args.max_iter = 100
+args.seed     = 1234567
 args.perc_diff = 1
 args.data_file = "../data/ds1.csv"
 args.meta_file = "../data/ds1.meta.lua"
