@@ -5,6 +5,26 @@ local Q = require 'Q'
 -- nJ = number of attributes/features
 -- nK = number of classes 
 
+local function chk_means(means, nJ, nK)
+  assert(nJ)
+  assert(type(nJ) == "number")
+  assert(nJ > 0)
+
+  assert(nK)
+  assert(type(nK) == "number")
+  assert(nK > 0)
+
+  assert(means)
+  assert(type(means) == "table")
+
+  for k, mu_k in pairs(means) do 
+    for j, mu_k_j in pairs(mu_k) do 
+      assert(type(mu_k_j) == "number") -- TODO P3 Should be Scalar
+    end
+  end
+  return true
+end
+--===============================
 local function chk_class(class, nK)
   assert(nK)
   assert(type(nK) == "number")
@@ -42,11 +62,13 @@ end
 local kmeans = {}
 local function assignment_step(
   D, -- D is a table of J Vectors of length nI
+  nK,
   means -- means is a table of J vectors of length K
   )
   --==== START: Error checking
-  assert(means and (type(means) == "table"))
   local nI, nJ = assert(chk_data(D))
+  assert(chk_means, nJ, nK)
+  assert(nil, "PREMATURE")
   --==== STOP: Error checking
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
@@ -87,7 +109,7 @@ local function update_step(
     means[k] = {}
     for j, Dj in pairs(D) do
       means[k][j] = Q.sum(Q.where(Dj, x)):eval():to_num() / nI
-      print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
+      -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
 
