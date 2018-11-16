@@ -1,11 +1,5 @@
 #include "rand_B1.h"
-
-static inline uint64_t RDTSC()
-{
-  unsigned int hi, lo;
-    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-      return ((uint64_t)hi << 32) | lo;
-}
+#include "_rdtsc.h"
 
 //START_FUNC_DECL
 int
@@ -25,10 +19,10 @@ rand_B1(
   if ( ( p < 0 ) || ( p > 1 ) ) { go_BYE(-1); }
   if ( idx == 0 ) { //seed has not yet been set
     l_sum = 0;
-    if ( seed == 0 ) {
-     seed = RDTSC();
+    if ( ptr_in->seed == 0 ) {
+     ptr_in->seed = RDTSC();
     }
-    srand48(seed);
+    srand48_r(seed, &(ptr_in->buffer));
   }
   //-- Initialize to 0
   uint8_t *lX = (uint8_t *)X;

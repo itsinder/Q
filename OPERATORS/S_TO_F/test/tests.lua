@@ -1,7 +1,27 @@
 -- FUNCTIONAL 
 local Q = require 'Q'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 require 'Q/UTILS/lua/strict'
 local tests = {}
+--=================================================
+tests.test_seed = function()
+  local len = 2*qconsts.chunk_size + 17
+  len = qconsts.chunk_size - 17
+  local seed = 12345678
+  local qtype = "I4"
+  local lb = 1
+  local ub = 10
+  local c1 = Q.rand( 
+    {seed = seed, lb = lb, ub = 10, qtype = qtype, len = len })
+  local c2 = Q.rand( 
+    {seed = seed, lb = lb, ub = 10, qtype = qtype, len = len })
+  local n1, n2 = Q.sum(Q.vveq(c1, c2)):eval()
+  Q.print_csv({c1, c2}, {opfile = "_x.csv"})
+  print(n1, n2)
+  assert(n1 == n2)
+  require('Q/UTILS/lua/cleanup')()
+  print("Test test_seed completed")
+end
 --=================================================
 tests.test_const = function()
   local num = (2048*1048576)-1
