@@ -1,0 +1,8 @@
+As an example
+
+package.loaded['Q/UTILS/lua/q_consts'].debug = true
+
+so you can over-write your local version without modifying the 
+original file
+
+
