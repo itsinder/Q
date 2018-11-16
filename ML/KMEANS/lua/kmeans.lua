@@ -1,5 +1,6 @@
 -- https://en.wikipedia.org/wiki/K-means_clustering
 local Q = require 'Q'
+local Scalar = require 'libsclr'
 -- ===========================================
 -- nI = number of instances
 -- nJ = number of attributes/features
@@ -68,17 +69,19 @@ local function assignment_step(
   --==== START: Error checking
   local nI, nJ = assert(chk_data(D))
   assert(chk_means, nJ, nK)
-  assert(nil, "PREMATURE")
   --==== STOP: Error checking
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
   for k = 1, nK do 
-    dist[k] = Q.const({val = 0, qtype = "F4", length = nI})
-    for j = 1, nJ do
+    dist[k] = Q.const({val = 0, qtype = "F4", len = nI})
+    for j, Dj in  pairs(D) do
       -- mu_j_k = value of jth feature for kth mean
-      local mu_j_k = means[j]:get_one(k-1)
-      dist[k] = Q.sum(dist[j], Q.sqr(Q.sub(D[j], mu_j_k)))
+      local mu_j_k = means[k][j]
+      dist[k] = Q.vvadd(dist[k], Q.sqr(Q.vssub(Dj, mu_j_k)))
     end
+  end
+  for k = 1, nK do 
+    dist[k]:eval()
   end
   -- start by assigning everything to class 1
   local best_clss = Q.const({val = 1, len = nI, qtype = "I4"})
@@ -87,9 +90,8 @@ local function assignment_step(
   for k = 2, nK do
     local x = Q.vvleq(best_clss, dist[k])
     best_dist = Q.ifxthenyelsez(x, best_dist, dist[k])
-    best_clss = Q.ifxthenyelsez(x, best_clss, k)
+    best_clss = Q.ifxthenyelsez(x, best_clss, Scalar.new(k, "I4"))
   end
-
   return best_clss -- vector of length nI
 end
 --================================
@@ -120,6 +122,7 @@ local function check_termination(old, new, nK)
   assert(chk_class(old, nK))
   assert(chk_class(new, nK))
   local num_diff = Q.sum(Q.vvneq(old, new)):eval():to_num()
+  print("num_diff = " .. num_diff)
   if ( num_diff == 0 ) then return true else return false end 
 end
 --================================

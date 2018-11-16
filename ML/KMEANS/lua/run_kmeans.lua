@@ -29,14 +29,17 @@ local function run_kmeans(
     D = Q.load_csv(data_file, M, optargs)
   end
   local old_class = kmeans.init(D, nK)
+  local n_iter = 1
   while true do 
     local means = kmeans.update_step(D, nK, old_class)
     -- assert(nil, "PREMATURE")
     new_class = kmeans.assignment_step(D, nK, means)
-    is_stop = kmeans.check_termination(old_class, new_class)
+    is_stop = kmeans.check_termination(old_class, new_class, nK)
     if ( is_stop ) then break else old_class = new_class end
     n_iter = n_iter + 1 
-    if ( n_iter > max_iter ) then print("Exceeded limit") break end
+    if ( max_iter and (n_iter > max_iter) ) then 
+      print("Exceeded limit") break 
+    end
   end
   print("Success")
 end
