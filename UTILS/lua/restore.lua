@@ -1,6 +1,9 @@
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local pl_path = require 'pl.path'
 local function restore_global(filename)
+  if ( not filename ) then
+    filename = os.getenv("Q_METADATA_FILE")
+  end
   assert(filename ~= nil, "A valid filename \\ filepath  has to be given")
   
   -- check does the (abs) valid filepath exists
