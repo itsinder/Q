@@ -1,6 +1,7 @@
 local qc      = require 'Q/UTILS/lua/q_core'
 local Q       = require 'Q'
 local kmeans  = require 'kmeans'
+local check   = require 'check'
 
 local function run_kmeans(
   args
@@ -8,12 +9,21 @@ local function run_kmeans(
   
   assert(args and (type(args) == "table"))
   
+  local perc_diff = 0.1
+  if ( args.perc_diff ) then
+    local x_perc_diff = args.perc_diff
+    assert(type(x_perc_diff) == "number")
+    assert( (x_perc_diff > 0 ) and ( x_perc_diff < 100 ) )
+    perc_diff = x_perc_diff
+  end
   local nK = assert(args.k)
   assert((type(nK) == "number") and ( nK > 0 ) and ( nK < 16 ))
   
-  local max_iter = args.max_iter
-  if ( max_iter ) then 
-    assert((type(max_iter) == "number") and ( max_iter > 0 ))
+  local max_iter = 1000
+  if ( args.max_iter ) then 
+    local x_max_iter = args.max_iter
+    assert((type(x_max_iter) == "number") and ( x_max_iter > 0 ))
+    max_iter = x_max_iter
   end
   
   local data_file = args.data_file
@@ -28,18 +38,16 @@ local function run_kmeans(
     print("Loading data")
     D = Q.load_csv(data_file, M, optargs)
   end
-  local old_class = kmeans.init(D, nK)
+  local nI, nJ = assert(check.data(D))
+  local old_class = kmeans.init(nI, nJ, nK)
   local n_iter = 1
   while true do 
     local means = kmeans.update_step(D, nK, old_class)
     -- assert(nil, "PREMATURE")
     new_class = kmeans.assignment_step(D, nK, means)
-    is_stop = kmeans.check_termination(old_class, new_class, nK)
+    is_stop, n_iter = kmeans.check_termination(
+    old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
     if ( is_stop ) then break else old_class = new_class end
-    n_iter = n_iter + 1 
-    if ( max_iter and (n_iter > max_iter) ) then 
-      print("Exceeded limit") break 
-    end
   end
   print("Success")
 end

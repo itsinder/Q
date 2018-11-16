@@ -1,64 +1,12 @@
 -- https://en.wikipedia.org/wiki/K-means_clustering
 local Q = require 'Q'
 local Scalar = require 'libsclr'
+local check = require 'check'
 -- ===========================================
 -- nI = number of instances
 -- nJ = number of attributes/features
 -- nK = number of classes 
 
-local function chk_means(means, nJ, nK)
-  assert(nJ)
-  assert(type(nJ) == "number")
-  assert(nJ > 0)
-
-  assert(nK)
-  assert(type(nK) == "number")
-  assert(nK > 0)
-
-  assert(means)
-  assert(type(means) == "table")
-
-  for k, mu_k in pairs(means) do 
-    for j, mu_k_j in pairs(mu_k) do 
-      assert(type(mu_k_j) == "number") -- TODO P3 Should be Scalar
-    end
-  end
-  return true
-end
---===============================
-local function chk_class(class, nK)
-  assert(nK)
-  assert(type(nK) == "number")
-
-  assert(class)
-  assert(type(class) == "lVector")
-
-  local qtype = class:fldtype()
-  assert( ( qtype == "I1" ) or
-          ( qtype == "I2" ) or
-          ( qtype == "I4" ) or
-          ( qtype == "I8" ) )
-  -- class should be between 1 and nK
-  local n1 = Q.sum(Q.vvor(Q.vslt(class, 1), Q.vsgt(class, nK))):eval()
-  assert(n1:to_num() == 0)
-  return true
-end
---===============================
-local function chk_data(D)
-  assert(D and (type(D) == "table"))
-  local nJ = 0
-  local nI
-  for j, v in pairs(D) do
-    if ( not nI ) then 
-      nI = v:length()
-    else
-      assert( nI == v:length())
-    end
-    nJ = nJ + 1 
-  end
-  assert(nI > 0)
-  return nI, nJ
-end
 --================================
 local kmeans = {}
 local function assignment_step(
@@ -67,8 +15,8 @@ local function assignment_step(
   means -- means is a table of J vectors of length K
   )
   --==== START: Error checking
-  local nI, nJ = assert(chk_data(D))
-  assert(chk_means, nJ, nK)
+  local nI, nJ = assert(check.data(D))
+  assert(check.means, nJ, nK)
   --==== STOP: Error checking
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
@@ -86,12 +34,20 @@ local function assignment_step(
   -- start by assigning everything to class 1
   local best_clss = Q.const({val = 1, len = nI, qtype = "I4"})
   local best_dist = dist[1]
+  -- Q.print_csv(dist[1], { filter = { lb = 0, ub = 15 }})
+  -- print("===============")
+  -- Q.print_csv(dist[2], { filter = { lb = 0, ub = 15 }})
   
   for k = 2, nK do
-    local x = Q.vvleq(best_clss, dist[k])
+    local x = Q.vvleq(best_dist, dist[k])
     best_dist = Q.ifxthenyelsez(x, best_dist, dist[k])
     best_clss = Q.ifxthenyelsez(x, best_clss, Scalar.new(k, "I4"))
   end
+  local chk = Q.numby(best_clss, nK+1):eval()
+  -- Q.print_csv(chk)
+  -- We get the 1 in check below because clusters are indexed
+  -- from 1, 2, ... and hence nothing assigned to cluster 0
+  assert(Q.sum(Q.vseq(chk, 0)):eval():to_num() == 1 )
   return best_clss -- vector of length nI
 end
 --================================
@@ -101,8 +57,8 @@ local function update_step(
   class -- Vector of length nI
   )
   --==== START: Error checking
-  assert(chk_class(class, nK))
-  local nI, nJ = assert(chk_data(D))
+  assert(check.class(class, nK))
+  local nI, nJ = assert(check.data(D))
   assert(class:length() == nI)
   --==== STOP: Error checking
   local means = {}
@@ -114,20 +70,31 @@ local function update_step(
       -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
-
   return means -- a table of nJ vectors of length nK
 end
 --================================
-local function check_termination(old, new, nK)
-  assert(chk_class(old, nK))
-  assert(chk_class(new, nK))
+local function check_termination(
+  old, new, nI, nJ, nK, max_perc_diff, n_iter, max_iter)
+
+  if ( max_iter and (n_iter > max_iter) ) then 
+    print("Exceeded limit of iterations", max_iter) 
+    return false
+  end
+  n_iter = n_iter + 1 
+  assert(check.class(old, nK)) -- TODO P4 Comment out
+  assert(check.class(new, nK)) -- TODO P4 Comment out
   local num_diff = Q.sum(Q.vvneq(old, new)):eval():to_num()
-  print("num_diff = " .. num_diff)
-  if ( num_diff == 0 ) then return true else return false end 
+  local this_perc_diff = 100.0*num_diff/nI
+  print("n_iter, num_diff, this_perc_diff = ", 
+    n_iter, num_diff, this_perc_diff)
+  if ( this_perc_diff < max_perc_diff ) then
+    return true
+  else 
+    return false, n_iter
+  end 
 end
 --================================
-local function init(D, nK)
-  local nI, nJ = assert(chk_data(D))
+local function init(nI, nJ, nK)
   local class = Q.rand({len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
   return class
 end

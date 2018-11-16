@@ -3,6 +3,8 @@ local run_kmeans = require 'run_kmeans'
 
 local args = {}
 args.k = 3
+args.max_iter = 100
+args.perc_diff = 1
 args.data_file = "../data/ds1.csv"
 args.meta_file = "../data/ds1.meta.lua"
 args.load_optargs = { is_hdr = true, use_accelerator = true }
