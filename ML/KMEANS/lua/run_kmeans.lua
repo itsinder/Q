@@ -42,9 +42,9 @@ local function run_kmeans(
   local old_class = kmeans.init(nI, nJ, nK)
   local n_iter = 1
   while true do 
-    local means = kmeans.update_step(D, nK, old_class)
+    local means = kmeans.update_step(D, nI, nJ, nK, old_class)
     -- assert(nil, "PREMATURE")
-    new_class = kmeans.assignment_step(D, nK, means)
+    new_class = kmeans.assignment_step(D, nI, nJ, nK, means)
     is_stop, n_iter = kmeans.check_termination(
     old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
     if ( is_stop ) then break else old_class = new_class end

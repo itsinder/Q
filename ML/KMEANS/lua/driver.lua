@@ -1,6 +1,7 @@
 local Q = require 'Q'
 local run_kmeans = require 'run_kmeans'
 
+debug = true -- set to false once code stabilizes
 local args = {}
 args.k = 3
 args.max_iter = 100

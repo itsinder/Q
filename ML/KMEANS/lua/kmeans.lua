@@ -11,13 +11,15 @@ local check = require 'check'
 local kmeans = {}
 local function assignment_step(
   D, -- D is a table of J Vectors of length nI
+  nI,
+  nJ,
   nK,
   means -- means is a table of J vectors of length K
   )
-  --==== START: Error checking
-  local nI, nJ = assert(check.data(D))
-  assert(check.means, nJ, nK)
-  --==== STOP: Error checking
+  if debug then 
+    local nI, nJ = assert(check.data(D))
+    assert(check.means, nJ, nK)
+  end
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
   for k = 1, nK do 
@@ -43,9 +45,9 @@ local function assignment_step(
     best_dist = Q.ifxthenyelsez(x, best_dist, dist[k])
     best_clss = Q.ifxthenyelsez(x, best_clss, Scalar.new(k, "I4"))
   end
+  -- verify that no cluster is empty
   local chk = Q.numby(best_clss, nK+1):eval()
-  -- Q.print_csv(chk)
-  -- We get the 1 in check below because clusters are indexed
+  -- We have the "== 1" in check below because clusters are indexed
   -- from 1, 2, ... and hence nothing assigned to cluster 0
   assert(Q.sum(Q.vseq(chk, 0)):eval():to_num() == 1 )
   return best_clss -- vector of length nI
@@ -53,14 +55,16 @@ end
 --================================
 local function update_step(
   D, -- D is a table of nJ Vectors of length nI
+  nI,
+  nJ,
   nK,
   class -- Vector of length nI
   )
-  --==== START: Error checking
-  assert(check.class(class, nK))
-  local nI, nJ = assert(check.data(D))
-  assert(class:length() == nI)
-  --==== STOP: Error checking
+  if ( debug ) then 
+    assert(check.class(class, nK))
+    local nI, nJ = assert(check.data(D))
+    assert(class:length() == nI)
+  end
   local means = {}
   for k = 1, nK do
     local x = Q.vseq(class, k):eval()
@@ -81,8 +85,10 @@ local function check_termination(
     return false
   end
   n_iter = n_iter + 1 
-  assert(check.class(old, nK)) -- TODO P4 Comment out
-  assert(check.class(new, nK)) -- TODO P4 Comment out
+  if ( debug ) then 
+    assert(check.class(old, nK)) 
+    assert(check.class(new, nK)) 
+  end
   local num_diff = Q.sum(Q.vvneq(old, new)):eval():to_num()
   local this_perc_diff = 100.0*num_diff/nI
   print("n_iter, num_diff, this_perc_diff = ", 
@@ -96,6 +102,10 @@ end
 --================================
 local function init(nI, nJ, nK)
   local class = Q.rand({len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
+  --[[ for debugging
+  local chk = Q.numby(class, nK+1) 
+  Q.print_csv(chk) 
+  --]]
   return class
 end
 --================================
