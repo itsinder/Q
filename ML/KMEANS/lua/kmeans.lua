@@ -5,6 +5,24 @@ local Q = require 'Q'
 -- nJ = number of attributes/features
 -- nK = number of classes 
 
+local function chk_class(class, nK)
+  assert(nK)
+  assert(type(nK) == "number")
+
+  assert(class)
+  assert(type(class) == "lVector")
+
+  local qtype = class:fldtype()
+  assert( ( qtype == "I1" ) or
+          ( qtype == "I2" ) or
+          ( qtype == "I4" ) or
+          ( qtype == "I8" ) )
+  -- class should be between 1 and nK
+  local n1 = Q.sum(Q.vvor(Q.vslt(class, 1), Q.vsgt(class, nK))):eval()
+  assert(n1:to_num() == 0)
+  return true
+end
+--===============================
 local function chk_data(D)
   assert(D and (type(D) == "table"))
   local nJ = 0
@@ -55,15 +73,22 @@ end
 --================================
 local function update_step(
   D, -- D is a table of nJ Vectors of length nI
+  nK,
   class -- Vector of length nI
   )
   --==== START: Error checking
-  assert(class and (type(class) == "lVector"))
+  assert(chk_class(class, nK))
   local nI, nJ = assert(chk_data(D))
+  assert(class:length() == nI)
   --==== STOP: Error checking
   local means = {}
-  for j = 1, nJ do
-    means[j] = XXXX
+  for k = 1, nK do
+    local x = Q.vseq(class, k):eval()
+    means[k] = {}
+    for j, Dj in pairs(D) do
+      means[k][j] = Q.sum(Q.where(Dj, x)):eval():to_num() / nI
+      print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
+    end
   end
 
   return means -- a table of nJ vectors of length nK

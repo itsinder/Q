@@ -30,7 +30,7 @@ local function run_kmeans(
   end
   local class = kmeans.init(D, nK)
   while true do 
-    local means = kmeans.update_step(D, class)
+    local means = kmeans.update_step(D, nK, class)
     assert(nil, "PREMATURE")
     class = kmeans.assignment_step(D, means)
     n_iter = n_iter + 1 
