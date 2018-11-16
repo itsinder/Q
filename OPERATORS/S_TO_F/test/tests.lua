@@ -6,7 +6,7 @@ local tests = {}
 --=================================================
 tests.test_seed = function()
   local len = 2*qconsts.chunk_size + 17
-  len = qconsts.chunk_size - 17
+  -- len = qconsts.chunk_size - 17
   local seed = 12345678
   local qtype = "I4"
   local lb = 1

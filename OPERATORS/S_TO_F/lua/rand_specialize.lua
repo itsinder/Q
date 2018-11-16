@@ -16,6 +16,7 @@ return function (
     uint64_t seed;
     <<ctype>> lb;
     <<ctype>> ub;
+    struct drand48_data buffer;
   } RAND_<<qtype>>_REC_TYPE;
 ]]
 
@@ -43,6 +44,7 @@ return function (
 
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
   hdr = string.gsub(hdr,"<<ctype>>",  ctype)
+  -- pcall(ffi.cdef, hdr0)
   pcall(ffi.cdef, hdr)
 
   if ( seed ) then 
