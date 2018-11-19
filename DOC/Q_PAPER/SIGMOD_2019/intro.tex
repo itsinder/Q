@@ -28,6 +28,13 @@ Further, the emergence of GPUs --- both their increased compute power and the
 increased  bandwidth to the GPU --- pack the single server solution with
 considerable punch.
 
+While Q shares many design goals with \cite{Weld2017}, there are some key
+differences. (1) Q's RTS performs data layout and locality optimizations, 
+using hints provided by the user such as marking Vectors as 
+ephemeral or indicating that memo-ization is not needed. (2) Because we control
+the data layout, we have been able to use \cite{UnifiedMemory2018} to offload
+computationally intensive activites to the GPU.
+
 In this paper, we present Q, our answer to both technological trends and actual
 user needs. Q is an analytical database that invites the participation of the
 user in tuning performance and writing new operators. 
