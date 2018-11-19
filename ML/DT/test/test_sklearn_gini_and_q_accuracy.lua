@@ -28,7 +28,7 @@ tests.t1 = function()
   split(data_file, metadata_file, split_csv_args, hdr_info)
 
   -- executing the sklearn gini and entropy
-  local cmd = "python3 -Wignore " .. Q_SRC_ROOT .. "/ML/DT/python/DTree_sklearn_breast_cancer_train_test.py"
+  local cmd = "python -Wignore " .. Q_SRC_ROOT .. "/ML/DT/python/DTree_sklearn_breast_cancer_train_test.py"
   os.execute(cmd)
   
   -- converting sklearn gini graphviz to q graphviz format
@@ -38,7 +38,7 @@ tests.t1 = function()
   -- ( i.e. loading q graphviz to q data structure)
   local features_list = {"radius_worst","fractal_dimension_worst","texture_se","id","symmetry_worst","fractal_dimension_se","concavity_worst","compactness_worst","texture_mean","smoothness_worst","concave points_se","perimeter_worst","area_mean","texture_worst","radius_mean","concavity_mean","concavity_se","concave points_mean","concave points_worst","symmetry_se","area_worst","symmetry_mean","area_se","smoothness_mean","smoothness_se","compactness_se","perimeter_mean","compactness_mean","perimeter_se","radius_se","fractal_dimension_mean"}
   
-  local file = path_to_here .. "gini_to_q_graphviz.txt"
+  local file = Q_SRC_ROOT .. "gini_to_q_graphviz.txt"
   local goal_feature = "diagnosis"
   --local new_features_list = load_csv_col_seq(features_list, goal_feature)
   local D = graphviz_to_D(file, features_list)

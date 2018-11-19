@@ -18,10 +18,10 @@ clean :
 	rm -r -f ../gen_inc; 
 	rm -f _*
 	rm -f *.so
-	rm maxk_specialize.lua
-	rm mink_specialize.lua
-	rm maxk_specialize_reducer.lua
-	rm mink_specialize_reducer.lua
+	rm -f maxk_specialize.lua
+	rm -f mink_specialize.lua
+	rm -f maxk_specialize_reducer.lua
+	rm -f mink_specialize_reducer.lua
 
 libgetk.so : getk.tmpl \
 	merge1.tmpl

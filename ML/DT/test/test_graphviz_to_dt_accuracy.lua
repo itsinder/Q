@@ -29,7 +29,7 @@ tests.t1 = function()
   args.split_ratio = 0.7
 
   -- load the data
-  local T = Q.load_csv(data_file, dofile(args.meta_data_file))
+  local T = Q.load_csv(data_file, dofile(args.meta_data_file), {is_hdr = true})
 
   local accuracy = {}
   -- break into a training set and a testing set
@@ -55,7 +55,7 @@ tests.t1 = function()
   check_dt(tree)
 
   -- print decision tree
-  local f = io.open("graphviz.txt", "a")
+  local f = io.open(path_to_here .. "graphviz.txt", "a")
   f:write("digraph Tree {\n")
   f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   f:write("edge [fontname=helvetica] ;\n")
@@ -108,8 +108,7 @@ tests.t1 = function()
   print_g_dt(D, fp)
   fp:write("}\n")
   fp:close()
-  
-  local status = os.execute("diff " .. file .. " graphviz_dt.txt")
+  local status = os.execute("diff " .. file .. " " ..  path_to_here .. "graphviz_dt.txt")
   assert(status == 0, "graphviz.txt and graphviz_dt files not matched")
   print("Successfully created D from graphviz file")
   

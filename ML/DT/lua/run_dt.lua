@@ -54,8 +54,8 @@ local function run_dt(args)
     else
       assert(train_csv)
       assert(test_csv)
-      Train = Q.load_csv(train_csv, dofile(meta_data_file))
-      Test = Q.load_csv(test_csv, dofile(meta_data_file))
+      Train = Q.load_csv(train_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
+      Test = Q.load_csv(test_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
     end
 
     local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)

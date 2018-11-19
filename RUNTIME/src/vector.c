@@ -19,6 +19,7 @@
 
 // TODO Delete luaL_Buffer g_errbuf;
 extern luaL_Buffer g_errbuf;
+static int32_t chunk_size = 0; 
 
 
 #undef USE_STACK_DUMP
@@ -55,6 +56,24 @@ static void stackDump (lua_State *L) {
 }
 #endif
 
+static int l_set_chunk_size( lua_State *L) {
+  int32_t new_chunk_size  = luaL_checknumber(L, 1);
+  if ( new_chunk_size < 64 ) { WHEREAMI; goto BYE; }
+  // check that it is a power of 2 
+  for ( int32_t x = new_chunk_size; x > 1; ) { 
+    if ( ( ( x / 2 ) * 2 ) != x ) { WHEREAMI; goto BYE; }
+    x = x / 2;
+  }
+  chunk_size = new_chunk_size;
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  char buf[128];
+  sprintf(buf, "ERROR: %s: bad chunk size %d \n", __func__, new_chunk_size);
+  lua_pushstring(L, buf);
+  return 2;
+}
 static int l_print_timers( lua_State *L) {
   vec_print_timers();
   return 0;
@@ -73,7 +92,6 @@ get_chunk_size(
 {
   int status = 0;
   *ptr_chunk_size = 0;
-  static int32_t chunk_size = 0; 
   if ( chunk_size == 0 ) { 
     status = luaL_dostring(L, "return require('Q/UTILS/lua/q_consts').chunk_size");
     if ( status != 0 ) {
@@ -94,8 +112,9 @@ static int l_vec_no_memcpy( lua_State *L) {
   int status = 0;
   VEC_REC_TYPE  *ptr_vec  = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
-  int chunk_size;
-  status = get_chunk_size(L, &chunk_size);
+  if ( chunk_size <= 0 ) { 
+    status = get_chunk_size(L, &chunk_size); cBYE(status);
+  }
   status = vec_no_memcpy(ptr_vec, ptr_cmem, chunk_size); cBYE(status);
   lua_pushboolean(L, true);
   return 1;
@@ -299,10 +318,11 @@ static int l_vec_get_chunk( lua_State *L)
   CMEM_REC_TYPE *ptr_cmem = NULL;
   int64_t chunk_num = -1;
   uint64_t idx = 0;
-  int32_t chunk_size;
 
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  status = get_chunk_size(L, &chunk_size); cBYE(status);
+  if ( chunk_size <= 0 ) { 
+    status = get_chunk_size(L, &chunk_size); cBYE(status);
+  }
 
   ptr_cmem = (CMEM_REC_TYPE *)lua_newuserdata(L, sizeof(CMEM_REC_TYPE));
   return_if_malloc_failed(ptr_cmem);
@@ -575,12 +595,13 @@ static int l_vec_new( lua_State *L)
   const char *file_name = NULL;
   const char *q_data_dir = NULL;
   int64_t num_elements = -1;
-  int32_t chunk_size;
   const char * const qtype_sz  = luaL_checkstring(L, 1);
   /* Note that I would have normally called it qtype 
      instead of qtype_sz but in the case of SC we send 
      SC:len where len is an integer */
-  status = get_chunk_size(L, &chunk_size); cBYE(status);
+  if ( chunk_size <= 0 ) { 
+    status = get_chunk_size(L, &chunk_size); cBYE(status);
+  }
 
   // q_data_dir to create file path
   q_data_dir = luaL_checkstring(L, 2);
@@ -667,6 +688,7 @@ static const struct luaL_Reg vector_methods[] = {
     { "num_in_chunk", l_vec_num_in_chunk },
     { "chunk_size", l_vec_chunk_size },
     { "get_chunk", l_vec_get_chunk },
+    { "set_chunk_size", l_set_chunk_size },
     { "put_chunk", l_vec_put_chunk },
     { "is_memo", l_vec_is_memo },
     { "is_eov", l_vec_is_eov },
@@ -710,6 +732,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "is_eov", l_vec_is_eov },
     { "cast", l_vec_cast },
     { "get_chunk", l_vec_get_chunk },
+    { "set_chunk_size", l_set_chunk_size },
     { "put_chunk", l_vec_put_chunk },
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },

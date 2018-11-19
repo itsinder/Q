@@ -30,17 +30,22 @@ main()
   free(vec);*/
   //---------------------------------
 //#ifdef LATER
+  RAND_I4_REC_TYPE argsy;
   uint32_t n = 1024;
   uint32_t len = 10240000;
-  int32_t *y = (int32_t*) malloc(len * sizeof(int32_t));
-  RAND_I4_REC_TYPE argsy;
-  argsy.seed = 0;
+  int ctr[n]; 
   int lb = 0;
   int ub = n - 1;
+
+  argsy.seed = 0;
+
+  int32_t *y = malloc(len * sizeof(int32_t));
+  return_if_malloc_failed(y);
+
   argsy.lb = lb;
   argsy.ub = ub;
-  status = rand_I4(y, len, &argsy, true);
-  int ctr[n]; for ( unsigned int i = 0; i < n; i++ ) { ctr[i]= 0; }
+  status = rand_I4(y, len, &argsy, 0);
+  for ( unsigned int i = 0; i < n; i++ ) { ctr[i]= 0; }
   for ( uint64_t i = 0; i < len; i++ ) {
     if ( y[i] < lb || y[i] > ub ) {
       printf("FAILURE\n");
@@ -71,10 +76,9 @@ main()
     printf("Uniformity is good");
   }
   printf("\n");
-
-//#endif
-
   //---------------------------------
+//#endif
+BYE:
+  free_if_non_null(y);
   return status;
 }
-

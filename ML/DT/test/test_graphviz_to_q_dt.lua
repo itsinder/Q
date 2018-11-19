@@ -24,8 +24,7 @@ tests.t1 = function()
   print_dt(D, f)
   f:write("}\n")
   f:close()
-
-  local status = os.execute("diff " .. file .. " graphviz_dt.txt")
+  local status = os.execute("diff " .. file .. " " .. path_to_here .. "graphviz_dt.txt")
   assert(status == 0, "graphviz.txt and graphviz_dt files not matched")
   print("Successfully created D from graphviz file")
 
