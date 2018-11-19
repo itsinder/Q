@@ -42,7 +42,7 @@ local function run_kmeans(
   
   local M = loadfile(meta_file)()
   local optargs = args.load_optargs
-  if ( not D ) then 
+  if ( not D ) then  -- D comes in by Q.restore()
     print("Loading data")
     D = Q.load_csv(data_file, M, optargs)
   end
@@ -50,13 +50,16 @@ local function run_kmeans(
   
   -- set chunk size to encompass data set (okay for small data sets)
   --[[
-  local chunk_size = 1024
-  while chunk_size < nI do
-    chunk_size = chunk_size * 2
+  local new_chunk_size = 1024
+  while new_chunk_size < nI do
+    new_chunk_size = new_chunk_size * 2
   end
-  print("chunk_size set to ", chunk_size)
-  package.loaded['Q/UTILS/lua/q_consts'].chunk_size = chunk_size
-  Vector.set_chunk_size(chunk_size);
+  print("chunk_size set to ", new_chunk_size)
+  package.loaded['Q/UTILS/lua/q_consts'].chunk_size = new_chunk_size
+  local chk = require('Q/UTILS/lua/q_consts').chunk_size")
+  assert(chk == new_chunk_size)
+  Vector.set_chunk_size(new_chunk_size);
+  assert(Vector.get_chunk_size(n) == new_chunk_size)
   --]]
 
   local old_class, num_in_class = kmeans.init(seed, nI, nJ, nK)

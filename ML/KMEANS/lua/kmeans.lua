@@ -23,21 +23,40 @@ local function assignment_step(
   end
   local dist = {}
   -- dist[k][i] is distance of ith instance from kth mean
-  os.execute(" rm -f _output" )
+  os.execute(" rm -f _temp1 _output1" )
   for k = 1, nK do 
-    dist[k] = Q.const({val = 0, qtype = "F8", len = nI})
+    dist[k] = Q.const({val = 0, qtype = "F4", len = nI})
     for j, Dj in  pairs(D) do
       -- mu_j_k = value of jth feature for kth mean
       local mu_j_k = means[k][j]
+      -- print("Cluster/Feature/Mean ", k, j, mu_j_k)
       dist[k] = Q.add(dist[k], Q.sqr(Q.vssub(Dj, mu_j_k)))
+      --[[
+      local temp = Q.vssub(Dj, mu_j_k):eval()
+      Q.print_csv(temp, { opfile = "_temp1" })
+      os.execute(" cat _temp1 >> _output1")
+      dist[k] = Q.add(dist[k], temp)
+      --]]
     end
   end
+  --[[
+  Q.print_csv(D['feature_7'], { opfile = "_feature_7" })
+  os.execute(" rm -f _temp1" )
+  assert(nil, "PREMATURE")
+  --]]
   for k = 1, nK do 
     dist[k]:eval()
   end
+  --[[
+  Q.print_csv(dist, { opfile = "_1.csv" })
+  assert(nil, "PREMATURE")
+  --]]
   -- start by assigning everything to class 1
   local best_clss = Q.const({val = 1, len = nI, qtype = "I4"})
   local best_dist = dist[1]
+  -- Q.print_csv(dist[1], { filter = { lb = 0, ub = 15 }})
+  -- print("===============")
+  -- Q.print_csv(dist[2], { filter = { lb = 0, ub = 15 }})
   
   for k = 2, nK do
     local x = Q.vvleq(best_dist, dist[k])
@@ -49,6 +68,10 @@ local function assignment_step(
   -- We have the "== 1" in check below because clusters are indexed
   -- from 1, 2, ... and hence nothing assigned to cluster 0
   assert(Q.sum(Q.vseq(num_in_class, 0)):eval():to_num() == 1 )
+  --[[
+  Q.print_csv({best_clss, best_dist}, { opfile = "_1.csv" } )
+  assert(nil, "PREMATURE")
+  --]]
   return best_clss, num_in_class 
 end
 --================================
