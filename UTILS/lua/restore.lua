@@ -13,7 +13,7 @@ local function restore_global(filename)
   end
 
   -- checking for file existence
-  assert(pl_path.exists(filename), "Give a valid filename")
+  assert(pl_path.exists(filename), "File not found " .. filename)
   
   local status, reason = pcall(dofile, filename)
   assert(status, reason)
