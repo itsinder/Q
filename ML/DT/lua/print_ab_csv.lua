@@ -7,7 +7,7 @@ local function print_to_csv (
   f, 		-- file_descriptor
   model_idx, -- idx of model 
   tree_idx,  -- idx of tree
-  gb_val  
+  xgb_val
 )
   local lines = model_idx .. "," .. tree_idx .. "," .. D.node_idx .. ","
   if D.left and D.right then
@@ -15,24 +15,31 @@ local function print_to_csv (
     if D.feature and D.threshold then
       lines = lines .. D.feature .. "," .. D.threshold .. ","
     end
-    lines = lines .. tostring(D.n_T) .. "," .. tostring(D.n_H) .. "," .. gb_val
-    
+    lines = lines .. tostring(D.n_T) .. "," .. tostring(D.n_H) .. "," .. xgb_val
     f:write(lines .. "\n")
-    print_to_csv(D.left, f, model_idx, tree_idx, gb_val)
-    print_to_csv(D.right, f, model_idx, tree_idx, gb_val)
+    print_to_csv(D.left, f, model_idx, tree_idx, xgb_val)
+    print_to_csv(D.right, f, model_idx, tree_idx, xgb_val)
   else
     -- No tree available
   end
 end
--- TODO: doumentation
--- print decision tree in csv format
-local print_ab_csv = function(tree, model_idx, tree_idx, gb_val)
+
+-- Usage:
+-- print_ab_csv(tree, model_idx, tree_idx, xgb_val):
+-- prints decision tree in required AB interpreter csv format
+    -- tree      : decision tree object
+    -- model_idx : index of input model
+    -- tree_idx  : index of input decision tree
+    -- xgb_val   : ?
+-- Output: a csv file(Q/ML/DT/lua/dt.csv) which has following columns
+-- [ model_idx, tree_idx, node_idx, lchild_idx, rchild_idx, feature_idx, threshold, neg, pos, xgb_val ]
+local print_ab_csv = function(tree, model_idx, tree_idx, xgb_val)
   local f = io.open(path_to_here .. "dt.csv", "w")
   f:write("model_idx, tree_idx, node_idx, lchild_idx, rchild_idx, feature_idx, threshold, neg, pos, xgb_val\n")
-  print_to_csv(tree, f, model_idx, tree_idx, gb_val)
-  f:write("}\n")
+  print_to_csv(tree, f, model_idx, tree_idx, xgb_val)
+  f:write("\n")
   f:close()
-  print("Written to" .. path_to_here .. "dt.csv file")
+  print("Written to " .. path_to_here .. "dt.csv file")
   return path_to_here .. "dt.csv"
 end
 
