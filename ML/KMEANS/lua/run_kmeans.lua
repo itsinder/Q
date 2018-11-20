@@ -49,6 +49,7 @@ local function run_kmeans(
   local nI, nJ = assert(check.data(D))
   
   -- set chunk size to encompass data set (okay for small data sets)
+  --[[
   local chunk_size = 1024
   while chunk_size < nI do
     chunk_size = chunk_size * 2
@@ -56,6 +57,7 @@ local function run_kmeans(
   print("chunk_size set to ", chunk_size)
   package.loaded['Q/UTILS/lua/q_consts'].chunk_size = chunk_size
   Vector.set_chunk_size(chunk_size);
+  --]]
 
   local old_class, num_in_class = kmeans.init(seed, nI, nJ, nK)
  
@@ -69,6 +71,5 @@ local function run_kmeans(
       old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
     if ( is_stop ) then break else old_class = new_class end
   end
-  print("Success")
 end
 return run_kmeans
