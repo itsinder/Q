@@ -24,6 +24,8 @@ def __wrap_output(op_name, result):
     elif op_name in table_as_output:
         # convert lua table to dict/list
         result = utils.to_list_or_dict(result)
+        for key, val in result.items():
+            result[key] = PVector(val)
     elif op_name in vec_as_output:
         # wrap it with PVector
         result = PVector(result)

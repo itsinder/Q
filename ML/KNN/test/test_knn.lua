@@ -12,6 +12,7 @@ tests.t1 = function()
   args.meta_data_file = metadata_file
   args.data_file = data_file
   args.goal = "occupy_status"
+  args.is_hdr = true
   local start_time = qc.RDTSC()
   Vector.reset_timers()
   local average_acr, accuracy_table = run_knn(args)
@@ -40,7 +41,7 @@ tests.t2 = function()
   args.meta_data_file = metadata_file
   args.data_file = data_file
   args.goal = "diagnosis"
-
+  args.is_hdr = true
   local start_time = qc.RDTSC()
   -- Vector.reset_timers()
   local average_acr, accuracy_table = run_knn(args)

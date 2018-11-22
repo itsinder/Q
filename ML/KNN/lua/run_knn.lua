@@ -48,6 +48,7 @@ function run_knn(args)
 
   local meta_data_file	= args.meta_data_file
   local data_file	= args.data_file
+  local is_hdr          = args.is_hdr
   local goal		= args.goal
   local iterations	= args.iterations
   local split_ratio	= args.split_ratio
@@ -55,7 +56,7 @@ function run_knn(args)
   local feature_of_interest = args.feature_of_interest
 
   -- load the data
-  local T = Q.load_csv(data_file, dofile(meta_data_file))
+  local T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = is_hdr })
 
   local accuracy = {}
   for i = 1, iterations do

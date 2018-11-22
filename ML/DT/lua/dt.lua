@@ -31,7 +31,8 @@ D	- Decision Tree Table having below fields
 local function make_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
-  alpha -- Scalar, minimum benefit
+  alpha, -- Scalar, minimum benefit
+  node_idx -- node indexing
   )
   local m, n, ng = chk_params(T, g, alpha)
   local D = {}
@@ -73,8 +74,10 @@ local function make_dt(
   end
   D.n_T = n_T
   D.n_H = n_H
+  D.node_idx = node_idx
+  node_idx = node_idx + 1
   if n_T == 0 or n_H == 0 then
-    return D
+    return node_idx, D
   end
   local best_bf, best_sf, best_k
   for k, f in pairs(T) do
@@ -98,14 +101,14 @@ local function make_dt(
       T_L[k] = Q.where(f, x):eval()
     end
     g_L = Q.where(g, x):eval()
-    D.left  = make_dt(T_L, g_L, alpha)
+    node_idx, D.left  = make_dt(T_L, g_L, alpha, node_idx)
     for k, f in pairs(T) do
       T_R[k] = Q.where(f, Q.vnot(x)):eval()
     end
     g_R = Q.where(g, Q.vnot(x)):eval()
-    D.right = make_dt(T_R, g_R, alpha)
+    node_idx, D.right = make_dt(T_R, g_R, alpha, node_idx)
   end
-  return D
+  return node_idx, D
 end
 
 

@@ -22,10 +22,8 @@ tests.t2 = function()
   end
   
   local vec = Q.mk_col(tbl, qtype)
-  local res = utils.vector_to_table(vec)
-  assert(type(res) == 'table', "output not of type table")
-  assert(#res == vec:num_elements(), "vector and table length not same")
-
+  local status, res = pcall(utils.vector_to_table,vec)
+  assert(status == false, res)
 end
 
 return tests
