@@ -45,8 +45,6 @@ ${fn}(
 
 {
   int status = 0;
-  ${in_ctype} inv; 
-  ${out_ctype} outv; 
 
   if ( in == NULL ) { go_BYE(-1); }
   if ( out == NULL ) { go_BYE(-1); }
@@ -56,6 +54,8 @@ ${fn}(
 
 #pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < nR; i++ ) { 
+    ${in_ctype} inv; 
+    ${out_ctype} outv; 
     inv = in[i];
     __operation(inv, sval, &outv);
     out[i] = outv;

@@ -4,14 +4,14 @@ Q is a high-performance ``almost-relational''
 analytical, single-node, column-store database. 
 \be
 \item 
-By ``analytical'' we mean that data changes at the user's behest (e.g.
-loading a data set) but is not subject to external events.
+By ``analytical'' we mean that data changes at the user's behest e.g.
+loading a data set.
 \item 
 By ``almost-relational'' we mean that it would more correctly
 be called a ``tabular model'' \cite{Codd1982}. As Codd states, ``Tables are
 at a lower level of abstraction than relations, since they give
 the impression that positional (array-type) addressing is applicable
-\ldots. Nevertheless, even with these minor flaws,
+\ldots even with these minor flaws,
 {\bf tables are the most important conceptual representation of
 relations}, because they are universally understood.''
 \item By ``single-node'', we mean that Q does not distribute computation across
@@ -21,7 +21,7 @@ relations}, because they are universally understood.''
 \item By ``column-store'', we mean that 
 Q provides the Lua programmer with the Vector type, each
 individual element of which is a Scalar. A table in Q is a Lua
-table of Vectors (Section~\ref{vectors_versus_tables}), where a Lua table is an
+table of Vectors, where a Lua table is an
 associative array, like a Python dictionary.
 
 \ee

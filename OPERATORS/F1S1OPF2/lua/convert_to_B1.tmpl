@@ -41,11 +41,12 @@ ${fn}(
 
 #pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < nR; i++ ) { 
-    status = set_bit_u64(out, i, in[i]);
-    if ( status < 0 ) { continue; }
+    int l_status = set_bit_u64(out, i, in[i]);
+    if ( l_status < 0 ) { continue; }
   } 
+  // TODO: Need to accumulate l_status into status
 BYE:
-    if ( status < 0 ) { WHEREAMI; }
+  if ( status < 0 ) { WHEREAMI; }
   return status;
 }
    ]]

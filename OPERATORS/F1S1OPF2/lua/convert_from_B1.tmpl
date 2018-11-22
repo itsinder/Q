@@ -44,7 +44,7 @@ ${fn}(
     out[i] = get_bit_u64(in, i);
   } 
 BYE:
-    if ( status < 0 ) { WHEREAMI; }
+  if ( status < 0 ) { WHEREAMI; }
   return status;
 }
    ]]
