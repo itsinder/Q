@@ -3,6 +3,7 @@ local Q       = require 'Q'
 local kmeans  = require 'kmeans'
 local check   = require 'check'
 local Vector  = require 'libvec'
+local rough_kmeans  = require 'rough_kmeans'
 
 local function run_kmeans(
   args
@@ -67,9 +68,18 @@ local function run_kmeans(
 
   local n_iter = 1
   while true do 
-    local means = kmeans.update_step(D, nI, nJ, nK, old_class, num_in_class)
-    local new_class, num_in_class = 
-      kmeans.assignment_step( D, nI, nJ, nK, means)
+    local means, new_class
+    if ( args.is_rough ) then 
+      means = rough_kmeans.update_step(D, nI, nJ, nK, 
+       old_class, num_in_class)
+      new_class, num_in_class = 
+        rough_kmeans.assignment_step( D, nI, nJ, nK, means)
+    else
+      means = kmeans.update_step(D, nI, nJ, nK, 
+       old_class, num_in_class)
+      new_class, num_in_class = 
+        kmeans.assignment_step( D, nI, nJ, nK, means)
+    end
     is_stop, n_iter = kmeans.check_termination(
       old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
     if ( is_stop ) then break else old_class = new_class end

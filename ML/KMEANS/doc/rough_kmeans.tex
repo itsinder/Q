@@ -1,0 +1,98 @@
+\startreport{Rough k-means in Q}
+\reportauthor{Ramesh Subramonian}
+
+\section{Introduction}
+
+We describe the rough k-means algorithm \cite{Peters2012}. 
+We assume that the reader is familiar with the \(k\)-means algorithm
+\cite{Hastie2009}. We make a minor change to their terminology, 
+refering to the 
+\bi
+\item lower approximation as the ``inner'' approximation
+\item upper approximation as the ``outer'' approximation
+\ei
+
+\subsection{Notation}
+
+\be
+\item Let \(n_J\) be the number of features. 
+We shall use \(j\) as the feature index. 
+\item Let \(n_I\) be the number of objects/instances/observations
+We shall use \(i\) as the instance index. 
+\item Let \(n_K\) be the number of means/centroids.
+We shall use \(k\) as the centroid index. 
+\item Let \(X\) be a set of observations in \(n_J\) dimensional space, 
+such that \(X_{j, i}\) is the value of the \(j^{th}\) feature of 
+the \(i^{th}\) instance. 
+\item Let \(\mu_{k, j}\) be the value of the \(j^{th}\) feature of the \(k^{th}\)
+centroid
+\item Let \(I_{k, i}\) be true if instance \(i\) is part of the 
+{\bf I}nner approximation of centroid \(k\)
+\item Let \(O_{k, i}\) be true if instance \(i\) is part of the 
+{\bf O}uter approximation of centroid \(k\)
+\item We shall treat the boolean value ``true'' and the integer
+1 interchangeably. 
+\item We shall treat the boolean value ``false'' and the integer
+0 interchangeably. 
+\item Let \(w_I\) and \(w_O\) be the weights assigned to the Inner and Outer
+approximations
+\item Let \(\alpha\) be the threshold for determining whether an instance
+belongs to the outer approximation. This is explained in 
+Section~\ref{update}
+\item Identifying \(i, j, k\) as feature indexes simplifies the notation. For
+example, \(\sum_k\) is actually \(\sum_{k=1}^{k=n_K}\). Similarly, \(\forall k\)
+means for all centroids, numbered \(1, \ldots, n_K\)
+\ee
+
+\subsection{Invariants}
+
+\begin{invariant}
+An instance can belong to the inner approximation of at most one centroid.
+
+\(\forall i: \sum_k I_{k, i} = 1\)
+\end{invariant}
+
+\begin{invariant}
+If an instance is not part of any inner approximation, it must belong to 
+two or more outer approximations. This implies that an instance cannot belong to only a single boundary region.
+
+\(\sum_k I_{k, i} = 0 \Rightarrow \sum_k O_{k, i} \geq 2\)
+
+\end{invariant}
+
+\section{Computation}
+
+\subsection{The Update Step}
+\label{update}
+
+\be
+\item \(\forall k: \mathrm{dist}[k] = \) is a Vector such that \(\mathrm{dist}_{k, i}\)
+is distance of instance \(i\) from centroid \(k\)
+\item \(\mathrm{best\_dist}\) is a Vector such that \(\mathrm{best\_dist}_i\) is
+smallest distance of instance \(i\) from any centroid
+\item \(\mathrm{best\_clss}\) is a Vector such that \(\mathrm{best\_clss}_i\) identifies
+the centroid that is closest to instance \(i\). Note that 
+\(\mathrm{best\_clss}_i \in [1, \ldots n_K]\)
+\item \(\forall k: O_k\) is a boolean Vector of length \(n_I\) such that 
+\(\mathrm{dist}_{k, i} \leq \mathrm{best\_dist}_i \times \alpha\)
+  end
+\item \(\hat{n_O} \) is a Vector of length \(n_I\), 
+where \(n_O_{k, i}  = \sum_k O_k[i]\)
+\item Let \(\hat{I}\) be a Vector of length \(n_I\) such that 
+\(O_i = \mathrm{true} \Rightarrow L_i = 0}; else, \(L_i = best\_clss_i\). What
+we are doing here is to state that if nobody else has a claim on instance \(i\), then
+it belongs to the inner approximation of \(best\_clss_i\). In other words,
+\be
+\item \(\hat{I}_i = 0 \Rightarrow \) instance \(i\) not in inner approximation
+of any centroid
+\item \(\hat{I}_i = k' \Rightarrow \) instance \(i\) in inner approximation
+of centroid \(k'\)
+\item 
+\ee
+
+\subsection{The Assignment Step}
+\label{assignment}
+
+
+\bibliographystyle{alpha}
+\bibliography{../../DT/doc/ref}

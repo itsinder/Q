@@ -1,3 +1,7 @@
+--[[
+export Q_METADATA_FILE=$HOME/local/Q/meta/kmeans/kmeans.lua
+export Q_METADATA_DIR=$HOME/local/Q/meta/kmeans
+--]]
 local Q = require 'Q'
 local run_kmeans = require 'run_kmeans'
 
@@ -10,6 +14,7 @@ args.perc_diff = 0.1
 args.data_file = "../data/ds1.csv"
 args.meta_file = "../data/ds1.meta.lua"
 args.load_optargs = { is_hdr = true, use_accelerator = true }
+args.is_rough = false
 
 Q.restore()
 run_kmeans(args)
