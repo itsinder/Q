@@ -31,3 +31,10 @@ free_ab(
     void *in_ptr_args
     );
 
+extern
+void *
+init_ab_copy(
+    const char *conf_file,
+    int size
+    );
+

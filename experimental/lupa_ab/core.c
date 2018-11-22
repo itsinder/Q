@@ -5,6 +5,27 @@
 
 #include "core.h"
 
+
+void *
+init_ab_copy(
+    const char *conf_file,
+    int size
+    )
+{
+  AB_ARGS *ptr_ab_args = NULL;
+  ptr_ab_args = malloc(sizeof(AB_ARGS));
+
+  // Initialize structure
+  ptr_ab_args->size = size;
+  ptr_ab_args->values = malloc(sizeof(float)*size);
+  for ( int i = 0; i < size; i++ ) {
+    ptr_ab_args->values[i] = i + 1;
+  }
+  memcpy(ptr_ab_args->conf_file, conf_file, 100);
+  return ptr_ab_args;
+}
+
+
 int
 init_ab(
     void *in_ptr_args,
@@ -84,5 +105,12 @@ main()
   printf("Sum = %d\n", result);
   print_ab(X);
   free_ab(X);
+  printf("====================================");
+  AB_ARGS *X_NEW = init_ab_copy("my_config", 20);
+  int result_new = sum_ab(X_NEW, 2);
+  printf("Sum = %d\n", result_new);
+  print_ab(X_NEW);
+  free_ab(X_NEW);
+
   return 0;
 }

@@ -13,6 +13,19 @@ void * malloc(size_t size);
 void free(void *ptr);
 ]])
 
+
+local fns = {}
+
+
+local function init_ab_copy(config_file)
+  local size = 20
+  assert(config_file)
+  local ab_struct = qc.init_ab_copy(config_file, size)
+  return ab_struct
+end
+fns.init_ab_copy = init_ab_copy
+
+
 local function init_ab(config_file)
   local size = 20
   assert(config_file)
@@ -20,6 +33,7 @@ local function init_ab(config_file)
   status = qc.init_ab(ab_struct, config_file, size)
   return ab_struct
 end
+fns.init_ab = init_ab
 
 
 local function sum_ab(ab_struct, json_body)
@@ -30,25 +44,19 @@ local function sum_ab(ab_struct, json_body)
   result['sum'] = sum
   return JSON:encode(result)
 end
+fns.sum_ab = sum_ab
 
 
 local function print_ab(ab_struct)
   return qc.print_ab(ab_struct)
 end
+fns.print_ab = print_ab
 
 
 local function free_ab(ab_struct)
   return qc.free_ab(ab_struct)
 end
+fns.free_ab = free_ab
 
 
-ab_struct = init_ab("My_Config")
-local ab_tbl = {}
-ab_tbl['factor'] = 2
-out_json = sum_ab(ab_struct, JSON:encode(ab_tbl))
-out_tbl = JSON:decode(out_json)
-for i, v in pairs(out_tbl) do
-  print(i, v)
-end
-print_ab(ab_struct)
-free_ab(ab_struct)
+return fns
