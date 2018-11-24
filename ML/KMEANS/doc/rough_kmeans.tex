@@ -103,11 +103,11 @@ smallest distance of instance \(i\) from any centroid i.e.,
 the centroid that is closest to instance \(i\). Note that 
 \(\bar{k}_i \in [1, \ldots n_K]\)
 \item \(\forall k: O_k\) is a B1 Vector of length \(n_I\) such that 
-\(d_{k, i} \leq \bar{d}_i \times \alpha\)
+\(d_{k, i} \leq \bar{d}_i \times \alpha \Rightarrow O_{k, i} = \mathrm{true}\)
 \item \(N^O\) is an I4 Vector of length \(n_I\), 
-where \(N^O_{k, i}  = \sum_k O_k[i]\)
+where \(N^O_i  = \sum_k O_k[i]\)
 \item Let \(\hat{I}\) be a Vector of length \(n_I\) such that 
-\(O_i = \mathrm{true} \Rightarrow \hat{I}_i = 0\); else, \(\hat{I}_i = \bar{k}_i\). What
+\(N^O_i \geq 2 \Rightarrow \hat{I}_i = 0\); else, \(\hat{I}_i = \bar{k}_i\). What
 we are doing here is stating that if nobody else has a claim on instance \(i\), then
 it belongs to the inner approximation of \(\bar{k}_i\). In other words,
 \be
