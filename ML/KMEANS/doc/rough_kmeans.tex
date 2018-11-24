@@ -42,6 +42,12 @@ Section~\ref{update}
 \item Identifying \(i, j, k\) as feature indexes simplifies the notation. For
 example, \(\sum_k\) is actually \(\sum_{k=1}^{k=n_K}\). Similarly, \(\forall k\)
 means for all centroids, numbered \(1, \ldots, n_K\)
+\item We use the following conventions for types
+\bd 
+\item F4 4-byte floating point
+\item I4 4-byte signed integer
+\item B1 1-bit boolean
+\ed
 \ee
 
 \subsection{Invariants}
@@ -67,14 +73,14 @@ The mathematical terms we use are terse, the variable names in the code somewhat
 more verbose. A mapping is provided in Table~\ref{tbl_mapping}.
 \begin{table}[htbp]
 \centering
-\begin{tabular}{|l|l|l|} \hline
-{\bf Math}     & {\bf Code}      \\ \hline
-\(d\) & dist \\ \hline
-\(\bar{d}\) & best\_dist \\ \hline
-\(\bar{k}\) & best\_clss \\ \hline
-\(O\) & is\_outer \\ \hline
-\(n^O\) & num\_in\_outer \\ \hline
-\(I\) & inner \\ \hline
+\begin{tabular}{|l|l|l|l|} \hline
+{\bf Math} & {\bf Code}     & {\bf Type} & {\bf Length} \\ \hline
+\(d_k\) & dist[k] & F4 Vector & \(n_I\) \\ \hline
+\(\bar{d}\) & best\_dist & F4 Vector & \(n_I\) \\ \hline
+\(\bar{k}\) & best\_clss & I4 Vector & \(n_I\) \\ \hline
+\(O_k\) & is\_outer[k] & B1 Vector & \(n_I\)  \\ \hline
+\(N^O_k\) & num\_in\_outer[k] & I4 Vector & \(n_I\)  \\ \hline
+\(\hat{I}\) & inner & I4 Vector & \(n_I\) \\ \hline
 \hline
 \end{tabular}
 \caption{Math symbols to names in code}
@@ -88,17 +94,17 @@ more verbose. A mapping is provided in Table~\ref{tbl_mapping}.
 \label{update}
 
 \be
-\item \(\forall k: d_k \) is a Vector such that \(d_{k, i}\)
+\item \(\forall k: d_k \) is a F4 Vector of length \(n_I\) such that \(d_{k, i}\)
 is distance of instance \(i\) from centroid \(k\)
-\item \(\bar{d}\) is a Vector such that \(\bar{d}_i\) is
+\item \(\bar{d}\) is a F4 Vector of length \(n_I\) such that \(\bar{d}_i\) is
 smallest distance of instance \(i\) from any centroid i.e.,
 \(\bar{d}_i = \min_k d_{k, i}\)
-\item \(\bar{k}\) is a Vector such that \(\bar{k}_i\) identifies
+\item \(\bar{k}\) is an I4 Vector of length \(n_I\) such that \(\bar{k}_i\) identifies
 the centroid that is closest to instance \(i\). Note that 
 \(\bar{k}_i \in [1, \ldots n_K]\)
-\item \(\forall k: O_k\) is a boolean Vector of length \(n_I\) such that 
+\item \(\forall k: O_k\) is a B1 Vector of length \(n_I\) such that 
 \(d_{k, i} \leq \bar{d}_i \times \alpha\)
-\item \(N^O\) is a Vector of length \(n_I\), 
+\item \(N^O\) is an I4 Vector of length \(n_I\), 
 where \(N^O_{k, i}  = \sum_k O_k[i]\)
 \item Let \(\hat{I}\) be a Vector of length \(n_I\) such that 
 \(O_i = \mathrm{true} \Rightarrow \hat{I}_i = 0\); else, \(\hat{I}_i = \bar{k}_i\). What
