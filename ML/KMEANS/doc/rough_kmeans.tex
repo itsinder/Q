@@ -48,6 +48,7 @@ means for all centroids, numbered \(1, \ldots, n_K\)
 \item I4 4-byte signed integer
 \item B1 1-bit boolean
 \ed
+\item Define \(\delta(x, y) = 1 \) if \(x = y\) and 0 otherwise.
 \ee
 
 \subsection{Invariants}
@@ -121,6 +122,16 @@ of centroid \(k'\)
 \subsection{The Assignment Step}
 \label{assignment}
 
-
+\be
+\item The contribution of the inner and outer sets are weighted and then
+combined into the value of the centroid as follows:
+\(\mu_{k, j} = w_I \times \mu^I_{k, j} +  w_O \times \mu^O_{k, j} \)
+\item 
+\(\mu^I_{k, j} = \frac{\sum_i \delta(\hat{I}_i, k) X_{k, i}}{D^I_k}\)
+\item 
+\(\mu^O_{k, j} = \frac{\sum_i (O_{k, i} \times X_{k, i})}{D^O_k}\)
+\item \(D^I_k = \sum_i \delta(\hat{I}, k)\)
+\item \(D^O_k = \sum_i O_{k, i}\)
+\ee
 \bibliographystyle{alpha}
 \bibliography{../../DT/doc/ref}
