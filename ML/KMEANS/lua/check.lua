@@ -27,7 +27,7 @@ check.means = function (means, nJ, nK)
   return true
 end
 --===============================
-check.class = function (class, nK)
+check.class = function (class, nK, is_rough)
   assert(nK)
   assert(type(nK) == "number")
 
@@ -39,8 +39,14 @@ check.class = function (class, nK)
           ( qtype == "I2" ) or
           ( qtype == "I4" ) or
           ( qtype == "I8" ) )
-  -- class should be between 1 and nK
-  local n1 = Q.sum(Q.vvor(Q.vslt(class, 1), Q.vsgt(class, nK))):eval()
+  local n1
+  if ( is_rough ) then 
+    -- class should be between 1 and nK
+    n1 = Q.sum(Q.vvor(Q.vslt(class, 1), Q.vsgt(class, nK))):eval()
+  else
+    -- class should be between 0 and nK
+    n1 = Q.sum(Q.vvor(Q.vslt(class, 0), Q.vsgt(class, nK))):eval()
+  end
   assert(n1:to_num() == 0)
   return true
 end

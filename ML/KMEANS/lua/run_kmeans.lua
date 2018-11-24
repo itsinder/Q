@@ -63,26 +63,35 @@ local function run_kmeans(
   assert(Vector.get_chunk_size(n) == new_chunk_size)
   --]]
 
-  local old_class, num_in_class = kmeans.init(seed, nI, nJ, nK)
+  local old_class, num_in_class, old_means
+  if ( args.is_rough ) then 
+    old_means = rough_kmeans.init(seed, D, nI, nJ, nK)
+  else
+    old_class, num_in_class = kmeans.init(seed, nI, nJ, nK)
+  end
  
 
   local n_iter = 1
   while true do 
-    local means, new_class
+    local new_class, new_means
+    local inner, num_in_inner, in_outer, num_in_outer
     if ( args.is_rough ) then 
-      means = rough_kmeans.update_step(D, nI, nJ, nK, 
-       old_class, num_in_class)
-      new_class, num_in_class = 
-        rough_kmeans.assignment_step( D, nI, nJ, nK, means)
+      inner, num_in_inner, in_outer, num_in_outer = 
+        rough_kmeans.assignment_step( D, nI, nJ, nK, old_means)
+      new_means = rough_kmeans.update_step(D, nI, nJ, nK, 
+      inner, num_in_inner, in_outer, num_in_outer)
+      is_stop, n_iter = rough_kmeans.check_termination(
+        old_means, new_means, nJ, nK, perc_diff, n_iter, max_iter)
+      if ( is_stop ) then break else old_means = new_means end
     else
       means = kmeans.update_step(D, nI, nJ, nK, 
        old_class, num_in_class)
       new_class, num_in_class = 
         kmeans.assignment_step( D, nI, nJ, nK, means)
+      is_stop, n_iter = kmeans.check_termination(
+        old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
+      if ( is_stop ) then break else old_class = new_class end
     end
-    is_stop, n_iter = kmeans.check_termination(
-      old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
-    if ( is_stop ) then break else old_class = new_class end
   end
 end
 return run_kmeans

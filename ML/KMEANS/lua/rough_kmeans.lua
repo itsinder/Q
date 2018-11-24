@@ -14,8 +14,7 @@ local function assignment_step(
   nI,
   nJ,
   nK,
-  means, -- means is a table of J vectors of length K
-  num_in_class
+  means -- means is a table of J vectors of length K
   )
   if debug then 
     local nI, nJ = assert(check.data(D))
@@ -40,28 +39,27 @@ local function assignment_step(
     best_clss = Q.ifxthenyelsez(x, best_clss, Scalar.new(k, "I4"))
   end
   -- Evaluate best clss and best distance
-  while true do 
-    local status = best_clss:next()
-    if ( not status ) then break end 
-    best_dist:next()
-  end
+  best_dist:eval()
+  best_clss:eval()
   -- Compute membership in outer
   local in_outer = {} 
   local alpha = 1.2 -- TODO Input parameter
   for k = 1, nK do
     in_outer[k] = Q.vvleq(dist[k], Q.vsmul(best_dist, alpha))
   end
-  num_claimants = Q.const({val = 0, qtype = "I1", len = n_I})
+  num_claimants = Q.const({val = 0, qtype = "I1", len = nI})
   for k = 1, nK do
     num_claimants = Q.vvadd(num_claimants,
                               Q.convert(in_outer[k], "I1"))
   end
-  inner = Q.ifxthenyelsez(Q.vsgeq(num_claimants, 2), 0, best_class)
+  num_claimants:eval()
+  inner = Q.ifxthenyelsez(Q.vsgeq(num_claimants, 2), Scalar.new(0, "I4"), 
+    best_clss)
   local num_in_outer = {}
   for k = 1, nK do 
     num_in_outer[k] = Q.sum(in_outer[k]):eval():to_num()
   end
-  num_in_inner = Q.numby(inner, n_K+1)
+  num_in_inner = Q.numby(inner, nK+1):eval()
   return inner, num_in_inner, in_outer, num_in_outer
 end
 --================================
@@ -70,22 +68,24 @@ local function update_step(
   nI,
   nJ,
   nK,
-  class, -- Vector of length nI
+  inner, -- Vector of length nI
   num_in_inner,
   in_outer,
   num_in_outer
   )
   if ( debug ) then 
-    assert(type(num_in_class) == "lVector")
-    assert(num_in_class:length() == nK+1)
-    assert(check.class(class, nK))
+    assert(type(num_in_inner) == "lVector")
+    assert(num_in_inner:length() == nK+1)
+    assert(check.class(inner, nK))
     local nI, nJ = assert(check.data(D))
-    assert(class:length() == nI)
+    assert(inner:length() == nI)
   end
+  local wt_inner = 0.5 -- TODO pass as parameter
+  local wt_outer = 0.5 -- TODO pass as parameter
   local means = {}
   -- accumulate stuff in "inner approximation"
-  for k = 1, nK do
-    local x = Q.vseq(class, k):eval()
+  for k = 1, nK do 
+    local x = Q.vseq(inner, k):eval()
     means[k] = {}
     for j, Dj in pairs(D) do
       means[k][j] = wt_inner * Q.sum(Q.where(Dj, x)):eval():to_num() / 
@@ -98,14 +98,44 @@ local function update_step(
     for j, Dj in pairs(D) do
       means[k][j] = means[k][j] + ( wt_outer *
         Q.sum(Q.where(Dj, in_outer[k])):eval():to_num() / 
-         num_in_outer:get_one(k):to_num())
+         num_in_outer[k])
       -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
   return means -- a table of nK tables of length nJ
 end
 --================================
+local function init(seed, D, nI, nJ, nK)
+  -- TODO Need to pick centroids at random, not just first nK
+  local means = {}
+  for k = 1, nK do 
+    means[k] = {}
+    for j, Dj in pairs(D) do 
+      means[k][j] = Dj:get_one(k-1):to_num()
+    end
+  end
+  --[[
+  for k = 1, nK do 
+    for j, Dj in pairs(D) do
+      print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
+    end
+  end
+  --]]
+  return means
+end
+--================================
+local function check_termination(
+        old_means, new_means, nJ, nK, perc_diff, n_iter, max_iter)
+  if ( n_iter > max_iter ) then 
+    return true
+  else
+    return false, n_iter+1
+  end
+end
+--================================
 rough_kmeans.assignment_step = assignment_step
 rough_kmeans.update_step = update_step
+rough_kmeans.init = init
+rough_kmeans.check_termination = check_termination
 
 return rough_kmeans
