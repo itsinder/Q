@@ -60,34 +60,56 @@ two or more outer approximations. This implies that an instance cannot belong to
 
 \end{invariant}
 
+
+\subsection{Mathematics to Code}
+\label{math_to_code}
+The mathematical terms we use are terse, the variable names in the code somewhat
+more verbose. A mapping is provided in Table~\ref{tbl_mapping}.
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|l|l|l|} \hline
+{\bf Math}     & {\bf Code}      \\ \hline
+\(d\) & dist \\ \hline
+\(\bar{d}\) & best\_dist \\ \hline
+\(\bar{k}\) & best\_clss \\ \hline
+\(O\) & is\_outer \\ \hline
+\(n^O\) & num\_in\_outer \\ \hline
+\(I\) & inner \\ \hline
+\hline
+\end{tabular}
+\caption{Math symbols to names in code}
+\label{tbl_mapping}
+\end{table}
+
+
 \section{Computation}
 
 \subsection{The Update Step}
 \label{update}
 
 \be
-\item \(\forall k: \mathrm{dist}[k] = \) is a Vector such that \(\mathrm{dist}_{k, i}\)
+\item \(\forall k: d_k \) is a Vector such that \(d_{k, i}\)
 is distance of instance \(i\) from centroid \(k\)
-\item \(\mathrm{best\_dist}\) is a Vector such that \(\mathrm{best\_dist}_i\) is
-smallest distance of instance \(i\) from any centroid
-\item \(\mathrm{best\_clss}\) is a Vector such that \(\mathrm{best\_clss}_i\) identifies
+\item \(\bar{d}\) is a Vector such that \(\bar{d}_i\) is
+smallest distance of instance \(i\) from any centroid i.e.,
+\(\bar{d}_i = \min_k d_{k, i}\)
+\item \(\bar{k}\) is a Vector such that \(\bar{k}_i\) identifies
 the centroid that is closest to instance \(i\). Note that 
-\(\mathrm{best\_clss}_i \in [1, \ldots n_K]\)
+\(\bar{k}_i \in [1, \ldots n_K]\)
 \item \(\forall k: O_k\) is a boolean Vector of length \(n_I\) such that 
-\(\mathrm{dist}_{k, i} \leq \mathrm{best\_dist}_i \times \alpha\)
-  end
-\item \(\hat{n_O} \) is a Vector of length \(n_I\), 
-where \(n_O_{k, i}  = \sum_k O_k[i]\)
+\(d_{k, i} \leq \bar{d}_i \times \alpha\)
+\item \(N^O\) is a Vector of length \(n_I\), 
+where \(N^O_{k, i}  = \sum_k O_k[i]\)
 \item Let \(\hat{I}\) be a Vector of length \(n_I\) such that 
-\(O_i = \mathrm{true} \Rightarrow L_i = 0}; else, \(L_i = best\_clss_i\). What
-we are doing here is to state that if nobody else has a claim on instance \(i\), then
-it belongs to the inner approximation of \(best\_clss_i\). In other words,
+\(O_i = \mathrm{true} \Rightarrow \hat{I}_i = 0\); else, \(\hat{I}_i = \bar{k}_i\). What
+we are doing here is stating that if nobody else has a claim on instance \(i\), then
+it belongs to the inner approximation of \(\bar{k}_i\). In other words,
 \be
 \item \(\hat{I}_i = 0 \Rightarrow \) instance \(i\) not in inner approximation
 of any centroid
 \item \(\hat{I}_i = k' \Rightarrow \) instance \(i\) in inner approximation
 of centroid \(k'\)
-\item 
+\ee
 \ee
 
 \subsection{The Assignment Step}

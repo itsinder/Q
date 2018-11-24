@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -f rough_kmeans.pdf
 set -e
 touch .meta
 eval ` ../../../DOC/latex/tools/setenv`
