@@ -132,8 +132,8 @@ local function check_termination(
   for k = 1, nK do
     for j, Dj in pairs(D) do
       if ( (math.abs(old_means[k][j] - new_means[k][j]) /
-           math.abs(old_means[k][j] + new_means[k][j]) ) > 0.1 ) then
-         print("old/new/k/j = ", old_means[k][j], new_means[k][j], k, j)
+           math.abs(old_means[k][j] + new_means[k][j]) ) > 0.01 ) then
+         -- print("old/new/k/j = ", old_means[k][j], new_means[k][j], k, j)
         return false, n_iter + 1 
       end
     end
