@@ -4,37 +4,23 @@ typedef struct _ab_args_type {
   float * values;
 } AB_ARGS_TYPE;
 
-extern
-int
+extern int
 init_ab(
-    void *in_ptr_args,
     const char *conf_file,
-    int size
+    int size,
+    AB_ARGS_TYPE **ptr_rslt
     );
-
-extern
-int
+extern int
 sum_ab(
    void *in_ptr_args,
-   int factor
+   int factor,
+   int *ptr_sum
    );
-
-extern
-void
+extern void
 print_ab(
      void *in_ptr_args
      );
-
-extern
-int
+extern int
 free_ab(
     void *in_ptr_args
     );
-
-extern
-void *
-init_ab_copy(
-    const char *conf_file,
-    int size
-    );
-
