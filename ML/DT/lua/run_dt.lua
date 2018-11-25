@@ -70,7 +70,7 @@ local function run_dt(args)
     local predicted_values = {}
     local actual_values = {}
     -- prepare decision tree
-    local node_idx, tree = make_dt(train, g_train, alpha)
+    local tree = make_dt(train, g_train, alpha)
     assert(tree)
 
     -- verify the decision tree

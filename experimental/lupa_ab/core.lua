@@ -17,21 +17,13 @@ void free(void *ptr);
 local fns = {}
 
 
-local function init_ab_copy(config_file)
-  local size = 20
-  assert(config_file)
-  local ab_struct = qc.init_ab_copy(config_file, size)
-  return ab_struct
-end
-fns.init_ab_copy = init_ab_copy
-
-
 local function init_ab(config_file)
   local size = 20
   assert(config_file)
-  local ab_struct = ffi.C.malloc(ffi.sizeof("AB_ARGS"))
-  status = qc.init_ab(ab_struct, config_file, size)
-  return ab_struct
+  local ab_struct = ffi.C.malloc(ffi.sizeof("AB_ARGS_TYPE*"))
+  status = qc.init_ab(config_file, size, ab_struct)
+  ab_struct = ffi.cast("AB_ARGS_TYPE **", ab_struct)
+  return ab_struct[0]
 end
 fns.init_ab = init_ab
 
@@ -39,9 +31,11 @@ fns.init_ab = init_ab
 local function sum_ab(ab_struct, json_body)
   local ab_tbl = assert(JSON:decode(json_body),
     "Not valid JSON")
-  local sum = qc.sum_ab(ab_struct, ab_tbl['factor'])
+  local sum = ffi.C.malloc(ffi.sizeof("int*"))
+  local status = qc.sum_ab(ab_struct, ab_tbl['factor'], sum)
   local result = {}
-  result['sum'] = sum
+  sum = ffi.cast("int *", sum)
+  result['sum'] = sum[0]
   return JSON:encode(result)
 end
 fns.sum_ab = sum_ab
