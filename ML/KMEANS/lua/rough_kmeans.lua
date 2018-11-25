@@ -129,16 +129,18 @@ local function check_termination(
   if ( n_iter > max_iter ) then 
     return true, 0
   end
+  local max_diff = 0.01 -- TODO pass as parameter
   for k = 1, nK do
     for j, Dj in pairs(D) do
       if ( (math.abs(old_means[k][j] - new_means[k][j]) /
-           math.abs(old_means[k][j] + new_means[k][j]) ) > 0.01 ) then
+           math.abs(old_means[k][j] + new_means[k][j]) ) > max_diff ) then
          -- print("old/new/k/j = ", old_means[k][j], new_means[k][j], k, j)
         return false, n_iter + 1 
       end
     end
-    return true, 0
   end
+  print("Convergence...", n_iter, max_iter)
+  return true, 0
 end
 --================================
 rough_kmeans.assignment_step = assignment_step
