@@ -72,6 +72,7 @@ local function run_kmeans(
  
 
   local n_iter = 1
+  local is_stop = false
   while true do 
     local new_class, new_means
     local inner, num_in_inner, in_outer, num_in_outer
@@ -81,7 +82,7 @@ local function run_kmeans(
       new_means = rough_kmeans.update_step(D, nI, nJ, nK, 
       inner, num_in_inner, in_outer, num_in_outer)
       is_stop, n_iter = rough_kmeans.check_termination(
-        old_means, new_means, nJ, nK, perc_diff, n_iter, max_iter)
+        old_means, new_means, D, nJ, nK, perc_diff, n_iter, max_iter)
       if ( is_stop ) then break else old_means = new_means end
     else
       means = kmeans.update_step(D, nI, nJ, nK, 
@@ -90,6 +91,7 @@ local function run_kmeans(
         kmeans.assignment_step( D, nI, nJ, nK, means)
       is_stop, n_iter = kmeans.check_termination(
         old_class, new_class, nI, nJ, nK, perc_diff, n_iter, max_iter)
+      assert(type(is_stop) == "boolean")
       if ( is_stop ) then break else old_class = new_class end
     end
   end

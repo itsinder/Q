@@ -125,11 +125,19 @@ local function init(seed, D, nI, nJ, nK)
 end
 --================================
 local function check_termination(
-        old_means, new_means, nJ, nK, perc_diff, n_iter, max_iter)
+        old_means, new_means, D, nJ, nK, perc_diff, n_iter, max_iter)
   if ( n_iter > max_iter ) then 
-    return true
-  else
-    return false, n_iter+1
+    return true, 0
+  end
+  for k = 1, nK do
+    for j, Dj in pairs(D) do
+      if ( (math.abs(old_means[k][j] - new_means[k][j]) /
+           math.abs(old_means[k][j] + new_means[k][j]) ) > 0.1 ) then
+         print("old/new/k/j = ", old_means[k][j], new_means[k][j], k, j)
+        return false, n_iter + 1 
+      end
+    end
+    return true, 0
   end
 end
 --================================

@@ -1,8 +1,8 @@
-typedef struct _ab_args {
+typedef struct _ab_args_type {
   char conf_file[100];
   int size;
   float * values;
-} AB_ARGS;
+} AB_ARGS_TYPE;
 
 extern
 int

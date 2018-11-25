@@ -12,8 +12,8 @@ init_ab_copy(
     int size
     )
 {
-  AB_ARGS *ptr_ab_args = NULL;
-  ptr_ab_args = malloc(sizeof(AB_ARGS));
+  AB_ARGS_TYPE *ptr_ab_args = NULL;
+  ptr_ab_args = malloc(sizeof(AB_ARGS_TYPE));
 
   // Initialize structure
   ptr_ab_args->size = size;
@@ -34,8 +34,8 @@ init_ab(
     ) 
 {
   int status = 0;
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
 
   // Initialize structure
   ptr_ab_args->size = size;
@@ -53,8 +53,8 @@ sum_ab(
    int factor
    )
 {
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   printf("SIZE = %d\n", ptr_ab_args->size);
   int sum = 0;
   for ( int i = 0; i < ptr_ab_args->size; i++ ) {
@@ -68,8 +68,8 @@ print_ab(
      void *in_ptr_args
      )
 {
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   printf("=============================================\n");
   printf("Config file name = %s\n", ptr_ab_args->conf_file);
   printf("=============================================\n");
@@ -86,8 +86,8 @@ free_ab(
     )
 {
   int status = 0;
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   free(ptr_ab_args->values);
   free(ptr_ab_args);
   printf("Freed up AB structure memory\n");
@@ -97,8 +97,8 @@ free_ab(
 int
 main()
 {
-  AB_ARGS *X = NULL;
-  X = malloc(sizeof(AB_ARGS));
+  AB_ARGS_TYPE *X = NULL;
+  X = malloc(sizeof(AB_ARGS_TYPE));
   int status = init_ab(X, "my_config", 20);
   printf("init() status = %d\n", status);
   int result = sum_ab(X, 2);
@@ -106,7 +106,7 @@ main()
   print_ab(X);
   free_ab(X);
   printf("====================================");
-  AB_ARGS *X_NEW = init_ab_copy("my_config", 20);
+  AB_ARGS_TYPE *X_NEW = init_ab_copy("my_config", 20);
   int result_new = sum_ab(X_NEW, 2);
   printf("Sum = %d\n", result_new);
   print_ab(X_NEW);
