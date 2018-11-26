@@ -37,7 +37,7 @@ tests.t1 = function()
   local predicted_values = {}
   local actual_values = {}
   -- prepare decision tree
-  local node_idx, tree = make_dt(train, g_train, alpha, 0)
+  local  tree = make_dt(train, g_train, alpha)
   assert(tree)
 
   -- verify the decision tree
