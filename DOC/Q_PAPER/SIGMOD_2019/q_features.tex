@@ -17,4 +17,29 @@ trivially parallelized if one has a rough distribution of the keys.
 Note that the fidelity demanded of these summary statistics is often low ---
 they need to be only as good as the use to which they are put. 
 
-\input{social_graph}
+\subsection{Building indexes --- she social graph}
+\label{social_graph}
+
+One of the problems we investigated at LinkedIn was using the social graph to
+guide and power the design of data-driven products.
+Assume that a social graph is presented as a 
+a table, {\tt E}, with 2 columns, {\tt from} and {\tt to}. Q supports the
+creation of auxiliary data structures to enable fast access but, in keeping with
+our minimalist philosophy, does not prvoide them out of the box. We describe the
+pre-processing performed to provide efficient access.
+\be
+\item {\tt f, t = Q.sort2(E.from, E.to, "ascending")}, sorts {\tt E}
+with {\tt from} as primary key and {\tt to} as
+secondary key
+\item {\tt V.m = Q.unique(f)} creates a Vector of 
+member IDs, sorted ascending. 
+\item For each member in {\tt V.m}, we determine the contiguous edges out of it
+  by 
+  \be
+\item {\tt V.lb = Q.join(f, V.m, min\_index)}
+\item {\tt V.ub = Q.join(f, V.m, max\_index)}
+  \ee
+Now, we can assert that member
+{\tt m = V.m[i]} is connected to members {\tt t[V.lb[i] .. V.ub[i]]}
+\ee
+

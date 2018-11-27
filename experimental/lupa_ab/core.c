@@ -1,66 +1,49 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
-
+#include "incs.h" 
 #include "core.h"
-
-
-void *
-init_ab_copy(
-    const char *conf_file,
-    int size
-    )
-{
-  AB_ARGS *ptr_ab_args = NULL;
-  ptr_ab_args = malloc(sizeof(AB_ARGS));
-
-  // Initialize structure
-  ptr_ab_args->size = size;
-  ptr_ab_args->values = malloc(sizeof(float)*size);
-  for ( int i = 0; i < size; i++ ) {
-    ptr_ab_args->values[i] = i + 1;
-  }
-  memcpy(ptr_ab_args->conf_file, conf_file, 100);
-  return ptr_ab_args;
-}
-
 
 int
 init_ab(
-    void *in_ptr_args,
     const char *conf_file,
-    int size
-    ) 
+    int size,
+    AB_ARGS_TYPE **ptr_rslt
+    )
 {
   int status = 0;
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *rslt = NULL;
+  rslt = malloc(sizeof(AB_ARGS_TYPE));
+  return_if_malloc_failed(rslt);
 
   // Initialize structure
-  ptr_ab_args->size = size;
-  ptr_ab_args->values = malloc(sizeof(float)*size);
+  rslt->size = size;
+  rslt->values = malloc(sizeof(float)*size);
   for ( int i = 0; i < size; i++ ) {
-    ptr_ab_args->values[i] = i + 1;
+    rslt->values[i] = i + 1;
   }
-  memcpy(ptr_ab_args->conf_file, conf_file, 100);
+  memcpy(rslt->conf_file, conf_file, 100);
+  *ptr_rslt = rslt;
+BYE:
   return status;
 }
 
 int
 sum_ab(
    void *in_ptr_args,
-   int factor
+   int factor,
+   int *ptr_sum
    )
 {
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  int status = 0;
+  *ptr_sum = 0;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   printf("SIZE = %d\n", ptr_ab_args->size);
   int sum = 0;
   for ( int i = 0; i < ptr_ab_args->size; i++ ) {
     sum = sum + ( factor * ptr_ab_args->values[i] );
   }
-  return sum;
+  *ptr_sum = sum;
+BYE:
+  return status;
 }
 
 void
@@ -68,8 +51,8 @@ print_ab(
      void *in_ptr_args
      )
 {
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   printf("=============================================\n");
   printf("Config file name = %s\n", ptr_ab_args->conf_file);
   printf("=============================================\n");
@@ -86,8 +69,8 @@ free_ab(
     )
 {
   int status = 0;
-  AB_ARGS *ptr_ab_args;
-  ptr_ab_args = (AB_ARGS *)in_ptr_args;
+  AB_ARGS_TYPE *ptr_ab_args;
+  ptr_ab_args = (AB_ARGS_TYPE *)in_ptr_args;
   free(ptr_ab_args->values);
   free(ptr_ab_args);
   printf("Freed up AB structure memory\n");
@@ -97,20 +80,14 @@ free_ab(
 int
 main()
 {
-  AB_ARGS *X = NULL;
-  X = malloc(sizeof(AB_ARGS));
-  int status = init_ab(X, "my_config", 20);
-  printf("init() status = %d\n", status);
-  int result = sum_ab(X, 2);
-  printf("Sum = %d\n", result);
+  int status = 0;
+  AB_ARGS_TYPE *X = NULL;
+  int sum_of_ab;
+  status = init_ab("my_config", 20, &X); cBYE(status);
+  status = sum_ab(X, 2, &sum_of_ab); cBYE(status);
+  printf("Sum = %d\n", sum_of_ab);
   print_ab(X);
   free_ab(X);
-  printf("====================================");
-  AB_ARGS *X_NEW = init_ab_copy("my_config", 20);
-  int result_new = sum_ab(X_NEW, 2);
-  printf("Sum = %d\n", result_new);
-  print_ab(X_NEW);
-  free_ab(X_NEW);
-
-  return 0;
+BYE:
+  return status;
 }

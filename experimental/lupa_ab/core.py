@@ -3,12 +3,12 @@ from lua_executor import Executor
 
 
 executor = Executor()
+executor.execute("ab = require 'core'")
 
 
 init_ab_str = \
     """
     function(config_file)
-        ab = require 'core'
         return ab.init_ab(config_file)
     end
     """
@@ -16,7 +16,6 @@ init_ab_str = \
 sum_ab_str = \
     """
     function(ab_struct, json_body)
-        ab = require 'core'
         return ab.sum_ab(ab_struct, json_body)
     end
     """
@@ -24,7 +23,6 @@ sum_ab_str = \
 print_ab_str = \
     """
     function(ab_struct)
-        ab = require 'core'
         return ab.print_ab(ab_struct)
     end
     """
@@ -32,7 +30,6 @@ print_ab_str = \
 free_ab_str = \
     """
     function(ab_struct)
-        ab = require 'core'
         return ab.free_ab(ab_struct)
     end
     """

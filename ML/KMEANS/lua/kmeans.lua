@@ -95,9 +95,10 @@ local function update_step(
     local x = Q.vseq(class, k):eval()
     means[k] = {}
     for j, Dj in pairs(D) do
-      means[k][j] = Q.sum(Q.where(Dj, x)):eval():to_num() / 
-         num_in_class:get_one(k):to_num()
-      -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
+      local numer = Q.sum(Q.where(Dj, x)):eval():to_num() 
+      local denom = num_in_class:get_one(k):to_num()
+      if ( denom > 0 ) then means[k][j] = numer / denom end
+      -- print(numer, denom, " means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
   return means -- a table of nJ vectors of length nK
@@ -108,7 +109,7 @@ local function check_termination(
 
   if ( n_iter > max_iter ) then 
     print("Exceeded limit of iterations", max_iter) 
-    return false
+    return true, 0
   end
   n_iter = n_iter + 1 
   if ( debug ) then 
@@ -129,6 +130,7 @@ end
 local function init(seed, nI, nJ, nK)
   local class = Q.rand({seed = seed, len = nI, lb = 1, ub = nK, qtype = "I4"}):eval()
   local num_in_class = Q.numby(class, nK+1):eval()
+  -- Q.print_csv(class)
   return class, num_in_class
 end
 --================================
