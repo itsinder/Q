@@ -90,7 +90,6 @@ local function update_step(
     for j, Dj in pairs(D) do
       means[k][j] = wt_inner * Q.sum(Q.where(Dj, x)):eval():to_num() / 
          num_in_inner:get_one(k):to_num()
-      -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
   -- accumulate stuff in "outer approximation"
@@ -99,7 +98,6 @@ local function update_step(
       means[k][j] = means[k][j] + ( wt_outer *
         Q.sum(Q.where(Dj, in_outer[k])):eval():to_num() / 
          num_in_outer[k])
-      -- print("means[" .. k .. "][" .. j .. "] = " .. means[k][j])
     end
   end
   return means -- a table of nK tables of length nJ
