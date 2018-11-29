@@ -24,12 +24,19 @@ return function (a, args)
   local bufsz =  multiple_of_8(chunk_size * width)
   local buff =  nil
   local chunk_idx = 0
+  local first_call = true
+  local myvec
   
   local gen1 = function(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
-    buff = buff or cmem.new(bufsz)
-    assert(buff, "malloc failed")
+    if ( first_call ) then
+      first_call = false
+      buff = assert(cmem.new(bufsz, out_qtype))
+      myvec:no_memcpy(buff) -- hand control of this buff to the vector
+    else
+      myvec:flush_buffer() -- tell the vector to flush its buffer
+    end
     local lb = chunk_size * chunk_idx
     local ub = lb + chunk_size
     local chunk_size = ub - lb;
@@ -48,5 +55,6 @@ return function (a, args)
       return chunk_size, buff
     end
   end
-  return lVector{gen=gen1, has_nulls=false, qtype=out_qtype}
+  myvec = lVector{gen=gen1, has_nulls=false, qtype=out_qtype}
+  return myvec
 end
