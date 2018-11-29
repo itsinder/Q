@@ -3,6 +3,7 @@ local Vector = require 'libvec'
 local file_name = "profile_result.txt"
 
 local n = 128*1048576
+
 --[[
 --TODO See if you can do a restore only if there is soemthing to resotre
 --
@@ -13,7 +14,9 @@ d = Q.const({ val = 1, len = n, qtype = "F8" }):set_name("d"):eval()
 e = Q.const({ val = 1, len = n, qtype = "F8" }):set_name("e"):eval()
 
 Q.save()
---]]
+os.exit()
+]]
+
 Q.restore()
 _G['g_time']  = {}
 Vector.reset_timers()
