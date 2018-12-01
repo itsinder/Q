@@ -6,7 +6,7 @@ coefficients, \(\beta\), using the Newton-Raphson algorithm.
 In the course of this, we need to compute
 \(\frac{1}{1 + e^{-x}}\) and 
 \(\frac{1}{(1 + e^{-x})^2}\).
-We use this to motivate the ``conjoin'' feature of Q.
+We use this to motivate the ``conjoin'' feature of \Q.
 Performing common sub-expression elimination as in 
 Figure~\ref{sub_expr} yields a 2x speedup.
 
@@ -45,7 +45,7 @@ been created, as in Figure~\ref{lock_step}.
 \end{figure}
 
 The problem with this solution is that the burden of lock-step evaluation falls
-on the Q programmer. This is remedied by the {\tt conjoin} function
+on the \Q\ programmer. This is remedied by the {\tt conjoin} function
 (Figure~\ref{conjoin})
 
 \begin{figure}

@@ -1,4 +1,4 @@
-// gcc -O4 par_sort.c qsort_asc_I4.c -fopenmp -lgomp -I../../../UTILS/inc/
+// gcc -O4 par_sort.c qsort_asc_I4.c -fopenmp -I../../../UTILS/inc/ -lgomp
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -124,14 +124,16 @@ main(
     num_in_bin[bidx] = where_to_put + 1;
   }
   t_stop = RDTSC();
-  printf("move time  = %" PRIu64 "\n", t_stop - t_start);
+  uint64_t pre_move_time = t_stop - t_start;
+  printf("pre_move time  = %" PRIu64 "\n", pre_move_time);
   t_start = RDTSC();
 #pragma omp parallel for 
   for ( int b = 0; b < num_bins; b++ ) {
     qsort_asc_I4 (lX[b], num_in_bin[b]);
   }
   t_stop = RDTSC();
-  printf("psort time = %" PRIu64 "\n", t_stop - t_start);
+  uint64_t psort_time = t_stop - t_start;
+  printf("psort time = %" PRIu64 "\n", psort_time);
   // Copy everything back to original location
   // convert num_in_bin to cumulative count
   cum_num_in_bin[0] = 0;
@@ -145,14 +147,21 @@ main(
     memcpy(addr, lX[b], sizeof(__DATA_TYPE__) * num_in_bin[b]);
   }
   t_stop = RDTSC();
-  printf(" move time = %" PRIu64 "\n", t_stop - t_start);
+  uint64_t post_move_time = t_stop - t_start;
+  printf(" post_move time = %" PRIu64 "\n", post_move_time); 
   // put some random numbers and do sequential sort
+#pragma omp parallel for schedule(static)
   for ( int i = 0; i < n; i++ ) { X[i] = rand(); }
+
   t_start = RDTSC();
   qsort_asc_I4 (X, n);
   t_stop = RDTSC();
-  printf(" seq  time = %" PRIu64 "\n", t_stop - t_start);
+  uint64_t seq_time = t_stop - t_start;
+  printf(" seq  time = %" PRIu64 "\n", seq_time);
   printf("         n = %" PRIu64 "\n", n);
+  printf("speed up   = %lf\n", 
+      (double)seq_time / 
+      (double)(pre_move_time + post_move_time+ psort_time));
 
 BYE:
   free_if_non_null(X);
