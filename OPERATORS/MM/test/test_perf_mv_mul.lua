@@ -1,20 +1,35 @@
 -- PERFORMANCE 
 local Q = require 'Q'
+local Vector = require 'libvec'
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
 tests.t1 = function(
   num_iters
   )
-  local n = 1048576 -- number of rows
-  local m = 128 -- number of columns
+  local n = 16*1048576 -- number of rows
+  local m = 1024 -- number of columns
   local X = {}
   for i = 1, m do 
-    X[i] = Q.const({val  = 1, len = n, qtype = "F4"})
+    X[i] = Q.const({val  = 1, len = n, qtype = "F4"}):memo(false)
   end
-  local Y = Q.const({val  = 1, len = n, qtype = "F4"})
+  local Y = Q.const({val  = 1, len = m, qtype = "F4"}):eval()
+  _G['g_time'] = {}
+  Vector.reset_timers()
+  local t_start = qc.RDTSC()
   local Z = Q.mv_mul(X, Y):eval()
-  Q.print_csv(Z)
+  local t_stop = qc.RDTSC()
+  Vector.print_timers()
+  local time = ( t_stop - t_start ) 
+  print(time, time / (2500.0 * 1000000.0 ))
+  -- Q.print_csv(Z)
+  if _G['g_time'] then
+    for k, v in pairs(_G['g_time']) do
+      local niters  = _G['g_ctr'][k] or "unknown"
+      local ncycles = tonumber(v)
+      print("0," .. k .. "," .. niters .. "," .. ncycles)
+    end
 end
-t1()
---return tests
+end
+-- tests.t1()
+return tests
