@@ -8,10 +8,10 @@ local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local record_time = require 'Q/UTILS/lua/record_time'
 
 -- This is matrix vector multiply, done chunks at a time 
-local mv_mul = function(X, y)
+local mv_mul = function(X, y, optargs)
   local sp_fn_name = "Q/OPERATORS/MM/lua/mv_mul_specialize"
   local spfn = assert(require(sp_fn_name))
-  local status, subs, tmpl = pcall(spfn, X, y)
+  local status, subs, tmpl = pcall(spfn, X, y, optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)

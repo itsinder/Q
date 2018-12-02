@@ -1,11 +1,4 @@
-//START_INCLUDES
-#include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <fcntl.h>
+#include "q_incs.h"
 #include "q_macros.h"
 //STOP_INCLUDES
 #include "_munmap.h"
@@ -18,8 +11,12 @@ rs_munmap(
 //STOP_FUNC_DECL
 { 
    int status = 0;
-   mcr_rs_munmap(X, nX);
-   cBYE(status);  
+   if ( ( X != NULL ) && ( nX != 0 ) ) {
+     munmap(X, nX);
+   }
+   else {
+     go_BYE(-1);
+   }
  BYE:
    return status;
 }
