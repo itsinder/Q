@@ -43,7 +43,6 @@ ${fn}(
   uint64_t num_in_C = *ptr_num_in_C;
   uint64_t aidx = *ptr_aidx;
   if ( num_in_C > nC ) { 
-    fprintf(stderr, "num_in_C,  nC = %llu, %llu \n", num_in_C, nC);
     go_BYE(-1); 
   }
   if ( aidx >= nA ) { go_BYE(-1); }

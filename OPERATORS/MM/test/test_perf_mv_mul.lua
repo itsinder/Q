@@ -32,6 +32,7 @@ tests.t1 = function(
         print("0," .. k .. "," .. niters .. "," .. ncycles)
       end
     end
+    print("=====================================")
   end
 end
 -- tests.t1()

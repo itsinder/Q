@@ -75,7 +75,6 @@ return function (
       T[4] = out_max_val
       T[5] = " ) "
       subs.cond = table.concat(T)
-      print(subs.cond)
     else
       subs.cond = " 0 "
     end
