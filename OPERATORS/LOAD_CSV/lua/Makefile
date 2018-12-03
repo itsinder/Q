@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS= -I.  -I../../../UTILS/inc/ -I../gen_inc/  -I../../../UTILS/gen_inc 
+INCS= -I.  -I../../../UTILS/inc/ -I../gen_inc/  -I../inc/ -I../../../UTILS/gen_inc 
 
 INCDIR = ../gen_inc/
 
@@ -23,9 +23,14 @@ all : libload_csv.so
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/get_cell.c ${INCDIR}
 
+../gen_inc/_txt_to_B1.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/txt_to_B1.c ${INCDIR}
+
 ../gen_inc/_txt_to_SC.h : 
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/txt_to_SC.c ${INCDIR}
+  
 #----------------------------------
 ../gen_src/_txt_to_I1.c :
 	lua gen_code_I.lua 
@@ -50,9 +55,15 @@ clean :
 
 ../src/txt_to_SC.c : ../gen_inc/_txt_to_SC.h
 
+../src/txt_to_B1.c : ../gen_inc/_txt_to_B1.h
+
+#../src/load_csv_fast.c : ../gen_inc/_load_csv_fast.h
+
 SRC_FILES =  \
 	../src/get_cell.c  \
 	../src/txt_to_SC.c \
+	../src/txt_to_B1.c \
+	../src/load_csv_fast.c \
 
 AUX_FILES = \
 	../../../UTILS/src/is_valid_chars_for_num.c 
@@ -76,6 +87,8 @@ libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES}
 	cp ${GEN_INC_FILES}        ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_get_cell.h  ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_txt_to_SC.h ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_txt_to_B1.h ${Q_BUILD_DIR}/include/
+	cp ../inc/load_csv_fast.h ${Q_BUILD_DIR}/include/
 
 test_q : libload_csv.so
 	echo "TODO"

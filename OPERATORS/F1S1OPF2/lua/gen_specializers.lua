@@ -8,6 +8,10 @@ y = string.gsub(x, "<<operator>>", "vsadd")
 y = string.gsub(y, "<<c_code>>", "c = a + b")
 plfile.write("vsadd_specialize.lua", y)
 --=======================
+y = string.gsub(x, "<<operator>>", "pow")
+y = string.gsub(y, "<<c_code>>", "c = pow((double)a, (double)b)")
+plfile.write("pow_specialize.lua", y)
+--=======================
 y = string.gsub(x, "<<operator>>", "vssub")
 y = string.gsub(y, "<<c_code>>", "c = a - b")
 plfile.write("vssub_specialize.lua", y)
@@ -102,6 +106,21 @@ y = string.gsub(y, "<<c_code_for_operator>>", "c = exp((double)a);")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("exp_specialize.lua", y)
 --=======================
+y = string.gsub(x, "<<operator>>", "reciprocal")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = 1 / a; ")
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
+plfile.write("reciprocal_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "sqrt")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = sqrt((double)a);")
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
+plfile.write("sqrt_specialize.lua", y)
+--=======================
+y = string.gsub(x, "<<operator>>", "sqr")
+y = string.gsub(y, "<<c_code_for_operator>>", "c = (a * a);")
+y = string.gsub(y, "<<out_qtype>>", 'in_qtype')
+plfile.write("sqr_specialize.lua", y)
+--=======================
 y = string.gsub(x, "<<operator>>", "log")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = log((double)a);")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
@@ -118,20 +137,22 @@ y = string.gsub(y, "<<out_qtype>>", "in_qtype")
 plfile.write("decr_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit")
-y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 1;} else{double temp = exp((double)a); c = temp/(1+temp);}")
+y = string.gsub(y, "<<c_code_for_operator>>", 
+  "c = 1.0 / ( 1.0 + exp(-1.0 * a)); ")
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit_specialize.lua", y)
 --=======================
 y = string.gsub(x, "<<operator>>", "logit2")
-y = string.gsub(y, "<<c_code_for_operator>>", "if( (double)a >= log(DBL_MAX) ) {c = 0;} else{double temp = exp((double)a); c = temp/((1+temp)*(1+temp));}")
+y = string.gsub(y, "<<c_code_for_operator>>", 
+" c = 1.0 / mcr_sqr ( ( 1.0 + exp(-1.0 *a) ) ); " )
 y = string.gsub(y, "<<out_qtype>>", '"F8"')
 plfile.write("logit2_specialize.lua", y)
 --=======================
 local tbl = 'local funcs = {I1 = "abs", I2 = "abs", I4 = "abs", I8 = "abs", F4 = "fabsf", F8 = "fabs"}\n'
 local tbl2 = 'local cast = {I1 = "(int8_t)", I2 = "(int16_t)", I4 = "(int32_t)", I8 = "(int64_t)", F4 = "", F8 = ""}\n'
 local z = x
-local w = ")\n" .. tbl .. tbl2
-y = string.gsub(z, "[)]", w)
+local w = "\n" .. tbl .. tbl2
+y = string.gsub(z, "--preamble", w)
 y = string.gsub(y, "<<operator>>", "abs")
 y = string.gsub(y, "<<c_code_for_operator>>", "c = ".. '".. cast[in_qtype] .. funcs[in_qtype] .."'.."(a);")
 y = string.gsub(y, "<<out_qtype>>", "in_qtype")

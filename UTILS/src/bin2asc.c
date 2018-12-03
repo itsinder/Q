@@ -57,11 +57,11 @@ bin2asc(
     qtype = I1;
     width = 1;
   }
-  if ( strcasecmp(fldtype, "I2") == 0 ) {
+  else if ( strcasecmp(fldtype, "I2") == 0 ) {
     qtype = I2;
     width = 2;
   }
-  if ( strcasecmp(fldtype, "I4") == 0 ) {
+  else if ( strcasecmp(fldtype, "I4") == 0 ) {
     qtype = I4;
     width = 4;
   }
@@ -123,7 +123,7 @@ bin2asc(
     fprintf(ofp, "%s\n", buf);
   }
 BYE:
-  rs_munmap(X, nX);
+  mcr_rs_munmap(X, nX);
   if ( *outfile != '\0' ) { 
     fclose_if_non_null(ofp);
   }

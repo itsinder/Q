@@ -2,17 +2,12 @@ return require 'Q/UTILS/lua/code_gen' {
 
    declaration = [[
 
-#include <limits.h>
-#include <math.h>
-#include "q_macros.h"
-#include <stdio.h>
-#include <stdint.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#include "q_incs.h"
+#include "_rdtsc.h"
 
 typedef struct _rand_${out_qtype}_rec_type {
   uint64_t seed;
+  struct drand48_data buffer;
   ${out_ctype} lb;
   ${out_ctype} ub;
 } RAND_${out_qtype}_REC_TYPE;
@@ -30,12 +25,6 @@ rand_${out_qtype}(
 
 #include "_rand_${out_qtype}.h"
 
-static inline uint64_t RDTSC()
-{
-  unsigned int hi, lo;
-    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-      return ((uint64_t)hi << 32) | lo;
-}
 
 //START_FUNC_DECL
 int
@@ -53,18 +42,18 @@ rand_${out_qtype}(
   ${out_ctype} lb = ptr_in->lb;
   ${out_ctype} ub = ptr_in->ub;
   if ( idx == 0 ) { //seed has not yet been set
-    if ( seed == 0 ) {
+    if ( seed <= 0 ) {
      seed = RDTSC();
     }
-    srand48(seed);
+    srand48_r(seed, &(ptr_in->buffer));
   }
   ${out_ctype} range = ub - lb;
-#pragma omp parallel for
+// TODO #pragma omp parallel for
   for ( uint64_t i = 0; i < nX; i++ ) { 
-    ${gen_type} x = ${generator}();
+    ${gen_type} x;
+    ${generator}(&(ptr_in->buffer), &x);
     X[i] = (${out_ctype}) (lb + (${scaling_code}) );
   }
-BYE:
   return status;
 }
 

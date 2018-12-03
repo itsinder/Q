@@ -2,11 +2,12 @@ return require 'Q/UTILS/lua/code_gen' {
 
    declaration = [[
 
-#include "q_types.h"
-#include "q_macros.h"
+#include "q_incs.h"
+#include "_set_bit_u64.h"
 extern int
 ${fn}(  
       const ${in_ctype} * restrict in,  
+      uint64_t *nn_in,
       uint64_t nR,  
       ${in_ctype} *ptr_sval,
       uint64_t *restrict out,
@@ -19,6 +20,7 @@ ${fn}(
 int
 ${fn}(  
       const ${in_ctype} * restrict in,  
+      uint64_t *nn_in,
       uint64_t nR,  
       ${in_ctype} *ptr_sval,
       uint64_t * restrict out,
@@ -40,7 +42,7 @@ ${fn}(
     num_last_block = nR - ( num_blocks * VECTOR_LENGTH);
     num_blocks++; 
   }
-#pragma omp parallel for 
+#pragma omp parallel for schedule(static)
   for ( uint64_t blk_idx = 0; blk_idx < num_blocks; blk_idx++ ) {  
     uint64_t lb = blk_idx * VECTOR_LENGTH;;
     uint64_t ub = lb + VECTOR_LENGTH;;
@@ -52,7 +54,7 @@ ${fn}(
       ${in_ctype} inval = in[iidx]; 
       int rslt = (inval ${comparison} sval);
       /* TODO: Avoid the if condition */
-      if ( rslt == 1 ) { mcr_set_bit(oval, bit_idx); }
+      if ( rslt == 1 ) { set_bit_u64(&oval, bit_idx, 1); }
       bit_idx++;
       if ( bit_idx == 64 ) {
         bit_idx = 0;

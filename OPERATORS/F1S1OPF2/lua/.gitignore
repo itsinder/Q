@@ -27,3 +27,7 @@ log_specialize.lua
 logit_specialize.lua
 logit2_specialize.lua
 abs_specialize.lua
+sqrt_specialize.lua
+
+pow_specialize.lua
+sqr_specialize.lua

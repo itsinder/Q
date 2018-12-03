@@ -29,7 +29,12 @@ use_terra=false
 if [ $compiler == "luaterra" ]
 then
   use_terra=true
-  compiler=luajit
+  # Using luajit compiler as luajit-2.0.4 instead of luajit-2.1.0-beta3 
+  # as we are facing issue with newer compiler when introduced the require 'terra' statement
+  compiler=luajit-2.0.4
+elif [ $compiler == "luajit" ]
+then
+  compiler=luajit-2.0.4
 fi
 
 $compiler lua/test_performance.lua $2 $use_terra

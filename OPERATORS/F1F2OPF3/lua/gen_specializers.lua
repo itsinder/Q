@@ -71,11 +71,11 @@ if do_bop or do_all then
   local x = plfile.read("bop_specialize.tmpl")
   
   y = string.gsub(x, "<<operator>>", "vvand")
-  y = string.gsub(y, "<<mathsymbol>>", "&&")
+  y = string.gsub(y, "<<mathsymbol>>", "&")
   plfile.write("vvand_specialize.lua", y)
   --=======================
   y = string.gsub(x, "<<operator>>", "vvor")
-  y = string.gsub(y, "<<mathsymbol>>", "||")
+  y = string.gsub(y, "<<mathsymbol>>", "|")
   plfile.write("vvor_specialize.lua", y)
   --=======================
   y = string.gsub(x, "<<operator>>", "vvxor")
@@ -83,7 +83,7 @@ if do_bop or do_all then
   plfile.write("vvxor_specialize.lua", y)
   --=======================
   y = string.gsub(x, "<<operator>>", "vvandnot")
-  y = string.gsub(y, "<<mathsymbol>>", "&& ~")
+  y = string.gsub(y, "<<mathsymbol>>", "& ~")
   plfile.write("vvandnot_specialize.lua", y)
 end
 --=======================

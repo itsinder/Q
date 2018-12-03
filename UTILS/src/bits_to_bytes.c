@@ -6,6 +6,7 @@
 int
 bits_to_bytes(
     uint64_t *in,
+    uint64_t n_in,
     uint8_t *out,
     uint64_t n_out
     )
@@ -16,7 +17,6 @@ bits_to_bytes(
   if ( out == NULL ) { go_BYE(-1); }
   if ( n_out   == 0    ) { go_BYE(-1); }
   uint64_t shift = 0;
-  uint64_t n_in = n_out / 64; if ( ( n_in* 64) != n_out ) { n_in++; }
   bool done = false;
   uint64_t oidx = 0;
   for ( uint64_t i = 0; i < n_in; i++ ) { 

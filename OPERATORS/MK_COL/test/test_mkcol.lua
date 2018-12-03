@@ -2,22 +2,34 @@
 
 local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
-
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
-local q_core = require 'Q/UTILS/lua/q_core'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local ffi = require 'Q/UTILS/lua/q_ffi'
--- input table of values 1,2,3 of type I4, given to mk_col
-local status, ret = pcall(mk_col, {1,3,4}, "I4")
--- local status, ret = pcall(mk_col, {1.1,5.1,4.5}, "F4")
-assert(status, "Error in mk col ")
-assert(type(ret) == "Column", " Output of mk_col is not Column")
-for i=1,ret:length() do  
-  local result = ret:get_element(i-1)
-  local ctype =  qconsts.qtypes[ret:fldtype()]["ctype"]
-  local str = ffi.cast(ctype.." *",result)
-  print(str[0])
+local convert_c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local tests = {}
+tests.t1 = function()
+  -- input table of values 1,2,3 of type I4, given to mk_col
+  local col = mk_col({1,3,4}, "I4")
+  assert(col)
+  assert(type(col) == "lVector", " Output of mk_col is not lVector")
+  for i=1, col:length() do  
+    local status, result = pcall(convert_c_to_txt, col, i)
+    assert(status, "Failed to get the value from vector at index: "..tostring(i))
+    if result == nil then result = "" end
+  end
+  assert(col:has_nulls() == false)
+  print("Test t1 succeeded")
 end   
-
-require('Q/UTILS/lua/cleanup')()
-os.exit() 
+tests.t2 = function()
+  -- make vector with null values
+  local col = mk_col({1,2,3,4}, "I4", {true, false, true, false})
+  assert(col)
+  assert(type(col) == "lVector", " Output of mk_col is not lVector")
+  for i=1, col:length() do  
+    local status, result = pcall(convert_c_to_txt, col, i)
+    assert(status, "Failed to get the value from vector at index: "..tostring(i))
+    if result == nil then result = "" end
+  end
+  assert(col:has_nulls())
+  -- TODO assert(Q.sum(col):eval():to_num() == 1+3)
+  print("Test t2 succeeded")
+end   
+return tests

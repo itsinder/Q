@@ -2,8 +2,17 @@ local plpath = require 'pl.path'
 
 local section = { c = 'definition', h = 'declaration' }
 
+local q_tmpl_dir = os.getenv("Q_TMPL_DIR") .. "/"
+assert(plpath.isdir(q_tmpl_dir))
 local function do_replacements(tmpl, subs)
-   local T = dofile(tmpl)
+  local T
+  if ( plpath.isfile(tmpl) ) then 
+    T = assert(dofile(tmpl))
+  else 
+    local filename = q_tmpl_dir .. tmpl
+    assert(plpath.isfile(filename), "File not found " .. filename)
+    T = dofile(filename)
+  end
    for k,v in pairs(subs) do
       T[k] = v
    end
@@ -23,16 +32,17 @@ local _dotfile = function(subs, tmpl, opdir, ext)
   local f = assert(io.open(fname, "w"))
   f:write(dotfile)
   f:close()
+  return true
 end
 
 local fns = {}
 
 fns.dotc = function (subs, tmpl, opdir)
-  _dotfile(subs, tmpl, opdir, 'c')
+  return _dotfile(subs, tmpl, opdir, 'c')
 end
 
 fns.doth = function (subs, tmpl, opdir)
-  _dotfile(subs, tmpl, opdir, 'h')
+  return _dotfile(subs, tmpl, opdir, 'h')
 end
 
 return fns

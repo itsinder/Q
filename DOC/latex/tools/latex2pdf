@@ -28,6 +28,8 @@ if ($docenv) {
   System("cat $ENV{DOCROOT}/styles/e-unibus-${docenv}.tex $fname > TEMP.tex");
   System("echo '\\end{document}' >> TEMP.tex");
   System('pdflatex', './TEMP.tex');
+  System('bibtex', './TEMP');
+  System('pdflatex', './TEMP.tex');
   System('pdflatex', './TEMP.tex');
 # Uncomment both following lines if you need to make indexes
 # System('makeindex', './TEMP');

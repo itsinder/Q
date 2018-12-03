@@ -1,4 +1,4 @@
-require 'parser'
+local fns = require 'Q/UTILS/lua/parser'
 
 
 return function (
@@ -17,7 +17,7 @@ return function (
 
     local lno = 1
     for line in ifp:lines() do 
-      local entry = parse_csv_line(line, ',')
+      local entry = fns["parse_csv_line"](line, ',')
       local skip = false 
       if #entry ~= num_cols then
         skip = true
@@ -26,7 +26,7 @@ return function (
         for i, regex in pairs(regex_list) do
           -- skip regex checking for nil or empty string
           if regex ~= nil and regex ~= "" then 
-            start, stop = string.find(entry[i], regex) 
+            local start, stop = string.find(entry[i], regex) 
             if not ( ( start ) and ( start == 1 ) and 
               ( stop == string.len(entry[i]) ) ) then 
             -- if ( string.len(x) ~= string.len(entry[i]) ) then 

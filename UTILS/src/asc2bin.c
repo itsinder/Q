@@ -22,7 +22,7 @@
 
 #define MAXLINE 64
 
-typedef enum _qtype_type { I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
+typedef enum _qtype_type { undef_qtype, B1, I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
 //START_FUNC_DECL
 int
 asc2bin(
@@ -34,7 +34,7 @@ asc2bin(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  qtype_type qtype;
+  qtype_type qtype = undef_qtype;
   FILE *ifp = NULL;
   FILE *ofp = NULL;
   char *cptr;
@@ -60,13 +60,16 @@ asc2bin(
     ofp = stdout;
   }
 
-  if ( strcasecmp(fldtype, "I1") == 0 ) {
+  if ( strcasecmp(fldtype, "B1") == 0 ) {
+    qtype = B1;
+  }
+  else if ( strcasecmp(fldtype, "I1") == 0 ) {
     qtype = I1;
   }
-  if ( strcasecmp(fldtype, "I2") == 0 ) {
+  else if ( strcasecmp(fldtype, "I2") == 0 ) {
     qtype = I2;
   }
-  if ( strcasecmp(fldtype, "I4") == 0 ) {
+  else if ( strcasecmp(fldtype, "I4") == 0 ) {
     qtype = I4;
   }
   else if ( strcasecmp(fldtype, "I8") == 0 ) {
@@ -86,12 +89,14 @@ asc2bin(
     /* not implemented */ go_BYE(-1); 
   }
   else { go_BYE(-1); }
+  if ( qtype == undef_qtype ) { go_BYE(-1); }
 
   if ( outlen > 0 ) { 
     opbuf = malloc(outlen * sizeof(char));
     return_if_malloc_failed(opbuf);
   }
   memset(line, '\0', MAXLINE);
+  uint64_t buf_b1 = 0; uint32_t buf_idx = 0; uint32_t bit_val = 0;
   for ( int lno = 0; ; lno++ ) { 
     int8_t tempI1; int16_t tempI2; int32_t tempI4; int64_t tempI8;
     float tempF4; double tempF8;
@@ -111,6 +116,29 @@ asc2bin(
       xptr = line+1;
     }
     switch ( qtype ) { 
+      case B1 : 
+        if ( ( ( strcmp(xptr, "true") == 0 ) || 
+              ( strcmp(xptr, "1") == 0 ) ) ) {
+          bit_val = 1;
+        }
+        else {
+          bit_val = 0;
+        }
+        if ( buf_idx == 64 ) {
+          fwrite(&buf_b1, 1, sizeof(uint64_t), ofp);
+          buf_b1 = 0;
+          buf_idx = 0;
+        }
+        if ( bit_val == 1 ) { 
+          uint64_t mask = 1 << buf_idx;
+          buf_b1 |= mask;
+        }
+        else {
+          uint64_t mask = ~(1 << buf_idx);
+          buf_b1 &= mask;
+        }
+        buf_idx++;
+        break;
       case I1 : 
         status = txt_to_I1(xptr, &tempI1); cBYE(status);
         fwrite(&tempI1, 1, sizeof(int8_t), ofp);
@@ -145,6 +173,10 @@ asc2bin(
         break;
     }
     memset(line, '\0', MAXLINE);
+  }
+  if ( qtype == B1 ) { 
+    if ( buf_idx == 0 )  { go_BYE(-1); }
+    fwrite(&buf_b1, 1, sizeof(uint64_t), ofp);
   }
 BYE:
   if ( *infile != '\0' ) { 

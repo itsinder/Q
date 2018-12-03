@@ -1,14 +1,13 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
-local pl      = require 'pl'
-local plpath  = require 'pl.path'
+local qc            = require 'Q/UTILS/lua/q_core'
   
 return function (
   M -- meta data table 
 )
   assert(type(M) == "table", err.METADATA_TYPE_TABLE)
 -- Sri: this should be ensured by library loading; trust our own
---  assert(plpath.isdir(_G["Q_META_DATA_DIR"]), err.Q_META_DATA_DIR_INCORRECT)
+--  assert(qc["isdir"](_G["Q_META_DATA_DIR"]), err.Q_META_DATA_DIR_INCORRECT)
   
   local col_names = {}
   -- now look at fields of metadata
@@ -17,6 +16,7 @@ return function (
     local col = "Column " .. midx .. "-"
     assert(type(fld_M) == "table", col .. err.COLUMN_DESC_ERROR)
     assert(fld_M.name,  col .. err.METADATA_NAME_NULL)
+    assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
     if fld_M.has_nulls ~= nil then 
@@ -38,7 +38,14 @@ return function (
     end
     if fld_M.qtype == "SC" then 
       assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
-      assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC ) 
+      assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC )
+      if fld_M.convert_sc ~= nil then
+          assert((fld_M.convert_sc == true or fld_M.convert_sc == false),
+          "convert_sc meta field not of type boolean" )
+      else
+        -- TODO: default value for convert_sc
+        fld_M.convert_sc = false
+      end
     end
     if fld_M.qtype == "SV" then
       --print(fld_M.max)

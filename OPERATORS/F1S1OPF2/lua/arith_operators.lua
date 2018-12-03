@@ -6,5 +6,6 @@ return {
 "vsrem", 
 "vsand", 
 "vsor",  
-"vsxor", 
+"vsxor",
+"pow",
 }

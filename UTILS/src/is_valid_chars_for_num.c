@@ -17,6 +17,9 @@ is_valid_chars_for_num(
   for ( char *cptr = (char *)X; *cptr != '\0'; cptr++ ) { 
     if ( isdigit(*cptr) || 
         ( *cptr == '-' )  ||
+        ( *cptr == 'E' )  ||/* allow for scientific notation*/
+        ( *cptr == '+' )  ||
+        ( *cptr == 'e' )  || /* allow for scientific notation*/
         ( *cptr == '.' ) ) {
       continue;
     }

@@ -5,7 +5,11 @@ return function (
   optargs
   )
     local plfile = require "pl.file"
-    local out_qtype = optargs.out_qtype -- okay for out_qtype to be nil
+    local out_qtype 
+    if ( optargs ) then
+      assert(type(optargs) == "table")
+      out_qtype = optargs.out_qtype -- okay for out_qtype to be nil
+    end
     local ok_intypes = { I1 = true, I2 = true, I4 = true }
     local ok_out_qtypes = { I2 = true, I4 = true, I8 = true }
 
@@ -48,7 +52,7 @@ return function (
       "specfiied outputtype not big enough")
       l_out_qtype = out_qtype
     end
-    local tmpl = 'base.tmpl'
+    local tmpl = 'f1f2opf3.tmpl'
     local subs = {}
     -- This includes is just as a demo. Not really needed
     subs.includes = "#include <math.h>\n"

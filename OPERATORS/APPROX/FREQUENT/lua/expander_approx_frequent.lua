@@ -1,7 +1,7 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
-local Column  = require 'Q/RUNTIME/COLUMN/code/lua/Column'
-local Scalar  = require 'Q/RUNTIME/SCALAR/lua/Scalar'
+local lVector = require 'Q/RUNTIME/lua/lVector'
+local Reducer = require 'Q/RUNTIME/lua/Reducer'
 local qc      = require 'Q/UTILS/lua/q_core'
 
 local qtypes  = require 'Q/OPERATORS/APPROX/FREQUENT/lua/qtypes'
@@ -9,49 +9,53 @@ local spfn    = require 'Q/OPERATORS/APPROX/FREQUENT/lua/specializer_approx_freq
 
 local function expander_approx_frequent(x, min_freq, err)
   local subs = spfn(x:fldtype())
-  local x_coro = assert(x:wrap(), "approx_frequent wrap failed for x")
 
-  local data = ffi.cast(subs.data_ty..'*', ffi.malloc(ffi.sizeof(subs.data_ty)))
-  local out_coro = coroutine.create(function()
-      local data = ffi.cast(subs.data_ty..'*', ffi.malloc(ffi.sizeof(subs.data_ty)))
-      qc[subs.alloc_fn](x:length(), min_freq, err, x:chunk_size(), data)
-      local status = true
-      while status do
-        local new_status, len, chunk = coroutine.resume(x_coro)
-        status = new_status
-        if status and len ~= nil then
-          qc[subs.chunk_fn](chunk, len, data)
-          coroutine.yield(data)
-        end
-      end
-  end)
+  local data = assert(ffi.malloc(ffi.sizeof(subs.data_ty)), "malloc failed")
+  data = ffi.cast(subs.data_ty..'*', data)
+  qc[subs.alloc_fn](x:length(), min_freq, err, x:chunk_size(), data)
+  local chunk_idx = 0
+  local function out_gen(chunk_num)
+    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
+    assert(chunk_num == chunk_idx)
+    local len, chunk, nn_chunk = x:chunk(chunk_idx)
+    chunk_idx = chunk_idx + 1
+    if len > 0 then
+      qc[subs.chunk_fn](chunk, len, data)
+      return data
+    else
+      return nil
+    end
+  end
 
   local function getter(data)
-    assert(coroutine.status(out_coro) == 'dead',
-           'attempt to access approx_frequent value before all data has been processed')
 
     local y_ty = subs.elem_ctype..'*'
-    local y = ffi.cast(y_ty..'*', ffi.malloc(ffi.sizeof(y_ty)))
+    local y = assert(ffi.malloc(ffi.sizeof(y_ty)), "malloc failed")
+    local y_copy = ffi.cast(y_ty..'*', y)
+    
     local f_ty = subs.freq_ctype..'*'
-    local f = ffi.cast(f_ty..'*', ffi.malloc(ffi.sizeof(f_ty)))
+    local f = assert(ffi.malloc(ffi.sizeof(f_ty)), "malloc failed")
+    local f_copy = ffi.cast(f_ty..'*', f)
+    
     local len_ty = subs.out_len_ctype
-    local len = ffi.cast(len_ty..'*', ffi.malloc(ffi.sizeof(len_ty)))
+    local len = assert(ffi.malloc(ffi.sizeof(len_ty)), "malloc failed")
+    len = ffi.cast(len_ty..'*', len)    
 
     qc[subs.out_fn](data, y, f, len)
 
-    local y_col = Column({field_type = subs.elem_qtype, write_vector = true})
-    y_col:put_chunk(len[0], y[0])
+    local y_col = lVector({qtype = subs.elem_qtype, gen = true, has_nulls = false})
+    y_col:put_chunk(y, nil, len[0])
     y_col:eov()
 
-    local f_col = Column({field_type = subs.freq_qtype, write_vector = true})
-    f_col:put_chunk(len[0], f[0])
+    local f_col = lVector({qtype = subs.freq_qtype, gen = true, has_nulls = false})
+    f_col:put_chunk(f, nil, len[0])
     f_col:eov()
 
     qc[subs.free_fn](data)
     return y_col, f_col, len[0]
   end
 
-  return Scalar({ coro = out_coro, func = getter })
+  return Reducer({ gen = out_gen, func = getter })
 end
 
 return expander_approx_frequent

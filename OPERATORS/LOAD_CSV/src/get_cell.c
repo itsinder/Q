@@ -1,8 +1,8 @@
 //START_INCLUDES
 #include <stdio.h>
 #include <string.h>
-#include "q_macros.h"
-#include "q_types.h"
+#include "q_incs.h"
+#include "_trim.h"
 //STOP_INCLUDES
 #include "_get_cell.h"
 //START_FUNC_DECL
@@ -13,6 +13,7 @@ get_cell(
     size_t xidx,
     bool is_last_col,
     char *buf,
+    char *lbuf,
     size_t bufsz
     )
 //STOP_FUNC_DECL
@@ -21,12 +22,18 @@ get_cell(
   char dquote = '"'; char comma = ','; 
   char bslash = '\\'; char eoln = '\n';
   uint32_t bufidx = 0;
+  bool is_trim = true;
   //--------------------------------
   if ( X == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
   if ( xidx == nX ) { go_BYE(-1); }
   if ( buf == NULL ) { go_BYE(-1); }
+  if ( lbuf == NULL ) {
+    is_trim = false;
+    lbuf = buf;
+  }
   if ( bufsz == 0 ) { go_BYE(-1); }
+  memset(lbuf, '\0', bufsz);
   memset(buf, '\0', bufsz);
   char last_char;
   bool start_dquote = false;
@@ -46,7 +53,12 @@ get_cell(
   //----------------------------
   for ( ; ; ) { 
     if ( xidx > nX ) { go_BYE(-1); }
-    if ( xidx == nX ) { return xidx; }
+    if ( xidx == nX ) {
+      if ( is_trim ) {
+        status = trim(lbuf, buf, bufsz); cBYE(status);
+      }
+      return xidx;
+    }
     if ( X[xidx] == last_char ) {
       xidx++; // jumo over last char;
       if ( start_dquote ) { 
@@ -59,6 +71,9 @@ get_cell(
         }
         xidx++;
       }
+      if ( is_trim ) {
+        status = trim(lbuf, buf, bufsz); cBYE(status);
+      }
       return xidx;
     }
     //---------------------------------
@@ -66,11 +81,11 @@ get_cell(
       xidx++;
       if ( xidx >= nX ) { go_BYE(-1); }
       if ( bufidx >= bufsz ) { go_BYE(-1); }
-      buf[bufidx++] = X[xidx++];
+      lbuf[bufidx++] = X[xidx++];
       continue;
     }
     if ( bufidx >= bufsz ) { go_BYE(-1); }
-    buf[bufidx++] = X[xidx++];
+    lbuf[bufidx++] = X[xidx++];
   }
 BYE:
   if ( status < 0 ) { xidx = 0; }

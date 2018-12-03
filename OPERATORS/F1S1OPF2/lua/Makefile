@@ -1,6 +1,6 @@
 # For fast version, make -e DBGFLAGS="" -e OPTFLAGS=" -O4"
 #
-INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ 
+INCS=-I.  -I../../../UTILS/inc/ -I../gen_inc/ -I../../../UTILS/gen_inc/
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG
@@ -13,13 +13,17 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libf1s1opf2.so _f1s1opf2.lua
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
+	abs_specialize.lua \
+	sqrt_specialize.lua \
+	sqr_specialize.lua \
 	log_specialize.lua exp_specialize.lua \
 	logit_specialize.lua logit2_specialize.lua 
 	luajit gen_specializers.lua f1opf2
 
 arith_specializers: arith_specialize.tmpl \
 	vsadd_specialize.lua vssub_specialize.lua \
-	vsmul_specialize.lua vsdiv_specialize.lua  
+	vsmul_specialize.lua vsdiv_specialize.lua \
+	pow_specialize.lua
 	luajit gen_specializers.lua arith
 
 cmp_specializers: vsgeq_specialize.lua vsleq_specialize.lua  \
@@ -56,9 +60,11 @@ clean :
 	rm -f exp_specialize.lua
 	rm -f incr_specialize.lua
 	rm -f log_specialize.lua
+	rm -f sqrt_specialize.lua
+	rm -f sqr_specialize.lua
+	rm -f pow_specialize.lua
 	rm -f logit_specialize.lua
 	rm -f logit2_specialize.lua
-	rm -f abs_specialize.lua
 #-------------
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
@@ -98,6 +104,12 @@ decr_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 log_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
+sqrt_specialize.lua  : f1opf2_specialize.tmpl
+	lua gen_specializers.lua f1opf2
+sqr_specialize.lua  : f1opf2_specialize.tmpl
+	lua gen_specializers.lua f1opf2
+pow_specialize.lua  : arith_specialize.tmpl
+	lua gen_specializers.lua arith
 exp_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 logit_specialize.lua  : f1opf2_specialize.tmpl
@@ -105,14 +117,29 @@ logit_specialize.lua  : f1opf2_specialize.tmpl
 logit2_specialize.lua  : f1opf2_specialize.tmpl
 	lua gen_specializers.lua f1opf2
 
-libf1s1opf2.so : _arith_files _cmp_files _f1opf2_files _convert_files
+libf1s1opf2.so : _arith_files  \
+	_cmp_files \
+	_f1opf2_files \
+	_convert_files \
+	_vnot_files \
+	_cum_cnt_files \
+	_is_prev_files
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1s1opf2.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
 
+_is_prev_files : is_prev_specialize.lua is_prev.tmpl
+	luajit generator_is_prev.lua
+
 _convert_files : convert_specialize.lua
-	luajit generator0_0.lua
+	luajit generator_conv.lua
+
+_cum_cnt_files : cum_cnt_specialize.lua
+	luajit generator_cum_cnt.lua
+		
+_vnot_files : vnot_specialize.lua
+	luajit generator_vnot.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua

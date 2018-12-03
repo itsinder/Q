@@ -16,16 +16,18 @@ branches:
   only:
     - dev
     - dev_ramesh
+    - dev_inder
 
 install:
   - cd GUIDING_PRINCIPLES/ && bash aio.sh && cd ../
-  - sudo ./q_install.sh
+  - source setup.sh && sudo ./q_install.sh
 
 before_script:
   - source setup.sh
 
 script:
-  - busted . -v -c --lua=luajit -p="_spec.lua"
+  - luajit TEST_RUNNER/q_testrunner.lua i ./
+  - luacov
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
