@@ -10,8 +10,9 @@ local q_data_dir = os.getenv("Q_DATA_DIR")
 q_data_dir = q_data_dir .. "/"
 
 local tests = {} 
---
 tests.t1 = function()
+  -- tests that memory is zero after Vector created, non-zeor after 
+  -- put happens and zero again after Vector is deleted
   local mem = 0
   local y = Vector.new('I4', q_data_dir)
   local s = Scalar.new(123, "I4")
