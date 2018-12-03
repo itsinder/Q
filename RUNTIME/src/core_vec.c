@@ -31,25 +31,27 @@ RDTSC(
 }
 
 
-static uint64_t t_l_vec_add;         static uint32_t n_l_vec_add;
-static uint64_t t_l_vec_check;       static uint32_t n_l_vec_check;
-static uint64_t t_l_vec_clone;       static uint32_t n_l_vec_clone;
-static uint64_t t_l_vec_end_write;   static uint32_t n_l_vec_end_write;
-static uint64_t t_l_vec_eov;         static uint32_t n_l_vec_eov;
-static uint64_t t_l_vec_free;         static uint32_t n_l_vec_free;
-static uint64_t t_l_vec_get;         static uint32_t n_l_vec_get;
-static uint64_t t_l_vec_memo;        static uint32_t n_l_vec_memo;
-static uint64_t t_l_vec_new;         static uint32_t n_l_vec_new;
-static uint64_t t_l_vec_new_virtual; static uint32_t n_l_vec_new_virtual;
-static uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
-static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
-static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
+uint64_t t_l_vec_add;         static uint32_t n_l_vec_add;
+uint64_t t_l_vec_check;       static uint32_t n_l_vec_check;
+uint64_t t_l_vec_clone;       static uint32_t n_l_vec_clone;
+uint64_t t_l_vec_end_write;   static uint32_t n_l_vec_end_write;
+uint64_t t_l_vec_eov;         static uint32_t n_l_vec_eov;
+uint64_t t_l_vec_free;         static uint32_t n_l_vec_free;
+uint64_t t_l_vec_get;         static uint32_t n_l_vec_get;
+uint64_t t_l_vec_memo;        static uint32_t n_l_vec_memo;
+uint64_t t_l_vec_new;         static uint32_t n_l_vec_new;
+uint64_t t_l_vec_new_virtual; static uint32_t n_l_vec_new_virtual;
+uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
+uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
+uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 
-static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
-static uint64_t t_memcpy;            static uint32_t n_memcpy;
-static uint64_t t_memset;            static uint32_t n_memset;
-static uint64_t t_malloc;            static uint32_t n_malloc;
-static uint64_t sz_malloc;           // number of bytes allocated
+uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
+uint64_t t_memcpy;            static uint32_t n_memcpy;
+uint64_t t_memset;            static uint32_t n_memset;
+
+//-- for memory allocation
+uint64_t t_malloc;            static uint32_t n_malloc;
+uint64_t sz_malloc;           // number of bytes allocated
 
 extern luaL_Buffer g_errbuf;
 
@@ -129,8 +131,6 @@ vec_reset_timers(
   t_flush_buffer = 0;       n_flush_buffer = 0;
   t_memcpy = 0;             n_memcpy = 0;
   t_memset = 0;             n_memset = 0;
-  t_malloc = 0;             n_malloc = 0;
-  sz_malloc = 0;
 }
 
 void
@@ -156,10 +156,16 @@ vec_print_timers(
   fprintf(stdout, "1,flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
+}
+
+void
+vec_print_mem(
+    void
+    )
+{
   fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
   fprintf(stdout, "2,sz_malloc,0,%" PRIu64 "\n", sz_malloc);
 }
-
 
 static bool 
 is_file_size_okay(

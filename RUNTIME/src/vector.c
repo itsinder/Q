@@ -78,6 +78,10 @@ static int l_print_timers( lua_State *L) {
   vec_print_timers();
   return 0;
 }
+static int l_print_mem( lua_State *L) {
+  vec_print_mem();
+  return 0;
+}
 
 static int l_reset_timers( lua_State *L) {
   vec_reset_timers();
@@ -737,6 +741,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },
     { "print_timers", l_print_timers },
+    { "print_mem", l_print_mem },
     { "reset_timers", l_reset_timers },
     { "no_memcpy", l_vec_no_memcpy },
     { "flush_buffer", l_vec_flush_buffer },

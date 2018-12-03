@@ -10,6 +10,10 @@ extern void
 vec_print_timers(
     void
     );
+extern void
+vec_print_mem(
+    void
+    );
 extern int
 chk_field_type(
     const char * const field_type,
