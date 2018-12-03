@@ -16,6 +16,13 @@ Q.count() : performs occurrence count of input vector
       -- Input arguments:  x is of type 'lVector' and y can be 'Scalar/Number'
       -- Returns        :  Scalar of type 'I8'
                         -- i)  occurrence count of given value(y)
+
+3) Q.count(x, y): which returns 'unique' ,'count' and 'sum' values
+      -- Input arguments:  x is of type 'lVector' and y is of type B1 'lVector'
+      -- Returns        :  3 vectors
+                        -- i)  unique values
+                        -- ii) count of the values
+                        -- iii)sum of respective B1 values
 -- ]]
 local function count(x, y, optargs)
   local expander, op 
