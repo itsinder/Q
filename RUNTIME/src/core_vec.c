@@ -87,13 +87,13 @@ l_malloc(
 {
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
   void *x = malloc(n);
+  sz_malloc += n;
   ptr_vec->uqid = t_start; // set a unique ID for debugging
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
 
 #ifdef MALLOC_DETAILS
   // TODO START Delete later
   uint64_t curr_sz_malloc = sz_malloc;
-  sz_malloc += n;
   fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
       ptr_vec->uqid, curr_sz_malloc, n, sz_malloc);
   if ( *ptr_vec->name == '\0' ) {
@@ -156,15 +156,15 @@ vec_print_timers(
   fprintf(stdout, "1,flush_buffer,%u,%" PRIu64 "\n", n_flush_buffer, t_flush_buffer);
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
+  fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
 }
 
-void
+uint64_t
 vec_print_mem(
     void
     )
 {
-  fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
-  fprintf(stdout, "2,sz_malloc,0,%" PRIu64 "\n", sz_malloc);
+  return sz_malloc;
 }
 
 static bool 
@@ -536,6 +536,8 @@ vec_free(
 #endif
 
     free(ptr_vec->chunk);
+    if ( sz_malloc < ptr_vec->chunk_sz ) { go_BYE(-1); }
+    sz_malloc -= ptr_vec->chunk_sz;
     ptr_vec->chunk = NULL;
     ptr_vec->chunk_sz = 0;
   }

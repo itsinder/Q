@@ -79,8 +79,16 @@ static int l_print_timers( lua_State *L) {
   return 0;
 }
 static int l_print_mem( lua_State *L) {
-  vec_print_mem();
-  return 0;
+  uint64_t sz =  vec_print_mem();
+  bool is_quiet = true;
+  if ( lua_isboolean(L, 2) ) { 
+    is_quiet = lua_toboolean(L, 2);
+  }
+  if ( !is_quiet ) { 
+    fprintf(stdout, "VEC,sz_malloc,0,%" PRIu64 "\n", sz);
+  }
+  lua_pushnumber(L, sz);
+  return 1;
 }
 
 static int l_reset_timers( lua_State *L) {

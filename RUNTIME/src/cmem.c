@@ -24,7 +24,26 @@
 #define MIN_VAL 1
 #define MAX_VAL 2
 #define BUFLEN 2047 // TODO: Should not be hard coded. See max txt length
+
+uint64_t sz_cmem_malloc;
+
 int luaopen_libcmem (lua_State *L);
+
+static int 
+l_cmem_print_mem( 
+    lua_State *L
+    ) 
+{
+  bool is_quiet = true;
+  if ( lua_isboolean(L, 2) ) { 
+    is_quiet = lua_toboolean(L, 2);
+  }
+  if ( !is_quiet ) { 
+    fprintf(stdout, "CMEM,sz_malloc,0,%" PRIu64 "\n", sz_cmem_malloc);
+  }
+  lua_pushnumber(L, sz_cmem_malloc);
+  return 1;
+}
 
 void cmem_undef( // USED FOR DEBUGGING
     CMEM_REC_TYPE *ptr_cmem
@@ -75,6 +94,7 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
   return_if_malloc_failed(data);
   ptr_cmem->data = data;
   ptr_cmem->size = size;
+  sz_cmem_malloc += size;
   if ( field_type != NULL ) { 
     strncpy(ptr_cmem->field_type, field_type, 4-1); // TODO Undo hard code
   }
@@ -385,7 +405,7 @@ static int l_cmem_is_foreign( lua_State *L) {
 static int l_cmem_free( lua_State *L) 
 {
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
-  if ( ptr_cmem->size <= 0 ) { 
+  if ( ptr_cmem->size <= 0 ) {
     // Control should never come here except as nelow
     if ( ( ptr_cmem->size == -1 ) && 
          ( strcmp(ptr_cmem->field_type, "XXX") == 0 ) && 
@@ -410,6 +430,7 @@ static int l_cmem_free( lua_State *L)
       free(ptr_cmem->data);
     }
   }
+  sz_cmem_malloc -= ptr_cmem->size; // TODO P1 Why are we not freeing?
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   // printf("Freeing %x \n", ptr_cmem);
   ptr_cmem = NULL; // Suggested by Indrajeet
@@ -642,6 +663,7 @@ static const struct luaL_Reg cmem_methods[] = {
     { "data",     l_cmem_data },
     { "size",     l_cmem_size },
     { "is_foreign",     l_cmem_is_foreign },
+    { "print_mem",     l_cmem_print_mem },
     { "dupe",     l_cmem_dupe },
     { "name",     l_cmem_name },
     { "set_default", l_cmem_set_default },
@@ -659,6 +681,7 @@ static const struct luaL_Reg cmem_functions[] = {
     { "data",     l_cmem_data },
     { "size",     l_cmem_size },
     { "is_foreign",     l_cmem_is_foreign },
+    { "print_mem",     l_cmem_print_mem },
     { "dupe",     l_cmem_dupe },
     { "name",     l_cmem_name },
     { "set",          l_cmem_set               },
