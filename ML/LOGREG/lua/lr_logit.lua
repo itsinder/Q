@@ -27,8 +27,8 @@ local function lr_logit(x, no_memo)
   local len = 0
   local len2 = 0
   repeat 
-    ly  = y:chunk(cidx)
-    lz = z:chunk(cidx)
+    local ly  = y:chunk(cidx)
+    local lz = z:chunk(cidx)
     assert(ly == lz)
     cidx = cidx + 1
   until ( ly == 0 )
