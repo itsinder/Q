@@ -17,7 +17,7 @@ gain and (iii) variance reduction
 \item a more intuitive way to deal with unknown values, both during 
 training and testing. This approach is particularly useful when
 the fact that the value is null does not have some systemic bias.
-Section~\ref{unknown}
+Section~\ref{unknowns}
 \item what ``decision'' does the decision tree really make? For example, if the
 evaluation of the tree leaves us at a node which had 
 \(n_H\) instances of class ``Heads'' and 
@@ -132,8 +132,8 @@ Initialize, decision tree \(D = \{\}\) \\
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= 
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 {\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+  \\
-  \(f', h_0, h_1 = CountIntervals(f, g)\) \\
-  \(b = \mathrm{Q.wtbnft}(h_0, h_1, n_T, n_H)\) (Figure~\ref{algo_weighted_benefit}) \\
+  \(f', h^0, h^1 = CountIntervals(f, g)\) \\
+  \(b = \mathrm{Q.wtbnft}(h^0, h^1, n_T, n_H)\) (Figure~\ref{algo_weighted_benefit}) \\
   \(b', \_, i = \mathrm{Q.max}(b)\) \\
   {\bf return} \(b', f'[i]\)  \- \\
 {\bf end} 
@@ -201,11 +201,12 @@ Vector \(f\) of length \(n\) type integer or floating point \\
 Vector \(g\) of length \(n\) type integer with values 0, 1 \- \\
 {\bf Outputs} \+ \\
 Vector \(f'\) of length \(n'\) type integer \\
-Vector \(h_0\) of length \(n'\) type integer  \\
-Vector \(h_1\) of length \(n'\) type integer  \- \\
+Vector \(h^0\) of length \(n'\) type integer  \\
+Vector \(h^1\) of length \(n'\) type integer  \- \\
 \(f'\) is the unique values of \(f\), sorted ascending \\
 Let \(\delta(x)\) = 1 if \(x\) is true and 0 otherwise \\
-\({h_k}_j = \sum_{i=1}^{i=n} \delta(g_i = k \wedge f_i \leq f_j)\) \- \\
+For \(k = 0, 1\), compute \(h^k_j = \sum_{i=1}^{i=n} \delta(g_i = k \wedge f_i \leq f_j)\) \- \\
+
 {\bf end} 
 \end{tabbing}
 \end{minipage}
@@ -214,23 +215,6 @@ Let \(\delta(x)\) = 1 if \(x\) is true and 0 otherwise \\
 \caption{Count Intervals}
 \end{figure}
 %%-------------------------------------------
-
-
-
-\begin{figure}
-\centering
-\fbox{
-\begin{minipage}{15cm}
-\begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+ 
-
-{\bf end} 
-\end{tabbing}
-\end{minipage}
-}
-\label{compute_benefit_categorical}
-\caption{Benefit Computation (categorical attributes)}
-\end{figure}
 
 \section{Algorithm}
 

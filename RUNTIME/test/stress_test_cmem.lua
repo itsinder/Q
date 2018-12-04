@@ -16,6 +16,7 @@ tests.t1 = function()
   collectgarbage()
   local y = cmem:print_mem(true)
   assert(y == 0)
+  print("Test t1 succeeded")
 end
 
   

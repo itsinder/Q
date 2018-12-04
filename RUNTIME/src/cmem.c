@@ -428,9 +428,9 @@ static int l_cmem_free( lua_State *L)
       // CONTROL SHOULD NEVER COME HERE
       if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
       free(ptr_cmem->data);
+      sz_cmem_malloc -= ptr_cmem->size; 
     }
   }
-  sz_cmem_malloc -= ptr_cmem->size; // TODO P1 Why are we not freeing?
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   // printf("Freeing %x \n", ptr_cmem);
   ptr_cmem = NULL; // Suggested by Indrajeet
