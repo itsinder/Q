@@ -13,9 +13,9 @@ tests.t1 = function(
   for _, mode in pairs(modes) do 
     local X = {}
     for i = 1, m do 
-      X[i] = Q.const({val  = 1, len = n, qtype = "F4"}):memo(false)
+      X[i] = Q.const({val  = 1, len = n, qtype = "F8"}):memo(false)
     end
-    local Y = Q.const({val  = 1, len = m, qtype = "F4"}):eval()
+    local Y = Q.const({val  = 1, len = m, qtype = "F8"}):eval()
     _G['g_time'] = {}
     Vector.reset_timers()
     local t_start = tonumber(qc.RDTSC())

@@ -14,13 +14,14 @@ tests.t1 = function()
   -- tests that memory is zero after Vector created, non-zeor after 
   -- put happens and zero again after Vector is deleted
   local mem = 0
-  local y = Vector.new('I4', q_data_dir)
-  local s = Scalar.new(123, "I4")
+  local qtype = 'I4'
+  local y = Vector.new(qtype,  q_data_dir)
+  local s = Scalar.new(123, qtype)
   mem = Vector.print_mem()
   assert(mem == 0)
   local status = y:put1(s)
   mem = Vector.print_mem()
-  assert(mem == qconsts.chunk_size * XXXX )
+  assert(mem == qconsts.chunk_size * qconsts.qtypes[qtype].width)
   status = y:eov(true)
   y:delete()
   mem = Vector.print_mem()

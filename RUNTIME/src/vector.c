@@ -15,6 +15,7 @@
 #include "core_vec.h"
 #include "scalar.h"
 #include "cmem.h"
+#include "mm.h"
 #include "_txt_to_I4.h"
 
 // TODO Delete luaL_Buffer g_errbuf;
@@ -74,21 +75,32 @@ BYE:
   lua_pushstring(L, buf);
   return 2;
 }
+
 static int l_print_timers( lua_State *L) {
   vec_print_timers();
   return 0;
 }
+
 static int l_print_mem( lua_State *L) {
-  uint64_t sz =  vec_print_mem();
+  int status = 0;
+  char buf[128];
+  uint64_t vec_sz, sz2;
+  status = mm(0, false, false, &vec_sz, &sz2); cBYE(status);
+  
   bool is_quiet = true;
   if ( lua_isboolean(L, 2) ) { 
     is_quiet = lua_toboolean(L, 2);
   }
   if ( !is_quiet ) { 
-    fprintf(stdout, "VEC,sz_malloc,0,%" PRIu64 "\n", sz);
+    fprintf(stdout, "VEC,sz_malloc,0,%" PRIu64 "\n", vec_sz);
   }
-  lua_pushnumber(L, sz);
+  lua_pushnumber(L, vec_sz);
   return 1;
+BYE:
+  lua_pushnil(L);
+  sprintf(buf, "ERROR: %s\n", __func__);
+  lua_pushstring(L, buf);
+  return 2;
 }
 
 static int l_reset_timers( lua_State *L) {

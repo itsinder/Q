@@ -25,4 +25,39 @@ extern int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
 extern void cmem_undef( // USED FOR DEBUGGING
     CMEM_REC_TYPE *ptr_cmem
     );
+extern int cmem_decrement_sz_malloc( 
+    uint64_t sz
+    );
+extern int
+cmem_get_sz_malloc( 
+    void
+);
+#undef MM
+#ifdef MM
+extern int
+incr_vec_mem(
+    uint64_t sz
+    );
+extern int
+decr_vec_mem(
+    uint64_t sz
+    );
+extern uint64_t
+get_vec_mem(
+    void
+    );
+extern int
+incr_cmem_mem(
+    uint64_t sz
+    );
+extern int
+decr_cmem_mem(
+    uint64_t sz
+    );
+extern uint64_t
+get_cmem_mem(
+    void
+    );
+#endif
+
 #endif

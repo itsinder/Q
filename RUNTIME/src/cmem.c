@@ -20,12 +20,11 @@
 #include "_F8_to_txt.h"
 
 #include "cmem.h"
+#include "mm.h"
 
 #define MIN_VAL 1
 #define MAX_VAL 2
 #define BUFLEN 2047 // TODO: Should not be hard coded. See max txt length
-
-uint64_t sz_cmem_malloc;
 
 int luaopen_libcmem (lua_State *L);
 
@@ -34,15 +33,25 @@ l_cmem_print_mem(
     lua_State *L
     ) 
 {
+  int status = 0;
+  char buf[128];
   bool is_quiet = true;
   if ( lua_isboolean(L, 2) ) { 
     is_quiet = lua_toboolean(L, 2);
   }
+  uint64_t sz1, cmem_sz;
+  status = mm(0, false, false, &sz1, &cmem_sz); cBYE(status);
+
   if ( !is_quiet ) { 
-    fprintf(stdout, "CMEM,sz_malloc,0,%" PRIu64 "\n", sz_cmem_malloc);
+    fprintf(stdout, "CMEM,sz_malloc,0,%" PRIu64 "\n", cmem_sz);
   }
-  lua_pushnumber(L, sz_cmem_malloc);
+  lua_pushnumber(L, cmem_sz);
   return 1;
+BYE:
+  lua_pushnil(L);
+  sprintf(buf, "ERROR: Failure in %s \n", __func__);
+  lua_pushstring(L, buf);
+  return 2;
 }
 
 void cmem_undef( // USED FOR DEBUGGING
@@ -86,6 +95,7 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
 {
   int status = 0;
   void *data = NULL;
+  uint64_t sz1, sz2;
   if ( size <= 0 ) { go_BYE(-1); }
   if ( ( ( size / 16 ) * 16 ) != size ) { 
     size = ( size / 16 ) * 16 + 16;
@@ -94,7 +104,8 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
   return_if_malloc_failed(data);
   ptr_cmem->data = data;
   ptr_cmem->size = size;
-  sz_cmem_malloc += size;
+  bool is_incr = true, is_vec = false;
+  status = mm(ptr_cmem->size, is_incr, is_vec, &sz1, &sz2); cBYE(status);
   if ( field_type != NULL ) { 
     strncpy(ptr_cmem->field_type, field_type, 4-1); // TODO Undo hard code
   }
@@ -404,6 +415,7 @@ static int l_cmem_is_foreign( lua_State *L) {
 }
 static int l_cmem_free( lua_State *L) 
 {
+  int status = 0;
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
   if ( ptr_cmem->size <= 0 ) {
     // Control should never come here except as nelow
@@ -428,7 +440,9 @@ static int l_cmem_free( lua_State *L)
       // CONTROL SHOULD NEVER COME HERE
       if ( ptr_cmem->data == NULL ) { WHEREAMI; goto BYE; }
       free(ptr_cmem->data);
-      sz_cmem_malloc -= ptr_cmem->size; 
+      bool is_add = false, is_vec = false;
+      uint64_t sz1, sz2;
+      status = mm(ptr_cmem->size, is_add, is_vec, &sz1, &sz2); cBYE(status);
     }
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
