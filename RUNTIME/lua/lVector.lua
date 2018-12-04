@@ -752,7 +752,13 @@ end
 
 function lVector:reincarnate()
   if ( qconsts.debug ) then self:check() end
+  -- Not saving lVector because not eov
   if ( not self:is_eov()) then
+    return nil
+  end
+  -- JIRA: QQ-160
+  -- Q.save() should not try to persist global Vectors that have been marked as memo = false
+  if ( not self:is_memo()) then
     return nil
   end
   
@@ -780,7 +786,6 @@ function lVector:reincarnate()
     T[#T+1] = "num_elements = "
     T[#T+1] = self:num_elements()
   end
-
   T[#T+1] = " } ) "
   if ( qconsts.debug ) then self:check() end
   return table.concat(T, '')

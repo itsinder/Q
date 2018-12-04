@@ -75,16 +75,16 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "lVector" ) then 
     -- TODO Indrajeet to check
-    file:write(name, " = ")
     local persist_str = value:reincarnate()
     if ( persist_str ) then 
+      file:write(name, " = ")
       file:write(persist_str)
       file:write("\n")
       save(name .. "._meta", value._meta, saved, file)
       file:write(name .. ":persist(true)")
       file:write("\n")
     else
-      print("Not saving lVector because not eov ", name)
+      print("Not saving lVector because not eov or memo is set to false ", name)
     end
   elseif ( type(value) == "Scalar" ) then
     -- Currently not supported
