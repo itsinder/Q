@@ -1,7 +1,7 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
-local run_dt = require 'Q/ML/DT/lua/calculate_alpha'
+local run_dt = require 'Q/ML/DT/lua/run_dt'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 
 local tests = {}

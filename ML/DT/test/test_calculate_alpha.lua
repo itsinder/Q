@@ -1,7 +1,7 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
 local tablex = require 'pl.tablex'
-local calculate_alpha = require 'Q/ML/DT/lua/calculate_alpha'
+local run_dt = require 'Q/ML/DT/lua/run_dt'
 local write_to_csv = require 'Q/ML/DT/lua/write_to_csv'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 
@@ -27,7 +27,7 @@ tests.t1 = function()
   Vector.reset_timers()
   start_time = qc.RDTSC()
 
-  local result = calculate_alpha(args)
+  local result = run_dt(args)
   local csv_path = "titanic_results.csv"
 
   write_to_csv(result, csv_path)
@@ -112,7 +112,7 @@ tests.t2 = function()
   Vector.reset_timers()
   start_time = qc.RDTSC()
 
-  local result = calculate_alpha(args)
+  local result = run_dt(args)
   local csv_path = "ramesh's_dataset_results.csv"
 
   write_to_csv(result, csv_path)
@@ -198,7 +198,7 @@ tests.t3 = function()
   Vector.reset_timers()
   start_time = qc.RDTSC()
 
-  local result = calculate_alpha(args)
+  local result = run_dt(args)
   local csv_path = "b_cancer_results.csv"
 
   write_to_csv(result, csv_path)
