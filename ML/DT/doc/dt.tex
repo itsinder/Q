@@ -17,7 +17,7 @@ gain and (iii) variance reduction
 \item a more intuitive way to deal with unknown values, both during 
 training and testing. This approach is particularly useful when
 the fact that the value is null does not have some systemic bias.
-Section~\ref{unknown}
+Section~\ref{unknowns}
 \item what ``decision'' does the decision tree really make? For example, if the
 evaluation of the tree leaves us at a node which had 
 \(n_H\) instances of class ``Heads'' and 
@@ -55,12 +55,14 @@ Titanit & X & X & \\ \hline
 
 \bi
 \item Let \(F = \{f_i\}\) be a table of vectors, representing the features.
-\item Let \(g\) be a vector, representing the outcome which we wish to
-predict. We will refer to the value 1 as heads and 0 as tails.
+\item Let \(g\) be a vector, representing the {\bf goal} or 
+outcome which we wish to
+predict. We assume the goal can be either Heads, represented by the integer value 1 or Tails, represented as 0.
 \item Restrictions on vectors (for a Q implementation)
 \be
 \item lengths of all vectors must be the same. 
-\item all feature vectors should be either F4, I4 or SV
+\item all feature vectors should be either F4 or I4 
+% TODO SV to be supported in future
 \item goal vector should be I4
 \ee
 \ei
@@ -73,13 +75,14 @@ A decision tree is a Lua table where each element identifies
 \item If the feature is ordered (I4 or F4), then the
 comparision is always \(\leq\) and a threshold needs to be provided e.g., age
 \(\leq 45\) 
-\item If the feature is unordered (SV), then the values on the left branch need
-to be provided e.g., State is one of California, Washington, Oregon; the values
-on the right branch being all other values that the feature can assume.
-
+%% TODO 
+%% \item If the feature is unordered (SV), then the values on the left branch need
+%% to be provided e.g., State is one of California, Washington, Oregon; the values
+%% on the right branch being all other values that the feature can assume.
+%% 
 \ee
-\item a left decision tree
-\item a right decision tree
+\item a left decision tree, which may be null
+\item a right decision tree, which may be null
 \ee
 
 \begin{figure}
@@ -89,7 +92,6 @@ on the right branch being all other values that the feature can assume.
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \=
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 Let \(\alpha\) be minimum benefit required to continue branching \\
-Let values taken on by goal be 0 (tails), 1 (heads)  \\
 Let \(n_G = 2\) be the number of values of the goal attribute \\
 Let \(n_T =\) number of instances classified as tails \\
 Let \(n_H =\) number of instances classified as heads \\
@@ -104,17 +106,17 @@ Initialize, decision tree \(D = \{\}\) \\
     {\bf return} \- \\
   {\bf endif} \\
     \(x = \mathrm{Q.vsgt}(f', s(f'))\) \\
-    \(F_L = F_R = \{\}\) \\
+    \(T_L = T_R = \{\}\) \\
     {\bf forall} \(f \in F\) {\bf do} \+ \\
-      \(F_L = F_L \cup \mathrm{Q.where}(f, x)\) \\ 
-      \(F_R = F_L \cup \mathrm{Q.where}(f, \mathrm{Q.not}(x))\) \\ 
+      \(T_L = T_L \cup \mathrm{Q.where}(f, x)\) \\ 
+      \(T_R = T_R \cup \mathrm{Q.where}(f, \mathrm{Q.not}(x))\) \\ 
     {\bf endfor} \\
-    T.feature = \(f'\) \\
-    T.threshold = \(b(f')\) \\
-    T.left = \(\{\}\) \\
-    T.right = \(\{\}\) \\
-    \(DT(F_L, g_L, T_L)\) \\
-    \(DT(F_R, g_R, T_R)\) \- \\
+    D.feature = \(f'\) \\
+    D.threshold = \(b(f')\) \\
+    D.left = \(\{\}\) \\
+    D.right = \(\{\}\) \\
+    \(DT(D.left, g_L, T_L)\) \\
+    \(DT(D.right, F_R, g_R, T_R)\) \- \\
 {\bf end} 
 \end{tabbing}
 \end{minipage}
@@ -130,8 +132,8 @@ Initialize, decision tree \(D = \{\}\) \\
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= 
                 \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 {\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+  \\
-  \(f', h_0, h_1 = CountIntervals(f, g)\) \\
-  \(b = \mathrm{Q.wtbnft}(h_0, h_1, n_T, n_H)\) (Figure~\ref{algo_weighted_benefit}) \\
+  \(f', h^0, h^1 = CountIntervals(f, g)\) \\
+  \(b = \mathrm{Q.wtbnft}(h^0, h^1, n_T, n_H)\) (Figure~\ref{algo_weighted_benefit}) \\
   \(b', \_, i = \mathrm{Q.max}(b)\) \\
   {\bf return} \(b', f'[i]\)  \- \\
 {\bf end} 
@@ -199,11 +201,12 @@ Vector \(f\) of length \(n\) type integer or floating point \\
 Vector \(g\) of length \(n\) type integer with values 0, 1 \- \\
 {\bf Outputs} \+ \\
 Vector \(f'\) of length \(n'\) type integer \\
-Vector \(h_0\) of length \(n'\) type integer  \\
-Vector \(h_1\) of length \(n'\) type integer  \- \\
+Vector \(h^0\) of length \(n'\) type integer  \\
+Vector \(h^1\) of length \(n'\) type integer  \- \\
 \(f'\) is the unique values of \(f\), sorted ascending \\
 Let \(\delta(x)\) = 1 if \(x\) is true and 0 otherwise \\
-\({h_k}_j = \sum_{i=1}^{i=n} \delta(g_i = k \wedge f_i \leq f_j)\) \- \\
+For \(k = 0, 1\), compute \(h^k_j = \sum_{i=1}^{i=n} \delta(g_i = k \wedge f_i \leq f_j)\) \- \\
+
 {\bf end} 
 \end{tabbing}
 \end{minipage}
@@ -212,23 +215,6 @@ Let \(\delta(x)\) = 1 if \(x\) is true and 0 otherwise \\
 \caption{Count Intervals}
 \end{figure}
 %%-------------------------------------------
-
-
-
-\begin{figure}
-\centering
-\fbox{
-\begin{minipage}{15cm}
-\begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
-{\bf function } \(\mathrm{Benefit}(f, g, n_T, n_H)\) \+ 
-
-{\bf end} 
-\end{tabbing}
-\end{minipage}
-}
-\label{compute_benefit_categorical}
-\caption{Benefit Computation (categorical attributes)}
-\end{figure}
 
 \section{Algorithm}
 
@@ -248,16 +234,17 @@ the odds of betting on heads or tails. At each node, we are asked to a single
 question. 
 \bi
 \item For a numeric attribute, it is of the form \(x \leq y\)
-\item For a boolean attribute, it is of the form \(x = y\), where y is true or
-false
-\item For an unordered categorical attribute that can take on values in \(X\),
-it is of the form \(x \in y \subset X\)
+\item For a boolean attribute, it is of the form \(x == y\), where 
+\(y\) can be true or false
+%% TODO LATER
+%% \item For an unordered categorical attribute that can take on values in \(X\),
+%% it is of the form \(x \in y \subset X\)
 \ei
 We iterate over all possible values of \(y\) for each attribute and find the
 attribute and decision that produces the maximum benefit. If this benefit
 exceeds a pre-defined threshold, we split the data into two, a left branch and a
 right branch and proceed recursively. Else, the expansion of the decision tree
-stops at this point and control returns to the parent node. 
+stops at this point.
 Figure~\ref{XXX} describes the algorithm at this level. For clarity of 
 exposition, we only describe the treatment of numeric attributes.
 
@@ -273,7 +260,8 @@ boolean vector such that \(x_i \geq s \Rightarrow y_i = \mathrm{true}\) and
 \item Q.sum(x). \(x\) is a Vector. output is a scalar
 \item Q.numby(x, n). \(x\) is a Vector, \(n\) is a positive integer 
 such that \(x_i \in [0, n-1]\). output is a vector \(y\) such that \(y_i\) is
-the number of elements of \(x\) that have value \(i\)
+the number of elements of \(x\) that have value \(i\). Note that
+\(y:mathrm{length} == n\)
 \ee
 
 \subsection{Benefit Computation}

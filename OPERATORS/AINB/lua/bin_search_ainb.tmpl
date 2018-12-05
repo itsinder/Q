@@ -30,15 +30,22 @@ ${fn}(
   int status = 0;
 
   memset(C, 0, nA); // Note that C must have nA bytes
-// TODO #pragma omp parallel for schedule(static, 256)
+#pragma omp parallel for schedule(static, 256)
   for ( uint64_t i = 0; i < nA; i++ ) { 
     int64_t pos;
-    status = bin_search_${b_qtype}(B, nB, ((${b_ctype})(A[i])), NULL, &pos);
+    int l_status = 0;
+    int x_status = bin_search_${b_qtype}(B, nB, ((${b_ctype})(A[i])), NULL, &pos);
+    if ( x_status < 0 ) {  
+      if ( l_status == 0 ) { 
+        l_status = -1;
+        status = -1;
+      }
+    }
     if ( pos >= 0 ) {
       set_bit_u64(C, i, 1);
     }
   }
-BYE:
+
   return status;
 }
    ]]

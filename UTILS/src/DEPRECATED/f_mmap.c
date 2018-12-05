@@ -1,19 +1,15 @@
 //START_INCLUDES
-#include <stdio.h>
+/*
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <string.h>
 #include <assert.h>
-#include <fcntl.h>
-#include <ctype.h>
-#include <errno.h>
 #include <malloc.h>
+#include <unistd.h>
+#include <fcntl.h>
+*/
 #include "q_incs.h"
 #include "mmap_types.h"
 //STOP_INCLUDES
@@ -22,7 +18,7 @@
 
 MMAP_REC_TYPE *
 f_mmap(
-   const char * const file_name,
+   char * const file_name,
    bool is_write
 )
 //STOP_FUNC_DECL

@@ -31,6 +31,7 @@
     if ( ( a == "convert" ) and ( f1:fldtype() == y ) ) then
       return f1
     end
+    --========================
     local status, subs, tmpl = pcall(spfn, f1:fldtype(), y, optargs)
     if not status then print(subs) end
     assert(status, "Specializer " .. sp_fn_name .. " failed")

@@ -46,12 +46,6 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_mix_UI8.h : 
 	lua ../lua/cli_extract_func_decl.lua mix_UI8.c ${INCDIR}
 
-../gen_inc/_f_mmap.h : 
-	lua ../lua/cli_extract_func_decl.lua f_mmap.c ${INCDIR}
-
-../gen_inc/_f_munmap.h : 
-	lua ../lua/cli_extract_func_decl.lua f_munmap.c ${INCDIR}
-
 ../gen_inc/_mmap.h : 
 	lua ../lua/cli_extract_func_decl.lua mmap.c ${INCDIR}
   
@@ -130,8 +124,6 @@ hdr_files = \
 	../gen_inc/_c_free.h  \
 	../gen_inc/_get_file_size.h  \
 	../gen_inc/_buf_to_file.h  \
-	../gen_inc/_f_mmap.h \
-	../gen_inc/_f_munmap.h \
 	../gen_inc/_mmap.h \
 	../gen_inc/_munmap.h \
 	../gen_inc/_get_time_usec.h \
@@ -163,8 +155,6 @@ SRC_FILES=  \
 	c_free.c \
 	get_file_size.c \
 	buf_to_file.c \
-	f_mmap.c  \
-	f_munmap.c \
 	mmap.c \
 	munmap.c \
 	get_time_usec.c \

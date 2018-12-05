@@ -37,19 +37,20 @@ ${fn}(
   if ( out == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
   if ( nn_out == NULL ) { go_BYE(-1); }
-  unsigned int sz1 = sizeof(${in_ctype}), sz2 = sizeof(${out_ctype});
 
 #pragma omp parallel for schedule(static)
   for ( uint64_t i = 0; i < nR; i++ ) {
-    unsigned int nn_out_i = 1;
-    out[i] = in[i];
-    if ( ( sz1 > sz2 ) && 
-      ( ( in[1] < ${min_val} ) || ( in[1] > ${max_val} ) ) ) {
-        out[i] = 0;
-        nn_out_i = 0;
+    unsigned int nn_out_i;
+    if ( ${cond} ) {
+      out[i] = 0;
+      nn_out_i = 0;
     }
-    if ( nn_out_i ) {
-      set_bit_u64(nn_out, i, 1);
+    else {
+      nn_out_i = 1;
+      out[i] = in[i];
+    }
+    if ( nn_out  ) {
+      set_bit_u64(nn_out, i, nn_out_i);
     }
   }
   BYE:

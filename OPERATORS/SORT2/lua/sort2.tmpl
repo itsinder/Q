@@ -33,15 +33,16 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <string.h>
 #include <inttypes.h>
 
-extern void
+extern int
 ${fn} (
-    void *const pbase,
-          ${F2_FLDTYPE} *drag,
-    size_t total_elems
+  void *const pbase,
+  ${F2_FLDTYPE} *drag,
+  uint64_t total_elems
     );
 ]],
 definition = [[
 
+#include "q_incs.h"
 #include "_${fn}.h"
 #define WHEREAMI { fprintf(stderr, "Line %3d of File %s \n", __LINE__, __FILE__); }
 
@@ -68,8 +69,8 @@ definition = [[
   ${F1_FLDTYPE} itmp = *ia; \
   aidx = ((char *)a - (char *)pbase) / size;                            \
   bidx = ((char *)b - (char *)pbase) / size;                            \
-  if ( ( aidx < 0 ) || ( aidx >= total_elems ) ) { go_BYE(-1);  } \
-  if ( ( bidx < 0 ) || ( bidx >= total_elems ) ) { go_BYE(-1);  } \
+  if ( aidx >= total_elems ) { go_BYE(-1);  } \
+  if ( bidx >= total_elems ) { go_BYE(-1);  } \
   aval = drag[aidx];                                                \
   bval = drag[bidx];                                                \
   drag[aidx] = bval;                                                \
@@ -101,17 +102,18 @@ typedef struct
 #define  STACK_NOT_EMPTY  (stack < top)
 
 // START FUNC DECL
-void
+int
 ${fn} (
 	    void *const pbase,
             ${F2_FLDTYPE} *drag,
-	    size_t total_elems
+	    uint64_t total_elems
 	    )
 // STOP FUNC DECL
 {
+  int status = 0;
   register char *base_ptr = (char *) pbase;
-  long long aidx, bidx;
-  int aval, bval;
+  uint64_t aidx, bidx;
+  uint64_t aval, bval;
 
   int size = sizeof(${F1_FLDTYPE});
   const size_t max_thresh = MAX_THRESH * size; 
@@ -298,6 +300,8 @@ ${fn} (
       }
     }
   }
+  BYE:
+  return status;
 }
 ]]
 }

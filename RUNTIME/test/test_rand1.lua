@@ -43,6 +43,7 @@ tests.t1 = function()
     assert(x:num_elements() == counter)
   end
   Vector.print_timers()
+  Vector.print_mem()
   print("Completed test1")
 end
 return tests

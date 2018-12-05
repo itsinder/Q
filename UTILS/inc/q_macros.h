@@ -22,12 +22,12 @@
 #define sqr(X)  ((X) * (X))
 
 #define mcr_rs_munmap(X, nX) { \
-  if ( ( X == NULL ) && ( nX != 0 ) ) {  WHEREAMI; return(-1); } \
-  if ( ( X != NULL ) && ( nX == 0 ) )  { WHEREAMI; return(-1); } \
+  if ( ( X == NULL ) && ( nX != 0 ) ) {  WHEREAMI; } \
+  if ( ( X != NULL ) && ( nX == 0 ) )  { WHEREAMI; } \
   if ( X != NULL ) { \
-  	int status = munmap(X, nX); if ( status != 0 ) { WHEREAMI; return(-1); } \
-   	X = NULL; nX = 0;  \
+  	int l_status = munmap(X, nX); if ( l_status != 0 ) { WHEREAMI; } \
   } \
+  X = NULL; nX = 0;  \
 }
 
 #define unlink_if_non_null(x) { if ( x != NULL ) { unlink( x ); } }

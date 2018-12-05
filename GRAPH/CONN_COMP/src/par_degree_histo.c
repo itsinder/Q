@@ -18,6 +18,7 @@ main(
   int max_id;
   char *X = NULL; size_t nX = 0;
   int *degree = NULL;
+  int **p_degree = NULL; /* [nT] */ int nT = 0;
   FILE *ofp1 = NULL;
   FILE *ofp2 = NULL;
 
@@ -32,26 +33,40 @@ main(
   int nV = max_id + 1;
   degree = malloc(nV * sizeof(int));
   return_if_malloc_failed(degree);
-  for ( int i = 0; i < nV; i++ ) { 
-    degree[i] = 0;
+  memset(degree, 0, nV * sizeof(int));
+  nT = 4;
+  p_degree = malloc(nT * sizeof(int *));
+  return_if_malloc_failed(p_degree);
+  for ( int tid = 0; tid < nT; tid++ ) { 
+    p_degree = malloc(nV * sizeof(int));
+    return_if_malloc_failed(p_degree);
+    memset(p_degree, 0, nV * sizeof(int));
   }
   //-----------------------
   status = rs_mmap(infile, &X, &nX, 0); cBYE(status);
   uint64_t n = nX / sizeof(int);
   int *E = (int *)X;
   uint64_t t_start = RDTSC();
-  for ( uint64_t i = 0; i < n; i++ ) {
-    int node_id = E[i];
+  uint64_t block_size = n / nT;
+  fprintf(stderr, "Starting\n");
+#pragma omp parallel for schedule(static)
+  for ( int tid = 0; tid < nT; tid++ ) { 
+    uint64_t lb = tid * block_size;
+    uint64_t ub = lb + block_size;
+    if ( tid == (nT-1) ) { ub = n; }
+    for ( uint64_t i = lb; i < ub; i++ ) {
+      int node_id = E[i];
 #ifdef DEBUG
-    if ( ( node_id < 0 ) || ( node_id >= max_id ) ) { 
-      fprintf(stderr, "node_id = %d \n", node_id);
-      go_BYE(-1);
-    }
-    if ( ( i % 10000000 ) == 0 ) { 
-      fprintf(stderr, "Processed %lf \n", (double)i);
-    }
+      if ( ( node_id < 0 ) || ( node_id >= max_id ) ) { 
+        fprintf(stderr, "node_id = %d \n", node_id);
+        go_BYE(-1);
+      }
+      if ( ( i % 10000000 ) == 0 ) { 
+        fprintf(stderr, "Processed %lf \n", (double)i);
+      }
 #endif
-    degree[node_id]++;
+      p_degree[node_id]++;
+    }
   }
   uint64_t t_stop = RDTSC();
   fprintf(stderr, "Successfully calculated degrees in time %lf\n",
@@ -86,6 +101,12 @@ main(
 BYE:
   mcr_rs_munmap(X, nX);
   free_if_non_null(degree);
+  if ( p_degree != NULL ) { 
+    for ( int tid = 0; tid < nT; tid++ ) { 
+      free_if_non_null(p_degree[tid]);
+    }
+  }
+  free_if_non_null(p_degree);
   fclose_if_non_null(ofp1);
   fclose_if_non_null(ofp2);
   return status;

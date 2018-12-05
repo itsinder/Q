@@ -12,7 +12,7 @@ distance from \(x\) to a point in \(T\) completely before proceeding to the next
 point. We invite the reader to judge from Figure~\ref{knn_core} the merits of our claim that the programming burden of being aware of data layout and
 operation ordering is not onerous.
 
-Given Q's lazy evaluation in chunks, note that the operation is actually
+Given \Q's lazy evaluation in chunks, note that the operation is actually
 performed in batches. In other words, had we written 
 {\tt d1, g1 = Q.mink(d, g, k)} and then done {\tt g1:next()} instead  of {\tt
 g1:eval()}, 
@@ -26,7 +26,7 @@ closest to \(x\) from the {\bf first} \(n_C\) points of \(T\).
 \centering
 \verbatiminput{knn.lua}
 %% TODO Change mink_reducer to mink in final paper
-\caption{core of k-nn algorithm in Lua}
+\caption{core of k-nn algorithm}
 \label{knn_core}
 \end{minipage}
 }

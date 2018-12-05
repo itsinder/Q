@@ -15,6 +15,7 @@
 #include "core_vec.h"
 #include "scalar.h"
 #include "cmem.h"
+#include "mm.h"
 #include "_txt_to_I4.h"
 
 // TODO Delete luaL_Buffer g_errbuf;
@@ -74,9 +75,32 @@ BYE:
   lua_pushstring(L, buf);
   return 2;
 }
+
 static int l_print_timers( lua_State *L) {
   vec_print_timers();
   return 0;
+}
+
+static int l_print_mem( lua_State *L) {
+  int status = 0;
+  char buf[128];
+  uint64_t vec_sz, sz2;
+  status = mm(0, false, false, &vec_sz, &sz2); cBYE(status);
+  
+  bool is_quiet = true;
+  if ( lua_isboolean(L, 2) ) { 
+    is_quiet = lua_toboolean(L, 2);
+  }
+  if ( !is_quiet ) { 
+    fprintf(stdout, "VEC,sz_malloc,0,%" PRIu64 "\n", vec_sz);
+  }
+  lua_pushnumber(L, vec_sz);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  sprintf(buf, "ERROR: %s\n", __func__);
+  lua_pushstring(L, buf);
+  return 2;
 }
 
 static int l_reset_timers( lua_State *L) {
@@ -737,6 +761,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },
     { "print_timers", l_print_timers },
+    { "print_mem", l_print_mem },
     { "reset_timers", l_reset_timers },
     { "no_memcpy", l_vec_no_memcpy },
     { "flush_buffer", l_vec_flush_buffer },

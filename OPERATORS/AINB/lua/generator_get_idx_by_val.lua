@@ -17,7 +17,7 @@ for _, idx_qtype in ipairs(idx_qtypes) do
     if ( status ) then 
       gen_code.doth(subs, tmpl, incdir)
       gen_code.dotc(subs, tmpl, srcdir)
-      print("Generated ", subs.fn)
+      -- print("Generated ", subs.fn)
       num_produced = num_produced + 1
     else
       print(subs)

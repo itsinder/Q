@@ -1,6 +1,8 @@
 #include "q_incs.h"
 #include "mmap_types.h"
 #include "core_vec.h"
+#include "cmem.h"
+#include "mm.h"
 #include "_mmap.h"
 #include "_rand_file_name.h"
 #include "_get_file_size.h"
@@ -13,8 +15,6 @@
 #include "_get_time_usec.h"
 
 #include "lauxlib.h"
-
-#undef MALLOC_DETAILS
 
 static uint64_t
 RDTSC(
@@ -31,25 +31,26 @@ RDTSC(
 }
 
 
-static uint64_t t_l_vec_add;         static uint32_t n_l_vec_add;
-static uint64_t t_l_vec_check;       static uint32_t n_l_vec_check;
-static uint64_t t_l_vec_clone;       static uint32_t n_l_vec_clone;
-static uint64_t t_l_vec_end_write;   static uint32_t n_l_vec_end_write;
-static uint64_t t_l_vec_eov;         static uint32_t n_l_vec_eov;
-static uint64_t t_l_vec_free;         static uint32_t n_l_vec_free;
-static uint64_t t_l_vec_get;         static uint32_t n_l_vec_get;
-static uint64_t t_l_vec_memo;        static uint32_t n_l_vec_memo;
-static uint64_t t_l_vec_new;         static uint32_t n_l_vec_new;
-static uint64_t t_l_vec_new_virtual; static uint32_t n_l_vec_new_virtual;
-static uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
-static uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
-static uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
+uint64_t t_l_vec_add;         static uint32_t n_l_vec_add;
+uint64_t t_l_vec_check;       static uint32_t n_l_vec_check;
+uint64_t t_l_vec_clone;       static uint32_t n_l_vec_clone;
+uint64_t t_l_vec_end_write;   static uint32_t n_l_vec_end_write;
+uint64_t t_l_vec_eov;         static uint32_t n_l_vec_eov;
+uint64_t t_l_vec_free;         static uint32_t n_l_vec_free;
+uint64_t t_l_vec_get;         static uint32_t n_l_vec_get;
+uint64_t t_l_vec_memo;        static uint32_t n_l_vec_memo;
+uint64_t t_l_vec_new;         static uint32_t n_l_vec_new;
+uint64_t t_l_vec_new_virtual; static uint32_t n_l_vec_new_virtual;
+uint64_t t_l_vec_persist;     static uint32_t n_l_vec_persist;
+uint64_t t_l_vec_set;         static uint32_t n_l_vec_set;
+uint64_t t_l_vec_start_write; static uint32_t n_l_vec_start_write;
 
-static uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
-static uint64_t t_memcpy;            static uint32_t n_memcpy;
-static uint64_t t_memset;            static uint32_t n_memset;
-static uint64_t t_malloc;            static uint32_t n_malloc;
-static uint64_t sz_malloc;           // number of bytes allocated
+uint64_t t_flush_buffer;      static uint32_t n_flush_buffer;
+uint64_t t_memcpy;            static uint32_t n_memcpy;
+uint64_t t_memset;            static uint32_t n_memset;
+
+//-- for memory allocation
+uint64_t t_malloc;            static uint32_t n_malloc;
 
 extern luaL_Buffer g_errbuf;
 
@@ -83,25 +84,15 @@ l_malloc(
     VEC_REC_TYPE *ptr_vec // TODO DELETE later just for debugging
     )
 {
+  int status = 0;
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
+  uint64_t sz1, sz2;
   void *x = malloc(n);
+  bool is_incr = true, is_vec = true;
+  status = mm(n, is_incr, is_vec, &sz1, &sz2); 
+  if ( status < 0 ) { WHEREAMI; return NULL; }
   ptr_vec->uqid = t_start; // set a unique ID for debugging
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_malloc += delta; }
-
-#ifdef MALLOC_DETAILS
-  // TODO START Delete later
-  uint64_t curr_sz_malloc = sz_malloc;
-  sz_malloc += n;
-  fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
-      ptr_vec->uqid, curr_sz_malloc, n, sz_malloc);
-  if ( *ptr_vec->name == '\0' ) {
-    fprintf(stderr, "NULL\n");
-  }
-  else {
-    fprintf(stderr, "%s\n", ptr_vec->name);
-  }
-  // TODO STOP Delete later
-#endif
 
   return x;
 }
@@ -129,8 +120,6 @@ vec_reset_timers(
   t_flush_buffer = 0;       n_flush_buffer = 0;
   t_memcpy = 0;             n_memcpy = 0;
   t_memset = 0;             n_memset = 0;
-  t_malloc = 0;             n_malloc = 0;
-  sz_malloc = 0;
 }
 
 void
@@ -157,9 +146,7 @@ vec_print_timers(
   fprintf(stdout, "1,memcpy,%u,%" PRIu64 "\n", n_memcpy, t_memcpy);
   fprintf(stdout, "1,memset,%u,%" PRIu64 "\n", n_memset, t_memset);
   fprintf(stdout, "1,malloc,%u,%" PRIu64 "\n", n_malloc, t_malloc);
-  fprintf(stdout, "2,sz_malloc,0,%" PRIu64 "\n", sz_malloc);
 }
-
 
 static bool 
 is_file_size_okay(
@@ -251,34 +238,7 @@ BYE:
   return status;
 }
 
-#undef XXXXX // TODO P1 Do we need this function? Can we deprecate?
-#ifdef XXXXX
-char *
-vec_get_buf(
-  VEC_REC_TYPE *ptr_vec
-)
-{
-  int status = 0;
-  char *chunk = NULL;
-  if ( ptr_vec->is_nascent ) {
-    if ( ptr_vec->chunk == NULL ) { 
-      ptr_vec->chunk = l_malloc(ptr_vec->chunk_sz, ptr_vec);
-      if ( ptr_vec->chunk == NULL ) {WHEREAMI; goto BYE; } 
-      l_memset( ptr_vec->chunk, '\0', ptr_vec->chunk_sz);
-    }
-    else {
-      if ( ptr_vec->num_in_chunk == ptr_vec->chunk_size ) {
-        status = flush_buffer(ptr_vec); cBYE(status);
-      }
-    }
-    if ( ptr_vec->num_in_chunk != 0 ) { WHEREAMI; goto BYE; }
-    if ( ptr_vec->chunk_sz     == 0 ) {  WHEREAMI; goto BYE; }
-    chunk = ptr_vec->chunk;
-  }
-BYE:
-  return chunk;
-}
-#endif
+/* Deprecated vec_get_buf() */
 
 int 
 vec_cast(
@@ -509,27 +469,10 @@ vec_free(
     ptr_vec->map_len  = 0;
   }
   if ( ptr_vec->chunk != NULL ) {
-
-#ifdef MALLOC_DETAILS
-    // TODO START Delete later
-    uint64_t curr_sz_malloc = sz_malloc;
-    if ( ptr_vec->chunk_sz > sz_malloc ) {
-      printf("hello world\n");
-    }
-    sz_malloc -= ptr_vec->chunk_sz;
-
-    fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
-        ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
-    if ( *ptr_vec->name == '\0' ) {
-      fprintf(stderr, "NULL\n");
-    }
-    else {
-      fprintf(stderr, "%s\n", ptr_vec->name);
-    }
-    // TODO STOP Delete later
-#endif
-
     free(ptr_vec->chunk);
+    uint64_t sz1, sz2;
+    bool is_incr = false, is_vec = true;
+    status = mm(ptr_vec->chunk_sz, is_incr, is_vec, &sz1, &sz2); cBYE(status);
     ptr_vec->chunk = NULL;
     ptr_vec->chunk_sz = 0;
   }
@@ -1035,21 +978,10 @@ vec_clean_chunk(
   int status = 0;
   if ( ptr_vec->is_eov == false ) { go_BYE(-1); }
   if ( ptr_vec->chunk != NULL ) {
-#ifdef MALLOC_DETAILS
-    // TODO START Delete later
-    uint64_t curr_sz_malloc = sz_malloc;
-    sz_malloc -= ptr_vec->chunk_sz;
-    fprintf(stderr, "--%" PRIu64 ",%" PRIu64 ",%u,%" PRIu64 ",", 
-        ptr_vec->uqid, curr_sz_malloc, ptr_vec->chunk_sz, sz_malloc);
-    if ( *ptr_vec->name == '\0' ) {
-      fprintf(stderr, "NULL\n");
-    }
-    else {
-      fprintf(stderr, "%s\n", ptr_vec->name);
-    }
-    // TODO STOP Delete later
-#endif
-
+    uint64_t sz1, sz2;
+    bool is_incr = false, is_vec = true;
+    status = mm(ptr_vec->chunk_sz, is_incr, is_vec, &sz1, &sz2); 
+    cBYE(status);
     // Clean the chunk and chunk metadata
     free(ptr_vec->chunk);
     ptr_vec->chunk = NULL;
@@ -1584,21 +1516,13 @@ vec_no_memcpy(
   ptr_vec->is_no_memcpy = true;
   ptr_cmem->is_foreign = true;
 
-#ifdef MALLOC_DETAILS
-  // TODO START Delete later
-  uint64_t curr_sz_malloc = sz_malloc;
-  sz_malloc += ptr_cmem->size;
-  fprintf(stderr, "++%" PRIu64 ",%" PRIu64 ",%lu,%" PRIu64 ",", 
-      ptr_vec->uqid, curr_sz_malloc, ptr_cmem->size, sz_malloc);
-  if ( *ptr_vec->name == '\0' ) {
-    fprintf(stderr, "NULL\n");
-  }
-  else {
-    fprintf(stderr, "%s\n", ptr_vec->name);
-  }
-  // TODO STOP Delete later
-#endif
+  uint64_t sz = ptr_cmem->size;
 
+  uint64_t sz1, sz2;
+  bool is_incr = true, is_vec = true;
+  status = mm(sz, is_incr, is_vec, &sz1, &sz2); cBYE(status);
+  is_incr = false; is_vec = false;
+  status = mm(sz, is_incr, is_vec, &sz1, &sz2); cBYE(status);
 BYE:
   return status;
 
