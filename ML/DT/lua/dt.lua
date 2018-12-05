@@ -161,18 +161,24 @@ end
 
 
 local function predict(
-  D,	-- prepared decision tree
-  x	-- a table with test features
+  D,    -- prepared decision tree
+  x,    -- a table with test features
+  g_val -- goal value for test sample
   )
   assert(type(D) == 'table')
   assert(type(x) == 'table')
 
   while true do
     if D.left == nil and D.right == nil then
+      if g_val == 0 then
+        D.n_T1 = D.n_T1 + 1
+      else
+        D.n_H1 = D.n_H1 + 1
+      end
       return D.n_H, D.n_T
     else
       local val = x[D.feature]
-      if val:to_num() > D.threshold then
+      if val > D.threshold then
         --print("Right Subtree")
         D = D.right
       else
@@ -184,23 +190,44 @@ local function predict(
 end
 
 
-local function print_dt(
-  D,		-- prepared decision tree
-  f,		-- file_descriptor
-  col_name	-- table of column names of train dataset
+-- set n_H1 and n_T1 at each leaf node to zero
+local function preprocess_dt(
+  D     -- prepared decision tree
   )
-  local label = "\"n_T=" .. tostring(D.n_T) .. ", n_H=" .. tostring(D.n_H)
+  if D.left and D.right then
+    preprocess_dt(D.left)
+    preprocess_dt(D.right)
+  else
+    D.n_H1 = 0
+    D.n_T1 = 0
+  end
+end
+
+
+local function print_dt(
+  D,            -- prepared decision tree
+  f,            -- file_descriptor
+  col_name      -- table of column names of train dataset
+  )
+  local label = "\"n_T0=" .. tostring(D.n_T) .. ", n_H0=" .. tostring(D.n_H)
   --print(D.feature, D.threshold, D.n_H, D.n_T)
   if D.left and D.right then
     label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\\n" .. "benefit=" .. D.benefit .. "\""
-    local left_label = "\"n_T=" .. tostring(D.left.n_T) .. ", n_H=" .. tostring(D.left.n_H)
-    local right_label = "\"n_T=" .. tostring(D.right.n_T) .. ", n_H=" .. tostring(D.right.n_H)
+    local left_label = "\"n_T0=" .. tostring(D.left.n_T) .. ", n_H0=" .. tostring(D.left.n_H)
+    local right_label = "\"n_T0=" .. tostring(D.right.n_T) .. ", n_H0=" .. tostring(D.right.n_H)
     if D.left.feature then
       left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
+    else
+      left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
+      left_label = left_label .. "\\n" .. "cost=" .. tostring(D.left.cost) .. ", gain=" .. tostring(D.left.gain)
+      -- leaf node
     end
     left_label = left_label .. "\""
     if D.right.feature then
       right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
+    else
+      right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
+      right_label = right_label .. "\\n" .. "cost=" .. tostring(D.right.cost) .. ", gain=" .. tostring(D.right.gain)
     end
     right_label = right_label .. "\""
     f:write(label .. " -> " .. left_label .. "\n")
@@ -211,7 +238,7 @@ local function print_dt(
     print_dt(D.left, f, col_name)
     print_dt(D.right, f, col_name)
   else
-    -- No tree available
+    -- nothing to do
   end
 end
 
@@ -221,5 +248,6 @@ dt.predict = predict
 dt.check_dt = check_dt
 dt.print_dt = print_dt
 dt.node_count = node_count
+dt.preprocess_dt = preprocess_dt
 
 return dt

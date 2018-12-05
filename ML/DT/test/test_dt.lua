@@ -1,7 +1,7 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
-local run_dt = require 'Q/ML/DT/lua/run_dt'
+local run_dt = require 'Q/ML/DT/lua/calculate_alpha'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 
 local tests = {}
@@ -19,7 +19,8 @@ tests.t1 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -61,7 +62,8 @@ tests.t2 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -78,10 +80,6 @@ tests.t2 = function()
   print("================================================")
   ]]
   print("Accuracy = " .. tostring(average_acr))
-  print("================================================")
-  for i, v in pairs(accuracy_table) do
-    print(i, v)
-  end
 end
 
 tests.t3 = function()
@@ -107,7 +105,8 @@ tests.t3 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -150,7 +149,8 @@ tests.t4 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -183,7 +183,8 @@ tests.t5 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -226,7 +227,8 @@ tests.t6 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")

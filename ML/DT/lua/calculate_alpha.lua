@@ -7,21 +7,40 @@ local node_count = require 'Q/ML/DT/lua/dt'['node_count']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
-local predict = require 'Q/ML/DT/lua/evaluate_dt'['predict']
-local print_dt = require 'Q/ML/DT/lua/evaluate_dt'['print_dt']
+local predict = require 'Q/ML/DT/lua/dt'['predict']
+local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
-local preprocess_dt = require 'Q/ML/DT/lua/evaluate_dt'['preprocess_dt']
+local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
   local data_file	= args.data_file
   local goal		= assert(args.goal)
-  local min_alpha	= assert(args.min_alpha)
-  local max_alpha	= assert(args.max_alpha)
-  local step_alpha	= assert(args.step_alpha)
-  local train_csv   = args.train_csv
-  local test_csv    = args.test_csv
+
+  local alpha, min_alpha, max_alpha, step_alpha
+  if args.alpha then
+    alpha = args.alpha
+    if type(alpha) ~= "Scalar" then
+      alpha = Scalar.new(alpha, "F4")
+    end
+    min_alpha = alpha
+    max_alpha = alpha
+    step_alpha = Scalar.new(1.0, "F4")
+  else
+    min_alpha	= assert(args.min_alpha)
+    max_alpha	= assert(args.max_alpha)
+    step_alpha	= assert(args.step_alpha)
+    if type(min_alpha) ~= "Scalar" then
+      min_alpha = Scalar.new(min_alpha, "F4")
+    end
+    if type(max_alpha) ~= "Scalar" then
+      max_alpha = Scalar.new(max_alpha, "F4")
+    end
+    if type(step_alpha) ~= "Scalar" then
+      step_alpha = Scalar.new(step_alpha, "F4")
+    end
+  end
 
   local iterations = 1
   if args.iterations then
@@ -67,6 +86,7 @@ local function run_dt(args)
   local f1_score_std_deviation = {}
   local c_d_score_std_deviation = {}
 
+  -- start iterating over range of alpha values
   while min_alpha <= max_alpha do
     local gain = {}
     local cost = {}
@@ -85,12 +105,12 @@ local function run_dt(args)
       -- break into a training set and a testing set
       local Train, Test
       if T then
-        Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100)
+        Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100) -- i*100 is a seed value
       else
-        assert(train_csv)
-        assert(test_csv)
-        Train = Q.load_csv(train_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
-        Test = Q.load_csv(test_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
+        assert(args.train_csv)
+        assert(args.test_csv)
+        Train = Q.load_csv(args.train_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
+        Test = Q.load_csv(args.test_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
       end
 
       local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
@@ -106,7 +126,7 @@ local function run_dt(args)
       local actual_values = {}
 
       -- prepare decision tree
-      local tree = make_dt(train, g_train, Scalar.new(min_alpha, "F4"))
+      local tree = make_dt(train, g_train, min_alpha)
       assert(tree)
 
       -- verify the decision tree
