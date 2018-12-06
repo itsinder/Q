@@ -29,7 +29,7 @@ tests.t1 = function()
   print("Test t1 succeeded")
 end
 tests.t2 = function() 
-  len = 1 * 1000000
+  local len = 1 * 1000000
   local x = Q.rand({ lb = 0.01, ub = 0.09, qtype = 'F4', len = len }):eval()
   local start = qc.RDTSC()
   local y = Q.logit(x):eval()
