@@ -285,12 +285,13 @@ tests.t11 = function()
   local src_lnk = Q.period( { len = num_elements, start = 3, by = 1, period = 2, qtype = "I4"}):eval()
   local src_fld = Q.period( { len = num_elements, start = 10, by = 10, period = 2, qtype = "I4"}):eval()
   local dst_lnk = Q.mk_col({ 3, 4, 4, 5 }, "I4")
-  local expected_dst_fld = {327680, 655360, 655360, 0}
+  local expected_dst_fld = {(qconsts.chunk_size/2)*10, qconsts.chunk_size*10, qconsts.chunk_size*10, 0}
   local dst_fld = Q.join(src_lnk, src_fld, dst_lnk, "sum")
   dst_fld:eval()
   local sum = Q.sum(src_fld):eval()
   for i = 1, dst_fld:length() do
     local value = c_to_txt(dst_fld, i)
+    print(value, expected_dst_fld[i])
     assert(value == expected_dst_fld[i])
   end
 end
