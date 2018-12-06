@@ -195,7 +195,7 @@ local function run_dt(args)
       -- print decision tree
       if is_first then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
-        local f = io.open(file_name, "a")
+        local f = io.open(file_name, "w")
         f:write("digraph Tree {\n")
         f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
         f:write("edge [fontname=helvetica] ;\n")
