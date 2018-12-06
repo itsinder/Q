@@ -44,9 +44,16 @@ tests.t2 = function ()
   local period = 10
   local cnt_1 = math.ceil((chunk_size*4+2)/period)
   local cnt_2 = math.floor((chunk_size*4+2)/period)
-  local cnt_table = {cnt_1, cnt_1, cnt_1, cnt_1, cnt_1, cnt_1, cnt_2, cnt_2, cnt_2, cnt_2}
+  local cnt_1_occurance = ((chunk_size*4+2) % period)
+  local cnt_table = {}
+  for i = 1, cnt_1_occurance do
+    cnt_table[#cnt_table+1] = cnt_1
+  end
+  for i = 1, (period-cnt_1_occurance) do
+    cnt_table[#cnt_table+1] = cnt_2
+  end
   local input = Q.period({ len = chunk_size*4+2, start = 1, by = 1, period = period, qtype = "I4"}):persist(true):eval()
-  
+   
   local input_col = Q.sort(input, "asc")
   -- Q.print_csv(input_col, {opfile = path_to_here .. "input_file_t2.csv"})
   local c, d = Q.unique(input_col)
