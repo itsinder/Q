@@ -8,7 +8,7 @@ local tests = {}
 tests.t1 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy_meta.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -42,7 +42,7 @@ end
 tests.t2 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_data.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
-  local alpha = Scalar.new(0.3, "F4")
+  local alpha = 0.3
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -85,7 +85,7 @@ end
 tests.t3 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_meta.lua"
-  local alpha = Scalar.new(0.3, "F4")
+  local alpha = 0.3
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -129,7 +129,7 @@ end
 tests.t4 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -172,7 +172,7 @@ end
 tests.t5 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/after_opr_lifespan.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/lifespan_metadata.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -213,7 +213,7 @@ tests.t6 = function()
 
   split(data_file, metadata_file, split_csv_args, hdr_info)
 
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
   local args = {}
