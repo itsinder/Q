@@ -221,6 +221,9 @@ end
 -- for this TC, num_elements should greater than chunk_size 
 -- for it to become materialized
 -- start_write() is tried on materialized vector 
+
+-- Update: with recent changes start_write() is allowed even if vector is in READ mode status
+-- refer start_write() from core_vec.c
 fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -248,18 +251,11 @@ fns.assert_nascent_vector3 = function(vec, test_name, num_elements, gen_method)
   
   -- Check number of elements in vector
   assert( vec:num_elements() == num_elements )
+  print(vec:num_elements())
   
   -- Try to modify values using start_write(), it should fail
   local map_addr, num_len = vec:start_write()
-  assert(map_addr == nil)
-  
-  -- Try writing to read only vector, it should fail
-  local s1 = Scalar.new(123, md.field_type)
-  status = vec:set(s1, 0)
-  assert(status == nil)
- 
-  -- Check number of elements in vector after write operation
-  assert( vec:num_elements() == num_elements )
+  --assert(map_addr == nil)
   
   vec:end_write()
   return true
@@ -403,6 +399,9 @@ end
 
 -- nascent vector -> materialized vector (using eov)
 -- try start_write() after read operation, this is not allowed
+
+-- Update: with recent changes start_write() is allowed even if vector is in READ mode status
+-- refer start_write() from core_vec.c
 fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -421,9 +420,7 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
   
   -- Try to modify values using start_write()
   local map_addr, num_len = vec:start_write()
-  print(map_addr, num_len)
-  -- assert(status == false)
-  assert(map_addr == nil)
+  --assert(map_addr == nil)
   
   return true
 end
@@ -516,6 +513,10 @@ fns.assert_materialized_vector3 = function(vec, test_name, num_elements)
 end
 
 -- read only materialized vector, try modifying value
+
+-- Update: with recent changes start_write() is allowed even if vector is in READ mode status
+-- refer start_write() from core_vec.c
+
 fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
   -- common checks for vectors
   assert(vec:check())
@@ -528,13 +529,13 @@ fns.assert_materialized_vector4 = function(vec, test_name, num_elements)
  
   -- Try to modify values using start_write(), it should fail
   local map_addr, num_len = vec:start_write()
-  assert(map_addr == nil)
+  --assert(map_addr == nil)
   
   -- Try setting value
   local test_value = 101
   local s1 = Scalar.new(test_value, md.field_type)
-  status = vec:set(s1, 0)
-  assert(status == nil)
+  --status = vec:set(s1, 0)
+  --assert(status == nil)
   
   vec:end_write()
   
