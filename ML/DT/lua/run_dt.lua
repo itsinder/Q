@@ -98,6 +98,10 @@ local function run_dt(args)
     local n_nodes = {}
     local mcc = {}
     local is_first = true
+
+    -- convert scalar to number for alpha value, avoid extra decimals
+    local cur_alpha = utils.round_num(min_alpha:to_num(), 2)
+
     for i = 1, iterations do
       local credit_val = 0
       local debit_val = 0
@@ -190,9 +194,8 @@ local function run_dt(args)
 
       -- print decision tree
       if is_first then
-        alpha_str = tostring((math.floor( min_alpha:to_num() * 1000 ) ) / 1000)
-        local file_name = alpha_str .. "_" .. tostring(i) .. "_graphviz.txt"
-        local f = io.open(file_name, "a")
+        local file_name = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
+        local f = io.open(file_name, "w")
         f:write("digraph Tree {\n")
         f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
         f:write("edge [fontname=helvetica] ;\n")
@@ -210,29 +213,29 @@ local function run_dt(args)
       f1_score[#f1_score + 1] = report["f1_score"]
       mcc[#mcc + 1] = report["mcc"]
     end
-    alpha_gain[min_alpha] = ml_utils.average_score(gain)
-    gain_std_deviation[min_alpha] = ml_utils.std_deviation_score(gain)
+    alpha_gain[cur_alpha] = ml_utils.average_score(gain)
+    gain_std_deviation[cur_alpha] = ml_utils.std_deviation_score(gain)
 
-    alpha_cost[min_alpha] = ml_utils.average_score(cost)
-    cost_std_deviation[min_alpha] = ml_utils.std_deviation_score(cost)
+    alpha_cost[cur_alpha] = ml_utils.average_score(cost)
+    cost_std_deviation[cur_alpha] = ml_utils.std_deviation_score(cost)
 
-    alpha_accuracy[min_alpha] = ml_utils.average_score(accuracy)
-    accuracy_std_deviation[min_alpha] = ml_utils.std_deviation_score(accuracy)
+    alpha_accuracy[cur_alpha] = ml_utils.average_score(accuracy)
+    accuracy_std_deviation[cur_alpha] = ml_utils.std_deviation_score(accuracy)
 
-    alpha_precision[min_alpha] = ml_utils.average_score(precision)
-    precision_std_deviation[min_alpha] = ml_utils.std_deviation_score(precision)
+    alpha_precision[cur_alpha] = ml_utils.average_score(precision)
+    precision_std_deviation[cur_alpha] = ml_utils.std_deviation_score(precision)
 
-    alpha_recall[min_alpha] = ml_utils.average_score(recall)
-    recall_std_deviation[min_alpha] = ml_utils.std_deviation_score(recall)
+    alpha_recall[cur_alpha] = ml_utils.average_score(recall)
+    recall_std_deviation[cur_alpha] = ml_utils.std_deviation_score(recall)
 
-    alpha_f1_score[min_alpha] = ml_utils.average_score(f1_score)
-    f1_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(f1_score)
+    alpha_f1_score[cur_alpha] = ml_utils.average_score(f1_score)
+    f1_score_std_deviation[cur_alpha] = ml_utils.std_deviation_score(f1_score)
 
-    alpha_c_d_score[min_alpha] = ml_utils.average_score(c_d_score)
-    c_d_score_std_deviation[min_alpha] = ml_utils.std_deviation_score(c_d_score)
+    alpha_c_d_score[cur_alpha] = ml_utils.average_score(c_d_score)
+    c_d_score_std_deviation[cur_alpha] = ml_utils.std_deviation_score(c_d_score)
 
-    alpha_n_nodes[min_alpha] = ml_utils.average_score(n_nodes)
-    alpha_mcc[min_alpha] = ml_utils.average_score(mcc)
+    alpha_n_nodes[cur_alpha] = ml_utils.average_score(n_nodes)
+    alpha_mcc[cur_alpha] = ml_utils.average_score(mcc)
 
     min_alpha = min_alpha + step_alpha
   end
