@@ -14,7 +14,6 @@ local all_qtype = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8', 'SC', 'SV' }
 local assert_valid = function(res, map_value, qtype)
   -- calling the assert function based on type of vector
   local function_name = "assert_" .. map_value.assert_fns
-  print(function_name)
   local status, fail_msg = pcall(fns[function_name], res, map_value.name .. qtype, map_value.num_elements, map_value.gen_method)
   if not status then 
     return status, fail_msg
