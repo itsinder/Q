@@ -159,6 +159,7 @@ tests.t2 = function()
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
   local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
+  local print_links      = require 'Q/ML/DT/lua/dt'['print_links']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
@@ -176,6 +177,18 @@ tests.t2 = function()
   print_g_dt(D, fp)
   fp:write("}\n")
   fp:close()
+
+  local f2 = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_new_graphviz_dt.txt", "w")
+  f2:write("digraph Tree {\n")
+  f2:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+  f2:write("edge [fontname=helvetica] ;\n")
+  local seperator = "<br/>"
+  local root_node_str = D.node_idx ..  " [label=<" .. features_list[D.feature] .. " &le; " .. D.threshold .. seperator .. "benefit = " .. D.benefit .. seperator .. "value = [" .. tostring(D.n_T) ..", " .. tostring(D.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
+  print(root_node_str)
+  f2:write(root_node_str)
+  print_links(D, f2, features_list)
+  f2:write("}\n")
+  f2:close()
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -206,6 +219,8 @@ tests.t2 = function()
   Test  = Q.load_csv(args.test_csv, dofile(args.meta_data_file), {is_hdr = args.is_hdr})
   local abc1, g_train, abc2, abc3, abc3 = extract_goal(Train, args.goal)
   local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  args.goal)
+  local pl_pp = require 'pl.pretty'
+  pl_pp.dump(test_col_name)
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}

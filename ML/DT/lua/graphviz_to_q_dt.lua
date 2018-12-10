@@ -46,7 +46,7 @@ local function modify(D, a, b, features)
   a = plstring.strip(a, " \"")
   b = plstring.strip(b, " \"")
   
-  local p_n, p_feature, p_benefit = plstring.splitv(a,'\\n')
+  local p_n, p_feature, p_benefit, p_node_idx = plstring.splitv(a,'\\n')
   local p_n_T, p_n_H = plstring.splitv(p_n,', ')
   
   local p_n_T_key, p_n_T_value = plstring.splitv(p_n_T,'=')
@@ -54,21 +54,34 @@ local function modify(D, a, b, features)
   local p_benefit_key, p_benefit_value = plstring.splitv(p_benefit,'=')
   local p_feature_key, p_feature_value = plstring.splitv(p_feature,'<=')
   p_feature_key = utils["table_find"](features, p_feature_key)
+  local p_node_idx_key, parent_node_idx = plstring.splitv(p_node_idx,'=')
+  parent_node_idx = tonumber(parent_node_idx)
 
-  local c_n, c_feature, c_benefit = plstring.splitv(b,'\\n')
+  local c_n, c_feature, c_benefit, c_node_idx = plstring.splitv(b,'\\n')
   local c_n_T, c_n_H = plstring.splitv(c_n,', ')
 
   local c_n_T_key, c_n_T_value = plstring.splitv(c_n_T,'=')
   local c_n_H_key, c_n_H_value = plstring.splitv(c_n_H,'=')
   
   local c_feature_key, c_feature_value, c_benefit_key, c_benefit_value
-  if c_feature and c_benefit then
+  print(c_n, c_feature, c_benefit, c_node_idx)
+  local c_node_idx_key, child_node_idx
+  if c_feature and c_benefit and c_node_idx then
     c_feature_key, c_feature_value = plstring.splitv(c_feature,'<=')
     c_feature_key = utils["table_find"](features, c_feature_key)
     c_benefit_key, c_benefit_value = plstring.splitv(c_benefit,'=')
     c_feature_value = tonumber(c_feature_value)
     c_benefit_value = tonumber(c_benefit_value)
+    c_node_idx_key, child_node_idx = plstring.splitv(c_node_idx,'=')
+    child_node_idx = tonumber(child_node_idx)
+  else
+    c_benefit_key, c_benefit_value = plstring.splitv(c_feature,'=')
+    c_benefit_value = tonumber(c_benefit_value)
+    c_node_idx_key, child_node_idx = plstring.splitv(c_benefit,'=')
+    child_node_idx = tonumber(child_node_idx)
   end
+--  print("$$$", parent_node_idx)
+--  print("###", child_node_idx)
   
   if c_feature_key then
     flag = true
@@ -80,16 +93,18 @@ local function modify(D, a, b, features)
     D[p_n_H_key] = tonumber(p_n_H_value)
     D.feature =  p_feature_key
     D.threshold = tonumber(p_feature_value)
-    D[p_benefit_key] = tonumber(p_benefit_value)
+    D['benefit'] = tonumber(p_benefit_value)
+    D['node_idx'] = parent_node_idx
     
     D.left = {}
     D.left.label = b
     D.left[c_n_T_key] = tonumber(c_n_T_value)
     D.left[c_n_H_key] = tonumber(c_n_H_value)
+    D.left['node_idx'] = child_node_idx
+    D.left['benefit'] = c_benefit_value
     if flag == true then
       D.left.feature = c_feature_key
       D.left.threshold = c_feature_value
-      D.left[c_benefit_key] = c_benefit_value
     end
     
   elseif  D.label == a and D.left == nil then
@@ -97,20 +112,22 @@ local function modify(D, a, b, features)
     D.left.label = b
     D.left[c_n_T_key] = tonumber(c_n_T_value)
     D.left[c_n_H_key] = tonumber(c_n_H_value)
+    D.left['node_idx'] = child_node_idx
+    D.left['benefit'] = c_benefit_value
     if flag == true then
       D.left.feature = c_feature_key
       D.left.threshold = c_feature_value
-      D.left[c_benefit_key] = c_benefit_value
     end  
   elseif  D.label == a and D.right == nil then
     D.right = {}
     D.right.label = b
     D.right[c_n_T_key] = tonumber(c_n_T_value)
     D.right[c_n_H_key] = tonumber(c_n_H_value)
+    D.right['node_idx'] = child_node_idx
+    D.right['benefit'] = c_benefit_value
     if flag == true then
       D.right.feature = c_feature_key
       D.right.threshold = c_feature_value
-      D.right[c_benefit_key] = c_benefit_value
     end
   end
   if D.label ~= a and D.left ~= nil then
@@ -142,6 +159,8 @@ local function graphviz_to_D(file, features)
      end
     end
   end
+--  local pl_p = require 'pl.pretty'
+--  pl_p.dump(D)
   return D
 end
 

@@ -78,11 +78,12 @@ local function get_required_fields(label_tbl)
       l4 = value_to_n_T_n_H(l4)
       l1 = get_condition(l1)
       l2 = get_benefit(l2)
-      local str = l4 .. "\\n" .. l1 .. "\\n" .. "benefit=" ..l2
+      local str = l4 .. "\\n" .. l1 .. "\\n" .. "benefit=" ..l2 .. "\\nnode_idx = " .. i-1
       q_field_labels[#q_field_labels + 1] = str
     else
       l3 = value_to_n_T_n_H(l3)
-      local str = l3
+      l1 = get_benefit(l1)
+      local str = l3 .. "\\nbenefit=" ..l1 .. "\\nnode_idx = " .. i-1
       q_field_labels[#q_field_labels + 1] = str
     end
   end
