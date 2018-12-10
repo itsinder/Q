@@ -32,7 +32,7 @@ tests.t4 = function ()
 end
 --======================================
 tests.t5 = function ()
-  qtypes = { "F4", "F8" }
+  local qtypes = { "F4", "F8" }
   for _, qtype in ipairs(qtypes) do 
     local x = Q.rand({ lb = 1000000, ub = 2000000, qtype = qtype, len = 10 } )
     assert(Q.vvseq(x, Q.reciprocal(Q.reciprocal(x)), 0.01, { mode = "ratio"}) == true)

@@ -79,7 +79,8 @@ y_pred_gini = utils.prediction(X_test, grid.best_estimator_)
 print("Results for gini algo")
 utils.cal_accuracy(y_test, y_pred_gini)
 
-export_graphviz(grid.best_estimator_, out_file="best_fit_graphviz_b_cancer_accuracy.txt", filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
+output_filename = "%s/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt"  % q_src_dir
+export_graphviz(grid.best_estimator_, out_file = output_filename, filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
 
 # Train using gini
 clf_gini = utils.train_using_gini(X_train, y_train)
