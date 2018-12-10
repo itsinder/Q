@@ -1,11 +1,11 @@
-from Q import utils, executor
-from p_vector import PVector
-from p_reducer import PReducer
-from p_scalar import PScalar
-import constants as q_consts
+import Q.lua_executor as executor
+import Q.utils as util
+from Q import constants as q_consts
+from Q.p_vector import PVector
+from Q.p_reducer import PReducer
+from Q.p_scalar import PScalar
+from Q.q_op_category import *
 import math
-from q_op_category import *
-
 
 
 def __wrap_output(op_name, result):
@@ -23,7 +23,7 @@ def __wrap_output(op_name, result):
         result = PScalar(base_scalar=result)
     elif op_name in table_as_output:
         # convert lua table to dict/list
-        result = utils.to_list_or_dict(result)
+        result = util.to_list_or_dict(result)
         for key, val in result.items():
             result[key] = PVector(val)
     elif op_name in vec_as_output:
@@ -37,17 +37,10 @@ def __wrap_output(op_name, result):
 def call_lua_op(op_name, *args):
     args_list = []
     for val in args:
-        val = utils.update_args(val)
+        val = util.unpack_args(val)
         args_list.append(val)
-    args_list = utils.to_table(args_list)
-
-    func_str = \
-        """
-        function(op_name, args)
-            return Q[op_name](unpack(args))
-        end
-        """
-    func = executor.eval(func_str)
+    args_list = util.to_table(args_list)
+    func = executor.eval_lua(q_consts.lua_op_fn_str)
     try:
         result = func(op_name, args_list)
     except Exception as e:
@@ -83,24 +76,10 @@ def array(in_vals, dtype=None):
         raise Exception("dtype %s is not supported" % dtype)
 
     # convert in_vals to lua table
-    in_vals = utils.to_table(in_vals)
+    in_vals = util.to_table(in_vals)
 
     # call wrapper function
     return call_lua_op(q_consts.MK_COL, in_vals, dtype)
-
-
-def add(vec1, vec2):
-    """Add two vectors, wrapper around Q.add"""
-
-    if not isinstance(vec1, PVector):
-        raise Exception("First argument is not of type PVector")
-
-    if not (isinstance(vec2, PVector) or isinstance(vec2, PScalar)
-            or type(vec2) == int or type(vec2) == float):
-        raise Exception("Second argument type {} is not supported".format(type(vec2)))
-
-    # call wrapper function
-    return call_lua_op(q_consts.ADD, vec1, vec2)
 
 
 def full(shape, fill_value, dtype=None):
