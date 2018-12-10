@@ -1,3 +1,5 @@
+If Input type 1 == Input type 2 then Output type = Input type 1
+
 Input type 1    Input type 2    Output type
 I1      I2      I2
 i1      I4      I4

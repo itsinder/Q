@@ -15,8 +15,15 @@ local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
-  local data_file	= assert(args.data_file)
+  local data_file	= args.data_file 
   local goal		= assert(args.goal)
+  if ( not data_file ) then 
+    assert(args.train_csv)
+    assert(args.test_csv)
+  else
+    assert(args.train_csv == nil)
+    assert(args.test_csv == nil)
+  end
 
   local alpha, min_alpha, max_alpha, step_alpha
   if args.alpha then
