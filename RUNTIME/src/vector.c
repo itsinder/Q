@@ -18,8 +18,6 @@
 #include "mm.h"
 #include "_txt_to_I4.h"
 
-// TODO Delete luaL_Buffer g_errbuf;
-extern luaL_Buffer g_errbuf;
 static int32_t chunk_size = 0; 
 
 
@@ -613,7 +611,6 @@ static int l_vec_new( lua_State *L)
 {
   int status = 0;
   VEC_REC_TYPE *ptr_vec = NULL;
-  luaL_buffinit(L, &g_errbuf);
 
   bool is_memo = true;
   const char *file_name = NULL;
@@ -651,8 +648,7 @@ static int l_vec_new( lua_State *L)
   status = vec_new(ptr_vec, qtype_sz, q_data_dir, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
 
-  luaL_pushresult(&g_errbuf);
-  return 2;
+  return 1; // Used to be return 2 because of errbuf return
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: Could not create vector\n");
@@ -664,7 +660,6 @@ static int l_vec_clone( lua_State *L)
   int status = 0;
   VEC_REC_TYPE *ptr_new_vec = NULL;
   const char *q_data_dir = NULL;
-  luaL_buffinit(L, &g_errbuf);
 
   VEC_REC_TYPE *ptr_old_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   // q_data_dir to create file_path
@@ -680,8 +675,7 @@ static int l_vec_clone( lua_State *L)
   status = vec_clone(ptr_old_vec, ptr_new_vec, q_data_dir);
   cBYE(status);
 
-  luaL_pushresult(&g_errbuf);
-  return 2;
+  return 1; // Used to be return 2 because of errbuf return
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: Could not clone vector\n");

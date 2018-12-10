@@ -7,29 +7,43 @@ n_T_L   - number of negatives (tails) on left
 n_H_L   - number of positives (heads) on left
 ]]
 -- TODO: export this function as Q's function --> Q.wtbnfit
-local function weighted_benefit(
+local function wt_benefit(
   n_T_L,
   n_H_L,
   n_T_R,
   n_H_R
   )
+  -- check parameters
+  assert(n_T_L > 0)
+  assert(n_H_L > 0)
+  assert(n_T_R > 0)
+  assert(n_H_R > 0)
+
   -- determine total number on left and right
   local n_L = n_T_L + n_H_L -- total number on left
   local n_R = n_T_R + n_H_R -- total number on right
 
-  -- determine left and right weightage
-  local w_L = n_L / ( n_L + n_R ) -- weightage on left
-  local w_R = n_R / ( n_L + n_R ) -- weightage on right
+  local n = n_L + n_R -- total number
 
-  -- odds of betting heads or tails
-  local o_T = ( ( n_H_L + n_H_R ) / ( n_T_L + n_T_R ) ) -- odds of betting tail
-  local o_H = ( ( n_T_L + n_T_R ) / ( n_H_L + n_H_R ) ) -- odds of betting head
+  -- determine left and right weightage
+  local w_L = n_L / n -- weightage on left
+  local w_R = n_R / n -- weightage on right
+
+  local p_H_L = n_H_L / n_L -- prob of heads on left
+  local p_H_R = n_H_R / n_R -- prob of heads on left
+  local p_T_L = n_T_L / n_L -- prob of tails on left
+  local p_T_R = n_T_R / n_R -- prob of tails on left
+
+  local o_H_L = n_T_L / n_H_L -- odds for heads on left
+  local o_T_L = n_H_L / n_T_L -- odds for tails on left
+  local o_H_R = n_T_R / n_H_R -- odds for heads on right
+  local o_T_R = n_H_R / n_T_R -- odds for tails on right
 
   -- calculate benefit
-  local b_H_L = o_H * ( n_H_L / n_L ) + ( n_T_L / n_L ) * (-1) -- benefit of betting head on left
-  local b_T_L = o_T * ( n_T_L / n_L ) + ( n_H_L / n_L ) * (-1) -- benefit of betting tail on left
-  local b_H_R = o_H * ( n_H_R / n_R ) + ( n_T_R / n_R ) * (-1) -- benefit of betting head on right
-  local b_T_R = o_T * ( n_T_R / n_R ) + ( n_H_R / n_R ) * (-1) -- benefit of betting tail on right
+  local b_H_L = ( o_H_L * p_H_L ) - ( 1 * p_T_L )
+  local b_T_L = ( o_T_L * p_T_L ) - ( 1 * p_H_L )
+  local b_H_R = ( o_H_R * p_H_R ) - ( 1 * p_T_R )
+  local b_T_R = ( o_T_R * p_T_R ) - ( 1 * p_H_R )
 
   local b_L = math.max(b_H_L, b_T_L) -- benefit on left
   local b_R = math.max(b_H_R, b_T_R) -- benefit on right
@@ -39,4 +53,4 @@ local function weighted_benefit(
   return b
 end
 
-return weighted_benefit
+return wt_benefit

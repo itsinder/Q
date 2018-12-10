@@ -1,7 +1,7 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
-local calc_benefit = require 'Q/ML/DT/lua/benefit'
+local calc_benefit = require 'Q/ML/DT/lua/calc_benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
@@ -36,42 +36,14 @@ local function make_dt(
   )
   local m, n, ng = chk_params(T, g, alpha)
   local D = {}
-
-  --[[
-  local ng_verify
-  local sum = Q.sum(g):eval()
-  if sum:to_num() > 0 then
-    ng_verify = 2
-  else
-    ng_verify = 1
-  end
-
-  local minval, _, _ = Q.min(g):eval()
-  local maxval, _, _ = Q.max(g):eval()
-  if maxval > minval then
-    ng_verify = maxval:to_num() - minval:to_num() + 1
-  elseif maxval == minval then
-    ng_verify = maxval:to_num() + 1
-  end
-  if ng_verify ~= ng then
-    print(Q.sum(g):eval())
-    print(ng_verify, ng)
-    print(minval, maxval)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    Q.print_csv(g)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-  end
-  assert(ng_verify == ng)
-  ]]
+  assert(ng == 2) --- LIMITATION FOR NOW 
+  alpha = alpha:to_num() -- convert to number
 
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
   n_T = cnts:get_one(0):to_num()
-  if ng == 1 then
-    n_H = 0
-  else
-    n_H = cnts:get_one(1):to_num()
-  end
+  n_H = cnts:get_one(1):to_num()
+
   D.n_T = n_T
   D.n_H = n_H
   D.node_idx = node_idx
@@ -79,24 +51,26 @@ local function make_dt(
   if n_T == 0 or n_H == 0 then
     return  D
   end
-  local best_bf, best_sf, best_k
+  local best_bf --- best benefit
+  local best_sf --- split point that yielded best benefit 
+  local best_k  --- feature that yielded best benefit
   for k, f in pairs(T) do
     local bf, sf = calc_benefit(f, g, n_T, n_H)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
-      best_k = k
+      best_k = k    
     end
   end
   -- print("Max benefit and respecitve feature is ")
   -- print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
-  if ( best_bf > alpha:to_num() ) then 
+  if ( best_bf > alpha ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
     local T_R = {}
-    D.feature = best_k
+    D.feature   = best_k
     D.threshold = best_sf
-    D.benefit = best_bf
+    D.benefit   = best_bf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x):eval()
     end
