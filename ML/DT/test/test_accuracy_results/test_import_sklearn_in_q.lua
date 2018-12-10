@@ -164,6 +164,7 @@ tests.t2 = function()
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+  local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 
   local features_list = { "PassengerId","Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked" }
   local goal_feature = "Survived"
@@ -178,6 +179,7 @@ tests.t2 = function()
   fp:write("}\n")
   fp:close()
 
+  features_list = load_csv_col_seq(features_list, goal_feature)
   local f2 = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_new_graphviz_dt.txt", "w")
   f2:write("digraph Tree {\n")
   f2:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
