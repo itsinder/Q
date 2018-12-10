@@ -28,6 +28,7 @@ local function write_to_file(content, fname)
 
 end
 
+local lib_link_path = string.format("-L%s/lib", Q_ROOT)
 local function compile(doth, h_path, dotc, so_path, libname)
   assert(doth ~= nil and type(doth) == "string", "need a valid string that is the  dot h file")
   assert( h_path ~= nil and type(h_path) == "string", "need a valid h_path")
@@ -38,8 +39,8 @@ local function compile(doth, h_path, dotc, so_path, libname)
   write_to_file(dotc, tmp_c)
   write_to_file(doth, tmp_h)
   local incs = string.format("-I /tmp/ -I %s -I %s ", q_src_root .. "/UTILS/inc", q_src_root .. "/UTILS/gen_inc")
-  local q_cmd = string.format("gcc %s %s %s %s -o %s", 
-       QC_FLAGS, tmp_c, incs, Q_LINK_FLAGS, so_path)
+  local q_cmd = string.format("gcc %s %s %s %s %s %s -o %s", 
+       QC_FLAGS, lib_link_path, tmp_c, incs, Q_LINK_FLAGS, "-lq_core",  so_path)
   local status = os.execute(q_cmd)
   assert(status == 0, "gcc failed for command: " .. q_cmd)
   assert(plpath.isfile(so_path), "Target " .. libname .. " not created")
