@@ -34,16 +34,14 @@ local function wt_benefit(
   local p_T_L = n_T_L / n_L -- prob of tails on left
   local p_T_R = n_T_R / n_R -- prob of tails on left
 
-  local o_H_L = n_T_L / n_H_L -- odds for heads on left
-  local o_T_L = n_H_L / n_T_L -- odds for tails on left
-  local o_H_R = n_T_R / n_H_R -- odds for heads on right
-  local o_T_R = n_H_R / n_T_R -- odds for tails on right
+  local o_H = n_T / n_H -- odds for heads 
+  local o_T = n_H / n_T -- odds for tails 
 
   -- calculate benefit
-  local b_H_L = ( o_H_L * p_H_L ) - ( 1 * p_T_L )
-  local b_T_L = ( o_T_L * p_T_L ) - ( 1 * p_H_L )
-  local b_H_R = ( o_H_R * p_H_R ) - ( 1 * p_T_R )
-  local b_T_R = ( o_T_R * p_T_R ) - ( 1 * p_H_R )
+  local b_H_L = ( o_H * p_H_L ) - ( 1 * p_T_L )
+  local b_T_L = ( o_T * p_T_L ) - ( 1 * p_H_L )
+  local b_H_R = ( o_H * p_H_R ) - ( 1 * p_T_R )
+  local b_T_R = ( o_T * p_T_R ) - ( 1 * p_H_R )
 
   local b_L = math.max(b_H_L, b_T_L) -- benefit on left
   local b_R = math.max(b_H_R, b_T_R) -- benefit on right
