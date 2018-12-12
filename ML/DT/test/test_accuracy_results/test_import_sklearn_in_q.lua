@@ -16,19 +16,36 @@ tests.t1 = function()
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+  local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
+  local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
+  local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
+
 
   local features_list = { "id", "diagnosis", "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean","compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst","texture_worst", "perimeter_worst", "area_worst", "smoothness_worst","compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst", "fractal_dimension_worst" }
-  local goal_feature = "diagnosis"
-  local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list, goal_feature)
-  -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_dt.txt", "w")
-  fp:write("digraph Tree {\n")
-  fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  fp:write("edge [fontname=helvetica] ;\n")
 
-  print_g_dt(D, fp)
-  fp:write("}\n")
-  fp:close()
+  local goal_feature = "diagnosis"
+
+  -- getting the correct sequence of the feature_list
+  features_list = load_csv_col_seq(features_list, goal_feature)
+  -- converting sklearn gini graphviz to q dt
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list)
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
+  -- printing the decision tree in gini graphviz format
+  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_accuracy_dt.txt"
+  local f = io.open(file_name, "w")
+  f:write("digraph Tree {\n")
+  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+  f:write("edge [fontname=helvetica] ;\n")
+  local seperator = "<br/>"
+  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
+  f:write(root_node_str)
+  print_dt(tree, f, features_list)
+  f:write("}\n")
+  f:close()
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -38,7 +55,7 @@ tests.t1 = function()
   args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
   args.is_hdr = true
   args.goal = goal_feature
-  args.tree = D
+  args.tree = tree
 
   local gain = {}
   local cost = {}
@@ -51,7 +68,7 @@ tests.t1 = function()
 
   local credit_val = 0
   local debit_val = 0
-      
+
   local Train, Test
   assert(args.test_csv)
   assert(args.meta_data_file)
@@ -62,9 +79,6 @@ tests.t1 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
-  -- perform the preprocess activity
-  -- initializes n_H1 and n_T1 to zero
-  preprocess_dt(args.tree)
 
   -- predict for test samples
   for i = 1, n_test do
@@ -108,14 +122,14 @@ tests.t1 = function()
   end
 
   -- get node count
-  local n_count = node_count(D)
+  local n_count = node_count(args.tree)
   n_nodes[#n_nodes+1] = n_count
 
   -- calculate credit-debit score
   c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
   -- calculate dt cost
-  local g, c = evaluate_dt(D, g_train)
+  local g, c = evaluate_dt(args.tree, g_train)
   gain[#gain+1] = g
   cost[#cost+1] = c
 
@@ -159,38 +173,37 @@ tests.t2 = function()
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
   local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
-  local print_links      = require 'Q/ML/DT/lua/dt'['print_links']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+  local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
+  local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 
   local features_list = { "PassengerId","Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked" }
   local goal_feature = "Survived"
-  local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_titanic_accuracy.txt", features_list, goal_feature)
-  -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_graphviz_dt.txt", "w")
-  fp:write("digraph Tree {\n")
-  fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  fp:write("edge [fontname=helvetica] ;\n")
-
-  print_g_dt(D, fp)
-  fp:write("}\n")
-  fp:close()
 
   features_list = load_csv_col_seq(features_list, goal_feature)
-  local f2 = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_new_graphviz_dt.txt", "w")
-  f2:write("digraph Tree {\n")
-  f2:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f2:write("edge [fontname=helvetica] ;\n")
+  -- converting sklearn gini graphviz to q dt
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_titanic_accuracy.txt", features_list)
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
+  -- printing the decision tree in gini graphviz format
+  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_accuracy_dt.txt"
+  local f = io.open(file_name, "w")
+  f:write("digraph Tree {\n")
+  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+  f:write("edge [fontname=helvetica] ;\n")
   local seperator = "<br/>"
-  local root_node_str = D.node_idx ..  " [label=<" .. features_list[D.feature] .. " &le; " .. D.threshold .. seperator .. "benefit = " .. D.benefit .. seperator .. "value = [" .. tostring(D.n_T) ..", " .. tostring(D.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  print(root_node_str)
-  f2:write(root_node_str)
-  print_links(D, f2, features_list)
-  f2:write("}\n")
-  f2:close()
+  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
+  f:write(root_node_str)
+  print_dt(tree, f, features_list)
+  f:write("}\n")
+  f:close()
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -200,7 +213,7 @@ tests.t2 = function()
   args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_meta.lua"
   args.is_hdr = true
   args.goal = goal_feature
-  args.tree = D
+  args.tree = tree
 
   local gain = {}
   local cost = {}
@@ -213,7 +226,7 @@ tests.t2 = function()
 
   local credit_val = 0
   local debit_val = 0
-      
+
   local Train, Test
   assert(args.test_csv)
   assert(args.meta_data_file)
@@ -226,9 +239,6 @@ tests.t2 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
-  -- perform the preprocess activity
-  -- initializes n_H1 and n_T1 to zero
-  preprocess_dt(args.tree)
   
   -- predict for test samples
   for i = 1, n_test do
@@ -271,14 +281,14 @@ tests.t2 = function()
   end
 
   -- get node count
-  local n_count = node_count(D)
+  local n_count = node_count(args.tree)
   n_nodes[#n_nodes+1] = n_count
 
   -- calculate credit-debit score
   c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
   -- calculate dt cost
-  local g, c = evaluate_dt(D, g_train)
+  local g, c = evaluate_dt( args.tree, g_train)
   gain[#gain+1] = g
   cost[#cost+1] = c
 
@@ -327,19 +337,34 @@ tests.t3 = function()
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+  local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
+  local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
+  local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
-  local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_accuracy.txt", features_list, goal_feature)
-  -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t3_imported_graphviz_dt.txt", "w")
-  fp:write("digraph Tree {\n")
-  fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  fp:write("edge [fontname=helvetica] ;\n")
 
-  print_g_dt(D, fp)
-  fp:write("}\n")
-  fp:close()
+  features_list = load_csv_col_seq(features_list, goal_feature)
+
+  -- converting sklearn gini graphviz to q dt
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_accuracy.txt", features_list)
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
+  -- printing the decision tree in gini graphviz format
+  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t3_imported_graphviz_dt.txt"
+  local f = io.open(file_name, "w")
+  f:write("digraph Tree {\n")
+  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+  f:write("edge [fontname=helvetica] ;\n")
+  local seperator = "<br/>"
+  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
+  f:write(root_node_str)
+  print_dt(tree, f, features_list)
+  f:write("}\n")
+  f:close()
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -349,7 +374,7 @@ tests.t3 = function()
   args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
   args.is_hdr = true
   args.goal = "class"
-  args.tree = D
+  args.tree = tree
 
   local gain = {}
   local cost = {}
@@ -362,7 +387,7 @@ tests.t3 = function()
 
   local credit_val = 0
   local debit_val = 0
-      
+
   local Train, Test
   assert(args.test_csv)
   assert(args.meta_data_file)
@@ -373,10 +398,7 @@ tests.t3 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
-  -- perform the preprocess activity
-  -- initializes n_H1 and n_T1 to zero
-  preprocess_dt(args.tree)
-  
+
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
@@ -386,7 +408,6 @@ tests.t3 = function()
     local n_H, n_T = predict(args.tree, x)
     n_H = n_H
     n_T = n_T
-    --print(type(n_H), type(n_T))
     local decision
     if n_H > n_T then
       decision = 1 
@@ -419,14 +440,14 @@ tests.t3 = function()
   end
 
   -- get node count
-  local n_count = node_count(D)
+  local n_count = node_count(args.tree)
   n_nodes[#n_nodes+1] = n_count
 
   -- calculate credit-debit score
   c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
   -- calculate dt cost
-  local g, c = evaluate_dt(D, g_train)
+  local g, c = evaluate_dt(args.tree, g_train)
   gain[#gain+1] = g
   cost[#cost+1] = c
 
@@ -474,19 +495,34 @@ tests.t4 = function()
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+  local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
+  local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
+  local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
-  local D = sklearn_to_q_dt(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_category2_f1.txt", features_list, goal_feature)
-  -- printing the q decision tree structure in a file
-  local fp = io.open(Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t4_imported_graphviz_f1_dt.txt", "w")
-  fp:write("digraph Tree {\n")
-  fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  fp:write("edge [fontname=helvetica] ;\n")
 
-  print_g_dt(D, fp)
-  fp:write("}\n")
-  fp:close()
+  features_list = load_csv_col_seq(features_list, goal_feature)
+
+  -- converting sklearn gini graphviz to q dt
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_category2_f1.txt", features_list)
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
+  -- printing the decision tree in gini graphviz format
+  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t4_imported_graphviz_f1_dt.txt"
+  local f = io.open(file_name, "w")
+  f:write("digraph Tree {\n")
+  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+  f:write("edge [fontname=helvetica] ;\n")
+  local seperator = "<br/>"
+  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
+  f:write(root_node_str)
+  print_dt(tree, f, features_list)
+  f:write("}\n")
+  f:close()
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -496,7 +532,7 @@ tests.t4 = function()
   args.meta_data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
   args.is_hdr = true
   args.goal = "class"
-  args.tree = D
+  args.tree = tree
 
   local gain = {}
   local cost = {}
@@ -520,9 +556,6 @@ tests.t4 = function()
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
-  -- perform the preprocess activity
-  -- initializes n_H1 and n_T1 to zero
-  preprocess_dt(args.tree)
 
   -- predict for test samples
   for i = 1, n_test do
@@ -566,14 +599,14 @@ tests.t4 = function()
   end
 
   -- get node count
-  local n_count = node_count(D)
+  local n_count = node_count(args.tree)
   n_nodes[#n_nodes+1] = n_count
 
   -- calculate credit-debit score
   c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
   -- calculate dt cost
-  local g, c = evaluate_dt(D, g_train)
+  local g, c = evaluate_dt(args.tree, g_train)
   gain[#gain+1] = g
   cost[#cost+1] = c
 

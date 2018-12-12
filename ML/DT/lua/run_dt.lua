@@ -194,23 +194,13 @@ local function run_dt(args)
 
       -- print decision tree
       if is_first then
-        local file_name = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
-        local f = io.open(file_name, "w")
-        f:write("digraph Tree {\n")
-        f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-        f:write("edge [fontname=helvetica] ;\n")
-        print_dt(tree, f, train_col_name)
-        f:write("}\n")
-        f:close()
-
-        local file_name2 = tostring(cur_alpha) .. "_" .. tostring(i) .. "_format2_graphviz.txt"
+        local file_name2 = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
         local f2 = io.open(file_name2, "w")
         f2:write("digraph Tree {\n")
         f2:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
         f2:write("edge [fontname=helvetica] ;\n")
         local seperator = "<br/>"
         local root_node_str = tree.node_idx ..  " [label=<" .. train_col_name[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-        print(root_node_str) -- check this root_node_str
         f2:write(root_node_str)
         print_links(tree, f2, train_col_name)
         f2:write("}\n")

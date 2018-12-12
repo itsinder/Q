@@ -203,46 +203,7 @@ local function preprocess_dt(
   end
 end
 
-
 local function print_dt(
-  D,            -- prepared decision tree
-  f,            -- file_descriptor
-  col_name      -- table of column names of train dataset
-  )
-  local label = "\"n_T=" .. tostring(D.n_T) .. ", n_H=" .. tostring(D.n_H)
-  --print(D.feature, D.threshold, D.n_H, D.n_T)
-  if D.left and D.right then
-    label = label .. "\\n" .. col_name[D.feature] .. "<=" .. D.threshold .. "\\n" .. "benefit=" .. D.benefit .. "\""
-    local left_label = "\"n_T=" .. tostring(D.left.n_T) .. ", n_H=" .. tostring(D.left.n_H)
-    local right_label = "\"n_T=" .. tostring(D.right.n_T) .. ", n_H=" .. tostring(D.right.n_H)
-    if D.left.feature then
-      left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
-    else
-      left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
-      left_label = left_label .. "\\n" .. "cost=" .. tostring(D.left.cost) .. ", gain=" .. tostring(D.left.gain)
-      -- leaf node
-    end
-    left_label = left_label .. "\""
-    if D.right.feature then
-      right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
-    else
-      right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
-      right_label = right_label .. "\\n" .. "cost=" .. tostring(D.right.cost) .. ", gain=" .. tostring(D.right.gain)
-    end
-    right_label = right_label .. "\""
-    f:write(label .. " -> " .. left_label .. "\n")
-    --print(label .. " -> " .. left_label)
-    f:write(label .. " -> " .. right_label .. "\n")
-    --print(label .. " -> " .. right_label)
-
-    print_dt(D.left, f, col_name)
-    print_dt(D.right, f, col_name)
-  else
-    -- nothing to do
-  end
-end
-
-local function print_links(
   D,            -- prepared decision tree
   f,            -- file_descriptor
   col_name      -- table of column names of train dataset
@@ -251,31 +212,31 @@ local function print_links(
   local seperator = "<br/>"
   local label = D.node_idx
   if D.left then
-    --node_idx [label=<concave points_worst &le; 0.146<br/>gini = 0.136<br/>samples = 191<br/>value = [14, 177]>, fillcolor="#399de5eb"] ;
     local condition
     if D.left.feature then
       condition = " [label=<" .. col_name[D.left.feature] .. " &le; " .. D.left.threshold .. seperator .. "benefit = " .. D.left.benefit .. seperator
     else
-      condition = " [label=<" .. "cost = " .. tostring(D.left.cost) .. seperator .. "gain = " .. tostring(D.left.gain) .. seperator .."benefit = " .. D.left.benefit .. seperator
+      condition = " [label=<" .. "cost = " .. tostring(D.left.cost) .. seperator .. "gain = " .. tostring(D.left.gain) .. seperator
     end
     local str = D.left.node_idx .. condition .. "value = [" .. tostring(D.left.n_T) ..", " .. tostring(D.left.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
 
     f:write(str .. "\n")
     f:write(label .. " -> " .. D.left.node_idx .. " ;\n")
-    print_links(D.left, f, col_name)
+    print_dt(D.left, f, col_name)
   end
   if D.right then
     local condition
     if D.right.feature then
       condition = " [label=<" .. col_name[D.right.feature] .. " &le; " .. D.right.threshold .. seperator .. "benefit = " .. D.right.benefit .. seperator
     else
-      condition = " [label=<" .. "cost = " .. tostring(D.right.cost) .. seperator .. "gain = " .. tostring(D.right.gain) .. seperator .. "benefit = " .. D.right.benefit .. seperator
+      -- D.right.benefit = 0 --todo
+      condition = " [label=<" .. "cost = " .. tostring(D.right.cost) .. seperator .. "gain = " .. tostring(D.right.gain) .. seperator
     end
 
     local str = D.right.node_idx .. condition .. "value = [" .. tostring(D.right.n_T) ..", " .. tostring(D.right.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
     f:write(str .. "\n")
     f:write(label .. " -> " .. D.right.node_idx .." ;\n")
-    print_links(D.right, f, col_name)
+    print_dt(D.right, f, col_name)
   end
 
 --  Inorder
@@ -290,7 +251,6 @@ dt.make_dt = make_dt
 dt.predict = predict
 dt.check_dt = check_dt
 dt.print_dt = print_dt
-dt.print_links = print_links
 dt.node_count = node_count
 dt.preprocess_dt = preprocess_dt
 
