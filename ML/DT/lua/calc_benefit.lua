@@ -12,7 +12,8 @@ local function calc_benefit(
   f,
   g,
   n_T,
-  n_H
+  n_H,
+  wt_prior
   )
   -- START: Check parameters
   assert(( type(n_T) == "Scalar") or ( type(n_T) == "number"))
@@ -64,7 +65,8 @@ local function calc_benefit(
       C[gi_val] = C[gi_val] + 1
       i = i + 1
     end
-    local f_val_benefit = wt_benefit(C[0], C[1], (n_T - C[0]), (n_H - C[1]))
+    local f_val_benefit = wt_benefit(
+      C[0], C[1], (n_T - C[0]), (n_H - C[1]), wt_prior)
     if f_val_benefit > benefit then
       benefit = f_val_benefit
       split_point = f_val

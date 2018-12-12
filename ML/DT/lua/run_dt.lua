@@ -137,7 +137,8 @@ local function run_dt(args)
       local actual_values = {}
 
       -- prepare decision tree
-      local tree = make_dt(train, g_train, min_alpha)
+      local tree = make_dt(train, g_train, min_alpha, 
+        args.min_to_split, args.wt_prior)
       assert(tree)
 
       -- verify the decision tree

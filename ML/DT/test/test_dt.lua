@@ -19,7 +19,7 @@ tests.t1 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
+  local result = run_dt(args)
   local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()

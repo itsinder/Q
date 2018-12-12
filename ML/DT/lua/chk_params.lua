@@ -33,10 +33,10 @@ local function chk_params(
   assert(g:length() == n, tostring(g:length()) .. ", " .. tostring(n))
   assert(g:fldtype() == "I4")
   -- LIMITATION: currently assuming g values to be 0 and 1
-  local maxval = Q.max(g):eval()
-  local minval = Q.min(g):eval()
-  assert(minval == 0)
-  assert(maxval == 0)
+  local maxval = Q.max(g):eval():to_num()
+  local minval = Q.min(g):eval():to_num()
+  assert(minval >= 0)
+  assert(maxval <= 1)
   local ng = 2
   
   return nT, n, ng

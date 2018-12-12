@@ -32,12 +32,20 @@ local node_idx = 0 -- node indexing
 local function make_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
-  alpha -- Scalar, minimum benefit
+  alpha, -- Scalar, minimum benefit
+  min_to_split,
+  wt_prior
   )
   local m, n, ng = chk_params(T, g, alpha)
   local D = {}
   assert(ng == 2) --- LIMITATION FOR NOW 
-  alpha = alpha:to_num() -- convert to number
+  -- do not split a node if it has less than 10 samples 
+  if ( not min_to_split ) then 
+    min_to_split = 10 
+  else
+    assert(type(min_to_split) == "number")
+    assert(min_to_split > 2)
+  end 
 
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
@@ -48,14 +56,16 @@ local function make_dt(
   D.n_H = n_H
   D.node_idx = node_idx
   node_idx = node_idx + 1
-  if n_T == 0 or n_H == 0 then
-    return  D
-  end
+
+  -- stop expansion if following conditions met 
+  if ( ( n_T == 0 ) or ( n_H == 0 ) ) then return D end
+  if ( n_T + n_H < min_to_split )     then return D end 
+
   local best_bf --- best benefit
   local best_sf --- split point that yielded best benefit 
   local best_k  --- feature that yielded best benefit
   for k, f in pairs(T) do
-    local bf, sf = calc_benefit(f, g, n_T, n_H)
+    local bf, sf = calc_benefit(f, g, n_T, n_H, wt_prior)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
@@ -64,7 +74,8 @@ local function make_dt(
   end
   -- print("Max benefit and respecitve feature is ")
   -- print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
-  if ( best_bf > alpha ) then 
+  local l_alpha = alpha:to_num()
+  if ( best_bf > l_alpha ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
     local T_R = {}
@@ -109,11 +120,9 @@ local function check_dt(
     return status
   end
 
-  if D.left then
-    assert(D.right)
-  else
-    assert(D.right == nil)
-  end
+  -- either both left and right are defined or neither
+  if D.left then assert(D.right) end
+  if D.right then assert(D.left) end
 
   if D.left == nil and D.right == nil then
     assert(D.feature == nil)
