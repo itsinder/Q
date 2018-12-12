@@ -1,15 +1,15 @@
 local Q = require 'Q'
 local fns = {}
 
-local function calc_cost(
+local function calc_payout(
   D,		-- decision tree
-  l_cost,	-- table containing cost value at each leaf node
+  l_payout,	-- table containing payout value at each leaf node
   l_weight	-- table containing weight value at each leaf node
   )
   --
   if D.left and D.right then
-    calc_cost(D.left, l_cost, l_weight)
-    calc_cost(D.right,l_cost, l_weight)
+    calc_payout(D.left, l_payout, l_weight)
+    calc_payout(D.right,l_payout, l_weight)
     return 
   end
   local n_H_train = D.n_H
@@ -21,12 +21,12 @@ local function calc_cost(
   p_H = n_H_train / n_train
   p_T = n_T_train / n_train
 
-  local cost = (n_H_test * (p_H - p_T)) + (n_T_test * (p_T - p_H))
+  local payout = (n_H_test * (p_H - p_T)) + (n_T_test * (p_T - p_H))
 
-  l_cost[#l_cost+1]     = cost
+  l_payout[#l_payout+1]     = payout
   l_weight[#l_weight+1] = n_test
 
-  D.cost = cost
+  D.payout = payout
   D.weight = weight
 end
 
@@ -36,22 +36,22 @@ local function evaluate_dt(
   g	-- lVector of length n, goal/target feature from training dataset
   )
 
-  local l_cost = {}   -- cost at each leaf node (using testing data)
+  local l_payout = {}   -- payout at each leaf node (using testing data)
   local l_weight = {} -- weight at each leaf node (using testing data)
-  calc_cost(D, l_cost, l_weight)
+  calc_payout(D, l_payout, l_weight)
 
-  assert(#l_cost > 0)
+  assert(#l_payout > 0)
   assert(#l_weight > 0)
-  assert(#l_cost == #l_weight)
+  assert(#l_payout == #l_weight)
 
-  -- calculate total cost
-  local total_cost = 0
+  -- calculate total payout
+  local total_payout = 0
   local total_weight = 0
   for i = 1, #l_weight do
-    total_cost = ( total_cost + ( l_weight[i] * l_cost[i] ) )
+    total_payout = ( total_payout + ( l_weight[i] * l_payout[i] ) )
     total_weight = ( total_weight + l_weight[i] )
   end
-  return ( total_cost / total_weight )
+  return ( total_payout / total_weight )
 end
 
 
