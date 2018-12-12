@@ -20,21 +20,19 @@ tests.t1 = function()
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
   local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 
-
   local features_list = { "id", "diagnosis", "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean","compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst","texture_worst", "perimeter_worst", "area_worst", "smoothness_worst","compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst", "fractal_dimension_worst" }
 
   local goal_feature = "diagnosis"
 
-  -- getting the correct sequence of the feature_list
-  features_list = load_csv_col_seq(features_list, goal_feature)
   -- converting sklearn gini graphviz to q dt
-  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list)
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list, goal_feature)
 
   -- perform the preprocess activity
   -- initializes n_H1 and n_T1 to zero
   preprocess_dt(tree)
 
   -- printing the decision tree in gini graphviz format
+  features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_accuracy_dt.txt"
   local f = io.open(file_name, "w")
   f:write("digraph Tree {\n")

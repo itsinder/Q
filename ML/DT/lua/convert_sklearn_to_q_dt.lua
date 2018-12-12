@@ -1,5 +1,6 @@
 local plstring = require 'pl.stringx'
 local utils = require 'Q/UTILS/lua/utils'
+local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 local plpath = require 'pl.path'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local path_to_here = Q_SRC_ROOT .. "/ML/DT/lua/"
@@ -172,7 +173,10 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
   end 
 end
 
-local function convert_sklearn_to_q(file, feature_list)
+local function convert_sklearn_to_q(file, feature_list, goal_feature)
+  -- getting the correct sequence of the feature_list
+  feature_list = load_csv_col_seq(feature_list, goal_feature)
+
   local lines_tbl = lines_from_file(file)
   assert(type(lines_tbl) == "table")
   local D = {}
