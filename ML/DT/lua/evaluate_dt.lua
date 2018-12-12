@@ -23,7 +23,7 @@ local function calc_payout(
 
   local payout = (n_H_test * (p_H - p_T)) + (n_T_test * (p_T - p_H))
 
-  l_payout[#l_payout+1]     = payout
+  l_payout[#l_payout+1] = payout
   l_weight[#l_weight+1] = n_test
 
   D.payout = payout
@@ -48,10 +48,11 @@ local function evaluate_dt(
   local total_payout = 0
   local total_weight = 0
   for i = 1, #l_weight do
-    total_payout = ( total_payout + ( l_weight[i] * l_payout[i] ) )
-    total_weight = ( total_weight + l_weight[i] )
+    total_payout = total_payout + l_payout[i]
+    total_weight = total_weight + l_weight[i]
   end
-  return ( total_payout / total_weight )
+  local avg_payout = total_payout / total_weight;
+  return avg_payout
 end
 
 

@@ -58,10 +58,9 @@ local function run_dt(args)
 
   local split_ratio = 0.7
   if args.split_ratio then
-    assert(type(args.split_ratio) == "number")
-    assert(args.split_ratio < 1 and args.split_ratio > 0)
     split_ratio = args.split_ratio
   end
+  assert(type(split_ratio) == "number")
   assert(split_ratio < 1 and split_ratio > 0)
 
   local feature_of_interest
@@ -196,9 +195,8 @@ local function run_dt(args)
       c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
 
       -- calculate dt cost
-      local g, c = evaluate_dt(tree, g_train)
-      gain[#gain+1] = g
-      cost[#cost+1] = c
+      local avg_payout = evaluate_dt(tree, g_train)
+      payout[#gain+1] = avg_payout
 
       -- print decision tree
       if is_first then
@@ -221,11 +219,8 @@ local function run_dt(args)
       f1_score[#f1_score + 1] = report["f1_score"]
       mcc[#mcc + 1] = report["mcc"]
     end
-    alpha_gain[cur_alpha] = ml_utils.average_score(gain)
-    gain_std_deviation[cur_alpha] = ml_utils.std_deviation_score(gain)
-
-    alpha_cost[cur_alpha] = ml_utils.average_score(cost)
-    cost_std_deviation[cur_alpha] = ml_utils.std_deviation_score(cost)
+    alpha_payout[cur_alpha] = ml_utils.average_score(payout)
+    payout_std_deviation[cur_alpha] = ml_utils.std_deviation_score(payout)
 
     alpha_accuracy[cur_alpha] = ml_utils.average_score(accuracy)
     accuracy_std_deviation[cur_alpha] = ml_utils.std_deviation_score(accuracy)
