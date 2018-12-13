@@ -149,7 +149,8 @@ local function run_dt(args)
         for k = 1, m_test do
           x[k] = test[k]:get_one(i-1):to_num()
         end
-        local n_H, n_T = predict(tree, x)
+        local actual_val = g_test:get_one(i-1):to_num()
+        local n_H, n_T = predict(tree, x, actual_val)
         local decision
         if n_H > n_T then
           decision = HEADS
@@ -157,7 +158,7 @@ local function run_dt(args)
           decision = TAILS
         end
         predicted_values[i] = decision
-        actual_values[i]    = g_test:get_one(i-1):to_num()
+        actual_values[i]    = actual_val
       end
       metrics.payout[iter] = evaluate_dt(tree) -- calculate payout
       -- get classification_report
@@ -168,6 +169,16 @@ local function run_dt(args)
       metrics.recall[iter]     = report['recall']
       metrics.f1_score[iter]   = report['f1_score']
       metrics.mcc[iter]        = report['mcc']
+      if args.print_graphviz then
+        local file_name = tostring(cur_alpha) .. "_" .. tostring(iter) .. "_graphviz.txt"
+        local f = io.open(file_name, "w")
+        f:write("digraph Tree {\n")
+        f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
+        f:write("edge [fontname=helvetica] ;\n")
+        print_dt(tree, f, train_col_name)
+        f:write("}\n")
+        f:close()
+      end
     end
     local avg_metrics = calc_avg_metrics(metrics)
     results[alpha] = avg_metrics

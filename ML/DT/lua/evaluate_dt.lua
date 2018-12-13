@@ -24,10 +24,11 @@ local function calc_payout(
   p_T = n_T_train / n_train
 
   local payout = (n_H_test * (p_H - p_T)) + (n_T_test * (p_T - p_H))
+  --[[
   print("n_H_train/n_T_train/n_H_test/n_T_test = ", 
     n_H_train, n_T_train, n_H_test, n_T_test)
   print("payout = " .. payout .. " weight = " .. n_test)
-
+  ]]
   l_payout[#l_payout+1] = payout
   l_weight[#l_weight+1] = n_test
 

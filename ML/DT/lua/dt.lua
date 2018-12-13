@@ -157,7 +157,7 @@ local function predict(
 
   while true do
     if D.left == nil and D.right == nil then
-      if g_val == 0 then -- heads 
+      if g_val == 0 then -- tails
         D.n_T1 = D.n_T1 + 1
       else
         D.n_H1 = D.n_H1 + 1
@@ -207,7 +207,7 @@ local function print_dt(
       left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
     else
       left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
-      left_label = left_label .. "\\n" .. "cost=" .. tostring(D.left.cost) .. ", gain=" .. tostring(D.left.gain)
+      left_label = left_label .. "\\n" .. "payout=" .. tostring(D.left.payout)
       -- leaf node
     end
     left_label = left_label .. "\""
@@ -215,7 +215,7 @@ local function print_dt(
       right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
     else
       right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
-      right_label = right_label .. "\\n" .. "cost=" .. tostring(D.right.cost) .. ", gain=" .. tostring(D.right.gain)
+      right_label = right_label .. "\\n" .. "payout=" .. tostring(D.right.payout)
     end
     right_label = right_label .. "\""
     f:write(label .. " -> " .. left_label .. "\n")
