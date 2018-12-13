@@ -11,7 +11,6 @@ local predict = require 'Q/ML/DT/lua/dt'['predict']
 local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
 local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
-local print_links = require 'Q/ML/DT/lua/dt'['print_links']
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
@@ -202,7 +201,7 @@ local function run_dt(args)
         local seperator = "<br/>"
         local root_node_str = tree.node_idx ..  " [label=<" .. train_col_name[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
         f2:write(root_node_str)
-        print_links(tree, f2, train_col_name)
+        print_dt(tree, f2, train_col_name)
         f2:write("}\n")
         f2:close()
 

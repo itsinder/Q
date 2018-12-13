@@ -7,11 +7,9 @@ local tests = {}
 
 -- Dataset: b_cancer/cancer_data_test.csv
 tests.t1 = function()
-  local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
-  local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
@@ -166,11 +164,9 @@ tests.t1 = function()
 
 -- Dataset: titanic/titanic_train_test.csv
 tests.t2 = function()
-  local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
-  local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
@@ -182,16 +178,16 @@ tests.t2 = function()
   local features_list = { "PassengerId","Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked" }
   local goal_feature = "Survived"
 
-  features_list = load_csv_col_seq(features_list, goal_feature)
   -- converting sklearn gini graphviz to q dt
-  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_titanic_accuracy.txt", features_list)
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_titanic_accuracy.txt", features_list, goal_feature)
 
   -- perform the preprocess activity
   -- initializes n_H1 and n_T1 to zero
   preprocess_dt(tree)
 
   -- printing the decision tree in gini graphviz format
-  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_accuracy_dt.txt"
+  features_list = load_csv_col_seq(features_list, goal_feature)
+  local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_graphviz_accuracy_dt.txt"
   local f = io.open(file_name, "w")
   f:write("digraph Tree {\n")
   f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
@@ -232,8 +228,6 @@ tests.t2 = function()
   Test  = Q.load_csv(args.test_csv, dofile(args.meta_data_file), {is_hdr = args.is_hdr})
   local abc1, g_train, abc2, abc3, abc3 = extract_goal(Train, args.goal)
   local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  args.goal)
-  local pl_pp = require 'pl.pretty'
-  pl_pp.dump(test_col_name)
   local predicted_values = {}
   local actual_values = {}
   local accuracy = {}
@@ -326,11 +320,9 @@ tests.t2 = function()
 
 -- Dataset: from_ramesh/ds1_11709_13248_test.csv
 tests.t3 = function()
-  local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
-  local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
@@ -342,16 +334,15 @@ tests.t3 = function()
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
 
-  features_list = load_csv_col_seq(features_list, goal_feature)
-
   -- converting sklearn gini graphviz to q dt
-  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_accuracy.txt", features_list)
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_accuracy.txt", features_list, goal_feature)
 
   -- perform the preprocess activity
   -- initializes n_H1 and n_T1 to zero
   preprocess_dt(tree)
 
   -- printing the decision tree in gini graphviz format
+  features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t3_imported_graphviz_dt.txt"
   local f = io.open(file_name, "w")
   f:write("digraph Tree {\n")
@@ -484,11 +475,9 @@ end
 
 -- Dataset: from_ramesh/ds2_11720_7137_test.csv
 tests.t4 = function()
-  local sklearn_to_q_dt = require "Q/ML/DT/lua/sklearn_to_q_dt"
   local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
   local predict = require 'Q/ML/DT/lua/dt'['predict']
   local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
-  local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
   local node_count = require 'Q/ML/DT/lua/dt'['node_count']
   local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
   local write_to_csv = require 'Q/ML/DT/lua/write_to_csv_1'
@@ -500,16 +489,15 @@ tests.t4 = function()
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
 
-  features_list = load_csv_col_seq(features_list, goal_feature)
-
   -- converting sklearn gini graphviz to q dt
-  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_category2_f1.txt", features_list)
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT.."/ML/DT/python/best_fit_graphviz_ramesh_category2_f1.txt", features_list, goal_feature)
 
   -- perform the preprocess activity
   -- initializes n_H1 and n_T1 to zero
   preprocess_dt(tree)
 
   -- printing the decision tree in gini graphviz format
+  features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t4_imported_graphviz_f1_dt.txt"
   local f = io.open(file_name, "w")
   f:write("digraph Tree {\n")
