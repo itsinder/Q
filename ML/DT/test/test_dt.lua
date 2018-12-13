@@ -19,8 +19,14 @@ tests.t1 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result = run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do 
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -36,7 +42,6 @@ tests.t1 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t2 = function()

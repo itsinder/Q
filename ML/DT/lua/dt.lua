@@ -143,17 +143,21 @@ local function check_dt(
 end
 
 
+-- This function does the following:
+-- It finds the leaf to which the instance, x, is assigned.
+-- It updates n_H1 and n_T1 for that leaf
+-- It returns n_H/n_T for that leaf
 local function predict(
   D,    -- prepared decision tree
-  x,    -- a table with test features
-  g_val -- goal value for test sample
+  x,    -- a table of numbers, indexed by feature
+  g_val -- a number, representing goal value 
   )
   assert(type(D) == 'table')
   assert(type(x) == 'table')
 
   while true do
     if D.left == nil and D.right == nil then
-      if g_val == 0 then
+      if g_val == 0 then -- heads 
         D.n_T1 = D.n_T1 + 1
       else
         D.n_H1 = D.n_H1 + 1
@@ -173,6 +177,8 @@ local function predict(
 end
 
 
+-- n_H1 is the number of heads in test data set at a given leaf
+-- n_T1 is the number of tails in test data set at a given leaf
 -- set n_H1 and n_T1 at each leaf node to zero
 local function preprocess_dt(
   D     -- prepared decision tree
@@ -185,7 +191,6 @@ local function preprocess_dt(
     D.n_T1 = 0
   end
 end
-
 
 local function print_dt(
   D,            -- prepared decision tree

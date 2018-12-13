@@ -12,6 +12,27 @@ local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
 local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 
+local function init_metrics()
+  local metrics = {}
+  metrics.accuracy  = {}
+  metrics.precision = {}
+  metrics.recall    = {}
+  metrics.f1_score  = {}
+  metrics.mcc       = {}
+  metrics.payout    = {}
+  return metrics
+end
+local function  calc_avg_metrics(metrics)
+  local out_metrics = {}
+  -- calculate avg and standard deviation for each metric 
+  for k, v in pairs(metrics) do 
+    out_metrics[k] = {}
+    local stats = {}
+    out_metrics[k].avg = ml_utils.average_score(v)
+    out_metrics[k].sd  = ml_utils.std_deviation_score(v)
+  end
+  return out_metrics
+end
 
 local function run_dt(args)
   local meta_data_file	= assert(args.meta_data_file)
@@ -75,56 +96,35 @@ local function run_dt(args)
     T = Q.load_csv(data_file, dofile(meta_data_file), { is_hdr = args.is_hdr })
   end
 
-  local alpha_gain = {}
-  local alpha_cost = {}
-  local alpha_accuracy = {}
-  local alpha_precision = {}
-  local alpha_recall = {}
-  local alpha_f1_score = {}
-  local alpha_c_d_score = {}
-  local alpha_n_nodes = {}
-  local alpha_mcc = {}
-  local accuracy_std_deviation = {}
-  local gain_std_deviation = {}
-  local cost_std_deviation = {}
-  local precision_std_deviation = {}
-  local recall_std_deviation = {}
-  local f1_score_std_deviation = {}
-  local c_d_score_std_deviation = {}
-
   -- start iterating over range of alpha values
+  local results = {}
   while min_alpha <= max_alpha do
-    local gain = {}
-    local cost = {}
-    local accuracy = {}
-    local precision = {}
-    local recall = {}
-    local f1_score = {}
-    local c_d_score = {}
-    local n_nodes = {}
-    local mcc = {}
-    local is_first = true
-
+    local   is_first = true
     -- convert scalar to number for alpha value, avoid extra decimals
     local cur_alpha = utils.round_num(min_alpha:to_num(), 2)
 
-    for i = 1, iterations do
-      local credit_val = 0
-      local debit_val = 0
-
+    local metrics = init_metrics ()
+    for iter = 1, iterations do
       -- break into a training set and a testing set
       local Train, Test
       if T then
-        Train, Test = split_train_test(T, split_ratio, feature_of_interest, i*100) -- i*100 is a seed value
+        local seed = iter * 100
+        Train, Test = split_train_test(T, split_ratio, 
+          feature_of_interest, seed)
       else
         assert(args.train_csv)
         assert(args.test_csv)
-        Train = Q.load_csv(args.train_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
-        Test = Q.load_csv(args.test_csv, dofile(meta_data_file), { is_hdr = args.is_hdr })
+        Train = Q.load_csv(args.train_csv, dofile(meta_data_file), 
+          { is_hdr = args.is_hdr })
+        Test = Q.load_csv(args.test_csv, dofile(meta_data_file), 
+          { is_hdr = args.is_hdr })
       end
 
-      local train, g_train, m_train, n_train, train_col_name = extract_goal(Train, goal)
-      local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  goal)
+      local train, g_train, m_train, n_train, train_col_name = 
+        extract_goal(Train, goal)
+      local test,  g_test,  m_test,  n_test, test_col_name  = 
+        extract_goal(Test,  goal)
+      assert(m_train == m_test)
 
       -- Current implementation assumes 2 values of goal as 0, 1
       local min_g, _ = Q.min(g_train):eval()
@@ -133,23 +133,17 @@ local function run_dt(args)
       assert(max_g:to_num() == 1)
 
       local predicted_values = {}
-      local actual_values = {}
+      local actual_values    = {}
 
       -- prepare decision tree
-      local tree = make_dt(train, g_train, min_alpha, 
-        args.min_to_split, args.wt_prior)
-      assert(tree)
-
-      -- verify the decision tree
+      local tree = assert(make_dt(train, g_train, min_alpha, 
+        args.min_to_split, args.wt_prior))
       check_dt(tree)
-
       --============== Decision Tree Cost Evaluation ==============
-
-      -- perform the preprocess activity
-      -- initializes n_H1 and n_T1 to zero
-      preprocess_dt(tree)
-
+      preprocess_dt(tree) -- initializes n_H1 and n_T1 to zero at leaves
       -- predict for test samples
+      local TAILS = 0
+      local HEADS = 1
       for i = 1, n_test do
         local x = {}
         for k = 1, m_test do
@@ -158,46 +152,32 @@ local function run_dt(args)
         local n_H, n_T = predict(tree, x)
         local decision
         if n_H > n_T then
-          decision = 1 
+          decision = HEADS
         else
-          decision = 0
+          decision = TAILS
         end
         predicted_values[i] = decision
-        actual_values[i] = g_test:get_one(i-1):to_num()
-
-        -- Calculate the credit and debit value
-        n_H_prob = ( n_H / ( n_H + n_T ) )
-        n_T_prob = ( n_T / ( n_H + n_T ) )
-        if predicted_values[i] == 1 then
-          if actual_values[i] == predicted_values[i] then
-            credit_val = credit_val + n_H_prob
-            debit_val = debit_val + n_T_prob
-          else
-            credit_val = credit_val + n_T_prob
-            debit_val = debit_val + n_H_prob
-          end
-        else
-          if actual_values[i] == predicted_values[i] then
-            credit_val = credit_val + n_T_prob
-            debit_val = debit_val + n_H_prob
-          else
-            credit_val = credit_val + n_H_prob
-            debit_val = debit_val + n_T_prob
-          end
-        end
+        actual_values[i]    = g_test:get_one(i-1):to_num()
       end
+      metrics.payout[iter] = evaluate_dt(tree) -- calculate payout
+      -- get classification_report
+      local report = ml_utils.classification_report(
+        actual_values, predicted_values)
+      metrics.accuracy[iter]   = report['accuracy']
+      metrics.precision[iter]  = report['precision']
+      metrics.recall[iter]     = report['recall']
+      metrics.f1_score[iter]   = report['f1_score']
+      metrics.mcc[iter]        = report['mcc']
+    end
+    local avg_metrics = calc_avg_metrics(metrics)
+    results[alpha] = avg_metrics
+    min_alpha = min_alpha + step_alpha
+  end
+  return results
+end
 
-      -- get node count
-      local n_count = node_count(tree)
-      n_nodes[#n_nodes+1] = n_count
-
-      -- calculate credit-debit score
-      c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
-
-      -- calculate dt cost
-      local avg_payout = evaluate_dt(tree, g_train)
-      payout[#gain+1] = avg_payout
-
+return run_dt
+--[[
       -- print decision tree
       if is_first then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
@@ -210,58 +190,4 @@ local function run_dt(args)
         f:close()
         is_first = false
       end
-
-      -- get classification_report
-      local report = ml_utils.classification_report(actual_values, predicted_values)
-      accuracy[#accuracy + 1] = report["accuracy_score"]
-      precision[#precision + 1] = report["precision_score"]
-      recall[#recall + 1] = report["recall_score"]
-      f1_score[#f1_score + 1] = report["f1_score"]
-      mcc[#mcc + 1] = report["mcc"]
-    end
-    alpha_payout[cur_alpha] = ml_utils.average_score(payout)
-    payout_std_deviation[cur_alpha] = ml_utils.std_deviation_score(payout)
-
-    alpha_accuracy[cur_alpha] = ml_utils.average_score(accuracy)
-    accuracy_std_deviation[cur_alpha] = ml_utils.std_deviation_score(accuracy)
-
-    alpha_precision[cur_alpha] = ml_utils.average_score(precision)
-    precision_std_deviation[cur_alpha] = ml_utils.std_deviation_score(precision)
-
-    alpha_recall[cur_alpha] = ml_utils.average_score(recall)
-    recall_std_deviation[cur_alpha] = ml_utils.std_deviation_score(recall)
-
-    alpha_f1_score[cur_alpha] = ml_utils.average_score(f1_score)
-    f1_score_std_deviation[cur_alpha] = ml_utils.std_deviation_score(f1_score)
-
-    alpha_c_d_score[cur_alpha] = ml_utils.average_score(c_d_score)
-    c_d_score_std_deviation[cur_alpha] = ml_utils.std_deviation_score(c_d_score)
-
-    alpha_n_nodes[cur_alpha] = ml_utils.average_score(n_nodes)
-    alpha_mcc[cur_alpha] = ml_utils.average_score(mcc)
-
-    min_alpha = min_alpha + step_alpha
-  end
-
-  local result = {}
-  result['accuracy'] = alpha_accuracy
-  result['gain'] = alpha_gain
-  result['cost'] = alpha_cost
-  result['accuracy_std_deviation'] = accuracy_std_deviation
-  result['gain_std_deviation'] = gain_std_deviation
-  result['cost_std_deviation'] = cost_std_deviation
-  result['precision'] = alpha_precision
-  result['recall'] = alpha_recall
-  result['f1_score'] = alpha_f1_score
-  result['precision_std_deviation'] = precision_std_deviation
-  result['recall_std_deviation'] = recall_std_deviation
-  result['f1_score_std_deviation'] = f1_score_std_deviation
-  result['c_d_score'] = alpha_c_d_score
-  result['c_d_score_std_deviation'] = c_d_score_std_deviation
-  result['n_nodes'] = alpha_n_nodes
-  result['mcc'] = alpha_mcc
-
-  return result
-end
-
-return run_dt
+--]]
