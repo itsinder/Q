@@ -15,6 +15,7 @@ tests.t1 = function()
   local goal_feature = "diagnosis"
   -- converting sklearn gini graphviz to q dt
   local tree = convert_sklearn_to_q(path_to_here .. "sklearn_gini_graphviz.txt", feature_list, goal_feature)
+  assert(type(tree) == "table", "q dt not created")
   
   -- perform the preprocess activity
   -- initializes n_H1 and n_T1 to zero
@@ -33,7 +34,8 @@ tests.t1 = function()
   print_dt(tree, f, feature_list)
   f:write("}\n")
   f:close()
-
+  print("Q graphviz written to :" .. path_to_here .. "/output_q_format_graphviz.txt")
+  print("Successfully completed test t1")
 end
 
 return tests
