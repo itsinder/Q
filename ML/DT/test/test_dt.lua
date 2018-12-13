@@ -56,6 +56,7 @@ tests.t2 = function()
   args.goal = "diagnosis"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
   args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,

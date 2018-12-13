@@ -25,9 +25,8 @@ end
 local function  calc_avg_metrics(metrics)
   local out_metrics = {}
   -- calculate avg and standard deviation for each metric 
-  for k, v in pairs(metrics) do 
+  for k, v in pairs(metrics) do
     out_metrics[k] = {}
-    local stats = {}
     out_metrics[k].avg = ml_utils.average_score(v)
     out_metrics[k].sd  = ml_utils.std_deviation_score(v)
   end
@@ -181,24 +180,10 @@ local function run_dt(args)
       end
     end
     local avg_metrics = calc_avg_metrics(metrics)
-    results[alpha] = avg_metrics
+    results[cur_alpha] = avg_metrics
     min_alpha = min_alpha + step_alpha
   end
   return results
 end
 
 return run_dt
---[[
-      -- print decision tree
-      if is_first then
-        local file_name = tostring(cur_alpha) .. "_" .. tostring(i) .. "_graphviz.txt"
-        local f = io.open(file_name, "w")
-        f:write("digraph Tree {\n")
-        f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-        f:write("edge [fontname=helvetica] ;\n")
-        print_dt(tree, f, train_col_name)
-        f:write("}\n")
-        f:close()
-        is_first = false
-      end
---]]
