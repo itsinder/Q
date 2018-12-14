@@ -5,6 +5,7 @@ local path_to_here = os.getenv("Q_SRC_ROOT") .. "/ML/DT/test/"
 assert(plpath.isdir(path_to_here))
 local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
+local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
 local tests = {}
 
@@ -21,19 +22,12 @@ tests.t1 = function()
   -- initializes n_H1 and n_T1 to zero
   preprocess_dt(tree)
   
-  -- printing the decision tree in gini graphviz format
   feature_list = load_csv_col_seq(feature_list, goal_feature)
+
+  -- printing the decision tree in gini graphviz format
   local file_name = path_to_here .. "/output_q_format_graphviz.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. feature_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, feature_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree, feature_list)
+
   print("Q graphviz written to :" .. path_to_here .. "/output_q_format_graphviz.txt")
   print("Successfully completed test t1")
 end

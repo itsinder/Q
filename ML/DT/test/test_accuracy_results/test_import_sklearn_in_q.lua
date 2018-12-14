@@ -16,7 +16,7 @@ tests.t1 = function()
   local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
   local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
-  local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
+  local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
   local features_list = { "id", "diagnosis", "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean","compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst","texture_worst", "perimeter_worst", "area_worst", "smoothness_worst","compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst", "fractal_dimension_worst" }
 
@@ -32,16 +32,7 @@ tests.t1 = function()
   -- printing the decision tree in gini graphviz format
   features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t1_imported_graphviz_accuracy_dt.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, features_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree, features_list)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -68,9 +59,9 @@ tests.t1 = function()
   local Train, Test
   assert(args.test_csv)
   assert(args.meta_data_file)
-  Train = Q.load_csv(args.train_csv, dofile(args.meta_data_file), {is_hdr = args.is_hdr})
+  -- Train = Q.load_csv(args.train_csv, dofile(args.meta_data_file), {is_hdr = args.is_hdr})
   Test  = Q.load_csv(args.test_csv, dofile(args.meta_data_file), {is_hdr = args.is_hdr})
-  local abc1, g_train, abc2, abc3, abc3 = extract_goal(Train, args.goal)
+  -- local abc1, g_train, abc2, abc3, abc3 = extract_goal(Train, args.goal)
   local test,  g_test,  m_test,  n_test, test_col_name  = extract_goal(Test,  args.goal)
   local predicted_values = {}
   local actual_values = {}
@@ -79,10 +70,11 @@ tests.t1 = function()
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
+    local actual_value = g_test:get_one(i-1):to_num()
     for k = 1, m_test do
       x[k] = test[k]:get_one(i-1):to_num()
     end
-    local n_H, n_T = predict(args.tree, x)
+    local n_H, n_T = predict(args.tree, x, actual_value )
     n_H = n_H
     n_T = n_T
     local decision
@@ -92,73 +84,20 @@ tests.t1 = function()
       decision = 0
     end
     predicted_values[i] = decision
-    actual_values[i] = g_test:get_one(i-1):to_num()
-    --print(( n_H / ( n_H + n_T ) ))
-    -- Calculate the credit and debit value
-    n_H_prob = ( n_H / ( n_H + n_T ) )
-    n_T_prob = ( n_T / ( n_H + n_T ) )
-    --print(n_H_prob, n_T_prob)
-    if predicted_values[i] == 1 then
-      if actual_values[i] == predicted_values[i] then
-        credit_val = credit_val + n_H_prob
-        debit_val = debit_val + n_T_prob
-      else
-        credit_val = credit_val + n_T_prob
-        debit_val = debit_val + n_H_prob
-      end
-    else
-      if actual_values[i] == predicted_values[i] then
-        credit_val = credit_val + n_T_prob
-        debit_val = debit_val + n_H_prob
-      else
-        credit_val = credit_val + n_H_prob
-        debit_val = debit_val + n_T_prob
-      end
-    end
+    actual_values[i] = actual_value
   end
 
-  -- get node count
-  local n_count = node_count(args.tree)
-  n_nodes[#n_nodes+1] = n_count
-
-  -- calculate credit-debit score
-  c_d_score[#c_d_score+1] = ( credit_val - debit_val ) / n_test
-
   -- calculate dt cost
-  local g, c = evaluate_dt(args.tree, g_train)
-  gain[#gain+1] = g
-  cost[#cost+1] = c
+  local payout = evaluate_dt(args.tree)
 
   -- get classification_report
   local report = ml_utils.classification_report(actual_values, predicted_values)
-  accuracy[#accuracy + 1] = report["accuracy_score"]
-  precision[#precision + 1] = report["precision_score"]
-  recall[#recall + 1] = report["recall_score"]
-  f1_score[#f1_score + 1] = report["f1_score"]
-  mcc[#mcc + 1] = report["mcc"]
-
-  local result = {}
-  result['accuracy'] = ml_utils.average_score(accuracy)
-  result['gain'] = ml_utils.average_score(gain)
-  result['cost'] = ml_utils.average_score(cost)
-  result['accuracy_std_deviation'] = ml_utils.std_deviation_score(accuracy)
-  result['gain_std_deviation'] = ml_utils.std_deviation_score(gain)
-  result['cost_std_deviation'] = ml_utils.std_deviation_score(cost)
-  result['precision'] = ml_utils.average_score(precision)
-  result['recall'] = ml_utils.average_score(recall)
-  result['f1_score'] = ml_utils.average_score(f1_score)
-  result['precision_std_deviation'] = ml_utils.std_deviation_score(precision)
-  result['recall_std_deviation'] = ml_utils.std_deviation_score(recall)
-  result['f1_score_std_deviation'] = ml_utils.std_deviation_score(f1_score)
-  result['c_d_score'] = ml_utils.average_score(c_d_score)
-  result['c_d_score_std_deviation'] = ml_utils.std_deviation_score(c_d_score)
-  result['n_nodes'] = ml_utils.average_score(n_nodes)
-  result['mcc'] = ml_utils.average_score(mcc)
+  report.payout = payout
 
   local csv_path = Q_SRC_ROOT .."/ML/DT/test/test_accuracy_results/b_cancer_accuracy_results.csv"
   local plpretty = require 'pl.pretty'
-  plpretty.dump(result)
-  write_to_csv(result, csv_path)
+  plpretty.dump(report)
+  write_to_csv(report, csv_path)
   print("Results written to " .. csv_path)
   end
 
@@ -174,6 +113,7 @@ tests.t2 = function()
   local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
   local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
+  local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
   local features_list = { "PassengerId","Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked" }
   local goal_feature = "Survived"
@@ -188,16 +128,7 @@ tests.t2 = function()
   -- printing the decision tree in gini graphviz format
   features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t2_imported_graphviz_accuracy_dt.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, features_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree, features_list)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -330,6 +261,7 @@ tests.t3 = function()
   local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
   local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
+  local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
@@ -344,16 +276,7 @@ tests.t3 = function()
   -- printing the decision tree in gini graphviz format
   features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t3_imported_graphviz_dt.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, features_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree, features_list)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -485,6 +408,7 @@ tests.t4 = function()
   local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
   local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
   local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
+  local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
   local features_list = { "f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12","f13","f14","f15","f16","f17","class" }
   local goal_feature = "class"
@@ -499,16 +423,7 @@ tests.t4 = function()
   -- printing the decision tree in gini graphviz format
   features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = Q_SRC_ROOT .. "/ML/DT/test/test_accuracy_results/t4_imported_graphviz_f1_dt.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, features_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree, features_list)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
