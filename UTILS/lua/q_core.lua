@@ -22,7 +22,7 @@ ffi.cdef(plfile.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
-
+local libs = {}
 
 local function load_lib(hfile)
   local file = hfile
@@ -38,7 +38,8 @@ local function load_lib(hfile)
       if status then
         assert(function_lookup[function_name] == nil,
           "Library name is already declared: " .. function_name)
-        function_lookup[function_name] = q_tmp[function_name]
+        libs[function_name] = q_tmp
+        function_lookup[function_name] = libs[function_name][function_name]
       else
         print("Unable to load lib " .. so_name, q_tmp)
       end
