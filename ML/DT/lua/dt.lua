@@ -66,7 +66,7 @@ local function make_dt(
   local best_k  --- feature that yielded best benefit
   for k, f in pairs(T) do
     local bf, sf = calc_benefit(f, g, n_T, n_H, wt_prior)
-    if ( best_bf == nil ) or ( bf > best_bf ) then
+    if sf and ( ( best_bf == nil ) or ( bf > best_bf ) ) then
       best_bf = bf
       best_sf = sf
       best_k = k    
