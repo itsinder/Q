@@ -159,15 +159,15 @@ local function run_dt(args)
         predicted_values[i] = decision
         actual_values[i]    = actual_val
       end
-      metrics.payout[iter] = evaluate_dt(tree) -- calculate payout
+      metrics.payout[iter] = utils.round_num(evaluate_dt(tree), 4) -- calculate payout
       -- get classification_report
       local report = ml_utils.classification_report(
         actual_values, predicted_values)
-      metrics.accuracy[iter]   = report['accuracy']
-      metrics.precision[iter]  = report['precision']
-      metrics.recall[iter]     = report['recall']
-      metrics.f1_score[iter]   = report['f1_score']
-      metrics.mcc[iter]        = report['mcc']
+      metrics.accuracy[iter]   = utils.round_num(report['accuracy'], 4)
+      metrics.precision[iter]  = utils.round_num(report['precision'], 4)
+      metrics.recall[iter]     = utils.round_num(report['recall'], 4)
+      metrics.f1_score[iter]   = utils.round_num(report['f1_score'], 4)
+      metrics.mcc[iter]        = utils.round_num(report['mcc'], 4)
       if args.print_graphviz then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(iter) .. "_graphviz.txt"
         local f = io.open(file_name, "w")

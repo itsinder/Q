@@ -6,33 +6,43 @@ local write_to_csv = function(result, csv_file_path, sep)
   assert(csv_file_path)
   assert(type(csv_file_path) == "string")
   sep = sep or ','
-
-  local accuracy = result['accuracy']
-  local accuracy_std_deviation = result['accuracy_std_deviation']
-  local gain = result['gain']
-  local gain_std_deviation = result['gain_std_deviation']
-  local cost = result['cost']
-  local cost_std_deviation = result['cost_std_deviation']
-  local precision = result['precision']
-  local precision_std_deviation = result['precision_std_deviation']
-  local recall = result['recall']
-  local recall_std_deviation = result['recall_std_deviation']
-  local f1_score = result['f1_score']
-  local f1_score_std_deviation = result['f1_score_std_deviation']
-  local c_d_score = result['c_d_score']
-  local c_d_score_std_deviation = result['c_d_score_std_deviation']
-  local n_nodes = result['n_nodes']
-  local mcc = result['mcc']
-
   local file = assert(io.open(csv_file_path, "w"))
-
-  file:write("alpha,accuracy,precision,recall,f1_score,c_d_score,gain,cost,nodes,mcc\n")
-  for i, v in tablex.sort(accuracy) do
-    file:write(i .. "," .. accuracy[i] .. "," .. precision[i] .. "," .. recall[i] .. "," .. f1_score[i] .. "," .. c_d_score[i] .. "," .. gain[i] .. "," .. cost[i] .. "," .. n_nodes[i] .. "," .. mcc[i])
-    file:write('\n')
+  local hdr = 'alpha'
+  for k, v in pairs(result) do
+    for k1, v1 in pairs(v) do
+      hdr = hdr .. "," .. k1 .. "," .. k1 .. "_sd"
+    end
   end
-
+  file:write(hdr .. "\n")
+  for k, v in pairs(result) do
+    file:write(k)
+    for k1, v1 in pairs(v) do
+      avg_score = v1.avg
+      sd_score = v1.sd
+      file:write("," .. avg_score .. "," .. sd_score)
+    end
+    file:write("\n")
+  end
   file:close()
+  --[[
+  file:write("alpha,accuracy,precision,recall,f1_score,mcc,payout\n")
+  for i, v in tablex.sort(result) do
+    local accuracy = v.accuracy.avg
+    local accuracy_sd = v.accuracy.sd
+    local precision = v.precision.avg
+    local precision_sd = v.precision.sd
+    local recall = v.recall.avg
+    local recall_sd = v.recall.sd
+    local f1_score = v.f1_score.avg
+    local f1_score_sd = v.f1_score.sd
+    local mcc = v.mcc.avg
+    local mcc_sd = v.mcc.sd
+    local payout = v.payout.avg
+    local payout_sd = v.payout.sd
+    file:write(i .. "," .. accuracy .. "," .. precision .. "," .. recall .. "," .. f1_score .. "," .. mcc .. "," .. payout)
+  end
+  file:close()
+  ]]
 end
 
 return write_to_csv

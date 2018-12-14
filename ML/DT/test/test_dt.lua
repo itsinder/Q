@@ -2,6 +2,9 @@ local Q = require 'Q'
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
+local write_to_csv = require 'Q/ML/DT/lua/write_to_csv'
+
+
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 
 local tests = {}
@@ -77,6 +80,7 @@ tests.t2 = function()
     end
   end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
