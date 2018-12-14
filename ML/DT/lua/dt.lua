@@ -205,9 +205,8 @@ local function print_dt(
     if D.left.feature then
       condition = " [label=<" .. col_name[D.left.feature] .. " &le; " .. D.left.threshold .. seperator .. "benefit = " .. D.left.benefit .. seperator
     else
-      left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
-      left_label = left_label .. "\\n" .. "payout=" .. tostring(D.left.payout)
       -- leaf node
+      condition = " [label=<" .. "n_T1 =" .. tostring(D.left.n_T1) .. seperator .. "n_H1 = " .. tostring(D.left.n_H1) .. seperator .. "payout = " .. tostring(D.left.payout) .. seperator
     end
     local str = D.left.node_idx .. condition .. "value = [" .. tostring(D.left.n_T) ..", " .. tostring(D.left.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
 
@@ -220,8 +219,8 @@ local function print_dt(
     if D.right.feature then
       condition = " [label=<" .. col_name[D.right.feature] .. " &le; " .. D.right.threshold .. seperator .. "benefit = " .. D.right.benefit .. seperator
     else
-      right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
-      right_label = right_label .. "\\n" .. "payout=" .. tostring(D.right.payout)
+      -- leaf node
+      condition = " [label=<" .. "n_T1 =" .. tostring(D.right.n_T1) .. seperator .. "n_H1 = " .. tostring(D.right.n_H1) .. seperator .. "payout = " .. tostring(D.right.payout) .. seperator
     end
 
     local str = D.right.node_idx .. condition .. "value = [" .. tostring(D.right.n_T) ..", " .. tostring(D.right.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
