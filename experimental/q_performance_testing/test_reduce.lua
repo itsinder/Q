@@ -2,7 +2,7 @@ local Q = require 'Q'
 local Vector = require 'libvec'
 local file_name = "profile_result.txt"
 
-local n = 1*1048576
+local n = 128*1048576
 
 -- Q.save()
 -- os.exit()

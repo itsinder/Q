@@ -1,7 +1,6 @@
 local Q = require 'Q'
 local wt_benefit = require 'Q/ML/DT/lua/wt_benefit'
 
-
 --[[
 variable explanation
 f	- feature vector (type lVector)
@@ -13,13 +12,14 @@ local function calc_benefit(
   f,
   g,
   n_T,
-  n_H
+  n_H,
+  wt_prior
   )
   -- START: Check parameters
-  --assert(type(n_T) == "Scalar")
-  --assert(type(n_H) == "Scalar")
-  assert(n_T >= 0)
-  assert(n_H >= 0)
+  assert(( type(n_T) == "Scalar") or ( type(n_T) == "number"))
+  assert(( type(n_H) == "Scalar") or ( type(n_H) == "number"))
+  assert(n_T > 0) -- changed check from >= 0 to > 0
+  assert(n_H > 0) -- changed check from >= 0 to > 0
   assert(type(g) == "lVector")
   assert(type(f) == "lVector")
   -- STOP: Check parameters
@@ -32,6 +32,7 @@ local function calc_benefit(
   return b', f[i]
   ]]
 
+  local n = n_H + n_T
   local benefit = -math.huge
   local split_point = nil
 
@@ -40,13 +41,14 @@ local function calc_benefit(
   local f_clone = f:clone()
   local g_clone = g:clone()
   Q.sort2(f_clone, g_clone, 'asc')
+  assert(f_clone:length() == n_T + n_H)
+  assert(g_clone:length() == n_T + n_H)
 
   -- counters for goal values
   local C = {}
   C[0] = 0
   C[1] = 0
 
-  local n = (n_T + n_H)
   local i = 0
 
   while i < n do
@@ -63,13 +65,17 @@ local function calc_benefit(
       C[gi_val] = C[gi_val] + 1
       i = i + 1
     end
-    local f_val_benefit = wt_benefit(C[0], C[1], (n_T - C[0]), (n_H - C[1]))
+    local f_val_benefit = wt_benefit(
+      C[0], C[1], (n_T - C[0]), (n_H - C[1]), wt_prior)
     if f_val_benefit > benefit then
       benefit = f_val_benefit
       split_point = f_val
     end
   end
+  assert(split_point) -- should be defined by now
+  assert(benefit ~= -math.huge) -- should be defined by now
+  f_clone:delete() -- explicit deletion
+  g_clone:delete() -- explicit deletion
   return benefit, split_point
 end
-
 return calc_benefit

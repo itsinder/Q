@@ -51,8 +51,6 @@ uint64_t t_memset;            static uint32_t n_memset;
 //-- for memory allocation
 uint64_t t_malloc;            static uint32_t n_malloc;
 
-extern luaL_Buffer g_errbuf;
-
 static inline void 
 l_memcpy(
     void *dest,
@@ -357,8 +355,6 @@ vec_materialized(
     )
 {
   int status = 0;
-  // Sample error luaL_addstring(&g_errbuf, "hello world"); 
-
   if ( ptr_vec == NULL ) { go_BYE(-1); }
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
   if ( strlen(file_name) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }

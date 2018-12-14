@@ -19,8 +19,14 @@ tests.t1 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do 
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -36,7 +42,6 @@ tests.t1 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t2 = function()
@@ -51,6 +56,8 @@ tests.t2 = function()
   args.goal = "diagnosis"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -59,11 +66,16 @@ tests.t2 = function()
   args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_train.csv"
   args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_test.csv"
   ]]
-
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -79,7 +91,6 @@ tests.t2 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t3 = function()
