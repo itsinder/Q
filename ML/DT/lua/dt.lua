@@ -192,55 +192,9 @@ local function preprocess_dt(
   end
 end
 
-local function print_dt(
-  D,            -- prepared decision tree
-  f,            -- file_descriptor
-  col_name      -- table of column names of train dataset
-  )
--- Preorder
-  local seperator = "<br/>"
-  local label = D.node_idx
-  if D.left then
-    local condition
-    if D.left.feature then
-      condition = " [label=<" .. col_name[D.left.feature] .. " &le; " .. D.left.threshold .. seperator .. "benefit = " .. D.left.benefit .. seperator
-    else
-      -- leaf node
-      condition = " [label=<" .. "n_T1 =" .. tostring(D.left.n_T1) .. seperator .. "n_H1 = " .. tostring(D.left.n_H1) .. seperator .. "payout = " .. tostring(D.left.payout) .. seperator
-    end
-    local str = D.left.node_idx .. condition .. "value = [" .. tostring(D.left.n_T) ..", " .. tostring(D.left.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
-
-    f:write(str .. "\n")
-    f:write(label .. " -> " .. D.left.node_idx .. " ;\n")
-    print_dt(D.left, f, col_name)
-  end
-  if D.right then
-    local condition
-    if D.right.feature then
-      condition = " [label=<" .. col_name[D.right.feature] .. " &le; " .. D.right.threshold .. seperator .. "benefit = " .. D.right.benefit .. seperator
-    else
-      -- leaf node
-      condition = " [label=<" .. "n_T1 =" .. tostring(D.right.n_T1) .. seperator .. "n_H1 = " .. tostring(D.right.n_H1) .. seperator .. "payout = " .. tostring(D.right.payout) .. seperator
-    end
-
-    local str = D.right.node_idx .. condition .. "value = [" .. tostring(D.right.n_T) ..", " .. tostring(D.right.n_H) .."]>,fillcolor=\"#e5813963\"] ;"
-    f:write(str .. "\n")
-    f:write(label .. " -> " .. D.right.node_idx .." ;\n")
-    print_dt(D.right, f, col_name)
-  end
-
---  Inorder
---  if D.left then print_links(D.left) end
---  local label = D.node_idx
---  print(label)
---  if D.right then print_links(D.right) end
-end
-
-
 dt.make_dt = make_dt
 dt.predict = predict
 dt.check_dt = check_dt
-dt.print_dt = print_dt
 dt.node_count = node_count
 dt.preprocess_dt = preprocess_dt
 

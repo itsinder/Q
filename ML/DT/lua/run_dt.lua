@@ -11,6 +11,7 @@ local predict = require 'Q/ML/DT/lua/dt'['predict']
 local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
 local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 
 local function init_metrics()
   local metrics = {}
@@ -170,17 +171,7 @@ local function run_dt(args)
       metrics.mcc[iter]        = utils.round_num(report['mcc'], 4)
       if args.print_graphviz then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(iter) .. "_graphviz.txt"
-        local f = io.open(file_name, "w")
-        f:write("digraph Tree {\n")
-        f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-        f:write("edge [fontname=helvetica] ;\n")
-        local seperator = "<br/>"
-        local root_node_str = tree.node_idx ..  " [label=<" .. train_col_name[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-        f:write(root_node_str)
-
-        print_dt(tree, f, train_col_name)
-        f:write("}\n")
-        f:close()
+        export_to_graphviz(file_name, tree, train_col_name)
       end
     end
     local avg_metrics = calc_avg_metrics(metrics)
