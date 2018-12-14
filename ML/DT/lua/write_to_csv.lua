@@ -12,9 +12,10 @@ local write_to_csv = function(result, csv_file_path, sep)
     for k1, v1 in pairs(v) do
       hdr = hdr .. "," .. k1 .. "," .. k1 .. "_sd"
     end
+    break
   end
   file:write(hdr .. "\n")
-  for k, v in pairs(result) do
+  for k, v in tablex.sort(result) do
     file:write(k)
     for k1, v1 in pairs(v) do
       avg_score = v1.avg
