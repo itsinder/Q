@@ -24,25 +24,6 @@ local write_to_csv = function(result, csv_file_path, sep)
     file:write("\n")
   end
   file:close()
-  --[[
-  file:write("alpha,accuracy,precision,recall,f1_score,mcc,payout\n")
-  for i, v in tablex.sort(result) do
-    local accuracy = v.accuracy.avg
-    local accuracy_sd = v.accuracy.sd
-    local precision = v.precision.avg
-    local precision_sd = v.precision.sd
-    local recall = v.recall.avg
-    local recall_sd = v.recall.sd
-    local f1_score = v.f1_score.avg
-    local f1_score_sd = v.f1_score.sd
-    local mcc = v.mcc.avg
-    local mcc_sd = v.mcc.sd
-    local payout = v.payout.avg
-    local payout_sd = v.payout.sd
-    file:write(i .. "," .. accuracy .. "," .. precision .. "," .. recall .. "," .. f1_score .. "," .. mcc .. "," .. payout)
-  end
-  file:close()
-  ]]
 end
 
 return write_to_csv
