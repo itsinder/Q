@@ -10,7 +10,7 @@ local write_to_csv = function(result, csv_file_path, sep)
   
   local file = assert(io.open(csv_file_path, "w"))
 
-  local required_param = {"f1_score","nodes","precision","recall","mcc","c_d_score","accuracy","gain","cost", "nodes"}
+  local required_param = {"f1_score","accuracy","mcc","precision","payout", "recall"}
   local tbl = {}
   for i, v in pairs(result) do
     if utils["table_find"](required_param, i) ~= nil then 
@@ -19,13 +19,22 @@ local write_to_csv = function(result, csv_file_path, sep)
   end
   --local plpretty = require "pl.pretty"
   --plpretty.dump(tbl)
-  
-  --file:write("alpha,accuracy,precision,recall,f1_score,c_d_score,gain,cost,nodes,mcc\n")
-  file:write("cost,c_d_score,f1_score,accuracy,mcc,precision,gain,recall\n")
+
+  local col_name = ""
+  local value_row = ""
+  local first_value = true
   for i,v in pairs(tbl) do
-    file:write(v)
-    file:write(',')
+    if first_value then
+      col_name = i
+      value_row = v
+      first_value = false
+    else
+      col_name = col_name .. "," .. i
+      value_row = value_row .. "," .. v
+    end
   end
+  file:write(col_name .. "\n")
+  file:write(value_row .. "\n")
 
   file:close()
 end
