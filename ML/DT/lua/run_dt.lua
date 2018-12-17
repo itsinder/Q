@@ -132,7 +132,7 @@ local function run_dt(args)
 
       -- prepare decision tree model
       local tree = assert(make_dt(train, g_train, min_alpha, 
-        args.min_to_split, args.wt_prior))
+        args.min_to_split, train_col_name, args.wt_prior))
 
       -- evaluate model for test samples
       metrics = eval_mdl(tree, Test, goal, metrics)
@@ -140,7 +140,7 @@ local function run_dt(args)
       -- print graphviz
       if args.print_graphviz and iter == 1 then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(iter) .. "_graphviz.txt"
-        export_to_graphviz(file_name, tree, train_col_name)
+        export_to_graphviz(file_name, tree)
       end
     end
     local avg_metrics = calc_avg_metrics(metrics)

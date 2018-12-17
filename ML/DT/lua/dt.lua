@@ -23,17 +23,19 @@ D	- Decision Tree Table having below fields
   n_T,		-- number of negative (tails) instances
   n_H,		-- number of positive (heads) instances
   feature,	-- feature index for the split
+  feature_name  -- name of the feature selected as split point
   threshold,	-- feature point/value for the split
   left,		-- left decision tree
   right 	-- right decision tree
 }
 ]]
 local node_idx = 0 -- node indexing
-local function make_dt(
+local function prepare_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
   alpha, -- Scalar, minimum benefit
   min_to_split,
+  col_names,
   wt_prior
   )
   local m, n, ng = chk_params(T, g, alpha)
@@ -45,7 +47,10 @@ local function make_dt(
   else
     assert(type(min_to_split) == "number")
     assert(min_to_split > 2)
-  end 
+  end
+
+  assert(col_names)
+  assert(type(col_names) == "table")
 
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
@@ -95,20 +100,56 @@ local function make_dt(
     local T_L = {}
     local T_R = {}
     D.feature   = best_k
+    D.feature_name = col_names[best_k]
     D.threshold = best_sf
     D.benefit   = best_bf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x):eval()
     end
     g_L = Q.where(g, x):eval()
-    D.left  = make_dt(T_L, g_L, alpha)
+    D.left  = prepare_dt(T_L, g_L, alpha, min_to_split, col_names, wt_prior)
     for k, f in pairs(T) do
       T_R[k] = Q.where(f, Q.vnot(x)):eval()
     end
     g_R = Q.where(g, Q.vnot(x)):eval()
-    D.right = make_dt(T_R, g_R, alpha)
+    D.right = prepare_dt(T_R, g_R, alpha, min_to_split, col_names, wt_prior)
   end
   return D
+end
+
+
+-- n_H1 is the number of heads in test data set at a given leaf
+-- n_T1 is the number of tails in test data set at a given leaf
+-- set n_H1 and n_T1 at each leaf node to zero
+local function preprocess_dt(
+  D      -- prepared decision tree
+  )
+  if D.left and D.right then
+    preprocess_dt(D.left, col_names)
+    preprocess_dt(D.right, col_names)
+  else
+    D.n_H1 = 0
+    D.n_T1 = 0
+  end
+end
+
+
+local function make_dt(
+  T, -- table of m lvectors of length n
+  g, -- lVector of length n
+  alpha, -- Scalar, minimum benefit
+  min_to_split,
+  col_names,
+  wt_prior
+)
+  -- create D
+  local tree = prepare_dt(T, g, alpha, min_to_split, col_names, wt_prior)
+
+  -- preprocess DT
+  --  1. initializes n_H1 and n_T1 to zero at leaves
+  preprocess_dt(tree)
+
+  return tree
 end
 
 
@@ -191,21 +232,6 @@ local function predict(
   end
 end
 
-
--- n_H1 is the number of heads in test data set at a given leaf
--- n_T1 is the number of tails in test data set at a given leaf
--- set n_H1 and n_T1 at each leaf node to zero
-local function preprocess_dt(
-  D     -- prepared decision tree
-  )
-  if D.left and D.right then
-    preprocess_dt(D.left)
-    preprocess_dt(D.right)
-  else
-    D.n_H1 = 0
-    D.n_T1 = 0
-  end
-end
 
 dt.make_dt = make_dt
 dt.predict = predict

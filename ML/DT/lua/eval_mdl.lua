@@ -3,7 +3,6 @@ local predict = require 'Q/ML/DT/lua/dt'['predict']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local utils = require 'Q/UTILS/lua/utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
-local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
 
 local fns = {}
@@ -70,9 +69,6 @@ local function eval_mdl(tree, Test, goal, metrics)
 
   -- verify DT
   check_dt(tree)
-
-  -- preprocess DT
-  preprocess_dt(tree) -- initializes n_H1 and n_T1 to zero at leaves
 
   -- perform prediction
   local predicted_values, actual_values = do_predict(tree, Test, goal)
