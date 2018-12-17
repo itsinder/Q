@@ -7,19 +7,19 @@ local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 local evaluate_dt = require 'Q/ML/DT/lua/evaluate_dt'['evaluate_dt']
 
 local fns = {}
+local metrics_of_interest = 
+{'accuracy', 'precision', 'recall', 'f1_score', 'mcc', 'payout'}
+
 
 local function init_metrics()
   local metrics = {}
-  metrics.accuracy  = {}
-  metrics.precision = {}
-  metrics.recall    = {}
-  metrics.f1_score  = {}
-  metrics.mcc       = {}
-  metrics.payout    = {}
+  for i, v in pairs(metrics_of_interest) do
+    metrics[v] = {}
+  end
   return metrics
 end
 
-local function  calc_avg_metrics(metrics)
+local function calc_avg_metrics(metrics)
   local out_metrics = {}
   -- calculate avg and standard deviation for each metric
   for k, v in pairs(metrics) do
@@ -30,21 +30,13 @@ local function  calc_avg_metrics(metrics)
   return out_metrics
 end
 
-local function eval_mdl(tree, Test, goal, metrics)
-  if not metrics then
-    metrics = init_metrics()
-  end
+local function do_predict(tree, Test, goal)
   local predicted_values = {}
   local actual_values    = {}
 
+  -- extract goal vector
   local test,  g_test,  m_test,  n_test, test_col_name  =
     extract_goal(Test,  goal)
-
-  -- verify DT
-  check_dt(tree)
-
-  -- preprocess DT
-  preprocess_dt(tree) -- initializes n_H1 and n_T1 to zero at leaves
 
   -- predict for test samples
   local TAILS = 0
@@ -66,21 +58,40 @@ local function eval_mdl(tree, Test, goal, metrics)
     actual_values[i]    = actual_val
   end
 
+  return predicted_values, actual_values
+end
+
+local function eval_mdl(tree, Test, goal, metrics)
+  if not metrics then
+    metrics = init_metrics()
+  end
+  local predicted_values = {}
+  local actual_values    = {}
+
+  -- verify DT
+  check_dt(tree)
+
+  -- preprocess DT
+  preprocess_dt(tree) -- initializes n_H1 and n_T1 to zero at leaves
+
+  -- perform prediction
+  local predicted_values, actual_values = do_predict(tree, Test, goal)
+
   -- prepare output metrics table
   local iter = #metrics.payout+1
   local report = ml_utils.classification_report(
     actual_values, predicted_values)    -- get classification_report
-  metrics.accuracy[iter]        = report['accuracy']
-  metrics.precision[iter]       = report['precision']
-  metrics.recall[iter]          = report['recall']
-  metrics.f1_score[iter]        = report['f1_score']
-  metrics.mcc[iter]             = report['mcc']
-  metrics.payout[iter]          = evaluate_dt(tree)     -- calculate payout
+  report.payout = evaluate_dt(tree)     -- calculate payout
+  for i, v in pairs(metrics_of_interest) do
+    metrics[v][iter] = report[v]
+  end
+
   return metrics
 end
 
 fns.eval_mdl = eval_mdl
 fns.init_metrics = init_metrics
 fns.calc_avg_metrics = calc_avg_metrics
+fns.do_predict = do_predict
 
 return fns 
