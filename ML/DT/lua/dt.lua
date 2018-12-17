@@ -64,14 +64,29 @@ local function make_dt(
   local best_bf --- best benefit
   local best_sf --- split point that yielded best benefit 
   local best_k  --- feature that yielded best benefit
+  local del_f
   for k, f in pairs(T) do
-    local bf, sf = calc_benefit(f, g, n_T, n_H, wt_prior)
-    if sf and ( ( best_bf == nil ) or ( bf > best_bf ) ) then
-      best_bf = bf
-      best_sf = sf
-      best_k = k    
+    local maxval = Q.max(f):eval():to_num()
+    local minval = Q.min(f):eval():to_num()
+    if (maxval > minval) then
+      local bf, sf = calc_benefit(f, g, n_T, n_H, wt_prior)
+      if ( best_bf == nil ) or ( bf > best_bf ) then
+        best_bf = bf
+        best_sf = sf
+        best_k = k
+      end
+    else
+      -- This feature is not of any importance as it has similar values
+      del_f = k
     end
   end
+  -- delete feature which is not important
+  -- TODO: facing some weird behavior if I delete feature so commenting for now
+  --[[
+  if del_f then
+    table.remove(T, del_f)
+  end
+  ]]
   -- print("Max benefit and respecitve feature is ")
   -- print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
   local l_alpha = alpha:to_num()

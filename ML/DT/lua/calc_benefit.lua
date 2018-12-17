@@ -72,14 +72,8 @@ local function calc_benefit(
       split_point = f_val
     end
   end
-  --TODO: commented below asserts, check with Ramesh
-  -- reason: what if a feature is having same values in it?
-  -- e.g In case of titanic dataset, feature 'sex' is having 0(male) and 1(female) value in it
-  -- In first split, if all males and females separated out then 
-  -- the next call to this function will have similar type of values
-
-  --assert(split_point) -- should be defined by now
-  --assert(benefit ~= -math.huge) -- should be defined by now
+  assert(split_point) -- should be defined by now
+  assert(benefit ~= -math.huge) -- should be defined by now
   f_clone:delete() -- explicit deletion
   g_clone:delete() -- explicit deletion
   return benefit, split_point
