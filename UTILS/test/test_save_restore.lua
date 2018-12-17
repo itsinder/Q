@@ -57,6 +57,14 @@ tests.t4 = function()
   print("Successfully executed test t4")
 end
 
+tests.t5 = function()
+    -- JIRA QQ-160:
+    -- verifying Q.save() should not try to persist global Vectors that have been marked as memo = false
+    col1 = Q.seq({ start = 1, by = 1, len = 10 , qtype = "I8"})
+    col1:memo(false)
+    col1:eval()
+    Q.save("/tmp/saving_it.lua")
+end
 
 return tests
 

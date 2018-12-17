@@ -19,3 +19,8 @@ args.is_rough = true
 Q.restore()
 run_kmeans(args)
 Q.save()
+
+
+ 
+-- Q.vvmul(c, Q.vvadd(a, b):set_memo(false):set_ephemeral(true))
+-- Q.fold({min,max, sum}Q.vvadd(a, b):set_memo(false))

@@ -257,5 +257,19 @@ tests.t12 = function()
   print("test 12 passed")
 end
 
+tests.t13 = function()
+  -- compare number and scalar
+  -- TODO DOES NOT WORK RIGHT NOW UNTIL QQ-151 is solved
+--[[
+  local x = Scalar.new(1, "I1")
+  local y = Scalar.new(1, "I1")
+  local z = x + y
+  local z = x + 1
+  assert(x == y )
+  assert(x == 1 )
+  local z = ( x + 1 )
+  --]]
+  return true
+end
 --================
 return tests

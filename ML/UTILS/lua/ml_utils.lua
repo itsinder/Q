@@ -91,10 +91,10 @@ local classification_report = function(actual_val, predicted_val)
   local f1 = f1_score(actual_val, predicted_val, conf_matrix)
   local mcc = matthews_corrcoef(actual_val, predicted_val, conf_matrix)
   local result = {}
-  result["accuracy_score"] = accuracy
+  result["accuracy"] = accuracy
   result["confusion_matrix"] = conf_matrix
-  result["precision_score"] = precision
-  result["recall_score"] = recall
+  result["precision"] = precision
+  result["recall"] = recall
   result["f1_score"] = f1
   result["mcc"] = mcc
   return result

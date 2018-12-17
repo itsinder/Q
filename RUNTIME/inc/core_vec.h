@@ -10,9 +10,9 @@ extern void
 vec_print_timers(
     void
     );
-extern void
+extern uint64_t
 vec_print_mem(
-    void
+   void 
     );
 extern int
 chk_field_type(

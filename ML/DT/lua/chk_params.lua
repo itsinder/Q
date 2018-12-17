@@ -16,46 +16,29 @@ local function chk_params(
   assert(type(T) == "table")
   -- Here, it's not sure that T is integer indexed table
   for k, v in pairs(T) do
-    n = v:length()
-    break
-  end
-  for k, v in pairs(T) do
+    if ( not n ) then 
+      n = v:length()
+    else
+      assert(n == v:length())
+    end
     assert(type(v) == "lVector")
     assert(v:fldtype() == "F4")
-    assert(n == v:length())
     nT = nT + 1
   end
   assert(utils.table_length(T) == nT)
   --=====================================
   assert(type(alpha) == "Scalar")
+  assert(alpha:to_num() > 0)
   --=====================================
   assert(g:length() == n, tostring(g:length()) .. ", " .. tostring(n))
   assert(g:fldtype() == "I4")
-  local minval, numval = Q.min(g):eval()
-  -- TODO: do we require below assert - discuss with Ramesh
-  -- assert(minval == Scalar.new(0, "I4"))
-  local maxval, numval = Q.max(g):eval()
-  local ng
-
-  -- currently assuming g values to be 0 and 1
-  local sum = Q.sum(g):eval()
-  if sum:to_num() > 0 then
-    ng = 2
-  else
-    ng = 1
-  end
-  --[[
-  if maxval > minval then
-    ng = maxval:to_num() - minval:to_num() + 1 -- number of values of goal attr
-  else
-    ng = maxval:to_num() + 1
-  end
-  ]]
-  -- TODO: do we require below assert
-  --assert(ng > 1)
-  assert(ng <= 4) -- arbitary limit for now 
-  --=====================================
-  -- STOP : Checking
+  -- LIMITATION: currently assuming g values to be 0 and 1
+  local maxval = Q.max(g):eval():to_num()
+  local minval = Q.min(g):eval():to_num()
+  assert(minval >= 0)
+  assert(maxval <= 1)
+  local ng = 2
+  
   return nT, n, ng
 end
 

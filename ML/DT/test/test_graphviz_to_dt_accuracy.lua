@@ -13,6 +13,7 @@ local split_train_test = require 'Q/ML/UTILS/lua/split_train_test'
 local plpath        = require 'pl.path'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local path_to_here = Q_SRC_ROOT .. "/ML/DT/test/"
+local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 assert(plpath.isdir(path_to_here))
 
 local tests = {}
@@ -55,7 +56,7 @@ tests.t1 = function()
   check_dt(tree)
 
   -- print decision tree
-  local f = io.open(path_to_here .. "graphviz.txt", "a")
+  local f = io.open(path_to_here .. "graphviz.txt", "w")
   f:write("digraph Tree {\n")
   f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
   f:write("edge [fontname=helvetica] ;\n")
@@ -63,11 +64,15 @@ tests.t1 = function()
   f:write("}\n")
   f:close()
 
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
     local n_H, n_T = predict(tree, x)
     local decision
@@ -113,11 +118,16 @@ tests.t1 = function()
   print("Successfully created D from graphviz file")
   
   local predicted_values_test = {}
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(D)
+
   -- predict for test samples
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
     local n_H, n_T = predict(D, x)
     local decision

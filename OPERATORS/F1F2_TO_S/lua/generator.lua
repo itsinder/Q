@@ -11,7 +11,6 @@ assert(plpath.isfile(operator_file))
 local operators = dofile(operator_file)
 
 local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
-local types = { 'I1', 'I2', 'I4', 'I8','F4', 'F8' }
 
 for i, operator in ipairs(operators) do
   local num_produced = 0
@@ -21,16 +20,16 @@ for i, operator in ipairs(operators) do
       local status, subs, tmpl
       status, subs, tmpl = pcall(sp_fn, xtype, ytype)
       if ( status ) then 
-        assert(type(subs) == "table")
-        assert(type(tmpl) == "string")
-        gen_code.doth(subs, tmpl, incdir)
-        gen_code.dotc(subs, tmpl, srcdir)
-        print("Generated ", subs.fn)
-        num_produced = num_produced + 1
-      else
-        if ( subs ~= "ok_to_fail" ) then
-          print("Failed ", xtype, ytype, status, subs)
+        if ( subs ~= "ok_to_fail" ) then 
+          assert(type(subs) == "table")
+          assert(type(tmpl) == "string")
+          gen_code.doth(subs, tmpl, incdir)
+          gen_code.dotc(subs, tmpl, srcdir)
+          print("Generated ", subs.fn)
+          num_produced = num_produced + 1
         end
+      else
+        print("Failed ", xtype, ytype, status, subs)
       end
     end
   end

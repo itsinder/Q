@@ -51,11 +51,21 @@ local function load_csv(
   end
   -- Initialize Buffers
   local cols, dicts, out_bufs, nn_out_bufs, n_buf = init_buffers(M)
+
   -- Memory map the input file
-  local f_map = ffi.gc(qc.f_mmap(infile, false), qc.f_munmap)
-  assert(f_map.status == 0 , err.MMAP_FAILED)
-  local X = ffi.cast("char *", f_map.map_addr)
-  local nX = tonumber(f_map.map_len)
+  -- TODO: review below code with Ramesh
+  local mmaped_file = ffi.gc(ffi.C.malloc(ffi.sizeof("char *")), ffi.C.free)
+  --local mmaped_file = cmem.new(ffi.sizeof("char *"), "F4", "file")
+  mmaped_file = ffi.cast("char **", mmaped_file)
+  local file_size = ffi.gc(ffi.C.malloc(ffi.sizeof("size_t")), ffi.C.free)
+  --local file_size = cmem.new(ffi.sizeof("size_t"), "F4", "size")
+  file_size = ffi.cast("size_t *", file_size)
+
+  local status = qc.rs_mmap(infile, mmaped_file, file_size, false)
+  assert(status == 0, err.MMAP_FAILED)
+
+  local X = mmaped_file[0]
+  local nX = tonumber(file_size[0])
   assert(nX > 0, err.FILE_EMPTY)
   --===================================================
   
@@ -159,6 +169,10 @@ local function load_csv(
       end
     end
   end
+
+  X = ffi.cast("char *", X)
+  status = qc.rs_munmap(X, nX)
+  assert(status == 0, "Unmap failed")
   return cols_to_return
 end
 

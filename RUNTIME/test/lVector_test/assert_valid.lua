@@ -429,10 +429,13 @@ end
 --===================
 
 -- nascent_vector --> eov() ( i.e. is_nascent = T and is_eov = T )
--- reading values from previous chunk, (open mode is set to 0) 
+-- reading values from previous chunk, (open mode is set to 1) 
 -- as reading values from previous chunk( values are serverd from file) 
 -- so is_nascent = F ( converted to materialized vector)
 -- now trying start_write(), should fail
+
+-- Update: with recent changes start_write() is allowed even if vector is in READ mode status
+-- refer start_write() from core_vec.c
 fns.assert_nascent_vector8_1_2 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -460,8 +463,8 @@ fns.assert_nascent_vector8_1_2 = function(vec, test_name, num_elements, gen_meth
   -- Try to modify values using start_write(), should fail
   -- but open mode is set to 0, 
   local status, len, base_data, nn_data = pcall(vec.start_write, vec)
-  assert(status == false)
-  assert(base_data == nil)
+  --assert(status == false)
+  --assert(base_data == nil)
   
   return true
 end
@@ -499,6 +502,9 @@ end
 
 -- nascet vector -> materialized vector (using eov)
 -- try start_write() after read operation, this is not allowed
+
+-- Update: with recent changes start_write() is allowed even if vector is in READ mode status
+-- refer start_write() from core_vec.c
 fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method)
   -- common checks for vectors
   assert(vec:check())
@@ -516,8 +522,8 @@ fns.assert_nascent_vector8_3 = function(vec, test_name, num_elements, gen_method
   
   -- Try to modify values using start_write()
   local status, len, base_data, nn_data = pcall(vec.start_write, vec)
-  assert(status == false)
-  assert(base_data == nil)
+  --assert(status == false)
+  --assert(base_data == nil)
   
   return true
 end

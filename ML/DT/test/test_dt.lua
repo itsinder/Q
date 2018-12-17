@@ -8,7 +8,7 @@ local tests = {}
 tests.t1 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/occupancy/occupancy_meta.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -19,7 +19,14 @@ tests.t1 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do 
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -35,13 +42,12 @@ tests.t1 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t2 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_data.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/cancer_meta.lua"
-  local alpha = Scalar.new(0.3, "F4")
+  local alpha = 0.3
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -50,6 +56,8 @@ tests.t2 = function()
   args.goal = "diagnosis"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -58,10 +66,16 @@ tests.t2 = function()
   args.train_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_train.csv"
   args.test_csv = Q_SRC_ROOT .. "/ML/KNN/data/cancer/b_cancer/b_cancer_test.csv"
   ]]
-
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -77,17 +91,12 @@ tests.t2 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
-  print("================================================")
-  for i, v in pairs(accuracy_table) do
-    print(i, v)
-  end
 end
 
 tests.t3 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/titanic/titanic_train_meta.lua"
-  local alpha = Scalar.new(0.3, "F4")
+  local alpha = 0.3
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -107,7 +116,8 @@ tests.t3 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -130,7 +140,7 @@ end
 tests.t4 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_11709_13248.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/from_ramesh/ds1_updated_meta.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -150,7 +160,8 @@ tests.t4 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -172,7 +183,7 @@ end
 tests.t5 = function()
   local data_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/after_opr_lifespan.csv"
   local metadata_file = Q_SRC_ROOT .. "/ML/KNN/data/Habermans_Survival_Data/lifespan_metadata.lua"
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
 
   local args = {}
   args.meta_data_file = metadata_file
@@ -183,7 +194,8 @@ tests.t5 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
@@ -212,7 +224,7 @@ tests.t6 = function()
 
   split(data_file, metadata_file, split_csv_args, hdr_info)
 
-  local alpha = Scalar.new(0.2, "F4")
+  local alpha = 0.2
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
   local args = {}
@@ -226,7 +238,8 @@ tests.t6 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local average_acr, accuracy_table = run_dt(args)
+  local result= run_dt(args)
+  local average_acr = result['accuracy'][alpha]
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")

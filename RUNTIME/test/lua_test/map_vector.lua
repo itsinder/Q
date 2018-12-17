@@ -18,7 +18,7 @@ return {
     assert_fns = "nascent_vector1",
     name = "create_nascent_vector_cmem_buf", 
     meta = "gm_create_nascent_vector1.lua", 
-    num_elements = 65540, 
+    num_elements = qconsts.chunk_size+4, 
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8", "B1" }
   },
@@ -40,7 +40,7 @@ return {
     assert_fns = "nascent_vector1",
     name = "Creation of nascent vector_cmem_buf", 
     meta = "gm_create_nascent_vector6.lua",
-    num_elements = 65540, 
+    num_elements = qconsts.chunk_size+4, 
     gen_method = "cmem_buf", 
     qtype = { "SC" }
   },
@@ -91,7 +91,7 @@ return {
     assert_fns = "nascent_vector3",
     name = "write_to_nascent_vector_read_only", 
     meta = "gm_create_nascent_vector3.lua", 
-    num_elements = 65540, 
+    num_elements = qconsts.chunk_size+4, 
     gen_method = "cmem_buf", 
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_1"
@@ -115,7 +115,7 @@ return {
     assert_fns = "nascent_vector7",
     name = "nascent_vec_get_chunk_without_chunk_num_argument",
     meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
@@ -133,7 +133,7 @@ return {
     assert_fns = "nascent_vector8_1",
     name = "nascent_vector_try_start_write()_after_eov",
     meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
@@ -157,7 +157,7 @@ return {
     assert_fns = "nascent_vector8_3",
     name = "nascent_vector_followed_eov_try_start_write()_after_get_chunk()",
     meta = "gm_create_nascent_vector5.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     gen_method = "cmem_buf",
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_1"
@@ -169,7 +169,7 @@ return {
     assert_fns = "materialized_vector1",
     name = "create_materialized_vector", 
     meta = "gm_create_materialized_vector1.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
@@ -179,7 +179,7 @@ return {
     assert_fns = "materialized_vector2",
     name = "materialized_vector_set_value_at_wrong_index", 
     meta = "gm_create_materialized_vector1.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_1"
   },    
@@ -190,7 +190,7 @@ return {
     assert_fns = "materialized_vector3",
     name = "materialized_vector_eov", 
     meta = "gm_create_materialized_vector1.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },      
 
@@ -201,7 +201,7 @@ return {
     assert_fns = "materialized_vector4",
     name = "modify_read_only_materialized_vector", 
     meta = "gm_create_materialized_vector2.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_1"
   },        
@@ -212,7 +212,7 @@ return {
     assert_fns = "materialized_vector5",
     name = "create_materialized_vector_file_not_present", 
     meta = "gm_create_materialized_vector3.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_2"
   },  
@@ -229,7 +229,7 @@ return {
     assert_fns = "materialized_vector5",
     name = "create_materialized_vector_file_not_present",
     meta = "gm_create_materialized_vector3.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1" }
   },
   ]]
@@ -241,7 +241,7 @@ return {
     assert_fns = "materialized_vector6",
     name = "modify_materialized_vector_with_start_write()",
     meta = "gm_create_materialized_vector2.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" }
   },
   
@@ -252,7 +252,7 @@ return {
     assert_fns = "materialized_vector7",
     name = "modify_materialized_vector_without_start_write()",
     meta = "gm_create_materialized_vector2.lua",
-    num_elements = 65540,
+    num_elements = qconsts.chunk_size+4,
     qtype = { "I1", "I2", "I4", "I8", "F4", "F8" },
     test_category = "error_testcase_1"
   },

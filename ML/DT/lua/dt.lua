@@ -1,7 +1,7 @@
 local Q = require 'Q'
 local Scalar = require 'libsclr'
 local utils = require 'Q/UTILS/lua/utils'
-local calc_benefit = require 'Q/ML/DT/lua/benefit'
+local calc_benefit = require 'Q/ML/DT/lua/calc_benefit'
 local chk_params = require 'Q/ML/DT/lua/chk_params'
 
 local dt = {}
@@ -32,71 +32,56 @@ local node_idx = 0 -- node indexing
 local function make_dt(
   T, -- table of m lvectors of length n
   g, -- lVector of length n
-  alpha -- Scalar, minimum benefit
+  alpha, -- Scalar, minimum benefit
+  min_to_split,
+  wt_prior
   )
   local m, n, ng = chk_params(T, g, alpha)
   local D = {}
-
-  --[[
-  local ng_verify
-  local sum = Q.sum(g):eval()
-  if sum:to_num() > 0 then
-    ng_verify = 2
+  assert(ng == 2) --- LIMITATION FOR NOW 
+  -- do not split a node if it has less than 10 samples 
+  if ( not min_to_split ) then 
+    min_to_split = 10 
   else
-    ng_verify = 1
-  end
-
-  local minval, _, _ = Q.min(g):eval()
-  local maxval, _, _ = Q.max(g):eval()
-  if maxval > minval then
-    ng_verify = maxval:to_num() - minval:to_num() + 1
-  elseif maxval == minval then
-    ng_verify = maxval:to_num() + 1
-  end
-  if ng_verify ~= ng then
-    print(Q.sum(g):eval())
-    print(ng_verify, ng)
-    print(minval, maxval)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    Q.print_csv(g)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-  end
-  assert(ng_verify == ng)
-  ]]
+    assert(type(min_to_split) == "number")
+    assert(min_to_split > 2)
+  end 
 
   local cnts = Q.numby(g, ng):eval()
   local n_T, n_H
   n_T = cnts:get_one(0):to_num()
-  if ng == 1 then
-    n_H = 0
-  else
-    n_H = cnts:get_one(1):to_num()
-  end
+  n_H = cnts:get_one(1):to_num()
+
   D.n_T = n_T
   D.n_H = n_H
   D.node_idx = node_idx
   node_idx = node_idx + 1
-  if n_T == 0 or n_H == 0 then
-    return  D
-  end
-  local best_bf, best_sf, best_k
+
+  -- stop expansion if following conditions met 
+  if ( ( n_T == 0 ) or ( n_H == 0 ) ) then return D end
+  if ( n_T + n_H < min_to_split )     then return D end 
+
+  local best_bf --- best benefit
+  local best_sf --- split point that yielded best benefit 
+  local best_k  --- feature that yielded best benefit
   for k, f in pairs(T) do
-    local bf, sf = calc_benefit(f, g, n_T, n_H)
+    local bf, sf = calc_benefit(f, g, n_T, n_H, wt_prior)
     if ( best_bf == nil ) or ( bf > best_bf ) then
       best_bf = bf
       best_sf = sf
-      best_k = k
+      best_k = k    
     end
   end
   -- print("Max benefit and respecitve feature is ")
   -- print(best_bf .. "\t" .. best_sf .. "\t" .. best_k)
-  if ( best_bf > alpha:to_num() ) then 
+  local l_alpha = alpha:to_num()
+  if ( best_bf > l_alpha ) then 
     local x = Q.vsleq(T[best_k], best_sf):eval()
     local T_L = {}
     local T_R = {}
-    D.feature = best_k
+    D.feature   = best_k
     D.threshold = best_sf
-    D.benefit = best_bf
+    D.benefit   = best_bf
     for k, f in pairs(T) do 
       T_L[k] = Q.where(f, x):eval()
     end
@@ -135,11 +120,9 @@ local function check_dt(
     return status
   end
 
-  if D.left then
-    assert(D.right)
-  else
-    assert(D.right == nil)
-  end
+  -- either both left and right are defined or neither
+  if D.left then assert(D.right) end
+  if D.right then assert(D.left) end
 
   if D.left == nil and D.right == nil then
     assert(D.feature == nil)
@@ -160,19 +143,29 @@ local function check_dt(
 end
 
 
+-- This function does the following:
+-- It finds the leaf to which the instance, x, is assigned.
+-- It updates n_H1 and n_T1 for that leaf
+-- It returns n_H/n_T for that leaf
 local function predict(
-  D,	-- prepared decision tree
-  x	-- a table with test features
+  D,    -- prepared decision tree
+  x,    -- a table of numbers, indexed by feature
+  g_val -- a number, representing goal value 
   )
   assert(type(D) == 'table')
   assert(type(x) == 'table')
 
   while true do
     if D.left == nil and D.right == nil then
+      if g_val == 0 then -- tails
+        D.n_T1 = D.n_T1 + 1
+      else
+        D.n_H1 = D.n_H1 + 1
+      end
       return D.n_H, D.n_T
     else
       local val = x[D.feature]
-      if val:to_num() > D.threshold then
+      if val > D.threshold then
         --print("Right Subtree")
         D = D.right
       else
@@ -184,10 +177,25 @@ local function predict(
 end
 
 
+-- n_H1 is the number of heads in test data set at a given leaf
+-- n_T1 is the number of tails in test data set at a given leaf
+-- set n_H1 and n_T1 at each leaf node to zero
+local function preprocess_dt(
+  D     -- prepared decision tree
+  )
+  if D.left and D.right then
+    preprocess_dt(D.left)
+    preprocess_dt(D.right)
+  else
+    D.n_H1 = 0
+    D.n_T1 = 0
+  end
+end
+
 local function print_dt(
-  D,		-- prepared decision tree
-  f,		-- file_descriptor
-  col_name	-- table of column names of train dataset
+  D,            -- prepared decision tree
+  f,            -- file_descriptor
+  col_name      -- table of column names of train dataset
   )
   local label = "\"n_T=" .. tostring(D.n_T) .. ", n_H=" .. tostring(D.n_H)
   --print(D.feature, D.threshold, D.n_H, D.n_T)
@@ -197,10 +205,17 @@ local function print_dt(
     local right_label = "\"n_T=" .. tostring(D.right.n_T) .. ", n_H=" .. tostring(D.right.n_H)
     if D.left.feature then
       left_label = left_label .. "\\n" .. col_name[D.left.feature] .. "<=" .. D.left.threshold .. "\\n" .. "benefit=" .. D.left.benefit
+    else
+      left_label = left_label .. "\\n" .. "n_T1=" .. tostring(D.left.n_T1) .. ", n_H1=" .. tostring(D.left.n_H1)
+      left_label = left_label .. "\\n" .. "payout=" .. tostring(D.left.payout)
+      -- leaf node
     end
     left_label = left_label .. "\""
     if D.right.feature then
       right_label = right_label .. "\\n" .. col_name[D.right.feature] .. "<=" .. D.right.threshold .. "\\n" .. "benefit=" .. D.right.benefit
+    else
+      right_label = right_label .. "\\n" .. "n_T1=" .. tostring(D.right.n_T1) .. ", n_H1=" .. tostring(D.right.n_H1)
+      right_label = right_label .. "\\n" .. "payout=" .. tostring(D.right.payout)
     end
     right_label = right_label .. "\""
     f:write(label .. " -> " .. left_label .. "\n")
@@ -211,7 +226,7 @@ local function print_dt(
     print_dt(D.left, f, col_name)
     print_dt(D.right, f, col_name)
   else
-    -- No tree available
+    -- nothing to do
   end
 end
 
@@ -221,5 +236,6 @@ dt.predict = predict
 dt.check_dt = check_dt
 dt.print_dt = print_dt
 dt.node_count = node_count
+dt.preprocess_dt = preprocess_dt
 
 return dt

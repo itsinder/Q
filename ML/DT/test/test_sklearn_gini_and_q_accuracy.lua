@@ -8,6 +8,7 @@ local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
 local split = require 'Q/ML/UTILS/lua/split_csv_to_train_test'
+local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
 local plpath = require 'pl.path'
@@ -32,13 +33,13 @@ tests.t1 = function()
   os.execute(cmd)
   
   -- converting sklearn gini graphviz to q graphviz format
-  gini_to_q_graphviz(Q_SRC_ROOT .."/ML/DT/python/graphviz_gini.txt")
+  gini_to_q_graphviz(Q_SRC_ROOT .."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt")
   
   -- converting q graphviz format file to Q dt
   -- ( i.e. loading q graphviz to q data structure)
   local features_list = {"radius_worst","fractal_dimension_worst","texture_se","id","symmetry_worst","fractal_dimension_se","concavity_worst","compactness_worst","texture_mean","smoothness_worst","concave points_se","perimeter_worst","area_mean","texture_worst","radius_mean","concavity_mean","concavity_se","concave points_mean","concave points_worst","symmetry_se","area_worst","symmetry_mean","area_se","smoothness_mean","smoothness_se","compactness_se","perimeter_mean","compactness_mean","perimeter_se","radius_se","fractal_dimension_mean"}
   
-  local file = Q_SRC_ROOT .. "gini_to_q_graphviz.txt"
+  local file = Q_SRC_ROOT .. "/ML/DT/lua/gini_to_q_graphviz.txt"
   local goal_feature = "diagnosis"
   --local new_features_list = load_csv_col_seq(features_list, goal_feature)
   local D = graphviz_to_D(file, features_list)
@@ -56,6 +57,10 @@ tests.t1 = function()
   --local status = os.execute("diff " .. file .. " graphviz_dt.txt")
   --assert(status == 0, "graphviz.txt and graphviz_dt files not matched")
   print("Successfully created D from graphviz file")
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(D)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -83,9 +88,9 @@ tests.t1 = function()
   for i = 1, n_test do
     local x = {}
     for k = 1, m_test do
-      x[k] = test[k]:get_one(i-1)
+      x[k] = test[k]:get_one(i-1):to_num()
     end
-    local n_H, n_T = predict(args.tree, x, i)
+    local n_H, n_T = predict(args.tree, x)
     local decision
     if n_H > n_T then
       decision = 1 
@@ -115,7 +120,7 @@ tests.t1 = function()
   end
   print("================================================")
   ]]
-  assert(average_acr == 92.43986254295532, "Different accuracy returned by sklearn and Q.dt")
+  assert(average_acr == 94.15807560137456, "Different accuracy returned by sklearn and Q.dt")
 end
 
 return tests
