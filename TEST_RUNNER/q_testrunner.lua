@@ -18,6 +18,7 @@ package.path = "/?.lua;" .. package.path
 local qc = require 'Q/UTILS/lua/q_core'
 local plpretty = require "pl.pretty"
 local q_root = assert(os.getenv("Q_ROOT"))
+-- local base_path = assert(os.getenv("BASE_PATH"))
 local find_all_files = require 'Q/TEST_RUNNER/q_test_discovery'
 assert(qc["isdir"](q_root))
 assert(qc["isdir"](q_root .. "/data/"))
@@ -62,9 +63,11 @@ local function run_isolated_tests(suite_name, isolated)
     calls = 0
   end
   io.write(".")
-  local base_str =  [[
+  local setup_path = string.format("export Q_ROOT='%s';\n", q_root)
+  local base_str = [[
 	export LUA_PATH="/?.lua;$LUA_PATH";
 	L -lluacov -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
+	base_str = setup_path .. base_str
 	local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
 	assert(subs == 1, suite_name .. " should end with .lua")
 	local status, tests = pcall(require, suite_name_mod)
