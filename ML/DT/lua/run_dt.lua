@@ -136,7 +136,9 @@ local function run_dt(args)
 
       -- evaluate model for test samples
       metrics = eval_mdl(tree, Test, goal, metrics)
-      if args.print_graphviz then
+
+      -- print graphviz
+      if args.print_graphviz and iter == 1 then
         local file_name = tostring(cur_alpha) .. "_" .. tostring(iter) .. "_graphviz.txt"
         export_to_graphviz(file_name, tree, train_col_name)
       end
