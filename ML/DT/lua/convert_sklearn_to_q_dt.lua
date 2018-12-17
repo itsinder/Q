@@ -58,7 +58,7 @@ local function get_condition_key_n_value(condition_str, feature_list)
   feature = plstring.strip(plstring.splitv(feature, "&le"))
   local feature_str = feature
   feature = utils["table_find"](feature_list, feature)
-  return feature, tonumber(threshold)
+  return feature_str, feature, tonumber(threshold)
 end
 
 local function get_benefit_key_n_value(benefit_str)
@@ -104,12 +104,12 @@ end
 local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
   -- getting the fields and field values for child only
   local l1, l2, l3 = plstring.splitv(label_tbl[c_node_idx+1], "<br/>")
-  local c_feature, c_threshold, c_benefit_key, c_benefit_val, c_n_T_value, c_n_H_value
+  local c_feature, c_feature_str, c_threshold, c_benefit_key, c_benefit_val, c_n_T_value, c_n_H_value
   local is_feature_present = false
   
   if l3 ~= nil then
     is_feature_present = true
-    c_feature, c_threshold = get_condition_key_n_value(l1, feature_list)
+    c_feature_str, c_feature, c_threshold = get_condition_key_n_value(l1, feature_list)
     c_benefit_key, c_benefit_val = get_benefit_key_n_value(l2)
     c_n_T_value, c_n_H_value = get_value_n_T_n_H(l3)
   else
@@ -120,7 +120,7 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
   if D.node_idx == nil then
     -- getting the fields and fields values for parent only
     local l1, l2, l3 = plstring.splitv(label_tbl[p_node_idx+1], "<br/>")
-    local p_feature, p_threshold = get_condition_key_n_value(l1, feature_list)
+    local p_feature_str, p_feature, p_threshold = get_condition_key_n_value(l1, feature_list)
     local p_benefit_key, p_benefit_val = get_benefit_key_n_value(l2)
     local p_n_T_value, p_n_H_value = get_value_n_T_n_H(l3)
 
@@ -128,6 +128,7 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
     D.n_T = p_n_T_value
     D.n_H = p_n_H_value
     D.feature =  p_feature
+    D.feature_name = p_feature_str
     D.threshold = p_threshold
     D.benefit = p_benefit_val
 
@@ -139,6 +140,7 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
     
     if is_feature_present then
       D.left.feature =  c_feature
+      D.left.feature_name = c_feature_str
       D.left.threshold = c_threshold
     end
   elseif  D.node_idx == p_node_idx and D.left == nil then
@@ -150,6 +152,7 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
     
     if is_feature_present then
       D.left.feature =  c_feature
+      D.left.feature_name = c_feature_str
       D.left.threshold = c_threshold
     end
 
@@ -162,6 +165,7 @@ local function create_dt(D, p_node_idx, c_node_idx, label_tbl, feature_list)
     
     if is_feature_present then
       D.right.feature =  c_feature
+      D.right.feature_name = c_feature_str
       D.right.threshold = c_threshold
     end
   end
