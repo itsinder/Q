@@ -19,6 +19,8 @@ tests.t1 = function()
   args.is_hdr = true
   args.goal = "occupy_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
@@ -111,6 +113,8 @@ tests.t3 = function()
   args.goal = "Survived"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -161,6 +165,8 @@ tests.t4 = function()
   args.goal = "class"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -209,6 +215,8 @@ tests.t5 = function()
   args.is_hdr = true
   args.goal = "survival_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
@@ -259,6 +267,8 @@ tests.t6 = function()
   args.is_hdr = true
   args.goal = "survival_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
