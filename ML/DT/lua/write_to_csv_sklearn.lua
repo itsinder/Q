@@ -26,11 +26,11 @@ local write_to_csv = function(result, csv_file_path, sep)
   for i,v in pairs(tbl) do
     if first_value then
       col_name = i
-      value_row = v
+      value_row = v[1]
       first_value = false
     else
       col_name = col_name .. "," .. i
-      value_row = value_row .. "," .. v
+      value_row = value_row .. "," .. v[1]
     end
   end
   file:write(col_name .. "\n")
