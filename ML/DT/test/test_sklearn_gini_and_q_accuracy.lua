@@ -1,6 +1,6 @@
 local Q = require 'Q'
 local load_csv_col_seq = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
-local print_dt = require 'Q/ML/DT/lua/dt'['print_dt']
+local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 local predict = require 'Q/ML/DT/lua/dt'['predict']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
@@ -47,16 +47,7 @@ tests.t1 = function()
   -- printing the q decision tree structure in a file
   features_list = load_csv_col_seq(features_list, goal_feature)
   local file_name = path_to_here .. "graphviz_dt.txt"
-  local f = io.open(file_name, "w")
-  f:write("digraph Tree {\n")
-  f:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  f:write("edge [fontname=helvetica] ;\n")
-  local seperator = "<br/>"
-  local root_node_str = tree.node_idx ..  " [label=<" .. features_list[tree.feature] .. " &le; " .. tree.threshold .. seperator .. "benefit = " .. tree.benefit .. seperator .. "value = [" .. tostring(tree.n_T) ..", " .. tostring(tree.n_H) .."]>,fillcolor=\"#e5813963\"] ;\n"
-  f:write(root_node_str)
-  print_dt(tree, f, features_list)
-  f:write("}\n")
-  f:close()
+  export_to_graphviz(file_name, tree)
 
   --local status = os.execute("diff " .. file .. " graphviz_dt.txt")
   --assert(status == 0, "graphviz.txt and graphviz_dt files not matched")

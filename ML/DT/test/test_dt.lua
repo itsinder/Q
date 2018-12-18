@@ -23,7 +23,7 @@ tests.t1 = function()
   Vector.reset_timers()
   start_time = qc.RDTSC()
   local results = run_dt(args)
-  for alpha, v in pairs(results) do 
+  for alpha, v in pairs(results) do
     for k2, v2 in pairs(v) do
       for k3, v3 in pairs(v2) do
         print(alpha, k2, k3, v3)
@@ -31,6 +31,8 @@ tests.t1 = function()
     end
   end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "room_occupancy_sample.csv")
+
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -80,7 +82,7 @@ tests.t2 = function()
     end
   end
   stop_time = qc.RDTSC()
-  write_to_csv(results, "sample.csv")
+  write_to_csv(results, "cancer_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -120,9 +122,16 @@ tests.t3 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "titanic_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -137,7 +146,6 @@ tests.t3 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 
@@ -164,9 +172,16 @@ tests.t4 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "ramesh_category1_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -181,7 +196,6 @@ tests.t4 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t5 = function()
@@ -198,9 +212,16 @@ tests.t5 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "habermans_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -215,7 +236,6 @@ tests.t5 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t6 = function()
@@ -242,14 +262,19 @@ tests.t6 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
   print("================================================")
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 return tests
