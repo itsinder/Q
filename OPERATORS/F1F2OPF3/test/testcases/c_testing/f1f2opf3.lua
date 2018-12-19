@@ -65,6 +65,14 @@ return function(operation, qtype_input1, qtype_input2, input1, input2, qtype_fn)
   
   -- convertor will be of the format -- e.g. - vvadd_I1_I1_I1
   --print(convertor)
+  local sp_fn_name = "Q/OPERATORS/F1F2OPF3/lua/" .. operation .. "_specialize"
+  local spfn = assert(require(sp_fn_name))
+  local status, subs, tmpl = pcall(spfn, qtype_input1, qtype_input2)
+
+  if ( not qc[convertor] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, convertor)
+  end
   assert(qc[convertor], g_err.CONVERTOR_FUNCTION_NULL)
   qc[convertor](chunk1, chunk2, #input1, chunk)
   local ret = {}
