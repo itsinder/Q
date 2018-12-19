@@ -18,6 +18,7 @@ echo $Q_SRC_ROOT
 #setting environment variables
 source $Q_SRC_ROOT/setup.sh -f
 
+rm -f ../../local/Q/lib/lib*.so
 cd $Q_SRC_ROOT/UTILS/build
 #running build
 build_cleanup_heading="------------OUTPUT of build cleanup--------------------------------------"
