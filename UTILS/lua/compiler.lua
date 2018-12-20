@@ -1,15 +1,20 @@
-local plpath = require 'pl.path'
-local plfile = require 'pl.file'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local QC_FLAGS= assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
 local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH not provided")
 local Q_PATH = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$'))
 local Q_ROOT = os.getenv("Q_ROOT") 
 local q_src_root = os.getenv("Q_SRC_ROOT")
-assert(plpath.isdir(q_src_root))
+local H_DIR = Q_ROOT .. "/include/" 
+local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
+local fileops = require 'Q/UTILS/lua/fileops'
+-- local tmp_c, tmp_h = "/tmp/dc.c", "/tmp/dc.h"
+
+
+assert(fileops.isdir(q_src_root))
 local H_DIR = Q_ROOT .. "/include/" 
 local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
 -- local tmp_c, tmp_h = "/tmp/dc.c", "/tmp/dc.h"
+
 
 local function cleaned_h_file(h_file)
   -- local cmd = string.format([[cat %s | sed 's/\\n/\n/g'| grep -v '#include'| cpp | grep -v '^#']], h_file)
@@ -43,14 +48,9 @@ local function compile(doth, h_path, dotc, so_path, libname)
        QC_FLAGS, lib_link_path, tmp_c, incs, Q_LINK_FLAGS, "-lq_core",  so_path)
   local status = os.execute(q_cmd)
   assert(status == 0, "gcc failed for command: " .. q_cmd)
-  assert(plpath.isfile(so_path), "Target " .. libname .. " not created")
-  -- print("Successfully created " .. libname)
-  -- if qconsts.debug ~= true then
-  --   plfile.delete(tmp_c)
-  --   plfile.delete(tmp_h)
-  -- end
+  assert(fileops.isfile(so_path), "Target " .. libname .. " not created")
   local h_file = cleaned_h_file(tmp_h)
-  plfile.write(h_path, h_file)
+  write_to_file(h_file, h_path)
 end
 
 return compile
