@@ -2,6 +2,7 @@ local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH mu
 local Q_ROOT = os.getenv("Q_ROOT") 
 local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
 
+local assertx = require 'Q/UTILS/lua/assertx'
 local compile = require 'Q/UTILS/lua/compiler'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local incfile = Q_ROOT .. "/include/q_core.h"
@@ -15,7 +16,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local timer = require 'posix.time'
 
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
-assert(fileops.isfile(incfile), "File not found " .. incfile)
+assertx(fileops.isfile(incfile), "File not found ", incfile)
 ffi.cdef(fileops.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
@@ -27,8 +28,8 @@ local function load_lib(hfile)
   file = file:match('[^/]*$')
   assert(#file > 0, "filename must be valid")
   local function_name, subs = file:gsub("%.h$", "")
-  assert(function_lookup[function_name] == nil,
-  "Library name is already declared: " .. function_name)
+  assertx(function_lookup[function_name] == nil,
+  "Library name is already declared: ", function_name)
   assert(subs == 1, "Should have a .h extension")
   local so_name = "lib" .. function_name .. ".so"
   assert(so_name ~= "libq_core.so", "Qcore should not be loaded with load libs")
