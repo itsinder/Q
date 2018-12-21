@@ -89,6 +89,7 @@ local function run_isolated_tests(suite_name, isolated)
 		end
 		-- print("cmd:", test_str)
 		local status = os.execute(test_str)
+		io.write(".")
 		-- print("Cmd status is " .. tostring(status))
 		if status == 0 then
 			table.insert(pass, k)

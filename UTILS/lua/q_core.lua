@@ -1,7 +1,8 @@
 local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH must be set")
-local Q_ROOT = os.getenv("Q_ROOT") -- TODO DISCUSS WITH SRINATH
+local Q_ROOT = os.getenv("Q_ROOT") 
 local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
 
+local assertx = require 'Q/UTILS/lua/assertx'
 local compile = require 'Q/UTILS/lua/compiler'
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local incfile = Q_ROOT .. "/include/q_core.h"
@@ -10,15 +11,13 @@ local ffi = require 'Q/UTILS/lua/q_ffi'
 local gen_code = require 'Q/UTILS/lua/gen_code'
 local Logger = require 'Q/UTILS/lua/logger'
 local lib_dir = Q_ROOT .. "/lib/"
-local plpath = require 'pl.path'
-local plfile = require 'pl.file'
-local pldir = require 'pl.dir'
+local fileops = require 'Q/UTILS/lua/fileops'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local timer = require 'posix.time'
 
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
-assert(plpath.isfile(incfile), "File not found " .. incfile)
-ffi.cdef(plfile.read(incfile))
+assertx(fileops.isfile(incfile), "File not found ", incfile)
+ffi.cdef(fileops.read(incfile))
 qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
@@ -29,34 +28,40 @@ local function load_lib(hfile)
   file = file:match('[^/]*$')
   assert(#file > 0, "filename must be valid")
   local function_name, subs = file:gsub("%.h$", "")
-  assert(subs == 1, "Should be only one extension")
+  assertx(function_lookup[function_name] == nil,
+  "Library name is already declared: ", function_name)
+  assert(subs == 1, "Should have a .h extension")
   local so_name = "lib" .. function_name .. ".so"
-  if so_name ~= "libq_core.so" then
-    local status, msg = pcall(ffi.cdef, plfile.read(hfile))
-    if status then
-      local status, q_tmp = pcall(ffi.load, so_name)
-      if status then
-        assert(function_lookup[function_name] == nil,
-          "Library name is already declared: " .. function_name)
-        libs[function_name] = q_tmp
-        function_lookup[function_name] = libs[function_name][function_name]
-      else
-        print("Unable to load lib " .. so_name, q_tmp)
-      end
-    else
-      print("Unable to load lib " .. so_name, msg)
-    end
-  end
+  assert(so_name ~= "libq_core.so", "Qcore should not be loaded with load libs")
 
+  local status, msg = pcall(ffi.cdef, fileops.read(hfile))
+  if status then
+    local status, q_tmp = pcall(ffi.load, so_name)
+    if status then
+      libs[function_name] = q_tmp
+      function_lookup[function_name] = libs[function_name][function_name]
+    else
+      print("Unable to load lib " .. so_name, q_tmp)
+    end
+  else
+    print("Unable to load lib " .. so_name, msg)
+  end
 end
 
 ----- Init Lookup ----
 local function add_libs()
-  local h_files = pldir.getfiles(Q_ROOT .. "/include", "*.h")
+  local h_files = fileops.list_files_in_dir(Q_ROOT .. "/include", "*.h")
   local libs = {}
+  local found_qcore = 0
   for file_id=1,#h_files do
-    load_lib(h_files[file_id])
+    local str = h_files[file_id]
+    if str:find("q_core.h") == nil then
+      load_lib(str)
+    else
+      found_qcore = 1
+    end
   end
+  assert(found_qcore == 1, "q_core must exist in the search path")
 end
 
 local function get_qc_val(val)
@@ -66,23 +71,27 @@ end
 local function q_add(doth, dotc, function_name)
   -- the lib is absent or the doth is missing compile it
   assert(function_lookup[function_name] == nil and qt[function_name] == nil,
-    "Function is already registered")
+  "Function is already registered")
+  assert(doth)
+  assert(dotc)
   if type(doth) == "table" then -- means this is subs and tmpl
     local subs, tmpl = doth, dotc
+    assert(type(tmpl) == "string")
     doth = gen_code.doth(subs, tmpl)
     dotc = gen_code.dotc(subs, tmpl)
   end
+  assert(type(dotc) == "string")
+  assert(type(doth) == "string")
 
-  -- TODO document function_lookup
   local h_path = inc_dir .. function_name .. ".h"
-  local so_path = lib_dir  .. "lib" .. function_name .. ".so"
+  local so_path = lib_dir  .. "/lib" .. function_name .. ".so"
   -- print("so path", so_path)
-  if plpath.isfile(h_path) == false or plpath.isfile(so_path) == false then
-    compile(doth, h_path, dotc, so_path, function_name)
-  end
+  assert(fileops.isfile(h_path) == false or fileops.isfile(so_path) == false,
+    "Libs should not exist in loadable state")
+  compile(doth, h_path, dotc, so_path, function_name)
   load_lib(h_path)
   -- ffi.cdef(plfile.read(h_path))
- --  local q_tmp = ffi.load("lib" .. function_name .. ".so")
+  --  local q_tmp = ffi.load("lib" .. function_name .. ".so")
 
   --  function_lookup[function_name] = q_tmp
 
@@ -97,10 +106,10 @@ local function wrap(func, name)
 
   return function(...)
     local start_time, stop_time
-    start_time = timer.clock_gettime(0)
+    start_time = qc.RDTSC() -- timer.clock_gettime(0)
     local tbl = table.pack(func(...))
-    stop_time = timer.clock_gettime(0)
-    local time =  (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
+    stop_time = qc.RDTSC() -- timer.clock_gettime(0)
+    local time =  stop_time - start_time  -- (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
     trace_logger:trace(name, time)
     -- print("time taken", time)
     if tbl.n == 0 then
