@@ -7,6 +7,7 @@ local q_src_root = os.getenv("Q_SRC_ROOT")
 local H_DIR = Q_ROOT .. "/include/" 
 local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
 local fileops = require 'Q/UTILS/lua/fileops'
+local assertx = require 'Q/UTILS/lua/assertx'
 -- local tmp_c, tmp_h = "/tmp/dc.c", "/tmp/dc.h"
 
 
@@ -26,7 +27,7 @@ local function cleaned_h_file(h_file)
 end
 
 local function write_to_file(content, fname)
-  local file = assert(io.open(fname, "w+"), "unable to create " .. fname)
+  local file = assertx(io.open(fname, "w+"), "unable to create ", fname)
   -- local str = content:gsub('\n', [[\n]])
   file:write(content)
   file:close()
@@ -47,8 +48,8 @@ local function compile(doth, h_path, dotc, so_path, libname)
   local q_cmd = string.format("gcc %s %s %s %s %s %s -o %s", 
        QC_FLAGS, lib_link_path, tmp_c, incs, Q_LINK_FLAGS, "-lq_core",  so_path)
   local status = os.execute(q_cmd)
-  assert(status == 0, "gcc failed for command: " .. q_cmd)
-  assert(fileops.isfile(so_path), "Target " .. libname .. " not created")
+  assertx(status == 0, "gcc failed for command: ", q_cmd)
+  assertx(fileops.isfile(so_path), "Target ", libname, " not created")
   local h_file = cleaned_h_file(tmp_h)
   write_to_file(h_file, h_path)
 end
