@@ -18,7 +18,7 @@ local timer = require 'posix.time'
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
 assertx(fileops.isfile(incfile), "File not found ", incfile)
 ffi.cdef(fileops.read(incfile))
-qc = ffi.load('libq_core.so')
+local qc = ffi.load('libq_core.so')
 local function_lookup = {}
 local qt = {}
 local libs = {}
