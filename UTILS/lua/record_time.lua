@@ -1,3 +1,4 @@
+local qc = require 'Q/UTILS/lua/q_core'
 local function record_time(
   start_time, 
   func_name
