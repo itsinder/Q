@@ -3,6 +3,7 @@ local Vector = require 'libvec'
 local Scalar = require 'libsclr'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local qc = require 'Q/UTILS/lua/q_core'
 
 local tests = {}
 tests.t1 = function()
