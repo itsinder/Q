@@ -3,6 +3,7 @@ local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
 local genbin = require 'Q/RUNTIME/test/generate_bin'
 local create_vector = require 'Q/RUNTIME/test/lVector_test/create_vector'
 local utils = require 'Q/UTILS/lua/utils'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
