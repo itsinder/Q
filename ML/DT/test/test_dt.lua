@@ -6,6 +6,7 @@ local write_to_csv = require 'Q/ML/DT/lua/write_to_csv'
 
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local qc = require 'Q/UTILS/lua/q_core'
 
 local tests = {}
 tests.t1 = function()

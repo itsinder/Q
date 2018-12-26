@@ -7,6 +7,7 @@ local function set_sclr_val_by_idx(x, y, optargs)
   local cmem        = require 'libcmem'
   local Scalar      = require 'libsclr'
   local record_time = require 'Q/UTILS/lua/record_time'
+  local qc          = require 'Q/UTILS/lua/q_core'
 
   assert(x and type(x) == "lVector", "x must be a Vector")
   assert(y and type(y) == "lVector", "y must be a Vector")
