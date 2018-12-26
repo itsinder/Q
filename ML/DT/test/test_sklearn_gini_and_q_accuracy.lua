@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local qc = require 'Q/UTILS/lua/q_core'
 local gini_to_q_graphviz = require 'Q/ML/DT/lua/sklearn_to_q_graphviz'['gini_to_q_graphviz']
 local load_csv_col_seq = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
 local graphviz_to_D = require 'Q/ML/DT/lua/graphviz_to_q_dt'['graphviz_to_D']
