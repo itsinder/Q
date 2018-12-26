@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local qc = require 'Q/UTILS/lua/q_core'
 local Vector = require 'libvec'
 local tablex = require 'pl.tablex'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
