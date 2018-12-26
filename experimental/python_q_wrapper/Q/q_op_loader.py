@@ -1,5 +1,5 @@
-from Q import executor
-from q_helper import call_lua_op
+import Q.lua_executor as executor
+from Q.q_helper import call_lua_op
 
 
 q_op_str = \
@@ -11,9 +11,8 @@ q_op_str = \
     end
     return t
     """
-q_operators = [str(x) for x in dict(executor.execute(q_op_str)).keys()]
+q_operators = [str(x) for x in dict(executor.execute_lua(q_op_str)).keys()]
 
 
 def op_wrapper(op_name):
     return lambda *y: call_lua_op(op_name, *y)
-

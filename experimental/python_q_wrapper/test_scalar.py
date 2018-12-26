@@ -1,5 +1,6 @@
 import Q
 from Q.p_scalar import PScalar
+from Q.p_vector import PVector
 
 
 def test_scalar_new():
@@ -29,16 +30,20 @@ def test_scalar_arith():
     print(sclr3)
 
     # Add scalar and number
-    # TODO: not yet supported in Q
-    """
     sclr4 = sclr1 + val2
     assert (isinstance(sclr4, PScalar))
     assert (sclr4.to_num() == (val1 + val2))
     print(sclr4.qtype())
 
+    # Add scalar and vector
+    vec1 = Q.mk_col([1, 2, 3, 4], sclr1.fldtype())
+    res = sclr1 + vec1
+    assert(isinstance(res, PVector))
+    assert(vec1.qtype() == res.qtype())
+
     result = (sclr3 == sclr4)
-    print(result)
-    """
+    assert(result == True)
+
     print("Successfully executed scalar arithmetic test")
 
 

@@ -1,5 +1,6 @@
-from Q import executor
-from constants import *
+import Q.lua_executor as executor
+from Q.constants import *
+import Q.utils as util
 
 
 class PScalar:
@@ -10,19 +11,10 @@ class PScalar:
             if not val or not qtype:
                 raise Exception("Provide appropriate argument to PScalar constructor")
             self.base_scalar = self.new(val, qtype)
-        from Q import utils
-        self.utils = utils
 
     def new(self, val, qtype):
         """create a scalar"""
-        func_str = \
-            """
-            function(val, qtype)
-                local Scalar = require 'libsclr'
-                return Scalar.new(val, qtype)
-            end
-            """
-        func = executor.eval(func_str)
+        func = executor.eval_lua(create_scalar_str)
         result = func(val, qtype)
         return result
 
@@ -33,14 +25,14 @@ class PScalar:
     def to_num(self):
         """convert scalar to number"""
         func_str = scalar_func_str.format(fn_name="to_num")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar)
         return result
 
     def fldtype(self):
         """return fldtype (qtype) of a scalar"""
         func_str = scalar_func_str.format(fn_name="fldtype")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar)
         return result
 
@@ -51,133 +43,171 @@ class PScalar:
     def to_str(self):
         """convert scalar to string"""
         func_str = scalar_func_str.format(fn_name="to_str")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar)
         return result
 
     def to_cmem(self):
         """convert scalar to cmem"""
         func_str = scalar_func_str.format(fn_name="to_cmem")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar)
         return result
 
     def conv(self, qtype):
         """convert scalar to other qtype"""
-        func_str = \
-            """
-            function(scalar, qtype)
-                return scalar:conv(qtype)
-            end
-            """
-        func = executor.eval(func_str)
+        func_str = scalar_func_arg_str.format(fn_name="conv")
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, qtype)
         return self
 
     def abs(self):
         """convert scalar to absolute"""
         func_str = scalar_func_str.format(fn_name="abs")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar)
         return result
 
     def __add__(self, other):
         """add two scalars"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_vector(other) or util.is_p_scalar(other)
+                or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        elif util.is_p_vector(other):
+            return other.__add__(self)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="+")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __sub__(self, other):
         """subtract two scalars"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="-")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __mul__(self, other):
         """multiply two scalars"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="*")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __div__(self, other):
         """multiply two scalars"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="/")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return PScalar(base_scalar=result)
 
     def __ne__(self, other):
         """check whether two scalars are not equal"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="~=")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 
     def __eq__(self, other):
         """check whether two scalars are equal"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="==")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 
     def __ge__(self, other):
         """check whether first scalar is greater than or equal to second scalar"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op=">=")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 
     def __gt__(self, other):
         """check whether first scalar is greater than second scalar"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op=">")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 
     def __le__(self, other):
         """check whether first scalar is less than or equal to second scalar"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="<=")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 
     def __lt__(self, other):
         """check whether first scalar is less than second scalar"""
-        if not (isinstance(other, PScalar) or type(other) == int or type(other) == float):
+        if not (util.is_p_scalar(other) or type(other) == int or type(other) == float):
             raise Exception("Second argument type {} is not supported".format(type(other)))
-        other = self.utils.update_args(other)
+        if type(other) == int:
+            other = PScalar(other, I8)
+        elif type(other) == float:
+            other = PScalar(other, F8)
+        other = other.get_base_scalar()
         func_str = scalar_arith_func_str.format(op="<")
-        func = executor.eval(func_str)
+        func = executor.eval_lua(func_str)
         result = func(self.base_scalar, other)
         return result
 

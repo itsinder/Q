@@ -21,7 +21,7 @@ tests.t1 = function()
   args.iterations = 10
   args.min_alpha = 0.15
   args.max_alpha = 0.7
-  args.step_alpha = 0.01
+  args.step_alpha = 0.1
   args.split_ratio = 0.5
   args.is_hdr = true
 
@@ -33,64 +33,6 @@ tests.t1 = function()
 
   write_to_csv(result, csv_path)
   print("Results written to " .. csv_path)
-
-  --[[
-  local accuracy = result['accuracy']
-  local accuracy_std_deviation = result['accuracy_std_deviation']
-  local gain = result['gain']
-  local gain_std_deviation = result['gain_std_deviation']
-  local cost = result['cost']
-  local cost_std_deviation = result['cost_std_deviation']
-
-  stop_time = qc.RDTSC()
-  --Vector.print_timers()
-  print("================================================")
-  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
-  print("================================================")
-  ]]
-  --[[
-  if _G['g_time'] then
-    for k, v in pairs(_G['g_time']) do
-      local niters  = _G['g_ctr'][k] or "unknown"
-      local ncycles = tonumber(v)
-      print("0," .. k .. "," .. niters .. "," .. ncycles)
-    end
-  end
-  print("================================================")
-  ]]
-
-  --[[
-  print("alpha & gain table")
-  for i, v in tablex.sort(gain) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost table")
-  for i, v in tablex.sort(cost) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy table")
-  for i, v in tablex.sort(accuracy) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy_std_deviation table")
-  for i, v in tablex.sort(accuracy_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & gain_std_deviation table")
-  for i, v in tablex.sort(gain_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost_std_deviation table")
-  for i, v in tablex.sort(cost_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  ]]
 end
 
 tests.t2 = function()
@@ -106,7 +48,7 @@ tests.t2 = function()
   args.iterations = 10
   args.min_alpha = 0.15
   args.max_alpha = 0.7
-  args.step_alpha = 0.01
+  args.step_alpha = 0.1
   args.split_ratio = 0.5
   args.is_hdr = true
 
@@ -118,63 +60,6 @@ tests.t2 = function()
 
   write_to_csv(result, csv_path)
   print("Results written to " .. csv_path)
-
-  --[[
-  local accuracy = result['accuracy']
-  local accuracy_std_deviation = result['accuracy_std_deviation']
-  local gain = result['gain']
-  local gain_std_deviation = result['gain_std_deviation']
-  local cost = result['cost']
-  local cost_std_deviation = result['cost_std_deviation']
-
-  stop_time = qc.RDTSC()
-  --Vector.print_timers()
-  print("================================================")
-  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
-  print("================================================")
-  ]]
-  --[[
-  if _G['g_time'] then
-    for k, v in pairs(_G['g_time']) do
-      local niters  = _G['g_ctr'][k] or "unknown"
-      local ncycles = tonumber(v)
-      print("0," .. k .. "," .. niters .. "," .. ncycles)
-    end
-  end
-  print("================================================")
-  ]]
-  --[[
-  print("alpha & gain table")
-  for i, v in tablex.sort(gain) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost table")
-  for i, v in tablex.sort(cost) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy table")
-  for i, v in tablex.sort(accuracy) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy_std_deviation table")
-  for i, v in tablex.sort(accuracy_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & gain_std_deviation table")
-  for i, v in tablex.sort(gain_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost_std_deviation table")
-  for i, v in tablex.sort(cost_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  ]]
 end
 
 
@@ -192,7 +77,7 @@ tests.t3 = function()
   args.iterations = 2
   args.min_alpha = 0.15
   args.max_alpha = 0.7
-  args.step_alpha = 0.01
+  args.step_alpha = 0.1
   args.split_ratio = 0.5
   args.is_hdr = true
 
@@ -204,86 +89,6 @@ tests.t3 = function()
 
   write_to_csv(result, csv_path)
   print("Results written to " .. csv_path)
-
-  --[[
-  local accuracy = result['accuracy']
-  local accuracy_std_deviation = result['accuracy_std_deviation']
-  local gain = result['gain']
-  local gain_std_deviation = result['gain_std_deviation']
-  local cost = result['cost']
-  local cost_std_deviation = result['cost_std_deviation']
-  local precision = result['precision']
-  local precision_std_deviation = result['precision_std_deviation']
-  local recall = result['recall']
-  local recall_std_deviation = result['recall_std_deviation']
-  local f1_score = result['f1_score']
-  local f1_score_std_deviation = result['f1_score_std_deviation']
-
-
-  stop_time = qc.RDTSC()
-  --Vector.print_timers()
-  print("================================================")
-  print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
-  print("================================================")
-  ]]
-  --[[
-  if _G['g_time'] then
-    for k, v in pairs(_G['g_time']) do
-      local niters  = _G['g_ctr'][k] or "unknown"
-      local ncycles = tonumber(v)
-      print("0," .. k .. "," .. niters .. "," .. ncycles)
-    end
-  end
-  print("================================================")
-  ]]
-
-  --[[
-  print("alpha & gain table")
-  for i, v in tablex.sort(gain) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost table")
-  for i, v in tablex.sort(cost) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy table")
-  for i, v in tablex.sort(accuracy) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & precision table")
-  for i, v in tablex.sort(precision) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & recall table")
-  for i, v in tablex.sort(recall) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & f1_score table")
-  for i, v in tablex.sort(f1_score) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & accuracy_std_deviation table")
-  for i, v in tablex.sort(accuracy_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & gain_std_deviation table")
-  for i, v in tablex.sort(gain_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  print("alpha & cost_std_deviation table")
-  for i, v in tablex.sort(cost_std_deviation) do
-    print(i, v)
-  end
-  print("================================================")
-  ]]
 end
 
 return tests
