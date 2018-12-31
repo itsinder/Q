@@ -87,7 +87,7 @@ ainb:
 	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
 
 where:
-	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/
+	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/ all_for_dc
 
 sumby:
 	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/
