@@ -1,48 +1,51 @@
-local T = {}
-
-local function hash(input_vec)
+local function hash(f1, optargs)
   local mk_col   = require 'Q/OPERATORS/MK_COL/lua/mk_col'
   local get_ptr  = require 'Q/UTILS/lua/get_ptr'
   local ffi      = require "Q/UTILS/lua/q_ffi"
   local qconsts  = require 'Q/UTILS/lua/q_consts'
-  local qc      = require 'Q/UTILS/lua/q_core'
-  local cmem    = require 'libcmem'
-  local Scalar  = require 'libsclr'
+  local qc       = require 'Q/UTILS/lua/q_core'
+  local is_in    = require 'Q/UTILS/lua/is_in'
+  local cmem     = require 'libcmem'
+  local Scalar   = require 'libsclr'
   
-  assert(type(input_vec) == "lVector", "input vector is not lVector")
-  assert(input_vec:qtype() == "SC", "input vector is not of type SC")
-  assert(input_vec:length() > 0, "input vector length must be greater than 0")
-  -- seed values are referred from AB repo seed values
-  local SEED_1 = 961748941
-  local SEED_2 = 982451653
+  assert(type(x) == "lVector", "input to hash() is not lVector")
+  assert(f1:has_nulls() == false, "not prepared for nulls in hash")
+  local spfn = assert(require("hash_specialize"))
+  local status, subs, tmpl = pcall(spfn, f1:fldtype(), optargs)
+  if not status then print(subs) end
+  assert(status, "Specializer " .. sp_fn_name .. " failed")
+  local func_name = assert(subs.fn)
+  assert(qc[func_name], "Missing symbol " .. func_name)
   
-  local sz_c_mem = ffi.sizeof("spooky_state")
-  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
-  local c_mem_ptr = ffi.cast("spooky_state *", get_ptr(c_mem))
-  qc["spooky_init"](c_mem_ptr , SEED_1, SEED_2)
-  
-  local output_tbl = {}
-  local num_of_chunks = math.ceil(input_vec:num_elements()/ qconsts.chunk_size)
-  -- TODO: get_one does not support for SC datatype
-  -- so, currently using ffi.cast logic
-  for chunk_num = 0, num_of_chunks-1 do
-    local len, base_data, nn_data = input_vec:chunk(chunk_num)
-    local casted = get_ptr(base_data, input_vec:qtype())
-    for idx = 0, len-1 do
-      local val = ffi.string(casted + idx * input_vec:field_width(), input_vec:field_width())
-      local hash_val = qc["spooky_hash64"](val, #val , SEED_1)
-      hash_val = tostring(ffi.cast("int64_t", hash_val))
-      if type(hash_val) == "string" and string.match(hash_val,'LL') == 'LL' then
-        hash_val = string.sub(hash_val,1,-3)
-      end
-      -- converting hash value to Scalar as hash_value > lua supported number
-      output_tbl[#output_tbl+1] = Scalar.new(hash_val, "I8")
+  local args = assert(subs.args)
+  local cst_args_as = assert(subs.cst_args_as)
+  args = ffi.cast(cst_args_as, args)
+  qc["spooky_init"](args, subs.seed1, subs.seed2)
+  local out_qtype = assert(subs.out_qtype)
+  local out_width = qconsts.qtypes[out_qtype].width
+  local buf_sz = qconsts.chunk_size * out_width
+  local out_buf    = nil
+  local chunk_idx = 0
+  local func_name = subs.fn
+  --============================================
+  local out_gen = function(chunk_num)
+    assert(chunk_num == chunk_idx)
+    out_buf = out_buf or cmem.new(buf_sz, out_qtype)
+    assert(out_buf)
+    local f1_len, f1_chunk, nn_f1_chunk = f1:chunk(chunk_idx)
+    local cst_f1_as  = qconsts.qtypes[subs.in_qtype].ctype  .. "*" 
+    local cst_out_as = qconsts.qtypes[subs.out_qtype].ctype .. "*" 
+    if f1_len > 0 then  
+      local cst_f1_chunk  = ffi.cast(cst_f1_as, get_ptr(f1_chunk))
+      local cst_out_buf   = ffi.cast(cst_out_as, get_ptr(out_buf))
+      local start_time = qc.RDTSC()
+      qc[func_name](cst_f1_chunk, ffi.NULL, f1_len, cst_ptr_args, 
+      cst_out_buf, ffi.NULL)
+      record_time(start_time, func_name)
     end
+    chunk_idx = chunk_idx + 1
+    return f1_len, out_buf
   end
-  local status, output_col = pcall(mk_col, output_tbl, "I8")
-  assert(status, "mk_col failed in hash function")
-  return output_col
+  return lVector{gen=out_gen, has_nulls=false, qtype=out_qtype}
 end
-T.hash = hash
-
 return require('Q/q_export').export('hash', hash)

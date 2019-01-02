@@ -34,7 +34,7 @@ main(
   degree = malloc(nV * sizeof(int));
   return_if_malloc_failed(degree);
   memset(degree, 0, nV * sizeof(int));
-  nT = 4;
+  nT = omp_get_num_threads();
   p_degree = malloc(nT * sizeof(int *));
   return_if_malloc_failed(p_degree);
   for ( int tid = 0; tid < nT; tid++ ) { 
@@ -48,7 +48,7 @@ main(
   int *E = (int *)X;
   uint64_t t_start = RDTSC();
   uint64_t block_size = n / nT;
-  fprintf(stderr, "Starting\n");
+  fprintf(stderr, "Starting %d threads\n", nT);
 #pragma omp parallel for schedule(static)
   for ( int tid = 0; tid < nT; tid++ ) { 
     uint64_t lb = tid * block_size;
@@ -65,6 +65,7 @@ main(
         fprintf(stderr, "Processed %lf \n", (double)i);
       }
 #endif
+// EXPERIMENTAL #pragma omp atomic update
       p_degree[node_id]++;
     }
   }

@@ -8,37 +8,19 @@ Decision trees are a well understood statistical technique \cite{Hastie2009}.
 This paper makes the following contributions:
 \be
 \item proposes a gambling-inspired metric that allows us to answer
-the two fundamental questions associated with building a decision tree:
-\be
-\item what is the decision to be made at a given node e.g., \(x \leq 0.5?\)
-\item when should a node not be split further?
-\ee
+the fundamental question faced when building a tree: 
+what is the decision to be made at a given node e.g., \(x \leq 0.5?\)
 This is in contrast to the well known metrics (i) gini impurity (ii) information
 gain and (iii) variance reduction
-\ifthenelse{\equal{extra}{1}}{
-\item a more intuitive way to deal with unknown values, both during 
-training and testing. This approach is particularly useful when
-the fact that the value is null does not have some systemic bias.
-Section~\ref{unknowns}
-}{}
-\item what ``decision'' does the decision tree really make? For example, if the
-evaluation of the tree leaves us at a node which had 
-\(n_H\) instances of class ``Heads'' and 
-\(n_T\) instances of class ``Tails'' at training time, what statement are we
-making?
-\ifthenelse{\equal{extra}{1}}{
-\item when using several decision trees to create a random forest, using
-principal component analysis to prune correlated trees
-}{}
-\item weighting the results of the different decision trees based 
-on their accuracy, instead of simply averaging the results.
+\item continuing the gambling metaphor, proposes a ``payout'' metric which
+measures the quality of the decision tree. This is in contrast to other means of
+evaluating the tree such as precision, recall, accuracy, f1-score, \ldots
 \ee
 
-We believe that these changes to the way decision trees are created and their
-results combined is particularly relevant to the case where relative
+We believe that these changes to the way decision trees are created and
+evaluated is particularly relevant to the case where relative
 confidences are involved. This is often the case when multiple candidates are
 competing for a limited resource, like user attention. 
-
 For example, supposed we have 2 classifiers, \(C_A, C_B\), one for product A and one for
 product B.  We need \(C_A, C_B\) to return \(p_A, p_B\), where \(p_A\) is
 \(C_A\)'s estimate of how likely the user is to select product A. In order to
@@ -114,8 +96,14 @@ Initialize, decision tree \(D = \{\}\) \\
     \(x = \mathrm{Q.vsgt}(f', s(f'))\) \\
     \(T_L = T_R = \{\}\) \\
     {\bf forall} \(f \in F\) {\bf do} \+ \\
-      \(T_L = T_L \cup \mathrm{Q.where}(f, x)\) \\ 
-      \(T_R = T_R \cup \mathrm{Q.where}(f, \mathrm{Q.not}(x))\) \\ 
+      \(f_L = Q.\mathrm{where}(f, x)\) \\
+      \(f_R = Q.\mathrm{where}(f, \mathrm{Q.not}(x))\) \\
+      {\bf if } \(Q.max(f_L) > Q.min(f_L)\) {\bf then} \+ \\
+        \(T_L = T_L \cup f_L \) \- \\
+      {\bf endif} \\
+      {\bf if } \(Q.max(f_R) > Q.min(f_R)\) {\bf then} \+ \\
+        \(T_R = T_R \cup f_R \) \- \\
+      {\bf endif} \- \\
     {\bf endfor} \\
     D.feature = \(f'\) \\
     D.threshold = \(b(f')\) \\
