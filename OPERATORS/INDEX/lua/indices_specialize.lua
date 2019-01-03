@@ -6,7 +6,7 @@ return function (
   local subs = {}; local tmpl
   assert((a_qtype) == "B1", "type of A must be B1 type")
   subs.fn = "indices"
-  tmpl = "indices.tmpl"
+  tmpl = qconsts.q_src_root .. "/OPERATORS/INDEX/lua/indices.tmpl"
   -- subs.qtype = "B1"
   subs.a_ctype = qconsts.qtypes[a_qtype].ctype
   return subs, tmpl

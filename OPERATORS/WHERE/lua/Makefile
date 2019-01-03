@@ -13,8 +13,6 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libwhere.so
 
 all_for_dc:
-	test -d   ${Q_TMPL_DIR}
-	cp *.tmpl ${Q_TMPL_DIR}
 	echo "Nothing to do"
 	
 #AUX_FILES = ../../../UTILS/src/bytes_to_bits.c

@@ -15,7 +15,7 @@ typedef struct _reduce_max_<<qtype>>_args {
   int64_t max_index;
 } REDUCE_max_<<qtype>>_ARGS;
   ]]
-    local tmpl = 'reduce.tmpl'
+    local tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/reduce.tmpl"
     local subs = {}
     if ( qtype == "B1" ) then
       assert(nil, "TODO")

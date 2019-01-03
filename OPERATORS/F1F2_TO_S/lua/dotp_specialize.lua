@@ -13,7 +13,7 @@ return function (
     uint64_t num; // number of non-null elements inspected
   } DOTP_<<qtype>>_ARGS;
   ]]
-  local tmpl = 'dotp.tmpl'
+  local tmpl = qconsts.q_src_root .. "/OPERATORS/F1F2_TO_S/lua/dotp.tmpl"
   if ( ( ( x_qtype == "F4" ) or ( x_qtype == "F8" ) ) and 
        ( ( y_qtype == "F4" ) or ( y_qtype == "F8" ) ) and 
          ( x_qtype == y_qtype) ) then

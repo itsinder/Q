@@ -57,7 +57,7 @@ local function <<operator>>_specialize(val_fldtype, drag_fldtype)
   subs.c_mem = c_mem
   subs.c_mem_type = "REDUCE_<<operator>>_" .. v_qtype .. "_" .. d_qtype .. "_ARGS *"
 
-  local tmpl = "getk.tmpl"
+  local tmpl = qconsts.q_src_root .. "/OPERATORS/GETK/lua/getk.tmpl"
   subs.fn = "<<operator>>_" .. v_qtype .. "_" .. d_qtype
   subs.comparator = "<<comparator>>"
   subs.op = "<<operator>>"
