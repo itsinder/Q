@@ -151,7 +151,7 @@ ax_equals_b: q_basic
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
 
 approx_quantile: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua all_for_dc
 
 approx_frequent: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
