@@ -9,12 +9,14 @@ local approx_quantile = function(x, args)
   local qtype = x:fldtype()
   local func_name = "approx_quantile_" .. qtype 
 
-  local sp_fn = assert(require("aq_specialize"))
+  local sp_fn = assert(require("Q/OPERATORS/APPROX/QUANTILE/lua/aq_specialize"))
 
   local status, subs, tmpl = pcall(sp_fn, x:fldtype())
+
   -- START: Dynamic compilation
   if ( not qc[func_name] ) then
     print("Dynamic compilation kicking in... ")
+    -- TODO : here tmpl is table of operator tmpls
     qc.q_add(subs, tmpl, func_name)
   end
   -- STOP : Dynamic compilation

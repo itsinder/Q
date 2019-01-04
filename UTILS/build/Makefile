@@ -130,10 +130,10 @@ f1s1opf2_val: q_basic
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua
 
 sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua all_for_dc
 
 sort2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT2/lua
+	make -C ${BASE_PATH}/OPERATORS/SORT2/lua all_for_dc
 
 get: q_basic
 	make -C ${BASE_PATH}/OPERATORS/GET/lua
@@ -154,7 +154,7 @@ approx_quantile: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua all_for_dc
 
 approx_frequent: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
+	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT all_for_dc
 
 mv_mul: q_basic
 	make -C ${BASE_PATH}/OPERATORS/MM/lua/
