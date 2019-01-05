@@ -24,6 +24,7 @@ local function sort(x, ordr)
     qc.q_add(subs, tmpl, func_name)
   end
   -- STOP: Dynamic compilation
+  assert(qc[func_name], "Missing symbol " .. func_name)
 
   -- TODO Check is already sorted correct way and don't repeat
   local x_len, x_chunk, nn_x_chunk = x:start_write()

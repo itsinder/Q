@@ -99,7 +99,7 @@ index:
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
 
 unique:
-	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/
+	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/ all_for_dc
 
 count:
 	make -C ${BASE_PATH}/OPERATORS/COUNT/lua/
