@@ -96,7 +96,7 @@ getk:
 	make -C ${BASE_PATH}/OPERATORS/GETK/lua/ all_for_dc
 
 index:
-	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
+	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/ all_for_dc
 
 unique:
 	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/ all_for_dc
