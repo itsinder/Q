@@ -25,10 +25,18 @@ local function expander_sumby(a, b, nb, optargs)
     end
   end
 
-  local status, subs, len = pcall(spfn, a:fldtype(), b:fldtype())
+  local status, subs, tmpl = pcall(spfn, a:fldtype(), b:fldtype())
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+
   assert(qc[func_name], "Symbol not defined " .. func_name)
   local sz_out = nb
   local sz_out_in_bytes = sz_out * qconsts.qtypes[subs.out_qtype].width

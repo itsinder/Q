@@ -10,7 +10,11 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libgetk.so  
+all : libgetk.so
+
+all_for_dc :
+	luajit gen_specializers.lua
+	luajit generator.lua
 	
 #----------------------------------
 clean :

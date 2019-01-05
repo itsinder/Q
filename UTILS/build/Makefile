@@ -78,22 +78,22 @@ utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 
 drop_nulls:
-	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/ all_for_dc
 
 ifxthenyelsez:
-	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/
+	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ all_for_dc
 
 ainb:
-	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ all_for_dc
 
 where:
 	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/ all_for_dc
 
 sumby:
-	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/
+	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/ all_for_dc
 
 getk:
-	make -C ${BASE_PATH}/OPERATORS/GETK/lua/
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua/ all_for_dc
 
 index:
 	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
