@@ -128,7 +128,7 @@ f1s1opf2: q_basic
 	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua all_for_dc
 
 f1s1opf2_val: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua all_for_dc
 
 sort: q_basic
 	make -C ${BASE_PATH}/OPERATORS/SORT/lua all_for_dc
@@ -137,16 +137,16 @@ sort2: q_basic
 	make -C ${BASE_PATH}/OPERATORS/SORT2/lua all_for_dc
 
 get: q_basic
-	make -C ${BASE_PATH}/OPERATORS/GET/lua
+	make -C ${BASE_PATH}/OPERATORS/GET/lua all_for_dc
 
 idx_sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua all_for_dc
 
 s_to_f: q_basic
-	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua all_for_dc
 
 f_to_s: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua all_for_dc
 
 ax_equals_b: q_basic
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
@@ -158,7 +158,7 @@ approx_frequent: q_basic
 	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT all_for_dc
 
 mv_mul: q_basic
-	make -C ${BASE_PATH}/OPERATORS/MM/lua/
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/ all_for_dc
 
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/

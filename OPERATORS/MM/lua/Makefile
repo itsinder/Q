@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
-all : libmm_mul.so 
+all : libmm_mul.so
+
+all_for_dc :
+	luajit generator.lua operators.lua 
 	
 #----------------------------------
 clean :

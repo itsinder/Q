@@ -15,6 +15,10 @@ OPTFLAGS=
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
 all : libf_to_s.so _f_to_s.lua
+
+all_for_dc : \
+	_f_to_s.lua
+	luajit generator.lua operators.lua
 	
 #----------------------------------
 clean :
