@@ -117,11 +117,9 @@ print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
 f1opf2f3: q_basic
-	#make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua all
 	make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua all_for_dc
 
 f1f2opf3: q_basic
-	# make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all_for_dc
 
 f1s1opf2: q_basic
