@@ -14,7 +14,6 @@ all : libgetk.so
 
 all_for_dc :
 	luajit gen_specializers.lua
-	luajit generator.lua
 	
 #----------------------------------
 clean :

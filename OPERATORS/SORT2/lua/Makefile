@@ -13,7 +13,7 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libsort2_asc.so
 
 all_for_dc :
-	     luajit generator.lua
+	echo "Nothing to do"
 	
 #----------------------------------
 clean :

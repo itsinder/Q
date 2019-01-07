@@ -13,7 +13,7 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libaq.so all_for_dc
 
 all_for_dc :
-	luajit generator.lua
+	echo "Nothing to do"
 
 #----------------------------------
 clean :
