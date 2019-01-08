@@ -18,6 +18,14 @@ local function sort(x, ordr)
   assert(type(subs) == "table", "error in call to sort_specialize")
   local func_name = assert(subs.fn)
 
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Missing symbol " .. func_name)
+
   -- TODO Check is already sorted correct way and don't repeat
   local x_len, x_chunk, nn_x_chunk = x:start_write()
   assert(x_len > 0, "Cannot sort null vector")

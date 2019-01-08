@@ -4,7 +4,7 @@ return function(f1_qtype, f2_qtype, ordr)
   assert( ( ( ordr == "asc") or ( ordr == "dsc") ),
   "Sort order should be asc or dsc")
   local subs = {}
-  local tmpl = 'sort2.tmpl'
+  local tmpl = qconsts.q_src_root .. "/OPERATORS/SORT2/lua/sort2.tmpl"
   subs.SORT_ORDER = ordr
   subs.F1_QTYPE = f1_qtype
   subs.F2_QTYPE = f2_qtype

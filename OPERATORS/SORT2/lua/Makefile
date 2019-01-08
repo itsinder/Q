@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libsort2_asc.so 
+all : libsort2_asc.so
+
+all_for_dc :
+	echo "Nothing to do"
 	
 #----------------------------------
 clean :

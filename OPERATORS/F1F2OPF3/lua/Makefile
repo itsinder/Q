@@ -103,5 +103,3 @@ _cmp_files : cmp_specializers
 
 _f1f2opf3.lua : 
 	lua pkg_f1f2opf3.lua
-	test -d   ${Q_TMPL_DIR}
-	cp *.tmpl ${Q_TMPL_DIR}

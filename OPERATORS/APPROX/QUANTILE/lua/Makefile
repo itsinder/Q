@@ -10,8 +10,11 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libaq.so 
-	
+all : libaq.so all_for_dc
+
+all_for_dc :
+	echo "Nothing to do"
+
 #----------------------------------
 clean :
 	rm -r -f ../gen_src; 

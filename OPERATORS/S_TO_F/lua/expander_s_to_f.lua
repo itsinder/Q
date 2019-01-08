@@ -16,6 +16,13 @@ return function (a, args)
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   local out_qtype = assert(args.qtype)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
   assert(qc[func_name], "Function not found " .. func_name)
   assert(subs.c_mem)
 

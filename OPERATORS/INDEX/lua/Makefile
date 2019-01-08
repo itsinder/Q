@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libindex.so  
+all : libindex.so
+
+all_for_dc :
+	echo "nothing to do"
 	
 #AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 

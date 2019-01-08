@@ -29,7 +29,11 @@
 // * does not need any other special mathematical properties
 #define SC_CONST 0xdeadbeefdeadbeefLL
 
-static inline uint64_t rot64(uint64_t x, int k)
+static inline uint64_t 
+rot64(
+    uint64_t x, 
+    int k
+    )
 {
   return (x << k) | (x >> (64 - k));
 }
@@ -47,13 +51,13 @@ static inline uint64_t rot64(uint64_t x, int k)
 // When run forward or backwards one Mix
 // I tried 3 pairs of each; they all differed by at least 212 bits.
 //
-static inline void mix
-(
- const uint64_t *data,
- uint64_t *s0, uint64_t *s1, uint64_t *s2, uint64_t *s3,
- uint64_t *s4, uint64_t *s5, uint64_t *s6, uint64_t *s7,
- uint64_t *s8, uint64_t *s9, uint64_t *s10, uint64_t *s11
- )
+static inline void 
+mix(
+    const uint64_t *data,
+    uint64_t *s0, uint64_t *s1, uint64_t *s2, uint64_t *s3,
+    uint64_t *s4, uint64_t *s5, uint64_t *s6, uint64_t *s7,
+    uint64_t *s8, uint64_t *s9, uint64_t *s10, uint64_t *s11
+   )
 {
   *s0 += data[0];	*s2 ^= *s10;	*s11 ^= *s0;	*s0 = rot64(*s0, 11);	*s11 += *s1;
   *s1 += data[1];	*s3 ^= *s11;	*s0 ^= *s1;	*s1 = rot64(*s1, 32);	*s0 += *s2;
@@ -85,12 +89,12 @@ static inline void mix
 // Two iterations was almost good enough for a 64-bit result, but a
 // 128-bit result is reported, so End() does three iterations.
 //
-static inline void endPartial
-(
- uint64_t *h0, uint64_t *h1, uint64_t *h2, uint64_t *h3,
- uint64_t *h4, uint64_t *h5, uint64_t *h6, uint64_t *h7,
- uint64_t *h8, uint64_t *h9, uint64_t *h10, uint64_t *h11
- )
+static inline void 
+endPartial(
+    uint64_t *h0, uint64_t *h1, uint64_t *h2, uint64_t *h3,
+    uint64_t *h4, uint64_t *h5, uint64_t *h6, uint64_t *h7,
+    uint64_t *h8, uint64_t *h9, uint64_t *h10, uint64_t *h11
+    )
 {
   *h11+= *h1;	*h2 ^= *h11;	*h1 = rot64(*h1, 44);
   *h0 += *h2;	*h3 ^= *h0;	*h2 = rot64(*h2, 15);
@@ -106,12 +110,12 @@ static inline void endPartial
   *h10+= *h0;	*h1 ^= *h10;	*h0 = rot64(*h0, 54);
 }
 
-static inline void end
-(
- uint64_t *h0,	uint64_t *h1,	uint64_t *h2,	uint64_t *h3,
- uint64_t *h4,	uint64_t *h5,	uint64_t *h6,	uint64_t *h7,
- uint64_t *h8,	uint64_t *h9,	uint64_t *h10,	uint64_t *h11
- )
+static inline void 
+end(
+    uint64_t *h0,	uint64_t *h1,	uint64_t *h2,	uint64_t *h3,
+    uint64_t *h4,	uint64_t *h5,	uint64_t *h6,	uint64_t *h7,
+    uint64_t *h8,	uint64_t *h9,	uint64_t *h10,	uint64_t *h11
+   )
 {
   endPartial(h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
   endPartial(h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
@@ -133,13 +137,13 @@ static inline void end
 // with diffs defined by either xor or subtraction
 // with a base of all zeros plus a counter, or plus another bit, or random
 //
-static inline void short_mix
-(
- uint64_t *h0,
- uint64_t *h1,
- uint64_t *h2,
- uint64_t *h3
- )
+static inline void 
+short_mix(
+    uint64_t *h0,
+    uint64_t *h1,
+    uint64_t *h2,
+    uint64_t *h3
+    )
 {
   *h2 = rot64(*h2, 50);	*h2 += *h3; *h0 ^= *h2;
   *h3 = rot64(*h3, 52);	*h3 += *h0; *h1 ^= *h3;
@@ -167,13 +171,13 @@ static inline void short_mix
 // For every pair of input bits,
 // with probability 50 +- .75% (the worst case is approximately that)
 //
-static inline void short_end
-(
- uint64_t *h0,
- uint64_t *h1,
- uint64_t *h2,
- uint64_t *h3
- )
+static inline void 
+short_end(
+    uint64_t *h0,
+    uint64_t *h1,
+    uint64_t *h2,
+    uint64_t *h3
+    )
 {
   *h3 ^= *h2; *h2 = rot64(*h2, 15); *h3 += *h2;
   *h0 ^= *h3; *h3 = rot64(*h3, 52); *h0 += *h3;
@@ -188,13 +192,13 @@ static inline void short_end
   *h1 ^= *h0; *h0 = rot64(*h0, 63); *h1 += *h0;
 }
 
-void spooky_shorthash
-(
- const void *message,
- size_t length,
- uint64_t *hash1,
- uint64_t *hash2
- )
+void 
+spooky_shorthash(
+    const void *message,
+    size_t length,
+    uint64_t *hash1,
+    uint64_t *hash2
+    )
 {
   uint64_t buf[2 * SC_NUMVARS];
   union
@@ -209,10 +213,10 @@ void spooky_shorthash
   u.p8 = (const uint8_t *)message;
 
   if (!ALLOW_UNALIGNED_READS && (u.i & 0x7))
-    {
-      memcpy(buf, message, length);
-      u.p64 = buf;
-    }
+  {
+    memcpy(buf, message, length);
+    u.p64 = buf;
+  }
 
   remainder = length % 32;
   a = *hash1;
@@ -220,35 +224,31 @@ void spooky_shorthash
   c = SC_CONST;
   d = SC_CONST;
 
-  if (length > 15)
-    {
-      const uint64_t *endp = u.p64 + (length/32)*4;
+  if ( length > 15 ) {
+    const uint64_t *endp = u.p64 + (length/32)*4;
 
-      // handle all complete sets of 32 bytes
-      for (; u.p64 < endp; u.p64 += 4)
-	{
-	  c += u.p64[0];
-	  d += u.p64[1];
-	  short_mix(&a, &b, &c, &d);
-	  a += u.p64[2];
-	  b += u.p64[3];
-	}
-
-      // Handle the case of 16+ remaining bytes.
-      if (remainder >= 16)
-	{
-	  c += u.p64[0];
-	  d += u.p64[1];
-	  short_mix(&a, &b, &c, &d);
-	  u.p64 += 2;
-	  remainder -= 16;
-	}
+    // handle all complete sets of 32 bytes
+    for ( ; u.p64 < endp; u.p64 += 4) {
+      c += u.p64[0];
+      d += u.p64[1];
+      short_mix(&a, &b, &c, &d);
+      a += u.p64[2];
+      b += u.p64[3];
     }
+
+    // Handle the case of 16+ remaining bytes.
+    if ( remainder >= 16 ) {
+      c += u.p64[0];
+      d += u.p64[1];
+      short_mix(&a, &b, &c, &d);
+      u.p64 += 2;
+      remainder -= 16;
+    }
+  }
 
   // Handle the last 0..15 bytes, and its length
   d = ((uint64_t)length) << 56;
-  switch (remainder)
-    {
+  switch (remainder) {
     case 15:
       d += ((uint64_t)u.p8[14]) << 48;
     case 14:
@@ -287,7 +287,7 @@ void spooky_shorthash
     case 0:
       c += SC_CONST;
       d += SC_CONST;
-    }
+  }
   short_end(&a, &b, &c, &d);
   *hash1 = a;
   *hash2 = b;
@@ -295,7 +295,7 @@ void spooky_shorthash
 
 void spooky_init
 (
- struct spooky_state *state,
+ SPOOKY_STATE *state,
  uint64_t seed1,
  uint64_t seed2
  )
@@ -304,14 +304,19 @@ void spooky_init
   state->m_remainder = 0;
   state->m_state[0] = seed1;
   state->m_state[1] = seed2;
+  state->q_is_first = 0;
+  state->q_seed1 = 0;
+  state->q_seed2 = 0;
+  state->q_seed  = 0;
+  state->q_stride= 0;
 }
 
-void spooky_update
-(
- struct spooky_state *state,
- const void *message,
- size_t length
- )
+void 
+spooky_update(
+    SPOOKY_STATE *state,
+    const void *message,
+    size_t length
+    )
 {
   uint64_t h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11;
   size_t newLength = length + state->m_remainder;
@@ -325,74 +330,65 @@ void spooky_update
   const uint64_t *endp;
 
   // Is this message fragment too short? If it is, stuff it away.
-  if (newLength < SC_BUFSIZE)
-    {
-      memcpy(&((uint8_t *)state->m_data)[state->m_remainder], message, length);
-      state->m_length = length + state->m_length;
-      state->m_remainder = (uint8_t)newLength;
-      return;
-    }
+  if (newLength < SC_BUFSIZE) {
+    memcpy(&((uint8_t *)state->m_data)[state->m_remainder], message, length);
+    state->m_length = length + state->m_length;
+    state->m_remainder = (uint8_t)newLength;
+    return;
+  }
 
   // init the variables
-  if (state->m_length < SC_BUFSIZE)
-    {
-      h0 = h3 = h6 = h9 = state->m_state[0];
-      h1 = h4 = h7 = h10 = state->m_state[1];
-      h2 = h5 = h8 = h11 = SC_CONST;
-    }
-  else
-    {
-      h0 = state->m_state[0];
-      h1 = state->m_state[1];
-      h2 = state->m_state[2];
-      h3 = state->m_state[3];
-      h4 = state->m_state[4];
-      h5 = state->m_state[5];
-      h6 = state->m_state[6];
-      h7 = state->m_state[7];
-      h8 = state->m_state[8];
-      h9 = state->m_state[9];
-      h10 = state->m_state[10];
-      h11 = state->m_state[11];
-    }
+  if (state->m_length < SC_BUFSIZE) {
+    h0 = h3 = h6 = h9 = state->m_state[0];
+    h1 = h4 = h7 = h10 = state->m_state[1];
+    h2 = h5 = h8 = h11 = SC_CONST;
+  }
+  else {
+    h0 = state->m_state[0];
+    h1 = state->m_state[1];
+    h2 = state->m_state[2];
+    h3 = state->m_state[3];
+    h4 = state->m_state[4];
+    h5 = state->m_state[5];
+    h6 = state->m_state[6];
+    h7 = state->m_state[7];
+    h8 = state->m_state[8];
+    h9 = state->m_state[9];
+    h10 = state->m_state[10];
+    h11 = state->m_state[11];
+  }
   state->m_length = length + state->m_length;
 
   // if we've got anything stuffed away, use it now
-  if (state->m_remainder)
-    {
-      uint8_t prefix = SC_BUFSIZE-state->m_remainder;
-      memcpy(&(((uint8_t *)state->m_data)[state->m_remainder]), message, prefix);
-      u.p64 = state->m_data;
-      mix(u.p64, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
-      mix(&u.p64[SC_NUMVARS], &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
-      u.p8 = ((const uint8_t *)message) + prefix;
-      length -= prefix;
-    }
-  else
-    {
-      u.p8 = (const uint8_t *)message;
-    }
+  if (state->m_remainder) {
+    uint8_t prefix = SC_BUFSIZE-state->m_remainder;
+    memcpy(&(((uint8_t *)state->m_data)[state->m_remainder]), message, prefix);
+    u.p64 = state->m_data;
+    mix(u.p64, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
+    mix(&u.p64[SC_NUMVARS], &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
+    u.p8 = ((const uint8_t *)message) + prefix;
+    length -= prefix;
+  }
+  else {
+    u.p8 = (const uint8_t *)message;
+  }
 
   // handle all whole blocks of SC_BLOCKSIZE bytes
   endp = u.p64 + (length/SC_BLOCKSIZE)*SC_NUMVARS;
   remainder = (uint8_t)(length-((const uint8_t *)endp - u.p8));
-  if (ALLOW_UNALIGNED_READS || (u.i & 0x7) == 0)
-    {
-      while (u.p64 < endp)
-	{
-	  mix(u.p64, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
-	  u.p64 += SC_NUMVARS;
-	}
+  if ( ( ALLOW_UNALIGNED_READS ) || ( (u.i & 0x7) == 0 ) ) {
+    while (u.p64 < endp) {
+      mix(u.p64, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
+      u.p64 += SC_NUMVARS;
     }
-  else
-    {
-      while (u.p64 < endp)
-	{
-	  memcpy(state->m_data, u.p8, SC_BLOCKSIZE);
-	  mix(state->m_data, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
-	  u.p64 += SC_NUMVARS;
-	}
+  }
+  else {
+    while (u.p64 < endp) {
+      memcpy(state->m_data, u.p8, SC_BLOCKSIZE);
+      mix(state->m_data, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
+      u.p64 += SC_NUMVARS;
     }
+  }
 
   // stuff away the last few bytes
   state->m_remainder = remainder;
@@ -415,7 +411,7 @@ void spooky_update
 
 void spooky_final
 (
- struct spooky_state *state,
+ SPOOKY_STATE *state,
  uint64_t *hash1,
  uint64_t *hash2
  )

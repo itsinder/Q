@@ -20,6 +20,14 @@ return function (a, x, y, optargs )
   local status, subs, tmpl = pcall(spfn, x_qtype, optargs)
   assert(status, "Failure of specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  --STOP: Dynamic compilation
+
   assert(qc[func_name], "Function does not exist " .. func_name)
   local count = assert(subs.count)
   local getter = assert(subs.getter)

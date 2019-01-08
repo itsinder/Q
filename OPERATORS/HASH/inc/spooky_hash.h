@@ -35,63 +35,67 @@
 #define SC_BLOCKSIZE (8 * SC_NUMVARS)
 #define SC_BUFSIZE (2 * SC_BLOCKSIZE)
 
-typedef struct spooky_state
-{
-uint64_t m_data[2 * SC_NUMVARS];
-uint64_t m_state[SC_NUMVARS];
-size_t m_length;
-unsigned char m_remainder;
-} spooky_state;
+typedef struct spooky_state {
+  uint64_t m_data[2 * SC_NUMVARS];
+  uint64_t m_state[SC_NUMVARS];
+  size_t m_length;
+  unsigned char m_remainder;
+  int q_is_first; // only for Q
+  uint64_t q_seed1; // only for Q
+  uint64_t q_seed2; // only for Q
+  uint64_t q_seed;  // only for Q
+  int q_stride;  //  only for Q
+} SPOOKY_STATE;
 
-extern void spooky_shorthash
-(
-const void *message,
-size_t length,
-uint64_t *hash1,
-uint64_t *hash2
-);
+extern void 
+spooky_shorthash (
+    const void *message,
+    size_t length,
+    uint64_t *hash1,
+    uint64_t *hash2
+    );
 
-extern void spooky_init
-(
-struct spooky_state *state,
-uint64_t hash1,
-uint64_t hash2
-);
+extern void 
+spooky_init(
+    SPOOKY_STATE *state,
+    uint64_t hash1,
+    uint64_t hash2
+    );
 
-extern void spooky_update
-(
-struct spooky_state *state,
-const void *msg,
-size_t len
-);
+extern void 
+spooky_update(
+    SPOOKY_STATE *state,
+    const void *msg,
+    size_t len
+    );
 
-extern void spooky_final
-(
-struct spooky_state *state,
-uint64_t *hash1,
-uint64_t *hash2
-);
+extern void 
+spooky_final(
+    SPOOKY_STATE *state,
+    uint64_t *hash1,
+    uint64_t *hash2
+    );
 
 //hash1/2 doubles as input parameter for seed1/2 and output for hash1/2
-extern void spooky_hash128
-(
-const void *message,
-size_t length,
-uint64_t *hash1,
-uint64_t *hash2
-);
+extern void 
+spooky_hash128(
+    const void *message,
+    size_t length,
+    uint64_t *hash1,
+    uint64_t *hash2
+    );
 
-extern uint64_t spooky_hash64
-(
-const void *message,
-size_t len,
-uint64_t seed
-);
+extern uint64_t 
+spooky_hash64(
+    const void *message,
+    size_t len,
+    uint64_t seed
+    );
 
-extern uint32_t spooky_hash32
-(
-const void *message,
-size_t len,
-uint32_t seed
-);
+extern uint32_t 
+spooky_hash32(
+    const void *message,
+    size_t len,
+    uint32_t seed
+    );
 #endif

@@ -1,5 +1,6 @@
 local qconsts = {}
---===========================  
+--===========================
+  qconsts.q_src_root = os.getenv("Q_SRC_ROOT")
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.chunk_size = 256 * 1024
   qconsts.debug = false -- set to TRUE only if you want debugging

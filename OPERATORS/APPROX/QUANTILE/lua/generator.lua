@@ -16,7 +16,8 @@ for _, intype in ipairs(qtypes) do
     assert(type(subs) == "table")
     assert(type(tmpls) == "table")
     for _, tmpl in ipairs(tmpls) do
-      subs.fn = string.sub(tmpl, 1, #tmpl - 5) .. "_" .. subs.qtype
+      local _,_,_,_,_,_,_,_,func_name = string.match(tmpl, "(%a+)/(%a+)/(%a+)/(%a+)/(%a+)/(%a+)/(%a+)/(%a+)/(%a+_*%a*)")
+      subs.fn = func_name .. "_" .. subs.qtype
       gen_code.doth(subs, tmpl, incdir)
       gen_code.dotc(subs, tmpl, srcdir)
       print("Generated ", subs.fn)
