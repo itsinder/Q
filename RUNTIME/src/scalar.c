@@ -84,12 +84,13 @@ static int l_sclr_reincarnate(lua_State *L) {
   int status = 0;
   char op_str_buf[4096]; // TODO P3 try not to hard code bound
   memset(op_str_buf, '\0', 4096);
-  // TODO P3 This is slow. Can be speeded up
-  char  buf[1024];
+  //  TODO P3 try not to hard code bound
+  char  buf[64+1];
+  memset(buf, '\0', 64+1);
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
 
-  strcat(op_str_buf, "Scalar.new(");
+  strcpy(op_str_buf, "Scalar.new(");
   if ( strcmp(field_type, "B1" ) == 0 ) {
     sprintf(buf, "%s", ptr_sclr->cdata.valB1 ? "true" : "false");
     strcat(op_str_buf, buf);
@@ -758,7 +759,7 @@ static const struct luaL_Reg sclr_methods[] = {
     { "conv", l_sclr_conv },
     { "abs", l_sclr_abs },
     { "fldtype", l_fldtype },
-    { "sclr_reincarnate", l_sclr_reincarnate },
+    { "reincarnate", l_sclr_reincarnate },
     { NULL,          NULL               },
 };
  
@@ -767,7 +768,7 @@ static const struct luaL_Reg sclr_functions[] = {
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
-    { "sclr_reincarnate", l_sclr_reincarnate },
+    { "reincarnate", l_sclr_reincarnate },
     { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },

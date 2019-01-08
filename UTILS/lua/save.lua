@@ -88,7 +88,7 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "Scalar" ) then
     -- Currently not supported
-    local scalar_str = value:sclr_reincarnate()
+    local scalar_str = value:reincarnate()
     file:write(name .. " = " .. scalar_str)
     file:write("\n")
   else
