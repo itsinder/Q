@@ -7,9 +7,8 @@ local Vector  = require 'libvec'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 local record_time = require 'Q/UTILS/lua/record_time'
 
-local function expander_where(op, a, b)
+local function expander_where(a, b)
   -- Verification
-  assert(op == "where")
   assert(type(a) == "lVector", "a must be a lVector ")
   assert(type(b) == "lVector", "b must be a lVector ")
   assert(b:qtype() == "B1", "b must be of type B1")
