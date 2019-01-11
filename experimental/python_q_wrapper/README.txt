@@ -3,8 +3,9 @@ Installations required for Python Q wrapper:
 $ sudo apt-get install python-dev
 $ sudo pip install lupa
 
-Update PYTHONPATH env variable
-$ export PYTHONPATH=$Q_SRC_ROOT/experimental/python_q_wrapper:$PYTHONPATH
+
+Before running any test, run below command
+$ source python_q_wrapper/to_source
 
 
 To run tests:
