@@ -12,13 +12,8 @@ $ python test_print_csv.py
 
 
 Note:
->> If you face error while running:
-$ python test_print_csv.py 
+>> If you face error while loading any module, please check whether __init__.py is present at below location
+Q/__init__.py
+Q/src/__init__.py
 
-Traceback (most recent call last):
-  File "test_print_csv.py", line 1, in <module>
-    import Q
-ImportError: No module named Q
-
->> Please checkout Q/__init__.py which might have been deleted.
-
+if not, please check it out
