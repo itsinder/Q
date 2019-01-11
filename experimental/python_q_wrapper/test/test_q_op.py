@@ -1,7 +1,7 @@
 import Q
-from Q.p_vector import PVector
-from Q.p_reducer import PReducer
-from Q.p_scalar import PScalar
+from Q.src.p_vector import PVector
+from Q.src.p_reducer import PReducer
+from Q.src.p_scalar import PScalar
 
 
 def test_const():

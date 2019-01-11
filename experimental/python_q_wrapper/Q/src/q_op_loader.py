@@ -1,5 +1,5 @@
-import Q.lua_executor as executor
-from Q.q_helper import call_lua_op
+import Q.src.lua_executor as executor
+from Q.src.q_helper import call_lua_op
 
 
 q_op_str = \

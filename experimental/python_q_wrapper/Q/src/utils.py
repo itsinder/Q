@@ -1,20 +1,20 @@
-import Q.lua_executor as executor
-from Q.constants import list_to_table_str, dict_to_table_str
+import Q.src.lua_executor as executor
+from Q.src.constants import list_to_table_str, dict_to_table_str
 from Q import lupa
 
 
 def is_p_vector(val):
-    from Q.p_vector import PVector
+    from Q.src.p_vector import PVector
     return isinstance(val, PVector)
 
 
 def is_p_scalar(val):
-    from Q.p_scalar import PScalar
+    from Q.src.p_scalar import PScalar
     return isinstance(val, PScalar)
 
 
 def is_p_reducer(val):
-    from Q.p_reducer import PReducer
+    from Q.src.p_reducer import PReducer
     return isinstance(val, PReducer)
 
 
