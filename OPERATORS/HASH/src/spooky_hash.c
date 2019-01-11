@@ -308,7 +308,7 @@ void spooky_init
   state->q_seed1 = 0;
   state->q_seed2 = 0;
   state->q_seed  = 0;
-  state->q_stride= 0;
+  //state->q_stride= 0;
 }
 
 void 

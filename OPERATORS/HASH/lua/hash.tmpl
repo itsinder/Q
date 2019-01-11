@@ -3,17 +3,18 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include "spooky_hash.h"
 #include <unistd.h>
 #include <stdint.h>
 #include <math.h>
 
 extern int
 ${fn}(  
-      const ${in_ctype} * const restrict in,  
+      char * restrict in,
       void *dummy1,
       uint64_t nR,
       void *args,
-      ${out_ctype} * restrict out,  
+      ${out_ctype} * restrict out,
       void *dummy2
       ) 
 ;
@@ -25,11 +26,11 @@ ${fn}(
 
 int
 ${fn}(  
-      const char * const restrict in,  
+      char * restrict in,
       void *dummy1,
-      uint64_t nR,  
+      uint64_t nR,
       void *args,
-      ${out_ctype} * restrict out,  
+      ${out_ctype} * restrict out,
       void *dummy2
       )
 
@@ -37,21 +38,21 @@ ${fn}(
   int status = 0;
   SPOOKY_STATE *spooky_state = (SPOOKY_STATE *)args;
   if ( spooky_state->q_is_first == 1 ) {
-    spooky_init(spooky_state, spooky_state->seed1, spooky_state->seed2);
+    spooky_init(spooky_state, spooky_state->q_seed1, spooky_state->q_seed2);
     spooky_state->q_is_first = 0;
   }
-  if ( in  == NULL ) { go_BYE(-1); }
+  if ( in == NULL ) { go_BYE(-1); }
   if ( out == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
-  uint64_t seed = spooky_state->seed;
+  uint64_t seed = spooky_state->q_seed;
   // OLD size_t len = sizeof(${in_ctype});
-  size_t len  = spooky_state->q_stride;
+  size_t len = spooky_state->q_stride;
   if ( len == 0 ) { go_BYE(-1); }
-  for ( uint64_t i = 0; i < nR; i++ ) { 
-    out[i] =  spooky_hash64(in, len, seed);
-    in += len;
-  } 
+  for ( uint64_t i = 0; i < nR; i++ ) {
+    out[i] = spooky_hash64(in, len, seed);
+    in += i*len;
+  }
 BYE:
   return status;
 }

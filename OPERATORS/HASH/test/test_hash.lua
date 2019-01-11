@@ -26,6 +26,7 @@ tests.t1 = function ()
   local status, ret = pcall(Q.load_csv, csv_file_path, M )
   assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ")
   -- call to hash function which returns I8 column
+
   local I8_col = Q.hash(ret['empid'])
   assert(I8_col)
   assert(I8_col:length()== ret['empid']:length())
@@ -35,6 +36,12 @@ tests.t1 = function ()
   assert(c_to_txt(I8_col, 2) == c_to_txt(I8_col,8))
   Q.print_csv(I8_col)
   print("Successfully completed test t1")
+end
+
+tests.t2 = function ()
+  local vec = Q.mk_col({1, 2, 3, 4}, "I2")
+  local out = Q.hash(vec)
+  Q.print_csv(out)
 end
 
 return tests
