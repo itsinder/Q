@@ -1,6 +1,6 @@
-from Q.src.constants import *
-import Q.src.lua_executor as executor
-from Q.src.p_scalar import PScalar
+from Q.constants import *
+import Q.lua_executor as executor
+from Q.p_scalar import PScalar
 
 
 class PReducer:

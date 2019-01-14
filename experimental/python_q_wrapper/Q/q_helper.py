@@ -1,10 +1,10 @@
-import Q.src.lua_executor as executor
-import Q.src.utils as util
-from Q.src import constants as q_consts
-from Q.src.p_vector import PVector
-from Q.src.p_reducer import PReducer
-from Q.src.p_scalar import PScalar
-from Q.src.q_op_category import *
+import Q.lua_executor as executor
+import Q.utils as util
+from Q import constants as q_consts
+from Q.p_vector import PVector
+from Q.p_reducer import PReducer
+from Q.p_scalar import PScalar
+from Q.q_op_category import *
 import math
 
 

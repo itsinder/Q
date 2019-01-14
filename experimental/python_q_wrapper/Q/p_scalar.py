@@ -1,6 +1,6 @@
-import Q.src.lua_executor as executor
-from Q.src.constants import *
-import Q.src.utils as util
+import Q.lua_executor as executor
+from Q.constants import *
+import Q.utils as util
 
 
 class PScalar:

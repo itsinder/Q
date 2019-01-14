@@ -1,6 +1,6 @@
 import Q
-from Q.src.p_vector import PVector
-from Q.src.p_scalar import PScalar
+from Q.p_vector import PVector
+from Q.p_scalar import PScalar
 
 
 def test_vec_concat():

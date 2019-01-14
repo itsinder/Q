@@ -1,4 +1,4 @@
-from Q.src import utils, lua_executor
+from Q import utils, lua_executor
 
 
 q_op_str = \

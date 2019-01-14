@@ -1,5 +1,5 @@
 import Q
-from Q.src.p_vector import PVector
+from Q.p_vector import PVector
 
 
 def test_mk_col():
