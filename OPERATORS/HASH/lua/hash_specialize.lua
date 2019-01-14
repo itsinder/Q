@@ -46,7 +46,12 @@ return function (
   subs.seed2 = seed2
   subs.seed = seed
   subs.is_first = 1
-  subs.stride = vec_meta.base.field_size
+  if ( in_qtype == "SC" ) then
+    subs.stride = vec_meta.base.field_size
+  else
+    subs.stride = ffi.sizeof(in_ctype)
+  end
+
 
   --[[
   local args_ctype = "SPOOKY_STATE"

@@ -51,7 +51,7 @@ ${fn}(
   if ( len == 0 ) { go_BYE(-1); }
   for ( uint64_t i = 0; i < nR; i++ ) {
     out[i] = spooky_hash64(in, len, seed);
-    in += i*len;
+    in += len;
   }
 BYE:
   return status;

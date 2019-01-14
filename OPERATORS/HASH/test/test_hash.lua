@@ -27,14 +27,14 @@ tests.t1 = function ()
   assert( status == true, "Error: " .. tostring(ret) .. "   : Loading Aborted ")
   -- call to hash function which returns I8 column
 
-  local I8_col = Q.hash(ret['empid'])
+  local I8_col = Q.hash(ret['empid']):eval()
   assert(I8_col)
   assert(I8_col:length()== ret['empid']:length())
+  Q.print_csv(I8_col)
   -- validating row 1 and 7, row 2 and 8
   -- should return same hash for the same SC value
   assert(c_to_txt(I8_col, 1) == c_to_txt(I8_col,7))
   assert(c_to_txt(I8_col, 2) == c_to_txt(I8_col,8))
-  Q.print_csv(I8_col)
   print("Successfully completed test t1")
 end
 

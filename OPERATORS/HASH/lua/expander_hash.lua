@@ -69,7 +69,7 @@ local function expander_hash(f1, optargs)
       local cst_f1_chunk  = ffi.cast("char *", get_ptr(f1_chunk))
       local cst_out_buf   = ffi.cast(cst_out_as, get_ptr(out_buf))
       local start_time = qc.RDTSC()
-      qc[func_name](f1_chunk, ffi.NULL, f1_len, cst_args, 
+      qc[func_name](cst_f1_chunk, ffi.NULL, f1_len, cst_args,
       cst_out_buf, ffi.NULL)
       record_time(start_time, func_name)
     end
