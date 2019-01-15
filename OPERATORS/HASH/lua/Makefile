@@ -12,7 +12,12 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libhash.so 
+all : libhash.so
+
+all_for_dc :
+	cp ../src/*.c ${Q_BUILD_DIR}/src/
+	cp ../inc/*.h ${Q_BUILD_DIR}/include/
+	echo "Done"
 	
 clean : 
 	rm -r -f ../gen_src;

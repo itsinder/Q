@@ -18,7 +18,6 @@ local function init_spooky_struct(subs)
   args_ptr[0].q_seed1 = subs.seed1
   args_ptr[0].q_seed2 = subs.seed2
   args_ptr[0].q_seed  = subs.seed
-  print(subs.stride)
   args_ptr[0].q_stride = subs.stride
   return args_ptr
 end
