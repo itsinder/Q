@@ -15,8 +15,6 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS}
 all : libhash.so
 
 all_for_dc :
-	cp ../src/*.c ${Q_BUILD_DIR}/src/
-	cp ../inc/*.h ${Q_BUILD_DIR}/include/
 	echo "Done"
 	
 clean : 
@@ -27,12 +25,10 @@ clean :
 
 libhash.so :
 	luajit generator.lua
-	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${CFLAGS} ${INCS} ../src/*.c ../gen_src/*.c -shared -o libhash.so
+	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${CFLAGS} ${INCS} ../../../UTILS/src/spooky_hash.c ../gen_src/*.c -shared -o libhash.so
 	test -d  ${Q_BUILD_DIR}/src/
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
 	cp ../gen_inc/*.h ${Q_BUILD_DIR}/include/
-	cp ../src/*.c ${Q_BUILD_DIR}/src/
-	cp ../inc/*.h ${Q_BUILD_DIR}/include/
 
 test_q : libhash.so
 	echo "TODO"
