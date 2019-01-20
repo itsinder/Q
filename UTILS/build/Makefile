@@ -3,6 +3,7 @@ OUTPUTS = libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
 all: q_core
+	cd ${BASE_PATH}
 	echo "Q is built"
 
 clean:
@@ -53,8 +54,6 @@ install: uninstall
 	cp ${Q_ROOT}/lib/libq_core.so /usr/lib;\
 	cp ${Q_ROOT}/include/q_core.h /usr/local/share/lua/5.1/Q
 
-all: q_core
-	cd ${BASE_PATH}
 
 uninstall:
 	rm -rf /usr/local/share/lua/5.1/Q;\

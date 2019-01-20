@@ -16,6 +16,8 @@ all : lib_hash.so
 	
 clean : 
 	rm -f _*
+	rm -f ../gen_src/*
+	rm -f ../gen_inc/*
 	rm -f *.so
 
 SRC_FILES =  \

@@ -72,8 +72,12 @@ tests.t3 = function()
   local lb = -32767
   local ub = 32767
   local x = Q.rand( { lb = lb, ub = ub, qtype = "I2", len = len })
+  Q.print_csv(x, { opfile = "_x.csv" })
+  os.exit()
   x = Q.sort(x, "asc")
   local y = Q.cum_cnt(x)
+  Q.print_csv(y, { opfile = "_y.csv" })
+  os.exit()
   assert(y:fldtype() == "I4")
   chk_range(y)
   chk_sawtooth(y)
