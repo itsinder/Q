@@ -40,9 +40,6 @@ typedef struct spooky_state {
   uint64_t m_state[SC_NUMVARS];
   size_t m_length;
   unsigned char m_remainder;
-  int q_is_first; // only for Q
-  uint64_t q_seed1; // only for Q
-  uint64_t q_seed2; // only for Q
   uint64_t q_seed;  // only for Q
   int q_stride;  //  only for Q
 } SPOOKY_STATE;

@@ -304,11 +304,6 @@ void spooky_init
   state->m_remainder = 0;
   state->m_state[0] = seed1;
   state->m_state[1] = seed2;
-  state->q_is_first = 0;
-  state->q_seed1 = 0;
-  state->q_seed2 = 0;
-  state->q_seed  = 0;
-  //state->q_stride= 0;
 }
 
 void 

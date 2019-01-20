@@ -37,16 +37,11 @@ ${fn}(
 {
   int status = 0;
   SPOOKY_STATE *spooky_state = (SPOOKY_STATE *)args;
-  if ( spooky_state->q_is_first == 1 ) {
-    spooky_init(spooky_state, spooky_state->q_seed1, spooky_state->q_seed2);
-    spooky_state->q_is_first = 0;
-  }
   if ( in == NULL ) { go_BYE(-1); }
   if ( out == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
 
   uint64_t seed = spooky_state->q_seed;
-  // OLD size_t len = sizeof(${in_ctype});
   size_t len = spooky_state->q_stride;
   if ( len == 0 ) { go_BYE(-1); }
   for ( uint64_t i = 0; i < nR; i++ ) {

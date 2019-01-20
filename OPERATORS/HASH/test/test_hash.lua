@@ -44,4 +44,28 @@ tests.t2 = function ()
   Q.print_csv(out)
 end
 
+-- TODO P1 Additional tests to write
+-- Create 2 identical vectors. hash them using default seeds
+-- Output vectors should be the same
+--
+-- Create 2 different vectors (no elements in common)
+-- hash them using default seeds
+-- Output vectors  should not have any elements in common
+--
+-- Create 2 identical vectors. hash them using custom seeds
+-- but same in both cases
+-- Output vectors should be the same
+
+-- Create 2 identical vectors. hash them using different custom seeds
+-- but same in both cases
+-- Output vectors  should not have any elements in common
+--
+-- Repeat all above tests for vector lengths in
+-- qconsts.chunk_size - 17
+-- qconsts.chunk_size 
+-- 2*qconsts.chunk_size + 33
+
+-- Repeat all above tests for all possible qtypes 
+--
+-- Ideally, you have a doubly nested for loop to test all variations
 return tests
