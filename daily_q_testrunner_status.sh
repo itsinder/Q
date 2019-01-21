@@ -24,7 +24,7 @@ cd $Q_SRC_ROOT/UTILS/build
 build_cleanup_heading="------------OUTPUT of build cleanup--------------------------------------"
 build_cleanup_output=$(make clean 2>&1)
 build_output_heading="------------OUTPUT of build scripts--------------------------------------"
-build_output=$(make 2>&1)
+build_output=$(make BUILD_TYPE=all 2>&1)
 
 cd ../../
 #running q_testrunner from Q_SRC_ROOT and dump output in temporary file
