@@ -13,11 +13,12 @@ local function chk_sawtooth(
   x:eval()
   local n = x:length()
   assert(n>0)
-  local y = Q.is_prev(x, "geq", { default_val = 1 } )
+  local y = Q.is_prev(x, "leq", { default_val = 1 } )
   local z = Q.vseq(x, 1)
   local w = Q.vvor(y, z)
+  -- Q.print_csv({x,y,z,w}, { opfile = "_x.csv" } )
   local n1, n2 = Q.sum(w):eval()
-  print(n1, n2)
+  -- print(n1, n2)
   assert(n1 == n2)
 end
 
@@ -72,12 +73,8 @@ tests.t3 = function()
   local lb = -32767
   local ub = 32767
   local x = Q.rand( { lb = lb, ub = ub, qtype = "I2", len = len })
-  Q.print_csv(x, { opfile = "_x.csv" })
-  os.exit()
   x = Q.sort(x, "asc")
   local y = Q.cum_cnt(x)
-  Q.print_csv(y, { opfile = "_y.csv" })
-  os.exit()
   assert(y:fldtype() == "I4")
   chk_range(y)
   chk_sawtooth(y)

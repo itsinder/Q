@@ -69,6 +69,16 @@ return function (
   c_mem_ptr.ub = ffi.cast(ctype .. " *", get_ptr(ub:to_cmem()))[0]
   c_mem_ptr.seed = seed
   --==============================
+  if ( qconsts.iorf[qtype] == "fixed" ) then 
+    subs.conv_fn = "floor"
+    subs.identity_fn = " /* no identitu function needed */ "
+  elseif ( qconsts.iorf[qtype] == "floating_point" ) then 
+    subs.conv_fn = "identity"
+    subs.identity_fn = " static double identity(double x) { return x; }"
+  else
+    assert(nil, "Unknown type " .. qtype)
+  end
+  --=========================
   tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/rand.tmpl"
   subs.fn = "rand_" .. qtype
   subs.c_mem = c_mem
