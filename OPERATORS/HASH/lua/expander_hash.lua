@@ -17,7 +17,7 @@ local function init_spooky_struct(subs)
   ffi.fill(args_ptr, sz_args)
   -- Following normally done by spooky_hash_init()
   args_ptr[0].m_length   = 0;
-  args_ptr[0].remainder  = 0;
+  args_ptr[0].m_remainder  = 0;
   args_ptr[0].m_state[0] = subs.seed1
   args_ptr[0].m_state[1] = subs.seed2
   -- needed by Q
@@ -32,7 +32,10 @@ local function expander_hash(f1, optargs)
   assert(f1:has_nulls() == false, "not prepared for nulls in hash")
   local spfn_name = "Q/OPERATORS/HASH/lua/hash_specialize"
   local spfn = assert(require(spfn_name))
-  local status, subs, tmpl = pcall(spfn, f1:meta(), optargs)
+  -- TODO: replace f1:meta().base with f1:lite_meta()
+  -- lite_meta() will have vec basic info including vec_nn info
+  -- without complex table structure
+  local status, subs, tmpl = pcall(spfn, f1:meta().base, optargs)
   if not status then print(subs) end
   assert(status, "Specializer " .. spfn_name .. " failed")
   local func_name = assert(subs.fn)

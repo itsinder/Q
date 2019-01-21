@@ -12,7 +12,7 @@ return function (
   optargs
   )
 
-  local in_qtype = vec_meta.base.field_type
+  local in_qtype = vec_meta.field_type
   -- seed values are referred from AB repo seed values
   local seed1 = 961748941
   local seed2 = 982451653
@@ -47,7 +47,7 @@ return function (
   subs.seed = seed
   subs.is_first = 1
   if ( in_qtype == "SC" ) then
-    subs.stride = vec_meta.base.field_size
+    subs.stride = vec_meta.field_size
   else
     subs.stride = ffi.sizeof(in_ctype)
   end
