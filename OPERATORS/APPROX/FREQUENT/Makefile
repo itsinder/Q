@@ -3,6 +3,9 @@ SRC_INCLUDES = ../../SORT/gen_src/*.c gen_src/*.c
 
 all: libapprox_frequent.so
 
+all_for_dc:
+	    echo "Nothing to do"
+
 gen_inc/% gen_src/% : lua/*
 	cd lua; luajit generator.lua
 

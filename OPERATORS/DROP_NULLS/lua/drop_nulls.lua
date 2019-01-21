@@ -28,6 +28,14 @@ local function drop_nulls(x, sval)
   assert(type(subs) == "table", "error in call to drop_nulls_specialize")
   local func_name = assert(subs.fn)
 
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Symbol not defined " .. func_name)
+
   -- early return if no nulls 
   if ( x:has_nulls() == false ) then return x end
     

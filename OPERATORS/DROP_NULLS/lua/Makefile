@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libdrop_nulls.so  
+all : libdrop_nulls.so
+
+all_for_dc :
+	echo "Nothing to do"
 	
 ../gen_src/_drop_nulls_I4.c :
 	luajit generator.lua # TODO: Should be more specific

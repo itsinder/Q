@@ -23,8 +23,15 @@ local function expander_unique(op, a, b)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
-  assert(qc[func_name], "Symbol not defined " .. func_name)
   
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Symbol not defined " .. func_name)
+
   local sz_out          = qconsts.chunk_size 
   local sz_out_in_bytes = sz_out * qconsts.qtypes[a:qtype()].width
   local out_buf = nil

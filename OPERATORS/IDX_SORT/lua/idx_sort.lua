@@ -32,6 +32,14 @@ local function idx_sort(idx, val, ordr)
   assert(type(subs) == "table", "error in call to idx_sort_specialize")
   local func_name = assert(subs.fn)
 
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Symbol not defined " .. func_name)
+
   local xlen, xptr, nn_xptr = val:start_write()
   assert(xlen > 0, "Cannot sort null vector")
   assert(not nn_xptr, "Cannot sort with null values")

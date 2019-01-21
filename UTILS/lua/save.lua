@@ -88,6 +88,9 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "Scalar" ) then
     -- Currently not supported
+    local scalar_str = value:reincarnate()
+    file:write(name .. " = " .. scalar_str)
+    file:write("\n")
   else
     error("cannot save " .. name .. " of type " .. type(value))
   end
@@ -132,6 +135,7 @@ local function save_global(filename)
   -- TODO: what if file already exists, for now it overrides (w+) the file 
   local file = assert(io.open(filename, "w+"), "Unable to open file for writing")
   file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
+  file:write("local Scalar = require 'libsclr'\n")
   -- file:write("local Vector = require 'libvector'\n")
   -- file:write("local Dictionary = require 'Dictionary'\n")
 

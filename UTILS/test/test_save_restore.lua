@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local Scalar = require 'libsclr'
 
 local tests = {}
 local qconsts = require 'Q/UTILS/lua/q_consts'
@@ -64,6 +65,26 @@ tests.t5 = function()
     col1:memo(false)
     col1:eval()
     Q.save("/tmp/saving_it.lua")
+end
+
+tests.t6 = function()
+  -- creating global Scalars
+  sc_B1_bool = Scalar.new(true, "B1")
+  sc_I1 = Scalar.new(100, "I1")
+  sc_B1_num = Scalar.new(0, "B1")
+  Q.save("/tmp/saving_sclrs.lua")
+
+  -- nullifying sc before restoring
+  sc_B1_bool = nil
+  sc_I1 = nil
+  sc_B1_num = nil
+
+  local status, ret = pcall(Q.restore, "/tmp/saving_sclrs.lua")
+  assert(status, ret)
+  assert(sc_B1_bool:to_str() == "true")
+  assert(sc_B1_bool:to_num() == 1)
+  assert(sc_I1:to_num() == 100)
+  print("Successfully executed test t6")
 end
 
 return tests

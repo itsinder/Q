@@ -56,6 +56,14 @@ local function expander_join(op, src_lnk, src_fld, dst_lnk, join_type, optargs)
   assert(status, "Specializer failed " .. sp_fn_name)
   assert(type(subs) == "table")
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+
   assert(qc[func_name], "Symbol not defined " .. func_name)
   local sz_out = qconsts.chunk_size
   local sz_dst = sz_out * qconsts.qtypes[subs.dst_fld_qtype].width

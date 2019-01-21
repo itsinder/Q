@@ -20,7 +20,7 @@ return function (
     assert(nil, "Bad in_qtype = " .. in_qtype)
   end
 
-  local tmpl = 'split.tmpl'
+  local tmpl = qconsts.q_src_root .. "/OPERATORS/F1OPF2F3/lua/split.tmpl"
   local subs = {}; 
   subs.fn = "split_" .. in_qtype .. "_" .. out_qtype 
   subs.in_ctype  = qconsts.qtypes[in_qtype].ctype

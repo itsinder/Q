@@ -20,6 +20,14 @@ local function sort2(x, y, ordr)
   assert(status, "error in call to sort2_asc_specialize")
   assert(type(subs) == "table", "error in call to sort2_asc_specialize")
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+
   -- TODO Check is already sorted correct way and don't repeat
   local x_len, x_chunk, nn_x_chunk = x:start_write()
   local y_len, y_chunk, nn_y_chunk = y:start_write()

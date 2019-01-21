@@ -80,8 +80,61 @@ BYE:
   return 2;
 }
 
-static int l_sclr_to_num( lua_State *L) {
+static int l_sclr_reincarnate(lua_State *L) {
+  int status = 0;
+  char op_str_buf[4096]; // TODO P3 try not to hard code bound
+  memset(op_str_buf, '\0', 4096);
+  //  TODO P3 try not to hard code bound
+  char  buf[64+1];
+  memset(buf, '\0', 64+1);
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  const char *field_type = ptr_sclr->field_type;
 
+  strcpy(op_str_buf, "Scalar.new(");
+  if ( strcmp(field_type, "B1" ) == 0 ) {
+    sprintf(buf, "%s", ptr_sclr->cdata.valB1 ? "true" : "false");
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "I1" ) == 0 ) {
+    sprintf(buf, "%" PRI1, ptr_sclr->cdata.valI1);
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "I2" ) == 0 ) {
+    sprintf(buf, "%" PRI2, ptr_sclr->cdata.valI2);
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "I4" ) == 0 ) {
+    sprintf(buf, "%" PRI4, ptr_sclr->cdata.valI4);
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "I8" ) == 0 ) {
+    sprintf(buf, "%" PRI8, ptr_sclr->cdata.valI8);
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "F4" ) == 0 ) {
+    sprintf(buf, "%" PRF4, ptr_sclr->cdata.valF4);
+    strcat(op_str_buf, buf);
+  }
+  else if ( strcmp(field_type, "F8" ) == 0 ) {
+    sprintf(buf, "%" PRF8, ptr_sclr->cdata.valF8);
+    strcat(op_str_buf, buf);
+  }
+  else {
+    WHEREAMI; goto BYE;
+  }
+  strcat(op_str_buf, ", '");
+  strcat(op_str_buf, field_type);
+  strcat(op_str_buf, "')");
+  lua_pushstring(L, op_str_buf);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_reincarnate. ");
+  lua_pushnumber(L, status);
+  return 2;
+}
+
+static int l_sclr_to_num( lua_State *L) {
   if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
@@ -706,6 +759,7 @@ static const struct luaL_Reg sclr_methods[] = {
     { "conv", l_sclr_conv },
     { "abs", l_sclr_abs },
     { "fldtype", l_fldtype },
+    { "reincarnate", l_sclr_reincarnate },
     { NULL,          NULL               },
 };
  
@@ -714,6 +768,7 @@ static const struct luaL_Reg sclr_functions[] = {
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "reincarnate", l_sclr_reincarnate },
     { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },

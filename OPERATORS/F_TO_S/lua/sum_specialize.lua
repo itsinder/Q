@@ -13,7 +13,7 @@ return function (
       uint64_t num; // number of non-null elements inspected
     } REDUCE_sum_<<qtype>>_ARGS;
     ]]
-    local tmpl = 'sum.tmpl'
+    local tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/sum.tmpl"
 
     local subs = {}
     subs.macro = "mcr_nop"

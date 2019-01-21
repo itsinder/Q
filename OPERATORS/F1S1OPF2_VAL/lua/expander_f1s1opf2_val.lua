@@ -31,6 +31,13 @@ local function expander_f1s1opf2_val(op, a, s, optargs)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
   assert(qc[func_name], "Symbol not defined " .. func_name)
 
   local s_cmem		= s:to_cmem()

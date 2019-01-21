@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
-all : libf1opf2f3.so 
+all : libf1opf2f3.so
+
+all_for_dc :
+	echo "Nothing to do"
 
 #----------------------------------
 clean :

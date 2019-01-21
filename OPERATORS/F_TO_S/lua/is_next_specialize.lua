@@ -14,11 +14,11 @@ return function (
     if ( optargs ) then 
       assert(type(optargs) == "table")
       if ( optargs.mode == "fast" ) then
-        tmpl = 'par_is_next.tmpl'
+        tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/par_is_next.tmpl"
         fast = true
       end
     end
-    if ( not tmpl ) then tmpl = 'is_next.tmpl' end
+    if ( not tmpl ) then tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/is_next.tmpl" end
     local subs = {}
     assert(is_base_qtype(qtype))
     if ( comparison == "gt" ) then

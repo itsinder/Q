@@ -15,6 +15,14 @@ local mv_mul = function(X, y, optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+
   assert(qc[func_name], "Symbol not available" .. func_name)
   local m = 0 -- number of columns of X
   for k, v in ipairs(X) do

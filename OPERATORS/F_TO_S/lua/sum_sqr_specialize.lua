@@ -13,7 +13,7 @@ typedef struct _reduce_sum_sqr_<<qtype>>_args {
   uint64_t num; // number of non-null elements inspected
 } REDUCE_sum_sqr_<<qtype>>_ARGS;
   ]]
-    local tmpl = 'sum.tmpl'
+    local tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/sum.tmpl"
     local subs = {}
     assert(is_base_qtype(qtype), "qtype must be base type, not" .. qtype) 
     subs.op = "sum_sqr" 

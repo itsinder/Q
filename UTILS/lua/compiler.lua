@@ -4,6 +4,7 @@ local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH no
 local Q_PATH = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$'))
 local Q_ROOT = os.getenv("Q_ROOT") 
 local q_src_root = os.getenv("Q_SRC_ROOT")
+local q_build = os.getenv("Q_BUILD_DIR")
 local H_DIR = Q_ROOT .. "/include/" 
 local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
 local fileops = require 'Q/UTILS/lua/fileops'
@@ -45,6 +46,9 @@ local function compile(doth, h_path, dotc, so_path, libname)
   write_to_file(dotc, tmp_c)
   write_to_file(doth, tmp_h)
   local incs = string.format("-I /tmp/ -I %s -I %s ", q_src_root .. "/UTILS/inc", q_src_root .. "/UTILS/gen_inc")
+  if fileops.isdir(q_build) then
+    incs = string.format("%s -I %s", incs, q_build .. "/include")
+  end
   local q_cmd = string.format("gcc %s %s %s %s %s %s -o %s", 
        QC_FLAGS, lib_link_path, tmp_c, incs, Q_LINK_FLAGS, "-lq_core",  so_path)
   local status = os.execute(q_cmd)

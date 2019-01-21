@@ -16,7 +16,7 @@ typedef struct _reduce_min_<<qtype>>_args {
 } REDUCE_min_<<qtype>>_ARGS;
   ]]
     
-    local tmpl = 'reduce.tmpl'
+    local tmpl = qconsts.q_src_root .. "/OPERATORS/F_TO_S/lua/reduce.tmpl"
     local subs = {}
     if ( qtype == "B1" ) then
       subs.reduce_qtype = "I1"

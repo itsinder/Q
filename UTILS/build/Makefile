@@ -77,34 +77,34 @@ utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 
 drop_nulls:
-	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/ all_for_dc
 
 ifxthenyelsez:
-	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/
+	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ all_for_dc
 
 ainb:
-	make -C ${BASE_PATH}/OPERATORS/AINB/lua/
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ all_for_dc
 
 where:
-	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/
+	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/ all_for_dc
 
 sumby:
-	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/
+	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/ all_for_dc
 
 getk:
-	make -C ${BASE_PATH}/OPERATORS/GETK/lua/
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua/ all_for_dc
 
 index:
-	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/
+	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/ all_for_dc
 
 unique:
-	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/
+	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/ all_for_dc
 
 count:
-	make -C ${BASE_PATH}/OPERATORS/COUNT/lua/
+	make -C ${BASE_PATH}/OPERATORS/COUNT/lua/ all_for_dc
 
 join:
-	make -C ${BASE_PATH}/OPERATORS/JOIN/lua/
+	make -C ${BASE_PATH}/OPERATORS/JOIN/lua/ all_for_dc
 
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
@@ -116,47 +116,46 @@ print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
 f1opf2f3: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua all
+	make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua all_for_dc
 
 f1f2opf3: q_basic
-	# make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all
 	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all_for_dc
 
 f1s1opf2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua all_for_dc
 
 f1s1opf2_val: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua all_for_dc
 
 sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT/lua
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua all_for_dc
 
 sort2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT2/lua
+	make -C ${BASE_PATH}/OPERATORS/SORT2/lua all_for_dc
 
 get: q_basic
-	make -C ${BASE_PATH}/OPERATORS/GET/lua
+	make -C ${BASE_PATH}/OPERATORS/GET/lua all_for_dc
 
 idx_sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua all_for_dc
 
 s_to_f: q_basic
-	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua all_for_dc
 
 f_to_s: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua all_for_dc
 
 ax_equals_b: q_basic
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
 
 approx_quantile: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua all_for_dc
 
 approx_frequent: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT
+	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT all_for_dc
 
 mv_mul: q_basic
-	make -C ${BASE_PATH}/OPERATORS/MM/lua/
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/ all_for_dc
 
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/

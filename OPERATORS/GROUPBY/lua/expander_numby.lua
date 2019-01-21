@@ -26,11 +26,19 @@ local function expander_numby(a, nb, optargs)
     end
   end
 
-  local status, subs, len = pcall(spfn, a:fldtype(), is_safe)
+  local status, subs, tmpl = pcall(spfn, a:fldtype(), is_safe)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
   local out_qtype = subs.out_qtype
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+
   assert(qc[func_name], "Symbol not defined " .. func_name)
   local sz_out = nb
   local sz_out_in_bytes = sz_out * qconsts.qtypes[out_qtype].width
