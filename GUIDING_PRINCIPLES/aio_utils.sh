@@ -9,3 +9,5 @@ my_print(){
     echo -e "$COLOR_RED AIO: $1 $COLOR_NORMAL"
   fi
 }
+
+$1 "$2"

@@ -1,3 +1,4 @@
+local run_q_tests = require "Q/GUIDING_PRINCIPLES/run_q_tests"
 local LUA_DEBUG = 0
 
 local switch = {
@@ -9,8 +10,9 @@ local switch = {
 		print "Case 2."
     local QC_FLAGS = os.getenv("QC_FLAGS")
     print(QC_FLAGS)
-    -- TODO: check whether export works 
-    os.execute("export QC_FLAGS=\"" .. QC_FLAGS .. " -g\"; echo $QC_FLAGS")
+    -- TODO: check whether export works in same shell instance
+    -- HACK: once LUA_DEBUG is used we can set this QC_FLAGS witg -g once called the corresponding .sh
+    -- -- os.execute("export QC_FLAGS=\"" .. QC_FLAGS .. " -g\"; echo $QC_FLAGS")
     --os.execute("echo $QC_FLAGS")
     LUA_DEBUG = 1
 	end
@@ -35,7 +37,7 @@ end
 -- install_apt_get_dependencies
 os.execute("bash apt_get_dependencies.sh install_apt_get_dependencies")
 
--- #lua_installation.from_apt_get()
+-- #os.execute("bash lua_installation.sh install_lua_from_apt_get)
 if  LUA_DEBUG == 1 then
   os.execute("bash debug_installation.sh install_debug_lua_from_source")
 else
@@ -50,16 +52,15 @@ if ret_val ~= 0 then
   os.execute("bash luarocks_installation.sh install_luarocks_from_source")
   os.execute("bash luarocks_installation.sh install_luarocks_dependencies")
 else
-  os.execute("echo \"luarocks is already installed\"")
+  os.execute("bash aio_utils.sh my_print \"luarocks is already installed\"")
 end
 
 -- # ######## Install LAPACK stuff #######
 assert(os.execute("sudo apt-get install liblapacke-dev liblapack-dev -y") == 0, "Installation of liblapack failed")
 
 -- #  ######## Build Q #########
-os.execute("echo \"Building Q\"")
--- -- TODO
--- -- cleanup ../ #cleaning up all files
+os.execute("bash aio_utils.sh my_print \"Building Q\"")
+assert(os.execute("bash clean_up.sh cleanup ../")) -- cleaning up all files
 os.execute("bash q_build_func.sh clean_q")
 if LUA_DEBUG == 1 then 
   os.execute("bash luaffi_installation.sh install_luaffi")
@@ -67,5 +68,6 @@ end
 os.execute("bash q_build_func.sh build_q")
 -- --TODO
 -- --run_q_tests
+run_q_tests()
 
 os.execute("echo \"Successfully completed aio.lua in TODO\"")
