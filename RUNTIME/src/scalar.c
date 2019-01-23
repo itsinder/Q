@@ -80,51 +80,51 @@ BYE:
   return 2;
 }
 
+#define OP_BUF_LEN 4095
+#define BUF_LEN 63
 static int l_sclr_reincarnate(lua_State *L) {
   int status = 0;
-  char op_str_buf[4096]; // TODO P3 try not to hard code bound
-  memset(op_str_buf, '\0', 4096);
-  //  TODO P3 try not to hard code bound
-  char  buf[64+1];
-  memset(buf, '\0', 64+1);
+  char op_str_buf[OP_BUF_LEN+1]; // TODO P3 try not to hard code bound
+  char  buf[BUF_LEN+1];          //  TODO P3 try not to hard code bound
+
+  memset(op_str_buf, '\0', OP_BUF_LEN+1);
+  memset(buf,        '\0', BUF_LEN+1);
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
 
-  strcpy(op_str_buf, "Scalar.new(");
+  strncpy(op_str_buf, "Scalar.new(", OP_BUF_LEN);
   if ( strcmp(field_type, "B1" ) == 0 ) {
-    sprintf(buf, "%s", ptr_sclr->cdata.valB1 ? "true" : "false");
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%s", ptr_sclr->cdata.valB1 ? "true" : "false");
   }
   else if ( strcmp(field_type, "I1" ) == 0 ) {
-    sprintf(buf, "%" PRI1, ptr_sclr->cdata.valI1);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRI1, ptr_sclr->cdata.valI1);
   }
   else if ( strcmp(field_type, "I2" ) == 0 ) {
-    sprintf(buf, "%" PRI2, ptr_sclr->cdata.valI2);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRI2, ptr_sclr->cdata.valI2);
   }
   else if ( strcmp(field_type, "I4" ) == 0 ) {
-    sprintf(buf, "%" PRI4, ptr_sclr->cdata.valI4);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRI4, ptr_sclr->cdata.valI4);
   }
   else if ( strcmp(field_type, "I8" ) == 0 ) {
-    sprintf(buf, "%" PRI8, ptr_sclr->cdata.valI8);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRI8, ptr_sclr->cdata.valI8);
   }
   else if ( strcmp(field_type, "F4" ) == 0 ) {
-    sprintf(buf, "%" PRF4, ptr_sclr->cdata.valF4);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRF4, ptr_sclr->cdata.valF4);
   }
   else if ( strcmp(field_type, "F8" ) == 0 ) {
-    sprintf(buf, "%" PRF8, ptr_sclr->cdata.valF8);
-    strcat(op_str_buf, buf);
+    snprintf(buf, BUF_LEN, "%" PRF8, ptr_sclr->cdata.valF8);
   }
   else {
     WHEREAMI; goto BYE;
   }
-  strcat(op_str_buf, ", '");
-  strcat(op_str_buf, field_type);
-  strcat(op_str_buf, "')");
+  strncat(op_str_buf, buf, OP_BUF_LEN);
+
+  strncat(op_str_buf, ", '", OP_BUF_LEN);
+
+  strncat(op_str_buf, field_type, OP_BUF_LEN);
+
+  strncat(op_str_buf, "')", OP_BUF_LEN);
+
   lua_pushstring(L, op_str_buf);
   return 1;
 BYE:
