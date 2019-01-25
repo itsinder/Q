@@ -11,17 +11,9 @@ return function (
   local ffi     = require "Q/UTILS/lua/q_ffi"
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   --=================================
-  local hdr = [[
-  typedef struct _rand_<<qtype>>_rec_type { 
-    uint64_t seed;
-    <<ctype>> lb;
-    <<ctype>> ub;
-    struct drand48_data buffer;
-  } RAND_<<qtype>>_REC_TYPE;
-]]
 
   local tmpl
-  local subs = {};
+  local subs = {}
   local status
   assert(type(args) == "table")
   local qtype = assert(args.qtype)
@@ -42,11 +34,6 @@ return function (
   local seed   = args.seed
   local ctype = qconsts.qtypes[qtype].ctype
 
-  hdr = string.gsub(hdr,"<<qtype>>", qtype)
-  hdr = string.gsub(hdr,"<<ctype>>",  ctype)
-  -- pcall(ffi.cdef, hdr0)
-  pcall(ffi.cdef, hdr)
-
   if ( seed ) then 
     assert(type(seed) == "number")
   else
@@ -60,14 +47,9 @@ return function (
   assert(type(len) == "number")
   assert(len > 0)
 
-  --==============================
-  -- Set c_mem using info from args
-  local sz_c_mem = ffi.sizeof("RAND_" .. qtype .. "_REC_TYPE")
-  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
-  local c_mem_ptr = ffi.cast("RAND_" .. qtype .. "_REC_TYPE *", get_ptr(c_mem))
-  c_mem_ptr.lb = ffi.cast(ctype .. " *", get_ptr(lb:to_cmem()))[0]
-  c_mem_ptr.ub = ffi.cast(ctype .. " *", get_ptr(ub:to_cmem()))[0]
-  c_mem_ptr.seed = seed
+  subs.seed = seed
+  subs.lb = lb
+  subs.ub = ub
   --==============================
   if ( qconsts.iorf[qtype] == "fixed" ) then 
     subs.generator = "mrand48_r"
@@ -83,10 +65,8 @@ return function (
   --=========================
   tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/rand.tmpl"
   subs.fn = "rand_" .. qtype
-  subs.c_mem = c_mem
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
   subs.out_qtype = qtype
-  subs.c_mem_type = "RAND_" .. qtype .. "_REC_TYPE *"
   return subs, tmpl
 end
