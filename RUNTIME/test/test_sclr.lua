@@ -271,5 +271,31 @@ tests.t13 = function()
   --]]
   return true
 end
+tests.t14 = function()
+  local f4 = Scalar.new(0.11, "F4")
+  print("Scalar = ",f4)
+  print("to_num",f4:to_num())
+  print("abs", f4:abs():to_num())
+  --[[
+  This produces the following output.
+  Scalar =  1.100000e-01
+  to_num  0.10999999940395
+  abs 0.10999999940395
+  
+  It appears incorrect but in fact it is. Run the following program in the 
+  debugger and inspect the values of w,x,y,z to convince yourself
+  
+  #include <stdio.h>
+  int
+  main()
+  {
+    float w = 0.11;
+    double x = 0.11;
+    float y = x;
+    float z = (float)x;
+    printf("hello world\n");
+  }
+  --]]
+end
 --================
 return tests

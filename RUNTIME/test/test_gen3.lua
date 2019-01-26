@@ -4,11 +4,11 @@ local Vector  = require 'libvec'
 local Scalar  = require 'libsclr'  
 local cmem    = require 'libcmem'  
 local lVector = require 'Q/RUNTIME/lua/lVector'
+require 'Q/UTILS/lua/strict'
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local qc = require 'Q/UTILS/lua/q_core'
+local qc      = require 'Q/UTILS/lua/q_core'
 local ffi     = require 'Q/UTILS/lua/q_ffi'
 local gen_bin = require 'Q/RUNTIME/test/generate_bin'
-require 'Q/UTILS/lua/strict'
 local expander_gen3 = require 'Q/RUNTIME/test/expander_gen3'
 
 local tests = {} 

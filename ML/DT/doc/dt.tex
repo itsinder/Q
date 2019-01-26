@@ -7,61 +7,78 @@
 Decision trees are a well understood statistical technique \cite{Hastie2009}.
 This paper makes the following contributions:
 \be
-\item proposes a gambling-inspired metric that allows us to answer
-the fundamental question faced when building a tree: 
-what is the decision to be made at a given node e.g., \(x \leq 0.5?\)
-This is in contrast to the well known metrics (i) gini impurity (ii) information
-gain and (iii) variance reduction
-\item continuing the gambling metaphor, proposes a ``payout'' metric which
-measures the quality of the decision tree. This is in contrast to other means of
-evaluating the tree such as precision, recall, accuracy, f1-score, \ldots
+\item Well known metrics used to determine the best decision to be made 
+at a given node are (i) gini impurity (ii) information gain and (iii) 
+variance reduction. In contrast, we propose a metric that is inspired by looking
+at the decision making as a gambling problem, the aim being to maximize the
+expected gain at each step.
+\item 
+Well known metrics used to measure the quality of the decision tree 
+induced by the splitting metric chosen above are 
+precision, recall, accuracy, f1-score, \ldots
+In contrast, continuing the gambling metaphor, we propose a ``payout'' metric which
+measures the quality of the decision tree. 
+\item Lastly, we show that the quality of the decision tree is affected by the
+choice of splitting metric. What this means is that one should choose the
+splitting metric {\bf after} one has decided which quality metric is most
+appropriate for the problem at hand.
 \ee
 
-We believe that these changes to the way decision trees are created and
+We believe that the proposed changes to the way decision trees are created and
 evaluated is particularly relevant to the case where relative
 confidences are involved. This is often the case when multiple candidates are
 competing for a limited resource, like user attention. 
-For example, supposed we have 2 classifiers, \(C_A, C_B\), one for product A and one for
+For example, supposed we have 2 decision trees, \(C_A, C_B\), one for product A and one for
 product B.  We need \(C_A, C_B\) to return \(p_A, p_B\), where \(p_A\) is
 \(C_A\)'s estimate of how likely the user is to select product A. In order to
 make the best business decision, we would like \(p_A, p_B\) to be as asccurate
 as possible.
 
-\subsection{Conventions}
-Throughout the paper, we use the data sets listed in Table~\ref{tbl_data_sets}
-for our experiments. 
-\begin{table}
-\centering
-\begin{tabular}{|l|l|l|l|} \hline \hline
-{\bf Data Set Name } & {\bf Rows} & {\bf Columns} & {\bf Location} \\ \hline 
-Breast Cancer & X & X & \\ \hline
-Titanic & X & X & \\ \hline
-\ldots & X & X & \\ \hline
-\end{tabular}
-\label{tbl_data_sets}
-\caption{Data Sets used for experimentation}
-\end{table}
+Random forests are a common way is which an ensemble of decision tres can be
+used to produce better results than any single tree. This paper specifically
+does not address how random forests are created. For example, different decision
+trees can be created by withholding some of the features, or some of the
+instances. What we focus on is creating the ``best'' possible decision tree
+given the inputs.
+
+%% \subsection{Conventions}
+%% Throughout the paper, we use the data sets listed in Table~\ref{tbl_data_sets}
+%% for our experiments. 
+%% \begin{table}
+%% \centering
+%% \begin{tabular}{|l|l|l|l|} \hline \hline
+%% {\bf Data Set Name } & {\bf Rows} & {\bf Columns} & {\bf Location} \\ \hline 
+%% Breast Cancer & X & X & \\ \hline
+%% Titanic & X & X & \\ \hline
+%% \ldots & X & X & \\ \hline
+%% \end{tabular}
+%% \label{tbl_data_sets}
+%% \caption{Data Sets used for experimentation}
+%% \end{table}
+%% 
+\subsection{A brief introduction to \cal{Q}}
+
+\cal{Q} is a column oriented database that is used to implement the decision
+tree algorithm. In this section, we present the essential aspects of \cal{Q}.
+
+\cal{Q} allows efficient manipulation of vectors. All elements of vectors are
+the same type. The 2 types we use in this paper are F4 and I4, representing
+single precision floating point and 4-byte signed integers. A vector has a fixed
+length \(n\) and can be thought of as a map from \(i\) to \(f(i)\), 
+where \(i \in [0, n-1]\).
+
 
 \subsection{Notations}
 
 \bi
-\item Let \(F = \{f_i\}\) be a table of vectors, representing the features.
-\item Let \(g\) be a vector, representing the {\bf goal} or 
+\item Let \(T = \{t_i\}\) be a table of vectors of type F4, representing the features.
+\item Let \(g\) be a vector of type I4, representing the {\bf goal} or 
 outcome which we wish to
 predict. We assume the goal can be either Heads, represented by the integer value 1 or Tails, represented as 0.
-\item Restrictions on vectors (for a Q implementation)
-\be
-\item lengths of all vectors must be the same. 
-\item qtype of all feature vectors should be F4. 
-% TODO Could be F*
-Note that boolean features are
+\item boolean features are
 modeled as having type F4 and the comparison is always \(\leq 0\), so that the
 left branch has instances where the feature value is false and the
 right branch has instances where the feature value is true.
-% TODO SV to be supported in future
-\item goal vector should be I4
-% TODO: could be I*
-\ee
 \ei
 
 A decision tree is a Lua table where each element identifies
@@ -140,7 +157,7 @@ Initialize, decision tree \(D = \{\}\) \\
 %%-------------------------------------------
 \begin{table}
 \centering
-\begin{tabular}{|l|l|l|} \\ \hline \hline
+\begin{tabular}{|l|l|l|} \hline \hline
 {\bf Variable} & {\bf Formula} & {\bf Explanation} \\ \hline \hline
 \(n_T^L\)  & & number of tails on left \\ \hline
 \(n_H^L\)  & & number of heads on left \\ \hline
@@ -193,8 +210,8 @@ Initialize, decision tree \(D = \{\}\) \\
 \begin{tabbing} \hspace*{0.25in} \=  \hspace*{0.25in} \= \kill
 {\bf function } \(\mathrm{CountIntervals}(f, g)\) \+  \\
 {\bf Inputs} \+ \\  
-Vector \(f\) of length \(n\) qtype F4 \\
-Vector \(g\) of length \(n\) qtype I4 with values 0, 1 \- \\
+Vector \(f\) of length \(n\) type F4 \\
+Vector \(g\) of length \(n\) type I4 with values 0, 1 \- \\
 {\bf Outputs} \+ \\
 Vector \(f'\) of length \(n'\) type F4 \\
 Vector \(h^0\) of length \(n'\) type I4  \\
@@ -379,11 +396,68 @@ Let \(b_x, w_x\) be the values for leaf \(x\). Then, the total payout of the tre
 In Figure~\ref{dt_pseudo_code}, we stated that we stop splitting when the weighted benefit
 is less than a threshold of \(\alpha\). We are now in a position to describe how
 \(\alpha\) is determined. We search the space of possible values of \(\alpha =
-(0, 1)\), evaluating the ``payout'' (Section~\ref{payout} for each \(\alpha\). 
+(0, 1)\), evaluating the ``payout'' (Section~\ref{payout}) for each \(\alpha\). 
 We pick the \(\alpha\) which produces the maximum payout. 
 %% A sample on the breast cancer data set (reference TODO) is in
 %% Figure~\ref{fig_breast_cancer_cost_versus_alpha}.
+%
+\section{Evalaution}
 
-%% TODO \input{unknown}
+For evaluation, we chose the following data sets
+\be
+\item 2 publicly available data sets, the breast cancer data set and the
+Titanic data set from the UCI ML Repository.
+\item 3 proprietary data sets --- ds1, ds2, ds3
+\item 2 synthetic data sets generated as follows
+\be
+\item \TBC
+\item \TBC
+\ee
+\ee
+
+We compare Q against sklearn. 
+In case of Q, the hyper-parameter to be optimized is \(\alpha\). 
+In case of sklearn, we use grid search to optimize for the hyper-parameters.We
+pick the model that optimizes f1 score. 
+
+\begin{table}
+\centering
+\begin{tabular}{|l||l|l|l|l|l|l|l|} \hline \hline
+{\bf Data Set} & {\bf Algorithm} & {\bf accuracy} & {\bf precision} & {\bf recall} & {\bf f1 score} & {\bf payout} \\ \hline \hline    
+cancer & Q &      92.0962 & 0.9385 &  0.9333 &  0.9359 &  \textcolor{red}{0.8385} \\ \hline
+cancer & sklearn & 94.1581 & 0.9605 &  0.9444 &  0.9524 &  0.8196 \\ \hline
+\hline                                        
+titanic & Q &      78.7946 & 0.7453 &  0.6897 &  0.7164 &  \textcolor{red}{0.5609} \\ \hline
+titanic & sklearn &       81.0268 & 0.7871 &  0.7011 &  0.7416 &  0.4937 \\ \hline
+\hline                                        
+ds1 & Q &    76.7681 &0.2441  &0.1511  & 0.1866  & 0.4723 \\ \hline
+ds1 &  sklearn &     75.6626 & 0.2659 &  0.2155 &  0.238 &   0.4687 \\ \hline
+\hline                                        
+ds2 & Q &     62.0271 & 0.5597 &  0.7833 &  0.6529 &  0.1505 \\ \hline
+ds2 & sklearn &     60.8696 & 0.5424 &  0.9077 &  0.679 &   0.1102 \\ \hline
+\hline                                        
+ds3 & Q &   60.1256 & 0.5714 &  0.6323 &  0.6003 &  0.1722 \\ \hline
+ds3 & sklearn &   59.056 &  0.5386 &  0.944 &   0.6859 &  0.0787 \\ \hline
+\hline
+\end{tabular}
+\label{tbl_results}
+\caption{Results comparing Q versus sklearn}
+\end{table}
+
+\subsection{Discussion}
+
+The key takeaway from the results is that you get what you look for. In case of
+Q, we are building the decision tree with optimizing payout in mind. In the case
+of sk-learn, we are building the decision tree with optimizing f1 score in mind.
+It should not come as a surprise that Q out performs sklearn when payout is the
+quality metric and that sklearn out performs Q when f1 score is the quality
+metric.
+
+This leads us to the conclusion that the choice of splitting decision 
+should not be made independent of the metric that will be used to judge the
+resultant decision tree. Of course, the quality metric should be chosen
+base on how well it models the business problem at hand.
+
+
 \bibliographystyle{alpha}
-\bibliography{../../../DOC/ref.bib}
+\bibliography{../../../DOC/Q_PAPER/ref.bib}
