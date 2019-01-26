@@ -8,22 +8,13 @@ dummy(
     )
 {
   int status = 0;
-  int N = 1048576; // TODO P2 get this from args
-  int *X = NULL;
-  int *Y = NULL;
-  int *Z = NULL;
-  X = malloc(N * sizeof(int)); return_if_malloc_failed(X);
-  Y = malloc(N * sizeof(int)); return_if_malloc_failed(Y);
-  Z = malloc(N * sizeof(int)); return_if_malloc_failed(Z);
-  for ( int i = 0; i < N; i++ ) { 
-    X[i] = i;
-    Y[i] = -1 * i;
-    Z[i] = INT_MAX;
+  status = luaL_dostring(g_L_DT, body)
+  if ( status != 0 ) { 
+    fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
+    sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));
+    lua_pop(g_L_DT, 1); go_BYE(-1);
   }
-  // Do not make direct call --> add_I4_I4_I4(X, Y, N,  Z); cBYE(status);
+  cBYE(status);
 BYE:
-  free_if_non_null(X);
-  free_if_non_null(Y);
-  free_if_non_null(Z);
   return status;
 }
