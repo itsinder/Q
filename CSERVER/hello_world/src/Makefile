@@ -5,6 +5,7 @@ INCS= -I. \
 	-I../libevent-2.1.8-stable/include/event2/ \
 	-I../libevent-2.1.8-stable/include/ \
 	-I../LuaJIT-2.1.0-beta3/src/ \
+	-I../lua-5.1.3/src/ \
 	-I../dt_interpreter/src/  \
 
 DBGFLAGS= 
@@ -40,6 +41,9 @@ all : q_httpd \
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS) $(DBGFLAGS)
 
 ../lua-5.1.3/src/liblua.a :
+	cd ../ && \
+	tar -zxvf lua-5.1.3.tar.gz &&  \
+	cd - && \
 	make -C ../lua-5.1.3/src/ linux
 
 ../libevent-2.1.8-stable/.libs/libevent.so : 

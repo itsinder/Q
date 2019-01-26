@@ -1,1 +1,1 @@
-	make -i -C ../lua-5.1.3/ clean 
+../lua-5.1.3/src/liblua.a :
