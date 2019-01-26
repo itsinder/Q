@@ -7,6 +7,8 @@ INCS= -I. \
 	-I../LuaJIT-2.1.0-beta3/src/ \
 	-I../lua-5.1.3/src/ \
 	-I../dt_interpreter/src/  \
+	-I../c_engine/ \
+
 
 DBGFLAGS= 
 DBGFLAGS= -g -DDEBUG
@@ -40,6 +42,9 @@ all : q_httpd \
 .c.o : 
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS) $(DBGFLAGS)
 
+../c_engine/libq_core.so : 
+	make -C ../c_engine/
+
 ../lua-5.1.3/src/liblua.a :
 	cd ../ && \
 	tar -zxvf lua-5.1.3.tar.gz &&  \
@@ -67,7 +72,8 @@ $(COBJS) : ../LuaJIT-2.1.0-beta3/src/libluajit.a \
 
 q_httpd : $(COBJS)  \
 	../LuaJIT-2.1.0-beta3/src/libluajit.a \
-	./libs/libevent.so
+	./libs/libevent.so \
+	../c_engine/libq_core.so
 	$(CC) $(CFLAGS) $(COBJS) \
 	  -o q_httpd  \
 	./libs/libevent.so \
@@ -76,6 +82,7 @@ q_httpd : $(COBJS)  \
 
 clean:
 	rm -r -f q_httpd $(COBJS) 
+	make -i -C ../c_engine/ clean
 #	make -i -C ../LuaJIT-2.1.0-beta3/src/ clean 
 #	make -i -C ../libevent-2.1.8-stable/ distclean 
 #	make -i -C ../lua-5.1.3/ clean 

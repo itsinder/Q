@@ -6,8 +6,8 @@ get_req_type(
     const char *api
     )
 {
-  if (strcasecmp(api, "Classify") == 0) {
-    return Classify;
+  if (strcasecmp(api, "Dummy") == 0) {
+    return Dummy;
   }
   else if (strcasecmp(api, "Diagnostics") == 0) {
     return Diagnostics;

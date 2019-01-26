@@ -3,6 +3,7 @@
 #include "auxil.h"
 #include "init.h"
 #include "setup.h"
+#include "dummy.h"
 
 extern bool g_halt; 
 extern char g_err[DT_ERR_MSG_LEN+1]; 
@@ -28,6 +29,10 @@ q_process_req(
   switch ( req_type ) {
     case Undefined :
       go_BYE(-1);
+      break;
+      //--------------------------------------------------------
+    case Dummy :
+      status = dummy(args, body); cBYE(status);
       break;
       //--------------------------------------------------------
     case Halt : 

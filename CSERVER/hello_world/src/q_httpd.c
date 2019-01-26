@@ -78,7 +78,7 @@ BYE:
   }
   evbuffer_free(opbuf);
   //--- Log time seen by clients
-  if ( req_type == Classify ) { // TODO FIX 
+  if ( req_type == Dummy ) { // TODO FIX 
     /*
     uint64_t t_stop = RDTSC();
     if ( t_stop > t_start ) { 
