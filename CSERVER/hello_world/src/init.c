@@ -42,40 +42,19 @@ zero_globals(
 
 int
 init_lua(
-    const char * const config_file
+    void
     )
 {
   int status = 0;
   g_L_DT = luaL_newstate(); if ( g_L_DT == NULL ) { go_BYE(-1); }
   luaL_openlibs(g_L_DT);  
-  status = luaL_dostring(g_L_DT, "require 'DT/init'"); 
+  status = luaL_dostring(g_L_DT, "require 'lua/init'"); 
   if ( status != 0 ) { 
     fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
     sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));
     lua_pop(g_L_DT, 1); go_BYE(-1);
   }
   cBYE(status);
-  //--- Now process the config file 
-  const char *const lua_fn = "proc_config_file";
-  lua_getglobal(g_L_DT, lua_fn);
-  if ( !lua_isfunction(g_L_DT, -1)) {
-    fprintf(stderr, "Lua Function %s undefined\n", lua_fn);
-    lua_pop(g_L_DT, 1); go_BYE(-1);
-  }
-  lua_pushstring(g_L_DT, config_file);
-  status = lua_pcall(g_L_DT, 1, 1, 0);
-  if ( status != 0 ) {
-    fprintf(stderr, "calling function %s failed: %s\n", 
-        lua_fn, lua_tostring(g_L_DT, -1));
-    sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));
-    lua_pop(g_L_DT, 1); go_BYE(-1);
-  }
-  if (!lua_isboolean(g_L_DT, -1)) {
-    fprintf(stderr, "%s: return 1 must be a boolean\n", __func__); go_BYE(-1); 
-  }
-  bool l_status = lua_toboolean(g_L_DT, -1);
-  if ( l_status != true ) { go_BYE(-1); }
-  // --------------------
 BYE:
   return status;
 }

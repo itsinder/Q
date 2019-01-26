@@ -13,6 +13,7 @@ setup(
 
   free_globals(); 
   zero_globals();
+  status = init_lua(); cBYE(status);
 BYE:
   return status;
 }

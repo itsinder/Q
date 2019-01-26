@@ -16,5 +16,5 @@ zero_log(
     );
 extern int
 init_lua(
-    const char *const config_file
+    void
     );
