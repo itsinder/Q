@@ -4,7 +4,6 @@ local cmem    = require 'libcmem'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 
 
-
 -- TODO: Need to confirm that input does not have nulls
 -- TODO: Need to send length of SC if appropriate?
 return function (
@@ -12,7 +11,7 @@ return function (
   optargs
   )
 
-  local in_qtype = vec_meta.base.field_type
+  local in_qtype = vec_meta.field_type
   -- seed values are referred from AB repo seed values
   local seed1 = 961748941
   local seed2 = 982451653
@@ -45,33 +44,11 @@ return function (
   subs.seed1 = seed1
   subs.seed2 = seed2
   subs.seed = seed
-  subs.is_first = 1
   if ( in_qtype == "SC" ) then
-    subs.stride = vec_meta.base.field_size
+    subs.stride = vec_meta.field_size
   else
     subs.stride = ffi.sizeof(in_ctype)
   end
-
-
-  --[[
-  local args_ctype = "SPOOKY_STATE"
-  local cst_args_as = "SPOOKY_STATE *"
-  local sz_args = ffi.sizeof(args_ctype)
-  local args = assert(cmem.new(sz_args), "malloc failed")
-  local args_ptr = ffi.cast(cst_args_as, args)
-  args_ptr[0].q_is_first = 1;
-  args_ptr[0].q_seed1 = seed1
-  args_ptr[0].q_seed2 = seed2
-  args_ptr[0].q_seed  = seed
-  subs.args = args
-  subs.cst_args_as = cst_args_as
-  if ( in_qtype == "SC" ) then 
-    args_ptr[0].stride = XXXX
-  else
-    args_ptr[0].stride = ffi.sizeof(in_ctype)
-  end
-  ]]
-  -- initialization of args in expander
 
   tmpl = qconsts.q_src_root .. "/OPERATORS/HASH/lua/hash.tmpl"
   return subs, tmpl

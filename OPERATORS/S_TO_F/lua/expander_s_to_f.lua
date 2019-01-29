@@ -10,6 +10,8 @@ local record_time = require 'Q/UTILS/lua/record_time'
 return function (a, args)
     -- Get name of specializer function. By convention
   local sp_fn_name = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
+  local mem_init_name = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_mem_initialize"
+  local mem_initialize = assert(require(mem_init_name))
   local spfn = assert(require(sp_fn_name), "Specializer not found")
   local status, subs, tmpl = pcall(spfn, args)
   if ( not status ) then print(subs) end 
@@ -24,8 +26,9 @@ return function (a, args)
   end
   -- STOP: Dynamic compilation
   assert(qc[func_name], "Function not found " .. func_name)
-  assert(subs.c_mem)
 
+  -- calling mem_initializer
+  local casted_struct = mem_initialize(subs)
   local chunk_size = qconsts.chunk_size
   local width =  assert(qconsts.qtypes[out_qtype].width)
   local bufsz =  multiple_of_8(chunk_size * width)
@@ -55,7 +58,6 @@ return function (a, args)
       return 0
     else
       local casted_buff = ffi.cast( qconsts.qtypes[out_qtype].ctype .. "*",  get_ptr(buff))
-      local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(subs.c_mem))
       local start_time = qc.RDTSC()
       qc[func_name](casted_buff, chunk_size, casted_struct, lb)
       record_time(start_time, func_name)

@@ -11,7 +11,7 @@ local sp_fn = require 'Q/OPERATORS/HASH/lua/hash_specialize'
 local num_produced = 0
 
 for _, qtype in ipairs(out_qtypes) do
-  local status, subs, tmpl = pcall(sp_fn, {base={field_type=qtype}}, {out_qtype = qtype})
+  local status, subs, tmpl = pcall(sp_fn, {field_type=qtype}, {out_qtype = qtype})
   if ( status ) then
     gen_code.doth(subs, tmpl, incdir)
     gen_code.dotc(subs, tmpl, srcdir)
