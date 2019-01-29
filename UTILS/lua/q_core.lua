@@ -2,20 +2,21 @@ local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH mu
 local Q_ROOT = os.getenv("Q_ROOT") 
 local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
 
-local assertx = require 'Q/UTILS/lua/assertx'
-local compile = require 'Q/UTILS/lua/compiler'
 -- local dbg = require 'Q/UTILS/lua/debugger'
-local incfile = Q_ROOT .. "/include/q_core.h"
-local inc_dir = Q_ROOT .. "/include/"
-local ffi = require 'Q/UTILS/lua/q_ffi'
+local assertx  = require 'Q/UTILS/lua/assertx'
+local compile  = require 'Q/UTILS/lua/compiler'
+local ffi      = require 'Q/UTILS/lua/q_ffi'
 local gen_code = require 'Q/UTILS/lua/gen_code'
-local Logger = require 'Q/UTILS/lua/logger'
-local lib_dir = Q_ROOT .. "/lib/"
-local fileops = require 'Q/UTILS/lua/fileops'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local timer = require 'posix.time'
+
+local incfile  = Q_ROOT .. "/include/q_core.h"
+local inc_dir  = Q_ROOT .. "/include/"
+local Logger   = require 'Q/UTILS/lua/logger'
+local lib_dir  = Q_ROOT .. "/lib/"
+local fileops  = require 'Q/UTILS/lua/fileops'
+local qconsts  = require 'Q/UTILS/lua/q_consts'
 
 local trace_logger = Logger.new({outfile = Q_TRACE_DIR .. "/qcore.log"})
+-- cdef the basic 
 assertx(fileops.isfile(incfile), "File not found ", incfile)
 ffi.cdef(fileops.read(incfile))
 local qc = ffi.load('libq_core.so')
@@ -106,9 +107,9 @@ local function wrap(func, name)
 
   return function(...)
     local start_time, stop_time
-    start_time = qc.RDTSC() -- timer.clock_gettime(0)
+    start_time = qc.RDTSC() -- posix.timer.clock_gettime(0)
     local tbl = table.pack(func(...))
-    stop_time = qc.RDTSC() -- timer.clock_gettime(0)
+    stop_time = qc.RDTSC() -- posix.timer.clock_gettime(0)
     local time =  stop_time - start_time  -- (stop_time.tv_sec*10^6 +stop_time.tv_nsec/10^3 - (start_time.tv_sec*10^6 +start_time.tv_nsec/10^3))/10^6
     trace_logger:trace(name, time)
     -- print("time taken", time)

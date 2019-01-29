@@ -21,6 +21,8 @@ clean :
 	rm -r -f ../gen_src;
 	rm -r -f ../gen_inc;
 	rm -f _*
+	rm -f ../gen_src/*
+	rm -f ../gen_inc/*
 	rm -f *.so
 
 libhash.so :

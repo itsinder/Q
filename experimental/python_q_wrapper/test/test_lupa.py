@@ -1,4 +1,4 @@
-from Q import utils, executor
+from Q import utils, lua_executor
 
 
 q_op_str = \
@@ -10,7 +10,7 @@ q_op_str = \
     end
     return t
     """
-q_operators = [ str(x) for x in dict(executor.execute_lua(q_op_str)).keys() ]
+q_operators = [ str(x) for x in dict(lua_executor.execute_lua(q_op_str)).keys() ]
 
 # for i in q_operators:
 #     print(i)
@@ -23,7 +23,7 @@ func_str = \
     end
     """
 
-func = executor.eval_lua(func_str)
+func = lua_executor.eval_lua(func_str)
 try:
     print(func(5, 9))
     print(func(None, 9))

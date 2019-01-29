@@ -3,6 +3,7 @@ OUTPUTS = libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
 
 all: q_core
+	cd ${BASE_PATH}
 	echo "Q is built"
 
 clean:
@@ -53,8 +54,6 @@ install: uninstall
 	cp ${Q_ROOT}/lib/libq_core.so /usr/lib;\
 	cp ${Q_ROOT}/include/q_core.h /usr/local/share/lua/5.1/Q
 
-all: q_core
-	cd ${BASE_PATH}
 
 uninstall:
 	rm -rf /usr/local/share/lua/5.1/Q;\
@@ -78,34 +77,34 @@ utils:
 	make -C ${BASE_PATH}/UTILS/src/ 
 
 drop_nulls:
-	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/DROP_NULLS/lua/ ${BUILD_TYPE}
 
 ifxthenyelsez:
-	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/IFXTHENYELSEZ/lua/ ${BUILD_TYPE}
 
 ainb:
-	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/AINB/lua/ ${BUILD_TYPE}
 
 where:
-	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/WHERE/lua/ ${BUILD_TYPE}
 
 sumby:
-	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/GROUPBY/lua/ ${BUILD_TYPE}
 
 getk:
-	make -C ${BASE_PATH}/OPERATORS/GETK/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/GETK/lua/ ${BUILD_TYPE}
 
 index:
-	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/INDEX/lua/ ${BUILD_TYPE}
 
 unique:
-	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/UNIQUE/lua/ ${BUILD_TYPE}
 
 count:
-	make -C ${BASE_PATH}/OPERATORS/COUNT/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/COUNT/lua/ ${BUILD_TYPE}
 
 join:
-	make -C ${BASE_PATH}/OPERATORS/JOIN/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/JOIN/lua/ ${BUILD_TYPE}
 
 load_csv:
 	make -C ${BASE_PATH}/OPERATORS/LOAD_CSV/lua/
@@ -117,46 +116,46 @@ print:
 	make -C ${BASE_PATH}/OPERATORS/PRINT/lua/
 
 f1opf2f3: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/F1OPF2F3/lua ${BUILD_TYPE}
 
 f1f2opf3: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/F1F2OPF3/lua ${BUILD_TYPE}
 
 f1s1opf2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2/lua ${BUILD_TYPE}
 
 f1s1opf2_val: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/F1S1OPF2_VAL/lua ${BUILD_TYPE}
 
 sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/SORT/lua ${BUILD_TYPE}
 
 sort2: q_basic
-	make -C ${BASE_PATH}/OPERATORS/SORT2/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/SORT2/lua ${BUILD_TYPE}
 
 get: q_basic
-	make -C ${BASE_PATH}/OPERATORS/GET/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/GET/lua ${BUILD_TYPE}
 
 idx_sort: q_basic
-	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/IDX_SORT/lua ${BUILD_TYPE}
 
 s_to_f: q_basic
-	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/S_TO_F/lua ${BUILD_TYPE}
 
 f_to_s: q_basic
-	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/F_TO_S/lua ${BUILD_TYPE}
 
 ax_equals_b: q_basic
 	make -C ${BASE_PATH}/OPERATORS/AX_EQUALS_B/
 
 approx_quantile: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/APPROX/QUANTILE/lua ${BUILD_TYPE}
 
 approx_frequent: q_basic
-	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/APPROX/FREQUENT ${BUILD_TYPE}
 
 mv_mul: q_basic
-	make -C ${BASE_PATH}/OPERATORS/MM/lua/ all_for_dc
+	make -C ${BASE_PATH}/OPERATORS/MM/lua/ ${BUILD_TYPE}
 
 corrm: q_basic
 	make -C ${BASE_PATH}/OPERATORS/PCA/src/

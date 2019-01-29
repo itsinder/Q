@@ -15,11 +15,6 @@ all : libwhere.so
 all_for_dc:
 	echo "Nothing to do"
 	
-#AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
-
-../../../UTILS/gen_inc/_bytes_to_bits.h :
-	make -C ../../../UTILS/src/
-
 #----------------------------------
 clean :
 	rm -r -f ../gen_src; 

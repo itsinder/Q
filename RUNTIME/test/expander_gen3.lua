@@ -33,6 +33,7 @@ local function expander_gen3(f1, f2)
       end
       local data_size = 0 -- signifying that the chunk is empty
       repeat
+        print("f1_chunk_num = ", f1_chunk_num)
          f1_len, f1_chunk = f1:chunk(f1_chunk_num)
          f2_len, f2_chunk = f2:chunk(f2_chunk_num)
 	 if ( (f1_len == 0) or (f2_len == 0) or 
