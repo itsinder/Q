@@ -2,12 +2,12 @@ return function (
   qtype, 
   optargs
   )
-    local plpath = require "pl.path"
     local qconsts = require 'Q/UTILS/lua/q_consts'
     local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
+    local file_exists = require 'Q/UTILS/lua/file_exists'
     local fmt = ""
     assert(is_base_qtype(qtype))
-    assert(plpath.isfile("to_txt.tmpl"))
+    assert(file_exists("to_txt.tmpl"))
     if ( optargs ) then
       assert(type(optargs) == "table")
       if (  optargs.format ) then 

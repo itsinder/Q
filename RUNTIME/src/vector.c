@@ -614,7 +614,6 @@ static int l_vec_new( lua_State *L)
 
   bool is_memo = true;
   const char *file_name = NULL;
-  const char *q_data_dir = NULL;
   int64_t num_elements = -1;
   const char * const qtype_sz  = luaL_checkstring(L, 1);
   /* Note that I would have normally called it qtype 
@@ -624,17 +623,14 @@ static int l_vec_new( lua_State *L)
     status = get_chunk_size(L, &chunk_size); cBYE(status);
   }
 
-  // q_data_dir to create file path
-  q_data_dir = luaL_checkstring(L, 2);
-  if ( q_data_dir == NULL ) { go_BYE(-1); }
-  if ( lua_isstring(L, 3) ) { // filename provided for materialized vec
-    file_name = luaL_checkstring(L, 3);
+  if ( lua_isstring(L, 2) ) { // filename provided for materialized vec
+    file_name = luaL_checkstring(L, 2);
   }
-  if ( lua_isboolean(L, 4) ) { // is_memo specified
-    is_memo = lua_toboolean(L, 4);
+  if ( lua_isboolean(L, 3) ) { // is_memo specified
+    is_memo = lua_toboolean(L, 3);
   }
   if ( file_name != NULL && strcmp(qtype_sz, "B1") == 0 ) { // num_elements provided for materialized B1 vec
-    num_elements = luaL_checknumber(L, 5);
+    num_elements = luaL_checknumber(L, 4);
     if ( num_elements <= 0 ) { go_BYE(-1); }
   }
 
@@ -645,7 +641,7 @@ static int l_vec_new( lua_State *L)
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
   // printf("vect new to %x \n", ptr_vec);
 
-  status = vec_new(ptr_vec, qtype_sz, q_data_dir, chunk_size, is_memo, file_name, num_elements);
+  status = vec_new(ptr_vec, qtype_sz, chunk_size, is_memo, file_name, num_elements);
   cBYE(status);
 
   return 1; // Used to be return 2 because of errbuf return
@@ -672,7 +668,7 @@ static int l_vec_clone( lua_State *L)
   luaL_getmetatable(L, "Vector"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = vec_clone(ptr_old_vec, ptr_new_vec, q_data_dir);
+  status = vec_clone(ptr_old_vec, ptr_new_vec);
   cBYE(status);
 
   return 1; // Used to be return 2 because of errbuf return

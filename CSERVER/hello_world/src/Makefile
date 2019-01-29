@@ -78,6 +78,7 @@ q_httpd : $(COBJS)  \
 	$(CC) $(CFLAGS) $(COBJS) \
 	  -o q_httpd  \
 	./libs/libevent.so \
+	../c_engine/libq_core.so \
 	../LuaJIT-2.1.0-beta3/src/libluajit.a \
 	-lm  -lpthread -ldl 
 

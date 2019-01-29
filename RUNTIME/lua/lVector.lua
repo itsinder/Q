@@ -1,7 +1,6 @@
 local ffi		= require 'Q/UTILS/lua/q_ffi'
 local qconsts		= require 'Q/UTILS/lua/q_consts'
 local log		= require 'Q/UTILS/lua/log'
-local plpath		= require "pl.path"
 local cmem		= require 'libcmem'
 local Scalar		= require 'libsclr'
 local Vector		= require 'libvec'
@@ -167,19 +166,6 @@ function lVector.new(arg)
   local has_nulls
   local is_nascent
   local is_memo = qconsts.is_memo -- referring value from qconsts, default to true
-  -- Using env variable Q_DATA_DIR
-  -- Passing q_data_dir to create the new vector's bin file in q_data_dir
-  local q_data_dir = assert(os.getenv("Q_DATA_DIR"), "Q_DATA_DIR not set")
-  --TODO RS Can we do this check in C in core_vec.c instead?
-  assert(plpath.isdir(q_data_dir)) 
-  
-  -- TODO RS DISCUSS WITH KRUSHNAKANT: I do not think this is needed
-  -- This is because we do a strcat of a forward slash and an extra
-  -- forward slash does not matter
-  -- Check if q_data_dir path ends with '/', if not append it
-  if not qc["endswith"](q_data_dir, "/") then
-    q_data_dir = q_data_dir .. "/"
-  end
  
   assert(type(arg) == "table", "Vector constructor requires table as arg")
 
@@ -238,7 +224,7 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, q_data_dir, file_name, is_memo, 
+  vector._base_vec = Vector.new(qtype, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
   -- added tonumber() because returned num_elements was of type cdata
@@ -247,7 +233,7 @@ function lVector.new(arg)
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
-    vector._nn_vec = Vector.new("B1", q_data_dir, nn_file_name, is_memo, num_elements)
+    vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
@@ -562,26 +548,16 @@ function lVector:clone(optargs)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
   -- assert(self:is_eov(), "can clone vector only if is EOV")
   
-  -- Passing q_data_dir to create the cloned vector's bin file in q_data_dir
-  local q_data_dir = os.getenv("Q_DATA_DIR")
-  assert(q_data_dir)
-  assert(plpath.isdir(q_data_dir))
-
-  -- Check if q_data_dir path ends with '/', if not append it
-  if not qc["endswith"](q_data_dir, "/") then
-    q_data_dir = q_data_dir .. "/"
-  end
-
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
   vector._meta = {}
 
-  vector._base_vec = Vector.clone(self._base_vec, q_data_dir)
+  vector._base_vec = Vector.clone(self._base_vec)
   assert(vector._base_vec)
 
   -- Check for nulls
   if ( self:has_nulls() ) then
-    vector._nn_vec = Vector.clone(self._nn_vec, q_data_dir)
+    vector._nn_vec = Vector.clone(self._nn_vec)
     assert(vector._nn_vec) 
   end
 

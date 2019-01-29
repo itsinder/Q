@@ -16,6 +16,23 @@
 
 #include "lauxlib.h"
 
+static char *
+get_q_data_dir(
+    )
+{
+  char *q_data_dir = NULL;
+  char *cptr = getenv("Q_DATA_DIR");
+  if ( cptr == NULL ) { WHEREAMI; return NULL; }
+  if ( !isdir(cptr) ) { WHEREAMI; return NULL; }
+  if ( strlen(cptr) > Q_MAX_LEN_DIR ) { WHEREAMI; return NULL; }
+  int len = strlen(cptr) + 2;
+  q_data_dir = malloc(len);
+  if ( q_data_dir == NULL ) { WHEREAMI; return NULL; }
+  memset(q_data_dir, '\0', strlen(cptr)+2);
+  strcpy(q_data_dir, cptr);
+  strcat(q_data_dir, "/");
+  return q_data_dir;
+}
 static uint64_t
 RDTSC(
     )
@@ -538,11 +555,13 @@ BYE:
 int 
 vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
-    VEC_REC_TYPE *ptr_new_vec,
-    const char *const q_data_dir
+    VEC_REC_TYPE *ptr_new_vec
     )
 {
   int status = 0;
+  char *q_data_dir = NULL;
+  q_data_dir = get_q_data_dir();
+  if ( q_data_dir == NULL ) { go_BYE(-1); }
   uint64_t delta = 0, t_start = RDTSC(); n_l_vec_clone++;
   // supporting clone operation for non_eov vectors, so commenting below condition
   // if ( ptr_old_vec->is_eov == false ) { go_BYE(-1); }
@@ -597,6 +616,7 @@ vec_clone(
   }
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_clone += delta; }
+  free_if_non_null(q_data_dir);
   return status;
 }
 
@@ -659,7 +679,6 @@ int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
-    const char *const q_data_dir,
     uint32_t chunk_size,
     bool is_memo,
     const char *const file_name,
@@ -667,12 +686,12 @@ vec_new(
     )
 {
   int status = 0;
+  char *q_data_dir = NULL;
   uint64_t delta = 0, t_start = RDTSC(); n_l_vec_new++;
+  q_data_dir = get_q_data_dir();
+  if ( q_data_dir == NULL ) { go_BYE(-1); }
 
   if ( ptr_vec == NULL ) { go_BYE(-1); }
-  if ( q_data_dir == NULL ) { go_BYE(-1); }
-  if ( !isdir(q_data_dir) ) { go_BYE(-1); }
-  if ( strlen(q_data_dir) > Q_MAX_LEN_DIR ) {go_BYE(-1); }
   memset(ptr_vec, '\0', sizeof(VEC_REC_TYPE));
   if ( chunk_size == 0 ) { go_BYE(-1); }
 
@@ -701,8 +720,8 @@ vec_new(
     strcpy(qtype, field_type); field_size = 8;
   }
   else if ( strncmp(field_type, "SC:", 3) == 0 ) {
-    char *cptr = (char *)field_type + 3;
-    status = txt_to_I4(cptr, &field_size); cBYE(status);
+    char *xptr = (char *)field_type + 3;
+    status = txt_to_I4(xptr, &field_size); cBYE(status);
     if ( field_size < 2 ) { go_BYE(-1); }
     strcpy(qtype, "SC");
   }
@@ -735,6 +754,7 @@ vec_new(
 
 BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_new += delta; }
+  free_if_non_null(q_data_dir);
   return status;
 }
 

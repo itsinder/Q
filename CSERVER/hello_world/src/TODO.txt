@@ -5,3 +5,12 @@ src:(dev)$ ./q_httpd
 
 This needs to be fixed.
 
+
+Document below
+
+Lua load : /usr/local/share/lua/5.1/pl/path.lua:28: pl.path requires
+LuaFileSystem
+
+
+sudo luarocks install luasec
+sudo luarocks install LuaFileSystem
