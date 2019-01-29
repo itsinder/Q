@@ -5,7 +5,7 @@ INCS= -I. \
 	-I../libevent-2.1.8-stable/include/event2/ \
 	-I../libevent-2.1.8-stable/include/ \
 	-I../LuaJIT-2.1.0-beta3/src/ \
-	-I../lua-5.1.3/src/ \
+	-I../lua-5.1.5/src/ \
 	-I../dt_interpreter/src/  \
 	-I../c_engine/ \
 
@@ -45,11 +45,11 @@ all : q_httpd \
 ../c_engine/libq_core.so : 
 	make -C ../c_engine/
 
-../lua-5.1.3/src/liblua.a :
+../lua-5.1.5/src/liblua.a :
 	cd ../ && \
-	tar -zxvf lua-5.1.3.tar.gz &&  \
+	tar -zxvf lua-5.1.5.tar.gz &&  \
 	cd - && \
-	make -C ../lua-5.1.3/src/ linux
+	make -C ../lua-5.1.5/src/ linux
 
 ../libevent-2.1.8-stable/.libs/libevent.so : 
 	cd ../ && \
@@ -87,10 +87,10 @@ clean:
 	make -i -C ../c_engine/ clean
 #	make -i -C ../LuaJIT-2.1.0-beta3/src/ clean 
 #	make -i -C ../libevent-2.1.8-stable/ distclean 
-#	make -i -C ../lua-5.1.3/ clean 
+#	make -i -C ../lua-5.1.5/ clean 
 	rm -r -f ../libevent-2.1.8-stable/ 
 	rm -r -f ../LuaJIT-2.1.0-beta3/ 
-	rm -r -f ../lua-5.1.3/ 
+	rm -r -f ../lua-5.1.5/ 
 	echo "ALL CLEAN"
 
 qclean :
