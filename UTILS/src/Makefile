@@ -169,6 +169,7 @@ SRC_FILES=  \
         copy_file.c  \
         generate_bin.c  \
 	is_valid_chars_for_num.c \
+	spooky_hash.c
 
 libutils.so : ${bin_search_files} ${hdr_files}
 	gcc ${QC_FLAGS} ${Q_LINK_FLAGS} ${INCS} ${SRC_FILES} ../gen_src/*.c -o libutils.so
