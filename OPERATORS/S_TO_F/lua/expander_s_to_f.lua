@@ -11,8 +11,10 @@ return function (a, args)
     -- Get name of specializer function. By convention
   local sp_fn_name = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_specialize"
   local mem_init_name = "Q/OPERATORS/S_TO_F/lua/" .. a .. "_mem_initialize"
-  local mem_initialize = assert(require(mem_init_name))
+  local req_status, mem_initialize = pcall(require, mem_init_name)
   local spfn = assert(require(sp_fn_name), "Specializer not found")
+  --TODO: remove below pcall,
+  -- currently calling it in pcall as mem_initialize is supported for rand only
   local status, subs, tmpl = pcall(spfn, args)
   if ( not status ) then print(subs) end 
   assert(status, "Specializer failed " .. sp_fn_name)
@@ -28,7 +30,13 @@ return function (a, args)
   assert(qc[func_name], "Function not found " .. func_name)
 
   -- calling mem_initializer
-  local casted_struct = mem_initialize(subs)
+  -- TODO: remove below temporary hack
+  local casted_struct
+  if req_status then
+    casted_struct = mem_initialize(subs)
+  else
+    casted_struct = ffi.cast(subs.c_mem_type, get_ptr(subs.c_mem))
+  end
   local chunk_size = qconsts.chunk_size
   local width =  assert(qconsts.qtypes[out_qtype].width)
   local bufsz =  multiple_of_8(chunk_size * width)
