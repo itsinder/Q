@@ -49,8 +49,8 @@ init_lua(
   g_L_DT = luaL_newstate(); if ( g_L_DT == NULL ) { go_BYE(-1); }
   luaL_openlibs(g_L_DT);  
   // status = luaL_dostring(g_L_DT, "require 'lua/init'"); 
-  status = luaL_dostring(g_L_DT, "require 'test1'"); 
-  // status = luaL_dostring(g_L_DT, "Q = require 'Q'");
+  // status = luaL_dostring(g_L_DT, "require 'test1'"); 
+  status = luaL_dostring(g_L_DT, "Q = require 'Q'");
   if ( status != 0 ) { 
     fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
     sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));

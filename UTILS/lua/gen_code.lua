@@ -1,16 +1,20 @@
-local plpath = require 'pl.path'
+local ffi = require 'ffi'
+ffi.cdef([[ extern bool isdir ( const char * const ); ]])
+ffi.cdef([[ extern bool isfile ( const char * const ); ]])
+local qc = ffi.load('libq_core')
 
 local section = { c = 'definition', h = 'declaration' }
 
 local q_tmpl_dir = os.getenv("Q_TMPL_DIR") .. "/"
-assert(plpath.isdir(q_tmpl_dir))
+local foo = qc.isdir
+assert(qc['isdir'](q_tmpl_dir))
 local function do_replacements(tmpl, subs)
   local T
-  if ( plpath.isfile(tmpl) ) then 
+  if ( qc.isfile(tmpl) ) then 
     T = assert(dofile(tmpl))
   else 
     local filename = q_tmpl_dir .. tmpl
-    assert(plpath.isfile(filename), "File not found " .. filename)
+    assert(qc.isfile(filename), "File not found " .. filename)
     T = dofile(filename)
   end
    for k,v in pairs(subs) do
@@ -27,7 +31,7 @@ local _dotfile = function(subs, tmpl, opdir, ext)
   if ( ( not opdir ) or ( opdir == "" ) ) then
     return dotfile
   end
-  assert(plpath.isdir(opdir), "Unable to find opdir " .. opdir)
+  assert(qc.isdir(opdir), "Unable to find opdir " .. opdir)
   local fname = opdir .. "_" .. subs.fn .. "." .. ext, "w"
   local f = assert(io.open(fname, "w"))
   f:write(dotfile)
