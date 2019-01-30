@@ -1,44 +1,61 @@
 import Q.lua_executor as executor
 from Q.constants import list_to_table_str, dict_to_table_str
 from Q import lupa
-
-
-def is_p_vector(val):
-    from Q.p_vector import PVector
-    return isinstance(val, PVector)
-
-
-def is_p_scalar(val):
-    from Q.p_scalar import PScalar
-    return isinstance(val, PScalar)
-
-
-def is_p_reducer(val):
-    from Q.p_reducer import PReducer
-    return isinstance(val, PReducer)
+from Q import q_op_category as q_cat
+from Q.p_reducer import PReducer
+from Q.p_scalar import PScalar
+from Q.p_vector import PVector
+from Q.validate import is_p_vector, is_p_scalar
 
 
 def is_valid_arg():
     pass
 
 
-def unpack_args(val):
+def pack_args(val):
+    """Convert args for a Q-lua function"""
     if is_p_vector(val):
         return val.get_base_vec()
     elif is_p_scalar(val):
         return val.get_base_scalar()
-    elif type(val) == list:
+    elif type(val) == list or type(val) == tuple:
         new_list = []
         for arg in val:
-            new_list.append(unpack_args(arg))
+            new_list.append(pack_args(arg))
         return to_table(new_list)
     elif type(val) == dict:
-        new_dict = {}
         for i, v in val.items():
-            new_dict[i] = unpack_args(v)
-        return to_table(new_dict)
+            val[i] = pack_args(v)
+        return to_table(val)
     else:
         return val
+
+
+def wrap_output(op_name, result):
+    """Convert output from a Q-lua function"""
+    if op_name in q_cat.number_as_output:
+        # no action required
+        pass
+    elif op_name in q_cat.string_as_output:
+        # no action required
+        pass
+    elif op_name in q_cat.reducer_as_output:
+        # wrap it with PReducer
+        result = PReducer(result)
+    elif op_name in q_cat.scalar_as_output:
+        # wrap it with PScalar
+        result = PScalar(base_scalar=result)
+    elif op_name in q_cat.table_as_output:
+        # convert lua table to dict/list
+        result = util.to_list_or_dict(result)
+        for key, val in result.items():
+            result[key] = PVector(val)
+    elif op_name in q_cat.vec_as_output:
+        # wrap it with PVector
+        result = PVector(result)
+    else:
+        raise Exception("Output type is not supported for operator {}".format(op_name))
+    return result
 
 
 def to_table(in_val):

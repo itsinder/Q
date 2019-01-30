@@ -107,3 +107,13 @@ lua_op_fn_str = \
         return Q[op_name](unpack(args))
     end
     """
+
+# get Q operator names string
+q_op_str = \
+    """
+    local t = {}
+    for i, v in pairs(Q) do
+        t[#t+1] = i
+    end
+    return t
+    """
