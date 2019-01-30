@@ -7,8 +7,9 @@ LUA_DEBUG=0
 bash system_requirements.sh
 
 # setting Q source env variables
-# TODO: absolute path can be supported 
-source ../setup.sh -f
+# TODO: absolute path can be supported
+# for now not exiting from setup.sh if any cmd fails i.e. nullifying the set -e effect 
+source ../setup.sh -f || true
 
 # TODO: aio.sh "dbg|test|doc|qli" all modes
 # checking  for aio.lua for -d(debug) mode

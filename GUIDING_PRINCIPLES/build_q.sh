@@ -5,5 +5,5 @@ pwd
 cd ../UTILS/build
 pwd
 make
-cd ../GUIDING_PRINCIPLES
+cd -
 bash my_print.sh "COMPLETED: Building Q"
