@@ -18,6 +18,8 @@
 // These two lines should be in globals but there is this 
 // unnamed struct in maxmind that throws off a gcc warning
 
+int g_l_global_variable;
+
 extern void 
 generic_handler(
     struct evhttp_request *req, 
@@ -78,7 +80,7 @@ BYE:
   }
   evbuffer_free(opbuf);
   //--- Log time seen by clients
-  if ( req_type == Dummy ) { // TODO FIX 
+  if ( ( req_type == DoString ) || ( req_type == DoFile ) ) {
     /*
     uint64_t t_stop = RDTSC();
     if ( t_stop > t_start ) { 

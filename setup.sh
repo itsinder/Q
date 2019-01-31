@@ -1,52 +1,6 @@
 #!/bin/bash
 CUR_DIR="`pwd`"
 PREV_DIR="`cd -`"
-# usage(){
-# 	echo "Usage: $0 [-f|-h] -- program to set the env variables for running Q" 1>&2
-# 	echo "where:" 1>&2
-# 	echo "  -h  shows this message" 1>&2
-# 	echo "  -f  sets all the parameters to their default values. Namely
-# 	Q_SRC_ROOT Q_ROOT LUA_INIT LD_LIBRARY_PATH QC_FLAGS Q_DATA_DIR Q_METADATA_DIR are set to the default values" 1>&2
-# 	echo "Note: To have the changes reflect in your env, use: source $0 [-f]" 1>&2
-# 	exit 1 ;
-# }
-
-# export Q_SRC_ROOT="$ {Q_SRC_ROOT: = ${BASE_PATH}}"
-# export Q_ROOT="$ {Q_ROOT: = ${HOME} / Q}"
-# mkdir -p $Q_ROOT/include $Q_ROOT/lib
-# export LUA_INIT="$ {LUA_INIT: = @${Q_SRC_ROOT} / init.lua}"
-# # Setting ld library path based on lua init
-# `lua| tail -1`
-# export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$Q_ROOT/lib"
-# export QC_FLAGS="$ {QC_FLAGS: = $C_FLAGS}"
-
-# while getopts "fh" opt;
-# do
-# 	case $opt in
-# 		h)
-# 			usage
-# 			;;
-# 		f)
-# 			# echo "-f was triggered, Parameter: $OPTARG" >&2
-# 			unset Q_SRC_ROOT
-# 			unset Q_ROOT
-# 			unset LUA_INIT
-# 			unset LD_LIBRARY_PATH
-# 			unset QC_FLAGS
-# 			unset Q_DATA_DIR
-# 			unset Q_METADATA_DIR
-# 			echo "Unset all params"
-# 			;;
-# 		\?)
-# 			echo "Invalid option: -$OPTARG" 1>&2
-# 			exit 1
-# 			;;
-# 		:)
-# 			echo "Option -$OPTARG requires an argument." 1>&2
-# 			exit 1
-# 			;;
-# 	esac
-# done
 
 unset Q_SRC_ROOT
 unset Q_ROOT
@@ -62,16 +16,15 @@ unset Q_BUILD_DIR
 unset LD_LIBRARY_PATH
 
 # Wont work with simlinks
-BASE_PATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
-echo "BASE_PATH: $BASE_PATH"
+Q_SRC_ROOT="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
+export Q_SRC_ROOT="${Q_SRC_ROOT}"
+echo "Q_SRC_ROOT: ${Q_SRC_ROOT}"
+
 export Q_ROOT="${Q_ROOT:=${HOME}/local/Q}"
 echo "Q_ROOT: $Q_ROOT"
 mkdir -p $HOME/local/
 mkdir -p $Q_ROOT/include
-mkdir -p $Q_ROOT/lib
-# export PATH=$PATH:$HOME/TERRA_STUFF/terra-Linux-x86_64-2fa8d0a/bin
-export Q_SRC_ROOT="${Q_SRC_ROOT:=$BASE_PATH}"
-echo "Q_SRC_ROOT: ${Q_SRC_ROOT}"
+mkdir -p $Q_ROOT/lib 
 C_FLAGS=' -std=gnu99 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wno-unused-parameter -pedantic -fopenmp'
 
 export QC_FLAGS="${QC_FLAGS:=$C_FLAGS}"
@@ -112,15 +65,13 @@ echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 export Q_LINK_FLAGS=" -llapacke -llapack -lblas -lm -shared -lgomp"
 echo "Q_LINK_FLAGS: $Q_LINK_FLAGS"
 CURR_PATH=`pwd`
-cd $BASE_PATH
+cd $Q_SRC_ROOT
 cd ../
 export LUA_PATH="`pwd`/?.lua;`pwd`/?/init.lua;;"
 export LUA_CPATH="${Q_ROOT}/lib/?.so;;"
-export TERRA_PATH="`pwd`/?.t;;"
 cd $CURR_PATH
 echo "LUA_PATH: $LUA_PATH"
 echo "LUA_CPATH: $LUA_CPATH"
-echo "TERRA_PATH: $TERRA_PATH"
 echo "Q_BUILD_DIR: $Q_BUILD_DIR"
 mkdir -p $Q_BUILD_DIR
 mkdir -p $Q_BUILD_DIR/src/

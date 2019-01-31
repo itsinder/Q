@@ -3,7 +3,8 @@
 #include "auxil.h"
 #include "init.h"
 #include "setup.h"
-#include "dummy.h"
+#include "do_string.h"
+#include "do_file.h"
 
 extern bool g_halt; 
 extern char g_err[DT_ERR_MSG_LEN+1]; 
@@ -15,8 +16,8 @@ int
 q_process_req(
     Q_REQ_TYPE req_type,
     const char *const api,
-    const char *args,
-    const char *body
+    char * const args,
+    const char * const body
     )
   // STOP FUNC DECL
 {
@@ -31,8 +32,12 @@ q_process_req(
       go_BYE(-1);
       break;
       //--------------------------------------------------------
-    case Dummy :
-      status = dummy(args, body); cBYE(status);
+    case DoString :
+      status = do_string(args, body); cBYE(status);
+      break;
+      //--------------------------------------------------------
+    case DoFile :
+      status = do_file(args, body); cBYE(status);
       break;
       //--------------------------------------------------------
     case Halt : 

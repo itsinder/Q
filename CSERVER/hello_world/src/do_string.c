@@ -1,6 +1,5 @@
 #include "q_incs.h"
-#include "dummy.h"
-#include "add_I4_I4_I4.h"
+#include "do_string.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -10,7 +9,7 @@ extern lua_State *g_L_DT;
 extern char g_err[DT_ERR_MSG_LEN+1]; 
 
 int
-dummy(
+do_string(
     const char *const args,
     const char *const body
     )

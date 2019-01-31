@@ -1,5 +1,5 @@
 extern int
-dummy(
-    const char *const args,
+do_file(
+    char *const args,
     const char *const body
     );

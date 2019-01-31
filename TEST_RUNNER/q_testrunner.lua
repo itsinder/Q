@@ -18,7 +18,6 @@ package.path = "/?.lua;" .. package.path
 local qc = require 'Q/UTILS/lua/q_core'
 local plpretty = require "pl.pretty"
 local q_root = assert(os.getenv("Q_ROOT"))
--- local base_path = assert(os.getenv("BASE_PATH"))
 local find_all_files = require 'Q/TEST_RUNNER/q_test_discovery'
 assert(qc["isdir"](q_root))
 assert(qc["isdir"](q_root .. "/data/"))

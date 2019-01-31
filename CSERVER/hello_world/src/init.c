@@ -32,7 +32,9 @@ zero_globals(
   memset(g_rslt, '\0', DT_MAX_LEN_RESULT+1);
 
   //------------
-  const char *str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/_:";
+  const char *str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/_:.";
+  /* Note that I added period to allow FileNames to be passed as args */
+  /* Not sure if that is good practice */
   memset(g_valid_chars_in_url, '\0', 256);
   for ( char *cptr = (char *)str; *cptr != '\0'; cptr++ ) {
     g_valid_chars_in_url[(uint8_t)(*cptr)] = true;
@@ -57,8 +59,7 @@ init_lua(
   status = luaL_dostring(g_L_DT, "cmem = require 'libcmem'");
   cBYE(status); fprintf(stderr, "status = %d \n", status);
   */
-  status = luaL_dostring(g_L_DT, 
-      "Q = require 'Q'; Q.print_csv(Q.mk_col({1,2,3}, 'I4'))");
+  status = luaL_dostring(g_L_DT, "Q = require 'Q'; ");
   if ( status != 0 ) { 
     fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
     sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));
