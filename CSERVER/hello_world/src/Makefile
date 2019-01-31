@@ -49,9 +49,6 @@ all : q_httpd \
 .c.o : 
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS) $(DBGFLAGS)
 
-../c_engine/libq_core.so : 
-	make -C ../c_engine/
-
 ../libevent-2.1.8-stable/.libs/libevent.so : 
 	cd ../ && \
 	tar -zxvf libevent-2.1.8-stable.tar.gz && \
@@ -83,13 +80,11 @@ $(COBJS) : ../LuaJIT-2.1.0-beta3/src/libluajit.a \
 
 q_httpd : $(COBJS)  \
 	./libs/libluajit.so \
-	./libs/libevent.so \
-	../c_engine/libq_core.so
+	./libs/libevent.so 
 	$(CC) $(CFLAGS) $(COBJS) \
 	  -o q_httpd  \
 	./libs/libevent.so \
 	./libs/libluajit.so \
-	../c_engine/libq_core.so \
 	-lm  -lpthread -ldl 
 
 
