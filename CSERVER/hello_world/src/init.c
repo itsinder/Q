@@ -50,7 +50,15 @@ init_lua(
   luaL_openlibs(g_L_DT);  
   // status = luaL_dostring(g_L_DT, "require 'lua/init'"); 
   // status = luaL_dostring(g_L_DT, "require 'test1'"); 
-  status = luaL_dostring(g_L_DT, "Q = require 'Q'");
+  // status = luaL_dostring(g_L_DT, "cmem = require 'libcmem'");
+  /*
+  status = luaL_dostring(g_L_DT, "ffi = require 'ffi'");
+  cBYE(status); fprintf(stderr, "status = %d \n", status);
+  status = luaL_dostring(g_L_DT, "cmem = require 'libcmem'");
+  cBYE(status); fprintf(stderr, "status = %d \n", status);
+  */
+  status = luaL_dostring(g_L_DT, 
+      "Q = require 'Q'; Q.print_csv(Q.mk_col({1,2,3}, 'I4'))");
   if ( status != 0 ) { 
     fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
     sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));

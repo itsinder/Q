@@ -31,6 +31,15 @@ all : q_httpd \
 ./libs:
 	mkdir libs
 
+
+../lua-5.1.5/src/liblua.a :
+	cd ../ && \
+	tar -zxvf lua-5.1.5.tar.gz && \
+	cd lua-5.1.5 && \
+	make linux && \
+	cp ./src/liblua.a ../src/libs && \
+	cd -
+
 ../LuaJIT-2.1.0-beta3/src/libluajit.a:
 		cd ../ && \
 		rm -rf LuaJIT-2.1.0-beta3 && \
@@ -45,12 +54,6 @@ all : q_httpd \
 ../c_engine/libq_core.so : 
 	make -C ../c_engine/
 
-../lua-5.1.5/src/liblua.a :
-	cd ../ && \
-	tar -zxvf lua-5.1.5.tar.gz &&  \
-	cd - && \
-	make -C ../lua-5.1.5/src/ linux
-
 ../libevent-2.1.8-stable/.libs/libevent.so : 
 	cd ../ && \
 	tar -zxvf libevent-2.1.8-stable.tar.gz && \
@@ -59,6 +62,15 @@ all : q_httpd \
 	./configure && \
 	make && \
 	cd ../src/
+
+./libs/libluajit.a : ./libs/ ../LuaJIT-2.1.0-beta3/src/libluajit.a
+	cp ../LuaJIT-2.1.0-beta3/src/libluajit.a ./libs/
+
+./libs/libluajit.so : ./libs/ ../LuaJIT-2.1.0-beta3/src/libluajit.so
+	cp ../LuaJIT-2.1.0-beta3/src/libluajit.so ./libs/
+
+./libs/liblua.a : ./libs/ ../lua-5.1.5/src/liblua.a 
+	cp ../lua-5.1.5/src/liblua.a  ./libs/
 
 ./libs/libevent.so: ./libs ../libevent-2.1.8-stable/.libs/libevent.so
 	cp ../libevent-2.1.8-stable/.libs/libevent.so ./libs/libevent.so
@@ -72,15 +84,20 @@ $(COBJS) : ../LuaJIT-2.1.0-beta3/src/libluajit.a \
 
 
 q_httpd : $(COBJS)  \
-	../LuaJIT-2.1.0-beta3/src/libluajit.a \
+	./libs/libluajit.a \
+	./libs/libluajit.so \
 	./libs/libevent.so \
+	./libs/liblua.a \
 	../c_engine/libq_core.so
 	$(CC) $(CFLAGS) $(COBJS) \
 	  -o q_httpd  \
 	./libs/libevent.so \
+	./libs/libluajit.so \
 	../c_engine/libq_core.so \
-	../LuaJIT-2.1.0-beta3/src/libluajit.a \
 	-lm  -lpthread -ldl 
+
+
+#	./libs/liblua.a \
 
 clean:
 	rm -r -f q_httpd $(COBJS) 
@@ -91,8 +108,8 @@ clean:
 	rm -r -f ../libevent-2.1.8-stable/ 
 	rm -r -f ../LuaJIT-2.1.0-beta3/ 
 	rm -r -f ../lua-5.1.5/ 
+	rm -f ./libs/*
 	echo "ALL CLEAN"
 
 qclean :
-	rm -r -f q_httpd $(COBJS) *.o _*
-	rm -f libs/*
+	rm  -f q_httpd $(COBJS) *.o _*
