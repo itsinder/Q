@@ -1,10 +1,21 @@
 DEFAULT_GOAL := all
 OUTPUTS = libq_core.so q.h q_core.h
 BASE_PATH=$(abspath ../../ )
+# Default build is static
+all: static
+#static & dynamic sets the "BUILD_TYPE" target specific variable
+#static build -> all and dynamic build-> all_for_dc
+static: BUILD_TYPE="all"
 
-all: q_core
+dynamic: BUILD_TYPE="all_for_dc"
+
+static: q_core
 	cd ${BASE_PATH}
-	echo "Q is built"
+	echo "Q is built statically"
+
+dynamic: q_core
+	cd ${BASE_PATH}
+	echo "Q is built dynamically"
 
 clean:
 	find ${BASE_PATH} -name "*.o" -o -name "_*" | xargs rm -rf
