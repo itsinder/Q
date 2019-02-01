@@ -1,3 +1,4 @@
+#include <signal.h>
 #include "q_incs.h"
 #include "q_globals.h"
 
@@ -8,6 +9,7 @@
 #include "get_body.h"
 #include "get_req_type.h"
 #include "setup.h"
+#include "halt_server.h"
 
 // #include <event.h>
 #include <evhttp.h>
@@ -36,16 +38,16 @@ generic_handler(
   Q_REQ_TYPE req_type = Undefined;
   // uint64_t t_start = RDTSC();
   struct event_base *base = (struct event_base *)arg;
-  char api[DT_MAX_LEN_API_NAME+1]; 
-  char args[DT_MAX_LEN_ARGS+1];
+  char api[Q_MAX_LEN_API_NAME+1]; 
+  char args[Q_MAX_LEN_ARGS+1];
   struct evbuffer *opbuf = NULL;
   opbuf = evbuffer_new();
   if ( opbuf == NULL) { go_BYE(-1); }
   const char *uri = evhttp_request_uri(req);
 
   //--------------------------------------
-  status = extract_api_args(uri, api, DT_MAX_LEN_API_NAME, 
-      args, DT_MAX_LEN_ARGS);
+  status = extract_api_args(uri, api, Q_MAX_LEN_API_NAME, 
+      args, Q_MAX_LEN_ARGS);
   // START: NW Specific
   if ( strcmp(api, "api/v1/health_check") == 0 ) { 
     strcpy(g_rslt, "{ \"HealthCheck\" : \"OK\" }"); goto BYE;
@@ -53,7 +55,7 @@ generic_handler(
   // STOP:  NW Specific 
   req_type = get_req_type(api); 
   if ( req_type == Undefined ) { go_BYE(-1); }
-  status = get_body(req_type, req, g_body, DT_MAX_LEN_BODY, &g_sz_body); 
+  status = get_body(req_type, req, g_body, Q_MAX_LEN_BODY, &g_sz_body); 
   cBYE(status);
   status = q_process_req(req_type, api, args, g_body); cBYE(status);
   //--------------------------------------
@@ -102,6 +104,7 @@ main(
   struct evhttp *httpd;
   struct event_base *base;
   int port = 0;
+  signal(SIGINT, halt_server);
 
   zero_globals();
   //----------------------------------
@@ -111,8 +114,8 @@ main(
   //----------------------------------
   base = event_base_new();
   httpd = evhttp_new(base);
-  evhttp_set_max_headers_size(httpd, DT_MAX_HEADERS_SIZE);
-  evhttp_set_max_body_size(httpd, DT_MAX_LEN_BODY);
+  evhttp_set_max_headers_size(httpd, Q_MAX_HEADERS_SIZE);
+  evhttp_set_max_body_size(httpd, Q_MAX_LEN_BODY);
   status = evhttp_bind_socket(httpd, "0.0.0.0", port); 
   if ( status < 0 ) { 
     fprintf(stderr, "Port %d busy \n", port); go_BYE(-1);

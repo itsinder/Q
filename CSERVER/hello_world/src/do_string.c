@@ -5,8 +5,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-extern lua_State *g_L_DT; 
-extern char g_err[DT_ERR_MSG_LEN+1]; 
+extern lua_State *g_L_Q; 
+extern char g_err[Q_ERR_MSG_LEN+1]; 
 
 int
 do_string(
@@ -15,13 +15,8 @@ do_string(
     )
 {
   int status = 0;
-  status = luaL_dostring(g_L_DT, body);
-  if ( status != 0 ) { 
-    fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_DT, -1));
-    sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_DT, -1));
-    lua_pop(g_L_DT, 1); go_BYE(-1);
-  }
-  cBYE(status);
+  status = luaL_dostring(g_L_Q, body);
+  mcr_chk_lua_rslt(status);
 BYE:
   return status;
 }

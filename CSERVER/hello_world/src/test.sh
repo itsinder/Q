@@ -13,3 +13,9 @@ curl -XPOST --url "http://localhost:8000/DoString?ABC=123"  \
   --data 'print(y:fldtype())'
 
 curl -XPOST --url "http://localhost:8000/DoFile?File=../lua/test1.lua"
+
+curl -XPOST --url "http://localhost:8000/DoString?ABC=123"  \
+  --data 'print("g_Q_META_FILE = " .. g_Q_META_FILE)'
+
+
+curl -XPOST --url "http://localhost:8000/Halt"

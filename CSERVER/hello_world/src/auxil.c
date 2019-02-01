@@ -140,7 +140,7 @@ abcdefghijklmnopqrstuvwxyz
 0123456789
 -._~:/?#[]@!$&'()*+,;=
 */
-char g_rslt[DT_MAX_LEN_RESULT+1]; // For C: ab_process_req()
+char g_rslt[Q_MAX_LEN_RESULT+1]; // For C: ab_process_req()
 int
 mk_json_output(
     char *api, 
@@ -150,8 +150,8 @@ mk_json_output(
     )
 {
   int status = 0;
-  memset(g_rslt, '\0', DT_MAX_LEN_RESULT+1);
-  int n_out = 0; int sz_out = DT_MAX_LEN_RESULT;
+  memset(g_rslt, '\0', Q_MAX_LEN_RESULT+1);
+  int n_out = 0; int sz_out = Q_MAX_LEN_RESULT;
   if ( n_out >= sz_out ) { go_BYE(-1); } out[n_out++] = '{';
   status = add_to_buf(api, "API", g_rslt, sz_out, &n_out); cBYE(status);
   if ( n_out >= sz_out ) { go_BYE(-1); } out[n_out++] = ',';
@@ -207,6 +207,21 @@ isfile (
   if ( ( filename == NULL ) || ( *filename == '\0' ) ) { return false; }
   int status = stat(filename, &buf );
   if ( ( status == 0 ) && ( S_ISREG( buf.st_mode ) ) ) { /* Path found, check for regular file */
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+bool 
+isdir (
+    const char * const dirname
+    )
+{
+  struct stat buf;
+  if ( ( dirname == NULL ) || ( *dirname == '\0' ) ) { return false; }
+  int status = stat(dirname, &buf );
+  if ( ( status == 0 ) && ( S_ISDIR( buf.st_mode ) ) ) { /* Path found, check for directory */
     return true;
   }
   else {

@@ -7,9 +7,9 @@
 #include "do_file.h"
 
 extern bool g_halt; 
-extern char g_err[DT_ERR_MSG_LEN+1]; 
-extern char g_buf[DT_ERR_MSG_LEN+1]; 
-extern char g_rslt[DT_MAX_LEN_RESULT+1]; 
+extern char g_err[Q_ERR_MSG_LEN+1]; 
+extern char g_buf[Q_ERR_MSG_LEN+1]; 
+extern char g_rslt[Q_MAX_LEN_RESULT+1]; 
 
 // START FUNC DECL
 int
@@ -23,9 +23,9 @@ q_process_req(
 {
   int status = 0;
   //-----------------------------------------
-  memset(g_rslt, '\0', DT_MAX_LEN_RESULT+1);
-  memset(g_err,  '\0', DT_ERR_MSG_LEN+1);
-  memset(g_buf,  '\0', DT_ERR_MSG_LEN+1);
+  memset(g_rslt, '\0', Q_MAX_LEN_RESULT+1);
+  memset(g_err,  '\0', Q_ERR_MSG_LEN+1);
+  memset(g_buf,  '\0', Q_ERR_MSG_LEN+1);
   //-----------------------------------------
   switch ( req_type ) {
     case Undefined :

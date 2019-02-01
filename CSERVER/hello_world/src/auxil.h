@@ -50,3 +50,7 @@ extern bool
 isfile (
     const char * const filename
     );
+extern bool 
+isdir (
+    const char * const dirname
+    );
