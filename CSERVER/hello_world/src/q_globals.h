@@ -18,6 +18,8 @@ char g_body[Q_MAX_LEN_BODY+1];
 int g_sz_body;
 
 char g_valid_chars_in_url[256]; 
+char g_qc_flags[Q_MAX_LEN_FLAGS]; 
+char g_link_flags[Q_MAX_LEN_FLAGS]; 
 
 //------------------------ For Lua
 lua_State *g_L_Q; 

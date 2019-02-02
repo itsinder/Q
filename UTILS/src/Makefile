@@ -89,17 +89,17 @@ all : libutils.so ${hdr_files} asc2bin
 	lua ../lua/cli_extract_func_decl.lua generate_bin.c ${INCDIR}
 
 ../gen_src/_bin_search_I1.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua I1
+	luajit bin_search_generator.lua I1
 ../gen_src/_bin_search_I2.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua I2
+	luajit bin_search_generator.lua I2
 ../gen_src/_bin_search_I4.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua I4
+	luajit bin_search_generator.lua I4
 ../gen_src/_bin_search_I8.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua I8 
+	luajit bin_search_generator.lua I8 
 ../gen_src/_bin_search_F4.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua F4
+	luajit bin_search_generator.lua F4
 ../gen_src/_bin_search_F8.c : bin_search.tmpl bin_search_generator.lua
-	lua bin_search_generator.lua F8
+	luajit bin_search_generator.lua F8
 
 bin_search_files = \
 	../gen_src/_bin_search_I1.c  \

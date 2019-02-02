@@ -1,16 +1,10 @@
-local Q_DATA_DIR = os.getenv("Q_DATA_DIR") -- TODO default
-if not Q_DATA_DIR then Q_DATA_DIR = os.getenv("HOME") .. "/Q/DATA_DIR" end
-local Q_META_DATA_DIR = os.getenv("Q_METADATA_DIR") -- TODO default
-if not Q_META_DATA_DIR then Q_META_DATA_DIR = os.getenv("HOME") .. "/Q/METADATA_DIR" end
-
---print ("Your Q_DATA_DIR is: " .. Q_DATA_DIR)
--- TODO P1 local pldir = require 'pl.dir'
--- TODO P1 pldir.makepath(Q_DATA_DIR)
--- TODO P1 pldir.makepath(Q_META_DATA_DIR)
+-- TODO P1 Why is this being done here????
+local Q_DATA_DIR = os.getenv("Q_DATA_DIR") 
+local Q_METADATA_FILE = os.getenv("Q_METADATA_FILE") 
 
 local res = {
     Q_DATA_DIR = Q_DATA_DIR, 
-    Q_META_DATA_DIR = Q_META_DATA_DIR,
+    Q_METADATA_FILE = Q_METADATA_FILE,
 }
 res.export = function(s, f) 
     res[s] = f

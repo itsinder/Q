@@ -15,5 +15,6 @@
 #define Q_MAX_HEADERS_SIZE 8191
 #define Q_MAX_LEN_BODY    32767
 #define Q_MAX_LEN_RESULT  32767
+#define Q_MAX_LEN_FLAGS  255
 #endif
 

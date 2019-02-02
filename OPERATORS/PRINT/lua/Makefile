@@ -28,17 +28,17 @@ all : libprint_csv.so
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/SC_to_txt.c ${INCDIR}
 #----------------------------------
 ../gen_src/_I1_to_txt.c :
-	lua generator.lua I1
+	luajit generator.lua I1
 ../gen_src/_I2_to_txt.c :
-	lua generator.lua I2
+	luajit generator.lua I2
 ../gen_src/_I4_to_txt.c :
-	lua generator.lua I4
+	luajit generator.lua I4
 ../gen_src/_I8_to_txt.c :
-	lua generator.lua I8
+	luajit generator.lua I8
 ../gen_src/_F4_to_txt.c :
-	lua generator.lua F4
+	luajit generator.lua F4
 ../gen_src/_F8_to_txt.c :
-	lua generator.lua F8
+	luajit generator.lua F8
 #----------------------------------
 clean :
 	rm -r -f ../gen_src; 
