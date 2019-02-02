@@ -66,10 +66,10 @@ q_core: q_basic q_operators
 	lua copy_generated_files.lua 
 	luajit mk_so.lua
 
-q_basic: utils load_csv print column
+q_basic: utils load_csv print runtime
 	luajit mk_so.lua /tmp/
 
-column:
+runtime:
 	cd ${Q_SRC_ROOT}/RUNTIME/src;
 	make -C ${Q_SRC_ROOT}/RUNTIME/src/
 
