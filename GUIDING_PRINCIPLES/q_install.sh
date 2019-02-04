@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 LUA_DEBUG=0
+LUA_DOC=0
+LUA_QLI=0
+LUA_TEST=0
 
 #---------- Main program starts ----------
 # first checking system package version required for Q
@@ -12,18 +15,27 @@ bash system_requirements.sh
 source ../setup.sh -f || true
 
 # TODO: aio.sh "dbg|test|doc|qli" all modes
-# checking  for aio.lua for -d(debug) mode
-while getopts 'hd' opt;
-do
-  case $opt in
-    h)
-      exit 0
-      ;;
-    d)
-      export QC_FLAGS="$QC_FLAGS -g"
-      LUA_DEBUG=1
-  esac
-done
+# checking  for aio.lua for mode
+
+ARG_MODE=$1
+case $ARG_MODE in
+  h)
+    exit 0
+    ;;
+  dbg)
+    export QC_FLAGS="$QC_FLAGS -g"
+    LUA_DEBUG=1
+    ;;
+  doc)
+    LUA_DOC=1
+    ;;
+  qli)
+    LUA_QLI=1
+    ;;
+  test)
+    LUA_TEST=1
+    ;;
+esac
 
 # installing apt get dependencies
 bash apt_get_dependencies.sh
@@ -59,10 +71,27 @@ bash clean_up.sh ../
 # make clean
 bash clean_q.sh
 
-# installing luaffi in case of debug mode
-if [[ $LUA_DEBUG -eq 1 ]] ; then 
-  bash luaffi_installation.sh
+# installing luaffi
+bash luarocks_installation.sh
+
+#if "dbg" mode then
+#if [[ $LUA_DEBUG -eq 1 ]] ; then
+#  bash q_debug_dependencies.sh
+#fi
+#if "doc" mode then
+if [[ $LUA_DOC -eq 1 ]] ; then
+  bash q_doc_dependencies.sh
 fi
+#if "qli" mode then
+if [[ $LUA_QLI -eq 1 ]] ; then
+  bash q_qli_dependencies.sh
+fi
+#if "test" mode then
+if [[ $LUA_TEST -eq 1 ]] ; then
+  bash q_test_dependencies.sh
+fi
+
+exit
 
 # make
 bash build_q.sh

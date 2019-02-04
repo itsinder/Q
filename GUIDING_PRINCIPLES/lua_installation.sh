@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 bash my_print.sh "STARTING: Installing lua from source"
-#--TODO: instead of wget we can get this tar from Q repo
+#TODO: instead of wget we can get this tar from Q repo
 wget https://www.lua.org/ftp/lua-5.1.5.tar.gz
 tar -xvzf lua-5.1.5.tar.gz
 cd lua-5.1.5/

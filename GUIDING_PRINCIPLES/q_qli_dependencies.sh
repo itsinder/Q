@@ -1,4 +1,4 @@
-source aio_utils.sh ; my_print "STARTING: Installing q dependencies using luarocks"
+bash my_print.sh "STARTING: Installing Q-qli dependencies using luarocks"
 #not needed right now
 #sudo luarocks install luaposix
 #sudo luarocks install luv
@@ -7,4 +7,4 @@ source aio_utils.sh ; my_print "STARTING: Installing q dependencies using luaroc
 #sudo luarocks install cluacov
 sudo luarocks install http      # for QLI
 sudo luarocks install linenoise # for QLI
-source aio_utils.sh ; my_print "COMPLETED: Installing q dependencies using luarocks"
+bash my_print.sh "COMPLETED: Installing Q-qli dependencies using luarocks"
