@@ -4,7 +4,6 @@ local Scalar = require 'libsclr' ;
 local cmem = require 'libcmem' ; 
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
-local q_data_dir = os.getenv("Q_DATA_DIR")
 
 local tests = {}
 tests.t1 = function() 
@@ -24,7 +23,7 @@ tests.t1 = function()
   print("num_iters = ", num_iters)
 
   for j = 1, num_iters do
-    local y = Vector.new('I4', q_data_dir)
+    local y = Vector.new('I4')
     for i = 1, chunk_size do 
       local status = y:put1(s)
       assert(status)

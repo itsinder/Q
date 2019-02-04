@@ -655,12 +655,8 @@ static int l_vec_clone( lua_State *L)
 {
   int status = 0;
   VEC_REC_TYPE *ptr_new_vec = NULL;
-  const char *q_data_dir = NULL;
 
   VEC_REC_TYPE *ptr_old_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
-  // q_data_dir to create file_path
-  //q_data_dir = luaL_checkstring(L, 2);
-  //if ( q_data_dir == NULL ) { go_BYE(-1); }
 
   ptr_new_vec = (VEC_REC_TYPE *)lua_newuserdata(L, sizeof(VEC_REC_TYPE));
   return_if_malloc_failed(ptr_new_vec);
