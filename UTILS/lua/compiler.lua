@@ -1,7 +1,5 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local QC_FLAGS= assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
-local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH not provided")
-local Q_PATH = LD_LIBRARY_PATH:sub(LD_LIBRARY_PATH:find('[^:]*$'))
 local Q_ROOT = os.getenv("Q_ROOT") 
 local q_src_root = os.getenv("Q_SRC_ROOT")
 local q_build = os.getenv("Q_BUILD_DIR")

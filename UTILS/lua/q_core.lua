@@ -1,4 +1,3 @@
-local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH must be set")
 local Q_ROOT = os.getenv("Q_ROOT") 
 local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
 
