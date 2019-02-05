@@ -84,7 +84,6 @@ vvlt_specialize.lua  : cmp_specialize.tmpl
 	lua gen_specializers.lua cmp
 
 libf1f2opf3.so : _concat_files _arith_files _bop_files _cmp_files
-	chk_env_var 
 	gcc ../gen_src/*.c ${CFLAGS} ${INCS} -shared -o libf1f2opf3.so
 	test -d ${Q_BUILD_DIR}
 	cp ../gen_src/*.c ${Q_BUILD_DIR}/src/
