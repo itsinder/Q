@@ -160,31 +160,33 @@ mv_mul: q_basic
 corrm: q_basic
 	make -C ${Q_SRC_ROOT}/OPERATORS/PCA/src/
 
-q_operators: f1f2opf3 \
+# maintain following list in alphabetical order
+q_operators: \
+	ainb \
+	approx_quantile \
+	approx_frequent \
+	ax_equals_b \
+	corrm \
+	f_to_s \
+	f1f2opf3 \
   	f1opf2f3 \
 	f1s1opf2 \
 	f1s1opf2_val \
+	get \
+	ifxthenyelsez \
+	idx_sort \
 	sort \
 	sort2 \
-	get \
-	idx_sort \
 	s_to_f \
-	f_to_s \
-	ax_equals_b \
-	ainb \
-	ifxthenyelsez \
 	mv_mul \
-	approx_quantile \
-	approx_frequent \
-	corrm \
 	drop_nulls \
-	where \
 	sumby  \
 	index \
 	unique \
 	count \
 	join \
 	getk \
-	hash
+	hash \
+	where 
 	echo "all done for operators"
 

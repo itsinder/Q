@@ -11,4 +11,8 @@ res.export = function(s, f)
     return f
 end
 
+-- Usage of environment variables should be
+-- Q.Q_DATA_DIR or
+-- Q.QC_FLAGS or ...
+
 return res

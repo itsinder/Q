@@ -65,7 +65,7 @@ init_lua(
 
   status = luaL_dostring(g_L_Q, "Q = require 'Q'; ");
   mcr_chk_lua_rslt(status);
-
+/*
   sprintf(buf, "g_Q_DATA_DIR  = '%s'", g_q_data_dir);
   status = luaL_dostring(g_L_Q, buf);
   mcr_chk_lua_rslt(status);
@@ -81,7 +81,7 @@ init_lua(
   sprintf(buf, "g_LINK_FLAGS = '%s'", g_link_flags);
   status = luaL_dostring(g_L_Q, buf);
   mcr_chk_lua_rslt(status);
-
+*/
   status = luaL_dostring(g_L_Q, "Q.restore()");
   mcr_chk_lua_rslt(status);
 

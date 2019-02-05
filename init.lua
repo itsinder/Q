@@ -1,4 +1,7 @@
 -- require all the root operator files
+-- TODO Krushnakant local qc = require 'libq_core'
+-- TODO assert(qc["chk_env_var"]())
+
 require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"

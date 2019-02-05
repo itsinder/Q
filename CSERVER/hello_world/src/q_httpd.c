@@ -68,8 +68,10 @@ generic_handler(
     event_base_loopbreak(base);
   }
 BYE:
+  /* not needed any more
   evhttp_add_header(evhttp_request_get_output_headers(req), 
       "Content-Type", "application/json; charset=UTF-8");
+  */
   if ( status < 0 ) { 
     status = mk_json_output(api, args, g_err, g_rslt);
     if ( status < 0 ) { WHEREAMI; }
