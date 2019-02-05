@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 bash my_print.sh "STARTING: Installing luajit from source"
-LUAJIT_VER=$(luajit -v)
+LUAJIT_VER=$(luajit -v) || true
 LUAJIT_VER_NO=$(echo $LUAJIT_VER | awk '/LuaJIT /{print $2;exit 0;}')
 REQUIRED_LUAJIT="2.1.0-beta3" #specify here the required luajit version
 
