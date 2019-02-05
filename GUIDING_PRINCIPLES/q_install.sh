@@ -91,8 +91,6 @@ if [[ $LUA_TEST -eq 1 ]] ; then
   bash q_test_dependencies.sh
 fi
 
-exit
-
 # make
 bash build_q.sh
 
