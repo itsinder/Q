@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 bash my_print.sh "STARTING: Installing lua from source"
+#TODO:version checking
+#LUA_VER=$(lua -v)
+#REQUIRED_LUA="Lua 5.1.5  Copyright (C) 1994-2012 Lua.org, PUC-Rio" #specify here the required lua version
+
 #TODO: instead of wget we can get this tar from Q repo
 wget https://www.lua.org/ftp/lua-5.1.5.tar.gz
 tar -xvzf lua-5.1.5.tar.gz
