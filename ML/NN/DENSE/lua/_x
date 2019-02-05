@@ -1,1 +1,0 @@
-local chk1 = require 'Q/ML/NN/DENSE/lua/chk1'
