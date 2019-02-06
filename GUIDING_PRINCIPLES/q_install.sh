@@ -54,7 +54,7 @@ echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
 echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 
 #---------- Luarocks ----------
-which luarocks &> /dev/null
+which luarocks &> /dev/null || true
 RES=$?
 if [[ $RES -ne 0 ]] ; then
   bash luarocks_installation.sh
@@ -73,6 +73,9 @@ bash clean_q.sh
 
 # installing luaffi
 bash luarocks_installation.sh
+
+# installing basic Q required packages
+bash q_required_packages.sh
 
 #if "dbg" mode then
 #if [[ $LUA_DEBUG -eq 1 ]] ; then
