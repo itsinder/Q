@@ -31,23 +31,23 @@ local run_q_tests = function()
   -- performance test stretch goal - add
   local RES = pcall(PROG.PROG_START)
   if RES == true then
-    os.execute("bash aio_utils.sh my_print \"SUCCESS in loading all libs\"")
+    os.execute("bash my_print.sh \"SUCCESS in loading all libs\"")
   else
-    os.execute("bash aio_utils.sh my_print \"FAIL error\"")
+    os.execute("bash my_print.sh \"FAIL error\"")
   end
 
   RES = pcall(PROG.PROG_SAVE)
   if RES == true then
-    os.execute("bash aio_utils.sh my_print \"SUCCESS in saving\"")
+    os.execute("bash my_print.sh \"SUCCESS in saving\"")
   else
-    os.execute("bash aio_utils.sh my_print \"FAIL error\"")
+    os.execute("bash my_print.sh \"FAIL error\"")
   end
 
   RES = pcall(PROG.PROG_RESTORE)
   if RES == true then
-    os.execute("bash aio_utils.sh my_print \"SUCCESS in restoring\"")
+    os.execute("bash my_print.sh \"SUCCESS in restoring\"")
   else
-    os.execute("bash aio_utils.sh my_print \"FAIL error\"")
+    os.execute("bash my_print.sh \"FAIL error\"")
   end
 end
 
