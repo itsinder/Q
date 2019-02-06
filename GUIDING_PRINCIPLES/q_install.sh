@@ -6,20 +6,26 @@ LUA_QLI=0
 LUA_TEST=0
 
 #---------- Main program starts ----------
-# first checking system package version required for Q
+# first checking version of system packages required for Q
 bash system_requirements.sh
 
 # setting Q source env variables
 # TODO: absolute path can be supported
-# for now not exiting from setup.sh if any cmd fails i.e. nullifying the set -e effect 
+# for now not exiting from setup.sh if any cmd fails i.e. nullifying the set -e effect
+# failing cmd: lscpu | grep "Architecture" | grep "arm"
 source ../setup.sh -f || true
 
-# TODO: aio.sh "dbg|test|doc|qli" all modes
-# checking  for aio.lua for mode
+# q_install.sh "dbg|doc|qli|test" modes
+# TODO: q_install.sh "all" mode which supports all modes
 
+# checking mode for q_install.sh
 ARG_MODE=$1
 case $ARG_MODE in
-  h)
+  help)
+    echo "------------------------------"
+    echo "Manual/Usage of q_install.sh:"
+    echo "bash q_install.sh dbg|doc|qli|test"
+    echo "------------------------------"
     exit 0
     ;;
   dbg)
@@ -40,7 +46,7 @@ esac
 # installing apt get dependencies
 bash apt_get_dependencies.sh
 
-if [[ $LUA_DEBUG  -eq 1 ]] ; then
+if [[ $LUA_DEBUG -eq 1 ]] ; then
   # installing lua with debug mode(set -g flag) if debug mode
   bash lua_installation.sh LUA_DEBUG
 else
@@ -71,25 +77,25 @@ bash clean_up.sh ../
 # make clean
 bash clean_q.sh
 
-# installing luaffi
+# installing luarocks
 bash luarocks_installation.sh
 
-# installing basic Q required packages
+# installing basic required packages for Q
 bash q_required_packages.sh
 
-#if "dbg" mode then
-#if [[ $LUA_DEBUG -eq 1 ]] ; then
-#  bash q_debug_dependencies.sh
-#fi
-#if "doc" mode then
+###if "dbg" mode then
+if [[ $LUA_DEBUG -eq 1 ]] ; then
+  bash q_debug_dependencies.sh
+fi
+###if "doc" mode then
 if [[ $LUA_DOC -eq 1 ]] ; then
   bash q_doc_dependencies.sh
 fi
-#if "qli" mode then
+###if "qli" mode then
 if [[ $LUA_QLI -eq 1 ]] ; then
   bash q_qli_dependencies.sh
 fi
-#if "test" mode then
+###if "test" mode then
 if [[ $LUA_TEST -eq 1 ]] ; then
   bash q_test_dependencies.sh
 fi
@@ -100,4 +106,4 @@ bash build_q.sh
 # execute run_q_tests to check whether Q is properly build
 luajit -e "require 'run_q_tests'()"
 
-bash my_print.sh "Successfully completed aio.lua"
+bash my_print.sh "Successfully completed q_install.sh"
