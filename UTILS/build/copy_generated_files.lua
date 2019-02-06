@@ -1,3 +1,5 @@
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'
 local plfile = require 'pl.file'
@@ -22,11 +24,11 @@ function recursive_copy( file_pattern, dir_pattern, currdir, destdir )
   end
 end
 --==========================
-local rootdir = os.getenv("Q_SRC_ROOT")
+local rootdir = qconsts.Q_SRC_ROOT
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 assert(plpath.isdir(rootdir))
 --==========================
-local build_dir = os.getenv("Q_BUILD_DIR")
+local build_dir = qconsts.Q_BUILD_DIR
 if ( not plpath.isdir(build_dir) ) then plpath.mkdir(build_dir) end
 --==========================
 local cdir = build_dir .. "/src/"

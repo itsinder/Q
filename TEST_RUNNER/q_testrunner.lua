@@ -16,8 +16,10 @@ Run luajit q_testrunner.lua to see its usage.
 
 package.path = "/?.lua;" .. package.path
 local qc = require 'Q/UTILS/lua/q_core'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 local plpretty = require "pl.pretty"
-local q_root = assert(os.getenv("Q_ROOT"))
+
+local q_root = qconsts.Q_ROOT
 local find_all_files = require 'Q/TEST_RUNNER/q_test_discovery'
 assert(qc["isdir"](q_root))
 assert(qc["isdir"](q_root .. "/data/"))

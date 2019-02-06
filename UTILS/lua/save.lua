@@ -1,4 +1,6 @@
 local ffi = require 'ffi'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
 ffi.cdef([[ extern bool isfile ( const char * const ); ]])
 local qc = ffi.load('libq_core')
 
@@ -101,7 +103,7 @@ local function save_global(file_to_save)
   if ( file_to_save ) then 
     metadata_file = file_to_save
   else
-    metadata_file = os.getenv("Q_METADATA_FILE")
+    metadata_file = qconsts.Q_METADATA_FILE
   end
   assert(type(metadata_file) == "string")
   local fp = assert(io.open(metadata_file, "r"))

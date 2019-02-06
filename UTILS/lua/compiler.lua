@@ -1,10 +1,10 @@
 local qconsts = require 'Q/UTILS/lua/q_consts'
-local QC_FLAGS= assert(os.getenv("QC_FLAGS"), "QC_FLAGS not provided")
-local Q_ROOT = os.getenv("Q_ROOT") 
-local q_src_root = os.getenv("Q_SRC_ROOT")
-local q_build = os.getenv("Q_BUILD_DIR")
+local QC_FLAGS= qconsts.QC_FLAGS
+local Q_ROOT = qconsts.Q_ROOT 
+local q_src_root = qconsts.Q_SRC_ROOT
+local q_build = qconsts.Q_BUILD_DIR
 local H_DIR = Q_ROOT .. "/include/" 
-local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
+local Q_LINK_FLAGS = qconsts.Q_LINK_FLAGS
 local fileops = require 'Q/UTILS/lua/fileops'
 local assertx = require 'Q/UTILS/lua/assertx'
 -- local tmp_c, tmp_h = "/tmp/dc.c", "/tmp/dc.h"
@@ -12,7 +12,7 @@ local assertx = require 'Q/UTILS/lua/assertx'
 
 assert(fileops.isdir(q_src_root))
 local H_DIR = Q_ROOT .. "/include/" 
-local Q_LINK_FLAGS = assert(os.getenv("Q_LINK_FLAGS"), "Q_LINK_FLAGS not provided")
+local Q_LINK_FLAGS = qconsts.Q_LINK_FLAGS
 -- local tmp_c, tmp_h = "/tmp/dc.c", "/tmp/dc.h"
 
 

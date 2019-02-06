@@ -1,10 +1,7 @@
 local plstring = require 'pl.stringx'
 local utils = require 'Q/UTILS/lua/utils'
 local load_csv_col_seq   = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
-local plpath = require 'pl.path'
-local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
-local path_to_here = Q_SRC_ROOT .. "/ML/DT/lua/"
-assert(plpath.isdir(path_to_here))
+
 local fns = {}
 
 -- see if the file exists
