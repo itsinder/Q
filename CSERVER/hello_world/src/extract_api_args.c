@@ -29,6 +29,7 @@ extract_api_args(
   for ( int i = 0; *cptr !=  '\0'; i++ ) {
     if ( i >= sz_args ) { go_BYE(-1); }
     if ( !g_valid_chars_in_url[(uint8_t)*cptr] ) { 
+      printf("hello\n");
       go_BYE(-1); }
     args[i] = *cptr++;
   }

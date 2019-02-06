@@ -6,8 +6,11 @@ get_req_type(
     const char *api
     )
 {
-  if (strcasecmp(api, "Dummy") == 0) {
-    return Dummy;
+  if (strcasecmp(api, "DoString") == 0) {
+    return DoString;
+  }
+  else if (strcasecmp(api, "DoFile") == 0) {
+    return DoFile;
   }
   else if (strcasecmp(api, "Diagnostics") == 0) {
     return Diagnostics;

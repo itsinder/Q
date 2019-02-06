@@ -2,7 +2,6 @@
 return function(infile, opdir)
 local plpath = require 'pl.path'
 local plstr  = require 'pl.stringx'
-local plpath = require 'pl.path'
 local opdir = plstr.strip(opdir)
 assert(plpath.isfile(infile), "Input file not found")
 assert(plpath.isdir(opdir), "Output directory not found")

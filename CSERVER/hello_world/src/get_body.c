@@ -1,6 +1,6 @@
 #include "q_incs.h"
 #include "auxil.h"
-extern char g_err[DT_ERR_MSG_LEN+1]; // For C: ab_process_req()
+extern char g_err[Q_ERR_MSG_LEN+1]; // For C: ab_process_req()
 #include "get_body.h"
 
 int 

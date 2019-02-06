@@ -1,4 +1,3 @@
-local utils	= require 'Q/UTILS/lua/utils'
 local g_err	= require 'Q/UTILS/lua/error_code'
 
 local function process_opt_args(vec_list, opt_args)

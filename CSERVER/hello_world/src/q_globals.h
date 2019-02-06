@@ -5,18 +5,22 @@
 #include <lauxlib.h>
 #include <pthread.h>
 
-bool g_halt; // For C TODO IS THIS NEEDED?
+bool g_halt; // For multi-threading
 //-----------------------------------------------------------------
-char g_err[DT_ERR_MSG_LEN+1]; // For C: ab_process_req()
-char g_buf[DT_ERR_MSG_LEN+1]; // For C: ab_process_req()
-char g_rslt[DT_MAX_LEN_RESULT+1]; // For C: ab_process_req()
-// above initialized as needed
+char g_err[Q_ERR_MSG_LEN+1]; 
+char g_buf[Q_ERR_MSG_LEN+1]; 
+char g_rslt[Q_MAX_LEN_RESULT+1]; 
 
-char g_body[DT_MAX_LEN_BODY+1];
+char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1];
+char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1];
+
+char g_body[Q_MAX_LEN_BODY+1];
 int g_sz_body;
 
-char g_valid_chars_in_url[256]; // Set by C
+char g_valid_chars_in_url[256]; 
+char g_qc_flags[Q_MAX_LEN_FLAGS]; 
+char g_link_flags[Q_MAX_LEN_FLAGS]; 
 
 //------------------------ For Lua
-lua_State *g_L_DT; // Set by C
+lua_State *g_L_Q; 
 

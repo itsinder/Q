@@ -1,8 +1,7 @@
-local err	= require 'Q/UTILS/lua/error_code'
 local qc	= require 'Q/UTILS/lua/q_core'
+local err       = require 'Q/UTILS/lua/error_code'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local qconsts	= require 'Q/UTILS/lua/q_consts'
-local utils	= require 'Q/UTILS/lua/utils'
 local cmem	= require 'libcmem'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
@@ -10,6 +9,17 @@ local trim = require 'Q/UTILS/lua/trim'
 
 local buf_size = 1024
 local buf = nil
+
+local function get_num_cols(vector_list)
+  local n_vecs = 0
+  for k, v in pairs(vector_list) do 
+    n_vecs = n_vecs + 1 
+  assert((type(v) == "lVector"), 
+    "Each element of input to print_csv must be a Vector")
+  end 
+  assert(n_vecs > 0)
+  return n_vecs
+end
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -86,11 +96,11 @@ end
 local function chk_cols(vector_list)
   assert(vector_list)
   assert(type(vector_list) == "table")
-  assert(utils.table_length(vector_list) > 0)  
+  assert(get_num_cols(vector_list) > 0)
+  -- assert(utils.table_length(vector_list) > 0)  
   local vec_length = nil
   local is_first = true
   for i, v in pairs(vector_list) do
-    assert((type(v) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
 
     -- Check the vector for eval(), if not then call eval()
     if not v:is_eov() then
@@ -170,7 +180,7 @@ local print_csv = function (vec_list, opt_args)
     opfile = trim(opfile)
   end
   assert(((type(vector_list) == "table") or 
-          (type(vector_list) == "lVector")), err.INPUT_NOT_TABLE)
+          (type(vector_list) == "lVector")), "Input must be vector or table of vectors")
   if type(vector_list) == "lVector" then
     vector_list = {vector_list}
   end
@@ -182,7 +192,7 @@ local print_csv = function (vec_list, opt_args)
   end
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
-  local num_cols = utils.table_length(vector_list)
+  local num_cols = get_num_cols(vector_list)
   local fp = nil -- file pointer
   local tbl_rslt = nil
   

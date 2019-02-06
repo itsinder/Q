@@ -1,7 +1,7 @@
--- requires luaposix have to include in our luarocks def
--- local stdlib = require("posix.stdlib")
-
 -- require all the root operator files
+-- TODO Krushnakant local qc = require 'libq_core'
+-- TODO assert(qc["chk_env_var"]())
+
 require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
 require "Q/OPERATORS/PRINT/lua/print_csv"
@@ -14,8 +14,8 @@ require "Q/OPERATORS/CLONE/lua/clone"
 require "Q/OPERATORS/CAT/lua/cat"
 require "Q/OPERATORS/IDX_SORT/lua/idx_sort"
 require "Q/OPERATORS/MM/lua/mv_mul"
-require "Q/UTILS/lua/save"
-require "Q/UTILS/lua/restore"
+-- TODO P1 UNDO COMMENT require "Q/UTILS/lua/save"
+-- TODO P1 UNDO COMMENT require "Q/UTILS/lua/restore"
 require "Q/UTILS/lua/set_memo"
 require "Q/UTILS/lua/q_shutdown"
 require "Q/UTILS/lua/view_meta"

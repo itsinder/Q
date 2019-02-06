@@ -4,7 +4,8 @@
 
 typedef enum _q_req_type {
   Undefined, // --- & ---
-  Dummy, // Read & C 
+  DoString, // Read & C 
+  DoFile, // Read & C 
   Diagnostics, // Read &  C  AND Lua
   DumpLog, // Read &  C
   GetConfig, // Read &  Lua

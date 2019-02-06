@@ -46,3 +46,11 @@ add_to_buf(
     int sz_out,
     int *ptr_n_out
     );
+extern bool 
+isfile (
+    const char * const filename
+    );
+extern bool 
+isdir (
+    const char * const dirname
+    );
