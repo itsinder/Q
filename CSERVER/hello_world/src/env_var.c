@@ -6,24 +6,26 @@ extern char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1];
 extern char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1];
 extern char g_qc_flags[Q_MAX_LEN_FLAGS+1];
 extern char g_link_flags[Q_MAX_LEN_FLAGS+1];
+extern char g_ld_library_path[Q_MAX_LEN_PATH+1];
 
 static int
 chk_file_make_if_not(
     const char *const label,
-    char *env_var
+    char *X,
+    size_t nX
     )
 {
   int status = 0;
   FILE *fp = NULL;
 
-  if ( ( label == NULL ) || ( *label == '\0' ) )  { go_BYE(-1; }
+  if ( ( label == NULL ) || ( *label == '\0' ) )  { go_BYE(-1); }
   char *cptr = getenv(label);
   if ( cptr == NULL ) { go_BYE(-1); }
-  if ( strlen(cptr) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
-  strncpy(env_var, cptr, Q_MAX_LEN_FILE_NAME);
-  fp = fopen(env_var, "r");
+  if ( strlen(cptr) > nX ) { go_BYE(-1); }
+  strncpy(X, cptr, nX);
+  fp = fopen(X, "r");
   if ( fp == NULL ) { 
-    fp = fopen(env_var, "w");
+    fp = fopen(X, "w");
     int nw = fprintf(fp, "\n"); 
     if ( nw != 1 ) { go_BYE(-1); }
     fclose_if_non_null(fp);
@@ -95,10 +97,35 @@ env_var(
   cBYE(status);
   status = get_flags("Q_LINK_FLAGS", g_link_flags, Q_MAX_LEN_FLAGS); 
   cBYE(status);
-  status = chk_file_make_if_not("Q_METADATA_FILE", g_q_metadata_file);
+  status = chk_file_make_if_not("Q_METADATA_FILE", g_q_metadata_file,
+      Q_MAX_LEN_FILE_NAME);
   cBYE(status);
-  status = chk_file_make_if_not("Q_METADATA_FILE", g_q_metadata_file);
-  cBYE(status);
+  //-- LD_LIBRARY_PATH
+  cptr = getenv("LD_LIBRARY_PATH");
+  if ( ( cptr == NULL ) || ( *cptr == '\0' ) ) { go_BYE(-1); }
+  if ( ( strlen(cptr) > Q_MAX_LEN_PATH ) ) { go_BYE(-1); }
+  strcpy(g_ld_library_path, cptr);
+  for ( int i = 0; ; i++ ) { 
+    char *xptr;
+    if ( i == 0 ) { 
+      xptr = strtok(cptr, ":");
+    }
+    else {
+      xptr = strtok(NULL, ":");
+    }
+    if ( xptr == NULL ) { break; }
+    if ( !isdir(xptr) ) { go_BYE(-1); }
+    /* TODO: Should we look for certain .so files here? */
+  }
+  /*
+  qconsts.Q_SRC_ROOT	= os.getenv("Q_SRC_ROOT")
+  qconsts.Q_ROOT	= os.getenv("Q_ROOT")
+  qconsts.Q_DATA_DIR	= os.getenv("Q_DATA_DIR")
+  qconsts.Q_TRACE_DIR	= os.getenv("Q_TRACE_DIR")
+  qconsts.Q_BUILD_DIR	= os.getenv("Q_BUILD_DIR")
+  qconsts.LUA_PATH	= os.getenv("LUA_PATH")
+  qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
+  */
 BYE:
   fclose_if_non_null(fp);
   return status;

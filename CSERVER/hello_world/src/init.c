@@ -11,12 +11,13 @@ extern char g_err[Q_ERR_MSG_LEN+1];
 extern char g_buf[Q_ERR_MSG_LEN+1]; 
 extern char g_rslt[Q_MAX_LEN_RESULT+1]; 
 
+extern char g_valid_chars_in_url[256]; 
+
 extern char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1]; 
 extern char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1]; 
-
-extern char g_valid_chars_in_url[256]; 
 extern char g_qc_flags[Q_MAX_LEN_FLAGS+1]; 
 extern char g_link_flags[Q_MAX_LEN_FLAGS+1]; 
+extern char g_ld_library_path[Q_MAX_LEN_PATH+1]; 
 
 void
 free_globals(
@@ -38,9 +39,9 @@ zero_globals(
 
   memset(g_q_data_dir,  '\0', Q_MAX_LEN_FILE_NAME+1);
   memset(g_q_metadata_file, '\0', Q_MAX_LEN_FILE_NAME+1);
-
   memset(g_qc_flags, '\0', Q_MAX_LEN_FLAGS+1);
   memset(g_link_flags, '\0', Q_MAX_LEN_FLAGS+1);
+  memset(g_ld_library_path, '\0', Q_MAX_LEN_PATH+1);
 
   //------------
   const char *str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/_:.";
@@ -59,29 +60,11 @@ init_lua(
     )
 {
   int status = 0;
-  char buf[4096]; // TODO P3 Undo hard coding 
   g_L_Q = luaL_newstate(); if ( g_L_Q == NULL ) { go_BYE(-1); }
   luaL_openlibs(g_L_Q);  
 
   status = luaL_dostring(g_L_Q, "Q = require 'Q'; ");
   mcr_chk_lua_rslt(status);
-/*
-  sprintf(buf, "g_Q_DATA_DIR  = '%s'", g_q_data_dir);
-  status = luaL_dostring(g_L_Q, buf);
-  mcr_chk_lua_rslt(status);
-
-  sprintf(buf, "g_Q_METADATA_FILE = '%s'", g_q_metadata_file);
-  status = luaL_dostring(g_L_Q, buf);
-  mcr_chk_lua_rslt(status);
-
-  sprintf(buf, "g_QC_FLAGS = '%s'", g_qc_flags);
-  status = luaL_dostring(g_L_Q, buf);
-  mcr_chk_lua_rslt(status);
-
-  sprintf(buf, "g_LINK_FLAGS = '%s'", g_link_flags);
-  status = luaL_dostring(g_L_Q, buf);
-  mcr_chk_lua_rslt(status);
-*/
   status = luaL_dostring(g_L_Q, "Q.restore()");
   mcr_chk_lua_rslt(status);
 

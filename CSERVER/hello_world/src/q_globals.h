@@ -11,15 +11,18 @@ char g_err[Q_ERR_MSG_LEN+1];
 char g_buf[Q_ERR_MSG_LEN+1]; 
 char g_rslt[Q_MAX_LEN_RESULT+1]; 
 
-char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1];
-char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1];
 
 char g_body[Q_MAX_LEN_BODY+1];
 int g_sz_body;
 
 char g_valid_chars_in_url[256]; 
+
+// Environment variables
+char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1];
+char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1];
 char g_qc_flags[Q_MAX_LEN_FLAGS]; 
 char g_link_flags[Q_MAX_LEN_FLAGS]; 
+char g_ld_library_path[Q_MAX_LEN_PATH+1];
 
 //------------------------ For Lua
 lua_State *g_L_Q; 
