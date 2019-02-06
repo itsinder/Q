@@ -4,51 +4,20 @@ from Q import constants as q_consts
 from Q.p_vector import PVector
 from Q.p_reducer import PReducer
 from Q.p_scalar import PScalar
-from Q.q_op_category import *
 import math
 
 
-def __wrap_output(op_name, result):
-    if op_name in number_as_output:
-        # no action required
-        pass
-    elif op_name in string_as_output:
-        # no action required
-        pass
-    elif op_name in reducer_as_output:
-        # wrap it with PReducer
-        result = PReducer(result)
-    elif op_name in scalar_as_output:
-        # wrap it with PScalar
-        result = PScalar(base_scalar=result)
-    elif op_name in table_as_output:
-        # convert lua table to dict/list
-        result = util.to_list_or_dict(result)
-        for key, val in result.items():
-            result[key] = PVector(val)
-    elif op_name in vec_as_output:
-        # wrap it with PVector
-        result = PVector(result)
-    else:
-        raise Exception("Output type is not supported for operator {}".format(op_name))
-    return result
-
-
 def call_lua_op(op_name, *args):
-    args_list = []
-    for val in args:
-        val = util.unpack_args(val)
-        args_list.append(val)
-    args_list = util.to_table(args_list)
+    args_table = util.pack_args(args)
     func = executor.eval_lua(q_consts.lua_op_fn_str)
     try:
-        result = func(op_name, args_list)
+        result = func(op_name, args_table)
     except Exception as e:
         # TODO: Handle operator level failures properly
         print(str(e))
         result = None
     if result:
-        result = __wrap_output(op_name, result)
+        result = util.wrap_output(op_name, result)
     return result
 
 

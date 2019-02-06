@@ -6,11 +6,9 @@ local cmem   = require 'libcmem'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
-local q_test_dir = os.getenv("Q_DATA_DIR")
 
 -- NOTE: appending '/' to Q_DATA_DIR value 
 -- as appending of '/' is not handled at vector.c level
-q_test_dir = q_test_dir .. "/"
 local tests = {} 
 
 tests.t1 = function()
@@ -22,7 +20,7 @@ tests.t1 = function()
     local ctype = assert(qconsts.qtypes[qtype].ctype)
     for i=1, iter do
       print("QType/Iteration: ", qtype, i)
-      local y = Vector.new(qtype, q_test_dir)
+      local y = Vector.new(qtype)
       --==== Set some initial values 
       for j = 1, num_elements do
         local s = assert(Scalar.new(j*10, qtype))

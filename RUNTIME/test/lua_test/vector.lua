@@ -18,7 +18,7 @@ return function( M )
   end
   
   -- Create Vector
-  local status, x = pcall(Vector.new, M.qtype, q_data_dir, M.file_name, M.is_memo, M.num_elements)
+  local status, x = pcall(Vector.new, M.qtype, M.file_name, M.is_memo, M.num_elements)
   if not status then
     print(x)
     x = nil

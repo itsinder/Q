@@ -1,12 +1,14 @@
+#!/bin/bash
+set -e
 GCCVER=$(gcc --version | awk '/gcc /{print $4;exit 0;}')
 GCCVER=$(echo "${GCCVER//.}")
-REQUIRED=5.4.0
+REQUIRED=5.4.0 #specify here the required gcc version
 REQUIRED=$(echo "${REQUIRED//.}")
 if [ $(bc <<< "$GCCVER >= $REQUIRED") -eq 1 ];then
-  bash aio_utils.sh my_print "STARTING: GCC version is appropriate"
+  bash my_print.sh "STARTING: GCC version is appropriate"
 else
-  #todo: Error msg color red
-  bash aio_utils.sh my_print "Required GCC version is 5.4.0"
+  #TODO: Error msg color red
+  bash my_print.sh "Required GCC version is 5.4.0"
   exit 1;
 fi
 

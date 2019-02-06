@@ -1,25 +1,20 @@
-function install_luarocks_from_source(){
-  source aio_utils.sh ; my_print "STARTING: Installing lua rocks"
+#!/bin/bash
+set -e
+bash my_print.sh "STARTING: Installing luarocks"
+LUAROCKS_VER=$(luarocks --version | awk '/luarocks/ {print $2;exit 0;}')
+REQUIRED_LUAROCKS="2.4.2" #specify here the required luarocks version
+
+if [ $LUAROCKS_VER == $REQUIRED_LUAROCKS ];then
+  bash my_print.sh "LuaRocks$LUAROCKS_VER up to date with required version"
+else
+  #TODO: instead of wget we can get this tar from Q repo
   wget https://luarocks.org/releases/luarocks-2.4.1.tar.gz
   tar zxpf luarocks-2.4.1.tar.gz
   cd luarocks-2.4.1
   ./configure; sudo make bootstrap
   cd ../
   rm -rf luarocks-2.4.1
-  source aio_utils.sh ; my_print "COMPLETED: Installing lua rocks"
-}
+fi
+bash my_print.sh "COMPLETED: Installing luarocks"
 
-function install_luarocks_dependencies(){
-  source aio_utils.sh ; my_print "STARTING: Installing dependencies using luarocks"
-  sudo luarocks install penlight
-  sudo luarocks install luaposix
-  sudo luarocks install luv
-  sudo luarocks install busted
-  sudo luarocks install luacov
-  sudo luarocks install cluacov
-  sudo luarocks install http      # for QLI
-  sudo luarocks install linenoise # for QLI
-  source aio_utils.sh ; my_print "COMPLETED: Installing dependencies using luarocks"
-}
 
-$1
