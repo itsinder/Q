@@ -1,6 +1,7 @@
-local LD_LIBRARY_PATH = assert(os.getenv("LD_LIBRARY_PATH"), "LD_LIBRARY_PATH must be set")
-local Q_ROOT = os.getenv("Q_ROOT") 
-local Q_TRACE_DIR = os.getenv('Q_TRACE_DIR')
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
+local Q_ROOT = qconsts.Q_ROOT 
+local Q_TRACE_DIR = qconsts.Q_TRACE_DIR
 
 -- local dbg = require 'Q/UTILS/lua/debugger'
 local assertx  = require 'Q/UTILS/lua/assertx'

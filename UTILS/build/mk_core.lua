@@ -1,9 +1,11 @@
-local q_root = os.getenv("Q_ROOT")
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
+local q_root = qconsts.Q_ROOT
 assert(q_root, "Do export Q_ROOT=/home/subramon/Q/ or some such")
 local final_h  = q_root .. "/include/"
 local final_so = q_root .. "/lib/"
 
-local rootdir = os.getenv("Q_SRC_ROOT")
+local rootdir = qconsts.Q_SRC_ROOT
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 local dbg = require 'Q/UTILS/lua.debugger'
 local plpath = require 'pl.path'

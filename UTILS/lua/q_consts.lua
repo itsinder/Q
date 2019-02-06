@@ -1,6 +1,23 @@
+--[[
+  q_consts will be a place where all constants are defined
+  it also includes all environment variables as well
+  whoever require access to these constants he should require q_consts.lua
+]]
+
 local qconsts = {}
 --===========================
-  qconsts.q_src_root = os.getenv("Q_SRC_ROOT")
+  -- Initialize environment variable constants
+  qconsts.Q_SRC_ROOT	= os.getenv("Q_SRC_ROOT")
+  qconsts.Q_ROOT	= os.getenv("Q_ROOT")
+  qconsts.QC_FLAGS	= os.getenv("QC_FLAGS")
+  qconsts.Q_DATA_DIR	= os.getenv("Q_DATA_DIR")
+  qconsts.Q_TRACE_DIR	= os.getenv("Q_TRACE_DIR")
+  qconsts.Q_BUILD_DIR	= os.getenv("Q_BUILD_DIR")
+  qconsts.Q_LINK_FLAGS	= os.getenv("Q_LINK_FLAGS")
+  qconsts.LUA_PATH	= os.getenv("LUA_PATH")
+  qconsts.Q_METADATA_FILE = os.getenv("Q_METADATA_FILE")
+  qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
+
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.chunk_size = 256 * 1024
   qconsts.debug = false -- set to TRUE only if you want debugging
