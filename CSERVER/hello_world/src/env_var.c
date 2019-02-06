@@ -7,7 +7,34 @@ extern char g_q_metadata_file[Q_MAX_LEN_FILE_NAME+1];
 extern char g_qc_flags[Q_MAX_LEN_FLAGS+1];
 extern char g_link_flags[Q_MAX_LEN_FLAGS+1];
 
-static int get_flags(
+static int
+chk_file_make_if_not(
+    const char *const label,
+    char *env_var
+    )
+{
+  int status = 0;
+  FILE *fp = NULL;
+
+  if ( ( label == NULL ) || ( *label == '\0' ) )  { go_BYE(-1; }
+  char *cptr = getenv(label);
+  if ( cptr == NULL ) { go_BYE(-1); }
+  if ( strlen(cptr) > Q_MAX_LEN_FILE_NAME ) { go_BYE(-1); }
+  strncpy(env_var, cptr, Q_MAX_LEN_FILE_NAME);
+  fp = fopen(env_var, "r");
+  if ( fp == NULL ) { 
+    fp = fopen(env_var, "w");
+    int nw = fprintf(fp, "\n"); 
+    if ( nw != 1 ) { go_BYE(-1); }
+    fclose_if_non_null(fp);
+  }
+BYE:
+  fclose_if_non_null(fp);
+  return status;
+}
+  //-----------------------------------------------------
+static int 
+get_flags(
     const char *const label,
     char *X,
     size_t nX
@@ -64,9 +91,16 @@ env_var(
   }
   fclose_if_non_null(fp);
   //-----------------------------------------------------
-  status = get_flags("QC_FLAGS", g_qc_flags, Q_MAX_LEN_FLAGS); cBYE(status);
-  status = get_flags("Q_LINK_FLAGS", g_link_flags, Q_MAX_LEN_FLAGS); cBYE(status);
+  status = get_flags("QC_FLAGS", g_qc_flags, Q_MAX_LEN_FLAGS); 
+  cBYE(status);
+  status = get_flags("Q_LINK_FLAGS", g_link_flags, Q_MAX_LEN_FLAGS); 
+  cBYE(status);
+  status = chk_file_make_if_not("Q_METADATA_FILE", g_q_metadata_file);
+  cBYE(status);
+  status = chk_file_make_if_not("Q_METADATA_FILE", g_q_metadata_file);
+  cBYE(status);
 BYE:
   fclose_if_non_null(fp);
   return status;
 }
+
