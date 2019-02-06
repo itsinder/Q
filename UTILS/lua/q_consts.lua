@@ -1,3 +1,9 @@
+[[
+  q_consts will be a place where all constants are defined
+  it also includes all environment variables as well
+  whoever require access to these constants he should require q_consts.lua
+]]
+
 local qconsts = {}
 --===========================
   -- Initialize environment variable constants
