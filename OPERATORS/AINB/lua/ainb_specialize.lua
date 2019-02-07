@@ -11,11 +11,11 @@ return function (
   assert(is_base_qtype(b_qtype), "type of B must be base type")
   if ( b_len <= 16 ) then 
     subs.fn = "simple_ainb_" .. a_qtype .. "_" .. b_qtype
-    tmpl = qconsts.q_src_root .. "/OPERATORS/AINB/lua/simple_ainb.tmpl"
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/AINB/lua/simple_ainb.tmpl"
   else 
     assert( b_sort_order == "asc", "B needs to be sorted ascending")
     subs.fn = "bin_search_ainb_" .. a_qtype .. "_" .. b_qtype
-    tmpl = qconsts.q_src_root .. "/OPERATORS/AINB/lua/bin_search_ainb.tmpl"
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/AINB/lua/bin_search_ainb.tmpl"
   end
   subs.a_qtype = a_qtype
   subs.b_qtype = b_qtype

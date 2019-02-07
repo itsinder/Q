@@ -48,7 +48,7 @@ return function (
   c_mem_ptr.by    = ffi.cast(ctype .. " *", get_ptr(by:to_cmem()))[0]
   c_mem_ptr.start = ffi.cast(ctype .. " *", get_ptr(start:to_cmem()))[0]
 
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/seq.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/S_TO_F/lua/seq.tmpl"
   local subs = {};
   subs.fn        = "seq_" .. qtype
   subs.c_mem     = c_mem

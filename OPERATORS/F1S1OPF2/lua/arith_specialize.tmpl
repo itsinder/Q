@@ -8,7 +8,7 @@ return function (
   local Scalar        = require 'libsclr'
 
   assert(is_base_qtype(in_qtype))
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/F1S1OPF2/lua/arith.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/arith.tmpl"
   local subs = {}; 
   subs.fn = "<<operator>>_" .. in_qtype .. "_" .. in_qtype
   subs.in_ctype = qconsts.qtypes[in_qtype].ctype

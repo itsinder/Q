@@ -8,7 +8,7 @@ local cmem    = require 'libcmem'
 return function (
   qtype
   )
-    local tmpl = qconsts.q_src_root .. "/OPERATORS/COUNT/lua/counts.tmpl"
+    local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/COUNT/lua/counts.tmpl"
     local subs = {}
     if ( qtype == "B1" ) then
       assert(nil, "TODO")

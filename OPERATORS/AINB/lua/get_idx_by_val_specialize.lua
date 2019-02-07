@@ -10,7 +10,7 @@ return function (
   assert(is_base_qtype(val_qtype), "val_type must be base type")
 
   subs.fn = "bin_search_get_idx_" .. idx_qtype .. "_by_val_" .. val_qtype
-  tmpl = qconsts.q_src_root .. "/OPERATORS/AINB/lua/bin_search_get_idx_by_val.tmpl"
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/AINB/lua/bin_search_get_idx_by_val.tmpl"
   subs.idx_qtype = idx_qtype
   subs.idx_ctype = qconsts.qtypes[idx_qtype].ctype
 

@@ -61,7 +61,7 @@ return function (
     assert(nil, "Unknown type " .. qtype)
   end
   --=========================
-  tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/rand.tmpl"
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/S_TO_F/lua/rand.tmpl"
   subs.fn = "rand_" .. qtype
   subs.out_ctype = qconsts.qtypes[qtype].ctype
   subs.len = len
