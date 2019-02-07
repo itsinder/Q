@@ -51,7 +51,7 @@ get_flags(
   if ( strlen(cptr) > nX ) { go_BYE(-1); }
   if ( *cptr == '\0' ) { go_BYE(-1); }
   for ( char *xptr = cptr; *xptr != '\0'; xptr++ ) {
-    if ( ( isalnum(*xptr) )  || ( *xptr == '-' ) ) {
+    if ( ( isspace(*xptr) ) || ( isalnum(*xptr) )  || ( *xptr == '-' ) ) {
       /* all is well */
     }
     else {
@@ -124,7 +124,6 @@ env_var(
   qconsts.Q_TRACE_DIR	= os.getenv("Q_TRACE_DIR")
   qconsts.Q_BUILD_DIR	= os.getenv("Q_BUILD_DIR")
   qconsts.LUA_PATH	= os.getenv("LUA_PATH")
-  qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
   */
 BYE:
   fclose_if_non_null(fp);
