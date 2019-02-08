@@ -1,0 +1,143 @@
+#include "q_incs.h"
+#include "luaconf.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+
+//----------------------------------------
+static int l_dnn_check( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  int status = dnn_check(ptr_dnn);
+  if ( status == 0 ) { lua_pushboolean(L, true); return 1; }
+BYE:
+  luaL_error(L, "could not check DNN\n"); 
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
+static int l_dnn_free( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  int status = dnn_free(ptr_dnn);cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
+static int l_dnn_new( lua_State *L) 
+{
+  int status = 0;
+  DNN_REC_TYPE *ptr_dnn = NULL;
+
+  bool is_memo = true;
+  const char *file_name = NULL;
+  int64_t num_elements = -1;
+  int batch_size = luaL_checknumber(L, 1);
+  int num_layers = luaL_checknumber(L, 2);
+
+  ptr_dnn = (DNN_REC_TYPE *)lua_newuserdata(L, sizeof(DNN_REC_TYPE));
+  return_if_malloc_failed(ptr_dnn);
+  memset(ptr_dnn, '\0', sizeof(DNN_REC_TYPE));
+  luaL_getmetatable(L, "DNN"); /* Add the metatable to the stack. */
+  lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
+
+  status = dnn_new(ptr_dnn, batch_size, num_layers);
+  cBYE(status);
+
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: Could not create DNN\n");
+  return 2;
+}
+//-----------------------
+static const struct luaL_Reg dnn_methods[] = {
+    { "__gc",    l_dnn_free   },
+    { "check", l_dnn_check },
+    { "delete", l_dnn_delete },
+    { "epoch", l_dnn_epoch },
+    { "hydrate", l_dnn_hydrate },
+    { "meta", l_dnn_meta },
+    { "serialize", l_dnn_serialize },
+    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
+    { NULL,          NULL               },
+};
+ 
+static const struct luaL_Reg dnn_functions[] = {
+    { "check", l_dnn_check },
+    { "delete", l_dnn_delete },
+    { "epoch", l_dnn_epoch },
+    { "hydrate", l_dnn_hydrate },
+    { "meta", l_dnn_meta },
+    { "new", l_dnn_new },
+    { "serialize", l_dnn_serialize },
+    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
+    { NULL,  NULL         }
+  };
+
+  /*
+  ** Implementation of luaL_testudata which will return NULL in case if udata is not of type tname
+  ** TODO: Check for the appropriate location for this function
+  */
+  LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
+    void *p = lua_touserdata(L, ud);
+    if (p != NULL) {  /* value is a userdata? */
+      if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
+        lua_getfield(L, LUA_REGISTRYINDEX, tname);  /* get correct metatable */
+        if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
+          lua_pop(L, 2);  /* remove both metatables */
+          return p;
+        }
+      }
+    }
+    return NULL;  /* to avoid warnings */
+  }
+   
+  /*
+  ** Open vector library
+  */
+  int luaopen_libdnn (lua_State *L) {
+    /* Create the metatable and put it on the stack. */
+    luaL_newmetatable(L, "DNN");
+    /* Duplicate the metatable on the stack (We know have 2). */
+    lua_pushvalue(L, -1);
+    /* Pop the first metatable off the stack and assign it to __index
+     * of the second one. We set the metatable for the table to itself.
+     * This is equivalent to the following in lua:
+     * metatable = {}
+     * metatable.__index = metatable
+     */
+    lua_setfield(L, -2, "__index");
+
+    /* Register the object.func functions into the table that is at the 
+     * top of the stack. */
+
+    /* Set the methods to the metatable that should be accessed via
+     * object:func */
+    luaL_register(L, NULL, dnn_methods);
+
+    int status = luaL_dostring(L, "return require 'Q/UTILS/lua/q_types'");
+    if ( status != 0 ) {
+      WHEREAMI;
+      fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
+      exit(1);
+    } 
+    luaL_getmetatable(L, "DNN");
+    lua_pushstring(L, "DNN");
+    status =  lua_pcall(L, 2, 0, 0);
+    if (status != 0 ) {
+       WHEREAMI; 
+       fprintf(stderr, "Type Registering failed: %s\n", lua_tostring(L, -1));
+       exit(1);
+    }
+
+    /* Register the object.func functions into the table that is at the
+     * top of the stack. */
+    lua_createtable(L, 0, 0);
+    luaL_register(L, NULL, dnn_functions);
+    // Why is return code not 0
+    return 1;
+}
