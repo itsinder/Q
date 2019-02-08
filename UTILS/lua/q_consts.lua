@@ -17,6 +17,8 @@ local qconsts = {}
   qconsts.LUA_PATH	= os.getenv("LUA_PATH")
   qconsts.Q_METADATA_FILE = os.getenv("Q_METADATA_FILE")
   qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
+  --TODO: check this with krushna
+  qconsts.DEFAULT_META_FILE = "/tmp/saved.meta"
 
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.chunk_size = 256 * 1024

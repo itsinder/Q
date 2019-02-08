@@ -103,18 +103,18 @@ local function save_global(file_to_save)
   if ( file_to_save ) then 
     metadata_file = file_to_save
   else
-    metadata_file = qconsts.Q_METADATA_FILE
+    metadata_file = qconsts.DEFAULT_META_FILE
   end
   assert(type(metadata_file) == "string")
-  local fp = assert(io.open(metadata_file, "r"))
+  local fp = io.open(metadata_file, "r")
   if ( fp ) then 
     print("Warning! Over-writing meta data file ", metadata_file)
     fp:close()
   end
   local fp = assert(io.open(metadata_file, "w+"), 
     "Unable to open file for writing" .. metadata_file)
-  file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
-  file:write("local Scalar  = require 'libsclr'\n")
+  fp:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
+  fp:write("local Scalar  = require 'libsclr'\n")
   -- file:write("local Dictionary = require 'Dictionary'\n")
 
   local saved = {}
