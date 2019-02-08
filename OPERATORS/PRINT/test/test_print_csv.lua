@@ -6,7 +6,7 @@ local dir = require 'pl.dir'
 local print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local gen_csv = require 'Q/RUNTIME/test/generate_csv'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 local plpath = require 'pl.path'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
@@ -51,12 +51,12 @@ for i, v in ipairs(T) do
       if fns[key] then
         local status = fns[key](i, v, M)
         -- preamble
-        utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
+        testcase_results(v, "Print_csv", "Unit Test", status, "")
         assert(status,"handle " .. v.category .. " assertions failed")
       else
         fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
         -- preamble
-        utils["testcase_results"](v, "Print_csv", "Unit Test", false, "")
+        testcase_results(v, "Print_csv", "Unit Test", false, "")
         assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
       end
     
@@ -96,18 +96,18 @@ for i, v in ipairs(T) do
         if fns[key] then
           result = fns[key](i, v, print_ret, status, load_ret)
           -- preamble
-          utils["testcase_results"](v, "Print_csv", "Unit Test", result, "")
+          testcase_results(v, "Print_csv", "Unit Test", result, "")
           assert(result,"handle " .. v.category .. " assertions failed")
         else
           fns["increment_failed"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
           -- preamble
-          utils["testcase_results"](v, "Print_csv", "Unit Test", false, "")
+          testcase_results(v, "Print_csv", "Unit Test", false, "")
           assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
         end
       else
         --print(" testcase failed: load api failed in print testcase. this should not happen")
         fns["increment_failed"](i, v, " testcase failed: load api failed in print testcase. this should not happen")
-        utils["testcase_results"](v, "Print_csv", "Unit Test", status, "")
+        testcase_results(v, "Print_csv", "Unit Test", status, "")
         assert(status)
       end
     
