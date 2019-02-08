@@ -3,13 +3,13 @@
 
 typedef enum act_fn_type { 
   undef_act_fn, RELU, SIGMOID, SOFT_MAX, TANH, LEAKY_RELU
-};
+} ACT_FN_TYPE;
 
 typedef struct _dnn_rec_type {
   int batch_size;
   int num_layers;
   int *neurons_in_layer; 
-  act_fn_type  *A; // activation_function[num_layers] 
+  ACT_FN_TYPE  *A; // activation_function[num_layers] 
   float **X; // TODO NOT SURE  [neurons_in_layer[0]][num_instances]
   int num_instances; // TODO NOT SURE 
   float ***W; // [num_layers] 

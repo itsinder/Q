@@ -3,14 +3,28 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "dnn_types.h"
+#include "core_dnn.h"
 
+int luaopen_libdnn (lua_State *L);
+//----------------------------------------
+static int l_dnn_epoch( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  int status = dnn_epoch(ptr_dnn); cBYE(status);
+  lua_pushboolean(L, true); 
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
 //----------------------------------------
 static int l_dnn_check( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
-  int status = dnn_check(ptr_dnn);
-  if ( status == 0 ) { lua_pushboolean(L, true); return 1; }
+  int status = dnn_check(ptr_dnn); cBYE(status);
+  lua_pushboolean(L, true); 
+  return 1; 
 BYE:
-  luaL_error(L, "could not check DNN\n"); 
   lua_pushnil(L);
   lua_pushstring(L, __func__);
   return 2;
@@ -26,15 +40,23 @@ BYE:
   lua_pushstring(L, __func__);
   return 2;
 }
+//-------------------------
+static int l_dnn_delete( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  int status = dnn_delete(ptr_dnn);cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
 //----------------------------------------
 static int l_dnn_new( lua_State *L) 
 {
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = NULL;
 
-  bool is_memo = true;
-  const char *file_name = NULL;
-  int64_t num_elements = -1;
   int batch_size = luaL_checknumber(L, 1);
   int num_layers = luaL_checknumber(L, 2);
 
@@ -59,10 +81,10 @@ static const struct luaL_Reg dnn_methods[] = {
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
     { "epoch", l_dnn_epoch },
-    { "hydrate", l_dnn_hydrate },
-    { "meta", l_dnn_meta },
-    { "serialize", l_dnn_serialize },
-    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
+//    { "hydrate", l_dnn_hydrate },
+//    { "meta", l_dnn_meta },
+//    { "serialize", l_dnn_serialize },
+//    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
     { NULL,          NULL               },
 };
  
@@ -70,32 +92,14 @@ static const struct luaL_Reg dnn_functions[] = {
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
     { "epoch", l_dnn_epoch },
-    { "hydrate", l_dnn_hydrate },
-    { "meta", l_dnn_meta },
+//    { "hydrate", l_dnn_hydrate },
+//    { "meta", l_dnn_meta },
     { "new", l_dnn_new },
-    { "serialize", l_dnn_serialize },
-    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
+//    { "serialize", l_dnn_serialize },
+//    { "test", l_dnn_test }, // TOOD SHould we have a test1 ?
     { NULL,  NULL         }
   };
 
-  /*
-  ** Implementation of luaL_testudata which will return NULL in case if udata is not of type tname
-  ** TODO: Check for the appropriate location for this function
-  */
-  LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
-    void *p = lua_touserdata(L, ud);
-    if (p != NULL) {  /* value is a userdata? */
-      if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
-        lua_getfield(L, LUA_REGISTRYINDEX, tname);  /* get correct metatable */
-        if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
-          lua_pop(L, 2);  /* remove both metatables */
-          return p;
-        }
-      }
-    }
-    return NULL;  /* to avoid warnings */
-  }
-   
   /*
   ** Open vector library
   */
