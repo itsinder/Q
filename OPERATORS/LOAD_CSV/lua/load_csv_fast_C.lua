@@ -1,4 +1,3 @@
-local data_dir      = require('Q/q_export').Q_DATA_DIR
 local Dictionary    = require 'Q/UTILS/lua/dictionary'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
@@ -8,6 +7,7 @@ local cmem          = require 'libcmem'
 local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
 local function load_csv_fast_C(M, infile, is_hdr)
+  local data_dir = qconsts.Q_DATA_DIR
   local nR = ffi.cast("uint64_t *", get_ptr(cmem.new(1*ffi.sizeof("uint64_t"))))
   nR[0] = 0
   local nC = #M
