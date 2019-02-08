@@ -6,7 +6,7 @@ require 'Q/UTILS/lua/strict'
 local Dictionary = require "Q/UTILS/lua/dictionary"
 local plstring = require 'pl.stringx'
 local plfile = require 'pl.path'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 local plpath = require 'pl.path'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
@@ -162,7 +162,7 @@ local function calling_dictionary(i ,m)
     if handle_function[m.category] then
       result = handle_function[m.category](i,ret, m)
       -- call to preamble
-      utils["testcase_results"](m, "Dictionary", "Unit Test", result, "")
+      testcase_results(m, "Dictionary", "Unit Test", result, "")
       assert(result,"Handle category failed")
     else
       increment_failed_load(i, m, "Handle function for "..m.category.." is not defined in handle_category.lua")
