@@ -5,11 +5,12 @@
 #include "lualib.h"
 #include "dnn_types.h"
 #include "core_dnn.h"
+#include "cmem.h"
 
 int luaopen_libdnn (lua_State *L);
 //----------------------------------------
 static int l_dnn_epoch( lua_State *L) {
-  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   int status = dnn_epoch(ptr_dnn); cBYE(status);
   lua_pushboolean(L, true); 
   return 1; 
@@ -20,7 +21,7 @@ BYE:
 }
 //----------------------------------------
 static int l_dnn_check( lua_State *L) {
-  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   int status = dnn_check(ptr_dnn); cBYE(status);
   lua_pushboolean(L, true); 
   return 1; 
@@ -29,10 +30,9 @@ BYE:
   lua_pushstring(L, __func__);
   return 2;
 }
-//----------------------------------------
-static int l_dnn_free( lua_State *L) {
-  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
-  int status = dnn_free(ptr_dnn);cBYE(status);
+static int l_dnn_delete( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  int status = dnn_delete(ptr_dnn);cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -40,10 +40,11 @@ BYE:
   lua_pushstring(L, __func__);
   return 2;
 }
-//-------------------------
-static int l_dnn_delete( lua_State *L) {
-  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "DNN");
-  int status = dnn_delete(ptr_dnn);cBYE(status);
+//----------------------------------------
+// TODO: Do we need this or can we just use l_dnn_delete()?
+static int l_dnn_free( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  int status = dnn_free(ptr_dnn);cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -57,16 +58,22 @@ static int l_dnn_new( lua_State *L)
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = NULL;
 
-  int batch_size = luaL_checknumber(L, 1);
-  int num_layers = luaL_checknumber(L, 2);
+  int bsz = luaL_checknumber(L, 1); // batch size 
+  int nl  = luaL_checknumber(L, 2); // num layers
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  if ( ptr_cmem == NULL ) { go_BYE(-1); }
+  if ( nl < 3 ) { go_BYE(-1); }
+  if ( bsz < 1 ) { go_BYE(-1); }
+  float *npl = (float *)ptr_cmem->data;
+  if ( strcmp(ptr_cmem->field_type, "F4") != 0 ) { go_BYE(-1); }
 
   ptr_dnn = (DNN_REC_TYPE *)lua_newuserdata(L, sizeof(DNN_REC_TYPE));
   return_if_malloc_failed(ptr_dnn);
   memset(ptr_dnn, '\0', sizeof(DNN_REC_TYPE));
-  luaL_getmetatable(L, "DNN"); /* Add the metatable to the stack. */
+  luaL_getmetatable(L, "Dnn"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = dnn_new(ptr_dnn, batch_size, num_layers);
+  status = dnn_new(ptr_dnn, bsz, nl, npl);
   cBYE(status);
 
   return 1; 
@@ -105,7 +112,7 @@ static const struct luaL_Reg dnn_functions[] = {
   */
   int luaopen_libdnn (lua_State *L) {
     /* Create the metatable and put it on the stack. */
-    luaL_newmetatable(L, "DNN");
+    luaL_newmetatable(L, "Dnn");
     /* Duplicate the metatable on the stack (We know have 2). */
     lua_pushvalue(L, -1);
     /* Pop the first metatable off the stack and assign it to __index
@@ -129,8 +136,8 @@ static const struct luaL_Reg dnn_functions[] = {
       fprintf(stderr, "Running require failed:  %s\n", lua_tostring(L, -1));
       exit(1);
     } 
-    luaL_getmetatable(L, "DNN");
-    lua_pushstring(L, "DNN");
+    luaL_getmetatable(L, "Dnn");
+    lua_pushstring(L, "Dnn");
     status =  lua_pcall(L, 2, 0, 0);
     if (status != 0 ) {
        WHEREAMI; 

@@ -1,7 +1,8 @@
 # Why are we depending on print and load csv?
 INCS= -I../inc/ \
+	-I../../inc/ \
 	-I../../../UTILS/gen_inc/ \
-	-I../../../UTILS/inc \
+	-I../../../UTILS/inc/ \
 	-I../../OPERATORS/LOAD_CSV/gen_inc/ \
 	-I../../OPERATORS/PRINT/gen_inc/ \
 	-I/usr/include/lua5.1/

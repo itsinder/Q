@@ -1,11 +1,11 @@
 local ffi		= require 'Q/UTILS/lua/q_ffi'
 local qconsts		= require 'Q/UTILS/lua/q_consts'
-local log		= require 'Q/UTILS/lua/log'
 local cmem		= require 'libcmem'
 local Scalar		= require 'libsclr'
-local dnn		= require 'libvec'
+local Dnn		= require 'libdnn'
 local register_type	= require 'Q/UTILS/lua/q_types'
 local qc		= require 'Q/UTILS/lua/q_core'
+local get_ptr           = require 'Q/UTILS/lua/get_ptr'
 --====================================
 local ldnn = {}
 ldnn.__index = ldnn
@@ -29,67 +29,53 @@ register_type(ldnn, "ldnn")
 -- end
 
 
-function ldnn.new(arg)
+function ldnn.new(mode, params)
   local dnn = setmetatable({}, ldnn)
   -- for meta data stored in dnn
   dnn._meta = {}
-  local num_layers
-  local batch_size
+  local nl  -- num_layers
+  local bsz -- batch_size
+  local npl -- neurons_per_layer
 
-  assert(type(arg) == "table", "dnn constructor requires table as arg")
-  assert( ( arg.neurons_in_layer) and 
-          ( type(arg.neurons_in_layer) == "table" ) and 
-          ( #(arg.neurons_in_layer) >= 3 ) )
-  num_layers = arg.neurons_in_layer
-  assert( ( arg.activation_functionn) and 
-          ( type(arg.activation_function) == "table" ) and 
-          ( #(arg.activation_function)  == num_layers) )
-  assert( ( args.batch_size)  and 
-          ( type(args.batch_size) == "number" ) and 
-          ( args.batch_size >= 1 ) )
-
-  --==========================================
-  neurons_per_layer = ffi.gc(
-    ffi.C.malloc( ffi.sizeof("int") * num_layers), 
-    ffi.C.free)
-  neurons_per_layer = ffi.cast("int *", neurons_per_layer)
-  for i = 1, num_layers do 
-    neurons_per_layer[i-1] = neurons_per_layer[i]
+  print("mode ", mode);
+  assert( mode and ( type(mode) == "string") ) 
+  if ( mode == "new" ) then 
+    assert(type(params) == "table", "dnn constructor requires table as arg")
+    assert( ( params.npl) and 
+            ( type(params.npl) == "table" ) and 
+            ( #(params.npl) >= 3 ) )
+    npl = params.npl
+    nl = #params.npl
+    --[[ TODO 
+    assert( ( params.activation_function) and 
+            ( type(params.activation_function) == "table" ) and 
+            ( #(params.activation_function)  == nl) )
+    --]]
+    assert( ( params.bsz)  and 
+            ( type(params.bsz) == "number" ) and 
+            ( params.bsz >= 1 ) )
+    bsz = params.bsz
+  elseif ( mode == "hydrate" ) then 
+    assert(nil, "TODO")
+  else
+    assert(nil, "Invalid mode of creation")
   end
   --==========================================
-  dnn._base_vec = dnn.new(batch_size, num_layers, neurons_per_layer,
-    num_elements)
-  assert(dnn._base_vec)
-  dnn.neurons_per_layer = neurons_per_layer 
-  dnn.num_layers        = num_layers 
+  -- c_npl = C neurons per layer 
+  local c_npl = cmem.new(ffi.sizeof("int") * nl, "F4") 
+  local  X = get_ptr(c_npl, "F4")
+  for i = 1, nl do 
+    X[i-1] = npl[i]
+  end
+  --==========================================
+  ldnn._base_vec = Dnn.new(bsz, nl, c_npl)
+  assert(ldnn._base_vec)
+  dnn.npl = npl
+  dnn.nl  = nl 
+  dnn.bsz = bsz
   return dnn
 end
 
-function ldnn.hydrate(arg)
-  local dnn = setmetatable({}, ldnn)
-  -- for meta data stored in dnn
-  dnn._meta = {}
-  local num_layers
-  local batch_size
-
-  assert(type(arg) == "table", "dnn constructor requires table as arg")
-  assert( ( arg.neurons_in_layer) and 
-          ( type(arg.neurons_in_layer) == "table" ) and 
-          ( #(arg.neurons_in_layer) >= 3 ) )
-  num_layers = arg.neurons_in_layer
-  assert( ( arg.activation_functionn) and 
-          ( type(arg.activation_function) == "table" ) and 
-          ( #(arg.activation_function)  == num_layers) )
-  assert( ( args.batch_size)  and 
-          ( type(args.batch_size) == "number" ) and 
-          ( args.batch_size >= 1 ) )
-
-  dnn.
-  dnn._base_vec = dnn.new(batch_size,
-    num_elements)
-  assert(dnn._base_vec)
-  return dnn
-end
 
 function ldnn:set_sibling(x)
   assert(type(x) == "ldnn")

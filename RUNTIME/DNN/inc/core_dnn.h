@@ -17,6 +17,7 @@ dnn_free(
 extern int
 dnn_new(
     DNN_REC_TYPE *ptr_X,
-    int batch_size,
-    int num_layers
+    int bsz,
+    int nl,
+    float *npl
     );
