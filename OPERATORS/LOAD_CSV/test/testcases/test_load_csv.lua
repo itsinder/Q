@@ -4,7 +4,7 @@ local Q = require 'Q'
 require 'Q/UTILS/lua/strict'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
 local fns = require 'Q/OPERATORS/LOAD_CSV/test/testcases/handle_category'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 local plpath = require 'pl.path'
 local gen_csv = require 'Q/RUNTIME/test/generate_csv'
 local plfile = require 'pl.file'
@@ -50,11 +50,11 @@ for i, v in ipairs(T) do
     if fns[key] then
       result = fns[key](i, status, ret, v, M[1].qtype)
       -- preamble
-      utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
+      testcase_results(v, "Load_csv", "Unit Test", result, "")
       assert(result,"handle " .. v.category .. " assertions failed")
     else
       fns["increment_failed_load"](i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")
-      utils["testcase_results"](v, "Load_csv", "Unit Test", result, "")
+      testcase_results(v, "Load_csv", "Unit Test", result, "")
       assert(fns[key], "handle category is not defined in handle_category_print.lua file") 
     end
     if v.category == "category2_1" then
