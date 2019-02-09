@@ -37,7 +37,6 @@ function ldnn.new(mode, params)
   local bsz -- batch_size
   local npl -- neurons_per_layer
 
-  print("mode ", mode);
   assert( mode and ( type(mode) == "string") ) 
   if ( mode == "new" ) then 
     assert(type(params) == "table", "dnn constructor requires table as arg")

@@ -6,9 +6,9 @@ typedef enum act_fn_type {
 } ACT_FN_TYPE;
 
 typedef struct _dnn_rec_type {
-  int batch_size;
-  int num_layers;
-  int *neurons_in_layer; 
+  int bsz; // batch size
+  int nl; // num layers
+  float *npl;  // neurons per layer 
   ACT_FN_TYPE  *A; // activation_function[num_layers] 
   float **X; // TODO NOT SURE  [neurons_in_layer[0]][num_instances]
   int num_instances; // TODO NOT SURE 

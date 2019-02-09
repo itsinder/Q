@@ -14,7 +14,13 @@ all: libdnn.so
 clean:
 	rm -f *.so *.o _*
 		
-libdnn.so: 
+dnn.o : dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
+	gcc -c ${QC_FLAGS} $(INCS) dnn.c -o dnn.o
+
+core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
+	gcc -c ${QC_FLAGS} $(INCS) core_dnn.c -o core_dnn.o
+
+libdnn.so:  dnn.o core_dnn.o
 	gcc ${QC_FLAGS} $(INCS) \
 	dnn.c \
 	core_dnn.c \

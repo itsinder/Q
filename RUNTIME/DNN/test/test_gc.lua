@@ -2,11 +2,19 @@ local ldnn = require 'Q/RUNTIME/DNN/lua/ldnn'
 
 local tests = {}
 tests.t1 = function(n)
-  n = n or 1 -- TODO make this a a large number 1000000
+  local n = n or 100000000
+  -- this is a ridiculously large number of layers
+  -- but this test is just to verify gc working properly
+  local nl = 100000
+  local npl = {}
+  for i = 1, nl do 
+    npl[i] = i
+  end
   for i = 1, n do 
-    print("hello world ", i)
-    x = ldnn.new("new", { nl == 3, npl = { 3, 4, 1 }, bsz = 10 })
-    print("hello world again", i)
+    x = ldnn.new("new", { nl == nl, npl = npl, bsz = 10 })
+    if ( ( i % 1000 ) == 0 )  then
+      print("Iterations " .. i)
+    end
   end
   print("Success on test t1")
 end
