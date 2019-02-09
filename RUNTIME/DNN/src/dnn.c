@@ -9,9 +9,9 @@
 
 int luaopen_libdnn (lua_State *L);
 //----------------------------------------
-static int l_dnn_epoch( lua_State *L) {
+static int l_dnn_check( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
-  int status = dnn_epoch(ptr_dnn); cBYE(status);
+  int status = dnn_check(ptr_dnn); cBYE(status);
   lua_pushboolean(L, true); 
   return 1; 
 BYE:
@@ -20,11 +20,11 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_dnn_check( lua_State *L) {
+static int l_dnn_epoch( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
-  int status = dnn_check(ptr_dnn); cBYE(status);
-  lua_pushboolean(L, true); 
-  return 1; 
+  int status = dnn_epoch(ptr_dnn);cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, __func__);
@@ -64,8 +64,8 @@ static int l_dnn_new( lua_State *L)
   if ( ptr_cmem == NULL ) { go_BYE(-1); }
   if ( nl < 3 ) { go_BYE(-1); }
   if ( bsz < 1 ) { go_BYE(-1); }
-  float *npl = (float *)ptr_cmem->data;
-  if ( strcmp(ptr_cmem->field_type, "F4") != 0 ) { go_BYE(-1); }
+  int *npl = (int *)ptr_cmem->data;
+  if ( strcmp(ptr_cmem->field_type, "I4") != 0 ) { go_BYE(-1); }
 
   ptr_dnn = (DNN_REC_TYPE *)lua_newuserdata(L, sizeof(DNN_REC_TYPE));
   return_if_malloc_failed(ptr_dnn);

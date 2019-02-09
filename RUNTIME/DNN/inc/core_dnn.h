@@ -19,5 +19,5 @@ dnn_new(
     DNN_REC_TYPE *ptr_X,
     int bsz,
     int nl,
-    float *npl
+    int *npl
     );
