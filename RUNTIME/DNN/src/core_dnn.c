@@ -46,6 +46,7 @@ dnn_delete(
     )
 {
   int status = 0;
+  tatus = dnn_free(ptr_X); cBYE(status);
 BYE:
   return status;
 }

@@ -105,7 +105,7 @@ function ldnn.new(mode, Xin, Xout, params)
   dnn._nl  = nl    -- num layers
   dnn._nphl = nphl -- neurons per hidden layer
   dnn._nhl  = nhl  -- num hidden layers
-  dnn._bsz = bsz
+  dnn._bsz = bs    -- batch size 
   dnn._num_epochs = 0
   return dnn
 end
