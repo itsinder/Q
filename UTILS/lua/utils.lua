@@ -1,4 +1,3 @@
-local timer = require 'posix.time'
 local g_err	= require 'Q/UTILS/lua/error_code'
 local base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
@@ -20,16 +19,6 @@ fns.clone = function(t) -- deep-copy a table
     end
     setmetatable(target, meta)
     return target
-end
-
-fns.timeit = function(f_name, ...)
-   local t1 = timer.clock_gettime(0)
-   local ret = table.pack(f_name(...))
-   local t2 = timer.clock_gettime(0)
-   if ret.n == 0 then
-      return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6
-   end
-   return (t2.tv_sec*10^6 +t2.tv_nsec/10^3 - (t1.tv_sec*10^6 +t1.tv_nsec/10^3))/10^6, unpack(ret)
 end
 
 fns.load_file_as_string = function (fname)

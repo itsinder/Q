@@ -2,7 +2,7 @@ local qc = require 'Q/UTILS/lua/q_core'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local Q = require 'Q'
 -- local dbg = require 'Q/UTILS/lua/debugger'
-local timeit = require 'Q/UTILS/lua/utils'["timeit"]
+local qc      = require 'Q/UTILS/lua/q_core'
 local filenm = arg[1]
 local Column = require 'Q/RUNTIME/COLUMN/code/lua/Column'
 local col = Column{field_type='I4', filename=filenm,}
@@ -23,4 +23,7 @@ end
 local size1, chunk1 = col:chunk(-1)
 local size2, chunk2 = col:chunk(-1)
 
-print(timeit(add_test, chunk1, size1, chunk2, size2))
+local start_time = qc.RDTSC()
+add_test(chunk1, size1, chunk2, size2))
+local stop_time = qc.RDTSC()
+print("time taken", stop_time-start_time)
