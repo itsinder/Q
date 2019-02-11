@@ -50,10 +50,10 @@ return function (
   local subs = {}; 
   local tmpl
   if ( mode == "simple" ) then 
-    tmpl = qconsts.q_src_root .. "/OPERATORS/MM/lua/mv_mul_simple.tmpl"
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/MM/lua/mv_mul_simple.tmpl"
     subs.fn = "mv_mul_simple_" .. x_qtype .. "_" .. y_qtype .. "_" .. z_qtype
   elseif ( mode == "opt" ) then 
-    tmpl = qconsts.q_src_root .. "/OPERATORS/MM/lua/mv_mul_opt.tmpl"
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/MM/lua/mv_mul_opt.tmpl"
     subs.fn = "mv_mul_opt_" .. x_qtype .. "_" .. y_qtype .. "_" .. z_qtype
   else
     assert(nil)

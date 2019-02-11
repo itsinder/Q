@@ -10,7 +10,7 @@ return function(idx_qtype, val_qtype, ordr)
   assert(qconsts.base_types[val_qtype])
 
   local subs = {}
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/IDX_SORT/lua/idx_qsort.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/IDX_SORT/lua/idx_qsort.tmpl"
   subs.srt_ordr = ordr
   subs.val_qtype = val_qtype
   subs.idx_qtype = idx_qtype

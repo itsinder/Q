@@ -8,7 +8,7 @@ return function (
 
   --==============================
   local subs = {}
-  local tmpl_path = qconsts.q_src_root .. "/OPERATORS/APPROX/QUANTILE/lua/"
+  local tmpl_path = qconsts.Q_SRC_ROOT .. "/OPERATORS/APPROX/QUANTILE/lua/"
   local tmpls = {
     tmpl_path .. 'approx_quantile.tmpl',
     tmpl_path .. 'New.tmpl',
