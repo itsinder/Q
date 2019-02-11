@@ -15,7 +15,7 @@ return function (
   else
     out_qtype = "I8"
   end
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/GROUPBY/lua/sumby.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/GROUPBY/lua/sumby.tmpl"
   local subs = {};
   subs.fn = "sumby_" .. val_qtype .. "_" .. grpby_qtype .. "_" .. out_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype

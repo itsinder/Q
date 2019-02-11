@@ -50,6 +50,6 @@ return function (
     subs.stride = ffi.sizeof(in_ctype)
   end
 
-  tmpl = qconsts.q_src_root .. "/OPERATORS/HASH/lua/hash.tmpl"
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/HASH/lua/hash.tmpl"
   return subs, tmpl
 end

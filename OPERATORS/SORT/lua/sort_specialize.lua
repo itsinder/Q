@@ -4,7 +4,7 @@ return function(in_qtype, ordr)
   assert( ( ( ordr == "asc") or ( ordr == "dsc") ), 
   "Sort order should be asc or dsc")
   local subs = {}
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/SORT/lua/qsort.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/SORT/lua/qsort.tmpl"
   subs.SORT_ORDER = ordr
   subs.QTYPE = in_qtype
   subs.fn = "qsort_" .. ordr .. "_" .. in_qtype

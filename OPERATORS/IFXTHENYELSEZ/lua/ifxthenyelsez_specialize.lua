@@ -9,7 +9,7 @@ return function (
   assert(variations[variation])
   assert(is_base_qtype(qtype))
   subs.fn = variation .. "_ifxthenyelsez_" .. qtype 
-  tmpl = qconsts.q_src_root .. "/OPERATORS/IFXTHENYELSEZ/lua/" .. variation .. "_ifxthenyelsez.tmpl"
+  tmpl = qconsts.Q_SRC_ROOT	 .. "/OPERATORS/IFXTHENYELSEZ/lua/" .. variation .. "_ifxthenyelsez.tmpl"
   subs.ctype = qconsts.qtypes[qtype].ctype
   subs.qtype = qtype
   return subs, tmpl

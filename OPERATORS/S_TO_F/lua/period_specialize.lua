@@ -44,7 +44,7 @@ return function (
   c_mem_ptr.start  = args.start;
   c_mem_ptr.by     = args.by;
   c_mem_ptr.period = args.period;
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/period.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/S_TO_F/lua/period.tmpl"
   local subs = {};
   subs.fn          = "period_" .. qtype
   subs.c_mem       = c_mem

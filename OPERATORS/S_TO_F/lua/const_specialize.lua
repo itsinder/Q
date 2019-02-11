@@ -18,7 +18,7 @@ return function (
   val = assert(to_scalar(val, qtype))
 
   --=======================
-  local tmpl = qconsts.q_src_root .. "/OPERATORS/S_TO_F/lua/const.tmpl"
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/S_TO_F/lua/const.tmpl"
   local subs = {};
   subs.fn = "const_" .. qtype
   subs.c_mem = val:to_cmem()
