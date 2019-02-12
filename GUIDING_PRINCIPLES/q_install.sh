@@ -43,6 +43,13 @@ case $ARG_MODE in
     ;;
 esac
 
+## Normal/basic mode: building Q with -O4 flag
+## for now, normal mode is when no argument is passed with q_install.sh
+## TODO: we can support with a parameter called "normal" ( bash q_install "normal")
+if [ $# -eq 0 ] ; then
+  export QC_FLAGS="$QC_FLAGS -O4"
+fi
+
 # installing apt get dependencies
 bash apt_get_dependencies.sh
 
