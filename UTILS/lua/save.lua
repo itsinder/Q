@@ -103,13 +103,12 @@ local function save_global(file_to_save)
   if ( file_to_save ) then 
     metadata_file = file_to_save
   else
-    metadata_file = qconsts.DEFAULT_META_FILE
+    metadata_file = qconsts.Q_METADATA_FILE
   end
-  assert(type(metadata_file) == "string")
-  local fp = io.open(metadata_file, "r")
-  if ( fp ) then 
+  assert(type(metadata_file) == "string", "metadata file is not provided")
+  local file_exists = qc.isfile(metadata_file)
+  if ( file_exists == true ) then
     print("Warning! Over-writing meta data file ", metadata_file)
-    fp:close()
   end
   local fp = assert(io.open(metadata_file, "w+"), 
     "Unable to open file for writing" .. metadata_file)
