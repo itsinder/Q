@@ -29,7 +29,7 @@ dnn.o : dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	gcc -c ${QC_FLAGS} $(INCS) core_dnn.c -o core_dnn.o
 
-libdnn.so: *.o
+libdnn.so: core_dnn.o dnn.o
 	gcc ${QC_FLAGS} $(INCS) \
 	core_dnn.o \
 	dnn.o \

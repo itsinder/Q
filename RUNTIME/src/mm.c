@@ -29,11 +29,16 @@ mm(
         vec_sz_malloc -= n;
       }
       else {
-        if ( cmem_sz_malloc < n ) { go_BYE(-1); }
+        if ( cmem_sz_malloc < n ) { 
+          fprintf(stderr, "cmem_sz_malloc/n = %lf, %lf \n",
+              (double)cmem_sz_malloc, (double)n);
+          go_BYE(-1); }
         cmem_sz_malloc -= n;
       }
     }
   }
+  fprintf(stderr, "vec_sz_malloc/cmem_sz_malloc = %lu/%lu \n",
+    vec_sz_malloc, cmem_sz_malloc);
   *ptr_vec_sz = vec_sz_malloc;
   *ptr_cmem_sz = cmem_sz_malloc;
 BYE:

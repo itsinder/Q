@@ -6,8 +6,8 @@ tests.t1 = function(n)
   local n = n or 100000000
   -- this is a ridiculously large number of layers
   -- but this test is just to verify gc working properly
-  local Xin = {}; Xin[1] = Q.mk_col({1, 2, 3}, "I4"):eval()
-  local Xout = {}; Xout[1] = Q.mk_col({1, 2, 3}, "I4"):eval()
+  local Xin = {}; Xin[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
+  local Xout = {}; Xout[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
 
   local nhl = 64
   local nphl = {}
@@ -16,15 +16,15 @@ tests.t1 = function(n)
   end
   for i = 1, n do 
     x = ldnn.new("new", Xin, Xout, { nphl = nphl })
-    if ( ( i % 10 ) == 0 )  then
+    if ( ( i % 1000 ) == 0 )  then
       print("Iterations " .. i)
     end
   end
   print("Success on test t1")
 end
 tests.t2 = function(n)
-  local Xin = {}; Xin[1] = Q.mk_col({1, 2, 3}, "I4"):eval()
-  local Xout = {}; Xout[1] = Q.mk_col({1, 2, 3}, "I4"):eval()
+  local Xin = {}; Xin[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
+  local Xout = {}; Xout[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
 
   local nhl = 3
   local nphl = {}
