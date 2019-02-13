@@ -5,6 +5,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include "q_incs.h"
 #include "_rdtsc.h"
 
+// Below structure needs to be same as structure template in rand_mem_initialize.lua
 typedef struct _rand_${out_qtype}_rec_type {
   uint64_t seed;
   struct drand48_data buffer;
