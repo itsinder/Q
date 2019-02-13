@@ -7,7 +7,11 @@ dnn_delete(
     DNN_REC_TYPE *ptr_X
     );
 extern int
-dnn_epoch(
+dnn_fstep(
+    DNN_REC_TYPE *ptr_X
+    );
+extern int
+dnn_bprop(
     DNN_REC_TYPE *ptr_X
     );
 extern int

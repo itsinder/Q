@@ -20,9 +20,9 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_dnn_epoch( lua_State *L) {
+static int l_dnn_fstep( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
-  int status = dnn_epoch(ptr_dnn);cBYE(status);
+  int status = dnn_fstep(ptr_dnn);cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:
@@ -30,6 +30,18 @@ BYE:
   lua_pushstring(L, __func__);
   return 2;
 }
+//----------------------------------------
+static int l_dnn_bprop( lua_State *L) {
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  int status = dnn_bprop(ptr_dnn);cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
 static int l_dnn_delete( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   int status = dnn_delete(ptr_dnn);cBYE(status);
@@ -87,7 +99,8 @@ static const struct luaL_Reg dnn_methods[] = {
     { "__gc",    l_dnn_free   },
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
-    { "epoch", l_dnn_epoch },
+    { "fstep", l_dnn_fstep },
+    { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
 //    { "serialize", l_dnn_serialize },
@@ -98,7 +111,8 @@ static const struct luaL_Reg dnn_methods[] = {
 static const struct luaL_Reg dnn_functions[] = {
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
-    { "epoch", l_dnn_epoch },
+    { "fstep", l_dnn_fstep },
+    { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
     { "new", l_dnn_new },

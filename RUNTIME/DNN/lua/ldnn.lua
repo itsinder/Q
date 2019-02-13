@@ -28,13 +28,15 @@ register_type(ldnn, "ldnn")
 --    return otype
 -- end
 
-local function chk_data(X)
+local function chk_data(X, lbl)
   local data_len
   local n_cols 
   assert( ( X ) and ( type(X) == "table" ) )
   for k, v in pairs(X) do 
     assert(type(v) == "lVector" )
     assert(v:is_eov())
+    assert(not v:has_nulls())
+    assert(v:fldtype() == "F4", "currently only F4 data is supported")
     if ( not n_cols ) then 
       data_len = v:length()
       n_cols = 1
@@ -44,7 +46,26 @@ local function chk_data(X)
     end
   end
   assert(n_cols >= 1 )
-  return n_cols, data_len
+  --=======================
+  -- Since we will randomize the input, we have to make a copy of it
+  local lX = {}
+  for k, v in pairs(X) do 
+    lX[k] = v:clone()
+  end
+  --=======================
+  -- We set up an array of pointers to the data of each vector
+  local ptrs = assert(cmem.new(ffi.sizeof("float *") * n_cols), "F4", lbl)
+  ptrs = ffi.cast("float **", ptrs)
+  for k, v in pairs(lX) do
+    -- the end_write will occur when the vector is gc'd
+    local x_len, x_chunk, nn_x_chunk = v:start_write()
+    assert(x_chunk)
+    assert(x_len > 0)
+    assert(not nn_x_chunk)
+    ptrs[k] = get_ptr(x_chunk, "F4")
+  end
+  --=======================
+  return n_cols, data_len, lX, ptrs
 end
 
 function ldnn.new(mode, Xin, Xout, params)
@@ -54,9 +75,9 @@ function ldnn.new(mode, Xin, Xout, params)
   local bsz -- batch_size
   local nphl -- neurons per hidden layer
   local nhl  -- neurons per layer
-  local n_in,  data_len_in  = chk_data(Xin)
-  local n_out, data_len_out = chk_data(Xout)
-  assert(data_len_in == data_len_out)
+  local ncols_in,  nrows_in,  lXin, cptrs_in  = chk_data(Xin, "in")
+  local ncols_out, nrows_out, lXout, cptrs_out = chk_data(Xout, "out")
+  assert(nrows_in == nrows_out)
 
   assert( mode and ( type(mode) == "string") ) 
   if ( mode == "new" ) then 
@@ -73,18 +94,18 @@ function ldnn.new(mode, Xin, Xout, params)
     --]]
     nl = nhl + 1 + 1  -- 1 for input, 1 for output
     npl = {}
-    npl[1] = data_len_in
+    npl[1] = ncols_in
     for i = 1, nhl do
       npl[i+1] = nphl[i]
     end
-    npl[nl] = data_len_out
+    npl[nl] = ncols_out
 
     if ( ( params.bsz)  and 
             ( type(params.bsz) == "number" ) and 
             ( params.bsz >= 1 ) ) then
       bsz = params.bsz
     else
-      bsz = data_len_in
+      bsz = nrows_in
     end
   elseif ( mode == "hydrate" ) then 
     assert(nil, "TODO")
@@ -106,12 +127,34 @@ function ldnn.new(mode, Xin, Xout, params)
   dnn._nphl = nphl -- neurons per hidden layer
   dnn._nhl  = nhl  -- num hidden layers
   dnn._bsz = bs    -- batch size 
+  dnn._Xin = lXin   -- copy of input data
+  dnn._Xin = lXout  -- copy of output data
+  dnn._cptrs_in  = cptrs_in   -- C pointers to input data
+  dnn._cptrs_out = cptrs_out  -- C pointers to output data
   dnn._num_epochs = 0
   return dnn
 end
 
+--================================== Destructor
+function ldnn.destructor()
+  if self._dnn.Xin then 
+    for k, v in pairs(self._dnn.Xin) do
+      v:end_write()
+      v:delete()
+    end
+  end
+  if self._dnn.Xout then 
+    for k, v in pairs(self._dnn.Xout) do
+      v:end_write()
+      v:delete()
+    end
+  end
+end
 
-function ldnn:train(num_epochs)
+ldnn.__gc = ldnn.destructor
+--================================== 
+
+function ldnn:fit(num_epochs)
   if ( not num_epochs ) then 
    num_epochs = 1
  else 

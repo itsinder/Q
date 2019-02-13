@@ -46,14 +46,24 @@ dnn_delete(
     )
 {
   int status = 0;
-  tatus = dnn_free(ptr_X); cBYE(status);
+  status = dnn_free(ptr_X); cBYE(status);
 BYE:
   return status;
 }
 //----------------------------------------------------
-
 int
-dnn_epoch(
+dnn_bprop(
+    DNN_REC_TYPE *ptr_X
+    )
+{
+  int status = 0;
+BYE:
+  return status;
+}
+
+//----------------------------------------------------
+int
+dnn_fstep(
     DNN_REC_TYPE *ptr_X
     )
 {
