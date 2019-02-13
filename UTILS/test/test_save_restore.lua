@@ -76,6 +76,8 @@ tests.t5 = function()
   print("Successfully executed test t5")
 end
 
+-- commenting this testcase as luaposix is removed from q_installation process
+--[[
 -- negative testcase
 tests.t6 = function()
   -- Usecase note: within same lua environment, modification in environment variables(for eg here: Q_METADATA_FILE) would not modify 
@@ -89,6 +91,8 @@ tests.t6 = function()
   assert(status == false)
   print("Successfully executed test t6")
 end
+]]
+
 return tests
 
 
