@@ -67,6 +67,7 @@ tests.t5 = function()
     Q.save("/tmp/saving_it.lua")
 end
 
+-- basic global scalar testcase
 tests.t6 = function()
   -- creating global Scalars
   sc_B1_bool = Scalar.new(true, "B1")
@@ -74,7 +75,7 @@ tests.t6 = function()
   sc_B1_num = Scalar.new(0, "B1")
   Q.save("/tmp/saving_sclrs.lua")
 
-  -- nullifying sc before restoring
+  -- nullifying sc_* before restoring
   sc_B1_bool = nil
   sc_I1 = nil
   sc_B1_num = nil

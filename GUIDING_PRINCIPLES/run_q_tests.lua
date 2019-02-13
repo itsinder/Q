@@ -20,7 +20,8 @@ PROG.PROG_SAVE = function()
 end
 
 PROG.PROG_RESTORE = function()
-  dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+  dofile(qconsts.Q_METADATA_FILE)
   print(type(x))
   print(x:length())
   print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
