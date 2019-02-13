@@ -7,6 +7,8 @@
 local qconsts = {}
 --===========================
   -- Initialize environment variable constants
+  -- Note: These are Environment variable constants, if modified in same lua environment
+  -- would not modify the value of these environment variable constants
   qconsts.Q_SRC_ROOT	= os.getenv("Q_SRC_ROOT")
   qconsts.Q_ROOT	= os.getenv("Q_ROOT")
   qconsts.QC_FLAGS	= os.getenv("QC_FLAGS")
@@ -17,8 +19,6 @@ local qconsts = {}
   qconsts.LUA_PATH	= os.getenv("LUA_PATH")
   qconsts.Q_METADATA_FILE = os.getenv("Q_METADATA_FILE")
   qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
-  --TODO: check this with krushna
-  qconsts.DEFAULT_META_FILE = "/tmp/saved.meta"
 
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
   qconsts.chunk_size = 256 * 1024

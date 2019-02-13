@@ -76,6 +76,19 @@ tests.t5 = function()
   print("Successfully executed test t5")
 end
 
+-- negative testcase
+tests.t6 = function()
+  -- Usecase note: within same lua environment, modification in environment variables(for eg here: Q_METADATA_FILE) would not modify 
+  -- the Q environment variables as they are now treated as constants (refer Q/UTILS/lua/q_consts/lua)
+  local posix = require 'posix.stdlib'
+  col1 = Q.mk_col({10,20,30,40,50}, "I4")
+  -- setting the Q_METADATA_FILE environment variable
+  posix.setenv('Q_METADATA_FILE', '/tmp/saved.meta')
+  -- Call save() without argument
+  local status, reason = pcall(Q.save)
+  assert(status == false)
+  print("Successfully executed test t6")
+end
 return tests
 
 
