@@ -35,16 +35,10 @@ return function (
 
   local subs = {};
   --==============================
-  -- Set c_mem using info from args
-  local sz_c_mem = ffi.sizeof("RAND_B1_REC_TYPE")
-  local c_mem = assert(cmem.new(sz_c_mem), "malloc failed")
-  local c_mem_ptr = ffi.cast("RAND_B1_REC_TYPE *", get_ptr(c_mem))
-  c_mem_ptr.seed = seed
-  c_mem_ptr.probability = probability
-  --==============================
   subs.fn = "rand_B1"
-  subs.c_mem = c_mem
   subs.len = len
-  subs.c_mem_type = "RAND_B1_REC_TYPE *"
+  subs.out_qtype = qtype
+  subs.seed = seed
+  subs.probability = probability
   return subs
 end

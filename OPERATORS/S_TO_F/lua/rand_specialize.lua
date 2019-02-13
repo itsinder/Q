@@ -28,11 +28,11 @@ return function (
     end
   end
 
-  local lb   = assert(args.lb)
-  local ub   = assert(args.ub)
-  local len   = assert(args.len)
-  local seed   = args.seed
-  local ctype = qconsts.qtypes[qtype].ctype
+  local lb	= assert(args.lb)
+  local ub	= assert(args.ub)
+  local len	= assert(args.len)
+  local seed	= args.seed
+  local ctype	= qconsts.qtypes[qtype].ctype
 
   if ( seed ) then 
     assert(type(seed) == "number")
@@ -40,6 +40,7 @@ return function (
     seed = 0 
   end
   assert(is_base_qtype(qtype))
+  assert(type(len) == "number")
   assert(len > 0, "vector length must be positive")
   lb = assert(to_scalar(lb, qtype))
   ub = assert(to_scalar(ub, qtype))
