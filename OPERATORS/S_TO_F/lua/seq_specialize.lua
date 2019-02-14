@@ -19,11 +19,8 @@ return function (
   local ctype = assert(qconsts.qtypes[qtype].ctype)
 
   assert(is_base_qtype(qtype))
-  if ( by ) then
-    by = assert(to_scalar(by, qtype))
-  else
-    by = Scalar.new(1, qtype)
-  end
+  if not by then by = 1 end
+  by = assert(to_scalar(by, qtype))
   start = assert(to_scalar(start, qtype))
   if ( type(len) == "Scalar" ) then len = len:to_num() end
   assert(type(len) == "number")
