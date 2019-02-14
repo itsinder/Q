@@ -1,1 +1,1 @@
-gcc client.c -lreadline -lcurl -o client.o
+gcc client.c -lreadline -lcurl -o q_client

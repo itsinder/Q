@@ -1,19 +1,20 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <curl/curl.h>
 
 
-int request_server(char * input)
+int
+request_server(
+    CURL *ch,
+    char * input,
+    const char * url
+    )
 {
   int status = 0;
-  CURL *ch = NULL;
   CURLcode curl_res;
- 
-  curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
-  if(ch) {
-    curl_easy_setopt(ch, CURLOPT_URL, "http://localhost:8000/Dummy?ABC=123");
+  if( ch ) {
     curl_easy_setopt(ch, CURLOPT_POSTFIELDS, input);
     curl_res = curl_easy_perform(ch);
     if(curl_res != CURLE_OK) {
@@ -21,21 +22,52 @@ int request_server(char * input)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(curl_res));
     }
-    curl_easy_cleanup(ch);
   }
   else {
     status = -1;
   }
-  curl_global_cleanup();
 BYE:
   return status;
 }
 
 
-int main()
+int main(
+    int argc, 
+    char* argv[]
+    )
 {
-  char *input;
-  int status = 0;
+  char *input	= NULL;
+  char *host	= NULL;
+  char *port	= NULL;
+  char *url	= NULL;
+  int status	= 0;
+
+  if ( argc != 3 ) {
+    printf("Please provide the appropriate arguments\n");
+    printf("Usage\n");
+    printf("./q_client <ip/hostname> <port>\n");
+    status = -1; goto BYE;
+  }
+
+  host = argv[1];
+  port = argv[2];
+  int u_len = strlen(host) + strlen(port) + 32;
+  printf("%d\n", u_len);
+  url = malloc(u_len);
+  if ( url == NULL ) { status = -1; goto BYE; }
+  int len = snprintf(url, u_len-1, "http://%s:%s/%s", host, port, "Dummy?ABC=123");
+  if ( len >= u_len-1 ) { status = -1; goto BYE; }
+  //char url[] = "http://localhost:8000/Dummy?ABC=123";
+  printf("%s\n", url);
+  // Prepare CURL utility object
+  CURL *ch = NULL;
+  curl_global_init(CURL_GLOBAL_ALL);
+  ch = curl_easy_init();
+  if ( !ch ) {
+    printf("Failed to prepare CURL object\n");
+    status = -1; goto BYE;
+  }
+  curl_easy_setopt(ch, CURLOPT_URL, url);
 
   while ( 1 )
   {
@@ -45,8 +77,12 @@ int main()
     if ( strcmp(input, "os.exit()") == 0 ) {
       break;
     }
-    status = request_server(input);
+    status = request_server(ch, input, url);
     printf("\n");
   }
-  return 0;
+  curl_easy_cleanup(ch);
+  curl_global_cleanup();
+BYE:
+  if ( url ) { free(url); }
+  return status;
 }
