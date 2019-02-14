@@ -67,7 +67,7 @@ local function run_isolated_tests(suite_name, isolated)
   local setup_path = string.format("export Q_ROOT='%s';\n", q_root)
   local base_str = [[
 	export LUA_PATH="/?.lua;$LUA_PATH";
-	L -lluacov -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
+	L -e "require '%s'[%s]();collectgarbage();os.exit(0)" >/dev/null 2>&1]]
 	base_str = setup_path .. base_str
 	local suite_name_mod, subs = suite_name:gsub("%.lua$", "")
 	assert(subs == 1, suite_name .. " should end with .lua")

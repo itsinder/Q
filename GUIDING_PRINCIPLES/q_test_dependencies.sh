@@ -1,5 +1,10 @@
 bash my_print.sh "STARTING: Installing Q-test dependencies using luarocks"
-sudo luarocks install luaposix #posix.time lib has been used for capturing timers
+## Reason: removing luaposix as,
+## capturing timers can be done using qc.RDTSC() and
+## modifying the env variablea within the same luajit instance will not work
+## as env variables are now treated as Q consts
+#sudo luarocks install luaposix
 sudo luarocks install penlight #pl lib has been used for Q unit test
-sudo luarocks install luacov #luacov is used in Q/TEST_RUNNER/q_testrunner.lua :line 70
+## Reason: as we are not doing code coverage for now -Ramesh
+#sudo luarocks install luacov
 bash my_print.sh "COMPLETED: Installing Q-test dependencies using luarocks"
