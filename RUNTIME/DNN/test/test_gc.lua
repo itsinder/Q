@@ -36,8 +36,9 @@ tests.t2 = function(n)
   for i = 1, nhl do 
     nphl[i] = i
   end
-  x = ldnn.new("new", Xin, Xout, { nphl = nphl, bsz = 10 })
+  local x = ldnn.new("new", Xin, Xout, { nphl = nphl, bsz = 10 })
   assert(x:check())
+  x:fit()
   print("Success on test t2")
 end
 return tests

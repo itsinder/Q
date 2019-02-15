@@ -502,6 +502,7 @@ function lVector:end_write()
     assert(status)
   end
   if ( qconsts.debug ) then self:check() end
+  return true
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
