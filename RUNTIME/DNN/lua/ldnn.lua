@@ -8,8 +8,13 @@ local qc		= require 'Q/UTILS/lua/q_core'
 local get_ptr           = require 'Q/UTILS/lua/get_ptr'
 --====================================
 local ldnn = {}
+-- TODO: WHAT IF  we commented out Line 11
+-- plese provide answer
+-- put wiki links
 ldnn.__index = ldnn
 
+-- put a comment and sample example, why we need __call metamethod
+-- Put a comment lie "see sem.lua" and checkin sem.lua in same directory
 setmetatable(ldnn, {
    __call = function (cls, ...)
       return cls.new(...)
