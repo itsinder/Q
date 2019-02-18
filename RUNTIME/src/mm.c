@@ -14,7 +14,6 @@ mm(
   int status = 0;
   static uint64_t vec_sz_malloc;           // number of bytes allocated
   static uint64_t cmem_sz_malloc;           // number of bytes allocated
-  if ( n == 0 ) { go_BYE(-1); } // Added this line experimentally
   if ( n > 0 ) {
     if ( is_incr ) { 
       if ( is_vec ) { 
