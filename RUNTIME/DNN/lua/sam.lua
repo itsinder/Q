@@ -1,28 +1,30 @@
--- put more ecomments in sem.lua explaninign what you just told me  - 
-
 ldnn = {}
-
-ldnn.__index = ldnn
 
 mt = {}
 
+-- introduce a '__call' metamethod in table 'mt'
 mt.__call = function (cls, ...)
   print(cls)
   print(...)
 end
 
+-- associate the metatable 'mt' with 'ldnn' table
 setmetatable(ldnn, mt)
 
--- explain the code walkthrough when below statement get executed
+-- call table 'ldnn' as like function
 ldnn("abc")
+-- above statement will execute a function associated with __call metamethod
+-- first argument ia table itself and rest of the arguments are passed as it is.
+-- line no. 7 will print the string representation of table
+-- line no. 8 will print the rest of the arguments passed (i.e "abc")
 
--- below statement is same as 
+--==========================================================================================
+
+-- set ldnn as metatable 
+dnn = setmetatable({}, ldnn)
+-- above statement is same as
 -- dnn= {}
 -- setmetatabale(dnn, ldnn)
 
-dnn = setmetatable({}, ldnn)
-
--- below will not work, specify the reason
+-- below statement will not work as line no. 15 becasue ldnn doesn't have '__call' metamethod
 dnn("hellow world")
-
-http://lua-users.org/wiki/LuaClassesWithMetatable

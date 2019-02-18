@@ -8,13 +8,21 @@ local qc		= require 'Q/UTILS/lua/q_core'
 local get_ptr           = require 'Q/UTILS/lua/get_ptr'
 --====================================
 local ldnn = {}
--- TODO: WHAT IF  we commented out Line 11
--- plese provide answer
--- put wiki links
+--[[
+__index metamethod tells about necessary action/provision, when a absent field is called from table.
+Below line indicates, whenever any method get called using 'dnn' object (e.g "dnn:fit()"),
+here 'dnn' is object/table returned from new() method, the method/key will be searched in ldnn table.
+If we comment below line then the methods/fields like 'fit' or 'check' will not be available for 'dnn' object
+]]
 ldnn.__index = ldnn
 
--- put a comment and sample example, why we need __call metamethod
--- Put a comment lie "see sem.lua" and checkin sem.lua in same directory
+
+--[[
+'__call' metamethod allows you to treat a table like a function.
+e.g ldnn(mode, Xin, Xout, params)
+above call is similar to ldnn.new(mode, Xin, Xout, params)
+for more info, please refer sam.lua in the same directory
+]]
 setmetatable(ldnn, {
    __call = function (cls, ...)
       return cls.new(...)
