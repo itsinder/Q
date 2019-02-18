@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <curl/curl.h>
-
+#include "q_client.h"
 
 int
 request_server(
@@ -46,7 +41,7 @@ int main(
     printf("Please provide the appropriate arguments\n");
     printf("Usage\n");
     printf("./q_client <ip/hostname> <port>\n");
-    status = -1; goto BYE;
+    go_BYE(-1);
   }
 
   host = argv[1];
@@ -54,9 +49,9 @@ int main(
   int u_len = strlen(host) + strlen(port) + 32;
   printf("%d\n", u_len);
   url = malloc(u_len);
-  if ( url == NULL ) { status = -1; goto BYE; }
-  int len = snprintf(url, u_len-1, "http://%s:%s/%s", host, port, "Dummy?ABC=123");
-  if ( len >= u_len-1 ) { status = -1; goto BYE; }
+  if ( url == NULL ) { go_BYE(-1); }
+  int len = snprintf(url, u_len-1, "http://%s:%s/%s", host, port, "DoString");
+  if ( len >= u_len-1 ) { go_BYE(-1); }
   //char url[] = "http://localhost:8000/Dummy?ABC=123";
   printf("%s\n", url);
   // Prepare CURL utility object
@@ -65,7 +60,7 @@ int main(
   ch = curl_easy_init();
   if ( !ch ) {
     printf("Failed to prepare CURL object\n");
-    status = -1; goto BYE;
+    go_BYE(-1);
   }
   curl_easy_setopt(ch, CURLOPT_URL, url);
 
