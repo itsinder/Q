@@ -36,7 +36,7 @@ generic_handler(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
+  char *X = NULL; size_t nX = 0; char *alt_X = NULL;
   Q_REQ_TYPE req_type = Undefined;
   uint64_t t_start = RDTSC();
   struct event_base *base = (struct event_base *)arg;
@@ -93,11 +93,17 @@ BYE:
     strcpy(ret_type, "OK");
   }
   status = rs_mmap(ret_file, &X, &nX, 0); 
+  
   if ( ( status < 0 ) || ( X == NULL ) || ( nX == 0 ) ) {
     evbuffer_add_printf(opbuf, "%s\n", "UNKNOWN");
   }
   else {
-    evbuffer_add_printf(opbuf, "%s\n", X);
+    // TODO: P4 is this null termination needed?
+    alt_X = malloc(nX+1);
+    alt_X[nX] = '\0';
+    memcpy(alt_X, X, nX);
+    evbuffer_add_printf(opbuf, "%s\n", alt_X);
+    free_if_non_null(alt_X); 
   }
   evhttp_send_reply(req, code, ret_type, opbuf);
   evbuffer_free(opbuf);
@@ -114,6 +120,7 @@ BYE:
       uint64_t t_delta = t_stop - t_start;
     }
   }
+  free_if_non_null(alt_X); 
   //--------------------
 }
 
