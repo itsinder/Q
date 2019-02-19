@@ -28,8 +28,12 @@ tests.t1 = function(n)
   print("Success on test t1")
 end
 tests.t2 = function(n)
-  local Xin = {}; Xin[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
-  local Xout = {}; Xout[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
+  local Xin = {}; 
+    Xin[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
+    Xin[2] = Q.mk_col({10, 20, 30}, "F4"):eval()
+    Xin[3] = Q.mk_col({100, 200, 300}, "F4"):eval()
+  local Xout = {}; 
+    Xout[1] = Q.mk_col({1000, 2000, 3000}, "F4"):eval()
 
   local nhl = 3
   local nphl = {}
