@@ -24,7 +24,17 @@ if [ "$#" -eq 1 -a $IS_LUA_DEBUG == "LUA_DEBUG" ];then
   sudo ln -sf /usr/local/bin/lua /usr/local/bin/L
 fi
 
-sudo cp ./etc/lua.pc /usr/lib/pkgconfig/
+## adding temporary hack for checking pkgconfig location
+if [[ -d /usr/lib/pkgconfig ]]; then
+  sudo cp ./etc/lua.pc /usr/lib/pkgconfig
+elif [[ -d /usr/share/pkgconfig ]]; then
+  sudo cp ./etc/lua.pc /usr/share/pkgconfig
+elif [[ -d /usr/local/lib/pkgconfig ]]; then
+  sudo cp ./etc/lua.pc /usr/local/lib/pkgconfig
+elif [[ -d /usr/local/share/pkgconfig ]]; then
+  sudo cp ./etc/lua.pc /usr/local/share/pkgconfig
+fi
+
 cd ../
 rm -rf lua-5.1.5 lua-5.1.5.tar.gz
 bash my_print.sh "COMPLETED: Installing lua from source"
