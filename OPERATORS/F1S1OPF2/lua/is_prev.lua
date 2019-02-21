@@ -39,9 +39,10 @@ local function is_prev(f1, cmp, optargs )
     if f1_len > 0 then  
       local cst_f1_chunk = ffi.cast(f1_cast_as, get_ptr(f1_chunk))
       local cst_f2_buf   = ffi.cast(f2_cast_as, get_ptr(f2_buf))
+      local casted_last_val = ffi.cast(qconsts.qtypes[subs.qtype].ctype .. "*", get_ptr(last_val))
       local start_time = qc.RDTSC()
       qc[func_name](cst_f1_chunk, f1_len, default_val, first_call,
-      cst_f2_buf, get_ptr(last_val))
+      cst_f2_buf, casted_last_val)
       record_time(start_time, func_name)
     end
     chunk_idx = chunk_idx + 1
