@@ -31,7 +31,6 @@ return function (a, args)
 
   -- calling mem_initializer
   -- TODO: remove below temporary hack
-  print(req_status, mem_initialize)
   local casted_struct
   if req_status then
     casted_struct = mem_initialize(subs)
