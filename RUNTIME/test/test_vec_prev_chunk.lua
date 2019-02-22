@@ -23,7 +23,7 @@ tests.t1 = function()
   print("num_iters = ", num_iters)
 
   for j = 1, num_iters do
-    local y = Vector.new('I4')
+    local y = Vector.new('I4', qconsts.Q_DATA_DIR)
     for i = 1, chunk_size do 
       local status = y:put1(s)
       assert(status)

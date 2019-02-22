@@ -42,6 +42,7 @@ extern int
 vec_new(
     VEC_REC_TYPE *ptr_vec,
     const char * const field_type,
+    const char *const q_data_dir,
     uint32_t chunk_size,
     bool is_memo,
     const char *const file_name,
@@ -155,7 +156,8 @@ vec_get_buf(
 extern int 
 vec_clone(
     VEC_REC_TYPE *ptr_old_vec,
-    VEC_REC_TYPE *ptr_new_vec
+    VEC_REC_TYPE *ptr_new_vec,
+    const char *const q_data_dir
     );
 extern int 
 vec_no_memcpy(

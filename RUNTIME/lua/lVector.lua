@@ -166,7 +166,9 @@ function lVector.new(arg)
   local has_nulls
   local is_nascent
   local is_memo = qconsts.is_memo -- referring value from qconsts, default to true
- 
+  local q_data_dir = qconsts.Q_DATA_DIR
+
+  assert(qc.isdir(q_data_dir), "Q_DATA_DIR not present")
   assert(type(arg) == "table", "Vector constructor requires table as arg")
 
   if ( arg.is_memo ~= nil ) then 
@@ -224,7 +226,7 @@ function lVector.new(arg)
   if ( arg.num_elements ) then  -- TODO P4: Move to Lua style
     num_elements = arg.num_elements
   end
-  vector._base_vec = Vector.new(qtype, file_name, is_memo, 
+  vector._base_vec = Vector.new(qtype, q_data_dir, file_name, is_memo, 
     num_elements)
   assert(vector._base_vec)
   -- added tonumber() because returned num_elements was of type cdata
@@ -233,7 +235,7 @@ function lVector.new(arg)
     if ( not is_nascent ) then 
       assert(num_elements > 0)
     end
-    vector._nn_vec = Vector.new("B1", nn_file_name, is_memo, num_elements)
+    vector._nn_vec = Vector.new("B1", q_data_dir, nn_file_name, is_memo, num_elements)
     assert(vector._nn_vec)
   end
   if ( ( arg.name ) and ( type(arg.name) == "string" ) )  then
@@ -502,6 +504,7 @@ function lVector:end_write()
     assert(status)
   end
   if ( qconsts.debug ) then self:check() end
+  return true
 end
 
 function lVector:put_chunk(base_addr, nn_addr, len)
@@ -547,17 +550,20 @@ function lVector:clone(optargs)
   assert(self._base_vec)
   -- Now we are supporting clone for non_eov vector as well, so commenting below condition
   -- assert(self:is_eov(), "can clone vector only if is EOV")
-  
+
+  local q_data_dir = qconsts.Q_DATA_DIR
+  assert(qc.isdir(q_data_dir), "Q_DATA_DIR not present")
+
   local vector = setmetatable({}, lVector)
   -- for meta data stored in vector
   vector._meta = {}
 
-  vector._base_vec = Vector.clone(self._base_vec)
+  vector._base_vec = Vector.clone(self._base_vec, q_data_dir)
   assert(vector._base_vec)
 
   -- Check for nulls
   if ( self:has_nulls() ) then
-    vector._nn_vec = Vector.clone(self._nn_vec)
+    vector._nn_vec = Vector.clone(self._nn_vec, q_data_dir)
     assert(vector._nn_vec) 
   end
 

@@ -21,8 +21,14 @@ BYE:
 }
 //----------------------------------------
 static int l_dnn_fstep( lua_State *L) {
+  int status = 0;
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
-  int status = dnn_fstep(ptr_dnn);cBYE(status);
+  CMEM_REC_TYPE *cptrs_in = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
+  CMEM_REC_TYPE *cptrs_out= (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  int num_instances = luaL_checknumber(L, 4);
+  status = dnn_fstep(ptr_dnn, 
+      (float **)cptrs_in->data, (float **)cptrs_out->data, num_instances);
+  cBYE(status);
   lua_pushboolean(L, true);
   return 1;
 BYE:

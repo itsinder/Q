@@ -20,7 +20,7 @@ tests.t1 = function()
   qc.generate_bin(10, "I4", infile, "linear")
 
   assert(plpath.isfile(infile), "Create the input files")
-  local y = Vector.new('I4', infile, false)
+  local y = Vector.new('I4', qconsts.Q_DATA_DIR, infile, false)
   assert(y:start_write())
   -- Second call to start_write should fail
   print("START: Deliberate error attempt")
