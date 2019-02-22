@@ -28,7 +28,7 @@ return function (a, args)
   assert(qc[func_name], "Function not found " .. func_name)
 
   -- calling mem_initializer
-  local casted_struct = mem_initialize(subs)
+  local c_mem, cst_as = mem_initialize(subs)
   local chunk_size = qconsts.chunk_size
   local width =  assert(qconsts.qtypes[out_qtype].width)
   local bufsz =  multiple_of_8(chunk_size * width)
@@ -58,6 +58,7 @@ return function (a, args)
       return 0
     else
       local casted_buff = ffi.cast( qconsts.qtypes[out_qtype].ctype .. "*",  get_ptr(buff))
+      local casted_struct = ffi.cast(cst_as, get_ptr(c_mem))
       local start_time = qc.RDTSC()
       qc[func_name](casted_buff, chunk_size, casted_struct, lb)
       record_time(start_time, func_name)

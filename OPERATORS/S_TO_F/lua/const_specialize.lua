@@ -3,8 +3,6 @@ local to_scalar = require 'Q/UTILS/lua/to_scalar'
 return function (
   args
   )
-  local qc      = require "Q/UTILS/lua/q_core"
-  local ffi     = require 'Q/UTILS/lua/q_ffi'
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local is_base_qtype = assert(require 'Q/UTILS/lua/is_base_qtype')
 
