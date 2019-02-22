@@ -3,6 +3,7 @@
 #include "q_globals.h"
 
 #include "init.h"
+#include "mmap.h"
 #include "auxil.h"
 #include "q_process_req.h"
 #include "extract_api_args.h"
@@ -35,8 +36,9 @@ generic_handler(
     )
 {
   int status = 0;
+  char *X = NULL; size_t nX = 0; char *alt_X = NULL;
   Q_REQ_TYPE req_type = Undefined;
-  // uint64_t t_start = RDTSC();
+  uint64_t t_start = RDTSC();
   struct event_base *base = (struct event_base *)arg;
   char api[Q_MAX_LEN_API_NAME+1]; 
   char args[Q_MAX_LEN_ARGS+1];
@@ -50,7 +52,7 @@ generic_handler(
       args, Q_MAX_LEN_ARGS);
   // START: NW Specific
   if ( strcmp(api, "api/v1/health_check") == 0 ) { 
-    strcpy(g_rslt, "{ \"HealthCheck\" : \"OK\" }"); goto BYE;
+    fprintf(stdout, "{ \"HealthCheck\" : \"OK\" }\n"); goto BYE;
   }
   // STOP:  NW Specific 
   req_type = get_req_type(api); 
@@ -68,30 +70,57 @@ generic_handler(
     event_base_loopbreak(base);
   }
 BYE:
-  /* not needed any more
   evhttp_add_header(evhttp_request_get_output_headers(req), 
-      "Content-Type", "application/json; charset=UTF-8");
-  */
+      "Content-Type", "text/plain; charset=UTF-8");
+  // START: Send back stdout or stderr
+  char out_file[Q_MAX_LEN_FILE_NAME+1];
+  char err_file[Q_MAX_LEN_FILE_NAME+1];
+  sprintf(out_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
+  sprintf(err_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
+  stdout = fopen(out_file, "w");
+  stderr = fopen(err_file, "w");
+  char *ret_file = NULL;
+  int code = 0;
+  char ret_type[8]; // TODO P4 improve name 
   if ( status < 0 ) { 
-    status = mk_json_output(api, args, g_err, g_rslt);
-    if ( status < 0 ) { WHEREAMI; }
-    evbuffer_add_printf(opbuf, "%s", g_rslt);
-    evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
+    ret_file = err_file;
+    code = HTTP_BADREQUEST;
+    strcpy(ret_type, "ERROR");
   }
-  else  {
-    evbuffer_add_printf(opbuf, "%s", g_rslt);
-    evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
+  else {
+    ret_file = out_file;
+    code = HTTP_OK;
+    strcpy(ret_type, "OK");
   }
+  status = rs_mmap(ret_file, &X, &nX, 0); 
+  
+  if ( ( status < 0 ) || ( X == NULL ) || ( nX == 0 ) ) {
+    evbuffer_add_printf(opbuf, "%s\n", "UNKNOWN");
+  }
+  else {
+    // TODO: P4 is this null termination needed?
+    alt_X = malloc(nX+1);
+    alt_X[nX] = '\0';
+    memcpy(alt_X, X, nX);
+    evbuffer_add_printf(opbuf, "%s\n", alt_X);
+    free_if_non_null(alt_X); 
+  }
+  evhttp_send_reply(req, code, ret_type, opbuf);
   evbuffer_free(opbuf);
+  if ( ( X != NULL ) && ( nX != 0 ) ) { munmap(X, nX); }
+  fclose(stdout);
+  fclose(stderr);
+  unlink(out_file);
+  unlink(err_file);
+  // STOP: Send back stdout or stderr
   //--- Log time seen by clients
   if ( ( req_type == DoString ) || ( req_type == DoFile ) ) {
-    /*
     uint64_t t_stop = RDTSC();
     if ( t_stop > t_start ) { 
       uint64_t t_delta = t_stop - t_start;
     }
-    */
   }
+  free_if_non_null(alt_X); 
   //--------------------
 }
 

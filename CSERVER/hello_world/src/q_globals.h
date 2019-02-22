@@ -7,10 +7,6 @@
 
 bool g_halt; // For multi-threading
 //-----------------------------------------------------------------
-char g_err[Q_ERR_MSG_LEN+1]; 
-char g_buf[Q_ERR_MSG_LEN+1]; 
-char g_rslt[Q_MAX_LEN_RESULT+1]; 
-
 
 char g_body[Q_MAX_LEN_BODY+1];
 int g_sz_body;

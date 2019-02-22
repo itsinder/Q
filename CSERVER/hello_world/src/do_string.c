@@ -6,7 +6,6 @@
 #include <lauxlib.h>
 
 extern lua_State *g_L_Q; 
-extern char g_err[Q_ERR_MSG_LEN+1]; 
 
 int
 do_string(

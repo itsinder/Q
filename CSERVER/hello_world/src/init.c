@@ -7,10 +7,6 @@
 extern lua_State *g_L_Q; 
 extern bool g_halt; 
 
-extern char g_err[Q_ERR_MSG_LEN+1]; 
-extern char g_buf[Q_ERR_MSG_LEN+1]; 
-extern char g_rslt[Q_MAX_LEN_RESULT+1]; 
-
 extern char g_valid_chars_in_url[256]; 
 
 extern char g_q_data_dir[Q_MAX_LEN_FILE_NAME+1]; 
@@ -33,9 +29,6 @@ zero_globals(
     )
 {
   g_halt = false;
-  memset(g_err, '\0', Q_ERR_MSG_LEN+1);
-  memset(g_buf, '\0', Q_ERR_MSG_LEN+1);
-  memset(g_rslt, '\0', Q_MAX_LEN_RESULT+1);
 
   memset(g_q_data_dir,  '\0', Q_MAX_LEN_FILE_NAME+1);
   memset(g_q_metadata_file, '\0', Q_MAX_LEN_FILE_NAME+1);

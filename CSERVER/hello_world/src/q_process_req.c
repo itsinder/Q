@@ -7,9 +7,6 @@
 #include "do_file.h"
 
 extern bool g_halt; 
-extern char g_err[Q_ERR_MSG_LEN+1]; 
-extern char g_buf[Q_ERR_MSG_LEN+1]; 
-extern char g_rslt[Q_MAX_LEN_RESULT+1]; 
 
 // START FUNC DECL
 int
@@ -22,10 +19,6 @@ q_process_req(
   // STOP FUNC DECL
 {
   int status = 0;
-  //-----------------------------------------
-  memset(g_rslt, '\0', Q_MAX_LEN_RESULT+1);
-  memset(g_err,  '\0', Q_ERR_MSG_LEN+1);
-  memset(g_buf,  '\0', Q_ERR_MSG_LEN+1);
   //-----------------------------------------
   switch ( req_type ) {
     case Undefined :
@@ -41,13 +34,13 @@ q_process_req(
       break;
       //--------------------------------------------------------
     case Halt : 
-      sprintf(g_rslt, "{ \"%s\" : \"OK\" }", api);
+      fprintf(stdout, "{ \"%s\" : \"OK\" }", api);
       g_halt = true;
       break;
       //--------------------------------------------------------
     case HealthCheck : 
     case Ignore :
-      sprintf(g_rslt, "{ \"%s\" : \"OK\" }", api);
+      fprintf(stdout, "{ \"%s\" : \"OK\" }", api);
       break;
       //--------------------------------------------------------
     default :

@@ -20,8 +20,7 @@
 
 #define mcr_chk_lua_rslt(status) { \
   if ( status != 0 ) {  \
-    fprintf(stderr, "Lua load : %s\n", lua_tostring(g_L_Q, -1)); \
-    sprintf(g_err, "{ \"error\": \"%s\"}",lua_tostring(g_L_Q, -1)); \
+    fprintf(stderr, "Lua error : %s\n", lua_tostring(g_L_Q, -1)); \
     lua_pop(g_L_Q, 1); go_BYE(-1); \
   } \
 }

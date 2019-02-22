@@ -1,6 +1,5 @@
 #include "q_incs.h"
 #include "auxil.h"
-extern char g_err[Q_ERR_MSG_LEN+1]; // For C: ab_process_req()
 #include "get_body.h"
 
 int 
@@ -21,7 +20,7 @@ get_body(
   if ( evbuffer_get_length(inbuf) > 0 ) {
     *ptr_sz_body = evbuffer_remove(inbuf, body, n_body);
     if ( *ptr_sz_body > n_body ) { 
-      sprintf(g_err, "Post body is larger than maximum allowed size");
+      fprintf(stderr, "Post body is larger than maximum allowed size");
       go_BYE(-1);
     }
   }
