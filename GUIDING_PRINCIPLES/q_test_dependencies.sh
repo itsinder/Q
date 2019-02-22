@@ -7,4 +7,6 @@ bash my_print.sh "STARTING: Installing Q-test dependencies using luarocks"
 sudo luarocks install penlight #pl lib has been used for Q unit test
 ## Reason: as we are not doing code coverage for now -Ramesh
 #sudo luarocks install luacov
+## TODO: need to add all dependencies in test mode to run sklearn's DT
+## like pip3, sklearn, pandas, numpy ...
 bash my_print.sh "COMPLETED: Installing Q-test dependencies using luarocks"
