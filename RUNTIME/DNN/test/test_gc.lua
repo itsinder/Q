@@ -24,11 +24,11 @@ end
 tests.t2 = function(n)
   local n = n or 100000000
   local Xin = {}; 
-    Xin[1] = Q.mk_col({1, 2, 3}, "F4"):eval()
-    Xin[2] = Q.mk_col({10, 20, 30}, "F4"):eval()
-    Xin[3] = Q.mk_col({100, 200, 300}, "F4"):eval()
+    Xin[1] = Q.mk_col({1, 2, 3, 4, 5, 6, 7}, "F4"):eval()
+    Xin[2] = Q.mk_col({10, 20, 30, 40, 50, 60, 70}, "F4"):eval()
+    Xin[3] = Q.mk_col({100, 200, 300, 400, 500, 600, 700}, "F4"):eval()
   local Xout = {}; 
-    Xout[1] = Q.mk_col({1000, 2000, 3000}, "F4"):eval()
+    Xout[1] = Q.mk_col({0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7}, "F4"):eval()
 
   local npl = {}
   npl[1] = 3
@@ -39,13 +39,14 @@ tests.t2 = function(n)
   for i = 1, n do 
     x:set_io(Xin, Xout)
     assert(x:check())
-    x:unset_io()
     assert(x:check())
     if ( ( i % 1000 ) == 0 )  then
       print("Iterations " .. i)
     end
+    x:fit()
+    x:unset_io()
+    x:delete()
   end
-  -- x:fit()
   print("Success on test t2")
 end
 return tests

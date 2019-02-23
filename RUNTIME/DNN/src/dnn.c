@@ -20,6 +20,25 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_dnn_set_io( lua_State *L) {
+  int status = 0;
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  int nl  = luaL_checknumber(L, 2); // num layers
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  if ( ptr_cmem == NULL ) { go_BYE(-1); }
+  int *npl = (int *)ptr_cmem->data;
+  if ( strcmp(ptr_cmem->field_type, "I4") != 0 ) { go_BYE(-1); }
+
+  int bsz = luaL_checknumber(L, 4);
+  status = dnn_set_io(ptr_dnn, nl, npl, bsz); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
 static int l_dnn_fstep( lua_State *L) {
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
@@ -102,6 +121,7 @@ static const struct luaL_Reg dnn_methods[] = {
     { "__gc",    l_dnn_free   },
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
+    { "set_io", l_dnn_set_io },
     { "fstep", l_dnn_fstep },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
@@ -114,6 +134,7 @@ static const struct luaL_Reg dnn_methods[] = {
 static const struct luaL_Reg dnn_functions[] = {
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
+    { "set_io", l_dnn_set_io },
     { "fstep", l_dnn_fstep },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },

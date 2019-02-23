@@ -1,6 +1,33 @@
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "core_dnn.h"
+static void
+free_z_a(
+    int nl, 
+    int *npl, 
+    int bsz, 
+    float ****ptr_z)
+{
+  float ***z = *ptr_z;
+
+  *ptr_z = NULL;
+}
+//----------------------------------------------------
+
+static int
+malloc_z_a(
+    int nl, 
+    int *npl, 
+    int bsz, 
+    float ****ptr_z)
+{
+  int status = 0;
+  float ***z = *ptr_z = NULL;
+
+  *ptr_z = z;
+BYE:
+  return status;
+}
 
 //----------------------------------------------------
 int
@@ -104,6 +131,27 @@ dnn_free(
   // fprintf(stderr, "garbage collection done\n");
 
 BYE:
+  return status;
+}
+//----------------------------------------------------
+int dnn_set_io(
+    DNN_REC_TYPE *ptr_dnn, 
+    int nl, 
+    int *npl, 
+    int bsz
+    )
+{
+  int status = 0;
+  float ***z = NULL;
+  float ***a = NULL;
+  status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
+  status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
+
+BYE:
+  if ( status < 0 ) { 
+    free_z_a(nl, npl, bsz, &z); 
+    free_z_a(nl, npl, bsz, &a); 
+  }
   return status;
 }
 //----------------------------------------------------

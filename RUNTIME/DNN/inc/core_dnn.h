@@ -27,3 +27,9 @@ dnn_new(
     int nl,
     int *npl
     );
+extern int dnn_set_io(
+    DNN_REC_TYPE *ptr_dnn, 
+    int nl, 
+    int *npl, 
+    int bsz
+    );
