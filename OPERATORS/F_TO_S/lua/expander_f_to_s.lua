@@ -8,8 +8,9 @@ local record_time = require 'Q/UTILS/lua/record_time'
 
 return function (a, x, y, optargs )
   local sp_fn_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_specialize"
-  local spfn = assert(require(sp_fn_name),
-  "Specializer missing " .. sp_fn_name)
+  local mem_init_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_mem_initialize"
+  local spfn = assert(require(sp_fn_name), "Specializer missing " .. sp_fn_name)
+  local mem_initialize = assert(require(mem_init_name), "mem_initializer not found")
   assert(type(x) == "lVector", "input should be a lVector")
   assert(x:has_nulls() == false, "Not set up for null values as yet")
   local x_qtype = assert(x:fldtype())
@@ -23,10 +24,12 @@ return function (a, x, y, optargs )
     qc.q_add(subs, tmpl, func_name)
   end
   -- STOP: Dynamic compilation
-
   assert(qc[func_name], "Function does not exist " .. func_name)
-  local reduce_struct = assert(subs.c_mem)
-  local getter = assert(subs.getter)
+
+  -- calling mem_initializer
+  local reduce_struct, cst_as, getter = mem_initialize(subs)
+  assert(reduce_struct)
+  assert(getter)
   assert(type(getter) == "function")
   --==================
   local is_early_exit = false
@@ -40,12 +43,12 @@ return function (a, x, y, optargs )
     chunk_index = chunk_index + 1
     if x_len and ( x_len > 0 ) and ( is_early_exit == false ) then
       local casted_x_chunk = ffi.cast( qconsts.qtypes[x:fldtype()].ctype .. "*",  get_ptr(x_chunk))
-      local casted_struct = ffi.cast(subs.c_mem_type, get_ptr(reduce_struct))
+      local casted_struct = ffi.cast(cst_as, get_ptr(reduce_struct))
       local start_time = qc.RDTSC()
       qc[func_name](casted_x_chunk, x_len, casted_struct, idx)
       record_time(start_time, func_name)
       if ( a == "is_next" ) then
-        local X = ffi.cast(subs.c_mem_type, reduce_struct)
+        local X = ffi.cast(cst_as, reduce_struct)
         if ( tonumber(X[0].is_violation) == 1 ) then 
           is_early_exit = true 
         end
