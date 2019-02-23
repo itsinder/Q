@@ -142,4 +142,8 @@ function ldnn:unset_io()
   self._lptrs_out = nil
 end
 
+function ldnn:delete()
+  ldnn:unset_io()
+end
+
 return ldnn
