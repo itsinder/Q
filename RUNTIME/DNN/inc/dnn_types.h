@@ -19,8 +19,8 @@ typedef struct _dnn_rec_type {
    * b[0] = NULL
    * b[i] = [num_layers][neurons_in_layer[i]]
    * */
-/* Do not allocate or de-allocate in/out. These are external */
 /*[2]*/  int bsz; // batch size
+/* Do not allocate or de-allocate in/out. These are external */
 /*[2]*/  float **in; // Input data, [neurons_in_layer[0]][num_instances]
 /*[2]*/  int num_instances; // 
 /*[2]*/  float **out; // Output data, [neurons_in_layer[nl-1]][num_instances]

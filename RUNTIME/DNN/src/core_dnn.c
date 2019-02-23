@@ -145,7 +145,7 @@ dnn_fpass(
       in  = a[l-1];
       out = z[l];
       if ( l == 1 ) { in = cptrs_in; }
-      if ( l == nl-1 ) { out = cptrs_out; }
+// WRONG      if ( l == nl-1 ) { out = cptrs_out; }
       status = fstep_a(in, W[l], b[l], 
           d[l-1], d[l], out, (ub-lb), npl[l-1], npl[l]);
       cBYE(status);
