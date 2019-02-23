@@ -1,16 +1,19 @@
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "core_dnn.h"
+#include "fstep_a.h"
 static void
 free_z_a(
     int nl, 
-    int *npl, 
-    int bsz, 
-    float ****ptr_z)
+    int *npl,
+    float ****ptr_z
+    )
 {
+  /*
   float ***z = *ptr_z;
 
   *ptr_z = NULL;
+*/
 }
 //----------------------------------------------------
 
@@ -23,7 +26,22 @@ malloc_z_a(
 {
   int status = 0;
   float ***z = *ptr_z = NULL;
+  z = malloc(nl * sizeof(float **));
+  return_if_malloc_failed(z);
+  memset(z, '\0', nl * sizeof(float **));
 
+  z[0] = NULL;
+  for ( int i = 1; i < nl; i++ ) { 
+    z[i] = malloc(npl[i] * sizeof(float *));
+    return_if_malloc_failed(z[i]);
+    memset(z[i], '\0', npl[i] * sizeof(float *));
+  }
+  for ( int i = 1; i < nl; i++ ) { 
+    for ( int j = 0; j < npl[i]; j++ ) { 
+      z[i][j] = malloc(bsz * sizeof(float));
+      return_if_malloc_failed(z[i][j]);
+    }
+  }
   *ptr_z = z;
 BYE:
   return status;
@@ -89,14 +107,51 @@ BYE:
 
 //----------------------------------------------------
 int
-dnn_fstep(
-    DNN_REC_TYPE *ptr_X,
+dnn_fpass(
+    DNN_REC_TYPE *ptr_dnn,
     float **cptrs_in, /* [npl[0]][nI] */
     float **cptrs_out, /* [npl[nl-1]][nI] */
     uint64_t nI // number of instances
     )
 {
   int status = 0;
+  int batch_size = ptr_dnn->bsz;
+  int nl = ptr_dnn->nl;
+  int num_batches = nI / batch_size;
+  int  *npl  = ptr_dnn->npl;
+  float ***W  = ptr_dnn->W;
+  float  **b  = ptr_dnn->b;
+  float   *d  = ptr_dnn->d;
+  float ***z = ptr_dnn->z;
+  float ***a = ptr_dnn->a;
+
+  if ( W   == NULL ) { go_BYE(-1); }
+  if ( b   == NULL ) { go_BYE(-1); }
+  if ( a   == NULL ) { go_BYE(-1); }
+  if ( d   == NULL ) { go_BYE(-1); }
+  if ( z   == NULL ) { go_BYE(-1); }
+  if ( npl == NULL ) { go_BYE(-1); }
+  if ( nl  <  3    ) { go_BYE(-1); }
+  if ( batch_size <= 0 ) { go_BYE(-1); }
+
+  if ( num_batches == 0 ) { num_batches = 1; }
+  for ( int i = 0; i < num_batches; i++ ) { 
+    int lb = i  * batch_size;
+    int ub = lb + batch_size;
+    if ( i == (num_batches-1) ) { ub = nI; }
+    float **in;
+    float **out;
+    for ( int l = 1; l < nl; l++ ) { 
+      in  = a[l-1];
+      out = z[l];
+      if ( l == 1 ) { in = cptrs_in; }
+      if ( l == nl-1 ) { out = cptrs_out; }
+      status = fstep_a(in, W[l], b[l], 
+          d[l-1], d[l], out, (ub-lb), npl[l-1], npl[l]);
+      cBYE(status);
+      /* TODO: do brop here */
+    }
+  }
 BYE:
   return status;
 }
@@ -134,23 +189,40 @@ BYE:
   return status;
 }
 //----------------------------------------------------
+int dnn_unset_io(
+    DNN_REC_TYPE *ptr_dnn
+    )
+{
+  int status = 0;
+  float ***z = ptr_dnn->z;
+  float ***a = ptr_dnn->a;
+  int nl = ptr_dnn->nl;
+  int *npl = ptr_dnn->npl;
+  free_z_a(nl, npl, &z); 
+  free_z_a(nl, npl, &a); 
+  return status;
+}
+//----------------------------------------------------
 int dnn_set_io(
     DNN_REC_TYPE *ptr_dnn, 
-    int nl, 
-    int *npl, 
     int bsz
     )
 {
   int status = 0;
   float ***z = NULL;
   float ***a = NULL;
+  int nl = ptr_dnn->nl;
+  int *npl = ptr_dnn->npl;
+  ptr_dnn->bsz = bsz;
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
 
+  ptr_dnn->z = z;
+  ptr_dnn->a = a;
 BYE:
   if ( status < 0 ) { 
-    free_z_a(nl, npl, bsz, &z); 
-    free_z_a(nl, npl, bsz, &a); 
+    free_z_a(nl, npl, &z); 
+    free_z_a(nl, npl, &a); 
   }
   return status;
 }
@@ -160,12 +232,14 @@ int
 dnn_new(
     DNN_REC_TYPE *ptr_X,
     int nl,
-    int *npl
+    int *npl,
+    float *dpl
     )
 {
   int status = 0;
   float ***W = NULL;
   float **b  = NULL;
+  float *d   = NULL;
   
   memset(ptr_X, '\0', sizeof(DNN_REC_TYPE));
   //--------------------------------------
@@ -186,14 +260,14 @@ dnn_new(
   W = malloc(nl * sizeof(float **));
   return_if_malloc_failed(W);
   W[0] = NULL;
-  for ( int lidx = 1; lidx < nl; lidx++ ) { 
-    int L_prev = npl[lidx-1];
-    int L_next = npl[lidx];
-    W[lidx] = malloc(L_prev * sizeof(float *));
-    return_if_malloc_failed(W[lidx]);
+  for ( int l = 1; l < nl; l++ ) { 
+    int L_prev = npl[l-1];
+    int L_next = npl[l];
+    W[l] = malloc(L_prev * sizeof(float *));
+    return_if_malloc_failed(W[l]);
     for ( int j = 0; j < L_prev; j++ ) { 
-      W[lidx][j] = malloc(L_next * sizeof(float *));
-      return_if_malloc_failed(W[lidx][j]);
+      W[l][j] = malloc(L_next * sizeof(float));
+      return_if_malloc_failed(W[l][j]);
     }
   }
   ptr_X->W  = W;
@@ -201,12 +275,21 @@ dnn_new(
   b = malloc(nl * sizeof(float *));
   return_if_malloc_failed(b);
   b[0] = NULL;
-  for ( int lidx = 1; lidx < nl; lidx++ ) { 
-    int L_next = npl[lidx];
-    b[lidx] = malloc(L_next * sizeof(float *));
-    return_if_malloc_failed(b[lidx]);
+  for ( int l = 1; l < nl; l++ ) { 
+    int L_next = npl[l];
+    b[l] = malloc(L_next * sizeof(float));
+    return_if_malloc_failed(b[l]);
   }
   ptr_X->b  = b;
+  //--------------------------------------
+  d = malloc(nl * sizeof(float));
+  return_if_malloc_failed(d);
+  for ( int l = 0; l < nl; l++ ) { 
+    d[l] = dpl[l];
+    if ( ( dpl[l] < 0 ) || ( dpl[l] >= 1 ) ) { go_BYE(-1); }
+  }
+  ptr_X->d  = d;
+  //--------------------------------------
 
 BYE:
   if ( status < 0 ) { WHEREAMI; /* need to handle this better */ }

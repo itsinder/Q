@@ -12,6 +12,8 @@ local get_dropout_per_layer =
   require 'Q/RUNTIME/DNN/lua/aux/get_dropout_per_layer'
 local get_ptrs_to_data = 
   require 'Q/RUNTIME/DNN/lua/aux/get_ptrs_to_data'
+local release_ptrs_to_data = 
+  require 'Q/RUNTIME/DNN/lua/aux/release_ptrs_to_data'
 local chk_data = require 'Q/RUNTIME/DNN/lua/aux/chk_data'
 local set_data = require 'Q/RUNTIME/DNN/lua/aux/set_data'
 --====================================
@@ -56,7 +58,7 @@ function ldnn.new(params)
   --=========== get dropout per layer; 0 means no drop out
   local dpl, c_dpl = get_dropout_per_layer(params, nl)
   --==========================================
-  dnn._dnn = assert(Dnn.new(nl, c_npl))
+  dnn._dnn = assert(Dnn.new(nl, c_npl, c_dpl))
   -- TODO: Should we maintain all the meta data on C side?
   dnn._npl    = npl   -- neurons per layer for Lua
   dnn._c_npl  = c_npl -- neurons per layer for C
@@ -86,8 +88,8 @@ function ldnn:fit(num_epochs)
     -- TODO Need to andomly permute data before each epoch 
     local cptrs_in  = get_ptrs_to_data(lptrs_in, lXin)
     local cptrs_out = get_ptrs_to_data(lptrs_out, lXout)
-    -- TODO Pass read only data to fstep and bprop
-    assert(Dnn.fstep(dnn, lptrs_in, lptrs_out, num_instances))
+    -- TODO Pass read only data to fpass and bprop
+    assert(Dnn.fpass(dnn, lptrs_in, lptrs_out, num_instances))
     assert(Dnn.bprop(dnn, lptrs_in, lptrs_out, num_instances))
     release_ptrs_to_data(lXin)
     release_ptrs_to_data(lXout)
@@ -102,11 +104,13 @@ function ldnn:check()
   return true
 end
 
-function ldnn:set_io(Xin, Xout)
+function ldnn:set_io(Xin, Xout, bsz)
   local ncols_in,  nrows_in  = chk_data(Xin)
   local ncols_out, nrows_out = chk_data(Xout)
   assert(nrows_in == nrows_out)
   assert(nrows_in > 0)
+
+  assert( ( bsz) and ( type(bsz) == "number")  and ( bsz >= 1 ) ) 
 
   local lXin, lptrs_in   = set_data(Xin, "in")
   local lXout, lptrs_out = set_data(Xout, "out")
@@ -116,9 +120,13 @@ function ldnn:set_io(Xin, Xout)
   assert(ncols_in  == npl[1] )
   assert(ncols_out == npl[nl])
   assert(ncols_out == 1) -- TODO: Assumption to be relaxed
+
+  local dnn  = self._dnn
+  assert(Dnn.set_io(dnn, bsz))
   --==========================================
   self._lXin  = lXin  -- copy of input data
   self._lXout = lXout -- copy of output data
+  self._bsz   = bsz
   self._num_instances = nrows_in
   self._lptrs_in  = lptrs_in   -- C pointers to input data
   self._lptrs_out = lptrs_out  -- C pointers to output data

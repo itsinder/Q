@@ -4,7 +4,6 @@ local get_ptr           = require 'Q/UTILS/lua/get_ptr'
 
 local function get_ptrs_to_data(lptrs, lX)
   assert(lptrs)
-  print(type(lX))
   assert(type(lX) == "table")
   local  cptrs = get_ptr(lptrs)
   cptrs = ffi.cast("float **", cptrs)

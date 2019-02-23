@@ -8,8 +8,10 @@ tests.t1 = function(n)
   -- this is a ridiculously large number of layers
 
   local npl = {}
+  local dpl = {}
   local nl = 64
   for i = 1, nl do npl[i] = nl - i + 1 end
+  for i = 1, nl do npl[i] = 1.0 / ( 1.0 + 1 + i) end
 
   for i = 1, n do 
     local x = ldnn.new({ npl = npl})
@@ -34,10 +36,14 @@ tests.t2 = function(n)
   npl[1] = 3
   npl[2] = 4
   npl[3] = 1
-  local x = ldnn.new({ npl = npl} )
+  local dpl = {}
+  dpl[1] = 0.1
+  dpl[2] = 0.2
+  dpl[3] = 0.3
+  local x = ldnn.new({ npl = npl, dpl = dpl} )
   assert(x:check())
   for i = 1, n do 
-    x:set_io(Xin, Xout)
+    x:set_io(Xin, Xout, 4)
     assert(x:check())
     assert(x:check())
     if ( ( i % 1000 ) == 0 )  then
