@@ -11,6 +11,7 @@ return function (a, x, y, optargs )
   local mem_init_name = "Q/OPERATORS/F_TO_S/lua/" .. a .. "_mem_initialize"
   local spfn = assert(require(sp_fn_name), "Specializer missing " .. sp_fn_name)
   local mem_initialize = assert(require(mem_init_name), "mem_initializer not found")
+
   assert(type(x) == "lVector", "input should be a lVector")
   assert(x:has_nulls() == false, "Not set up for null values as yet")
   local x_qtype = assert(x:fldtype())

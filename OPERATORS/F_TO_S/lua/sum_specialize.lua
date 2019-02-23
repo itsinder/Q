@@ -7,8 +7,9 @@ return function (qtype)
   subs.macro = "mcr_nop"
   if ( qtype == "B1" ) then
     subs.fn = "sum_B1"
-    subs.reduce_ctype = "uint64_t" 
-    subs.reduce_qtype = "I8" 
+    subs.reduce_ctype = "uint64_t"
+    subs.reduce_qtype = "I8"
+    subs.qtype = qtype
     tmpl = nil
   else
     assert(is_base_qtype(qtype), "qtype must be base type")
