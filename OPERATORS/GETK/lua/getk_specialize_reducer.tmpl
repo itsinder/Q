@@ -15,11 +15,13 @@ local function <<operator>>_specialize(val_fldtype, drag_fldtype)
   local d_ctype = qconsts.qtypes[d_qtype].ctype
   local d_width = qconsts.qtypes[d_qtype].width
 
+  local struct_type = "REDUCE_<<operator>>_" .. v_qtype .. "_" .. d_qtype .. "_ARGS"
   subs.v_qtype = v_qtype
   subs.v_ctype = v_ctype
   subs.v_width = v_width
   subs.reduce_v_ctype = v_ctype
   subs.reduce_v_qtype = v_qtype
+  subs.reducer_struct_type = struct_type
 
   subs.d_qtype = d_qtype
   subs.d_ctype = d_ctype
