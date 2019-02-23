@@ -66,6 +66,7 @@ typedef struct _cum_cnt_<<val_qtype>>_<<cnt_qtype>>_args {
   hdr = string.gsub(hdr,"<<cnt_ctype>>", cnt_ctype)
   pcall(ffi.cdef, hdr)
   --===============
+  --TODO: is it required to introduce mem_initialize?
   -- Set args 
   local args_ctype = "CUM_CNT_" .. val_qtype .. "_" .. cnt_qtype .. "_ARGS"
   local sz_args = ffi.sizeof(args_ctype)

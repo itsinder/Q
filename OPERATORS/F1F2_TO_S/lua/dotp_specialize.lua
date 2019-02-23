@@ -26,6 +26,7 @@ return function (
   subs.ctype = qconsts.qtypes[subs.qtype].ctype
   subs.args_type = "DOTP_" .. qtype .. "_ARGS *"
   -- Set c_mem 
+  --TODO: is it required to introduce mem_initialize?
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
   hdr = string.gsub(hdr,"<<ctype>>",  subs.ctype)
   pcall(ffi.cdef, hdr)
