@@ -730,6 +730,7 @@ vec_new(
     // For nascent vector, file_name = q_data_dir + randomly generated file name
     // copying q_data_dir to file_name field, will append the randomly generated file_name later
     strncpy(ptr_vec->file_name, q_data_dir, Q_MAX_LEN_DIR);
+    strcat(ptr_vec->file_name, "/");
   }
 
 BYE:
