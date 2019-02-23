@@ -16,13 +16,18 @@ PROG.PROG_SAVE = function()
   x = mk_col({10, 20, 30, 40}, 'I4')
   print(type(x))
   print(x:length())
-  save('tmp.save')
+  save('/tmp/tmp.save')
 end
 
 PROG.PROG_RESTORE = function()
-  dofile(os.getenv('Q_METADATA_DIR') .. '/tmp.save')
+  local qconsts = require 'Q/UTILS/lua/q_consts'
+  local restore = require 'Q/UTILS/lua/restore'
+  local status, ret = pcall(restore, "/tmp/tmp.save")
+  assert(status, ret)
   print(type(x))
   print(x:length())
+  assert(type(x) == "lVector")
+  assert(x:length() == 4)
   print_csv = require 'Q/OPERATORS/PRINT/lua/print_csv'
   print_csv(x)
 end

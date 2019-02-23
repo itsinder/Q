@@ -13,9 +13,10 @@ tests.t1 = function()
   -- put happens and zero again after Vector is deleted
   local mem = 0
   local qtype = 'I4'
-  local y = Vector.new(qtype)
+  local y = Vector.new(qtype, qconsts.Q_DATA_DIR)
   local s = Scalar.new(123, qtype)
   mem = Vector.print_mem()
+  print(mem)
   assert(mem == 0)
   local status = y:put1(s)
   mem = Vector.print_mem()

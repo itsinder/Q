@@ -20,7 +20,7 @@ tests.t1 = function()
     local ctype = assert(qconsts.qtypes[qtype].ctype)
     for i=1, iter do
       print("QType/Iteration: ", qtype, i)
-      local y = Vector.new(qtype)
+      local y = Vector.new(qtype, qconsts.Q_DATA_DIR)
       --==== Set some initial values 
       for j = 1, num_elements do
         local s = assert(Scalar.new(j*10, qtype))

@@ -5,6 +5,7 @@ local Q = require 'Q'
 local ffi = require 'Q/UTILS/lua/q_ffi'
 local plpath = require 'pl.path'
 local c_to_txt = require 'Q/UTILS/lua/C_to_txt'
+local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local tests = {}
 tests.t1 = function()
@@ -54,7 +55,7 @@ tests.t1 = function()
   --assert(ffi.cast("int *", val)[0] == 65535)
   assert(val == 65535)
   -- now lets remove all the files in the data folder
-  local data_dir = require("Q/q_export").Q_DATA_DIR 
+  local data_dir = qconsts.Q_DATA_DIR
   os.execute(string.format("find %s -type f -delete", data_dir))
 end
 

@@ -1,5 +1,6 @@
 -- FUNCTIONAL
 local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 require 'Q/UTILS/lua/strict'
 
 local plstring = require 'pl.stringx'
@@ -110,7 +111,7 @@ for i, v in ipairs(T) do
     if handle_function[v.category] then
       result = handle_function[v.category](i,status, ret, v)
       -- call to preamble
-      utils["testcase_results"](v, "Preprocess Boolean values", "Unit Test", result, "")
+      testcase_results(v, "Preprocess Boolean values", "Unit Test", result, "")
       assert(result,"Handle category failed")
     else
       increment_failed_load(i, v, "Handle function for "..v.category.." is not defined in handle_category.lua")

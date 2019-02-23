@@ -1,7 +1,7 @@
 -- FUNCTIONAL
 
 local Q = require 'Q'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 require 'Q/UTILS/lua/strict'
 local vector = require 'Q/RUNTIME/test/lua_test/vector'
 local testsuite_vector = require 'Q/RUNTIME/test/lua_test/testsuite_vector'
@@ -59,7 +59,7 @@ for k,test_num in pairs(tests_to_run) do
     if status then
       result, reason = test.check(res)
       -- preamble
-      utils["testcase_results"](test, testsuite_vector.test_for, testsuite_vector.test_type, result, "")
+      testcase_results(test, testsuite_vector.test_for, testsuite_vector.test_type, result, "")
       if reason ~= nil then
         assert(result,"test name:" .. test.name .. ":: Reason: " .. reason)
       end
@@ -67,7 +67,7 @@ for k,test_num in pairs(tests_to_run) do
       -- myassert (result, test_num, test.name)
     else      
       -- preamble
-      utils["testcase_results"](test, testsuite_vector.test_for, testsuite_vector.test_type, status, "")
+      testcase_results(test, testsuite_vector.test_for, testsuite_vector.test_type, status, "")
       if res ~= nil then
         assert(status,"test name:" .. test.name .. ":: Reason: " .. res)
       end

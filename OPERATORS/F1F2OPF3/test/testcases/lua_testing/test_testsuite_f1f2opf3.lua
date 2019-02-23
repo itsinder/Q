@@ -1,7 +1,7 @@
 -- FUNCTIONAL
 
 local Q = require 'Q'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 require 'Q/UTILS/lua/strict'
 local f1f2opf3 = require 'Q/OPERATORS/F1F2OPF3/test/testcases/lua_testing/f1f2opf3'
 local testsuite_f1f2opf3 = require 'Q/OPERATORS/F1F2OPF3/test/testcases/lua_testing/testsuite_f1f2opf3'
@@ -50,7 +50,7 @@ for k,test_num in pairs(tests_to_run) do
     if status then
       result, reason = test.check(res)
       -- preamble
-      utils["testcase_results"](test, testsuite_f1f2opf3.test_for, testsuite_f1f2opf3.test_type, result, "")
+      testcase_results(test, testsuite_f1f2opf3.test_for, testsuite_f1f2opf3.test_type, result, "")
       if reason ~= nil then
         assert(result,"test name: " .. test.name .. " :: Reason: " .. reason)
       end
@@ -58,7 +58,7 @@ for k,test_num in pairs(tests_to_run) do
       -- myassert (result, test_num, test.name)
     else      
       -- preamble
-      utils["testcase_results"](test, testsuite_f1f2opf3.test_for, testsuite_f1f2opf3.test_type, status, "")
+      testcase_results(test, testsuite_f1f2opf3.test_for, testsuite_f1f2opf3.test_type, status, "")
       if res ~= nil then
         assert(status,"test name: " .. test.name .. " :: Reason: " .. res)
       end

@@ -8,7 +8,7 @@ local plfile = require 'pl.file'
 local dir = require 'pl.dir'
 local fns = require 'Q/OPERATORS/LOAD_CSV/test/performance_testing/gen_csv_metadata_file'
 local load_csv = require 'Q/OPERATORS/LOAD_CSV/lua/load_csv'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/OPERATORS/LOAD_CSV/test/performance_testing"
@@ -65,7 +65,7 @@ for i, v in ipairs(T) do
     -- calling standard output function
     local result
     if type(ret) == "table" then result = true else result = false end
-    utils["testcase_results"](v, "Load_csv Performance Testing", "Performance Testing", result, "")
+    testcase_results(v, "Load_csv Performance Testing", "Performance Testing", result, "")
     
     -- delete respective csv file
     plfile.delete(csv_file_path) 
