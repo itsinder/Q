@@ -37,9 +37,9 @@ tests.t2 = function(n)
   npl[2] = 4
   npl[3] = 1
   local dpl = {}
-  dpl[1] = 0.1
-  dpl[2] = 0.2
-  dpl[3] = 0.3
+  dpl[1] = 0.8
+  dpl[2] = 0.5
+  dpl[3] = 0
   local x = ldnn.new({ npl = npl, dpl = dpl} )
   assert(x:check())
   for i = 1, n do 

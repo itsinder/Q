@@ -32,14 +32,16 @@ int fstep_a(
       out_k[i] = b_k;
     }
   }
-  for ( int j = 0; j < n_in; j++ ) { 
+  for ( int j = 0; j < n_in; j++ ) {  // for each neuron in input
+    if ( dropout[j] == true ) { continue; }
     float *in_j = in[j];
     float *W_j = W[j];
-// TODO #pragma omp parallel for 
-    for ( int k = 0; k < n_out; k++ ) {
+#pragma omp parallel for 
+    for ( int k = 0; k < n_out; k++ ) { // for each neuron in output
+      if ( dropout[k] == true ) { continue; }
       float w_jk = W_j[k];
       float *out_k = out[k];
-      for ( int i = 0; i < nI; i++ ) { 
+      for ( int i = 0; i < nI; i++ ) {  // for batch size 
         out_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working 
       }
     }

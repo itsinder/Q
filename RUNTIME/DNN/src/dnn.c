@@ -45,13 +45,13 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_dnn_fpass( lua_State *L) {
+static int l_dnn_train( lua_State *L) {
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   CMEM_REC_TYPE *cptrs_in = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
   CMEM_REC_TYPE *cptrs_out= (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
   int num_instances = luaL_checknumber(L, 4);
-  status = dnn_fpass(ptr_dnn, 
+  status = dnn_train(ptr_dnn, 
       (float **)cptrs_in->data, (float **)cptrs_out->data, num_instances);
   cBYE(status);
   lua_pushboolean(L, true);
@@ -136,7 +136,7 @@ static const struct luaL_Reg dnn_methods[] = {
     { "delete", l_dnn_delete },
     { "set_io", l_dnn_set_io },
     { "unset_io", l_dnn_unset_io },
-    { "fpass", l_dnn_fpass },
+    { "train", l_dnn_train },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
@@ -150,7 +150,7 @@ static const struct luaL_Reg dnn_functions[] = {
     { "delete", l_dnn_delete },
     { "set_io", l_dnn_set_io },
     { "unset_io", l_dnn_unset_io },
-    { "fpass", l_dnn_fpass },
+    { "train", l_dnn_train },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },

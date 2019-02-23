@@ -89,7 +89,7 @@ function ldnn:fit(num_epochs)
     local cptrs_in  = get_ptrs_to_data(lptrs_in, lXin)
     local cptrs_out = get_ptrs_to_data(lptrs_out, lXout)
     -- TODO Pass read only data to fpass and bprop
-    assert(Dnn.fpass(dnn, lptrs_in, lptrs_out, num_instances))
+    assert(Dnn.train(dnn, lptrs_in, lptrs_out, num_instances))
     -- WRONG: assert(Dnn.bprop(dnn, lptrs_in, lptrs_out, num_instances))
     release_ptrs_to_data(lXin)
     release_ptrs_to_data(lXout)

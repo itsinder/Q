@@ -7,7 +7,7 @@ dnn_delete(
     DNN_REC_TYPE *ptr_X
     );
 extern int
-dnn_fpass(
+dnn_train(
     DNN_REC_TYPE *ptr_X,
     float **cptrs_in, /* [npl[0]][nI] */
     float **cptrs_out, /* [npl[nl-1]][nI] */

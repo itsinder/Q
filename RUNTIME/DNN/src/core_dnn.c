@@ -107,7 +107,7 @@ BYE:
 
 //----------------------------------------------------
 int
-dnn_fpass(
+dnn_train(
     DNN_REC_TYPE *ptr_dnn,
     float **cptrs_in, /* [npl[0]][nI] */
     float **cptrs_out, /* [npl[nl-1]][nI] */
@@ -121,7 +121,8 @@ dnn_fpass(
   int  *npl  = ptr_dnn->npl;
   float ***W  = ptr_dnn->W;
   float  **b  = ptr_dnn->b;
-  float   *d  = ptr_dnn->d;
+  float  **d  = ptr_dnn->d;
+  float  *dpl  = ptr_dnn->dpl;
   float ***z = ptr_dnn->z;
   float ***a = ptr_dnn->a;
 
@@ -129,6 +130,7 @@ dnn_fpass(
   if ( b   == NULL ) { go_BYE(-1); }
   if ( a   == NULL ) { go_BYE(-1); }
   if ( d   == NULL ) { go_BYE(-1); }
+  if ( dpl == NULL ) { go_BYE(-1); }
   if ( z   == NULL ) { go_BYE(-1); }
   if ( npl == NULL ) { go_BYE(-1); }
   if ( nl  <  3    ) { go_BYE(-1); }
@@ -147,7 +149,7 @@ dnn_fpass(
       if ( l == 1 ) { in = cptrs_in; }
 // WRONG      if ( l == nl-1 ) { out = cptrs_out; }
       status = fstep_a(in, W[l], b[l], 
-          d[l-1], d[l], out, (ub-lb), npl[l-1], npl[l]);
+          dpl[l-1], dpl[l], out, (ub-lb), npl[l-1], npl[l]);
       cBYE(status);
       /* TODO: do brop here */
     }
@@ -239,7 +241,7 @@ dnn_new(
   int status = 0;
   float ***W = NULL;
   float **b  = NULL;
-  float *d   = NULL;
+  float **d  = NULL;
   
   memset(ptr_X, '\0', sizeof(DNN_REC_TYPE));
   //--------------------------------------
@@ -252,10 +254,21 @@ dnn_new(
   // TODO P1: Current implementation assumes last layer has 1 neuron
   if ( npl[nl-1] != 1 ) { go_BYE(-1); }
   //--------------------------------------
-  int *tmp = malloc(nl * sizeof(int));
-  return_if_malloc_failed(tmp);
-  memcpy(tmp, npl, nl * sizeof(int));
-  ptr_X->npl = tmp;
+  if ( dpl[0]    != 0 ) { go_BYE(-1); }
+  if ( dpl[nl-1] != 0 ) { go_BYE(-1); }
+  for ( int i = 1; i < nl-1; i++ ) { 
+    if ( ( dpl[i] < 0 ) || ( dpl[i] >= 1 ) ) { go_BYE(-1); }
+  }
+  //--------------------------------------
+  int *itmp = malloc(nl * sizeof(int));
+  return_if_malloc_failed(itmp);
+  memcpy(itmp, npl, nl * sizeof(int));
+  ptr_X->npl = itmp;
+  //--------------------------------------
+  float *ftmp = malloc(nl * sizeof(float));
+  return_if_malloc_failed(ftmp);
+  memcpy(ftmp, dpl, nl * sizeof(float));
+  ptr_X->dpl = ftmp;
   //--------------------------------------
   W = malloc(nl * sizeof(float **));
   return_if_malloc_failed(W);
@@ -282,11 +295,13 @@ dnn_new(
   }
   ptr_X->b  = b;
   //--------------------------------------
-  d = malloc(nl * sizeof(float));
+  d = malloc(nl * sizeof(float *));
   return_if_malloc_failed(d);
-  for ( int l = 0; l < nl; l++ ) { 
-    d[l] = dpl[l];
-    if ( ( dpl[l] < 0 ) || ( dpl[l] >= 1 ) ) { go_BYE(-1); }
+  d[0]    = NULL;
+  d[nl-1] = NULL;
+  for ( int l = 1; l < nl-1; l++ ) { 
+    d[l] = malloc(npl[l] * sizeof(float));
+    return_if_malloc_failed(d[l]);
   }
   ptr_X->d  = d;
   //--------------------------------------

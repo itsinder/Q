@@ -13,7 +13,12 @@ typedef struct _dnn_rec_type {
 /*[1]*/  ACT_FN_TYPE  *A; // activation_function[num_layers] 
 /*[1]*/  float ***W; // weights, 
 /*[1]*/  float **b; // bias, 
-/*[1]*/  float *d; // dropout probabilit [num_layers]
+/*[1]*/  float **d; // [num_layers][neurons_in_layer[i]]
+/*
+ * d[0]    == NULL: No dropout for input  layer
+ * d[nl-1] == NULL: No dropout for output layer
+ * */
+/*[1]*/  float *dpl; // dropout per layer [num_layers]
   /* W[0] = NULL
    * W[i] = [num_layers][neurons_in_layer[i-1]][neurons_in_layer[i]]
    * b[0] = NULL
