@@ -29,12 +29,16 @@ dnn.o : dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 fstep_a.o : fstep_a.c ../inc/dnn_types.h ../inc/fstep_a.h
 	gcc -c ${QC_FLAGS} $(INCS) fstep_a.c -o fstep_a.o
 
+act_fns.o : act_fns.c ../inc/dnn_types.h ../inc/act_fns.h
+	gcc -c ${QC_FLAGS} $(INCS) act_fns.c -o act_fns.o
+
 core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	gcc -c ${QC_FLAGS} $(INCS) core_dnn.c -o core_dnn.o
 
-libdnn.so: core_dnn.o dnn.o fstep_a.o
+libdnn.so: core_dnn.o dnn.o fstep_a.o act_fns.o
 	gcc ${QC_FLAGS} $(INCS) \
 	core_dnn.o \
 	dnn.o \
+	act_fns.o \
 	fstep_a.o \
 	-shared -o libdnn.so

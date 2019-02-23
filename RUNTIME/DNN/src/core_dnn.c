@@ -1,7 +1,57 @@
+#include <sys/time.h>
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "core_dnn.h"
 #include "fstep_a.h"
+
+static uint64_t 
+get_time_usec(
+    void
+    )
+{
+  struct timeval Tps; 
+  struct timezone Tpf;
+  gettimeofday (&Tps, &Tpf);
+  return ((uint64_t )Tps.tv_usec + 1000000* (uint64_t )Tps.tv_sec);
+}
+static uint64_t
+RDTSC(
+    void
+    )
+//STOP_FUNC_DECL  
+{
+#ifdef RASPBERRY_PI
+  return get_time_usec();
+#else
+  unsigned int lo, hi;
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64_t)hi << 32) | lo;
+#endif
+}
+static int 
+set_dropout(
+    uint8_t *d, /* [num neurons ] */
+    float dpl,  /* probability of dropout */
+    int n       /* num neurons */
+    )
+{
+  int status = 0;
+  if ( d == NULL ) { go_BYE(-1); }
+  if ( n <= 0    ) { go_BYE(-1); }
+  if ( dpl < 0 ) { go_BYE(-1); }
+  if ( dpl > 0 ) { 
+    memset(d, '\0', (sizeof(uint8_t) * n));
+    for ( int i = 0; i < n; i++ ) { 
+      double dtemp = drand48();
+      if ( dtemp > dpl ) { 
+        d[i] = 1;
+      }
+    }
+  }
+BYE:
+  return status;
+}
+
 static void
 free_z_a(
     int nl, 
@@ -40,6 +90,9 @@ malloc_z_a(
     for ( int j = 0; j < npl[i]; j++ ) { 
       z[i][j] = malloc(bsz * sizeof(float));
       return_if_malloc_failed(z[i][j]);
+      for ( int k = 0; k < bsz; k++ ) {  // TODO DELETE 
+        z[i][j][k] = i*1000 + j*10 + k; 
+      }
     }
   }
   *ptr_z = z;
@@ -117,14 +170,14 @@ dnn_train(
   int status = 0;
   int batch_size = ptr_dnn->bsz;
   int nl = ptr_dnn->nl;
-  int num_batches = nI / batch_size;
-  int  *npl  = ptr_dnn->npl;
-  float ***W  = ptr_dnn->W;
-  float  **b  = ptr_dnn->b;
-  float  **d  = ptr_dnn->d;
-  float  *dpl  = ptr_dnn->dpl;
-  float ***z = ptr_dnn->z;
-  float ***a = ptr_dnn->a;
+  int    *npl  = ptr_dnn->npl;
+  float  ***W  = ptr_dnn->W;
+  float   **b  = ptr_dnn->b;
+  uint8_t  **d = ptr_dnn->d;
+  float   *dpl = ptr_dnn->dpl;
+  float   ***z = ptr_dnn->z;
+  float   ***a = ptr_dnn->a;
+  __act_fn_t  *A = ptr_dnn->A;
 
   if ( W   == NULL ) { go_BYE(-1); }
   if ( b   == NULL ) { go_BYE(-1); }
@@ -136,20 +189,29 @@ dnn_train(
   if ( nl  <  3    ) { go_BYE(-1); }
   if ( batch_size <= 0 ) { go_BYE(-1); }
 
-  if ( num_batches == 0 ) { num_batches = 1; }
+  int num_batches = nI / batch_size;
+  if ( ( num_batches * batch_size ) != (int)nI ) {
+    num_batches++;
+  }
+  srand48(RDTSC());
   for ( int i = 0; i < num_batches; i++ ) { 
     int lb = i  * batch_size;
     int ub = lb + batch_size;
     if ( i == (num_batches-1) ) { ub = nI; }
     float **in;
-    float **out;
+    float **out_z;
+    float **out_a;
+    if ( ( ub - lb ) > batch_size ) { go_BYE(-1); }
     for ( int l = 1; l < nl; l++ ) { 
       in  = a[l-1];
-      out = z[l];
+      out_z = z[l];
+      out_a = a[l];
       if ( l == 1 ) { in = cptrs_in; }
 // WRONG      if ( l == nl-1 ) { out = cptrs_out; }
+      status = set_dropout(d[l-1], dpl[l-1], npl[l-1]); cBYE(status);
+      status = set_dropout(d[l],   dpl[l],   npl[l]); cBYE(status);
       status = fstep_a(in, W[l], b[l], 
-          dpl[l-1], dpl[l], out, (ub-lb), npl[l-1], npl[l]);
+          d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
       /* TODO: do brop here */
     }
@@ -168,23 +230,39 @@ dnn_free(
   if ( ptr_X == NULL ) { go_BYE(-1); }
   if ( ptr_X->nl < 3 ) { go_BYE(-1); }
   int nl = ptr_X->nl;
-  int *npl = ptr_X->npl;
-  float ***W = ptr_X->W;
-  float **b = ptr_X->b;
+  int *npl    = ptr_X->npl;
+  float  ***W = ptr_X->W;
+  float   **b = ptr_X->b;
+  uint8_t **d = ptr_X->d;
 
-  if ( W == NULL ) { go_BYE(-1); }
-  for ( int lidx = 1; lidx < nl; lidx++ ) { 
-    if ( W[lidx] == NULL ) { go_BYE(-1); }
-    int L_prev = npl[lidx-1];
-    for ( int j = 0; j < L_prev; j++ ) { 
-      free_if_non_null(W[lidx][j]);
+  //---------------------------------------
+  if ( W != NULL ) { 
+    for ( int lidx = 1; lidx < nl; lidx++ ) { 
+      int L_prev = npl[lidx-1];
+      for ( int j = 0; j < L_prev; j++ ) { 
+        free_if_non_null(W[lidx][j]);
+      }
+      free_if_non_null(W[lidx]);
     }
-    free_if_non_null(W[lidx]);
-    free_if_non_null(b[lidx]);
+    free_if_non_null(W);
   }
-  free_if_non_null(W);
-  free_if_non_null(b);
+  //---------------------------------------
+  if ( b != NULL ) { 
+    for ( int lidx = 1; lidx < nl; lidx++ ) { 
+      free_if_non_null(b[lidx]);
+    }
+    free_if_non_null(b);
+  }
+  //---------------------------------------
+  if ( d != NULL ) { 
+    for ( int lidx = 0; lidx < nl; lidx++ ) { 
+      free_if_non_null(d[lidx]);
+    }
+    free_if_non_null(d);
+  }
+  //---------------------------------------
   free_if_non_null(ptr_X->npl);
+  free_if_non_null(ptr_X->dpl);
   // fprintf(stderr, "garbage collection done\n");
 
 BYE:
@@ -235,13 +313,15 @@ dnn_new(
     DNN_REC_TYPE *ptr_X,
     int nl,
     int *npl,
-    float *dpl
+    float *dpl,
+    const char * const afns
     )
 {
   int status = 0;
-  float ***W = NULL;
-  float **b  = NULL;
-  float **d  = NULL;
+  float   ***W = NULL;
+  float   **b  = NULL;
+  uint8_t **d  = NULL;
+  __act_fn_t  *A = NULL;
   
   memset(ptr_X, '\0', sizeof(DNN_REC_TYPE));
   //--------------------------------------
@@ -254,11 +334,41 @@ dnn_new(
   // TODO P1: Current implementation assumes last layer has 1 neuron
   if ( npl[nl-1] != 1 ) { go_BYE(-1); }
   //--------------------------------------
-  if ( dpl[0]    != 0 ) { go_BYE(-1); }
+  // CAN HAVE DROPOUT IN INPUT LAYER  if ( dpl[0]    != 0 ) { go_BYE(-1); }
   if ( dpl[nl-1] != 0 ) { go_BYE(-1); }
   for ( int i = 1; i < nl-1; i++ ) { 
     if ( ( dpl[i] < 0 ) || ( dpl[i] >= 1 ) ) { go_BYE(-1); }
   }
+  //--------------------------------------
+  A = malloc(nl * sizeof(__act_fn_t));
+  memset(A, '\0',  (nl * sizeof(__act_fn_t)));
+  for ( int i = 0; i < nl; i++ ) { 
+    char *cptr;
+    if ( i == 0 ) {
+      cptr = strtok((char *)afns, ":");
+      if ( strcmp(cptr, "NONE") != 0 ) { go_BYE(-1); }
+      A[i] = identity;
+    }
+    else {
+      cptr = strtok(NULL, ":");
+      if ( strcmp(cptr, "sigmoid") == 0 ) {
+        A[i] = sigmoid;
+      }
+      else if ( strcmp(cptr, "relu") == 0 ) {
+        go_BYE(-1);
+      }
+      else if ( strcmp(cptr, "leaky_relu") == 0 ) {
+        go_BYE(-1);
+      }
+      else if ( strcmp(cptr, "tanh") == 0 ) {
+        go_BYE(-1);
+      }
+      else {
+        go_BYE(-1);
+      }
+    }
+  }
+  ptr_X->A  = A;
   //--------------------------------------
   int *itmp = malloc(nl * sizeof(int));
   return_if_malloc_failed(itmp);
@@ -283,6 +393,16 @@ dnn_new(
       return_if_malloc_failed(W[l][j]);
     }
   }
+  /* TODO: Undo bogus initialization */
+  for ( int l = 1; l < nl; l++ ) { 
+    int L_prev = npl[l-1];
+    int L_next = npl[l];
+    for ( int j = 0; j < L_prev; j++ ) { 
+      for ( int k = 0; k < L_next; k++ ) { 
+        W[l][j][k] = ((l+1)*1000) + ((j+1)*(k+1));
+      }
+    }
+  }
   ptr_X->W  = W;
   //--------------------------------------
   b = malloc(nl * sizeof(float *));
@@ -293,14 +413,18 @@ dnn_new(
     b[l] = malloc(L_next * sizeof(float));
     return_if_malloc_failed(b[l]);
   }
+  /* TODO: Undo bogus initialization */
+  for ( int l = 1; l < nl; l++ ) { 
+    for ( int j = 0; j < npl[l]; j++ ) { 
+      b[l][j] = ((l+1)*10) + (j+1);
+    }
+  }
   ptr_X->b  = b;
   //--------------------------------------
-  d = malloc(nl * sizeof(float *));
+  d = malloc(nl * sizeof(uint8_t *));
   return_if_malloc_failed(d);
-  d[0]    = NULL;
-  d[nl-1] = NULL;
-  for ( int l = 1; l < nl-1; l++ ) { 
-    d[l] = malloc(npl[l] * sizeof(float));
+  for ( int l = 0; l < nl; l++ ) { 
+    d[l] = malloc(npl[l] * sizeof(uint8_t));
     return_if_malloc_failed(d[l]);
   }
   ptr_X->d  = d;

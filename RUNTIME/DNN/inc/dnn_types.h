@@ -1,6 +1,8 @@
 #ifndef __DNN_TYPES_H
 #define __DNN_TYPES_H
 
+typedef float(* __act_fn_t )(float *, int, float *);
+
 typedef enum act_fn_type { 
   undef_act_fn, RELU, SIGMOID, SOFT_MAX, TANH, LEAKY_RELU
 } ACT_FN_TYPE;
@@ -10,14 +12,11 @@ typedef enum act_fn_type {
 typedef struct _dnn_rec_type {
 /*[1]*/  int nl; // num layers
 /*[1]*/  int *npl;  // neurons per layer  [num_layers]
-/*[1]*/  ACT_FN_TYPE  *A; // activation_function[num_layers] 
+/*[1]*/  __act_fn_t  *A; // activation_function[num_layers] 
 /*[1]*/  float ***W; // weights, 
 /*[1]*/  float **b; // bias, 
-/*[1]*/  float **d; // [num_layers][neurons_in_layer[i]]
-/*
- * d[0]    == NULL: No dropout for input  layer
- * d[nl-1] == NULL: No dropout for output layer
- * */
+/*[1]*/  uint8_t **d; // [num_layers][neurons_in_layer[i]]
+/* Note that we need a bit for d (in or out) burt we use 8 bits */
 /*[1]*/  float *dpl; // dropout per layer [num_layers]
   /* W[0] = NULL
    * W[i] = [num_layers][neurons_in_layer[i-1]][neurons_in_layer[i]]

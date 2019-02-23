@@ -10,6 +10,8 @@ local get_network_structure           =
   require 'Q/RUNTIME/DNN/lua/aux/get_network_structure'
 local get_dropout_per_layer = 
   require 'Q/RUNTIME/DNN/lua/aux/get_dropout_per_layer'
+local get_activation_functions = 
+  require 'Q/RUNTIME/DNN/lua/aux/get_activation_functions'
 local get_ptrs_to_data = 
   require 'Q/RUNTIME/DNN/lua/aux/get_ptrs_to_data'
 local release_ptrs_to_data = 
@@ -60,18 +62,14 @@ function ldnn.new(params)
   setmetatable(dnn, ldnn)
   --]]
   -- for meta data stored in dnn
-  assert(type(params) == "table", "dnn constructor requires table as arg")
-  --[[
-  assert( ( params.activation_function) and 
-          ( type(params.activation_function) == "table" ) and 
-          ( #(params.activation_function)  == nl) )
-  --]]
   -- Get structure of network, # of layers and # of neurons per layer
   local nl, npl, c_npl = get_network_structure(params)
   --=========== get dropout per layer; 0 means no drop out
   local dpl, c_dpl = get_dropout_per_layer(params, nl)
   --==========================================
-  dnn._dnn = assert(Dnn.new(nl, c_npl, c_dpl))
+  local afns = get_activation_functions(params, nl)
+  --==========================================
+  dnn._dnn = assert(Dnn.new(nl, c_npl, c_dpl, afns))
   -- TODO: Should we maintain all the meta data on C side?
   dnn._npl    = npl   -- neurons per layer for Lua
   dnn._c_npl  = c_npl -- neurons per layer for C

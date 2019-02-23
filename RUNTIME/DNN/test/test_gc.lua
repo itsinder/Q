@@ -37,10 +37,14 @@ tests.t2 = function(n)
   npl[2] = 4
   npl[3] = 1
   local dpl = {}
-  dpl[1] = 0.8
+  dpl[1] = 0.5
   dpl[2] = 0.5
   dpl[3] = 0
-  local x = ldnn.new({ npl = npl, dpl = dpl} )
+  local afns = {}
+  afns[1] = ""
+  afns[2] = "sigmoid"
+  afns[3] = "sigmoid"
+  local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
   for i = 1, n do 
     x:set_io(Xin, Xout, 4)
@@ -54,6 +58,19 @@ tests.t2 = function(n)
     x:delete()
   end
   print("Success on test t2")
+end
+tests.t3 =  function()
+  local Xin = {}
+  local Xout = {}; 
+  for i = 1, 1000000 do 
+    Xin[1] = Q.mk_col({1, 2, 3, 4, 5, 6, 7}, "F4"):eval()
+    Xin[2] = Q.mk_col({10, 20, 30, 40, 50, 60, 70}, "F4"):eval()
+    Xin[3] = Q.mk_col({100, 200, 300, 400, 500, 600, 700}, "F4"):eval()
+    Xout[1] = Q.mk_col({0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7}, "F4"):eval()
+    if ( ( i % 1000 ) == 0 )  then
+      print("Iterations " .. i)
+    end
+  end
 end
 return tests
 

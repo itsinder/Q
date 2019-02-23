@@ -26,7 +26,8 @@ dnn_new(
     DNN_REC_TYPE *ptr_X,
     int nl,
     int *npl,
-    float *dpl
+    float *dpl,
+    const char * const afns
     );
 extern int dnn_set_io(
     DNN_REC_TYPE *ptr_dnn,

@@ -114,13 +114,15 @@ static int l_dnn_new( lua_State *L)
   float *dpl = (float *)ptr_cmem->data;
   if ( strcmp(ptr_cmem->field_type, "F4") != 0 ) { go_BYE(-1); }
 
+  const char * const afns  = luaL_checkstring(L, 4); // activation fns
+
   ptr_dnn = (DNN_REC_TYPE *)lua_newuserdata(L, sizeof(DNN_REC_TYPE));
   return_if_malloc_failed(ptr_dnn);
   memset(ptr_dnn, '\0', sizeof(DNN_REC_TYPE));
   luaL_getmetatable(L, "Dnn"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = dnn_new(ptr_dnn, nl, npl, dpl);
+  status = dnn_new(ptr_dnn, nl, npl, dpl, afns);
   cBYE(status);
 
   return 1; 
