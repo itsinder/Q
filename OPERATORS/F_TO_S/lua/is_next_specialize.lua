@@ -30,6 +30,10 @@ return function(qtype, comparison, optargs)
     assert(nil, "invalid comparison" .. comparison)
   end
   subs.qtype = qtype
+  local rec_name = string.format("is_next_%s_%s_ARGS",
+    comparison, qtype)
+  if ( fast ) then rec_name = "par_" .. rec_name end
+  subs.rec_name = rec_name
   subs.fast = fast
   subs.comparison = comparison
   subs.ctype = qconsts.qtypes[qtype].ctype
