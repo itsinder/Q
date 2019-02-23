@@ -531,11 +531,12 @@ end
 function lVector:delete()
   -- This method free up all vector resources
   assert(self._base_vec)
+  local has_nulls = self:has_nulls()
   local status = Vector.delete(self._base_vec)
   assert(status)
 
   -- Check for nulls
-  if ( self:has_nulls() ) then
+  if ( has_nulls ) then
     status = Vector.delete(self._nn_vec)
     assert(status)
   end

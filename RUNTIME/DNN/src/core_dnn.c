@@ -12,7 +12,6 @@ dnn_check(
   if ( ptr_X == NULL ) { go_BYE(-1); }
   if ( ptr_X->nl < 3 ) { go_BYE(-1); }
   if ( ptr_X->npl == NULL ) { go_BYE(-1); }
-  if ( ptr_X->bsz < 1 ) { go_BYE(-1); }
   for ( int i = 0; i < ptr_X->nl; i++ ) { 
     if ( ptr_X->npl[i] < 1 ) { go_BYE(-1); 
     }
@@ -112,7 +111,6 @@ BYE:
 int
 dnn_new(
     DNN_REC_TYPE *ptr_X,
-    int bsz,
     int nl,
     int *npl
     )
@@ -123,16 +121,19 @@ dnn_new(
   
   memset(ptr_X, '\0', sizeof(DNN_REC_TYPE));
   //--------------------------------------
+  if ( nl < 3 ) { go_BYE(-1); }
+  ptr_X->nl  = nl;
+  //--------------------------------------
+  for ( int i = 1; i < nl; i++ ) { 
+    if ( npl[i] < 1 ) { go_BYE(-1); }
+  }
+  // TODO P1: Current implementation assumes last layer has 1 neuron
+  if ( npl[nl-1] != 1 ) { go_BYE(-1); }
+  //--------------------------------------
   int *tmp = malloc(nl * sizeof(int));
   return_if_malloc_failed(tmp);
   memcpy(tmp, npl, nl * sizeof(int));
   ptr_X->npl = tmp;
-  //--------------------------------------
-  if ( bsz < 1 ) { go_BYE(-1); }
-  ptr_X->bsz = bsz;
-  //--------------------------------------
-  if ( nl < 3 ) { go_BYE(-1); }
-  ptr_X->nl  = nl;
   //--------------------------------------
   W = malloc(nl * sizeof(float **));
   return_if_malloc_failed(W);

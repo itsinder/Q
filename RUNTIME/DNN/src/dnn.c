@@ -76,12 +76,9 @@ static int l_dnn_new( lua_State *L)
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = NULL;
 
-  int bsz = luaL_checknumber(L, 1); // batch size 
-  int nl  = luaL_checknumber(L, 2); // num layers
-  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  int nl  = luaL_checknumber(L, 1); // num layers
+  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
   if ( ptr_cmem == NULL ) { go_BYE(-1); }
-  if ( nl < 3 ) { go_BYE(-1); }
-  if ( bsz < 1 ) { go_BYE(-1); }
   int *npl = (int *)ptr_cmem->data;
   if ( strcmp(ptr_cmem->field_type, "I4") != 0 ) { go_BYE(-1); }
 
@@ -91,7 +88,7 @@ static int l_dnn_new( lua_State *L)
   luaL_getmetatable(L, "Dnn"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = dnn_new(ptr_dnn, bsz, nl, npl);
+  status = dnn_new(ptr_dnn, nl, npl);
   cBYE(status);
 
   return 1; 
