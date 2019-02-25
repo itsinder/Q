@@ -19,5 +19,22 @@ tests.t1 = function()
   print("Test t1 succeeded")
 end
 
+tests.t2 = function()
+  -- basic test 
+  local X = {}
+  local niter = 1048576
+  local buf
+  for i = 1, niter do 
+    buf = cmem.new(i, "I4", "string_" .. i)
+    assert(type(buf) == "CMEM")
+    if ( ( i % 65536 ) == 0 ) then 
+      print(i) 
+      y = cmem:print_mem(true)
+    end 
+    buf:delete()
+  end
+  print("Test t2 succeeded")
+end
+
   
 return tests

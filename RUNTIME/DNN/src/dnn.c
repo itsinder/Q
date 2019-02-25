@@ -20,13 +20,38 @@ BYE:
   return 2;
 }
 //----------------------------------------
-static int l_dnn_fstep( lua_State *L) {
+static int l_dnn_unset_io( lua_State *L) {
+  int status = 0;
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  status = dnn_unset_io(ptr_dnn); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
+static int l_dnn_set_io( lua_State *L) {
+  int status = 0;
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  int bsz = luaL_checknumber(L, 2);
+  status = dnn_set_io(ptr_dnn, bsz); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
+static int l_dnn_fpass( lua_State *L) {
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   CMEM_REC_TYPE *cptrs_in = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
   CMEM_REC_TYPE *cptrs_out= (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
   int num_instances = luaL_checknumber(L, 4);
-  status = dnn_fstep(ptr_dnn, 
+  status = dnn_fpass(ptr_dnn, 
       (float **)cptrs_in->data, (float **)cptrs_out->data, num_instances);
   cBYE(status);
   lua_pushboolean(L, true);
@@ -75,15 +100,19 @@ static int l_dnn_new( lua_State *L)
 {
   int status = 0;
   DNN_REC_TYPE *ptr_dnn = NULL;
+  CMEM_REC_TYPE *ptr_cmem = NULL;
 
-  int bsz = luaL_checknumber(L, 1); // batch size 
-  int nl  = luaL_checknumber(L, 2); // num layers
-  CMEM_REC_TYPE *ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  int nl  = luaL_checknumber(L, 1); // num layers
+
+  ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
   if ( ptr_cmem == NULL ) { go_BYE(-1); }
-  if ( nl < 3 ) { go_BYE(-1); }
-  if ( bsz < 1 ) { go_BYE(-1); }
   int *npl = (int *)ptr_cmem->data;
   if ( strcmp(ptr_cmem->field_type, "I4") != 0 ) { go_BYE(-1); }
+
+  ptr_cmem = (CMEM_REC_TYPE *)luaL_checkudata(L, 3, "CMEM");
+  if ( ptr_cmem == NULL ) { go_BYE(-1); }
+  float *dpl = (float *)ptr_cmem->data;
+  if ( strcmp(ptr_cmem->field_type, "F4") != 0 ) { go_BYE(-1); }
 
   ptr_dnn = (DNN_REC_TYPE *)lua_newuserdata(L, sizeof(DNN_REC_TYPE));
   return_if_malloc_failed(ptr_dnn);
@@ -91,7 +120,7 @@ static int l_dnn_new( lua_State *L)
   luaL_getmetatable(L, "Dnn"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  status = dnn_new(ptr_dnn, bsz, nl, npl);
+  status = dnn_new(ptr_dnn, nl, npl, dpl);
   cBYE(status);
 
   return 1; 
@@ -105,7 +134,9 @@ static const struct luaL_Reg dnn_methods[] = {
     { "__gc",    l_dnn_free   },
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
-    { "fstep", l_dnn_fstep },
+    { "set_io", l_dnn_set_io },
+    { "unset_io", l_dnn_unset_io },
+    { "fpass", l_dnn_fpass },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
@@ -117,7 +148,9 @@ static const struct luaL_Reg dnn_methods[] = {
 static const struct luaL_Reg dnn_functions[] = {
     { "check", l_dnn_check },
     { "delete", l_dnn_delete },
-    { "fstep", l_dnn_fstep },
+    { "set_io", l_dnn_set_io },
+    { "unset_io", l_dnn_unset_io },
+    { "fpass", l_dnn_fpass },
     { "bprop", l_dnn_bprop },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
