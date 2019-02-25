@@ -417,6 +417,15 @@ static int l_cmem_free( lua_State *L)
 {
   int status = 0;
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
+  if ( ptr_cmem->data == NULL ) { 
+    // explicit free will cause control to come here
+    if ( ( ptr_cmem->size != 0 ) ||
+         ( *(ptr_cmem->field_type) != '\0' ) || 
+         ( *(ptr_cmem->cell_name) != '\0' ) ) {
+        go_BYE(-1);
+    }
+    goto BYE;
+  } 
   if ( ptr_cmem->size <= 0 ) {
     // Control should never come here except as nelow
     if ( ( ptr_cmem->size == -1 ) && 
@@ -425,7 +434,6 @@ static int l_cmem_free( lua_State *L)
       /* okay */
     }
     else {
-      // printf("cmem strange %x \n", ptr_cmem);
       WHEREAMI; goto BYE; 
     }
   }
@@ -666,6 +674,7 @@ BYE:
 //----------------------------------------
 static const struct luaL_Reg cmem_methods[] = {
     { "__gc",          l_cmem_free               },
+    { "delete",          l_cmem_free               },
     { "set",          l_cmem_set               },
     { "seq",          l_cmem_seq               },
     { "zero",        l_cmem_zero },

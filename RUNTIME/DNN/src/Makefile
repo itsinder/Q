@@ -26,11 +26,15 @@ COBJS = $(CSRCS:.c=.o)
 dnn.o : dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	gcc -c ${QC_FLAGS} $(INCS) dnn.c -o dnn.o
 
+fstep_a.o : fstep_a.c ../inc/dnn_types.h ../inc/fstep_a.h
+	gcc -c ${QC_FLAGS} $(INCS) fstep_a.c -o fstep_a.o
+
 core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	gcc -c ${QC_FLAGS} $(INCS) core_dnn.c -o core_dnn.o
 
-libdnn.so: core_dnn.o dnn.o
+libdnn.so: core_dnn.o dnn.o fstep_a.o
 	gcc ${QC_FLAGS} $(INCS) \
 	core_dnn.o \
 	dnn.o \
+	fstep_a.o \
 	-shared -o libdnn.so

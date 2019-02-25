@@ -50,15 +50,18 @@ generic_handler(
   //--------------------------------------
   status = extract_api_args(uri, api, Q_MAX_LEN_API_NAME, 
       args, Q_MAX_LEN_ARGS);
-  // START: NW Specific
-  if ( strcmp(api, "api/v1/health_check") == 0 ) { 
-    fprintf(stdout, "{ \"HealthCheck\" : \"OK\" }\n"); goto BYE;
-  }
-  // STOP:  NW Specific 
   req_type = get_req_type(api); 
   if ( req_type == Undefined ) { go_BYE(-1); }
   status = get_body(req_type, req, g_body, Q_MAX_LEN_BODY, &g_sz_body); 
   cBYE(status);
+  // START: Send back stdout or stderr
+  char out_file[Q_MAX_LEN_FILE_NAME+1];
+  char err_file[Q_MAX_LEN_FILE_NAME+1];
+  sprintf(out_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
+  sprintf(err_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
+  FILE *stdout = fopen(out_file, "w");
+  FILE *stderr = fopen(err_file, "w");
+  // STOP: Send back stdout or stderr
   status = q_process_req(req_type, api, args, g_body); cBYE(status);
   //--------------------------------------
   if ( strcmp(api, "Halt") == 0 ) {
@@ -73,12 +76,6 @@ BYE:
   evhttp_add_header(evhttp_request_get_output_headers(req), 
       "Content-Type", "text/plain; charset=UTF-8");
   // START: Send back stdout or stderr
-  char out_file[Q_MAX_LEN_FILE_NAME+1];
-  char err_file[Q_MAX_LEN_FILE_NAME+1];
-  sprintf(out_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
-  sprintf(err_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
-  stdout = fopen(out_file, "w");
-  stderr = fopen(err_file, "w");
   char *ret_file = NULL;
   int code = 0;
   char ret_type[8]; // TODO P4 improve name 
@@ -95,7 +92,7 @@ BYE:
   status = rs_mmap(ret_file, &X, &nX, 0); 
   
   if ( ( status < 0 ) || ( X == NULL ) || ( nX == 0 ) ) {
-    evbuffer_add_printf(opbuf, "%s\n", "UNKNOWN");
+    evbuffer_add_printf(opbuf, "%s\n","");
   }
   else {
     // TODO: P4 is this null termination needed?
