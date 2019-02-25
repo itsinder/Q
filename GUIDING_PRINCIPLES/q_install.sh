@@ -43,6 +43,13 @@ case $ARG_MODE in
     ;;
 esac
 
+## Normal/basic mode: building Q with -O4 flag
+## for now, normal mode is when no argument is passed with q_install.sh
+## TODO: we can support with a parameter called "normal" ( bash q_install "normal")
+if [ $# -eq 0 ] ; then
+  export QC_FLAGS="$QC_FLAGS -O4"
+fi
+
 # installing apt get dependencies
 bash apt_get_dependencies.sh
 
@@ -55,7 +62,9 @@ else
   bash luajit_installation.sh
 fi
 
-# TODO: what's this for?
+# This modifies (increases dramatically) the number of files the particular user can have
+# open (concurrently). The user for whom we are increasing the limits is the current user.
+# The understanding is that Q will be run by this user.
 echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
 echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 

@@ -2,6 +2,7 @@ local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ; 
+local qconsts = require 'Q/UTILS/lua/q_consts'
 require 'Q/UTILS/lua/strict'
 
 -- for k, v in pairs(vec) do print(k, v) end 
@@ -11,7 +12,7 @@ tests.t1 = function()
   local num_trials = 1000000
   for i = 1, num_trials do 
     -- create a nascent vector many times
-    local y = Vector.new('I4')
+    local y = Vector.new('I4', qconsts.Q_DATA_DIR)
     assert(y:check())
     local num_elements = 100000
     for j = 1, num_elements do 

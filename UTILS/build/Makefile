@@ -13,11 +13,11 @@ dynamic: BUILD_TYPE="all_for_dc"
 
 static: q_core
 	cd ${Q_SRC_ROOT}
-	echo "Q is built statically"
+	echo "Q statically compiled"
 
 dynamic: q_core
 	cd ${Q_SRC_ROOT}
-	echo "Q is built dynamically"
+	echo "Q dynamically compiled"
 
 clean:
 	find ${Q_SRC_ROOT} -name "*.o" -o -name "_*" | xargs rm -rf

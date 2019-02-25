@@ -30,9 +30,10 @@ tests.t1 = function()
   qc["delete_file"](path_to_here .. "/dummy_pl_dir/")
   qc["delete_file"](path_to_here .. "/dummy_qc_dir/")
   
-  local pl_endswith = plstring.endswith("home/pragati/WORK/Q/", "/")
-  local qc_endswith = qc['endswith']("home/pragati/WORK/Q/", "/")
-  assert(pl_endswith == qc_endswith)
+  -- this function has been deprecated
+  --local pl_endswith = plstring.endswith("home/pragati/WORK/Q/", "/")
+  --local qc_endswith = qc['endswith']("home/pragati/WORK/Q/", "/")
+  --assert(pl_endswith == qc_endswith)
 end
 
 return tests
