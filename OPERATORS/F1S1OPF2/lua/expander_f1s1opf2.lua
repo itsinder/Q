@@ -36,7 +36,6 @@
     if not status then print(subs) end
     assert(status, "Specializer " .. sp_fn_name .. " failed")
     local func_name = assert(subs.fn)
-
     -- START: Dynamic compilation
     if ( not qc[func_name] ) then
       print("Dynamic compilation kicking in... ")

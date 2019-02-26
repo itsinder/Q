@@ -28,7 +28,7 @@ typedef struct _cum_cnt_<<val_qtype>>_<<cnt_qtype>>_args {
   assert(is_base_qtype(val_qtype))
 
   --preamble
-  local tmpl = 'cum_cnt.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/cum_cnt.tmpl"
   local subs = {}; 
   subs.val_qtype = val_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype

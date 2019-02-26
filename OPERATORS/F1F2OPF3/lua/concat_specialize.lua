@@ -52,7 +52,7 @@ return function (
       "specfiied outputtype not big enough")
       l_out_qtype = out_qtype
     end
-    local tmpl = 'f1f2opf3.tmpl'
+    local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1F2OPF3/lua/f1f2opf3.tmpl"
     local subs = {}
     -- This includes is just as a demo. Not really needed
     subs.includes = "#include <math.h>\n"

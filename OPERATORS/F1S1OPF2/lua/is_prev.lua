@@ -19,6 +19,12 @@ local function is_prev(f1, cmp, optargs )
   local default_val = assert(subs.default_val)
   assert(status, "Specializer " .. sp_fn_name .. " failed")
   local func_name = assert(subs.fn)
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
   assert(qc[func_name], "Missing symbol " .. func_name)
   local f2_qtype = "B1"
   local f2_buf    
