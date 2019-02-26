@@ -208,7 +208,14 @@ dnn_train(
       out_a = a[l];
       if ( l == 1 ) { in = cptrs_in; }
 // WRONG      if ( l == nl-1 ) { out = cptrs_out; }
-      status = set_dropout(d[l-1], dpl[l-1], npl[l-1]); cBYE(status);
+      /* the following if condition is important. To see why,
+       * A: when l=1, we set dropouts for layer 0, 1 
+       * B: when l=2, we set dropouts for layer 1, 2
+       * but B would over-write the dropouts we set in A
+       * this will cause errors */
+      if ( l == 1 ) { 
+        status = set_dropout(d[l-1], dpl[l-1], npl[l-1]); cBYE(status);
+      }
       status = set_dropout(d[l],   dpl[l],   npl[l]); cBYE(status);
       status = fstep_a(in, W[l], b[l], 
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);

@@ -21,7 +21,6 @@ local function get_activation_functions(params, nl)
     assert(n == nl)
   end
   afns = table.concat(afns, ":")
-  print("afns = ", afns)
   return afns
 end
 return get_activation_functions
