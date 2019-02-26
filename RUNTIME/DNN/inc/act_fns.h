@@ -18,4 +18,10 @@ relu(
     int n, 
     float *y
     );
+extern float 
+softmax(
+    float *x, 
+    int n, 
+    float *y
+    );
 #endif

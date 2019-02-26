@@ -11,7 +11,7 @@ tests.t1 = function(n)
   local dpl = {}
   local nl = 64
   for i = 1, nl do npl[i] = nl - i + 1 end
-  for i = 1, nl do npl[i] = 1.0 / ( 1.0 + 1 + i) end
+  for i = 1, nl do dpl[i] = 1.0 / ( 1.0 + 1 + i) end
 
   for i = 1, n do 
     local x = ldnn.new({ npl = npl})

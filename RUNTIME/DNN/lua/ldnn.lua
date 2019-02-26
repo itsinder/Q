@@ -77,11 +77,13 @@ function ldnn.new(params)
   dnn._c_dpl  = c_dpl -- dropout per layer for C
   dnn._nl     = nl    -- num layers
   dnn._num_epochs = 0
+  if ( qconsts.debug ) then dnn:check() end
   return dnn
 end
 
 
 function ldnn:fit(num_epochs)
+  if ( qconsts.debug ) then self:check() end
   if ( not num_epochs ) then 
      num_epochs = 1
   else 
@@ -106,6 +108,7 @@ function ldnn:fit(num_epochs)
     release_ptrs_to_data(lXout)
   end
   self._num_epochs = self._num_epochs + num_epochs
+  if ( qconsts.debug ) then self:check() end
   return true
 end
 
@@ -116,6 +119,7 @@ function ldnn:check()
 end
 
 function ldnn:set_io(Xin, Xout, bsz)
+  if ( qconsts.debug ) then self:check() end
   local ncols_in,  nrows_in  = chk_data(Xin)
   local ncols_out, nrows_out = chk_data(Xout)
   assert(nrows_in == nrows_out)
@@ -141,6 +145,7 @@ function ldnn:set_io(Xin, Xout, bsz)
   self._num_instances = nrows_in
   self._lptrs_in  = lptrs_in   -- C pointers to input data
   self._lptrs_out = lptrs_out  -- C pointers to output data
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
