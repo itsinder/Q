@@ -37,6 +37,7 @@ local function expander_where(a, b)
     print("Dynamic compilation kicking in... ")
     qc.q_add(subs, tmpl, func_name)
   end
+  -- STOP: Dynamic compilation
   assert(qc[func_name], "Symbol not defined " .. func_name)
   
   local out_buf = nil

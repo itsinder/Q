@@ -53,6 +53,7 @@ clean :
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
 	rm -f _*
+	rm -f *.so
 		
 vvadd_specialize.lua : arith_specialize.tmpl
 	lua gen_specializers.lua arith
