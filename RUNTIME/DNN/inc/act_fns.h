@@ -12,4 +12,10 @@ identity(
     int n, 
     float *y
     );
+extern float 
+relu(
+    float *x, 
+    int n, 
+    float *y
+    );
 #endif
