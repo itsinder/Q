@@ -24,6 +24,7 @@ return function (
 
       --==============================
       -- TODO: is it right place to malloc for count variable
+      --TODO: is it required to introduce mem_initialize?
       local count_size = ffi.sizeof("uint64_t")
       local count = assert(cmem.new(count_size))
       count = ffi.cast('uint64_t *' , get_ptr(count))

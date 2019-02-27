@@ -28,7 +28,7 @@ typedef struct _cum_cnt_<<val_qtype>>_<<cnt_qtype>>_args {
   assert(is_base_qtype(val_qtype))
 
   --preamble
-  local tmpl = 'cum_cnt.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/cum_cnt.tmpl"
   local subs = {}; 
   subs.val_qtype = val_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype
@@ -66,6 +66,7 @@ typedef struct _cum_cnt_<<val_qtype>>_<<cnt_qtype>>_args {
   hdr = string.gsub(hdr,"<<cnt_ctype>>", cnt_ctype)
   pcall(ffi.cdef, hdr)
   --===============
+  --TODO: is it required to introduce mem_initialize?
   -- Set args 
   local args_ctype = "CUM_CNT_" .. val_qtype .. "_" .. cnt_qtype .. "_ARGS"
   local sz_args = ffi.sizeof(args_ctype)

@@ -24,7 +24,7 @@ return function (
 
   local out_min_val = assert(qconsts.qtypes[out_qtype].min)
   local out_max_val = assert(qconsts.qtypes[out_qtype].max)
-  local tmpl = 'f1opf2.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/f1opf2.tmpl"
   local subs = {};
   local out_smaller_than_in = false
   if ( in_qtype == "F8" ) then
@@ -57,13 +57,13 @@ return function (
   if ( out_qtype == "B1" ) then subs.out_ctype = "uint64_t" end
   
   if out_qtype == "B1" then
-    tmpl = 'convert_to_B1.tmpl'
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/convert_to_B1.tmpl"
     subs.out_ctype = "uint64_t"
   elseif in_qtype == "B1" then 
-    tmpl = 'convert_from_B1.tmpl'
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/convert_from_B1.tmpl"
     subs.in_ctype = "uint64_t"
   elseif is_safe then
-    tmpl = 'safe_convert.tmpl'
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/safe_convert.tmpl"
     subs.fn = "safe_convert_" .. in_qtype .. "_" .. out_qtype
     subs.in_qtype = in_qtype
     subs.out_qtype = out_qtype
@@ -80,7 +80,7 @@ return function (
     end
     subs.is_safe = is_safe
   else
-    tmpl = 'convert.tmpl'
+    tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/convert.tmpl"
   end    
   return subs, tmpl
 end

@@ -7,6 +7,7 @@ return require 'Q/UTILS/lua/code_gen' {
 #include <stdint.h>
 #include <stdlib.h>
 
+// Below structure needs to be same as structure template in period_mem_initialize.lua
 typedef struct _period_${out_qtype}_rec_type {
    ${out_ctype} start;
    ${out_ctype} by;

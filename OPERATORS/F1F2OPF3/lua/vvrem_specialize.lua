@@ -16,7 +16,7 @@ return function (
     else
          out_qtype = f2type
     end
-    local tmpl = 'f1f2opf3.tmpl'
+    local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1F2OPF3/lua/f1f2opf3.tmpl"
     local subs = {}
     subs.fn = "vvrem_" .. f1type .. "_" .. f2type .. "_" .. out_qtype
     subs.in1_ctype = assert(qconsts.qtypes[f1type].ctype)
