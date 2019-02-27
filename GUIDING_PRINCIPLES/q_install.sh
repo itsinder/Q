@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e
 LUA_DEBUG=0
-LUA_DOC=0
-LUA_QLI=0
-LUA_TEST=0
+LUA_PROD=0
+LUA_DEV=0
 
 #---------- Main program starts ----------
 # first checking version of system packages required for Q
@@ -15,8 +14,10 @@ bash system_requirements.sh
 # failing cmd: lscpu | grep "Architecture" | grep "arm"
 source ../setup.sh -f || true
 
-# q_install.sh "dbg|doc|qli|test" modes
-# TODO: q_install.sh "all" mode which supports all modes
+## q_install.sh "prod|dev|dbg" modes
+## prod : Q production mode
+## dev  : Q developer mode
+## dbg  : Q debugger mode
 
 # checking mode for q_install.sh
 ARG_MODE=$1
@@ -24,31 +25,29 @@ case $ARG_MODE in
   help)
     echo "------------------------------"
     echo "Manual/Usage of q_install.sh:"
-    echo "bash q_install.sh dbg|doc|qli|test"
+    echo "bash q_install.sh prod|dev|dbg"
     echo "------------------------------"
     exit 0
+    ;;
+  prod)
+    export QC_FLAGS="$QC_FLAGS -O4"
+    ##LUA_PROD=1
+    ;;
+  dev)
+    export QC_FLAGS="$QC_FLAGS -O4"
+    LUA_DEV=1
     ;;
   dbg)
     export QC_FLAGS="$QC_FLAGS -g"
     LUA_DEBUG=1
     ;;
-  doc)
-    LUA_DOC=1
-    ;;
-  qli)
-    LUA_QLI=1
-    ;;
-  test)
-    LUA_TEST=1
-    ;;
 esac
 
-## Normal/basic mode: building Q with -O4 flag
-## for now, normal mode is when no argument is passed with q_install.sh
-## TODO: we can support with a parameter called "normal" ( bash q_install "normal")
-if [ $# -eq 0 ] ; then
-  export QC_FLAGS="$QC_FLAGS -O4"
-fi
+## Note: Production & Developer mode: building Q with -O4 flag
+# Removing this as -O4 is set in respective mode, now normal mode is the production mode
+##if [ $# -eq 0 ] ; then
+##  export QC_FLAGS="$QC_FLAGS -O4"
+##fi
 
 # installing apt get dependencies
 bash apt_get_dependencies.sh
@@ -96,18 +95,17 @@ bash q_required_packages.sh
 if [[ $LUA_DEBUG -eq 1 ]] ; then
   bash q_debug_dependencies.sh
 fi
-###if "doc" mode then
-if [[ $LUA_DOC -eq 1 ]] ; then
+
+###if "dev" mode then
+if [[ $LUA_DEV -eq 1 ]] ; then
+  #doc installation
   bash q_doc_dependencies.sh
-fi
-###if "qli" mode then
-if [[ $LUA_QLI -eq 1 ]] ; then
+  #qli installation
   bash q_qli_dependencies.sh
-fi
-###if "test" mode then
-if [[ $LUA_TEST -eq 1 ]] ; then
+  #test installation
   bash q_test_dependencies.sh
 fi
+
 
 # make
 bash build_q.sh
