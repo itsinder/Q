@@ -109,12 +109,29 @@ dnn_check(
 
   if ( ptr_X == NULL ) { go_BYE(-1); }
   int nl = ptr_X->nl;
-  int *npl = ptr_X->npl;
-  float *dpl = ptr_X->dpl;
-  float ***W = ptr_X->W;
-  float **b = ptr_X->b;
+  int    *npl = ptr_X->npl;
+  float  *dpl = ptr_X->dpl;
+  float  ***W = ptr_X->W;
+  float  **b = ptr_X->b;
+  float ***a = ptr_X->z;
+  float ***z = ptr_X->z;
   __act_fn_t *A = ptr_X->A;
   //-------------------------
+  if ( ( a == NULL ) && ( z != NULL ) ) { go_BYE(-1); }
+  if ( ( a != NULL ) && ( z == NULL ) ) { go_BYE(-1); }
+  if ( a != NULL ) { 
+    if ( a[0] != NULL ) { go_BYE(-1); }
+    if ( z[0] != NULL ) { go_BYE(-1); }
+    for ( int l = 1; l < nl; l++ ) { 
+      if ( a[l] == NULL ) { go_BYE(-1); }
+      if ( z[l] == NULL ) { go_BYE(-1); }
+      for ( int j = 0; j < npl[l]; j++ ) { 
+        if ( a[l][j] == NULL ) { go_BYE(-1); }
+        if ( z[l][j] == NULL ) { go_BYE(-1); }
+      }
+    }
+  }
+
   if ( nl < 3 ) { go_BYE(-1); }
   //-----------------------------------
   if ( npl == NULL ) { go_BYE(-1); }

@@ -60,10 +60,11 @@ tests.t2 = function(n)
   end
   print("Success on test t2")
 end
-tests.t3 =  function()
+tests.t3 =  function(n)
+  local n = n or 100000000
   local Xin = {}
   local Xout = {}; 
-  for i = 1, 1000000 do 
+  for i = 1, n do 
     Xin[1] = Q.mk_col({1, 2, 3, 4, 5, 6, 7}, "F4"):eval()
     Xin[2] = Q.mk_col({10, 20, 30, 40, 50, 60, 70}, "F4"):eval()
     Xin[3] = Q.mk_col({100, 200, 300, 400, 500, 600, 700}, "F4"):eval()
