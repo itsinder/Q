@@ -9,7 +9,7 @@ local function get_activation_functions(params, nl)
       afns[i] = "sigmoid"
     end
   else
-    afns = params.activation_function
+    afns = params.activation_functions
     assert( ( type(afns) == "table" ) and ( #(afns)  == nl) )
     local n = 0
     for k, v in ipairs(afns) do 

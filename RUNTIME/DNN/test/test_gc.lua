@@ -47,7 +47,8 @@ tests.t2 = function(n)
   local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
   for i = 1, n do 
-    x:set_io(Xin, Xout, 4)
+    x:set_io(Xin, Xout)
+    x:set_batch_size(i+1)
     assert(x:check())
     assert(x:check())
     if ( ( i % 1000 ) == 0 )  then

@@ -49,6 +49,7 @@ set_dropout(
       }
     }
   }
+  // TODO: Make sure at least one node is alive after dropout
 BYE:
   return status;
 }
@@ -195,7 +196,7 @@ dnn_train(
     num_batches++;
   }
   srand48(RDTSC());
-  for ( int i = 0; i < num_batches; i++ ) { 
+  for ( int i = 0; i < num_batches; i++ ) {
     int lb = i  * batch_size;
     int ub = lb + batch_size;
     if ( i == (num_batches-1) ) { ub = nI; }
@@ -204,11 +205,19 @@ dnn_train(
     float **in;
     float **out_z;
     float **out_a;
-    for ( int l = 1; l < nl; l++ ) { 
+    for ( int l = 1; l < nl; l++ ) { // Note that loop starts from 1, not 0
       in  = a[l-1];
       out_z = z[l];
       out_a = a[l];
-      if ( l == 1 ) { in = cptrs_in; }
+      if ( l == 1 ) { 
+        in = cptrs_in; 
+        /* Advance the pointers to get to the appropriate batch */
+        for ( int j = 0; j < npl[0]; j++ ) { 
+          in[j] += lb;
+        }
+        if ( a[l-1] != NULL ) { go_BYE(-1); }
+        if ( z[l-1] != NULL ) { go_BYE(-1); }
+      }
 // WRONG      if ( l == nl-1 ) { out = cptrs_out; }
       /* the following if condition is important. To see why,
        * A: when l=1, we set dropouts for layer 0, 1 
@@ -278,7 +287,7 @@ BYE:
   return status;
 }
 //----------------------------------------------------
-int dnn_unset_io(
+int dnn_unset_bsz(
     DNN_REC_TYPE *ptr_dnn
     )
 {
@@ -292,7 +301,7 @@ int dnn_unset_io(
   return status;
 }
 //----------------------------------------------------
-int dnn_set_io(
+int dnn_set_bsz(
     DNN_REC_TYPE *ptr_dnn, 
     int bsz
     )
@@ -401,16 +410,6 @@ dnn_new(
     for ( int j = 0; j < L_prev; j++ ) { 
       W[l][j] = malloc(L_next * sizeof(float));
       return_if_malloc_failed(W[l][j]);
-    }
-  }
-  /* TODO: Undo bogus initialization */
-  for ( int l = 1; l < nl; l++ ) { 
-    int L_prev = npl[l-1];
-    int L_next = npl[l];
-    for ( int j = 0; j < L_prev; j++ ) { 
-      for ( int k = 0; k < L_next; k++ ) { 
-        W[l][j][k] = ((l+1)*1000) + ((j+1)*(k+1));
-      }
     }
   }
   ptr_X->W  = W;

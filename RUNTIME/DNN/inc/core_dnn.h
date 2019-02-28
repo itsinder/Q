@@ -29,10 +29,10 @@ dnn_new(
     float *dpl,
     const char * const afns
     );
-extern int dnn_set_io(
+extern int dnn_set_bsz(
     DNN_REC_TYPE *ptr_dnn,
     int bsz
     );
-extern int dnn_unset_io(
+extern int dnn_unset_bsz(
     DNN_REC_TYPE *ptr_dnn
     );
