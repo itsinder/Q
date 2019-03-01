@@ -11,7 +11,7 @@ tests.t1 = function(n)
   local dpl = {}
   local nl = 64
   for i = 1, nl do npl[i] = nl - i + 1 end
-  for i = 1, nl do npl[i] = 1.0 / ( 1.0 + 1 + i) end
+  for i = 1, nl do dpl[i] = 1.0 / ( 1.0 + 1 + i) end
 
   for i = 1, n do 
     local x = ldnn.new({ npl = npl})
@@ -47,7 +47,8 @@ tests.t2 = function(n)
   local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
   for i = 1, n do 
-    x:set_io(Xin, Xout, 4)
+    x:set_io(Xin, Xout)
+    x:set_batch_size(i+1)
     assert(x:check())
     assert(x:check())
     if ( ( i % 1000 ) == 0 )  then
@@ -59,10 +60,11 @@ tests.t2 = function(n)
   end
   print("Success on test t2")
 end
-tests.t3 =  function()
+tests.t3 =  function(n)
+  local n = n or 100000000
   local Xin = {}
   local Xout = {}; 
-  for i = 1, 1000000 do 
+  for i = 1, n do 
     Xin[1] = Q.mk_col({1, 2, 3, 4, 5, 6, 7}, "F4"):eval()
     Xin[2] = Q.mk_col({10, 20, 30, 40, 50, 60, 70}, "F4"):eval()
     Xin[3] = Q.mk_col({100, 200, 300, 400, 500, 600, 700}, "F4"):eval()

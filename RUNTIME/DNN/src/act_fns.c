@@ -63,6 +63,7 @@ softmax(
   for ( int  i = 0; i < n; i++ ) { y[i] = exp(x[i]); }
   float sum = 0;
 #pragma omp simd reduction(+:sum)
+  for ( int  i = 0; i < n; i++ ) { 
     sum += y[i];
   }
 #pragma omp simd 

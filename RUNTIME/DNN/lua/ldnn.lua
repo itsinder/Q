@@ -77,11 +77,13 @@ function ldnn.new(params)
   dnn._c_dpl  = c_dpl -- dropout per layer for C
   dnn._nl     = nl    -- num layers
   dnn._num_epochs = 0
+  if ( qconsts.debug ) then dnn:check() end
   return dnn
 end
 
 
 function ldnn:fit(num_epochs)
+  if ( qconsts.debug ) then self:check() end
   if ( not num_epochs ) then 
      num_epochs = 1
   else 
@@ -94,6 +96,7 @@ function ldnn:fit(num_epochs)
   local lptrs_in  = self._lptrs_in
   local lptrs_out = self._lptrs_out
   local num_instances = self._num_instances
+  assert(self._bsz, "batch size not set")
 
   for i = 1, num_epochs do 
     -- TODO Need to randomly permute data before each epoch 
@@ -106,6 +109,7 @@ function ldnn:fit(num_epochs)
     release_ptrs_to_data(lXout)
   end
   self._num_epochs = self._num_epochs + num_epochs
+  if ( qconsts.debug ) then self:check() end
   return true
 end
 
@@ -115,13 +119,12 @@ function ldnn:check()
   return true
 end
 
-function ldnn:set_io(Xin, Xout, bsz)
+function ldnn:set_io(Xin, Xout)
+  if ( qconsts.debug ) then self:check() end
   local ncols_in,  nrows_in  = chk_data(Xin)
   local ncols_out, nrows_out = chk_data(Xout)
   assert(nrows_in == nrows_out)
   assert(nrows_in > 0)
-
-  assert( ( bsz) and ( type(bsz) == "number")  and ( bsz >= 1 ) ) 
 
   local lXin, lptrs_in   = set_data(Xin, "in")
   local lXout, lptrs_out = set_data(Xout, "out")
@@ -132,15 +135,13 @@ function ldnn:set_io(Xin, Xout, bsz)
   assert(ncols_out == npl[nl])
   assert(ncols_out == 1) -- TODO: Assumption to be relaxed
 
-  local dnn  = self._dnn
-  assert(Dnn.set_io(dnn, bsz))
   --==========================================
   self._lXin  = lXin  -- copy of input data
   self._lXout = lXout -- copy of output data
-  self._bsz   = bsz
   self._num_instances = nrows_in
   self._lptrs_in  = lptrs_in   -- C pointers to input data
   self._lptrs_out = lptrs_out  -- C pointers to output data
+  if ( qconsts.debug ) then self:check() end
   return self
 end
 
@@ -160,6 +161,29 @@ function ldnn:unset_io()
   self._lptrs_in  = nil
   self._lptrs_out = nil
 end
+
+function ldnn:set_batch_size(bsz)
+  if ( qconsts.debug ) then self:check() end
+  assert( ( bsz) and ( type(bsz) == "number")  and ( bsz >= 1 ) ) 
+
+  if ( self._bsz ) then 
+    assert(Dnn.unset_bsz(self._dnn))
+    self._bsz = nil
+  end 
+  assert(Dnn.set_bsz(self._dnn, bsz))
+  self._bsz   = bsz
+  if ( qconsts.debug ) then self:check() end
+  return self
+end
+
+function ldnn:unset_batch_size()
+  if ( qconsts.debug ) then self:check() end
+  assert(Dnn.unset_bsz(self._dnn))
+  self._bsz   = nil
+  if ( qconsts.debug ) then self:check() end
+  return self
+end
+
 
 function ldnn:delete()
   ldnn:unset_io()
