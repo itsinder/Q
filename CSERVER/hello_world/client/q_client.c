@@ -47,13 +47,10 @@ int main(
   host = argv[1];
   port = argv[2];
   int u_len = strlen(host) + strlen(port) + 32;
-  printf("%d\n", u_len);
   url = malloc(u_len);
   if ( url == NULL ) { go_BYE(-1); }
   int len = snprintf(url, u_len-1, "http://%s:%s/%s", host, port, "DoString");
   if ( len >= u_len-1 ) { go_BYE(-1); }
-  //char url[] = "http://localhost:8000/Dummy?ABC=123";
-  printf("%s\n", url);
   // Prepare CURL utility object
   CURL *ch = NULL;
   curl_global_init(CURL_GLOBAL_ALL);

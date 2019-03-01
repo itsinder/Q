@@ -58,8 +58,10 @@ init_lua(
 
   status = luaL_dostring(g_L_Q, "Q = require 'Q'; ");
   mcr_chk_lua_rslt(status);
-  status = luaL_dostring(g_L_Q, "Q.restore()");
-  mcr_chk_lua_rslt(status);
+  if ( ( g_q_metadata_file != NULL ) && ( strcmp(g_q_metadata_file, "" ) != 0 ) ) {
+    status = luaL_dostring(g_L_Q, "Q.restore()");
+    mcr_chk_lua_rslt(status);
+  }
 
 BYE:
   return status;
