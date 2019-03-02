@@ -2,11 +2,14 @@
 local Q = require 'Q'
 local Vector = require 'libvec'
 require 'Q/UTILS/lua/strict'
+local qc = require 'Q/UTILS/lua/q_core'
+local utils = require 'Q/UTILS/lua/utils'
 
 local tests = {}
 tests.t1 = function(
   num_iters
   )
+  local start_time = qc.RDTSC()
   local n = 16*1048576 -- number of rows
   local m = 1024 -- number of columns
   local modes = { "opt", "simple" }
@@ -34,6 +37,9 @@ tests.t1 = function(
     end
     print("=====================================")
   end
+  local stop_time = qc.RDTSC()
+  print("stress_test_perf_mv_mul time(seconds): ", utils["RDTSC"](stop_time-start_time))
+  print("Successfully completed stress test OPERATORS/MM/test/stress_test_perf_mv_mul.lua")
 end
 -- tests.t1()
 return tests

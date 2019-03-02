@@ -11,9 +11,11 @@ void halt_server(
     )
 {
   int status = luaL_dostring(g_L_Q, "Q.save()");
-  if ( status != 0 ) {  
-    fprintf(stderr, "Lua error : %s\n", lua_tostring(g_L_Q, -1)); 
-    lua_pop(g_L_Q, 1); 
+  if ( status != 0 ) {
+    //TODO: do we require to print this message?
+    fprintf(stderr, "Lua error : %s\n", lua_tostring(g_L_Q, -1));
+    lua_pop(g_L_Q, 1);
     WHEREAMI;
-  } 
+  }
+  exit(status);
 }

@@ -3,13 +3,16 @@ local Vector = require 'libvec' ;
 local Scalar = require 'libsclr' ; 
 local cmem = require 'libcmem' ;
 local qconsts = require 'Q/UTILS/lua/q_consts'
+local qc = require 'Q/UTILS/lua/q_core'
+local utils = require 'Q/UTILS/lua/utils'
 require 'Q/UTILS/lua/strict'
 
 -- for k, v in pairs(vec) do print(k, v) end 
 local tests = {} 
 -- 
 tests.t1 = function()
-  local num_trials = 1000000
+  local start_time = qc.RDTSC()
+  local num_trials = 100000
   for i = 1, num_trials do 
     -- create a nascent vector a bit at a time
     local y = Vector.new('B1', qconsts.Q_DATA_DIR)
@@ -26,7 +29,9 @@ tests.t1 = function()
     assert(y:check())
     print("Iter = ", i)
   end
-  print("Successfully completed test t1")
+  local stop_time = qc.RDTSC()
+  print("stress_test_bvec time(seconds): ", utils["RDTSC"](stop_time-start_time))
+  print("Successfully completed test RUNTIME/test/stress_test_bvec.lua")
 end
 
 return tests
