@@ -4,27 +4,6 @@
 #include "core_dnn.h"
 #include "fstep_a.h"
 
-static void
-set_W(
-    float ***W
-    )
-{
-  /*
-     W[1][0] = = 0.17511345;
-     W[1][1] = -0.4797196;
-     W[2][1] = -0.30251271;
-     , -0.32758364, -0.15845926,
-   = 0.17511345, -0.47971962, -0.30251271, -0.32758364, -0.15845926,
-         0.13971159, -0.25937964,  0.21091907,  0.04563044,  0.23632542],
-       [-0.10095298, -0.19570727,  0.34871516, -0.58248266,  0.12900959,
-         0.29941416,  0.1690164 , -0.06477899, -0.08915248,  0.00968901],
-       [-0.22156274,  0.21357835,  0.02842162, -0.19919548,  0.33684907,
-        -0.21418677,  0.44400973, -0.39859007, -0.13523984, -0.05911348],
-       [-0.72570658,  0.19094223, -0.05694645,  0.05892507,  0.04916247,
-        -0.04978276, -0.14645337,  0.20778173, -0.4079519 , -0.04742307]]), 
-        */
-}
-
 static uint64_t 
 get_time_usec(
     void
@@ -89,7 +68,33 @@ free_z_a(
 */
 }
 //----------------------------------------------------
+static int
+check_z_a(
+    int nl, 
+    int *npl, 
+    int bsz, 
+    float ***z,
+    float ***zprime
+    )
+{
+  int status = 0;
+  if ( z == zprime ) { go_BYE(-1); }
+  for ( int i = 1; i < nl; i++ ) { 
+    for ( int j = 0; j < npl[i]; j++ ) { 
+      for ( int k = 0; k < bsz; k++ )  {
+        // printf("%f:%f \n", z[i][j][k], zprime[i][j][k]);
+        if ( ( fabs(z[i][j][k] - zprime[i][j][k]) /  
+               fabs(z[i][j][k] + zprime[i][j][k]) ) > 0.0001 ) { 
+          printf("difference \n");
+        }
+      }
+    }
+  }
+BYE:
+  return status;
+}
 
+//----------------------------------------------------
 static int
 malloc_z_a(
     int nl, 
@@ -217,6 +222,8 @@ dnn_train(
   float   *dpl = ptr_dnn->dpl;
   float   ***z = ptr_dnn->z;
   float   ***a = ptr_dnn->a;
+  float   ***zprime = ptr_dnn->zprime;
+  float   ***aprime = ptr_dnn->aprime;
   __act_fn_t  *A = ptr_dnn->A;
 
   if ( W   == NULL ) { go_BYE(-1); }
@@ -256,7 +263,7 @@ dnn_train(
         if ( a[l-1] != NULL ) { go_BYE(-1); }
         if ( z[l-1] != NULL ) { go_BYE(-1); }
       }
-// WRONG      if ( l == nl-1 ) { out = cptrs_out; }
+      // WRONG      if ( l == nl-1 ) { out = cptrs_out; }
       /* the following if condition is important. To see why,
        * A: when l=1, we set dropouts for layer 0, 1 
        * B: when l=2, we set dropouts for layer 1, 2
@@ -269,10 +276,13 @@ dnn_train(
       status = fstep_a(in, W[l], b[l], 
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
-      /* Test z versus zprime */
-      /* Test a versus zprime */
       /* TODO: do brop here */
     }
+#ifdef TEST_VS_PYTHON
+    status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
+    status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
+    printf("SUCCESS\n"); exit(0);
+#endif
   }
 BYE:
   return status;
@@ -338,6 +348,11 @@ int dnn_unset_bsz(
   int *npl = ptr_dnn->npl;
   free_z_a(nl, npl, &z); 
   free_z_a(nl, npl, &a); 
+
+  z = ptr_dnn->zprime;
+  a = ptr_dnn->aprime;
+  free_z_a(nl, npl, &z); 
+  free_z_a(nl, npl, &a); 
   return status;
 }
 //----------------------------------------------------
@@ -361,8 +376,10 @@ int dnn_set_bsz(
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
   ptr_dnn->zprime = z;
   ptr_dnn->aprime = a;
-// #include "_test_z_a.c"
-  /* STOP: For testing */
+#ifdef TEST_VS_PYTHON
+ #include "../test/z_val.c" // FOR TESTING 
+ #include "../test/a_val.c" // FOR TESTING 
+#endif
 BYE:
   if ( status < 0 ) { 
     free_z_a(nl, npl, &z); 
@@ -456,13 +473,10 @@ dnn_new(
       return_if_malloc_failed(W[l][j]);
     }
   }
-  /* START: FOR BORIS TEST */
-  // set_W(W);
-#ifdef BORIS_TEST
-#include "_set_w.c"
-#endif
-  /* STOP: FOR BORIS TEST */
+#ifdef TEST_VS_PYTHON
+#include "../test/set_wt.c" // FOR TESTING 
   ptr_X->W  = W;
+#endif
   //--------------------------------------
   b = malloc(nl * sizeof(float *));
   return_if_malloc_failed(b);
@@ -472,13 +486,9 @@ dnn_new(
     b[l] = malloc(L_next * sizeof(float));
     return_if_malloc_failed(b[l]);
   }
-  /* START: BORIS TEST */
-  for ( int l = 1; l < nl; l++ ) { 
-    for ( int j = 0; j < npl[l]; j++ ) { 
-      b[l][j] = 0; 
-    }
-  }
-  /* STOP : BORIS TEST */
+#ifdef TEST_VS_PYTHON
+#include "../test/set_bias.c" // FOR TESTING 
+#endif
   ptr_X->b  = b;
   //--------------------------------------
   d = malloc(nl * sizeof(uint8_t *));

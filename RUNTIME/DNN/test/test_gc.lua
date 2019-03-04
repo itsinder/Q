@@ -76,8 +76,8 @@ tests.t3 =  function(n)
 end
 tests.t4 = function()
 
-local Xin  = require 'boris_in_1'
-local Xout = require 'boris_out_1'
+local Xin  = require 'X_train'
+local Xout = require 'y_train'
 
   local npl = {}
   npl[#npl+1] = 10
@@ -96,6 +96,9 @@ local Xout = require 'boris_out_1'
   afns[#afns+1] = "sigmoid"
   local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
+  x:set_io(Xin, Xout)
+  x:set_batch_size(3) -- TODO UNDO HARD CODE 
+  x:fit()
   print("Test t4 succeeded")
 
 end
