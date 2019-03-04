@@ -74,33 +74,5 @@ tests.t3 =  function(n)
     end
   end
 end
-tests.t4 = function()
-
-local Xin  = require 'X_train'
-local Xout = require 'y_train'
-
-  local npl = {}
-  npl[#npl+1] = 10
-  npl[#npl+1] = 4
-  npl[#npl+1] = 2
-  npl[#npl+1] = 1
-  local dpl = {}
-  dpl[#dpl+1] = 0
-  dpl[#dpl+1] = 0
-  dpl[#dpl+1] = 0
-  dpl[#dpl+1] = 0
-  local afns = {}
-  afns[#afns+1] = ""
-  afns[#afns+1] = "relu"
-  afns[#afns+1] = "relu"
-  afns[#afns+1] = "sigmoid"
-  local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
-  assert(x:check())
-  x:set_io(Xin, Xout)
-  x:set_batch_size(3) -- TODO UNDO HARD CODE 
-  x:fit()
-  print("Test t4 succeeded")
-
-end
 return tests
 
