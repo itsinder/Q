@@ -228,7 +228,9 @@ def foreword_propagate(x, params, activation, y_dim):
         a, cache = dense_activation_propagate(a_prev, wi, bi, activation='relu')
         print('layer:', i)
         print('z:', cache)
+        write_z_a(cache[1], i, "z_val.c", 'z')
         print('a:', a)
+        write_z_a(a, i, "a_val.c", 'a')
         print('-' * 40)
         caches.append(cache)
 
@@ -239,7 +241,9 @@ def foreword_propagate(x, params, activation, y_dim):
     y_hat, cache = dense_activation_propagate(a, wi, bi, activation=activation)
     print('output layer:')
     print('z:', cache)
+    write_z_a(cache[1], n_layers, "z_val.c", 'z')
     print('a:', y_hat)
+    write_z_a(y_hat, n_layers, "a_val.c", 'a')
     print('-' * 40)
     caches.append(cache)
     assert (y_hat.shape == (y_dim, x.shape[1]))
@@ -574,6 +578,17 @@ def write_bias(params, file_path):
                         for k, r in enumerate(q):
                             f.write("B[%s][%s] = %s;\n" % (str(layer_index), str(j), str(r)))
                     f.write("//==========================================\n")
+    except Exception as e:
+        print("Failed to write, Error %s" % str(e))
+
+
+def write_z_a(val, layer_index, file_path, val_type):
+    try:
+        with open(file_path, "a") as f:
+            for i, p in enumerate(val):
+                for j, q in enumerate(p):
+                    f.write("%s[%s][%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(i), str(j), str(q)))
+                f.write("//==========================================\n")
     except Exception as e:
         print("Failed to write, Error %s" % str(e))
 
