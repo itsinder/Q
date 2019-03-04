@@ -269,6 +269,8 @@ dnn_train(
       status = fstep_a(in, W[l], b[l], 
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
+      /* Test z versus zprime */
+      /* Test a versus zprime */
       /* TODO: do brop here */
     }
   }
