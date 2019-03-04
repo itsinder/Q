@@ -4,6 +4,27 @@
 #include "core_dnn.h"
 #include "fstep_a.h"
 
+static void
+set_W(
+    float ***W
+    )
+{
+  /*
+     W[1][0] = = 0.17511345;
+     W[1][1] = -0.4797196;
+     W[2][1] = -0.30251271;
+     , -0.32758364, -0.15845926,
+   = 0.17511345, -0.47971962, -0.30251271, -0.32758364, -0.15845926,
+         0.13971159, -0.25937964,  0.21091907,  0.04563044,  0.23632542],
+       [-0.10095298, -0.19570727,  0.34871516, -0.58248266,  0.12900959,
+         0.29941416,  0.1690164 , -0.06477899, -0.08915248,  0.00968901],
+       [-0.22156274,  0.21357835,  0.02842162, -0.19919548,  0.33684907,
+        -0.21418677,  0.44400973, -0.39859007, -0.13523984, -0.05911348],
+       [-0.72570658,  0.19094223, -0.05694645,  0.05892507,  0.04916247,
+        -0.04978276, -0.14645337,  0.20778173, -0.4079519 , -0.04742307]]), 
+        */
+}
+
 static uint64_t 
 get_time_usec(
     void
@@ -331,9 +352,15 @@ int dnn_set_bsz(
   ptr_dnn->bsz = bsz;
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
-
   ptr_dnn->z = z;
   ptr_dnn->a = a;
+  /* START: For testing */
+  status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
+  status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
+  ptr_dnn->zprime = z;
+  ptr_dnn->aprime = a;
+// #include "_test_z_a.c"
+  /* STOP: For testing */
 BYE:
   if ( status < 0 ) { 
     free_z_a(nl, npl, &z); 
@@ -399,13 +426,11 @@ dnn_new(
       }
       else if ( strcmp(cptr, "relu") == 0 ) {
         A[i] = relu;
-        go_BYE(-1);
       }
       else if ( strcmp(cptr, "leaky_relu") == 0 ) {
         go_BYE(-1);
       }
       else if ( strcmp(cptr, "tanh") == 0 ) {
-        A[i] = relu;
         go_BYE(-1);
       }
       else {
@@ -421,14 +446,20 @@ dnn_new(
   W[0] = NULL;
   for ( int l = 1; l < nl; l++ ) { 
     int L_prev = npl[l-1];
-    int L_next = npl[l];
+    int L_curr = npl[l];
     W[l] = malloc(L_prev * sizeof(float *));
     return_if_malloc_failed(W[l]);
     for ( int j = 0; j < L_prev; j++ ) { 
-      W[l][j] = malloc(L_next * sizeof(float));
+      W[l][j] = malloc(L_curr * sizeof(float));
       return_if_malloc_failed(W[l][j]);
     }
   }
+  /* START: FOR BORIS TEST */
+  // set_W(W);
+#ifdef BORIS_TEST
+#include "_set_w.c"
+#endif
+  /* STOP: FOR BORIS TEST */
   ptr_X->W  = W;
   //--------------------------------------
   b = malloc(nl * sizeof(float *));
@@ -439,12 +470,13 @@ dnn_new(
     b[l] = malloc(L_next * sizeof(float));
     return_if_malloc_failed(b[l]);
   }
-  /* TODO: Undo bogus initialization */
+  /* START: BORIS TEST */
   for ( int l = 1; l < nl; l++ ) { 
     for ( int j = 0; j < npl[l]; j++ ) { 
-      b[l][j] = ((l+1)*10) + (j+1);
+      b[l][j] = 0; 
     }
   }
+  /* STOP : BORIS TEST */
   ptr_X->b  = b;
   //--------------------------------------
   d = malloc(nl * sizeof(uint8_t *));

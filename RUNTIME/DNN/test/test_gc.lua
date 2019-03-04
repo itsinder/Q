@@ -74,5 +74,30 @@ tests.t3 =  function(n)
     end
   end
 end
+tests.t4 = function()
+
+local Xin  = require 'boris_in_1'
+local Xout = require 'boris_out_1'
+
+  local npl = {}
+  npl[#npl+1] = 10
+  npl[#npl+1] = 4
+  npl[#npl+1] = 2
+  npl[#npl+1] = 1
+  local dpl = {}
+  dpl[#dpl+1] = 0
+  dpl[#dpl+1] = 0
+  dpl[#dpl+1] = 0
+  dpl[#dpl+1] = 0
+  local afns = {}
+  afns[#afns+1] = ""
+  afns[#afns+1] = "relu"
+  afns[#afns+1] = "relu"
+  afns[#afns+1] = "sigmoid"
+  local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
+  assert(x:check())
+  print("Test t4 succeeded")
+
+end
 return tests
 

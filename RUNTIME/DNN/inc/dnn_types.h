@@ -38,6 +38,8 @@ typedef struct _dnn_rec_type {
    a[0] == NULL
    a[i] = [num_layers][neurons_per_layer[l]][bsz]
 */
+float ***zprime;  /* for testing */
+float ***aprime;  /* for testing */
 //------------------------------------------------------------
 } DNN_REC_TYPE;
 #endif // _DNN_TYPES_H
