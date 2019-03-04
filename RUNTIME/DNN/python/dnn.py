@@ -550,7 +550,7 @@ def write_wt(params, file_path):
                     layer_index = i[1]
                     for j, q in enumerate(p):
                         for k, r in enumerate(q):
-                            f.write("W[%s][%s][%s] = %s\n" % (str(layer_index), str(k), str(j), str(r)))
+                            f.write("W[%s][%s][%s] = %s;\n" % (str(layer_index), str(k), str(j), str(r)))
                     f.write("//==========================================\n")
     except Exception as e:
         print("Failed to write, Error %s" % str(e))
@@ -572,7 +572,7 @@ def write_bias(params, file_path):
                     layer_index = i[1]
                     for j, q in enumerate(p):
                         for k, r in enumerate(q):
-                            f.write("B[%s][%s] = %s\n" % (str(layer_index), str(j), str(r)))
+                            f.write("B[%s][%s] = %s;\n" % (str(layer_index), str(j), str(r)))
                     f.write("//==========================================\n")
     except Exception as e:
         print("Failed to write, Error %s" % str(e))
