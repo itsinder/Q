@@ -22,6 +22,7 @@ chk_path(
 {
   int status = 0;
 
+  if ( ( label == NULL ) || ( *label == '\0' ) )  { go_BYE(-1); }
   char *cptr = getenv(label);
   if ( ( cptr == NULL ) || ( *cptr == '\0' ) ) { go_BYE(-1); }
   if ( ( strlen(cptr) > nX ) ) { go_BYE(-1); }
@@ -53,6 +54,7 @@ chk_env_dir(
 {
   int status = 0;
 
+  if ( ( label == NULL ) || ( *label == '\0' ) )  { go_BYE(-1); }
   char *cptr = getenv(label);
   if ( cptr == NULL ) { go_BYE(-1); }
   if ( strlen(cptr) > nX ) { go_BYE(-1); }
