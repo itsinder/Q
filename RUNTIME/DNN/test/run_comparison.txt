@@ -1,4 +1,10 @@
-1) Run dnn.py
+0) Install Python 3.5.2 and virtual environment
+
+1) 
+cd ../src/
+source ../src/venv/bin/activate
+deactivate
+
 TODO: Krushnakant to add more details here
 2) This will produce the following 5 files
  _Xin.lua
