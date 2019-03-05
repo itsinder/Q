@@ -621,6 +621,18 @@ def test_dnn():
     activation = 'sigmoid'
     y_hat, caches = foreword_propagate(x, params, activation, layers_dims[-1])
     print(y_hat)
+    print('-----------------------------------------')
+    costs = []
+    alpha=0.0075
+    cost = comp_cost(y_hat, y, activation)
+    grads = back_propagate(y_hat, y, caches, activation)
+    print('-----------------------------------------')
+    for k, v in grads.items():
+      print(k, v)
+    print('-----------------------------------------')
+    params = update_parameters(params, grads, alpha)
+    print('Cost : %f' % cost)
+    costs.append(cost)
 
     '''
     x = array([[ 0.49671415, -0.1382643 ,  0.64768854],
