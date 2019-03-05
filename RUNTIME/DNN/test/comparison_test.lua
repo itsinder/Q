@@ -9,7 +9,7 @@ local Xin  = require '_Xinn'
 local Xout = require '_Xout'
 local npl  = require '_npl'
 local dpl  = require '_dpl'
-local relu = require '_relu'
+local afns = require '_afns'
 --[[
   local npl = {}
   npl[#npl+1] = 10

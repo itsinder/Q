@@ -1,15 +1,48 @@
-location: Q/RUNTIME/DNN/python/dnn.py
+Virtual environment steps
 
-Command to run:
-$ cd Q/RUNTIME/DNN/python 
-$ python dnn.py
+> Create virtual environment
+    # install virtualenv package
+        $ pip3 install virtualenv
+    # create a directory
+        $ mkdir ~/virtual_env
+        $ cd ~/virtual_env
+    # create virtualenv named dnn
+        $ virtualenv dnn
+    # activate the virtual env (always run below command from '~/virtual_env' directory)
+        $ source dnn/bin/activate
 
-Above command will generate 6 files in the same directory
-a_val.c --> values of A
-z_val.c --> values of Z
-set_bias.c --> bias values
-set_wt.c --> weight values
-X_train.lua --> Xin (input values)
-y_train.lua --> Xout (output values)
+> Install below packages in virtual environment
+    (dnn) $ pip install h5py
+    (dnn) $ pip install numpy
+    (dnn) $ pip install pandas
+    (dnn) $ pip install sklearn
+    (dnn) $ pip install image
 
-Please let me know if you face any issue.
+> Deactivate the virtualenv
+    (dnn) $ deactivate
+
+==================================
+
+Commands to run dnn.py
+
+> Run dnn.py
+    # start virtual environment (refer above guide)
+        $ source dnn/bin/activate
+    # run python command
+        (dnn) $ cd Q/RUNTIME/DNN/python
+        (dnn) $ python dnn.py
+
+> This will produce the following 5 lua files (in current directory)
+    _Xin.lua
+    _Xout.lua
+    _npl.lua
+    _dpl.lua
+    _afns.lua
+
+ and the following 4 C files (in current directory)
+    _set_W.c
+    _set_B.c
+    _set_Z.c
+    _set_A.c
+
+==================================

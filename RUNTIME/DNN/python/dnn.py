@@ -228,9 +228,9 @@ def foreword_propagate(x, params, activation, y_dim):
         a, cache = dense_activation_propagate(a_prev, wi, bi, activation='relu')
         print('layer:', i)
         print('z:', cache)
-        write_z_a(cache[1], i, "z_val.c", 'z')
+        write_z_a(cache[1], i, "_set_Z.c", 'z')
         print('a:', a)
-        write_z_a(a, i, "a_val.c", 'a')
+        write_z_a(a, i, "_set_A.c", 'a')
         print('-' * 40)
         caches.append(cache)
 
@@ -241,9 +241,9 @@ def foreword_propagate(x, params, activation, y_dim):
     y_hat, cache = dense_activation_propagate(a, wi, bi, activation=activation)
     print('output layer:')
     print('z:', cache)
-    write_z_a(cache[1], n_layers, "z_val.c", 'z')
+    write_z_a(cache[1], n_layers, "_set_Z.c", 'z')
     print('a:', y_hat)
-    write_z_a(y_hat, n_layers, "a_val.c", 'a')
+    write_z_a(y_hat, n_layers, "_set_A.c", 'a')
     print('-' * 40)
     caches.append(cache)
     assert (y_hat.shape == (y_dim, x.shape[1]))
@@ -537,46 +537,28 @@ def write_inputs(val, file_path):
         print("Failed to write, Error %s" % str(e))
 
 
-def write_wt(params, file_path):
+def write_w_b(params, file_path, val_type):
     n_layers = len(params) // 2  # number of layers
-    # Assumption: key representing the weight in params should be formed as below
+    # Assumption: key representing the weight/bias in params should be formed as below
     # wt_key = 'w' .. str(layer_index)
-    # e.g w1, w2, w3
-    # prepare wt keys
+    # bias_key = 'b' .. str(layer_index)
+    # e.g w1, w2, w3, b1, b2, b3
+    # prepare keys
     n_layers = len(params) // 2  # number of layers (input layer is not considered)
-    wt_keys = []
+    keys = []
     for i in range(n_layers):
-        wt_keys.append('w%s' % str(i+1))
+        keys.append('%s%s' % (val_type.lower(), str(i+1)))
     try:
         with open(file_path, "w") as f:
             for i, p in params.items():
-                if i in wt_keys:
+                if i in keys:
                     layer_index = i[1]
                     for j, q in enumerate(p):
                         for k, r in enumerate(q):
-                            f.write("W[%s][%s][%s] = %s;\n" % (str(layer_index), str(k), str(j), str(r)))
-                    f.write("//==========================================\n")
-    except Exception as e:
-        print("Failed to write, Error %s" % str(e))
-
-
-def write_bias(params, file_path):
-    n_layers = len(params) // 2  # number of layers
-    # Assumption: key representing the bias in params should be formed as below
-    # wt_key = 'b' .. str(layer_index)
-    # e.g b1, b2, b3
-    # prepare b keys
-    b_keys = []
-    for i in range(n_layers):
-        b_keys.append('b%s' % str(i+1))
-    try:
-        with open(file_path, "w") as f:
-            for i, p in params.items():
-                if i in b_keys:
-                    layer_index = i[1]
-                    for j, q in enumerate(p):
-                        for k, r in enumerate(q):
-                            f.write("B[%s][%s] = %s;\n" % (str(layer_index), str(j), str(r)))
+                            if val_type.lower() == 'w':
+                                f.write("%s[%s][%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(k), str(j), str(r)))
+                            elif val_type.lower() == 'b':
+                                f.write("%s[%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(j), str(r)))
                     f.write("//==========================================\n")
     except Exception as e:
         print("Failed to write, Error %s" % str(e))
@@ -587,14 +569,34 @@ def write_z_a(val, layer_index, file_path, val_type):
         with open(file_path, "a") as f:
             for i, p in enumerate(val):
                 for j, q in enumerate(p):
-                    f.write("%s[%s][%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(i), str(j), str(q)))
+                    f.write("%s[%s][%s][%s] = %s;\n" % (val_type.lower(), str(layer_index), str(i), str(j), str(q)))
                 f.write("//==========================================\n")
+    except Exception as e:
+        print("Failed to write, Error %s" % str(e))
+
+
+def write_dnn_configs(layer_dims, file_path, val_type):
+    val_type = val_type.lower()
+    try:
+        with open(file_path, "w") as f:
+            f.write('local Q = require \'Q\'\n')
+            f.write('local %s = {}\n' % val_type)
+            for i in layer_dims:
+                f.write("%s[#%s+1] = %s\n" % (val_type, val_type, str(i)))
+            f.write("return %s" % val_type)
     except Exception as e:
         print("Failed to write, Error %s" % str(e))
 
 
 def test_dnn():
     layers_dims = [10, 4, 2, 1]
+    write_dnn_configs(layers_dims, "_npl.lua", "npl")
+
+    layers_dpl_dims = [0, 0, 0, 0]
+    write_dnn_configs(layers_dpl_dims, "_dpl.lua", "dpl")
+
+    layers_act_dims = ['""', '"relu"', '"relu"', '"sigmoid"']
+    write_dnn_configs(layers_act_dims, "_afns.lua", "afns")
 
     np.random.seed(42)
     x = np.random.randn(30).reshape((10, 3))
@@ -604,18 +606,17 @@ def test_dnn():
 
     print('x shape:', x.shape)
     # (10, 3)
-    write_inputs(x, "X_train.lua")
+    write_inputs(x, "_Xin.lua")
     print('-----------------------------------------')
     y = np.random.randint(0, 2, 3)
     y = y.reshape((1, 3))
     print('y shape:', y.shape)
     # (1, 3)
-    write_inputs(y, "y_train.lua")
+    write_inputs(y, "_Xout.lua")
     print('-----------------------------------------')
-    print('params')
     params = init_params(layers_dims)
-    write_wt(params, "set_wt.c")
-    write_bias(params, "set_bias.c")
+    write_w_b(params, "_set_W.c", 'w')
+    write_w_b(params, "_set_B.c", 'b')
     print('-----------------------------------------')
     activation = 'sigmoid'
     y_hat, caches = foreword_propagate(x, params, activation, layers_dims[-1])
