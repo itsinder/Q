@@ -398,24 +398,25 @@ dnn_train(
         cBYE(status);
       }
       /* computed z[l] */
-      /* TODO: compute a[l-1] */
+      /* TODO: compute da[l-1] */
     }
     printf("Generated dz \n");
     for ( int l = nl-1; l > 0; l-- ) { // back prop through other layers
       float **dW_l = dW[l];
       float  *db_l = db[l];
       float **dz_l = dz[l];
-      float **da_l = da[l];
-      float **da_l_minus_one = da[l-1];
+      float **a_l  = a[l];
+      float **a_l_minus_one = a[l-1];
       for ( int j = 0; j < npl[l]; j++ ) { // for neurons in last layer
         float *dz_l_j = dz_l[j];
-        float *da_l_j = da_l[j];
+        float *a_l_j  =  a_l[j];
         float sum = 0;
+        //     dw = (1. / m) * np.dot(dz, a_prev.T)
         for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { 
           sum = 0;
-          float *da_l_minus_one_jprime = da_l_minus_one[jprime];
+          float *a_l_minus_one_jprime = a_l_minus_one[jprime];
           for ( int i = 0; i < batch_size; i++ ) { 
-            sum += dz_l_j[i] * da_l_minus_one_jprime[i];
+            sum += dz_l_j[i] * a_l_minus_one_jprime[i];
           }
           sum /= batch_size;
           dW_l[jprime][j] = sum;
