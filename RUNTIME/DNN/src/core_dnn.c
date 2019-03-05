@@ -385,6 +385,7 @@ dnn_train(
             - ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) );
       }
     }
+    // da[3] has been computed
     printf("Generated da for last layer\n");
     for ( int l = nl-1; l > 0; l-- ) { 
       float **z_l  = z[l];
@@ -397,8 +398,13 @@ dnn_train(
         status = bak_A[l](z_l_j, da_l_j, batch_size, dz_l_j);
         cBYE(status);
       }
+      // first time, dz[3] has been computed
       /* computed z[l] */
+      if ( l >= 2 ) { // to avoid computing da[0], which is NULL
+        // z[1][10][4] 
+        // z[l][npl[l-1]][npl[l]]
       /* TODO: compute da[l-1] */
+      }
     }
     printf("Generated dz \n");
     for ( int l = nl-1; l > 0; l-- ) { // back prop through other layers
