@@ -96,3 +96,26 @@ softmax(
   for ( int  i = 0; i < n; i++ ) { y[i] = y[i] / sum; }
   return status;
 }
+
+float
+relu_bak(
+    float *z,
+    float *da,
+    int n,
+    float *dz
+    )
+{
+  int status = 0;
+
+  for ( int  i = 0; i < n; i++ ) { 
+    if ( z[i] < 0 ) { 
+      dz[i] = 0;
+    }
+    else { 
+      dz[i] = z[i];
+    }
+  }
+BYE:
+  return status;
+}
+

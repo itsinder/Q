@@ -21,7 +21,9 @@ typedef struct _dnn_rec_type {
 /*[1]*/  __act_fn_t  *A; // activation_function[num_layers]
 /*[1]*/  __bak_act_fn_t  *bak_A; // bak_activation_function[num_layers]
 /*[1]*/  float ***W; // weights, 
+/*[1]*/  float ***dW; // delta weights, 
 /*[1]*/  float **b; // bias, 
+/*[1]*/  float **db; // delta bias, 
 /*[1]*/  uint8_t **d; // [num_layers][neurons_in_layer[i]]
 /* Note that we need a bit for d (in or out) burt we use 8 bits */
 /*[1]*/  float *dpl; // dropout per layer [num_layers]

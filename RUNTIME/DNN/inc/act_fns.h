@@ -31,4 +31,11 @@ softmax(
     int n, 
     float *y
     );
+extern float
+relu_bak(
+    float *z,
+    float *da,
+    int n,
+    float *dz
+    );
 #endif
