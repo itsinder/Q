@@ -282,9 +282,11 @@ dnn_train(
 #ifdef TEST_VS_PYTHON
     status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
     status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
-    printf("SUCCESS\n"); exit(0);
+    printf("SUCCESS\n"); 
+    exit(0);
 #endif
-    /* TODO: do brop here */
+    for ( int l = nl-1; l > 0; l-- ) { // back prop through the layers
+    }
   }
 BYE:
   return status;
