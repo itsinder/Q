@@ -1,0 +1,15 @@
+1) Run dnn.py
+TODO: Krushnakant to add more details here
+2) This will produce the following 5 files
+ _Xin.lua
+ _Xout.lua
+ and the following 4 C files
+ _set_W.c
+ _set_b.c
+ _set_z.c
+ _set_z.c
+3) cd ../src/ 
+make clean
+make with CFLAGS set as following
+CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON
+4) run test t1 in comparison_test.lua
