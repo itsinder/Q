@@ -187,8 +187,26 @@ tests.t9 = function()
   local max_value, no_of_trav, max_idx = value:value()
   assert(max_value:to_num() == expected_max_value)
   -- as indexing starts with 0, so idx-1
+  print(max_idx:to_num(), expected_max_idx-1)
   assert(max_idx:to_num() == expected_max_idx-1 )
   print("Successfully completed test t9")
+end
+
+-- occurence of max value is twice, should return first occurence index
+tests.t10 = function()
+  local mk_col_table = {100, 20, 30, 40, 50, 60, 70, 100, 90, 80}
+  local expected_max_value = 100
+  local expected_max_idx = 1
+
+  local c1 = Q.mk_col( mk_col_table, "I4")
+  local value = Q.max(c1)
+  value:eval()
+  local max_value, no_of_trav, max_idx = value:value()
+  assert(max_value:to_num() == expected_max_value)
+  -- as indexing starts with 0, so idx-1
+  print(max_idx:to_num(), expected_max_idx-1)
+  assert(max_idx:to_num() == expected_max_idx-1 )
+  print("Successfully completed test t10")
 end
 
 return tests
