@@ -58,9 +58,14 @@ generic_handler(
   char out_file[Q_MAX_LEN_FILE_NAME+1];
   char err_file[Q_MAX_LEN_FILE_NAME+1];
   sprintf(out_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
-  sprintf(err_file, "/tmp/_out_%llu.txt", (unsigned long long)t_start);
+  sprintf(err_file, "/tmp/_err_%llu.txt", (unsigned long long)t_start);
   FILE *stdout = fopen(out_file, "w");
   FILE *stderr = fopen(err_file, "w");
+  fprintf(stdout, "this is stdout\n");
+  fprintf(stderr, "this is stderr\n");
+  /* test redirection 
+  Q.print_csv(Q.mk_col({1,2,3}, "I4"))
+  */
   // STOP: Send back stdout or stderr
   status = q_process_req(req_type, api, args, g_body); cBYE(status);
   //--------------------------------------
@@ -76,6 +81,8 @@ BYE:
   evhttp_add_header(evhttp_request_get_output_headers(req), 
       "Content-Type", "text/plain; charset=UTF-8");
   // START: Send back stdout or stderr
+  fflush(stdout); fflush(stderr);
+  fclose(stdout); fclose(stderr);
   char *ret_file = NULL;
   int code = 0;
   char ret_type[8]; // TODO P4 improve name 
