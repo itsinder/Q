@@ -108,6 +108,7 @@ relu_bak(
   int status = 0;
 
   for ( int  i = 0; i < n; i++ ) { 
+    // TODO Use terary operatorz[i] = z[i] < 0 ? 0 : z[i];
     if ( z[i] < 0 ) { 
       dz[i] = 0;
     }

@@ -14,6 +14,8 @@ Produced files are as below
     _set_B.c
     _set_Z.c
     _set_A.c
+    _set_Wprime.c -- W at the end of back prop
+    _set_Bprime.c -- b at the end of back prop
 
 These files are required before running the comparison test
 
@@ -32,3 +34,7 @@ Run python Vs C comparison_test.lua
 
 > run test t1 in comparison_test.lua
     $ luajit -e "require 'comparison_test'['t1']()" 
+
+A few things to note:
+Keep the number of instances small.
+The batch size must be set to the number of instances

@@ -4,6 +4,7 @@
 #include "core_dnn.h"
 #include "fstep_a.h"
 #include "bstep.h"
+#include "update_W_b.h"
 
 #ifdef RASPBERRY_PI
 static uint64_t 
@@ -86,6 +87,22 @@ free_z_a(
 
   *ptr_z = NULL;
 */
+}
+//----------------------------------------------------
+static int
+check_W_b(
+    int nl, 
+    int *npl, 
+    float ***W,
+    float ***Wprime,
+    float **b,
+    float **bprime
+    )
+{
+  int status = 0;
+  // TODO
+BYE:
+  return status;
 }
 //----------------------------------------------------
 static int
@@ -297,6 +314,8 @@ dnn_train(
   float   ***da = ptr_dnn->da;
   float   ***zprime = ptr_dnn->zprime;
   float   ***aprime = ptr_dnn->aprime;
+  float   ***Wprime = ptr_dnn->Wprime;
+  float    **bprime = ptr_dnn->bprime;
   __act_fn_t  *A = ptr_dnn->A;
   __bak_act_fn_t  *bak_A = ptr_dnn->bak_A;
 
@@ -356,10 +375,8 @@ dnn_train(
 #ifdef TEST_VS_PYTHON
     status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
     status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
-    printf("SUCCESS\n"); 
-    //exit(0);
+    printf("SUCCESS for forward pass\n"); 
 #endif
-
 
     // da = - (np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat))
     // da = Q.sub(Q.div(Q.sub(1, y), Q.sub(1, yhat)), Q.div(y/ yhat))
@@ -452,6 +469,7 @@ dnn_train(
     // Completed one epoch
 
     // Updates the 'W' and 'b'
+#ifdef OLD
     for ( int l = 1; l < nl-1; l++ ) { // for layer, starting from one
       float **W_l = W[l];
       float **dW_l = dW[l];
@@ -464,7 +482,13 @@ dnn_train(
         b_l[j] -= ( ALPHA * db_l[j] );
       }
     }
+#endif
+    status = update_W_b(W, dW, b, db, nl, npl, ALPHA); cBYE(status);
+#ifdef TEST_VS_PYTHON
+    status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
+    printf("SUCCESS for backward pass\n"); 
     exit(0);
+#endif
   }
 BYE:
   return status;
@@ -685,6 +709,18 @@ dnn_new(
   b = NULL;
   status = malloc_b(nl, npl, &b); cBYE(status);
   ptr_X->db  = b;
+  //--------------------------------------
+#ifdef TEST_VS_PYTHON
+  W = NULL; 
+  status = malloc_W(nl, npl, &W); cBYE(status);
+  ptr_X->Wprime  = W;
+// TODO UNCOMMENT #include "../test/_set_Wprime.c" // FOR TESTING 
+  //--------------------------------------
+  b = NULL;
+  status = malloc_b(nl, npl, &b); cBYE(status);
+  ptr_X->bprime  = b;
+// TODO UNCOMMENT #include "../test/_set_Bprime.c" // FOR TESTING 
+#endif
   //--------------------------------------
   d = malloc(nl * sizeof(uint8_t *));
   return_if_malloc_failed(d);
