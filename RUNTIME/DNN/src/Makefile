@@ -37,13 +37,17 @@ bstep.o : bstep.c ../inc/dnn_types.h ../inc/bstep.h
 act_fns.o : act_fns.c ../inc/dnn_types.h ../inc/act_fns.h
 	gcc -c ${CFLAGS} $(INCS) act_fns.c -o act_fns.o
 
+update_W_b.o : update_W_b.c ../inc/dnn_types.h ../inc/update_W_b.h
+	gcc -c ${CFLAGS} $(INCS) update_W_b.c -o update_W_b.o
+
 core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	gcc -c ${CFLAGS} $(INCS) core_dnn.c -o core_dnn.o
 
-libdnn.so: core_dnn.o dnn.o fstep_a.o bstep.o act_fns.o
+libdnn.so: core_dnn.o dnn.o fstep_a.o bstep.o act_fns.o update_W_b.o
 	gcc ${CFLAGS} $(INCS) \
 	core_dnn.o \
 	dnn.o \
+	update_W_b.o \
 	act_fns.o \
 	fstep_a.o \
 	bstep.o \
