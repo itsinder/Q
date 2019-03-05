@@ -63,6 +63,7 @@ free_z_a(
 {
   /*
   float ***z = *ptr_z;
+  TODO
 
   *ptr_z = NULL;
 */
@@ -85,7 +86,8 @@ check_z_a(
         // printf("%f:%f \n", z[i][j][k], zprime[i][j][k]);
         if ( ( fabs(z[i][j][k] - zprime[i][j][k]) /  
                fabs(z[i][j][k] + zprime[i][j][k]) ) > 0.0001 ) { 
-          printf("difference \n");
+          printf("difference [%d][%d][%d]\n", i, j, k); 
+          go_BYE(-1); 
         }
       }
     }
@@ -276,13 +278,13 @@ dnn_train(
       status = fstep_a(in, W[l], b[l], 
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
-      /* TODO: do brop here */
     }
 #ifdef TEST_VS_PYTHON
     status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
     status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
     printf("SUCCESS\n"); exit(0);
 #endif
+    /* TODO: do brop here */
   }
 BYE:
   return status;
@@ -348,11 +350,12 @@ int dnn_unset_bsz(
   int *npl = ptr_dnn->npl;
   free_z_a(nl, npl, &z); 
   free_z_a(nl, npl, &a); 
-
+#ifdef TEST_VS_PYTHON
   z = ptr_dnn->zprime;
   a = ptr_dnn->aprime;
   free_z_a(nl, npl, &z); 
   free_z_a(nl, npl, &a); 
+#endif
   return status;
 }
 //----------------------------------------------------
@@ -371,14 +374,14 @@ int dnn_set_bsz(
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
   ptr_dnn->z = z;
   ptr_dnn->a = a;
-  /* START: For testing */
+#ifdef TEST_VS_PYTHON
+  z = a = NULL; // not necessary but to show we are re-initializing
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
+#include "../test/z_val.c" // FOR TESTING 
+#include "../test/a_val.c" // FOR TESTING 
   ptr_dnn->zprime = z;
   ptr_dnn->aprime = a;
-#ifdef TEST_VS_PYTHON
- #include "../test/z_val.c" // FOR TESTING 
- #include "../test/a_val.c" // FOR TESTING 
 #endif
 BYE:
   if ( status < 0 ) { 

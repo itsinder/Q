@@ -3,11 +3,14 @@ local ldnn = require 'Q/RUNTIME/DNN/lua/ldnn'
 require 'Q/UTILS/lua/strict'
 
 local tests = {}
-tests.t4 = function()
+tests.t1 = function()
 
-local Xin  = require 'X_train'
-local Xout = require 'y_train'
-
+local Xin  = require '_Xinn'
+local Xout = require '_Xout'
+local npl  = require '_npl'
+local dpl  = require '_dpl'
+local relu = require '_relu'
+--[[
   local npl = {}
   npl[#npl+1] = 10
   npl[#npl+1] = 4
@@ -23,6 +26,7 @@ local Xout = require 'y_train'
   afns[#afns+1] = "relu"
   afns[#afns+1] = "relu"
   afns[#afns+1] = "sigmoid"
+--]]
   local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
   x:set_io(Xin, Xout)
