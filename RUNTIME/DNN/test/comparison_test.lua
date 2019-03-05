@@ -5,7 +5,7 @@ require 'Q/UTILS/lua/strict'
 local tests = {}
 tests.t1 = function()
 
-local Xin  = require '_Xinn'
+local Xin  = require '_Xin'
 local Xout = require '_Xout'
 local npl  = require '_npl'
 local dpl  = require '_dpl'

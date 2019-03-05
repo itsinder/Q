@@ -380,8 +380,8 @@ int dnn_set_bsz(
   z = a = NULL; // not necessary but to show we are re-initializing
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
-#include "../test/z_val.c" // FOR TESTING 
-#include "../test/a_val.c" // FOR TESTING 
+#include "../test/_set_Z.c" // FOR TESTING 
+#include "../test/_set_A.c" // FOR TESTING 
   ptr_dnn->zprime = z;
   ptr_dnn->aprime = a;
 #endif
@@ -479,7 +479,7 @@ dnn_new(
     }
   }
 #ifdef TEST_VS_PYTHON
-#include "../test/set_wt.c" // FOR TESTING 
+#include "../test/_set_W.c" // FOR TESTING 
   ptr_X->W  = W;
 #endif
   //--------------------------------------
@@ -492,7 +492,7 @@ dnn_new(
     return_if_malloc_failed(b[l]);
   }
 #ifdef TEST_VS_PYTHON
-#include "../test/set_bias.c" // FOR TESTING 
+#include "../test/_set_B.c" // FOR TESTING 
 #endif
   ptr_X->b  = b;
   //--------------------------------------

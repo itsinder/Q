@@ -558,7 +558,7 @@ def write_w_b(params, file_path, val_type):
                             if val_type.lower() == 'w':
                                 f.write("%s[%s][%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(k), str(j), str(r)))
                             elif val_type.lower() == 'b':
-                                f.write("%s[%s][%s] = %s;\n" % (val_type.upper(), str(layer_index), str(j), str(r)))
+                                f.write("%s[%s][%s] = %s;\n" % (val_type.lower(), str(layer_index), str(j), str(r)))
                     f.write("//==========================================\n")
     except Exception as e:
         print("Failed to write, Error %s" % str(e))

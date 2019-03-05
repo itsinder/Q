@@ -1,58 +1,34 @@
-Virtual environment steps
+To produce the input files using dnn.py, refer Q/RUNTIME/DNN/python/README.txt
 
-> Create virtual environment
-    # install virtualenv package
-        $ pip3 install virtualenv
-    # create a directory
-        $ mkdir ~/virtual_env
-        $ cd ~/virtual_env
-    # create virtualenv named dnn
-        $ virtualenv dnn
-    # activate the virtual env (always run below command from '~/virtual_env' directory)
-        $ source dnn/bin/activate
+Produced files are as below
 
-> Install below packages in virtual environment
-    (dnn) $ pip install h5py
-    (dnn) $ pip install numpy
-    (dnn) $ pip install pandas
-    (dnn) $ pip install sklearn
-    (dnn) $ pip install image
-
-> Deactivate the virtualenv
-    (dnn) $ deactivate
-
-==================================
-
-Commands to run dnn.py
-
-> Run dnn.py
-    # start virtual environment (refer above guide)
-        $ source dnn/bin/activate
-    # run python command
-        (dnn) $ cd Q/RUNTIME/DNN/python
-        (dnn) $ python dnn.py
-
-> This will produce the following 5 lua files (in current directory)
+5 lua files (in "Q/RUNTIME/DNN/python/" directory)
     _Xin.lua
     _Xout.lua
     _npl.lua
     _dpl.lua
     _afns.lua
 
- and the following 4 C files (in current directory)
+ and the following 4 C files (in "Q/RUNTIME/DNN/python/" directory)
     _set_W.c
     _set_B.c
     _set_Z.c
     _set_A.c
 
+These files are required before running the comparison test
+
 ==================================
 
 Run python Vs C comparison_test.lua
+
+> copy the generated files from pytyon directory to test directory
+    $ cp Q/RUNTIME/DNN/python/_* Q/RUNTIME/DNN/test/
 
 > Build the DNN
     $ cd Q/RUNTIME/DNN/src/ 
     $ make clean
     $ make with CFLAGS set as following
-      CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON
+      CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON 
 
 > run test t1 in comparison_test.lua
+    $ luajit -e "require 'comparison_test'['t1']()" 
