@@ -29,10 +29,12 @@ typedef struct _dnn_rec_type {
 /*[2]*/  int num_instances; // 
 /*[2]*/  float **out; // Output data, [neurons_in_layer[nl-1]][num_instances]
 /*[3]*/  float ***z; 
+/*[3]*/  float ***dz; 
 /* z[0] == NULL
    z[i] = [num_layers][neurons_per_layer[l]][bsz]
    */
 /*[3]*/  float ***a; 
+/*[3]*/  float ***da; 
 /*
    a[0] == NULL
    a[i] = [num_layers][neurons_per_layer[l]][bsz]

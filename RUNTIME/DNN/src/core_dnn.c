@@ -285,8 +285,25 @@ dnn_train(
     printf("SUCCESS\n"); 
     exit(0);
 #endif
+    // da = - (np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat))
+    // da = Q.sub(Q.div(Q.sub(1, y), Q.sub(1, yhat)), Q.div(y/ yhat))
+    //
+    // s = 1 / (1 + np.exp(-z))
+    // dz = da * s * (1 - s)
+
+    // s = Q.reciprocal(Q.vsadd(Q.exp(Q.vsmul(z, -1)), 1))
+    // dz = Q.vvmul(da, Q.vvmul(s, Q.vssub(1, s)))
+#define ALPHA 0.0075 // TODO This is a user supplied parameter
+    // compute da and dz 
     for ( int l = nl-1; l > 0; l-- ) { // back prop through the layers
     }
+    // update W and b
+    for ( int l = nl-1; l > 0; l-- ) { // back prop through the layers
+      // dot product of x, y 
+      // dw = (1. / m) * np.dot(dz, a_prev.T)
+      // dw = Q.sum(Q.vvmul(dz, XXXX)):eval():to_number() / x:length()
+    }
+    // compare W with Wprime, b with bprime
   }
 BYE:
   return status;
