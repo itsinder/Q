@@ -3,16 +3,23 @@
 
 typedef float(* __act_fn_t )(float *, int, float *);
 
-typedef enum act_fn_type { 
+typedef float(* __bak_act_fn_t )(float *, float *, int, float *);
+
+typedef enum _act_fn_type { 
   undef_act_fn, RELU, SIGMOID, SOFT_MAX, TANH, LEAKY_RELU
 } ACT_FN_TYPE;
+
+typedef enum _bak_act_fn_type {
+  undef_bak_act_fn, SIGMOID_BACK
+} BAK_ACT_FN_TYPE;
 
 /* Items marked [1] are created by new */
 /* Items marked [2] are created by set_io */
 typedef struct _dnn_rec_type {
 /*[1]*/  int nl; // num layers
 /*[1]*/  int *npl;  // neurons per layer  [num_layers]
-/*[1]*/  __act_fn_t  *A; // activation_function[num_layers] 
+/*[1]*/  __act_fn_t  *A; // activation_function[num_layers]
+/*[1]*/  __bak_act_fn_t  *bak_A; // bak_activation_function[num_layers]
 /*[1]*/  float ***W; // weights, 
 /*[1]*/  float **b; // bias, 
 /*[1]*/  uint8_t **d; // [num_layers][neurons_in_layer[i]]

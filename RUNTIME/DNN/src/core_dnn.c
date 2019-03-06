@@ -3,6 +3,7 @@
 #include "dnn_types.h"
 #include "core_dnn.h"
 #include "fstep_a.h"
+#include "bstep.h"
 
 static uint64_t 
 get_time_usec(
@@ -55,6 +56,22 @@ BYE:
 }
 
 static void
+free_da(
+    int nl,
+    int *npl,
+    float ****ptr_z
+    )
+{
+  /*
+  float ***z = *ptr_z;
+  TODO
+
+  *ptr_z = NULL;
+*/
+}
+
+//----------------------------------------------------
+static void
 free_z_a(
     int nl, 
     int *npl,
@@ -92,6 +109,42 @@ check_z_a(
       }
     }
   }
+BYE:
+  return status;
+}
+
+//----------------------------------------------------
+// 'da' malloc is not same as z, a or dz
+// 'da' is pointing to previous layer in back propagation
+// so for 10, 4, 2, 1 case
+// da[0] = NULL, da[1] = 10 * 3
+// da[2] = 4 * 3, da[3] = 2 * 3
+static int
+malloc_da(
+    int nl,
+    int *npl,
+    int bsz,
+    float ****ptr_z)
+{
+  int status = 0;
+  float ***z = *ptr_z = NULL;
+  z = malloc(nl * sizeof(float **));
+  return_if_malloc_failed(z);
+  memset(z, '\0', nl * sizeof(float **));
+
+  z[0] = NULL;
+  for ( int i = 1; i < nl; i++ ) {
+    z[i] = malloc(npl[i-1] * sizeof(float *));
+    return_if_malloc_failed(z[i]);
+    memset(z[i], '\0', npl[i] * sizeof(float *));
+  }
+  for ( int i = 1; i < nl; i++ ) {
+    for ( int j = 0; j < npl[i]; j++ ) {
+      z[i][j] = malloc(bsz * sizeof(float));
+      return_if_malloc_failed(z[i][j]);
+    }
+  }
+  *ptr_z = z;
 BYE:
   return status;
 }
@@ -224,9 +277,12 @@ dnn_train(
   float   *dpl = ptr_dnn->dpl;
   float   ***z = ptr_dnn->z;
   float   ***a = ptr_dnn->a;
+  float   ***dz = ptr_dnn->dz;
+  float   ***da = ptr_dnn->da;
   float   ***zprime = ptr_dnn->zprime;
   float   ***aprime = ptr_dnn->aprime;
   __act_fn_t  *A = ptr_dnn->A;
+  __bak_act_fn_t  *bak_A = ptr_dnn->bak_A;
 
   if ( W   == NULL ) { go_BYE(-1); }
   if ( b   == NULL ) { go_BYE(-1); }
@@ -242,6 +298,16 @@ dnn_train(
   if ( ( num_batches * batch_size ) != (int)nI ) {
     num_batches++;
   }
+
+  // allocate space for da_temp (used in back propagation
+  float **da_temp;
+  da_temp = malloc(npl[nl-1] * sizeof(float*));
+  return_if_malloc_failed(da_temp);
+  for ( int l = 0; l < npl[nl-1]; l++ ) {
+    da_temp[l] = malloc(batch_size * sizeof(float));
+    return_if_malloc_failed(da_temp[l]);
+  }
+
   srand48(RDTSC());
   for ( int i = 0; i < num_batches; i++ ) {
     int lb = i  * batch_size;
@@ -283,8 +349,10 @@ dnn_train(
     status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
     status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
     printf("SUCCESS\n"); 
-    exit(0);
+    //exit(0);
 #endif
+
+    
     // da = - (np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat))
     // da = Q.sub(Q.div(Q.sub(1, y), Q.sub(1, yhat)), Q.div(y/ yhat))
     //
@@ -294,8 +362,39 @@ dnn_train(
     // s = Q.reciprocal(Q.vsadd(Q.exp(Q.vsmul(z, -1)), 1))
     // dz = Q.vvmul(da, Q.vvmul(s, Q.vssub(1, s)))
 #define ALPHA 0.0075 // TODO This is a user supplied parameter
-    // compute da and dz 
+
+    // populate da_temp using a[nl-1] and Xout
+    // da_temp is a input in the back propagation
+    float **out;
+    out = cptrs_out;
+    for ( int p = 0; p < npl[nl-1]; p++ ) {
+      float *x_out = out[p];
+      float *a_out = a[nl-1][p];
+      float *da_temp_p = da_temp[p];
+      for ( int q = 0; q < batch_size; q++ ) {
+        da_temp_p[q] = - ( ( x_out[q] / a_out[q] ) - ( ( 1 - x_out[q] ) / ( 1 - a_out[q] ) ) );
+      }
+    }
+    printf("Generated da_temp\n");
+
+    // Use this da_temp, a, z, to prepare da, dz, dw & db
+    float **f_z; /* f_z is z created in forward pass */
+    float **f_a;
+    float **out_dz;
+    float **out_da;
     for ( int l = nl-1; l > 0; l-- ) { // back prop through the layers
+      in = da[l+1]; /* input to second last layer stored in da[3], refer malloc_da() */
+      out_dz = dz[l];
+      out_da = da[l];
+      f_z = z[l];
+      f_a = a[l];
+      if ( l == ( nl - 1 ) ) {
+        in = da_temp;
+      }
+      status = bstep(in, f_a, f_z, d[l-1], d[l], out_dz, out_da, (ub-lb), npl[l], npl[l-1], bak_A[l]);
+      cBYE(status);
+      // TODO: remove below exit()
+      exit(0);
     }
     // update W and b
     for ( int l = nl-1; l > 0; l-- ) { // back prop through the layers
@@ -306,6 +405,14 @@ dnn_train(
     // compare W with Wprime, b with bprime
   }
 BYE:
+  // free da_temp
+  if ( da_temp != NULL ) {
+    for ( int l = 0; l < npl[nl-1]; l++ ) {
+      free_if_non_null(da_temp[l]);
+    }
+    free_if_non_null(da_temp);
+  }
+
   return status;
 }
 
@@ -365,10 +472,14 @@ int dnn_unset_bsz(
   int status = 0;
   float ***z = ptr_dnn->z;
   float ***a = ptr_dnn->a;
+  float ***dz = ptr_dnn->dz;
+  float ***da = ptr_dnn->da;
   int nl = ptr_dnn->nl;
   int *npl = ptr_dnn->npl;
   free_z_a(nl, npl, &z); 
-  free_z_a(nl, npl, &a); 
+  free_z_a(nl, npl, &a);
+  free_z_a(nl, npl, &dz);
+  free_da(nl, npl, &da); 
 #ifdef TEST_VS_PYTHON
   z = ptr_dnn->zprime;
   a = ptr_dnn->aprime;
@@ -386,6 +497,10 @@ int dnn_set_bsz(
   int status = 0;
   float ***z = NULL;
   float ***a = NULL;
+
+  float ***dz = NULL;
+  float ***da = NULL;
+
   int nl = ptr_dnn->nl;
   int *npl = ptr_dnn->npl;
   ptr_dnn->bsz = bsz;
@@ -393,6 +508,11 @@ int dnn_set_bsz(
   status = malloc_z_a(nl, npl, bsz, &a); cBYE(status);
   ptr_dnn->z = z;
   ptr_dnn->a = a;
+
+  status = malloc_z_a(nl, npl, bsz, &dz); cBYE(status);
+  status = malloc_da(nl, npl, bsz, &da); cBYE(status);
+  ptr_dnn->dz = dz;
+  ptr_dnn->da = da;
 #ifdef TEST_VS_PYTHON
   z = a = NULL; // not necessary but to show we are re-initializing
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
@@ -405,7 +525,9 @@ int dnn_set_bsz(
 BYE:
   if ( status < 0 ) { 
     free_z_a(nl, npl, &z); 
-    free_z_a(nl, npl, &a); 
+    free_z_a(nl, npl, &a);
+    free_z_a(nl, npl, &dz);
+    free_da(nl, npl, &da);
   }
   return status;
 }
@@ -425,6 +547,7 @@ dnn_new(
   float   **b  = NULL;
   uint8_t **d  = NULL;
   __act_fn_t  *A = NULL;
+  __bak_act_fn_t  *bak_A = NULL;
   
   memset(ptr_X, '\0', sizeof(DNN_REC_TYPE));
   //--------------------------------------
@@ -453,33 +576,41 @@ dnn_new(
   //--------------------------------------
   A = malloc(nl * sizeof(__act_fn_t));
   memset(A, '\0',  (nl * sizeof(__act_fn_t)));
+
+  bak_A = malloc(nl * sizeof(__bak_act_fn_t));
+  memset(bak_A, '\0',  (nl * sizeof(__bak_act_fn_t)));
+
   for ( int i = 0; i < nl; i++ ) { 
     char *cptr;
     if ( i == 0 ) {
       cptr = strtok((char *)afns, ":");
       if ( strcmp(cptr, "NONE") != 0 ) { go_BYE(-1); }
+      // TODO: do we require below line?
       A[i] = identity;
+      continue;
     }
     else {
       cptr = strtok(NULL, ":");
-      if ( strcmp(cptr, "sigmoid") == 0 ) {
-        A[i] = sigmoid;
-      }
-      else if ( strcmp(cptr, "relu") == 0 ) {
-        A[i] = relu;
-      }
-      else if ( strcmp(cptr, "leaky_relu") == 0 ) {
-        go_BYE(-1);
-      }
-      else if ( strcmp(cptr, "tanh") == 0 ) {
-        go_BYE(-1);
-      }
-      else {
-        go_BYE(-1);
-      }
+    }
+    if ( strcmp(cptr, "sigmoid") == 0 ) {
+      A[i] = sigmoid;
+      bak_A[i] = sigmoid_bak;
+    }
+    else if ( strcmp(cptr, "relu") == 0 ) {
+      A[i] = relu;
+    }
+    else if ( strcmp(cptr, "leaky_relu") == 0 ) {
+      go_BYE(-1);
+    }
+    else if ( strcmp(cptr, "tanh") == 0 ) {
+      go_BYE(-1);
+    }
+    else {
+      go_BYE(-1);
     }
   }
   ptr_X->A  = A;
+  ptr_X->bak_A  = bak_A;
   //--------------------------------------
   //--------------------------------------
   W = malloc(nl * sizeof(float **));

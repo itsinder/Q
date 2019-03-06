@@ -6,6 +6,13 @@ sigmoid(
     int n, 
     float *y
     );
+extern float
+sigmoid_bak(
+    float *z,
+    float *da,
+    int n,
+    float *dz
+    );
 extern float 
 identity(
     float *x, 

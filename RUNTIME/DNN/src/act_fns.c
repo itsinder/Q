@@ -20,6 +20,32 @@ sigmoid(
   return status;
 }
 
+float
+sigmoid_bak(
+    float *z,
+    float *da,
+    int n,
+    float *dz
+    )
+{
+  int status = 0;
+  // Don't malloc s here
+  float *s;
+  s = malloc(n * sizeof(float));
+  return_if_malloc_failed(s);
+
+  status = sigmoid(z, n, s);
+  cBYE(status);
+
+#pragma omp simd
+  for ( int  i = 0; i < n; i++ ) { 
+    dz[i] = ( da[i] * s[i] * ( 1 - s[i] ) );
+  }
+BYE:
+  free_if_non_null(s);
+  return status;
+}
+
 float 
 identity(
     float *x, 
