@@ -448,6 +448,22 @@ dnn_train(
       }
       printf("HERE AI AM %d \n", l);
     }
+    // back propagation done
+    // Completed one epoch
+
+    // Updates the 'W' and 'b'
+    for ( int l = 1; l < nl-1; l++ ) { // for layer, starting from one
+      float **W_l = W[l];
+      float **dW_l = dW[l];
+      float *b_l = b[l];
+      float *db_l = db[l];
+      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
+        for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { // for neurons in layer l-1
+          W_l[jprime][j] -= ( ALPHA * dW_l[jprime][j] );
+        }
+        b_l[j] -= ( ALPHA * db_l[j] );
+      }
+    }
     exit(0);
   }
 BYE:
