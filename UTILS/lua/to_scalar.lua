@@ -6,7 +6,7 @@ local function to_scalar(x, qtype)
   assert(qtype, "must provide qtype for Scalar")
   local retval 
   if ( ( type(x) == "number") or ( type(x) == "string" ) or ( type(x) == "boolean" ) ) then 
-    retval = assert(Scalar.new(x, qtype), "bah value for Scalar")
+    retval = assert(Scalar.new(x, qtype), "bad value for Scalar")
     return retval
   elseif ( type(x) == "Scalar") then 
     -- see if you can promote to desired type
