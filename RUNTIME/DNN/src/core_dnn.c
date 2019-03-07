@@ -384,35 +384,47 @@ dnn_train(
         da_last_j[i] = - ( ( out_j[i] / a_j[i] ) 
             - ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) );
       }
-    }
-    // da[3] has been computed
+    } // da[3] has been computed
     printf("Generated da for last layer\n");
-    for ( int l = nl-1; l > 0; l-- ) { 
+
+    for ( int l = nl-1; l > 0; l-- ) { // for layer, starting from last
       float **z_l  = z[l];
       float **da_l = da[l];
       float **dz_l = dz[l];
-      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in last layer
+      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
         float *z_l_j = z_l[j];
         float *da_l_j = da_l[j];
         float *dz_l_j = dz_l[j];
         status = bak_A[l](z_l_j, da_l_j, batch_size, dz_l_j);
         cBYE(status);
-      }
-      // first time, dz[3] has been computed
-      /* computed z[l] */
+      } // dz[l] has been computed
+
       if ( l >= 2 ) { // to avoid computing da[0], which is NULL
-        // z[1][10][4] 
-        // z[l][npl[l-1]][npl[l]]
-      /* TODO: compute da[l-1] */
+        float **W_l = W[l];
+        float **da_l_minus_one = da[l-1];
+        for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
+          float *dz_l_j = dz_l[j];
+          for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { // for neurons in layer (l-1)
+            float *W_l_jprime = W_l[jprime];
+            float *da_l_minus_one_jprime = da_l_minus_one[jprime];
+            for ( int i = 0; i < batch_size; i++ ) {
+              da_l_minus_one_jprime[i] += dz_l_j[i] * W_l_jprime[j];
+            }
+          }
+        }
       }
     }
-    printf("Generated dz \n");
+    printf("Generated dz and da_prev\n");
+
     for ( int l = nl-1; l > 0; l-- ) { // back prop through other layers
       float **dW_l = dW[l];
       float  *db_l = db[l];
       float **dz_l = dz[l];
       float **a_l  = a[l];
       float **a_l_minus_one = a[l-1];
+      if ( l == 1 ) { // a[0] is NULL
+        a_l_minus_one = cptrs_in;
+      }
       for ( int j = 0; j < npl[l]; j++ ) { // for neurons in last layer
         float *dz_l_j = dz_l[j];
         float *a_l_j  =  a_l[j];
@@ -421,7 +433,7 @@ dnn_train(
         for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { 
           sum = 0;
           float *a_l_minus_one_jprime = a_l_minus_one[jprime];
-          for ( int i = 0; i < batch_size; i++ ) { 
+          for ( int i = 0; i < batch_size; i++ ) {
             sum += dz_l_j[i] * a_l_minus_one_jprime[i];
           }
           sum /= batch_size;

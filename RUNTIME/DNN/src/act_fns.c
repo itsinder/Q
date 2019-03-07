@@ -112,7 +112,7 @@ relu_bak(
       dz[i] = 0;
     }
     else { 
-      dz[i] = z[i];
+      dz[i] = da[i];
     }
   }
 BYE:
