@@ -631,6 +631,13 @@ def test_dnn():
       print(k, v)
     print('-----------------------------------------')
     params = update_parameters(params, grads, alpha)
+    write_w_b(params, "_set_Wprime.c", 'w')
+    write_w_b(params, "_set_Bprime.c", 'b')
+    print("Params after update")
+    for k, v in params.items():
+      print(k, v)
+    print('-----------------------------------------')
+
     print('Cost : %f' % cost)
     costs.append(cost)
 

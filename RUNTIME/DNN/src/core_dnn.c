@@ -100,7 +100,30 @@ check_W_b(
     )
 {
   int status = 0;
-  // TODO
+
+  if ( W == Wprime ) { go_BYE(-1); }
+  if ( b == bprime ) { go_BYE(-1); }
+  for ( int i = 1; i < nl; i++ ) {
+    for ( int j = 0; j < npl[i-1]; j++ ) { // for neurons in previous layer
+      for ( int jprime = 0; jprime < npl[i]; jprime++ )  { // for neurons in current layer
+        // printf("W = %f \t Wprime = %f \n", W[i][j][jprime], Wprime[i][j][jprime]);
+        if ( ( fabs(W[i][j][jprime] - Wprime[i][j][jprime]) /
+               fabs(W[i][j][jprime] + Wprime[i][j][jprime]) ) > 0.0001 ) {
+          printf("difference in W at [%d][%d][%d]\n", i, j, jprime);
+          go_BYE(-1);
+        }
+      }
+    }
+
+    for ( int j = 0; j < npl[i]; j++ ) { // for neurons in current layer
+      // printf("b = %f \t bprime = %f \n", b[i][j], bprime[i][j]);
+      if ( ( fabs(b[i][j] - bprime[i][j]) /
+             fabs(b[i][j] + bprime[i][j]) ) > 0.0001 ) {
+        printf("difference in b at [%d][%d]\n", i, j);
+        go_BYE(-1);
+      }
+    }
+  }
 BYE:
   return status;
 }
@@ -341,6 +364,7 @@ dnn_train(
     if ( bidx == (num_batches-1) ) { ub = nI; }
     if ( ( ub - lb ) > batch_size ) { go_BYE(-1); }
 
+    //========= START - forward propagation =========
     float **in;
     float **out_z;
     float **out_a;
@@ -372,105 +396,47 @@ dnn_train(
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
     }
+    //========= STOP - forward propagation =========
+
 #ifdef TEST_VS_PYTHON
     status = check_z_a(nl, npl, batch_size, z, zprime); cBYE(status);
     status = check_z_a(nl, npl, batch_size, a, aprime); cBYE(status);
     printf("SUCCESS for forward pass\n"); 
 #endif
 
-    // da = - (np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat))
-    // da = Q.sub(Q.div(Q.sub(1, y), Q.sub(1, yhat)), Q.div(y/ yhat))
-    //
-    // s = 1 / (1 + np.exp(-z))
-    // dz = da * s * (1 - s)
-
-    // s = Q.reciprocal(Q.vsadd(Q.exp(Q.vsmul(z, -1)), 1))
-    // dz = Q.vvmul(da, Q.vvmul(s, Q.vssub(1, s)))
 #define ALPHA 0.0075 // TODO This is a user supplied parameter
 
+    //========= START - backward propagation =========
     float **da_last = da[nl-1];
     float **a_last  =  a[nl-1];
-    float **z_last  =  z[nl-1];
     float **out = cptrs_out;
-    int num_in_last = npl[nl-1];
-    for ( int j = 0; j < num_in_last; j++ ) { // for neurons in last layer
-      float *out_j     = out[j];
-      float *a_j       = a_last[j];
-      float *da_last_j = da_last[j];
-      for ( int i = 0; i < batch_size; i++ ) { // for each instance
-        da_last_j[i] = - ( ( out_j[i] / a_j[i] ) 
-            - ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) );
-      }
-    } // da[3] has been computed
-    printf("Generated da for last layer\n");
+    status = generate_da_last(a_last, out, da_last, npl[nl-1], batch_size);
+    cBYE(status);
+    // da for the last layer has been computed
 
     for ( int l = nl-1; l > 0; l-- ) { // for layer, starting from last
-      float **z_l  = z[l];
+      float **z_l = z[l];
+      float **dz_l = dz[l];
       float **da_l = da[l];
-      float **dz_l = dz[l];
-      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
-        float *z_l_j = z_l[j];
-        float *da_l_j = da_l[j];
-        float *dz_l_j = dz_l[j];
-        status = bak_A[l](z_l_j, da_l_j, batch_size, dz_l_j);
-        cBYE(status);
-      } // dz[l] has been computed
-
-      if ( l >= 2 ) { // to avoid computing da[0], which is NULL
-        float **W_l = W[l];
-        float **da_l_minus_one = da[l-1];
-        for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
-          float *dz_l_j = dz_l[j];
-          for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { // for neurons in layer (l-1)
-            float *W_l_jprime = W_l[jprime];
-            float *da_l_minus_one_jprime = da_l_minus_one[jprime];
-            for ( int i = 0; i < batch_size; i++ ) {
-              da_l_minus_one_jprime[i] += dz_l_j[i] * W_l_jprime[j];
-            }
-          }
-        }
-      }
-    }
-    printf("Generated dz and da_prev\n");
-
-    for ( int l = nl-1; l > 0; l-- ) { // back prop through other layers
+      float **W_l = W[l];
       float **dW_l = dW[l];
-      float  *db_l = db[l];
-      float **dz_l = dz[l];
-      float **a_l  = a[l];
-      float **a_l_minus_one = a[l-1];
-      if ( l == 1 ) { // a[0] is NULL
-        a_l_minus_one = cptrs_in;
-      }
-      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in last layer
-        float *dz_l_j = dz_l[j];
-        float *a_l_j  =  a_l[j];
-        float sum = 0;
-        //     dw = (1. / m) * np.dot(dz, a_prev.T)
-        for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { 
-          sum = 0;
-          float *a_l_minus_one_jprime = a_l_minus_one[jprime];
-          for ( int i = 0; i < batch_size; i++ ) {
-            sum += dz_l_j[i] * a_l_minus_one_jprime[i];
-          }
-          sum /= batch_size;
-          dW_l[jprime][j] = sum;
-        }
-        sum = 0;
-        for ( int i = 0; i < batch_size; i++ ) { 
-          sum += dz_l_j[i];
-        }
-        sum /= batch_size;
-        db_l[j] = sum;
-      }
-      printf("HERE AI AM %d \n", l);
-    }
-    // back propagation done
-    // Completed one epoch
+      float *db_l = db[l];
+      float **a_prev_l = a[l-1];
+      float **da_prev_l = da[l-1];
 
-    // Updates the 'W' and 'b'
+      if ( l == 1 ) {
+        a_prev_l = cptrs_in; // a[0] is NULL
+      }
+
+      status = bstep(z_l, a_prev_l, W_l, da_l, dz_l, 
+          da_prev_l, dW_l, db_l, npl[l], npl[l-1], batch_size, bak_A[l]);
+      cBYE(status);
+    }
+    //========= STOP - backward propagation =========
+
+    //========= START - update 'W' and 'b' =========
 #ifdef OLD
-    for ( int l = 1; l < nl-1; l++ ) { // for layer, starting from one
+    for ( int l = 1; l < nl; l++ ) { // for layer, starting from one
       float **W_l = W[l];
       float **dW_l = dW[l];
       float *b_l = b[l];
@@ -484,6 +450,8 @@ dnn_train(
     }
 #endif
     status = update_W_b(W, dW, b, db, nl, npl, ALPHA); cBYE(status);
+    //========= STOP - update 'W' and 'b' =========
+
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 
@@ -714,12 +682,12 @@ dnn_new(
   W = NULL; 
   status = malloc_W(nl, npl, &W); cBYE(status);
   ptr_X->Wprime  = W;
-// TODO UNCOMMENT #include "../test/_set_Wprime.c" // FOR TESTING 
+#include "../test/_set_Wprime.c" // FOR TESTING 
   //--------------------------------------
   b = NULL;
   status = malloc_b(nl, npl, &b); cBYE(status);
   ptr_X->bprime  = b;
-// TODO UNCOMMENT #include "../test/_set_Bprime.c" // FOR TESTING 
+#include "../test/_set_Bprime.c" // FOR TESTING 
 #endif
   //--------------------------------------
   d = malloc(nl * sizeof(uint8_t *));
