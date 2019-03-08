@@ -14,10 +14,10 @@
 // Given in, W, we update out
 int fstep_a(
     float **in,  /* [n_in][nI] */
-    float **W,   /* [n_in][n_out] */ /* TODO: Order to be debated */
+    float **W,   /* [n_in][n_out] */ 
     float *b,    /* bias[n_out] */
-    uint8_t *d_in,   /* [n_in]  dropout for input layer */
-    uint8_t *d_out,  /* [n_out] dropout for output layer */
+    bool *d_in,   /* [n_in]  dropout for input layer */
+    bool *d_out,  /* [n_out] dropout for output layer */
     float **out_z, /* [n_out][nI] */
     float **out_a, /* [n_out][nI] */
     int32_t nI, 
@@ -29,9 +29,9 @@ int fstep_a(
   int status = 0;
 
   // This loop is the "b + " part of the formula 
-// TODO #pragma omp parallel for 
+// #pragma omp parallel for 
   for ( int k = 0; k < n_out; k++ ) {
-    if ( d_out[k] == true ) { continue; }
+    if ( d_out[k] ) { continue; }
     float *out_z_k = out_z[k];
     float b_k = b[k];
     for ( int i = 0; i < nI; i++ ) { 
@@ -39,12 +39,12 @@ int fstep_a(
     }
   }
   for ( int j = 0; j < n_in; j++ ) {  // for each neuron in input
-    if ( d_in[j] == true ) { continue; }
+    if ( d_in[j] ) { continue; }
     float *in_j = in[j];
     float *W_j = W[j];
 // #pragma omp parallel for 
     for ( int k = 0; k < n_out; k++ ) { // for each neuron in output
-      if ( d_out[k] == true ) { continue; }
+      if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
 #pragma omp simd

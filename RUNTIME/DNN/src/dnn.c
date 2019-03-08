@@ -73,7 +73,6 @@ BYE:
   return 2;
 }
 //----------------------------------------
-// TODO: Do we need this or can we just use l_dnn_delete()?
 static int l_dnn_free( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   int status = dnn_free(ptr_dnn);cBYE(status);

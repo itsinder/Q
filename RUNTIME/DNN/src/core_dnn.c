@@ -34,7 +34,7 @@ RDTSC(
 }
 static int 
 set_dropout(
-    uint8_t *d, /* [num neurons ] */
+    bool *d, /* [num neurons ] */
     float dpl,  /* probability of dropout */
     int n       /* num neurons */
     )
@@ -44,12 +44,12 @@ set_dropout(
   if ( n <= 0    ) { go_BYE(-1); }
   if ( dpl < 0 ) { go_BYE(-1); }
   if ( dpl >= 1 ) { go_BYE(-1); }
-  memset(d, '\0', (sizeof(uint8_t) * n)); // nobody dropped out
+  for ( int i = 0; i < n; i++ ) { d[i] = false; }
   if ( dpl > 0 ) { 
     for ( int i = 0; i < n; i++ ) { 
       double dtemp = drand48();
       if ( dtemp > dpl ) { 
-        d[i] = 1; // ith neuron will be dropped
+        d[i] = true; // ith neuron will be dropped
       }
     }
   }
@@ -327,9 +327,9 @@ dnn_train(
   int    *npl  = ptr_dnn->npl;
   float  ***W  = ptr_dnn->W;
   float   **b  = ptr_dnn->b;
-  float  ***dW  = ptr_dnn->dW;
-  float   **db  = ptr_dnn->db;
-  uint8_t  **d = ptr_dnn->d;
+  float  ***dW = ptr_dnn->dW;
+  float   **db = ptr_dnn->db;
+  bool     **d = ptr_dnn->d;
   float   *dpl = ptr_dnn->dpl;
   float   ***z = ptr_dnn->z;
   float   ***a = ptr_dnn->a;
@@ -449,7 +449,7 @@ dnn_train(
       }
     }
 #endif
-    status = update_W_b(W, dW, b, db, nl, npl, ALPHA); cBYE(status);
+    status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
     //========= STOP - update 'W' and 'b' =========
 
 #ifdef TEST_VS_PYTHON
@@ -475,7 +475,7 @@ dnn_free(
   int *npl    = ptr_X->npl;
   float  ***W = ptr_X->W;
   float   **b = ptr_X->b;
-  uint8_t **d = ptr_X->d;
+  bool **d = ptr_X->d;
 
   //---------------------------------------
   if ( W != NULL ) { 
@@ -591,7 +591,7 @@ dnn_new(
   int status = 0;
   float   ***W = NULL;
   float   **b  = NULL;
-  uint8_t **d  = NULL;
+  bool **d  = NULL;
   __act_fn_t  *A = NULL;
   __bak_act_fn_t  *bak_A = NULL;
 
@@ -690,10 +690,10 @@ dnn_new(
 #include "../test/_set_Bprime.c" // FOR TESTING 
 #endif
   //--------------------------------------
-  d = malloc(nl * sizeof(uint8_t *));
+  d = malloc(nl * sizeof(bool *));
   return_if_malloc_failed(d);
   for ( int l = 0; l < nl; l++ ) { 
-    d[l] = malloc(npl[l] * sizeof(uint8_t));
+    d[l] = malloc(npl[l] * sizeof(bool));
     return_if_malloc_failed(d[l]);
   }
   ptr_X->d  = d;

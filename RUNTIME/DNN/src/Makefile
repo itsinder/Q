@@ -14,7 +14,7 @@ all: libdnn.so
 	cp libdnn.so ${Q_ROOT}/lib/
 
 clean:
-	rm -f *.so *.o _*
+	rm -r -f *.so *.o _*
 		
 CSRCS := $(wildcard *.c)
 COBJS = $(CSRCS:.c=.o)

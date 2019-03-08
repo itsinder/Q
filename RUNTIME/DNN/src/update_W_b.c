@@ -9,6 +9,7 @@ update_W_b(
     float **db,
     int nl,
     int *npl,
+    bool **d, // true => dropout; false => keep
     float alpha // learning rate
     )
 {
@@ -20,9 +21,11 @@ update_W_b(
     float **dW_l = dW[l];
     float *b_l   = b[l];
     float *db_l  = db[l];
+    bool *d_l   = d[l];
     // for neurons in layer l-1
 // #pragma omp parallel for 
     for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { 
+      if ( d_l[jprime] ) { continue; } // TODO: Study carefully
       float  *W_l_jprime =  W_l[jprime];
       float *dW_l_jprime = dW_l[jprime];
       // for neurons in layer l
