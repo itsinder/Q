@@ -610,7 +610,10 @@ dnn_new(
   memcpy(itmp, npl, nl * sizeof(int));
   ptr_X->npl = itmp;
   //--------------------------------------
-  // CAN HAVE DROPOUT IN INPUT LAYER  if ( dpl[0]    != 0 ) { go_BYE(-1); }
+  /* CAN HAVE DROPOUT IN INPUT LAYER  Hence following is commented
+   * if ( dpl[0]    != 0 ) { go_BYE(-1); }
+   */
+  /* Cannot have dropout in output layer  Hence following check */
   if ( dpl[nl-1] != 0 ) { go_BYE(-1); }
   for ( int i = 1; i < nl-1; i++ ) { 
     if ( ( dpl[i] < 0 ) || ( dpl[i] >= 1 ) ) { go_BYE(-1); }
