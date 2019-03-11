@@ -14,13 +14,14 @@ bash system_requirements.sh
 # failing cmd: lscpu | grep "Architecture" | grep "arm"
 source ../setup.sh -f || true
 
-# TODO: please add a one liner info about 'prod', 'dev' & 'dbg' mode
-## q_install.sh "prod|dev|dbg" modes
-## prod : Q production mode
-## dev  : Q developer mode
-## dbg  : Q debugger mode
+#Usage: bash q_install.sh "prod|dev|dbg"
+#Performs installations of all the required packages, libraries, dependencies required
+#for running Q, it works in 3 modes.
+#Modes/Options:
+#prod : Production mode have just the bare bones of Q to run the Q scripts.
+#dev  : Developer mode have everything else: testing, documentation, qli.
+#dbg  : Debug mode will be useful for debugging.
 
-# TODO: if there is no argument provided, print help
 # checking mode for q_install.sh
 ARG_MODE=$1
 case $ARG_MODE in
@@ -43,16 +44,19 @@ case $ARG_MODE in
     export QC_FLAGS="$QC_FLAGS -g"
     LUA_DEBUG=1
     ;;
+  *)
+   #default case
+   echo "------------------------------"
+   echo "Manual/Usage of q_install.sh:"
+   echo "bash q_install.sh prod|dev|dbg"
+   echo "------------------------------"
+   exit 0
+   ;;
 esac
 
 ## Note: Production & Developer mode: building Q with -O4 flag
-# Removing this as -O4 is set in respective mode, now normal mode is the production mode
 # TODO: I think, -O4 flag should be there for production mode, else use -g flab
-# TODO: you can remove below lines
-##if [ $# -eq 0 ] ; then
-##  export QC_FLAGS="$QC_FLAGS -O4"
-##fi
-
+# Discuss: we are using -g flag incase of debugging, and for dev mode we are not doing dbg installations
 # installing apt get dependencies
 bash apt_get_dependencies.sh
 
@@ -90,12 +94,10 @@ bash clean_up.sh ../
 # make clean
 bash clean_q.sh
 
-# TODO: why do we require below statement here? is it redundant?
 # installing luarocks
 bash luarocks_installation.sh
 
-# installing basic required packages for Q
-# TODO: does these packages installed using luarocks, if yes, please mention it in above comment
+# installing basic required packages using luarocks
 bash q_required_packages.sh
 
 ###if "dbg" mode then
