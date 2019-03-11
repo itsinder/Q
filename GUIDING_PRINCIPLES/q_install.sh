@@ -14,11 +14,13 @@ bash system_requirements.sh
 # failing cmd: lscpu | grep "Architecture" | grep "arm"
 source ../setup.sh -f || true
 
+# TODO: please add a one liner info about 'prod', 'dev' & 'dbg' mode
 ## q_install.sh "prod|dev|dbg" modes
 ## prod : Q production mode
 ## dev  : Q developer mode
 ## dbg  : Q debugger mode
 
+# TODO: if there is no argument provided, print help
 # checking mode for q_install.sh
 ARG_MODE=$1
 case $ARG_MODE in
@@ -45,6 +47,8 @@ esac
 
 ## Note: Production & Developer mode: building Q with -O4 flag
 # Removing this as -O4 is set in respective mode, now normal mode is the production mode
+# TODO: I think, -O4 flag should be there for production mode, else use -g flab
+# TODO: you can remove below lines
 ##if [ $# -eq 0 ] ; then
 ##  export QC_FLAGS="$QC_FLAGS -O4"
 ##fi
@@ -57,6 +61,7 @@ if [[ $LUA_DEBUG -eq 1 ]] ; then
   bash lua_installation.sh LUA_DEBUG
 else
   # installing lua and luajit normal mode
+  # TODO: can we check existence of lua and luajit before calling the script, same as luarocks
   bash lua_installation.sh
   bash luajit_installation.sh
 fi
@@ -85,14 +90,17 @@ bash clean_up.sh ../
 # make clean
 bash clean_q.sh
 
+# TODO: why do we require below statement here? is it redundant?
 # installing luarocks
 bash luarocks_installation.sh
 
 # installing basic required packages for Q
+# TODO: does these packages installed using luarocks, if yes, please mention it in above comment
 bash q_required_packages.sh
 
 ###if "dbg" mode then
 if [[ $LUA_DEBUG -eq 1 ]] ; then
+  # TODO: don't we require doc, qli & test packages in debug mode?
   bash q_debug_dependencies.sh
 fi
 
