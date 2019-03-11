@@ -410,7 +410,7 @@ dnn_train(
     float **da_last = da[nl-1];
     float **a_last  =  a[nl-1];
     float **out = cptrs_out;
-    status = generate_da_last(a_last, out, da_last, npl[nl-1], batch_size);
+    status = compute_da_last(a_last, out, da_last, npl[nl-1], batch_size);
     cBYE(status);
     // da for the last layer has been computed
 
@@ -435,20 +435,6 @@ dnn_train(
     //========= STOP - backward propagation =========
 
     //========= START - update 'W' and 'b' =========
-#ifdef OLD
-    for ( int l = 1; l < nl; l++ ) { // for layer, starting from one
-      float **W_l = W[l];
-      float **dW_l = dW[l];
-      float *b_l = b[l];
-      float *db_l = db[l];
-      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
-        for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { // for neurons in layer l-1
-          W_l[jprime][j] -= ( ALPHA * dW_l[jprime][j] );
-        }
-        b_l[j] -= ( ALPHA * db_l[j] );
-      }
-    }
-#endif
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
     //========= STOP - update 'W' and 'b' =========
 

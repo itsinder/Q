@@ -15,22 +15,20 @@ update_W_b(
 {
   int status = 0;
   // Updates the 'W' and 'b'
-  // TODO: Why is upper bound nl-1 and not nl?
-  for ( int l = 1; l < nl-1; l++ ) { // for layer, starting from one
+  for ( int l = 1; l < nl; l++ ) { // for layer, starting from one
     float **W_l  = W[l];
     float **dW_l = dW[l];
     float *b_l   = b[l];
     float *db_l  = db[l];
     bool *d_l   = d[l];
-    // for neurons in layer l-1
-// #pragma omp parallel for 
-    for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) { 
+#pragma omp parallel for
+    for ( int jprime = 0; jprime < npl[l-1]; jprime++ ) {
+      // for neurons in layer l-1
       if ( d_l[jprime] ) { continue; } // TODO: Study carefully
       float  *W_l_jprime =  W_l[jprime];
       float *dW_l_jprime = dW_l[jprime];
-      // for neurons in layer l
-// #pragma omp simd 
-      for ( int j = 0; j < npl[l]; j++ ) { 
+#pragma omp simd
+      for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
         W_l_jprime[j] -= ( alpha * dW_l_jprime[j] );
       }
       /* above is equivalent to below 
@@ -39,7 +37,7 @@ update_W_b(
       }
       */
     }
-// #pragma omp simd 
+#pragma omp simd
     for ( int j = 0; j < npl[l]; j++ ) { 
       b_l[j] -= ( alpha * db_l[j] );
     }

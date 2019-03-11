@@ -1,7 +1,7 @@
 #include "act_fns.h"
 
 extern int
-generate_da_last(
+compute_da_last(
     float **a,
     float **out,
     float **da,

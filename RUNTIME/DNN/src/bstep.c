@@ -6,7 +6,7 @@
 
 // TODO: Add pragma omp at appropriate places
 
-int generate_da_last(
+int compute_da_last(
     float **a,   /* 'a' value for last layer */
     float **out,   /* Xout */
     float **da,   /* 'da' value for last layer */
@@ -57,16 +57,21 @@ int bstep(
 
   // I think it might make sense to compute dW and db even if we don't 
   // use them because of the dropout
-  // This loop will produce the dz, dW, db & da_prev values
+
+  // ----------- START - compute dz -----------
+// #pragma omp parallel for  // TODO: check with Ramesh
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
-    // ----------- START - generate dz -----------
     float *z_j = z[j];
     float *da_j = da[j];
     float *dz_j = dz[j];
     status = afn(z_j, da_j, batch_size, dz_j); cBYE(status);
-    // ----------- STOP - generate dz -----------
+  }
+  // ----------- STOP - compute dz -----------
 
-    // ----------- START - generate da_prev -----------
+  // ----------- START - compute da_prev -----------
+// #pragma omp parallel for // TODO: check with Ramesh
+  for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
+    float *dz_j = dz[j];
     if ( da_prev != NULL ) { // avoid computing da[0], which is NULL
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
@@ -77,10 +82,14 @@ int bstep(
         }
       }
     }
-    // ----------- STOP - generate da_prev -----------
+  }
+  // ----------- STOP - compute da_prev -----------
 
-    // ----------- START - generate dW & db -----------
+  // ----------- START - compute dW & db -----------
+// #pragma omp parallel for // TODO: check with Ramesh
+  for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
     float sum = 0;
+    float *dz_j = dz[j];
     for ( int jprime = 0; jprime < n_out; jprime++ ) { 
       // for neurons in out_layer
       sum = 0;
@@ -99,8 +108,8 @@ int bstep(
     }
     sum /= batch_size;
     db[j] = sum;
-    // ----------- STOP - generate dW & db -----------
   }
+  // ----------- STOP - compute dW & db -----------
   
 BYE:
   return status;
