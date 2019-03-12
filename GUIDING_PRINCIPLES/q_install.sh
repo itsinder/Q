@@ -1,8 +1,20 @@
 #!/bin/bash
 set -e
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $SCRIPT_DIR
+
 LUA_DEBUG=0
 LUA_PROD=0
 LUA_DEV=0
+
+#q_install script's usage function
+usage(){
+  echo "------------------------------"
+  echo "Manual/Usage of q_install.sh:"
+  echo "bash q_install.sh prod|dev|dbg"
+  echo "------------------------------"
+  exit 0
+}
 
 #---------- Main program starts ----------
 # first checking version of system packages required for Q
@@ -26,18 +38,14 @@ source ../setup.sh -f || true
 ARG_MODE=$1
 case $ARG_MODE in
   help)
-    echo "------------------------------"
-    echo "Manual/Usage of q_install.sh:"
-    echo "bash q_install.sh prod|dev|dbg"
-    echo "------------------------------"
-    exit 0
+    usage
     ;;
   prod)
     export QC_FLAGS="$QC_FLAGS -O4"
     ##LUA_PROD=1
     ;;
   dev)
-    export QC_FLAGS="$QC_FLAGS -O4"
+    export QC_FLAGS="$QC_FLAGS -g"
     LUA_DEV=1
     ;;
   dbg)
@@ -46,17 +54,13 @@ case $ARG_MODE in
     ;;
   *)
    #default case
-   echo "------------------------------"
-   echo "Manual/Usage of q_install.sh:"
-   echo "bash q_install.sh prod|dev|dbg"
-   echo "------------------------------"
+   usage
    exit 0
    ;;
 esac
 
-## Note: Production & Developer mode: building Q with -O4 flag
-# TODO: I think, -O4 flag should be there for production mode, else use -g flab
-# Discuss: we are using -g flag incase of debugging, and for dev mode we are not doing dbg installations
+## Note: Debugger & Developer mode: building Q with -g flag
+
 # installing apt get dependencies
 bash apt_get_dependencies.sh
 
@@ -64,8 +68,7 @@ if [[ $LUA_DEBUG -eq 1 ]] ; then
   # installing lua with debug mode(set -g flag) if debug mode
   bash lua_installation.sh LUA_DEBUG
 else
-  # installing lua and luajit normal mode
-  # TODO: can we check existence of lua and luajit before calling the script, same as luarocks
+  # installing lua and luajit normal mode(prod and dev mode)
   bash lua_installation.sh
   bash luajit_installation.sh
 fi
@@ -76,14 +79,8 @@ fi
 echo "`whoami` hard nofile 102400" | sudo tee --append /etc/security/limits.conf
 echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 
-#---------- Luarocks ----------
-which luarocks &> /dev/null || true
-RES=$?
-if [[ $RES -ne 0 ]] ; then
-  bash luarocks_installation.sh
-else
-  bash my_print.sh "Luarocks is already installed"
-fi
+# Installing Luarocks
+bash luarocks_installation.sh
 
 # Build Q
 bash my_print.sh "Building Q"
@@ -94,16 +91,17 @@ bash clean_up.sh ../
 # make clean
 bash clean_q.sh
 
-# installing luarocks
-bash luarocks_installation.sh
-
 # installing basic required packages using luarocks
 bash q_required_packages.sh
 
 ###if "dbg" mode then
 if [[ $LUA_DEBUG -eq 1 ]] ; then
-  # TODO: don't we require doc, qli & test packages in debug mode?
+  #TODO: do we require doc in debug mode?
   bash q_debug_dependencies.sh
+  #qli installation
+  bash q_qli_dependencies.sh
+  #test installation
+  bash q_test_dependencies.sh
 fi
 
 ###if "dev" mode then
@@ -115,7 +113,6 @@ if [[ $LUA_DEV -eq 1 ]] ; then
   #test installation
   bash q_test_dependencies.sh
 fi
-
 
 # make
 bash build_q.sh
