@@ -588,30 +588,31 @@ def write_dnn_configs(layer_dims, file_path, val_type):
         print("Failed to write, Error %s" % str(e))
 
 
-def test_dnn():
-    layers_dims = [10, 4, 2, 1]
+def test_dnn(layers_dims, n_samples, alpha=0.0075):
     write_dnn_configs(layers_dims, "_npl.lua", "npl")
 
-    layers_dpl_dims = [0, 0, 0, 0]
+    layers_dpl_dims = [0] * len(layers_dims)
     write_dnn_configs(layers_dpl_dims, "_dpl.lua", "dpl")
 
-    layers_act_dims = ['""', '"relu"', '"relu"', '"sigmoid"']
+    layers_act_dims = []
+    layers_act_dims.append('""')
+    for i in range(1, len(layers_dims)-1):
+        layers_act_dims.append('"relu"')
+    layers_act_dims.append('"sigmoid"')
     write_dnn_configs(layers_act_dims, "_afns.lua", "afns")
 
     np.random.seed(42)
-    x = np.random.randn(30).reshape((10, 3))
+    x = np.random.randn(layers_dims[0] * n_samples).reshape((layers_dims[0], n_samples))
     scaler = MinMaxScaler()
     x = scaler.fit_transform(x)
     print('-----------------------------------------')
 
     print('x shape:', x.shape)
-    # (10, 3)
     write_inputs(x, "_Xin.lua")
     print('-----------------------------------------')
-    y = np.random.randint(0, 2, 3)
-    y = y.reshape((1, 3))
+    y = np.random.randint(0, 2, n_samples)
+    y = y.reshape((1, n_samples))
     print('y shape:', y.shape)
-    # (1, 3)
     write_inputs(y, "_Xout.lua")
     print('-----------------------------------------')
     params = init_params(layers_dims)
@@ -623,7 +624,6 @@ def test_dnn():
     print(y_hat)
     print('-----------------------------------------')
     costs = []
-    alpha=0.0075
     cost = comp_cost(y_hat, y, activation)
     grads = back_propagate(y_hat, y, caches, activation)
     print('-----------------------------------------')
@@ -729,7 +729,11 @@ def test_dnn():
 
 
 if __name__ == '__main__':
-    test_dnn()
+    layers_dims = [10, 4, 2, 1]
+    # layers_dims = [8, 16, 4, 2, 1]
+    n_samples = 3
+    alpha=0.0075
+    test_dnn(layers_dims, n_samples, alpha)
     print("====================")
     """
     np.random.seed(1)
