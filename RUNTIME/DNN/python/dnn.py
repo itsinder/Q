@@ -217,7 +217,7 @@ def foreword_propagate(x, params, activation, y_dim):
     a = x
     n_layers = len(params) // 2  # number of layers
 
-    print('-' * 40)
+    # print('-' * 40)
 
     # implements linear-relu * (l-1)
     # adds cache to the caches list
@@ -226,12 +226,12 @@ def foreword_propagate(x, params, activation, y_dim):
         wi = params['w' + str(i)]
         bi = params['b' + str(i)]
         a, cache = dense_activation_propagate(a_prev, wi, bi, activation='relu')
-        print('layer:', i)
-        print('z:', cache)
+        # print('layer:', i)
+        # print('z:', cache)
         write_z_a(cache[1], i, "_set_Z.c", 'z')
-        print('a:', a)
+        # print('a:', a)
         write_z_a(a, i, "_set_A.c", 'a')
-        print('-' * 40)
+        # print('-' * 40)
         caches.append(cache)
 
     # implements linear-sigmoid or linear-softmax
@@ -239,12 +239,12 @@ def foreword_propagate(x, params, activation, y_dim):
     wi = params['w%s' % n_layers]
     bi = params['b%s' % n_layers]
     y_hat, cache = dense_activation_propagate(a, wi, bi, activation=activation)
-    print('output layer:')
-    print('z:', cache)
+    # print('output layer:')
+    # print('z:', cache)
     write_z_a(cache[1], n_layers, "_set_Z.c", 'z')
-    print('a:', y_hat)
+    # print('a:', y_hat)
     write_z_a(y_hat, n_layers, "_set_A.c", 'a')
-    print('-' * 40)
+    # print('-' * 40)
     caches.append(cache)
     assert (y_hat.shape == (y_dim, x.shape[1]))
 
@@ -405,7 +405,7 @@ def dense_activation_back_propagate(da, cache, activation):
     elif activation == 'softmax':
         dz = da  # softmax_back_propagate(da, a_cache)
     da_prev, dw, db = dense_back_propagate(dz, dense_cache)
-    return da_prev, dw, db
+    return da_prev, dw, db, dz
 
 
 def back_propagate(y_hat, y, caches, activation):
@@ -441,18 +441,21 @@ def back_propagate(y_hat, y, caches, activation):
     # inputs: ai, y, caches
     # outputs: grads['dai'], grads['dwi'], grads['dbi']
 
+    write_z_a(da, len(caches), "_set_dA.c", 'da')
+
     n = len(caches)
     c = caches[n-1]
-    grads['da%s' % n], grads['dw%s' % n], grads['db%s' % n] = (
+    grads['da%s' % n], grads['dw%s' % n], grads['db%s' % n], grads['dz%s' % n] = (
         dense_activation_back_propagate(da, c, activation=activation))
 
     for i in reversed(range(n - 1)):
         c = caches[i]
-        da_prev_temp, dw_temp, db_temp = dense_activation_back_propagate(
+        da_prev_temp, dw_temp, db_temp, dz_temp = dense_activation_back_propagate(
             grads['da%s' % (i+2)], c, activation="relu")
         grads['da%s' % (i+1)] = da_prev_temp
         grads['dw%s' % (i+1)] = dw_temp
         grads['db%s' % (i+1)] = db_temp
+        grads['dz%s' % (i+1)] = dz_temp
 
     return grads
 
@@ -534,7 +537,7 @@ def write_inputs(val, file_path):
                 f.write('X[#X+1] = Q.mk_col({%s}, "F4")\n' % separator.join(str(e) for e in i))
             f.write('return X')
     except Exception as e:
-        print("Failed to write, Error %s" % str(e))
+        print("Failed to write in/out, Error %s" % str(e))
 
 
 def write_w_b(params, file_path, val_type):
@@ -561,7 +564,7 @@ def write_w_b(params, file_path, val_type):
                                 f.write("%s[%s][%s] = %s;\n" % (val_type.lower(), str(layer_index), str(j), str(r)))
                     f.write("//==========================================\n")
     except Exception as e:
-        print("Failed to write, Error %s" % str(e))
+        print("Failed to write w/b, Error %s" % str(e))
 
 
 def write_z_a(val, layer_index, file_path, val_type):
@@ -572,7 +575,7 @@ def write_z_a(val, layer_index, file_path, val_type):
                     f.write("%s[%s][%s][%s] = %s;\n" % (val_type.lower(), str(layer_index), str(i), str(j), str(q)))
                 f.write("//==========================================\n")
     except Exception as e:
-        print("Failed to write, Error %s" % str(e))
+        print("Failed to write z/a, Error %s" % str(e))
 
 
 def write_dnn_configs(layer_dims, file_path, val_type):
@@ -585,7 +588,30 @@ def write_dnn_configs(layer_dims, file_path, val_type):
                 f.write("%s[#%s+1] = %s\n" % (val_type, val_type, str(i)))
             f.write("return %s" % val_type)
     except Exception as e:
-        print("Failed to write, Error %s" % str(e))
+        print("Failed to write dnn configs, Error %s" % str(e))
+
+# TODO: merge it with write_w_b()
+def write_grads(grads, file_path, val_type):
+    val_type = val_type.lower()
+    n_layers = len(grads) // 3  # number of layers (0th layer is not considered)
+    keys = []
+    for i in range(n_layers):
+        keys.append('%s%s' % (val_type, str(i+1)))
+    try:
+        # write dW & db
+        with open(file_path, "w") as f:
+            for i, p in grads.items():
+                if i in keys:
+                    layer_index = i[2]
+                    for j, q in enumerate(p):
+                        for k, r in enumerate(q):
+                            if val_type == 'dw':
+                                f.write("dW[%s][%s][%s] = %s;\n" % (str(layer_index), str(k), str(j), str(r)))
+                            elif val_type.lower() == 'b':
+                                f.write("db[%s][%s] = %s;\n" % (str(layer_index), str(j), str(r)))
+                    f.write("//==========================================\n")
+    except Exception as e:
+        print("Failed to write grads")
 
 
 def test_dnn(layers_dims, n_samples, alpha=0.0075):
@@ -618,25 +644,30 @@ def test_dnn(layers_dims, n_samples, alpha=0.0075):
     params = init_params(layers_dims)
     write_w_b(params, "_set_W.c", 'w')
     write_w_b(params, "_set_B.c", 'b')
-    print('-----------------------------------------')
+    # print('-----------------------------------------')
     activation = 'sigmoid'
     y_hat, caches = foreword_propagate(x, params, activation, layers_dims[-1])
-    print(y_hat)
-    print('-----------------------------------------')
+    # print(y_hat)
+    # print('-----------------------------------------')
     costs = []
     cost = comp_cost(y_hat, y, activation)
     grads = back_propagate(y_hat, y, caches, activation)
-    print('-----------------------------------------')
+    write_grads(grads, "_set_dW.c", 'dW')
+    write_grads(grads, "_set_db.c", 'db')
+    write_z_a(grads["dz1"], 1, "_set_dZ.c", 'dz')
+    for i in range(2, len(layers_dims)):
+      write_z_a(grads["da%s" % str(i)], i-1, "_set_dA.c", 'da')
+      write_z_a(grads["dz%s" % str(i)], i, "_set_dZ.c", 'dz')
+    # print('-----------------------------------------')
+    """
     for k, v in grads.items():
       print(k, v)
-    print('-----------------------------------------')
+    """
+    # print('-----------------------------------------')
     params = update_parameters(params, grads, alpha)
     write_w_b(params, "_set_Wprime.c", 'w')
     write_w_b(params, "_set_Bprime.c", 'b')
-    print("Params after update")
-    for k, v in params.items():
-      print(k, v)
-    print('-----------------------------------------')
+    # print('-----------------------------------------')
 
     print('Cost : %f' % cost)
     costs.append(cost)
@@ -729,9 +760,9 @@ def test_dnn(layers_dims, n_samples, alpha=0.0075):
 
 
 if __name__ == '__main__':
-    layers_dims = [10, 4, 2, 1]
-    # layers_dims = [8, 16, 4, 2, 1]
-    n_samples = 3
+    # layers_dims = [10, 4, 2, 1]
+    layers_dims = [18, 12, 10, 7, 4, 2, 1]
+    n_samples = 5
     alpha=0.0075
     test_dnn(layers_dims, n_samples, alpha)
     print("====================")
