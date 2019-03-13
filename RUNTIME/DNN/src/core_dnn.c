@@ -225,10 +225,11 @@ malloc_z_a(
     return_if_malloc_failed(z[i]);
     memset(z[i], '\0', npl[i] * sizeof(float *));
   }
-  for ( int i = 1; i < nl; i++ ) { 
+  for ( int i = 1; i < nl; i++ ) {
     for ( int j = 0; j < npl[i]; j++ ) { 
       z[i][j] = malloc(bsz * sizeof(float));
       return_if_malloc_failed(z[i][j]);
+      memset(z[i][j], '\0', bsz * sizeof(float));
     }
   }
   *ptr_z = z;
