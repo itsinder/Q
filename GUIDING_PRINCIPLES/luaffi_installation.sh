@@ -8,6 +8,10 @@ make
 EX_PATH="${Q_ROOT}/lib"
 echo $EX_PATH
 cp ffi.so $EX_PATH
+rm -f /tmp/ffi.so
+#copying the ffi.so to /tmp/ as we require this later &
+#at end of this script we are deleting the luaffi directory.
+cp ffi.so /tmp/
 cd ../
 sudo rm -rf luaffi
 bash my_print.sh "COMPLETED: Installing luaffi"
