@@ -5,11 +5,11 @@ require 'Q/UTILS/lua/strict'
 local tests = {}
 tests.t1 = function()
 
-local Xin  = require '_Xin'
-local Xout = require '_Xout'
-local npl  = require '_npl'
-local dpl  = require '_dpl'
-local afns = require '_afns'
+  local Xin  = require '_Xin'
+  local Xout = require '_Xout'
+  local npl  = require '_npl'
+  local dpl  = require '_dpl'
+  local afns = require '_afns'
 --[[
   local npl = {}
   npl[#npl+1] = 10
@@ -30,7 +30,7 @@ local afns = require '_afns'
   local x = ldnn.new({ npl = npl, dpl = dpl, activation_functions = afns} )
   assert(x:check())
   x:set_io(Xin, Xout)
-  x:set_batch_size(3) -- TODO UNDO HARD CODE 
+  x:set_batch_size(Xout[1]:length()) -- TODO UNDO HARD CODE 
   x:fit()
   print("Test t4 succeeded")
 
