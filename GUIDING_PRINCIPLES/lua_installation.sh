@@ -22,6 +22,9 @@ sudo make install
 #debug flag is set then creating a link to L
 if [ "$#" -eq 1 -a $IS_LUA_DEBUG == "LUA_DEBUG" ];then
   sudo ln -sf /usr/local/bin/lua /usr/local/bin/L
+  #temporary hack: by creating a link 'luajit' which points to lua
+  #our build(Makefiles) are using luajit as interpreter. Need to discuss.
+  sudo ln -sf /usr/local/bin/lua /usr/local/bin/luajit
 fi
 
 ## adding temporary hack for checking pkgconfig location

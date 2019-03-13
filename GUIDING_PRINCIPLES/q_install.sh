@@ -82,22 +82,13 @@ echo "`whoami` soft nofile 102400" | sudo tee --append /etc/security/limits.conf
 # Installing Luarocks
 bash luarocks_installation.sh
 
-# Build Q
-bash my_print.sh "Building Q"
-
-# cleaning up all files
-bash clean_up.sh ../
-
-# make clean
-bash clean_q.sh
-
 # installing basic required packages using luarocks
 bash q_required_packages.sh
 
 ###if "dbg" mode then
 if [[ $LUA_DEBUG -eq 1 ]] ; then
   #TODO: do we require doc in debug mode?
-  bash q_debug_dependencies.sh
+  bash luaffi_installation.sh
   #qli installation
   bash q_qli_dependencies.sh
   #test installation
@@ -114,10 +105,23 @@ if [[ $LUA_DEV -eq 1 ]] ; then
   bash q_test_dependencies.sh
 fi
 
+# Build Q
+bash my_print.sh "Building Q"
+
+# cleaning up all files
+bash clean_up.sh ../
+
+# make clean
+bash clean_q.sh
+
+if [[ $LUA_DEBUG -eq 1 ]] ; then
+  cp /tmp/ffi.so ${Q_ROOT}/lib
+fi
+
 # make
 bash build_q.sh
 
 # execute run_q_tests to check whether Q is properly build
-luajit -e "require 'run_q_tests'()"
+L -e "require 'run_q_tests'()"
 
 bash my_print.sh "Successfully completed q_install.sh"
