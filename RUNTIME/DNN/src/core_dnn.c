@@ -110,6 +110,7 @@ check_W_b(
         if ( ( fabs(W[i][j][jprime] - Wprime[i][j][jprime]) /
                fabs(W[i][j][jprime] + Wprime[i][j][jprime]) ) > 0.0001 ) {
           printf("difference in W at [%d][%d][%d]\n", i, j, jprime);
+          printf("expected=%f\t actual=%f\n", W[i][j][jprime], Wprime[i][j][jprime]);
           go_BYE(-1);
         }
       }
@@ -120,6 +121,7 @@ check_W_b(
       if ( ( fabs(b[i][j] - bprime[i][j]) /
              fabs(b[i][j] + bprime[i][j]) ) > 0.0001 ) {
         printf("difference in b at [%d][%d]\n", i, j);
+        printf("expected=%f\t actual=%f\n", b[i][j], bprime[i][j]);
         go_BYE(-1);
       }
     }
@@ -433,6 +435,13 @@ dnn_train(
       cBYE(status);
     }
     //========= STOP - backward propagation =========
+/*
+#ifdef TEST_VS_PYTHON
+    status = check_z_a(nl, npl, batch_size, dz, dzprime); cBYE(status);
+    status = check_z_a(nl, npl, batch_size, da, daprime); cBYE(status);
+    printf("SUCCESS for forward pass\n");
+#endif
+*/
 
     //========= START - update 'W' and 'b' =========
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
