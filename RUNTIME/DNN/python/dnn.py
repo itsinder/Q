@@ -761,7 +761,7 @@ def test_dnn(layers_dims, n_samples, alpha=0.0075):
 
 if __name__ == '__main__':
     # layers_dims = [10, 4, 2, 1]
-    layers_dims = [18, 12, 10, 7, 4, 2, 1]
+    layers_dims = [18, 10, 13, 7, 4, 2, 1]
     n_samples = 5
     alpha=0.0075
     test_dnn(layers_dims, n_samples, alpha)

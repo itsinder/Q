@@ -4,8 +4,6 @@
 
 #include "bstep.h"
 
-// TODO: Add pragma omp at appropriate places
-
 int compute_da_last(
     float **a,   /* 'a' value for last layer */
     float **out,   /* Xout */
@@ -59,23 +57,30 @@ int bstep(
   // use them because of the dropout
 
   // ----------- START - compute dz -----------
-// #pragma omp parallel for  // TODO: check with Ramesh
+#pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
+    int l_status = 0;
+    if ( status < 0 ) { continue; }
     float *z_j = z[j];
     float *da_j = da[j];
     float *dz_j = dz[j];
-    status = afn(z_j, da_j, batch_size, dz_j); cBYE(status);
+    l_status = afn(z_j, da_j, batch_size, dz_j);
+    if ( l_status < 0 ) { status = -1; continue; }
   }
+  cBYE(status);
   // ----------- STOP - compute dz -----------
 
   // ----------- START - compute da_prev -----------
-// #pragma omp parallel for // TODO: check with Ramesh
+// TODO: if I enable below pragma omp instruction, 
+// then I observe difference for few values of updated 'W' and 'b'
+// #pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
     float *dz_j = dz[j];
     if ( da_prev != NULL ) { // avoid computing da[0], which is NULL
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
+// #pragma omp simd
         for ( int i = 0; i < batch_size; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
           // TODO Check FMA working
@@ -86,7 +91,7 @@ int bstep(
   // ----------- STOP - compute da_prev -----------
 
   // ----------- START - compute dW & db -----------
-// #pragma omp parallel for // TODO: check with Ramesh
+#pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
     float sum = 0;
     float *dz_j = dz[j];
