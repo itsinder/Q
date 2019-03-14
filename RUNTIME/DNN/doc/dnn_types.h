@@ -1,18 +1,3 @@
-#ifndef __DNN_TYPES_H
-#define __DNN_TYPES_H
-
-typedef float(* __act_fn_t )(float *, int, float *);
-
-typedef float(* __bak_act_fn_t )(float *, float *, int, float *);
-
-typedef enum _act_fn_type { 
-  undef_act_fn, RELU, SIGMOID, SOFT_MAX, TANH, LEAKY_RELU
-} ACT_FN_TYPE;
-
-typedef enum _bak_act_fn_type {
-  undef_bak_act_fn, SIGMOID_BACK
-} BAK_ACT_FN_TYPE;
-
 /* Items marked [1] are created by new */
 /* Items marked [2] are created by set_io */
 typedef struct _dnn_rec_type {
@@ -25,7 +10,6 @@ typedef struct _dnn_rec_type {
 /*[1]*/  float **b; // bias, 
 /*[1]*/  float **db; // delta bias, 
 /*[1]*/  bool **d; // [num_layers][neurons_in_layer[i]]
-/* Note that we need a bit for d (in or out) burt we use 8 bits */
 /*[1]*/  float *dpl; // dropout per layer [num_layers]
   /* W[0] = NULL
    * W[i] = [num_layers][neurons_in_layer[i-1]][neurons_in_layer[i]]
@@ -44,12 +28,4 @@ typedef struct _dnn_rec_type {
    a[0] == NULL
    a[i] = [num_layers][neurons_per_layer[l]][bsz]
 */
-#ifdef TEST_VS_PYTHON
-float ***zprime;  /* for testing */
-float ***aprime;  /* for testing */
-float ***Wprime; /* for testing */ 
-float **bprime;  /* for testing */
-#endif
-//------------------------------------------------------------
 } DNN_REC_TYPE;
-#endif // _DNN_TYPES_H
