@@ -60,6 +60,8 @@ int bstep(
 #pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
     float *dz_j = dz[j];
+    // RAMESH: We should compare loop with memset
+    // RAMESH: might as well do omp simd, will not hurt
 #pragma omp simd  //TODO: do we require simd instruction here?
     for ( int i = 0; i < batch_size; i++ ) {
       dz_j[i] = 0;
@@ -71,6 +73,8 @@ int bstep(
 #pragma omp parallel for schedule(static)
     for ( int j = 0; j < n_out; j++ ) { // for neurons in out_layer
       float *da_prev_j = da_prev[j];
+      // RAMESH: Same comments as earlier, 
+      // compare with memset and simd won't hurt
 #pragma omp simd  //TODO: do we require simd instruction here?
       for ( int i = 0; i < batch_size; i++ ) {
         da_prev_j[i] = 0;
