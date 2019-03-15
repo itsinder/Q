@@ -1,6 +1,10 @@
 #ifndef __DNN_TYPES_H
 #define __DNN_TYPES_H
 
+int num_f_fops;
+int num_b_fops;
+int num_fops;
+
 typedef float(* __act_fn_t )(float *, int, float *);
 
 typedef float(* __bak_act_fn_t )(float *, float *, int, float *);

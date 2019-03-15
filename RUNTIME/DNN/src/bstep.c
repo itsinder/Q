@@ -24,6 +24,7 @@ int compute_da_last(
     for ( int i = 0; i < batch_size; i++ ) { // for each instance
       da_j[i] = ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) 
         - ( out_j[i] / a_j[i] );
+      num_b_fops += 5;
     }
   } // 'da' for last layer has been computed
 BYE:
@@ -62,7 +63,7 @@ int bstep(
     float *dz_j = dz[j];
     // RAMESH: We should compare loop with memset
     // RAMESH: might as well do omp simd, will not hurt
-#pragma omp simd  //TODO: do we require simd instruction here?
+#pragma omp simd
     for ( int i = 0; i < batch_size; i++ ) {
       dz_j[i] = 0;
     }
@@ -75,7 +76,7 @@ int bstep(
       float *da_prev_j = da_prev[j];
       // RAMESH: Same comments as earlier, 
       // compare with memset and simd won't hurt
-#pragma omp simd  //TODO: do we require simd instruction here?
+#pragma omp simd
       for ( int i = 0; i < batch_size; i++ ) {
         da_prev_j[i] = 0;
       }
@@ -109,6 +110,7 @@ int bstep(
 #pragma omp simd
         for ( int i = 0; i < batch_size; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
+          num_b_fops += 2;
           // TODO Check FMA working
         }
       }
@@ -128,16 +130,20 @@ int bstep(
 #pragma omp simd
       for ( int i = 0; i < batch_size; i++ ) {
         sum += dz_j[i] * a_prev_jprime[i]; // TODO Check FMA working
+        num_b_fops += 2;
       }
       sum /= batch_size;
+      num_b_fops += 1;
       dW[jprime][j] = sum;
     }
     sum = 0;
 #pragma omp simd reduction(+:sum)
     for ( int i = 0; i < batch_size; i++ ) {
       sum += dz_j[i];
+      num_b_fops += 1;
     }
     sum /= batch_size;
+    num_b_fops += 1;
     db[j] = sum;
   }
   // ----------- STOP - compute dW & db -----------

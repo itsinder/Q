@@ -30,6 +30,7 @@ update_W_b(
 #pragma omp simd
       for ( int j = 0; j < npl[l]; j++ ) { // for neurons in layer l
         W_l_jprime[j] -= ( alpha * dW_l_jprime[j] );
+        num_fops += 2;
       }
       /* above is equivalent to below 
       for ( int j = 0; j < npl[l]; j++ ) { 
@@ -40,6 +41,7 @@ update_W_b(
 #pragma omp simd
     for ( int j = 0; j < npl[l]; j++ ) { 
       b_l[j] -= ( alpha * db_l[j] );
+      num_fops += 2;
     }
   }
 BYE:

@@ -1,22 +1,35 @@
 #include "q_incs.h"
+#include "dnn_types.h"
 #include "act_fns.h"
 
 float 
 sigmoid(
-    float *x, 
-    int n, 
+    float *x,
+    int n,
     float *y
-    ) 
-{ 
+    )
+{
   int status = 0;
 #pragma omp simd
-  for ( int  i = 0; i < n; i++ ) { y[i] = -1 * x[i]; }
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = -1 * x[i];
+    num_f_fops += 1;
+  }
 #pragma omp simd
-  for ( int  i = 0; i < n; i++ ) { y[i] = exp(y[i]); }
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = exp(y[i]);
+    num_f_fops += 1;
+  }
 #pragma omp simd
-  for ( int  i = 0; i < n; i++ ) { y[i] = 1 + y[i]; }
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = 1 + y[i];
+    num_f_fops += 1;
+  }
 #pragma omp simd
-  for ( int  i = 0; i < n; i++ ) { y[i] = 1.0 / y[i]; }
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = 1.0 / y[i];
+    num_f_fops += 1;
+  }
   return status;
 }
 
@@ -30,19 +43,43 @@ sigmoid_bak(
 {
   int status = 0;
   // Don't malloc s here
-  float *s;
-  s = malloc(n * sizeof(float));
-  return_if_malloc_failed(s);
+  float *y;
+  y = malloc(n * sizeof(float));
+  return_if_malloc_failed(y);
 
+#pragma omp simd
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = -1 * z[i];
+    num_b_fops += 1;
+  }
+#pragma omp simd
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = exp(y[i]);
+    num_b_fops += 1;
+  }
+#pragma omp simd
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = 1 + y[i];
+    num_b_fops += 1;
+  }
+#pragma omp simd
+  for ( int  i = 0; i < n; i++ ) {
+    y[i] = 1.0 / y[i];
+    num_b_fops += 1;
+  }
+
+  /*
   status = sigmoid(z, n, s);
   cBYE(status);
+  */
 
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) { 
-    dz[i] = ( da[i] * s[i] * ( 1 - s[i] ) );
+    dz[i] = ( da[i] * y[i] * ( 1 - y[i] ) );
+    num_b_fops += 3;
   }
 BYE:
-  free_if_non_null(s);
+  free_if_non_null(y);
   return status;
 }
 
@@ -58,6 +95,7 @@ identity(
   for ( int  i = 0; i < n; i++ ) { y[i] = x[i]; }
   return status;
 }
+
 float 
 relu(
     float *x, 

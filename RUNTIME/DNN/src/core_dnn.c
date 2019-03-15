@@ -226,6 +226,7 @@ malloc_z_a(
     memset(z[i], '\0', npl[i] * sizeof(float *));
   }
   for ( int i = 1; i < nl; i++ ) {
+    // TODO: add pragma omp here
     for ( int j = 0; j < npl[i]; j++ ) { 
       z[i][j] = malloc(bsz * sizeof(float));
       return_if_malloc_failed(z[i][j]);
@@ -376,11 +377,12 @@ dnn_train(
       in  = a[l-1];
       out_z = z[l];
       out_a = a[l];
-      if ( l == 1 ) { 
+      if ( l == 1 ) {
         in = cptrs_in; 
         /* Advance the pointers to get to the appropriate batch */
         for ( int j = 0; j < npl[0]; j++ ) { 
           in[j] += lb;
+          num_f_fops += 1;
         }
         if ( a[l-1] != NULL ) { go_BYE(-1); }
         if ( z[l-1] != NULL ) { go_BYE(-1); }
@@ -445,8 +447,14 @@ dnn_train(
 */
 
     //========= START - update 'W' and 'b' =========
+    num_fops = num_f_fops + num_b_fops;
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
     //========= STOP - update 'W' and 'b' =========
+
+    // To get the correct count, comment out all pragma omp
+    printf("num of floating point ops in forward pass = %d\n", num_f_fops);
+    printf("num of floating point ops in backward pass = %d\n", num_b_fops);
+    printf("total num of floating point ops = %d\n", num_fops);
 
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);

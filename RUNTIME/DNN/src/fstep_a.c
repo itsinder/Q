@@ -29,7 +29,7 @@ int fstep_a(
   int status = 0;
 
   // This loop is the "b + " part of the formula 
-// #pragma omp parallel for 
+#pragma omp parallel for
   for ( int k = 0; k < n_out; k++ ) {
     if ( d_out[k] ) { continue; }
     float *out_z_k = out_z[k];
@@ -42,7 +42,7 @@ int fstep_a(
     if ( d_in[j] ) { continue; }
     float *in_j = in[j];
     float *W_j = W[j];
-// #pragma omp parallel for 
+#pragma omp parallel for
     for ( int k = 0; k < n_out; k++ ) { // for each neuron in output
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
@@ -50,7 +50,8 @@ int fstep_a(
 #pragma omp simd
 // #pragma omp parallel for 
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
-        out_z_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working 
+        out_z_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working
+        num_f_fops += 2;
       }
       float *out_a_k = out_a[k];
       afn(out_z_k, nI, out_a_k);
