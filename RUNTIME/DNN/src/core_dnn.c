@@ -360,8 +360,8 @@ BYE:
 int
 dnn_train(
     DNN_REC_TYPE *ptr_dnn,
-    float const ** const cptrs_in, /* [npl[0]][nI] */
-    float const ** const cptrs_out, /* [npl[nl-1]][nI] */
+    float ** const cptrs_in, /* [npl[0]][nI] */
+    float ** const cptrs_out, /* [npl[nl-1]][nI] */
     uint64_t nI // number of instances
     )
 {
@@ -419,22 +419,11 @@ dnn_train(
       in  = a[l-1];
       out_z = z[l];
       out_a = a[l];
-      if ( l == 1 ) {
+      if ( l == 1 ) { 
         in = cptrs_in;
-        /* Advance the pointers to get to the appropriate batch */
-        /*
-        for ( int j = 0; j < npl[0]; j++ ) {
-          in[j] += lb;
-          num_f_fops += 1;
-        }
-        */
-        // TODO: check with Ramesh
-        // Considering cptrs_in is also getting incremented along with in
-        // Added below logic
         if ( bidx != 0 ) {
           for ( int j = 0; j < npl[0]; j++ ) {
             in[j] += batch_size;
-            num_f_fops += 1;
           }
         }
         if ( a[l-1] != NULL ) { go_BYE(-1); }
@@ -511,7 +500,7 @@ dnn_train(
     printf("num of floating point ops in backward pass = %d\n", num_b_fops);
     printf("total num of floating point ops = %d\n", num_fops);
     */
-    printf("epoch %d completed\n", bidx);
+    printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 

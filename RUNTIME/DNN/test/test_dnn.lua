@@ -13,7 +13,8 @@ tests.t1 = function()
   local saved_file_path = "dnn_in.txt"
   local n_samples = 1024 * 1024
   local batch_size = 16 * 1024
-  --[[
+
+--[[
   npl = { 128, 64, 32, 8, 4, 2, 1 }
   dpl = { 0, 0, 0, 0, 0, 0, 0 }
   afns = { '', 'relu', 'relu', 'relu', 'relu', 'relu', 'sigmoid' }
@@ -23,7 +24,7 @@ tests.t1 = function()
   Xout[1] = Q.convert(Q.rand( { lb = 0, ub = 2, seed = 1234, qtype = "I1", len = n_samples }), "F4"):eval()
   Q.save(saved_file_path)
   os.exit()
-  ]]
+--]]
   -- For the first time, enable the above code block and then onwards just restore it
   Q.restore(saved_file_path)
 
@@ -52,7 +53,7 @@ tests.t1 = function()
 
   print("training started")
   start_t = qc.RDTSC()
-  x:fit()
+  x:fit(2)
   end_t = qc.RDTSC()
   print("fit = " .. tostring(end_t - start_t))
   print("Test t4 succeeded")
