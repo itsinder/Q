@@ -56,6 +56,28 @@ int bstep(
   // I think it might make sense to compute dW and db even if we don't 
   // use them because of the dropout
 
+  // Initialize dz to zero
+#pragma omp parallel for schedule(static)
+  for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
+    float *dz_j = dz[j];
+#pragma omp simd  //TODO: do we require simd instruction here?
+    for ( int i = 0; i < batch_size; i++ ) {
+      dz_j[i] = 0;
+    }
+  }
+
+  // Initialize da_prev to zero
+  if ( da_prev != NULL ) { // avoid computing da[0], which is NULL
+#pragma omp parallel for schedule(static)
+    for ( int j = 0; j < n_out; j++ ) { // for neurons in out_layer
+      float *da_prev_j = da_prev[j];
+#pragma omp simd  //TODO: do we require simd instruction here?
+      for ( int i = 0; i < batch_size; i++ ) {
+        da_prev_j[i] = 0;
+      }
+    }
+  }
+
   // ----------- START - compute dz -----------
 #pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
@@ -80,7 +102,7 @@ int bstep(
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
-// #pragma omp simd
+#pragma omp simd
         for ( int i = 0; i < batch_size; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
           // TODO Check FMA working
