@@ -15,30 +15,33 @@ We start by presenting the data structure of the DNN
 
 We now explain each element of the 
 \be
-\item \(n_l\) --- {\tt nl}, number of layers. The simplest DNN has 3 layers --- 
+\item \(n^l\) --- {\tt nl}, number of layers. The simplest DNN has 3 layers --- 
 an input layer, a hidden layer and an output layer.
-\item \(p[l]\) -- {\tt npl}, number of neurons per layer. The network of
-Figure~\ref{sample_network} would have \(n_l = 3, p = \{3,4,1\}\)
+\item \(p\) -- {\tt npl}, number of neurons per layer. \(p_l\) is number of
+neurons in layer \(l\), where \(0 \leq l < n^l\). The network of
+Figure~\ref{sample_network} would have \(n^l = 3, p = \{3,4,1\}\)
 \item \(W\) --- the weights on the edges. 
 \(W_i\) contains the edges from layer \(i-1\) to layer \(i\). 
 Hence, 
 \be
 \item \(W_0 = \bot\)
-\item \(W_i = \) edges from layer \(i-1\) to layer \(i\)
+\item \(W_i = \) edges from layer \(i-1\) to layer \(i\). Note that 
+\(0 < i < n^l\)
 \item \(W_{i,j} = \) edges from neuron \(j\) of layer \(i-1\) to layer \(i\).
-Note that \(j = 0, 1, p_{i-1} -1\).
-\item \(W_{i,j,k} = \) edges from neuron \(j\) of layer \(i-1\) to 
+Note that \( 0 \leq < p_{i-1}\).
+\item \(W_{i,j,k} = \) edge from neuron \(j\) of layer \(i-1\) to 
 neuron \(k\) of layer \(i\).
-Note that \(k = 0, 1, p_i -1\).
+Note that \(0 \leq k < p_i\).
 \ee
-\item \(b\) --- the bias of the neurons
+\item \(b\) --- the bias of the neurons.
 \(b_i\) contains the bias of neurons in layer \(i\). 
-Note that \(j = 0, 1, p_{i-1} -1\).
+Note that \(0 < i < n^l\).
 Hence, 
 \be
 \item \(b_0 = \bot\)
 \item \(b_i = \) biases of neurons in layer \(i\)
-\item \(b_{i,j} = \) bias of neuron \(j\) of layer \(i\) 
+\item \(b_{i,j} = \) bias of neuron \(j\) of layer \(i\), 
+where \(0 \leq j < p_i\)
 \ee
 \item \(z\) --- the intermediate output of a neuron
 \(z_i\) contains the intermediate output of neurons in layer \(i\). 
@@ -46,6 +49,7 @@ Hence,
 \be
 \item \(z_0 = \bot\)
 \item \(z_i = \) intermediate output of neurons in layer \(i\)
+Note that \(0 < i < n^l\).
 \item \(z_{i,j} = \) intermediate output of neuron \(j\) of layer \(i-1\) 
 \ee
 \item \(a\) --- the output output of a neuron --- after intermediate output has been
@@ -55,6 +59,7 @@ Hence,
 \be
 \item \(a_0 = \bot\)
 \item \(a_i = \) output of neurons in layer \(i\)
+Note that \(0 < i < n^l\).
 \item \(a_{i,j} = \) output of neuron \(j\) of layer \(i-1\) 
 \ee
 The observant reader would have noticed that the above description indicates

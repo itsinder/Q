@@ -26,7 +26,8 @@ $fullfname .= "/$fname";
 if ($docenv) {
   Warn("Process\n'$fullfname'\nin '$docenv' environment");
   System("cat $ENV{DOCROOT}/styles/e-unibus-${docenv}.tex $fname > TEMP.tex");
-  System("echo '\\end{document}' >> TEMP.tex");
+  # RAMESH: added extra back slashes because of complaints on Ubuntu 18.04
+  System('echo "\\\\\\end{document}" >> TEMP.tex');
   System('pdflatex', './TEMP.tex');
   System('bibtex', './TEMP');
   System('pdflatex', './TEMP.tex');
