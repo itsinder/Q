@@ -157,6 +157,23 @@ BYE:
   return status;
 }
 
+static int
+init_b(
+    int nl,
+    int *npl,
+    float **ptr_b
+    )
+{
+  int status = 0;
+  for ( int l = 1; l < nl; l++ ) {
+    for ( int j = 0; j < npl[l]; j++ ) {
+      float num = (0.01 - (-0.01)) * ( (float)rand() / (float)RAND_MAX ) + (-0.01);
+      ptr_b[l][j] = num;
+    }
+  }
+BYE:
+  return status;
+}
 
 static int
 malloc_b(
@@ -176,9 +193,31 @@ malloc_b(
     return_if_malloc_failed(b[l]);
   }
   *ptr_b = b;
+  status = init_b(nl, npl, *ptr_b);
 BYE:
   return status;
 }
+
+static int
+init_W(
+    int nl,
+    int *npl,
+    float ***ptr_W
+    )
+{
+  int status = 0;
+  for ( int l = 1; l < nl; l++ ) {
+    for ( int j = 0; j < npl[l-1]; j++ ) {
+      for ( int jprime = 0; jprime < npl[l]; jprime++ ) {
+        float num = (0.01 - (-0.01)) * ( (float)rand() / (float)RAND_MAX ) + (-0.01);
+        ptr_W[l][j][jprime] = num;
+      }
+    }
+  }
+BYE:
+  return status;
+}
+
 static int
 malloc_W(
     int nl,
@@ -202,6 +241,7 @@ malloc_W(
     }
   }
   *ptr_W = W;
+  status = init_W(nl, npl, *ptr_W);
 BYE:
   return status;
 }
@@ -320,8 +360,8 @@ BYE:
 int
 dnn_train(
     DNN_REC_TYPE *ptr_dnn,
-    float **cptrs_in, /* [npl[0]][nI] */
-    float **cptrs_out, /* [npl[nl-1]][nI] */
+    float const ** const cptrs_in, /* [npl[0]][nI] */
+    float const ** const cptrs_out, /* [npl[nl-1]][nI] */
     uint64_t nI // number of instances
     )
 {
@@ -339,10 +379,12 @@ dnn_train(
   float   ***a = ptr_dnn->a;
   float   ***dz = ptr_dnn->dz;
   float   ***da = ptr_dnn->da;
+#ifdef TEST_VS_PYTHON
   float   ***zprime = ptr_dnn->zprime;
   float   ***aprime = ptr_dnn->aprime;
   float   ***Wprime = ptr_dnn->Wprime;
   float    **bprime = ptr_dnn->bprime;
+#endif
   __act_fn_t  *A = ptr_dnn->A;
   __bak_act_fn_t  *bak_A = ptr_dnn->bak_A;
 
@@ -378,11 +420,22 @@ dnn_train(
       out_z = z[l];
       out_a = a[l];
       if ( l == 1 ) {
-        in = cptrs_in; 
+        in = cptrs_in;
         /* Advance the pointers to get to the appropriate batch */
-        for ( int j = 0; j < npl[0]; j++ ) { 
+        /*
+        for ( int j = 0; j < npl[0]; j++ ) {
           in[j] += lb;
           num_f_fops += 1;
+        }
+        */
+        // TODO: check with Ramesh
+        // Considering cptrs_in is also getting incremented along with in
+        // Added below logic
+        if ( bidx != 0 ) {
+          for ( int j = 0; j < npl[0]; j++ ) {
+            in[j] += batch_size;
+            num_f_fops += 1;
+          }
         }
         if ( a[l-1] != NULL ) { go_BYE(-1); }
         if ( z[l-1] != NULL ) { go_BYE(-1); }
@@ -393,6 +446,7 @@ dnn_train(
        * B: when l=2, we set dropouts for layer 1, 2
        * but B would over-write the dropouts we set in A
        * this will cause errors */
+
       if ( l == 1 ) { 
         status = set_dropout(d[l-1], dpl[l-1], npl[l-1]); cBYE(status);
       }
@@ -452,10 +506,12 @@ dnn_train(
     //========= STOP - update 'W' and 'b' =========
 
     // To get the correct count, comment out all pragma omp
+    /*
     printf("num of floating point ops in forward pass = %d\n", num_f_fops);
     printf("num of floating point ops in backward pass = %d\n", num_b_fops);
     printf("total num of floating point ops = %d\n", num_fops);
-
+    */
+    printf("epoch %d completed\n", bidx);
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 

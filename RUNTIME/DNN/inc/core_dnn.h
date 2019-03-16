@@ -9,8 +9,8 @@ dnn_delete(
 extern int
 dnn_train(
     DNN_REC_TYPE *ptr_X,
-    float **cptrs_in, /* [npl[0]][nI] */
-    float **cptrs_out, /* [npl[nl-1]][nI] */
+    float const ** const cptrs_in, /* [npl[0]][nI] */
+    float const ** const cptrs_out, /* [npl[nl-1]][nI] */
     uint64_t nI // number of instances
     );
 extern int
