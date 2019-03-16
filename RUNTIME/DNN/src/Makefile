@@ -20,7 +20,7 @@ CSRCS := $(wildcard *.c)
 COBJS = $(CSRCS:.c=.o)
 
 CFLAGS = $(QC_FLAGS) 
-CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON
+# CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON
 
 .c.o : 
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS)
