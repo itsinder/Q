@@ -433,7 +433,7 @@ dnn_train(
         // Added below logic
         if ( bidx != 0 ) {
           for ( int j = 0; j < npl[0]; j++ ) {
-            in[j] += (ub - lb);
+            in[j] += batch_size;
             num_f_fops += 1;
           }
         }
