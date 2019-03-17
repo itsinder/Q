@@ -98,7 +98,9 @@ function ldnn:fit(num_epochs)
   local num_instances = self._num_instances
   assert(self._bsz, "batch size not set")
 
-  for i = 1, num_epochs do 
+  local total = 0
+  for i = 1, num_epochs do
+    local start_t = qc.RDTSC()
     -- TODO Need to randomly permute data before each epoch 
     local cptrs_in  = get_ptrs_to_data(lptrs_in, lXin)
     local cptrs_out = get_ptrs_to_data(lptrs_out, lXout)
@@ -107,7 +109,11 @@ function ldnn:fit(num_epochs)
     -- WRONG: assert(Dnn.bprop(dnn, lptrs_in, lptrs_out, num_instances))
     release_ptrs_to_data(lXin)
     release_ptrs_to_data(lXout)
+    local end_t = qc.RDTSC()
+    total = total + tonumber(end_t - start_t)
+    print("Iteration " .. i .. " time = " .. tostring(tonumber(end_t - start_t)))
   end
+  print("Total Training time for " .. num_epochs .. " iteation = " .. total)
   self._num_epochs = self._num_epochs + num_epochs
   if ( qconsts.debug ) then self:check() end
   return true

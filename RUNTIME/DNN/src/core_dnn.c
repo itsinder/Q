@@ -404,6 +404,10 @@ dnn_train(
   }
 
   srand48(RDTSC());
+  t_fstep = 0;
+  t_bstep = 0;
+  t_update = 0;
+  n_epochs = 0;
   for ( int bidx = 0; bidx < num_batches; bidx++ ) {
     int lb = bidx  * batch_size;
     int ub = lb + batch_size;
@@ -411,6 +415,7 @@ dnn_train(
     if ( ( ub - lb ) > batch_size ) { go_BYE(-1); }
 
     //========= START - forward propagation =========
+    uint64_t delta = 0, t_start = RDTSC();
     float **in;
     float **out_z;
     float **out_a;
@@ -444,6 +449,7 @@ dnn_train(
           d[l-1], d[l], out_z, out_a, (ub-lb), npl[l-1], npl[l], A[l]);
       cBYE(status);
     }
+    delta = RDTSC() - t_start; if ( delta > 0 ) { t_fstep += delta; }
     //========= STOP - forward propagation =========
 
 #ifdef TEST_VS_PYTHON
@@ -455,6 +461,7 @@ dnn_train(
 #define ALPHA 0.0075 // TODO This is a user supplied parameter
 
     //========= START - backward propagation =========
+    t_start = RDTSC();
     float **da_last = da[nl-1];
     float **a_last  =  a[nl-1];
     float **out = cptrs_out;
@@ -480,6 +487,7 @@ dnn_train(
           da_prev_l, dW_l, db_l, npl[l], npl[l-1], batch_size, bak_A[l]);
       cBYE(status);
     }
+    delta = RDTSC() - t_start; if ( delta > 0 ) { t_bstep += delta; }
     //========= STOP - backward propagation =========
 /*
 #ifdef TEST_VS_PYTHON
@@ -490,8 +498,10 @@ dnn_train(
 */
 
     //========= START - update 'W' and 'b' =========
+    t_start = RDTSC();
     num_fops = num_f_fops + num_b_fops;
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
+    delta = RDTSC() - t_start; if ( delta > 0 ) { t_update += delta; }
     //========= STOP - update 'W' and 'b' =========
 
     // To get the correct count, comment out all pragma omp
@@ -500,13 +510,19 @@ dnn_train(
     printf("num of floating point ops in backward pass = %d\n", num_b_fops);
     printf("total num of floating point ops = %d\n", num_fops);
     */
-    printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
+    //printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
+    n_epochs++;
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 
     exit(0);
 #endif
   }
+
+  fprintf(stdout, "t_fstep = %u%" PRIu64 "\n", t_fstep);
+  fprintf(stdout, "t_bstep = %u%" PRIu64 "\n", t_bstep);
+  fprintf(stdout, "t_update = %u%" PRIu64 "\n", t_update);
+  fprintf(stdout, "n_epochs = %u%" PRIu64 "\n", n_epochs);
 BYE:
   return status;
 }

@@ -5,6 +5,8 @@ int num_f_fops;
 int num_b_fops;
 int num_fops;
 
+uint64_t t_fstep, t_bstep, t_update, n_epochs;
+
 typedef float(* __act_fn_t )(float *, int, float *);
 
 typedef float(* __bak_act_fn_t )(float *, float *, int, float *);

@@ -100,7 +100,7 @@ int bstep(
   // ----------- START - compute da_prev -----------
 // TODO: if I enable below pragma omp instruction, 
 // then I observe difference for few values of updated 'W' and 'b'
-// #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
   for ( int j = 0; j < n_in; j++ ) { // for neurons in in_layer
     float *dz_j = dz[j];
     if ( da_prev != NULL ) { // avoid computing da[0], which is NULL
