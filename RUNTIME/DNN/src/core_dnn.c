@@ -407,7 +407,6 @@ dnn_train(
   t_fstep = 0;
   t_bstep = 0;
   t_update = 0;
-  n_epochs = 0;
   for ( int bidx = 0; bidx < num_batches; bidx++ ) {
     int lb = bidx  * batch_size;
     int ub = lb + batch_size;
@@ -499,30 +498,32 @@ dnn_train(
 
     //========= START - update 'W' and 'b' =========
     t_start = RDTSC();
-    num_fops = num_f_fops + num_b_fops;
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
     delta = RDTSC() - t_start; if ( delta > 0 ) { t_update += delta; }
     //========= STOP - update 'W' and 'b' =========
 
     // To get the correct count, comment out all pragma omp
-    /*
-    printf("num of floating point ops in forward pass = %d\n", num_f_fops);
-    printf("num of floating point ops in backward pass = %d\n", num_b_fops);
-    printf("total num of floating point ops = %d\n", num_fops);
-    */
-    //printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
-    n_epochs++;
+#ifdef COUNT
+    printf("num flops forward pass  = %" PRIu64 "\n", num_f_flops);
+    printf("num flops backward pass = %" PRIu64 "\n", num_b_flops);
+#endif
+    printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 
     exit(0);
 #endif
   }
+#ifdef COUNT
+  printf("num flops forward pass  = %" PRIu64 "\n", num_f_flops);
+  printf("num flops backward pass = %" PRIu64 "\n", num_b_flops);
+  printf("total num flops         = %" PRIu64 "\n", 
+        (num_f_flops+num_b_flops));
+#endif
 
-  fprintf(stdout, "t_fstep = %u%" PRIu64 "\n", t_fstep);
-  fprintf(stdout, "t_bstep = %u%" PRIu64 "\n", t_bstep);
-  fprintf(stdout, "t_update = %u%" PRIu64 "\n", t_update);
-  fprintf(stdout, "n_epochs = %u%" PRIu64 "\n", n_epochs);
+  fprintf(stdout, "t_fstep  = %" PRIu64 "\n", t_fstep);
+  fprintf(stdout, "t_bstep  = %" PRIu64 "\n", t_bstep);
+  fprintf(stdout, "t_update = %" PRIu64 "\n", t_update);
 BYE:
   return status;
 }

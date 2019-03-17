@@ -53,7 +53,7 @@ tests.t1 = function()
 
   print("training started")
   start_t = qc.RDTSC()
-  x:fit(2)
+  x:fit(1)
   end_t = qc.RDTSC()
   print("fit = " .. tostring(end_t - start_t))
   print("Test t4 succeeded")

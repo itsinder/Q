@@ -1,9 +1,8 @@
 #ifndef __DNN_TYPES_H
 #define __DNN_TYPES_H
 
-int num_f_fops;
-int num_b_fops;
-int num_fops;
+uint64_t num_f_flops;
+uint64_t num_b_flops;
 
 uint64_t t_fstep, t_bstep, t_update, n_epochs;
 

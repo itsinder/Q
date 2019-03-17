@@ -13,22 +13,30 @@ sigmoid(
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = -1 * x[i];
-    num_f_fops += 1;
+#ifdef COUNT
+    num_f_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = exp(y[i]);
-    num_f_fops += 1;
+#ifdef COUNT
+    num_f_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = 1 + y[i];
-    num_f_fops += 1;
+#ifdef COUNT
+    num_f_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = 1.0 / y[i];
-    num_f_fops += 1;
+#ifdef COUNT
+    num_f_flops += 1;
+#endif
   }
   return status;
 }
@@ -50,22 +58,30 @@ sigmoid_bak(
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = -1 * z[i];
-    num_b_fops += 1;
+#ifdef COUNT
+    num_b_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = exp(y[i]);
-    num_b_fops += 1;
+#ifdef COUNT
+    num_b_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = 1 + y[i];
-    num_b_fops += 1;
+#ifdef COUNT
+    num_b_flops += 1;
+#endif
   }
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) {
     y[i] = 1.0 / y[i];
-    num_b_fops += 1;
+#ifdef COUNT
+    num_b_flops += 1;
+#endif
   }
 
   /*
@@ -76,7 +92,9 @@ sigmoid_bak(
 #pragma omp simd
   for ( int  i = 0; i < n; i++ ) { 
     dz[i] = ( da[i] * y[i] * ( 1 - y[i] ) );
-    num_b_fops += 3;
+#ifdef COUNT
+    num_b_flops += 3;
+#endif
   }
 BYE:
   free_if_non_null(y);

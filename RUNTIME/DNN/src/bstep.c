@@ -24,7 +24,9 @@ int compute_da_last(
     for ( int i = 0; i < batch_size; i++ ) { // for each instance
       da_j[i] = ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) 
         - ( out_j[i] / a_j[i] );
-      num_b_fops += 5;
+#ifdef COUNT
+      num_b_flops += 5;
+#endif
     }
   } // 'da' for last layer has been computed
 BYE:
@@ -110,7 +112,9 @@ int bstep(
 #pragma omp simd
         for ( int i = 0; i < batch_size; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
-          num_b_fops += 2;
+#ifdef COUNT
+          num_b_flops += 2;
+#endif
           // TODO Check FMA working
         }
       }
@@ -130,20 +134,28 @@ int bstep(
 #pragma omp simd
       for ( int i = 0; i < batch_size; i++ ) {
         sum += dz_j[i] * a_prev_jprime[i]; // TODO Check FMA working
-        num_b_fops += 2;
+#ifdef COUNT
+        num_b_flops += 2;
+#endif
       }
       sum /= batch_size;
-      num_b_fops += 1;
+#ifdef COUNT
+      num_b_flops += 1;
+#endif
       dW[jprime][j] = sum;
     }
     sum = 0;
 #pragma omp simd reduction(+:sum)
     for ( int i = 0; i < batch_size; i++ ) {
       sum += dz_j[i];
-      num_b_fops += 1;
+#ifdef COUNT
+      num_b_flops += 1;
+#endif
     }
     sum /= batch_size;
-    num_b_fops += 1;
+#ifdef COUNT
+    num_b_flops += 1;
+#endif
     db[j] = sum;
   }
   // ----------- STOP - compute dW & db -----------

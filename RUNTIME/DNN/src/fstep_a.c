@@ -51,7 +51,9 @@ int fstep_a(
 // #pragma omp parallel for 
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
         out_z_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working
-        num_f_fops += 2;
+#ifdef COUNT
+        num_f_flops += 2;
+#endif
       }
       float *out_a_k = out_a[k];
       afn(out_z_k, nI, out_a_k);
