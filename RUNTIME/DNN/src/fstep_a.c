@@ -64,13 +64,14 @@ int fstep_a(
     if ( d_in[j] ) { continue; }
     float *in_j = in[j];
     float *W_j = W[j];
+// #pragma omp parallel for if ( outer_par )
 #pragma omp parallel for 
     for ( int k = 0; k < n_out; k++ ) { // for each neuron in output
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
 #pragma omp simd
-// #pragma omp parallel for if (inner_par)
+// #pragma omp parallel for if ( inner_par )
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
         /*
         float in_j_i = in_j[i];

@@ -522,7 +522,7 @@ dnn_train(
 
   fprintf(stdout, "fcycles  = %" PRIu64 "\n", t_fstep);
   fprintf(stdout, "bcycles  = %" PRIu64 "\n", t_bstep);
-  fprintf(stdout, "t_total  = %" PRIu64 "\n", (t_fstep+t_bstep));
+  fprintf(stdout, "tcycles  = %" PRIu64 "\n", (t_fstep+t_bstep));
 BYE:
   return status;
 }

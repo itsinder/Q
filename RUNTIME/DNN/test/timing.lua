@@ -5,8 +5,10 @@ f_flops = 22108176384
 b_flops = 27150704320
 --total num flops         = 49258880704
 
-fcycles  = 5307828723 -- 4k batch size
-bcycles  = 7808706682 -- 4k batch size
+fcycles  = 5275653199
+bcycles  = 8137887296
+tcycles  = 13413540495
+
 fnsec   = fcycles / 2.5
 bnsec   = bcycles / 2.5
 

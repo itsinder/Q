@@ -12,7 +12,7 @@ afns = {}
 tests.t1 = function()
   local saved_file_path = "dnn_in.txt"
   local n_samples = 1024 * 1024
-  local batch_size = 4 * 1024
+  local batch_size = 32 -- 1 * 1024
 
 --[[
   npl = { 128, 64, 32, 8, 4, 2, 1 }
