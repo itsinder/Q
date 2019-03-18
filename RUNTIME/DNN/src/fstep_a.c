@@ -1,3 +1,4 @@
+#include <omp.h>
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "act_fns.h"
@@ -38,18 +39,46 @@ int fstep_a(
       out_z_k[i] = b_k;
     }
   }
+  // START: decide on which loop to parallelize
+  int num_procs = omp_get_num_procs();
+  bool outer_par = false, inner_par = false;
+  if ( ( n_out == 1 ) && ( nI == 1 ) )  {
+    outer_par = inner_par = false;
+  }
+  else {
+    if ( n_out < num_procs ) {
+      if ( nI < 1024 ) {  
+        outer_par = true; inner_par = false;
+      }
+      else {
+        outer_par = false; inner_par = true;
+      }
+    }
+    else {
+      outer_par = true; inner_par = false;
+    }
+  }
+  if ( outer_par && inner_par ) { go_BYE(-1); }
+  // STOP: decide on which loop to parallelize
   for ( int j = 0; j < n_in; j++ ) {  // for each neuron in input
     if ( d_in[j] ) { continue; }
     float *in_j = in[j];
     float *W_j = W[j];
-#pragma omp parallel for
+#pragma omp parallel for 
     for ( int k = 0; k < n_out; k++ ) { // for each neuron in output
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
 #pragma omp simd
-// #pragma omp parallel for 
+// #pragma omp parallel for if (inner_par)
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
+        /*
+        float in_j_i = in_j[i];
+        float prod = in_j_i * w_jk;
+        float out_z_k_i = out_z_k[i];
+        out_z_k_i += prod;
+        out_z_k[i] = out_z_k_i;
+        */
         out_z_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working
 #ifdef COUNT
         num_f_flops += 2;
@@ -59,5 +88,6 @@ int fstep_a(
       afn(out_z_k, nI, out_a_k);
     }
   }
+BYE:
   return status;
 }

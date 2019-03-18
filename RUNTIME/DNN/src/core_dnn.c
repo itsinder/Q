@@ -505,8 +505,8 @@ dnn_train(
 #ifdef COUNT
     printf("num flops forward pass  = %" PRIu64 "\n", num_f_flops);
     printf("num flops backward pass = %" PRIu64 "\n", num_b_flops);
-#endif
     printf("batch %d completed, [%d, %d]\n", bidx, lb, ub);
+#endif
 #ifdef TEST_VS_PYTHON
     status = check_W_b(nl, npl, W, Wprime, b, bprime); cBYE(status);
     printf("SUCCESS for backward pass\n"); 
@@ -520,8 +520,8 @@ dnn_train(
         (num_f_flops+num_b_flops));
 #endif
 
-  fprintf(stdout, "t_fstep  = %" PRIu64 "\n", t_fstep);
-  fprintf(stdout, "t_bstep  = %" PRIu64 "\n", t_bstep);
+  fprintf(stdout, "fcycles  = %" PRIu64 "\n", t_fstep);
+  fprintf(stdout, "bcycles  = %" PRIu64 "\n", t_bstep);
   fprintf(stdout, "t_total  = %" PRIu64 "\n", (t_fstep+t_bstep));
 BYE:
   return status;
