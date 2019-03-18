@@ -463,7 +463,7 @@ dnn_train(
     float **da_last = da[nl-1];
     float **a_last  =  a[nl-1];
     float **out = cptrs_out;
-    status = compute_da_last(a_last, out, da_last, npl[nl-1], batch_size);
+    status = compute_da_last(a_last, out, da_last, npl[nl-1], (ub-lb));
     cBYE(status);
     // da for the last layer has been computed
 
@@ -482,7 +482,7 @@ dnn_train(
       }
 
       status = bstep(z_l, a_prev_l, W_l, da_l, dz_l, 
-          da_prev_l, dW_l, db_l, npl[l], npl[l-1], batch_size, bak_A[l]);
+          da_prev_l, dW_l, db_l, npl[l], npl[l-1], (ub-lb), bak_A[l]);
       cBYE(status);
     }
     delta = RDTSC() - t_start; if ( delta > 0 ) { t_bstep += delta; }

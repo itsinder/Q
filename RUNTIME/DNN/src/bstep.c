@@ -9,7 +9,7 @@ int compute_da_last(
     float **out,   /* Xout */
     float **da,   /* 'da' value for last layer */
     int n_in_last,   /* number of neurons in last layer */
-    int batch_size
+    int nI
     )
 {
   int status = 0;
@@ -21,7 +21,7 @@ int compute_da_last(
 #pragma omp parallel for schedule(static, 16)
     // 16 is so that if cache line is 64 bytes and float is 4 bytes
     // then threads do not stomp on each other
-    for ( int i = 0; i < batch_size; i++ ) { // for each instance
+    for ( int i = 0; i < nI; i++ ) { // for each instance
       da_j[i] = ( ( 1 - out_j[i] ) / ( 1 - a_j[i] ) ) 
         - ( out_j[i] / a_j[i] );
 #ifdef COUNT
@@ -50,7 +50,7 @@ int bstep(
     float *db, /* 'db' at in_layer */
     int32_t n_in, /* neurons in in_layer */
     int32_t n_out, /* neurons in out_layer */
-    int32_t batch_size,
+    int32_t nI,
     __bak_act_fn_t afn
     )
 {
@@ -66,7 +66,7 @@ int bstep(
     // RAMESH: We should compare loop with memset
     // RAMESH: might as well do omp simd, will not hurt
 #pragma omp simd
-    for ( int i = 0; i < batch_size; i++ ) {
+    for ( int i = 0; i < nI; i++ ) {
       dz_j[i] = 0;
     }
   }
@@ -79,7 +79,7 @@ int bstep(
       // RAMESH: Same comments as earlier, 
       // compare with memset and simd won't hurt
 #pragma omp simd
-      for ( int i = 0; i < batch_size; i++ ) {
+      for ( int i = 0; i < nI; i++ ) {
         da_prev_j[i] = 0;
       }
     }
@@ -93,7 +93,7 @@ int bstep(
     float *z_j = z[j];
     float *da_j = da[j];
     float *dz_j = dz[j];
-    l_status = afn(z_j, da_j, batch_size, dz_j);
+    l_status = afn(z_j, da_j, nI, dz_j);
     if ( l_status < 0 ) { status = -1; continue; }
   }
   cBYE(status);
@@ -110,7 +110,7 @@ int bstep(
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
 #pragma omp simd
-        for ( int i = 0; i < batch_size; i++ ) {
+        for ( int i = 0; i < nI; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
 #ifdef COUNT
           num_b_flops += 2;
@@ -132,13 +132,13 @@ int bstep(
       sum = 0;
       float *a_prev_jprime = a_prev[jprime];
 #pragma omp simd
-      for ( int i = 0; i < batch_size; i++ ) {
+      for ( int i = 0; i < nI; i++ ) {
         sum += dz_j[i] * a_prev_jprime[i]; // TODO Check FMA working
 #ifdef COUNT
         num_b_flops += 2;
 #endif
       }
-      sum /= batch_size;
+      sum /= nI;
 #ifdef COUNT
       num_b_flops += 1;
 #endif
@@ -146,13 +146,13 @@ int bstep(
     }
     sum = 0;
 #pragma omp simd reduction(+:sum)
-    for ( int i = 0; i < batch_size; i++ ) {
+    for ( int i = 0; i < nI; i++ ) {
       sum += dz_j[i];
 #ifdef COUNT
       num_b_flops += 1;
 #endif
     }
-    sum /= batch_size;
+    sum /= nI;
 #ifdef COUNT
     num_b_flops += 1;
 #endif

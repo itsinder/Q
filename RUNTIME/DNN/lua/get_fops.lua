@@ -9,7 +9,7 @@ local get_f_fops = function(npl, nI)
     end
     cnt = cnt + (npl[i-1] * npl[i] * nI * factor)
   end
-  return cnt + npl[1]
+  return cnt
 end
 
 local get_b_fops = function(npl, nI)
@@ -44,16 +44,12 @@ end
 
 local npl -- network structure 
 local nI  -- number of instances
-npl = { 9, 7, 2, 1 }
 npl = { 128, 64, 32, 16, 8, 4, 2, 1 }
---local ld_tbl = {18,10,13,7,4,2,1}
-nI = 5
 nI = 1024 * 1024 
 local num_epoch = 1
 local f_fops = get_f_fops(npl, nI)
-print(f_fops)
+print("num flops forward pass = " .. tostring(f_fops))
 local b_fops = get_b_fops(npl, nI)
-print(b_fops)
 local wb_fops = get_update_wb_fops(npl)
-print(wb_fops)
-print(f_fops+b_fops+wb_fops)
+print("num flops backword pass = " .. tostring(b_fops + wb_fops))
+print("total num flops = " .. tostring(f_fops+b_fops+wb_fops))
