@@ -42,9 +42,13 @@ local get_update_wb_fops = function(npl)
   return cnt
 end
 
-local npl = { 9, 7, 2, 1 }
+local npl -- network structure 
+local nI  -- number of instances
+npl = { 9, 7, 2, 1 }
+npl = { 128, 64, 32, 16, 8, 4, 2, 1 }
 --local ld_tbl = {18,10,13,7,4,2,1}
-local nI = 5
+nI = 5
+nI = 1024 * 1024 
 local num_epoch = 1
 local f_fops = get_f_fops(npl, nI)
 print(f_fops)

@@ -406,7 +406,6 @@ dnn_train(
   srand48(RDTSC());
   t_fstep = 0;
   t_bstep = 0;
-  t_update = 0;
   for ( int bidx = 0; bidx < num_batches; bidx++ ) {
     int lb = bidx  * batch_size;
     int ub = lb + batch_size;
@@ -499,7 +498,7 @@ dnn_train(
     //========= START - update 'W' and 'b' =========
     t_start = RDTSC();
     status = update_W_b(W, dW, b, db, nl, npl, d, ALPHA); cBYE(status);
-    delta = RDTSC() - t_start; if ( delta > 0 ) { t_update += delta; }
+    delta = RDTSC() - t_start; if ( delta > 0 ) { t_bstep += delta; }
     //========= STOP - update 'W' and 'b' =========
 
     // To get the correct count, comment out all pragma omp
@@ -523,7 +522,7 @@ dnn_train(
 
   fprintf(stdout, "t_fstep  = %" PRIu64 "\n", t_fstep);
   fprintf(stdout, "t_bstep  = %" PRIu64 "\n", t_bstep);
-  fprintf(stdout, "t_update = %" PRIu64 "\n", t_update);
+  fprintf(stdout, "t_total  = %" PRIu64 "\n", (t_fstep+t_bstep));
 BYE:
   return status;
 }

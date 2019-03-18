@@ -4,7 +4,7 @@
 uint64_t num_f_flops;
 uint64_t num_b_flops;
 
-uint64_t t_fstep, t_bstep, t_update, n_epochs;
+uint64_t t_fstep, t_bstep;
 
 typedef float(* __act_fn_t )(float *, int, float *);
 
