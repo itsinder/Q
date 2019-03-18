@@ -42,14 +42,45 @@ local get_update_wb_fops = function(npl)
   return cnt
 end
 
-local npl -- network structure 
-local nI  -- number of instances
-npl = { 128, 64, 32, 16, 8, 4, 2, 1 }
-nI = 1024 * 1024 
-local num_epoch = 1
-local f_fops = get_f_fops(npl, nI)
-print("num flops forward pass = " .. tostring(f_fops))
-local b_fops = get_b_fops(npl, nI)
-local wb_fops = get_update_wb_fops(npl)
-print("num flops backword pass = " .. tostring(b_fops + wb_fops))
-print("total num flops = " .. tostring(f_fops+b_fops+wb_fops))
+
+local test_get_fops = function()
+
+  local npl -- network structure 
+  local nI  -- number of instances
+  local batch_size
+
+  npl = { 128, 64, 32, 8, 4, 2, 1 }
+  nI = 1024 * 1024
+  batch_size = 16 * 1024
+
+  local f_fops = 0
+  local b_fops = 0
+  local wb_fops = 0 
+
+  local num_batches = nI / batch_size
+  num_batches = math.ceil(num_batches)
+
+  for i = 0, num_batches-1 do
+    local lb = i  * batch_size;
+    local ub = lb + batch_size;
+    if i == (num_batches-1) then
+      ub = nI
+    end
+    f_fops = f_fops + get_f_fops(npl, (ub - lb))
+    b_fops = b_fops + get_b_fops(npl, (ub - lb))
+    wb_fops = wb_fops + get_update_wb_fops(npl)
+
+    print("num flops forward pass = " .. tostring(f_fops))
+    print("num flops backword pass = " .. tostring(b_fops + wb_fops))
+    print("total num flops = " .. tostring(f_fops+b_fops+wb_fops))
+
+    print("batch " .. tostring(i) .. " completed, [" .. tostring(lb) .. ", " .. tostring(ub) .. "]")
+  end
+  print("===============TOTAL===================")
+  print("num flops forward pass = " .. tostring(f_fops))
+  print("num flops backword pass = " .. tostring(b_fops + wb_fops))
+  print("total num flops = " .. tostring(f_fops+b_fops+wb_fops))
+end
+
+test_get_fops()
+
