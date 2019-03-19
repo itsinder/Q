@@ -523,6 +523,7 @@ dnn_train(
   fprintf(stdout, "fcycles  = %" PRIu64 "\n", t_fstep);
   fprintf(stdout, "bcycles  = %" PRIu64 "\n", t_bstep);
   fprintf(stdout, "tcycles  = %" PRIu64 "\n", (t_fstep+t_bstep));
+  fprintf(stdout, " time    = %lf \n", (t_fstep+t_bstep) / (2.5 * 1000 * 1000));
 BYE:
   return status;
 }
