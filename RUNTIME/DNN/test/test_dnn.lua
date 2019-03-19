@@ -9,10 +9,11 @@ Xout = {}
 npl = {}
 dpl = {}
 afns = {}
-tests.t1 = function()
+tests.t1 = function(batch_size)
+  local batch_size = batch_size or 4096
   local saved_file_path = "dnn_in.txt"
   local n_samples = 1024 * 1024
-  local batch_size = 1 * 1024
+  print("batch size = ", batch_size)
 
 --[[
   npl = { 128, 64, 32, 8, 4, 2, 1 }
