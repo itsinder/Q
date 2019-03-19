@@ -62,6 +62,22 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_dnn_test( lua_State *L) {
+  int status = 0;
+  DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
+  CMEM_REC_TYPE *cptrs_in = (CMEM_REC_TYPE *)luaL_checkudata(L, 2, "CMEM");
+  float out;
+  status = dnn_test(ptr_dnn,
+      (float **)cptrs_in->data, &out);
+  cBYE(status);
+  lua_pushnumber(L, out);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  return 2;
+}
+//----------------------------------------
 static int l_dnn_delete( lua_State *L) {
   DNN_REC_TYPE *ptr_dnn = (DNN_REC_TYPE *)luaL_checkudata(L, 1, "Dnn");
   int status = dnn_delete(ptr_dnn);cBYE(status);
@@ -127,6 +143,7 @@ static const struct luaL_Reg dnn_methods[] = {
     { "set_bsz", l_dnn_set_bsz },
     { "unset_bsz", l_dnn_unset_bsz },
     { "train", l_dnn_train },
+    { "test", l_dnn_test },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
 //    { "serialize", l_dnn_serialize },
@@ -140,6 +157,7 @@ static const struct luaL_Reg dnn_functions[] = {
     { "set_bsz", l_dnn_set_bsz },
     { "unset_bsz", l_dnn_unset_bsz },
     { "train", l_dnn_train },
+    { "test", l_dnn_test },
 //    { "hydrate", l_dnn_hydrate },
 //    { "meta", l_dnn_meta },
     { "new", l_dnn_new },

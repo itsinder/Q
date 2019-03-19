@@ -36,3 +36,9 @@ extern int dnn_set_bsz(
 extern int dnn_unset_bsz(
     DNN_REC_TYPE *ptr_dnn
     );
+extern int
+dnn_test(
+    DNN_REC_TYPE *ptr_dnn,
+    float ** const cptrs_in,
+    float *out
+    );

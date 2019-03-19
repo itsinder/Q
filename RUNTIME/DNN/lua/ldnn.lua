@@ -119,6 +119,39 @@ function ldnn:fit(num_epochs)
   return true
 end
 
+
+function ldnn:predict(in_table)
+  local start_t = qc.RDTSC()
+  if ( qconsts.debug ) then self:check() end
+  assert(type(in_table) == "table")
+  local n_scalars = 0
+  for k, v in pairs(in_table) do
+    assert(type(v) == "Scalar")
+    assert(v:fldtype() == "F4")
+    n_scalars = n_scalars + 1;
+  end
+  local dnn  = self._dnn
+
+  -- prepare input using input scalars
+  local sz = ffi.sizeof("float *") * n_scalars
+  local lptrs = cmem.new(sz)
+  local cptrs = get_ptr(lptrs)
+  cptrs = ffi.cast("float **", cptrs)
+  for k, v in pairs(in_table) do
+    local data = v:to_cmem()
+    cptrs[k-1] = get_ptr(data, "F4")
+  end
+  local end_t = qc.RDTSC()
+  local set_io_t = tonumber(end_t - start_t)
+
+  local start_t = qc.RDTSC()
+  local out = assert(Dnn.test(dnn, lptrs))
+  local end_t = qc.RDTSC()
+  local test_t = tonumber(end_t - start_t)
+  if ( qconsts.debug ) then self:check() end
+  return Scalar.new(out, "F4"), test_t, set_io_t
+end
+
 function ldnn:check()
   local chk = Dnn.check(self._dnn)
   assert(chk, "Internal error")

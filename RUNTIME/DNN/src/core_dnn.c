@@ -358,6 +358,66 @@ BYE:
 }
 //----------------------------------------------------
 int
+dnn_test(
+    DNN_REC_TYPE *ptr_dnn,
+    float ** const cptrs_in,
+    float *out
+    )
+{
+  int status = 0;
+  int    nl    = ptr_dnn->nl;
+  int    *npl  = ptr_dnn->npl;
+  float  ***W  = ptr_dnn->W;
+  float   **b  = ptr_dnn->b;
+  bool     **d = ptr_dnn->d;
+  float   *dpl = ptr_dnn->dpl;
+  float   ***z = ptr_dnn->z;
+  float   ***a = ptr_dnn->a;
+  __act_fn_t  *A = ptr_dnn->A;
+
+  if ( W   == NULL ) { go_BYE(-1); }
+  if ( b   == NULL ) { go_BYE(-1); }
+  if ( a   == NULL ) { go_BYE(-1); }
+  if ( d   == NULL ) { go_BYE(-1); }
+  if ( dpl == NULL ) { go_BYE(-1); }
+  if ( z   == NULL ) { go_BYE(-1); }
+  if ( npl == NULL ) { go_BYE(-1); }
+  if ( nl  <  3    ) { go_BYE(-1); }
+
+  //========= START - forward propagation =========
+  uint64_t t_end = 0, t_start = RDTSC();
+  float **in;
+  float **out_z;
+  float **out_a;
+  for ( int l = 1; l < nl; l++ ) { // For each layer
+    // Note that loop starts from 1, not 0
+    in  = a[l-1];
+    out_z = z[l];
+    out_a = a[l];
+    if ( l == 1 ) {
+      in = cptrs_in;
+      if ( a[l-1] != NULL ) { go_BYE(-1); }
+      if ( z[l-1] != NULL ) { go_BYE(-1); }
+    }
+    if ( l == 1 ) {
+      status = set_dropout(d[l-1], dpl[l-1], npl[l-1]); cBYE(status);
+    }
+    status = set_dropout(d[l],   dpl[l],   npl[l]); cBYE(status);
+    status = fstep_a(in, W[l], b[l],
+        d[l-1], d[l], out_z, out_a, 1, npl[l-1], npl[l], A[l]);
+    cBYE(status);
+  }
+  //TODO: handle it properly, for now assuming one neuron in last layer
+  *out = a[nl-1][0][0];
+  t_end = RDTSC();
+  //========= STOP - forward propagation =========
+  // fprintf(stdout, "C test cycles  = %" PRIu64 "\n", (t_end-t_start));
+
+BYE:
+  return status;
+}
+//----------------------------------------------------
+int
 dnn_train(
     DNN_REC_TYPE *ptr_dnn,
     float ** const cptrs_in, /* [npl[0]][nI] */
