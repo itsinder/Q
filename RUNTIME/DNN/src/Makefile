@@ -21,7 +21,8 @@ COBJS = $(CSRCS:.c=.o)
 
 CFLAGS = $(QC_FLAGS)  
 # CFLAGS = $(QC_FLAGS) -DTEST_VS_PYTHON
-# CFLAGS = $(QC_FLAGS) -DCOUNT # for counting flops
+count : CFLAGS = $(QC_FLAGS) -DCOUNT # for counting flops
+count : all
 
 .c.o : 
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS)
