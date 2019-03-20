@@ -5,12 +5,12 @@
 -- T.t4()
 local T = require 'test_dnn'
 local t1 = T.t1
-local bsz = 65536
+local bsz = 4096
 repeat 
-  for i = 1, 3 do 
+  for i = 1, 1 do 
     print("bsz/i = ", bsz, i)
     t1(bsz)
   end
   bsz = bsz / 2 
   print("---------------------------------------")
-until bsz < 1 
+until bsz < 2048

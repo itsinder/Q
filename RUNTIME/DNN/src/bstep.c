@@ -5,9 +5,9 @@
 #include "bstep.h"
 
 int compute_da_last(
-    float **a,   /* 'a' value for last layer */
-    float **out,   /* Xout */
-    float **da,   /* 'da' value for last layer */
+    float ** restrict a,   /* 'a' value for last layer */
+    float ** restrict out,   /* Xout */
+    float ** restrict da,   /* 'da' value for last layer */
     int n_in_last,   /* number of neurons in last layer */
     int nI
     )

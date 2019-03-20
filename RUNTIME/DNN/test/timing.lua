@@ -2,12 +2,12 @@
 --                   back = 28776104315
 --
 f_flops = 22108176384
-b_flops = 27150704320
+b_flops = 27156859648
 --total num flops         = 49258880704
 
-fcycles  = 5275653199
-bcycles  = 8137887296
-tcycles  = 13413540495
+fcycles  = 5642214953
+bcycles  = 7830304974
+tcycles  = 13472519927
 
 fnsec   = fcycles / 2.5
 bnsec   = bcycles / 2.5

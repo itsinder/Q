@@ -51,7 +51,7 @@ local test_get_fops = function()
 
   npl = { 128, 64, 32, 8, 4, 2, 1 }
   nI = 1024 * 1024
-  batch_size = 16 * 1024
+  batch_size = 4 * 1024
 
   local f_fops = 0
   local b_fops = 0

@@ -14,13 +14,13 @@
 // We use k as the index for each element in the output
 // Given in, W, we update out
 int fstep_a(
-    float **in,  /* [n_in][nI] */
-    float **W,   /* [n_in][n_out] */ 
-    float *b,    /* bias[n_out] */
-    bool *d_in,   /* [n_in]  dropout for input layer */
-    bool *d_out,  /* [n_out] dropout for output layer */
-    float **out_z, /* [n_out][nI] */
-    float **out_a, /* [n_out][nI] */
+    float ** restrict in,  /* [n_in][nI] */
+    float ** restrict W,   /* [n_in][n_out] */ 
+    float * restrict b,    /* bias[n_out] */
+    bool * restrict d_in,   /* [n_in]  dropout for input layer */
+    bool * restrict d_out,  /* [n_out] dropout for output layer */
+    float ** restrict out_z, /* [n_out][nI] */
+    float ** restrict out_a, /* [n_out][nI] */
     int32_t nI, 
     int32_t n_in,  /* j is index for  input streaming */
     int32_t n_out,  /* k is index for output streaming */
@@ -71,16 +71,12 @@ int fstep_a(
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
 #pragma omp simd
-// #pragma omp parallel for if ( inner_par )
+// TODO #pragma omp parallel for if ( inner_par )
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
-        /*
-        float in_j_i = in_j[i];
-        float prod = in_j_i * w_jk;
-        float out_z_k_i = out_z_k[i];
-        out_z_k_i += prod;
-        out_z_k[i] = out_z_k_i;
-        */
-        out_z_k[i] += in_j[i] * w_jk; // TODO Check if FMA is working
+        out_z_k[i] = out_z_k[i] + (in_j[i] * w_jk); 
+        // out_z_k[i] = fmaf(in_j[i], w_jk, out_z_k[i]);
+        // out_z_k[i] = __FP_FAST_FMAF32(in_j[i], w_jk, out_z_k[i]);
+        // out_z_k[i] = __builtin_ia32_fmaddps(in_j[i], w_jk, out_z_k[i]);
 #ifdef COUNT
         num_f_flops += 2;
 #endif

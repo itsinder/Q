@@ -50,7 +50,7 @@ sigmoid_bak(
     )
 {
   int status = 0;
-  // Don't malloc s here
+  // TODO Don't malloc s here
   float *y;
   y = malloc(n * sizeof(float));
   return_if_malloc_failed(y);
