@@ -16,7 +16,9 @@ int main() {
   for ( int i = 0; i < N; i++ ) { C[i] = i*4; }
 
   printf("starting\n");
-  for ( int i = 0; i < 1; i++ ) { 
+  int register_width = 256;
+  int num_words_in_reg = register_width / (8 * sizeof(float));
+  for ( int i = 0; i < N/num_words_in_reg; i += num_words_in_reg ) { 
     /*
     __m256 a = _mm256_setr_ps(A[i], A[i+1], A[i+2], A[i+3]);
     __m256 b = _mm256_setr_ps(B[i], B[i+1], B[i+2], B[i+3]);
@@ -39,7 +41,7 @@ int main() {
     printf("D: %lf %lf %lf %lf\n", dptr[0], dptr[1], dptr[2], dptr[3]);
     // memcpy(D, dptr, 256);
     printf("storing..\n");
-    _mm256_store_ps(D, d);
+    _mm256_store_ps(D+i, d);
     printf("stored\n");
   }
 
