@@ -2,22 +2,29 @@
 #include <immintrin.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 
 #define N 1048576
 
 int main() {
-  double *A = malloc(N * sizeof(double));
-  double *B = malloc(N * sizeof(double));
-  double *C = malloc(N * sizeof(double));
-  double *D = malloc(N * sizeof(double));
+  double *A = memalign(256, N * sizeof(double));
+  double *B = memalign(256, N * sizeof(double));
+  double *C = memalign(256, N * sizeof(double));
+  double *D = memalign(256, N * sizeof(double));
   for ( int i = 0; i < N; i++ ) { A[i] = i; }
   for ( int i = 0; i < N; i++ ) { B[i] = i*2; }
   for ( int i = 0; i < N; i++ ) { C[i] = i*4; }
 
+  printf("starting\n");
   for ( int i = 0; i < 1; i++ ) { 
+    /*
     __m256d a = _mm256_setr_pd(A[i], A[i+1], A[i+2], A[i+3]);
     __m256d b = _mm256_setr_pd(B[i], B[i+1], B[i+2], B[i+3]);
     __m256d c = _mm256_setr_pd(C[i], C[i+1], C[i+2], C[i+3]);
+    */
+    __m256d a = _mm256_load_pd(A+i);
+    __m256d b = _mm256_load_pd(B+i);
+    __m256d c = _mm256_load_pd(C+i);
 
     /* Display the elements of the input vector a */
     double * aptr = (double*)&a;
@@ -31,7 +38,9 @@ int main() {
     double * dptr = (double*)&d;
     printf("D: %lf %lf %lf %lf\n", dptr[0], dptr[1], dptr[2], dptr[3]);
     // memcpy(D, dptr, 256);
+    printf("storing..\n");
     _mm256_store_pd(D, d);
+    printf("stored\n");
   }
 
   for ( int i = 0; i < 4; i++ ) { 
