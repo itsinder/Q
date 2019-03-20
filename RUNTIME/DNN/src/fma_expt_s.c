@@ -56,4 +56,29 @@ int main() {
   return 0;
 }
 
+/* following gives basic assembler
+// gcc -mavx2 -mfma -S x.c   -lm - x 
+#include <immintrin.h>
+#include <stdio.h>
+#include <string.h>
+#include <malloc.h>
 
+#define N 1048576
+
+int main() {
+  float *A;
+  float *B;
+  float *C;
+  float *D;
+  int register_width;
+  int num_words_in_reg;
+  for ( int i = 0; i < N/num_words_in_reg; i += num_words_in_reg ) { 
+    __m256 a = _mm256_load_ps(A+i);
+    __m256 b = _mm256_load_ps(B+i);
+    __m256 c = _mm256_load_ps(C+i);
+    __m256 d = _mm256_fmadd_ps(a, b, c);
+    _mm256_store_ps(D+i, d);
+  }
+  return 0;
+}
+*/
