@@ -1,4 +1,5 @@
-// gcc -mavx2 -mfma -S x.c   -lm - x 
+// gcc -mavx2 -mfma -S -c  x.c   -lm  # to produce assembler
+// gcc -mavx2 -mfma -O4 x.c   -lm  # produces executable a.out
 #include <immintrin.h>
 #include <stdio.h>
 #include <string.h>
