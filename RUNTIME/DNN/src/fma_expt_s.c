@@ -16,8 +16,9 @@ int main() {
   for ( int i = 0; i < N; i++ ) { C[i] = i*4; }
 
   printf("starting\n");
-  int register_width = 256;
-  int num_words_in_reg = register_width / (8 * sizeof(float));
+  int register_width_in_bits = 256;
+  int bits_per_byte = 8;
+  int num_words_in_reg = register_width_in_bits / (bits_per_byte * sizeof(float));
   for ( int i = 0; i < N/num_words_in_reg; i += num_words_in_reg ) { 
     /*
     __m256 a = _mm256_setr_ps(A[i], A[i+1], A[i+2], A[i+3]);
