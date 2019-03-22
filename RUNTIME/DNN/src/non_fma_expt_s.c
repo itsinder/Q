@@ -1,4 +1,4 @@
-// gcc -O4 -lm without_fma_expt_s.c  # produces executable a.out
+// gcc -O4 -lm non_fma_expt_s.c  # produces executable a.out
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
