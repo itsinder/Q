@@ -93,7 +93,7 @@ def ones(shape, dtype=None):
     return full(shape, 1, dtype)
 
 
-def arange(start=0, stop=None, step=1, dtype=None):
+def arange(start, stop=None, step=1, dtype=None):
     """Create a sequence according to inputs, wrapper around Q.seq()"""
 
     if not stop:
