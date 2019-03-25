@@ -19,4 +19,6 @@ sudo apt-get install libreadline-dev -y
 #installing LAPACK stuff
 sudo apt-get install liblapacke-dev liblapack-dev -y
 
+sudo apt-get install bc
+
 bash my_print.sh "COMPLETED: Installing dependencies from apt-get"

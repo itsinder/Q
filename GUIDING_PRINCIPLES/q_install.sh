@@ -103,6 +103,10 @@ if [[ $LUA_DEV -eq 1 ]] ; then
   bash q_qli_dependencies.sh
   #test installation
   bash q_test_dependencies.sh
+  #Q-Machine Learning installation
+  bash q_ml_dependencies.sh
+  #python-Q wrapper installation
+  bash q_python_wrapper_dependencies.sh
 fi
 
 # Build Q
