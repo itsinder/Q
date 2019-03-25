@@ -117,7 +117,6 @@ int bstep(
 #ifdef COUNT
           num_b_flops += 2;
 #endif
-          // TODO Check FMA working
         }
 #else
         status = a_times_sb_plus_c(dz_j, W_jprime[j], da_prev_jprime, da_prev_jprime, nI);
