@@ -1,6 +1,7 @@
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "act_fns.h"
+#include "fma.h"
 
 #include "bstep.h"
 
@@ -109,6 +110,7 @@ int bstep(
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
+#ifndef FMA
 #pragma omp simd
         for ( int i = 0; i < nI; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];
@@ -117,6 +119,10 @@ int bstep(
 #endif
           // TODO Check FMA working
         }
+#else
+        status = a_times_sb_plus_c(dz_j, W_jprime[j], da_prev_jprime, da_prev_jprime, nI);
+        //cBYE(status)
+#endif
       }
     }
   }
