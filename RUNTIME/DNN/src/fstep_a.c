@@ -1,9 +1,51 @@
 #include <omp.h>
+#include <immintrin.h>
+#include <malloc.h>
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "act_fns.h"
 
 #include "fstep_a.h"
+#define REG_WIDTH_IN_BITS 256
+
+#ifdef FMA
+int a_times_sb_plus_c(
+    float *A,
+    float sB,
+    float *C,
+    float *D,
+    int32_t nI
+    )
+{
+  int status = 0;
+
+  int bits_per_byte = 8;
+  int stride = REG_WIDTH_IN_BITS / (bits_per_byte * sizeof(float));
+  int nI_rem = ( nI % stride );
+
+  // loop with fma
+  __m256 b = _mm256_setr_ps(sB, sB, sB, sB, sB, sB, sB, sB);
+  for ( int i = 0; i < (nI-nI_rem); i += stride ) {
+    __m256 a = _mm256_load_ps(A+i);
+    __m256 c = _mm256_load_ps(C+i);
+    __m256 d = _mm256_fmadd_ps(a, b, c);
+    _mm256_store_ps(D+i, d);
+#ifdef COUNT
+    num_f_flops += 2*stride;
+#endif
+  }
+
+  // loop without fma
+  for ( int i = (nI-nI_rem); i < nI; i++ ) {
+    D[i] = C[i] + (A[i] * sB);
+#ifdef COUNT
+    num_f_flops += 2;
+#endif
+  }
+BYE:
+  return status;
+}
+#endif
 
 // This subroutine is best when n_out >> number of processors
 // A single element of the input is in[0][i], in[1][i], ... in[n_in-1][i]
@@ -70,17 +112,18 @@ int fstep_a(
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
+#ifndef FMA
 #pragma omp simd
-// TODO #pragma omp parallel for if ( inner_par )
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
         out_z_k[i] = out_z_k[i] + (in_j[i] * w_jk); 
-        // out_z_k[i] = fmaf(in_j[i], w_jk, out_z_k[i]);
-        // out_z_k[i] = __FP_FAST_FMAF32(in_j[i], w_jk, out_z_k[i]);
-        // out_z_k[i] = __builtin_ia32_fmaddps(in_j[i], w_jk, out_z_k[i]);
 #ifdef COUNT
         num_f_flops += 2;
 #endif
       }
+#else
+      status = a_times_sb_plus_c(in_j, w_jk, out_z_k, out_z_k, nI);
+      //cBYE(status);
+#endif
       float *out_a_k = out_a[k];
       afn(out_z_k, nI, out_a_k);
     }

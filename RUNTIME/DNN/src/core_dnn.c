@@ -5,6 +5,10 @@
 #include "fstep_a.h"
 #include "bstep.h"
 #include "update_W_b.h"
+#include <malloc.h>
+
+#define BITS_IN_VEC_REG 256
+#define MEMALIGN_BATCH 32
 
 #ifdef RASPBERRY_PI
 static uint64_t 
@@ -184,12 +188,12 @@ malloc_b(
 {
   int status = 0;
   float **b = NULL;
-  b = malloc(nl * sizeof(float *));
+  b = memalign(MEMALIGN_BATCH, nl * sizeof(float *));
   return_if_malloc_failed(b);
   b[0] = NULL;
   for ( int l = 1; l < nl; l++ ) { 
     int L_next = npl[l];
-    b[l] = malloc(L_next * sizeof(float));
+    b[l] = memalign(MEMALIGN_BATCH, L_next * sizeof(float));
     return_if_malloc_failed(b[l]);
   }
   *ptr_b = b;
@@ -227,16 +231,16 @@ malloc_W(
 {
   int status = 0;
   float *** W = NULL;
-  W = malloc(nl * sizeof(float **));
+  W = memalign(MEMALIGN_BATCH, nl * sizeof(float **));
   return_if_malloc_failed(W);
   W[0] = NULL;
   for ( int l = 1; l < nl; l++ ) { 
     int L_prev = npl[l-1];
     int L_curr = npl[l];
-    W[l] = malloc(L_prev * sizeof(float *));
+    W[l] = memalign(MEMALIGN_BATCH, L_prev * sizeof(float *));
     return_if_malloc_failed(W[l]);
     for ( int j = 0; j < L_prev; j++ ) { 
-      W[l][j] = malloc(L_curr * sizeof(float));
+      W[l][j] = memalign(MEMALIGN_BATCH, L_curr * sizeof(float));
       return_if_malloc_failed(W[l][j]);
     }
   }
@@ -255,20 +259,20 @@ malloc_z_a(
 {
   int status = 0;
   float ***z = *ptr_z = NULL;
-  z = malloc(nl * sizeof(float **));
+  z = memalign(MEMALIGN_BATCH, nl * sizeof(float **));
   return_if_malloc_failed(z);
   memset(z, '\0', nl * sizeof(float **));
 
   z[0] = NULL;
   for ( int i = 1; i < nl; i++ ) { 
-    z[i] = malloc(npl[i] * sizeof(float *));
+    z[i] = memalign(MEMALIGN_BATCH, npl[i] * sizeof(float *));
     return_if_malloc_failed(z[i]);
     memset(z[i], '\0', npl[i] * sizeof(float *));
   }
   for ( int i = 1; i < nl; i++ ) {
     // TODO: add pragma omp here
     for ( int j = 0; j < npl[i]; j++ ) { 
-      z[i][j] = malloc(bsz * sizeof(float));
+      z[i][j] = memalign(MEMALIGN_BATCH, bsz * sizeof(float));
       return_if_malloc_failed(z[i][j]);
       memset(z[i][j], '\0', bsz * sizeof(float));
     }
@@ -685,6 +689,7 @@ int dnn_set_bsz(
   status = malloc_z_a(nl, npl, bsz, &da); cBYE(status);
   ptr_dnn->dz = dz;
   ptr_dnn->da = da;
+
 #ifdef TEST_VS_PYTHON
   z = a = NULL; // not necessary but to show we are re-initializing
   status = malloc_z_a(nl, npl, bsz, &z); cBYE(status);
@@ -731,7 +736,7 @@ dnn_new(
   }
   // TODO P1: Current implementation assumes last layer has 1 neuron
   if ( npl[nl-1] != 1 ) { go_BYE(-1); }
-  int *itmp = malloc(nl * sizeof(int));
+  int *itmp = memalign(MEMALIGN_BATCH, nl * sizeof(int));
   return_if_malloc_failed(itmp);
   memcpy(itmp, npl, nl * sizeof(int));
   ptr_X->npl = itmp;
@@ -744,15 +749,15 @@ dnn_new(
   for ( int i = 1; i < nl-1; i++ ) { 
     if ( ( dpl[i] < 0 ) || ( dpl[i] >= 1 ) ) { go_BYE(-1); }
   }
-  float *ftmp = malloc(nl * sizeof(float));
+  float *ftmp = memalign(MEMALIGN_BATCH, nl * sizeof(float));
   return_if_malloc_failed(ftmp);
   memcpy(ftmp, dpl, nl * sizeof(float));
   ptr_X->dpl = ftmp;
   //--------------------------------------
-  A = malloc(nl * sizeof(__act_fn_t));
+  A = memalign(MEMALIGN_BATCH, nl * sizeof(__act_fn_t));
   memset(A, '\0',  (nl * sizeof(__act_fn_t)));
 
-  bak_A = malloc(nl * sizeof(__bak_act_fn_t));
+  bak_A = memalign(MEMALIGN_BATCH, nl * sizeof(__bak_act_fn_t));
   memset(bak_A, '\0',  (nl * sizeof(__bak_act_fn_t)));
 
   for ( int i = 0; i < nl; i++ ) { 
@@ -819,10 +824,10 @@ dnn_new(
 #include "../test/_set_Bprime.c" // FOR TESTING 
 #endif
   //--------------------------------------
-  d = malloc(nl * sizeof(bool *));
+  d = memalign(MEMALIGN_BATCH, nl * sizeof(bool *));
   return_if_malloc_failed(d);
   for ( int l = 0; l < nl; l++ ) { 
-    d[l] = malloc(npl[l] * sizeof(bool));
+    d[l] = memalign(MEMALIGN_BATCH, npl[l] * sizeof(bool));
     return_if_malloc_failed(d[l]);
   }
   ptr_X->d  = d;
