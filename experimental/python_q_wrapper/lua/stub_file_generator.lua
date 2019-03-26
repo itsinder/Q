@@ -17,6 +17,9 @@ for name,func in pairs(Q) do
   if name ~= "save" and name ~= "restore" and name ~= "view_meta" and name ~= "Dictionary" then
     local status, docstring = pcall(Q[name], "help")
     if status==true and docstring then
+      -- now processing the docstring to get Q operators signature
+      
+      -- TODO: asserting/checking has not done
       -- to get "Signature: Q.mk_col(input, qtype, opt_nn_input)" in str
       local str = pl_str.splitv(docstring, "\n")
       -- to get function arguments
