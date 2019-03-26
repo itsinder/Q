@@ -198,7 +198,7 @@ local print_csv = function (vec_list, opt_args)
   
   -- When output requires as string, we will accumulate partials in tbl_rslt
   if not opfile then
-    io.output(io.stdout)
+    --io.output()
   else
     if ( opfile ~= "" ) then
       fp = io.open(opfile, "w+")
@@ -237,11 +237,11 @@ local print_csv = function (vec_list, opt_args)
             table.insert(tbl_rslt,"\n") 
           end
         else
-          assert(io.write(result), "Write failed")
+          print(result)
           if ( col_idx ~= num_cols ) then 
-            assert(io.write(","), "Write failed")
+            print(',')
           else
-            assert(io.write("\n"), "Write failed") 
+            --print("\n")
           end
         end
         col_idx = col_idx + 1
