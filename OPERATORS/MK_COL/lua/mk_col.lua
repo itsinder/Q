@@ -15,7 +15,7 @@ local mk_col = function (input, qtype, nn_input)
 -- returns: column of input values of qtype"
 ]]
   -- this call has been just done for docstring
-  if input and input == "docstring" then
+  if input and input == "help" then
       return doc_string
   end
 

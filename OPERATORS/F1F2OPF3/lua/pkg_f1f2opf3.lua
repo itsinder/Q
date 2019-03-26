@@ -4,7 +4,7 @@ local function <<operator>>(x, y, optargs)
   -- This operator performs <<operator>> of x and y
   ]]
   -- this call has been just done for docstring
-  if x and x == "docstring" then
+  if x and x == "help" then
     return doc_string
   end
 

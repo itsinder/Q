@@ -162,16 +162,23 @@ local function process_filter(filter, vec_length)
 end
 
 local print_csv = function (vec_list, opt_args)
-  -- Convention: Q.print_csv({T}, opt_args)
-  -- opt_args: table of 3 arguments { opfile, <filter>, print_order }
-  -- 1) opfile: where to print the columns
-             -- "file_name" : will print to file
-             -- ""     : will return a string
-             -- nil    : will print to stdout
-  -- 2) <filter> 
-  -- 3) print_order: order/required column names
-                  -- nil : takes the complete vec_list as it is
-                  -- table of strings (column names)
+local doc_string = [[ Signature: Q.print_csv({T}, opt_args)
+  -- Q.print_csv prints the Columns contents where specified to.(default is stdout)
+  opt_args: table of 3 arguments { opfile, <filter>, print_order }
+  1) opfile: where to print the columns
+            -- "file_name" : will print to file
+            --  ""         : will return a string
+            --  nil        : will print to stdout
+  2) <filter> 
+  3) print_order: order/required column names
+                -- nil : takes the complete vec_list as it is
+                -- table of strings (column names)
+]]
+  -- this call has been just done for docstring
+  if vec_list and vec_list == "help" then
+      return doc_string
+  end
+
 
   -- processing opt_args of print_csv
   local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
