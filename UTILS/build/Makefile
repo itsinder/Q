@@ -25,6 +25,8 @@ clean:
 	rm -f ${Q_ROOT}/include/*.h
 	rm -f ${Q_BUILD_DIR}/src/*
 	rm -f ${Q_BUILD_DIR}/include/*
+	#removing the stub file which is required by python-Q wrapper
+	rm -f ${Q_SRC_ROOT}/experimental/python_q_wrapper/lua/q_op_stub_file.pyi
 	make -C ${Q_SRC_ROOT}/UTILS/src/  clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/LOAD_CSV/lua/ clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/HASH/lua/ clean
