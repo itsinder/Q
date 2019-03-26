@@ -1,5 +1,13 @@
 local s = [===[
 local function <<operator>>(x, y, optargs)
+  local doc_string = [[ Signature: Q.<<operator>>(x, y, opt_optargs)
+  -- This operator performs <<operator>> of x and y
+  ]]
+  -- this call has been just done for docstring
+  if x and x == "docstring" then
+    return doc_string
+  end
+
   local expander = require 'Q/OPERATORS/F1F2OPF3/lua/expander_f1f2opf3'
   if type(x) == "lVector" and type(y) == "lVector" then
     local status, col = pcall(expander, "<<operator>>", x, y, optargs)
