@@ -110,18 +110,8 @@ int bstep(
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
-#ifndef AVX
-#pragma omp simd
-        for ( int i = 0; i < nI; i++ ) {
-          da_prev_jprime[i] += dz_j[i] * W_jprime[j];
-#ifdef COUNT
-          num_b_flops += 2;
-#endif
-        }
-#else
         status = a_times_sb_plus_c(dz_j, W_jprime[j], da_prev_jprime, da_prev_jprime, nI);
         //cBYE(status)
-#endif
       }
     }
   }
@@ -136,13 +126,8 @@ int bstep(
       // for neurons in out_layer
       sum = 0;
       float *a_prev_jprime = a_prev[jprime];
-#pragma omp simd
-      for ( int i = 0; i < nI; i++ ) {
-        sum += dz_j[i] * a_prev_jprime[i]; // TODO Check FMA working
-#ifdef COUNT
-        num_b_flops += 2;
-#endif
-      }
+      status = a_dot_b(dz_j, a_prev_jprime, &sum, nI);
+      //cBYE(status);
       sum /= nI;
 #ifdef COUNT
       num_b_flops += 1;

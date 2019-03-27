@@ -71,18 +71,8 @@ int fstep_a(
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
-#ifndef AVX
-#pragma omp simd
-      for ( int i = 0; i < nI; i++ ) {  // for batch size 
-        out_z_k[i] = out_z_k[i] + (in_j[i] * w_jk); 
-#ifdef COUNT
-        num_f_flops += 2;
-#endif
-      }
-#else
       status = a_times_sb_plus_c(in_j, w_jk, out_z_k, out_z_k, nI);
       //cBYE(status);
-#endif
       float *out_a_k = out_a[k];
       afn(out_z_k, nI, out_a_k);
     }
