@@ -110,7 +110,7 @@ int bstep(
       for ( int jprime = 0; jprime < n_out; jprime++ ) { // for neurons in out_layer
         float *W_jprime = W[jprime];
         float *da_prev_jprime = da_prev[jprime];
-#ifndef FMA
+#ifndef AVX
 #pragma omp simd
         for ( int i = 0; i < nI; i++ ) {
           da_prev_jprime[i] += dz_j[i] * W_jprime[j];

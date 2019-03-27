@@ -1,17 +1,17 @@
-##########  WITH FMA  ##########
+##########  WITH AVX  ##########
 
 Average cycles - 2729220.2
 time_cmd_avg - 0.0188 sec
 
 
-##########  WITHOUT FMA  ##########
+##########  WITHOUT AVX  ##########
 
 Average cycles - 15318867.2
 time_cmd_avg - 0.0268 sec
 
 =======================================================================================
 
-################  With FMA  ##################
+################  With AVX  ##################
 
 root@ubuntu:~/git_repo/fresh/WORK/Q/RUNTIME/DNN/src# time ./a.out
 starting
@@ -92,7 +92,7 @@ root@ubuntu:~/git_repo/fresh/WORK/Q/RUNTIME/DNN/src#
 
 ===================================================================================================
 
-################  Without FMA  ##################
+################  Without AVX  ##################
 
 root@ubuntu:~/git_repo/fresh/WORK/Q/RUNTIME/DNN/src# time ./a.out
 starting

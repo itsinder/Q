@@ -4,7 +4,7 @@
 
 #define REG_WIDTH_IN_BITS 256
 
-#ifdef FMA
+#ifdef AVX
 int a_times_sb_plus_c(
     float *A,
     float sB,

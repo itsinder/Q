@@ -19,11 +19,11 @@ clean:
 CSRCS := $(wildcard *.c)
 COBJS = $(CSRCS:.c=.o)
 
-FMA = 
-FMA = -mavx2 -mfma -DFMA
+AVX =
+AVX = -mavx2 -mfma -DAVX
 
-CFLAGS = $(QC_FLAGS) $(FMA)
-# CFLAGS = $(QC_FLAGS) $(FMA) -DTEST_VS_PYTHON
+CFLAGS = $(QC_FLAGS) $(AVX)
+# CFLAGS = $(QC_FLAGS) $(AVX) -DTEST_VS_PYTHON
 
 
 count : CFLAGS = $(QC_FLAGS) -DCOUNT # for counting flops

@@ -71,7 +71,7 @@ int fstep_a(
       if ( d_out[k] ) { continue; }
       float w_jk = W_j[k];
       float *out_z_k = out_z[k];
-#ifndef FMA
+#ifndef AVX
 #pragma omp simd
       for ( int i = 0; i < nI; i++ ) {  // for batch size 
         out_z_k[i] = out_z_k[i] + (in_j[i] * w_jk); 
