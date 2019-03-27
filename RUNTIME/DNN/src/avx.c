@@ -82,14 +82,23 @@ int a_dot_b(
   float tmp_prod[8] = {0};
   _mm256_store_ps(tmp_prod, s);
   //printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", tmp_prod[0], tmp_prod[1], tmp_prod[2], tmp_prod[3], tmp_prod[4], tmp_prod[5], tmp_prod[6], tmp_prod[7]);
-  // TODO: update C properly
+  // TODO: update sum properly
+
+  // loop for remaining elements
+  for ( int i = (nI-nI_rem); i < nI; i++ ) {
+    sum += A[i] * B[i];
+#ifdef COUNT
+    num_b_flops += 2;
+#endif
+  }
+
 #else
 
 #pragma omp simd reduction(+:sum)
   for ( int i = 0; i < nI; i++ ) {
     sum += A[i] * B[i];
 #ifdef COUNT
-    num_b_flops += 1;
+    num_b_flops += 2;
 #endif
   }
   *C = sum;
