@@ -50,14 +50,14 @@ update_W_b.o : update_W_b.c ../inc/dnn_types.h ../inc/update_W_b.h
 core_dnn.o : core_dnn.c ../inc/dnn_types.h ../inc/core_dnn.h
 	$(CC) -c ${CFLAGS} $(INCS) core_dnn.c -o core_dnn.o
 
-fma.o : fma.c ../inc/dnn_types.h ../inc/fma.h
-	$(CC) -c ${CFLAGS} $(INCS) fma.c -o fma.o
+avx.o : avx.c ../inc/dnn_types.h ../inc/avx.h
+	$(CC) -c ${CFLAGS} $(INCS) avx.c -o avx.o
 
-libdnn.so: core_dnn.o dnn.o fma.o fstep_a.o bstep.o act_fns.o update_W_b.o
+libdnn.so: core_dnn.o dnn.o avx.o fstep_a.o bstep.o act_fns.o update_W_b.o
 	$(CC) ${CFLAGS} $(INCS) \
 	core_dnn.o \
 	dnn.o \
-	fma.o \
+	avx.o \
 	update_W_b.o \
 	act_fns.o \
 	fstep_a.o \

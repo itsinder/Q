@@ -1,7 +1,7 @@
 #include "q_incs.h"
 #include "dnn_types.h"
 #include "act_fns.h"
-#include "fma.h"
+#include "avx.h"
 
 #include "bstep.h"
 

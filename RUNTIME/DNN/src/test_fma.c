@@ -5,7 +5,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <inttypes.h>
-#include "fma.h"
+#include "avx.h"
 
 #define REG_WIDTH_IN_BITS 256
 

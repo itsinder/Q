@@ -1,6 +1,6 @@
 #include <immintrin.h>
 
-#include "fma.h"
+#include "avx.h"
 
 #define REG_WIDTH_IN_BITS 256
 
