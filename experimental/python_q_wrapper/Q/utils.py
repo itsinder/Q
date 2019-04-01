@@ -13,7 +13,16 @@ def is_valid_arg():
 
 
 def pack_args(val):
-    """Convert args for a Q-lua function"""
+    """
+    Convert args for a Q-lua function
+
+    Parameters:
+        val: a python object (list, dict, number, string etc)
+
+    Returns:
+        a lua representation for given python object
+    """
+
     if is_p_vector(val):
         return val.get_base_vec()
     elif is_p_scalar(val):
@@ -32,7 +41,16 @@ def pack_args(val):
 
 
 def wrap_output(op_name, result):
-    """Convert output from a Q-lua function"""
+    """
+    Convert output from a Q-lua function
+
+    Parameters:
+        op_name: the operation name
+        result: output from Q-lua function
+
+    Returns:
+        a python object (representation) for Q-lua object
+    """
     if op_name in q_cat.number_as_output:
         # no action required
         pass
@@ -59,6 +77,16 @@ def wrap_output(op_name, result):
 
 
 def to_table(in_val):
+    """
+    converts input list or dict to table
+
+    Parameters:
+        in_val: a list or dict
+
+    Returns:
+        returns a lua table
+    """
+
     func = None
     if type(in_val) == list:
         func = executor.eval_lua(list_to_table_str)
@@ -71,11 +99,15 @@ def to_table(in_val):
 
 
 def to_list(in_table):
+    """converts a lua table to list"""
+
     # TODO: check type of in_table, it should be lua table
     return list(in_table)
 
 
 def to_dict(in_table):
+    """converts a lua table to dict"""
+
     # TODO: check type of in_table, it should be lua table
     return list(in_table)
 

@@ -8,20 +8,35 @@ import math
 
 
 def call_lua_op(op_name, *args):
+    """
+    this functions calls the given Q-lua function with specified arguments
+
+    Parameters:
+        op_name: operation (Q-lua function) name (is a string)
+        args: arguments to be passed to specified function
+
+    Return:
+        execution result of a function
+    """
+
+    # convert the python objects to lua
     args_table = util.pack_args(args)
-    func = executor.eval_lua(q_consts.lua_op_fn_str)
     try:
+        func = executor.eval_lua(q_consts.lua_op_fn_str)
         result = func(op_name, args_table)
     except Exception as e:
         # TODO: Handle operator level failures properly
         print(str(e))
         result = None
     if result:
+        # wrap the lua objects to python
         result = util.wrap_output(op_name, result)
     return result
 
 
 def __get_default_dtype(val_type):
+    """returns the default types"""
+
     if val_type == int:
         dtype = q_consts.int64
     elif val_type == float:
@@ -68,11 +83,13 @@ def full(shape, fill_value, dtype=None):
 
 def zeros(shape, dtype=None):
     """Create a constant vector with value zero"""
+
     return full(shape, 0, dtype)
 
 
 def ones(shape, dtype=None):
     """Create a constant vector with value one"""
+
     return full(shape, 1, dtype)
 
 
