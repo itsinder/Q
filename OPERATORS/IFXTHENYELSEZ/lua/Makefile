@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libifxthenyelsez.so  
+all : libifxthenyelsez.so
+
+all_for_dc :
+	echo "nothing to do"
 	
 ../gen_src/_vv_ifxthenyelsez_I4.c :
 	luajit generator.lua # TODO: Should be more specific

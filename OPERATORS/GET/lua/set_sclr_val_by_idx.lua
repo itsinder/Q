@@ -7,6 +7,7 @@ local function set_sclr_val_by_idx(x, y, optargs)
   local cmem        = require 'libcmem'
   local Scalar      = require 'libsclr'
   local record_time = require 'Q/UTILS/lua/record_time'
+  local qc          = require 'Q/UTILS/lua/q_core'
 
   assert(x and type(x) == "lVector", "x must be a Vector")
   assert(y and type(y) == "lVector", "y must be a Vector")
@@ -21,6 +22,14 @@ local function set_sclr_val_by_idx(x, y, optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  --STOP: Dynamic compilation
+
   assert(qc[func_name], "Symbol not available" .. func_name)
 
   --=====================================

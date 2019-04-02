@@ -70,7 +70,7 @@ ${fn}(
 #pragma omp critical (_${fn})
     {
     ${op}_val = ${t_reducer}(curr_val, lval);
-    if (${op}_val != curr_val){
+    if ((${op}_val != curr_val) || ((${op}_val == curr_val) && (index < curr_index))){
        curr_val = ${op}_val;
        curr_index = index;
     }

@@ -2,7 +2,11 @@ local Q = require 'Q'
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
+local write_to_csv = require 'Q/ML/DT/lua/write_to_csv'
+
+
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local qc = require 'Q/UTILS/lua/q_core'
 
 local tests = {}
 tests.t1 = function()
@@ -16,11 +20,13 @@ tests.t1 = function()
   args.is_hdr = true
   args.goal = "occupy_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
   local results = run_dt(args)
-  for alpha, v in pairs(results) do 
+  for alpha, v in pairs(results) do
     for k2, v2 in pairs(v) do
       for k3, v3 in pairs(v2) do
         print(alpha, k2, k3, v3)
@@ -28,6 +34,8 @@ tests.t1 = function()
     end
   end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "room_occupancy_sample.csv")
+
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -77,6 +85,7 @@ tests.t2 = function()
     end
   end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "cancer_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -105,6 +114,8 @@ tests.t3 = function()
   args.goal = "Survived"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -116,9 +127,16 @@ tests.t3 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "titanic_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -133,7 +151,6 @@ tests.t3 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 
@@ -149,6 +166,8 @@ tests.t4 = function()
   args.goal = "class"
   args.alpha = alpha
   args.split_ratio = 0.5
+  args.iterations = 2
+  args.print_graphviz = true
 
   -- If you want to provide train and test csv file explicitly,
   -- then don't provide "args.data_file" argument
@@ -160,9 +179,16 @@ tests.t4 = function()
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "ramesh_category1_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -177,7 +203,6 @@ tests.t4 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t5 = function()
@@ -191,12 +216,21 @@ tests.t5 = function()
   args.is_hdr = true
   args.goal = "survival_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
+  write_to_csv(results, "habermans_sample.csv")
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
@@ -211,7 +245,6 @@ tests.t5 = function()
   end
   print("================================================")
   ]]
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 tests.t6 = function()
@@ -235,17 +268,24 @@ tests.t6 = function()
   args.is_hdr = true
   args.goal = "survival_status"
   args.alpha = alpha
+  args.iterations = 2
+  args.print_graphviz = true
 
   Vector.reset_timers()
   start_time = qc.RDTSC()
-  local result= run_dt(args)
-  local average_acr = result['accuracy'][alpha]
+  local results = run_dt(args)
+  for alpha, v in pairs(results) do
+    for k2, v2 in pairs(v) do
+      for k3, v3 in pairs(v2) do
+        print(alpha, k2, k3, v3)
+      end
+    end
+  end
   stop_time = qc.RDTSC()
   --Vector.print_timers()
   print("================================================")
   print("total execution time : " .. tostring(tonumber(stop_time-start_time)))
   print("================================================")
-  print("Accuracy = " .. tostring(average_acr))
 end
 
 return tests

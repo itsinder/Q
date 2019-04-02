@@ -1,32 +1,18 @@
--- local dbg = require 'Q/UTILS/lua/debugger'
-local pl_path = require 'pl.path'
+local qc = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
-local function restore_global(filename)
-
-  local default_file_name = qconsts.default_meta_file
-  if not filename then
-    local metadata_file = os.getenv("Q_METADATA_FILE")
-    if metadata_file then
-      filename = metadata_file
-    else
-      filename = default_file_name
-    end
+local function restore(file_to_restore)
+  local metadata_file
+  if ( file_to_restore ) then 
+    metadata_file = file_to_restore
+  else
+    metadata_file = qconsts.Q_METADATA_FILE
   end
-
-  assert(filename ~= nil, "A valid filename \\ filepath  has to be given")
-  
-  -- check does the (abs) valid filepath exists
-  if not pl_path.isabs(filename) then
-    -- append Q_METADATA_DIR if filename/ relative path is provided 
-    filename = string.format("%s/%s", os.getenv("Q_METADATA_DIR"), filename)
-  end
-
-  -- checking for file existence
-  assert(pl_path.exists(filename), "File not found " .. filename)
-  
-  local status, reason = pcall(dofile, filename)
-  assert(status, reason)
+  assert(type(metadata_file) == "string", "metadata file is not provided")
+  -- checking isfile present
+  assert(qc.isfile(file_to_restore),
+"Meta file not found = " .. file_to_restore)
+  local status, reason = pcall(dofile, metadata_file)
+  return status, reason -- responsibility of caller
 end
-return require('Q/q_export').export('restore', restore_global)
--- returning status(true or false)
+return require('Q/q_export').export('restore', restore)

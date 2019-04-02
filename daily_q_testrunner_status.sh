@@ -18,12 +18,13 @@ echo $Q_SRC_ROOT
 #setting environment variables
 source $Q_SRC_ROOT/setup.sh -f
 
+rm -f ../../local/Q/lib/lib*.so
 cd $Q_SRC_ROOT/UTILS/build
 #running build
 build_cleanup_heading="------------OUTPUT of build cleanup--------------------------------------"
 build_cleanup_output=$(make clean 2>&1)
 build_output_heading="------------OUTPUT of build scripts--------------------------------------"
-build_output=$(make 2>&1)
+build_output=$(make static 2>&1)
 
 cd ../../
 #running q_testrunner from Q_SRC_ROOT and dump output in temporary file

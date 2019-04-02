@@ -53,6 +53,7 @@ clean :
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
 	rm -f _*
+	rm -f *.so
 		
 vvadd_specialize.lua : arith_specialize.tmpl
 	lua gen_specializers.lua arith
@@ -103,5 +104,3 @@ _cmp_files : cmp_specializers
 
 _f1f2opf3.lua : 
 	lua pkg_f1f2opf3.lua
-	test -d   ${Q_TMPL_DIR}
-	cp *.tmpl ${Q_TMPL_DIR}

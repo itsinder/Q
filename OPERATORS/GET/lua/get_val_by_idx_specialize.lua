@@ -28,7 +28,7 @@ return function (
 
   local subs = {}
   local tmpl
-  tmpl = 'get_val_by_idx.tmpl'
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/GET/lua/get_val_by_idx.tmpl"
   subs.fn = "get_val_" .. in2_qtype .. "_by_idx_" .. in1_qtype 
   subs.in1_ctype = qconsts.qtypes[in1_qtype].ctype
   subs.in2_ctype = qconsts.qtypes[in2_qtype].ctype

@@ -10,7 +10,7 @@ return function (
   local subs = {}; local tmpl
   --assert(is_base_qtype(src_lnk_type), "type of in must be base type")
   assert(is_base_qtype(src_fld_type), "type of in must be base type")
-  tmpl = "join.tmpl"
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/JOIN/lua/join.tmpl"
 
   local dst_fld_type
   if op == "sum" or op == "and" or op == "or" then

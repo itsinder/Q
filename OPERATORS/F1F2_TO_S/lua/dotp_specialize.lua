@@ -13,7 +13,7 @@ return function (
     uint64_t num; // number of non-null elements inspected
   } DOTP_<<qtype>>_ARGS;
   ]]
-  local tmpl = 'dotp.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1F2_TO_S/lua/dotp.tmpl"
   if ( ( ( x_qtype == "F4" ) or ( x_qtype == "F8" ) ) and 
        ( ( y_qtype == "F4" ) or ( y_qtype == "F8" ) ) and 
          ( x_qtype == y_qtype) ) then
@@ -26,6 +26,7 @@ return function (
   subs.ctype = qconsts.qtypes[subs.qtype].ctype
   subs.args_type = "DOTP_" .. qtype .. "_ARGS *"
   -- Set c_mem 
+  --TODO: is it required to introduce mem_initialize?
   hdr = string.gsub(hdr,"<<qtype>>", qtype)
   hdr = string.gsub(hdr,"<<ctype>>",  subs.ctype)
   pcall(ffi.cdef, hdr)

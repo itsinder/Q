@@ -1,4 +1,6 @@
-local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
+local Q_SRC_ROOT = qconsts.Q_SRC_ROOT
 local path_to_here = Q_SRC_ROOT .. "/ML/DT/lua/"
 local T = {}
 

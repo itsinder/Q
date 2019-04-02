@@ -10,7 +10,14 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libf1s1opf2.so _f1s1opf2.lua
+all : libf1s1opf2.so all_for_dc
+
+all_for_dc : \
+	_f1s1opf2.lua \
+	f1opf2_specializers \
+	arith_specializers \
+	cmp_specializers \
+	bop_specializers \
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
 	abs_specialize.lua \

@@ -1,8 +1,7 @@
-local err	= require 'Q/UTILS/lua/error_code'
 local qc	= require 'Q/UTILS/lua/q_core'
+local err       = require 'Q/UTILS/lua/error_code'
 local ffi	= require 'Q/UTILS/lua/q_ffi'
 local qconsts	= require 'Q/UTILS/lua/q_consts'
-local utils	= require 'Q/UTILS/lua/utils'
 local cmem	= require 'libcmem'
 local get_ptr	= require 'Q/UTILS/lua/get_ptr'
 local process_opt_args = require 'Q/OPERATORS/PRINT/lua/process_opt_args'
@@ -10,6 +9,17 @@ local trim = require 'Q/UTILS/lua/trim'
 
 local buf_size = 1024
 local buf = nil
+
+local function get_num_cols(vector_list)
+  local n_vecs = 0
+  for k, v in pairs(vector_list) do 
+    n_vecs = n_vecs + 1 
+  assert((type(v) == "lVector"), 
+    "Each element of input to print_csv must be a Vector")
+  end 
+  assert(n_vecs > 0)
+  return n_vecs
+end
 
 -- Below tables contains the pointers to chunk
 -- Look for the memory constraints
@@ -86,11 +96,11 @@ end
 local function chk_cols(vector_list)
   assert(vector_list)
   assert(type(vector_list) == "table")
-  assert(utils.table_length(vector_list) > 0)  
+  assert(get_num_cols(vector_list) > 0)
+  -- assert(utils.table_length(vector_list) > 0)  
   local vec_length = nil
   local is_first = true
   for i, v in pairs(vector_list) do
-    assert((type(v) == "lVector"), err.INPUT_NOT_COLUMN_NUMBER)
 
     -- Check the vector for eval(), if not then call eval()
     if not v:is_eov() then
@@ -152,16 +162,23 @@ local function process_filter(filter, vec_length)
 end
 
 local print_csv = function (vec_list, opt_args)
-  -- Convention: Q.print_csv({T}, opt_args)
-  -- opt_args: table of 3 arguments { opfile, <filter>, print_order }
-  -- 1) opfile: where to print the columns
-             -- "file_name" : will print to file
-             -- ""     : will return a string
-             -- nil    : will print to stdout
-  -- 2) <filter> 
-  -- 3) print_order: order/required column names
-                  -- nil : takes the complete vec_list as it is
-                  -- table of strings (column names)
+local doc_string = [[ Signature: Q.print_csv({T}, opt_args)
+  -- Q.print_csv prints the Columns contents where specified to.(default is stdout)
+  opt_args: table of 3 arguments { opfile, <filter>, print_order }
+  1) opfile: where to print the columns
+            -- "file_name" : will print to file
+            --  ""         : will return a string
+            --  nil        : will print to stdout
+  2) <filter> 
+  3) print_order: order/required column names
+                -- nil : takes the complete vec_list as it is
+                -- table of strings (column names)
+]]
+  -- this call has been just done for docstring
+  if vec_list and vec_list == "help" then
+      return doc_string
+  end
+
 
   -- processing opt_args of print_csv
   local vector_list, opfile, filter = process_opt_args(vec_list, opt_args)
@@ -170,7 +187,7 @@ local print_csv = function (vec_list, opt_args)
     opfile = trim(opfile)
   end
   assert(((type(vector_list) == "table") or 
-          (type(vector_list) == "lVector")), err.INPUT_NOT_TABLE)
+          (type(vector_list) == "lVector")), "Input must be vector or table of vectors")
   if type(vector_list) == "lVector" then
     vector_list = {vector_list}
   end
@@ -182,7 +199,7 @@ local print_csv = function (vec_list, opt_args)
   end
   local where, lb, ub = process_filter(filter, vec_length)
   -- TODO remove hardcoding of 1024
-  local num_cols = utils.table_length(vector_list)
+  local num_cols = get_num_cols(vector_list)
   local fp = nil -- file pointer
   local tbl_rslt = nil
   
@@ -231,7 +248,7 @@ local print_csv = function (vec_list, opt_args)
           if ( col_idx ~= num_cols ) then 
             assert(io.write(","), "Write failed")
           else
-            assert(io.write("\n"), "Write failed") 
+            assert(io.write("\n"), "Write failed")
           end
         end
         col_idx = col_idx + 1

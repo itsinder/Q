@@ -11,7 +11,7 @@ return function (
   optargs
   )
   local default_val 
-  local tmpl = 'is_prev.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/is_prev.tmpl"
   if ( optargs ) then 
     assert(type(optargs) == "table")
     if ( optargs.default_val ) then 

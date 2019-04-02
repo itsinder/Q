@@ -46,6 +46,7 @@ tests.t1 = function ()
 
   n_out = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
   n_out = ffi.cast("uint64_t *", n_out)
+  n_out[0] = 0
 
   aidx = assert(get_ptr(cmem.new(ffi.sizeof("uint64_t"))))
   aidx = ffi.cast("uint64_t *", aidx)

@@ -1,72 +1,117 @@
-from Q import executor
+import Q.lua_executor as executor
+from Q.constants import list_to_table_str, dict_to_table_str
 from Q import lupa
-from p_vector import PVector
-from p_scalar import PScalar
+from Q import q_op_category as q_cat
+from Q.p_reducer import PReducer
+from Q.p_scalar import PScalar
+from Q.p_vector import PVector
+from Q.validate import is_p_vector, is_p_scalar
 
 
-class Utils:
-    def __init__(self):
+def is_valid_arg():
+    pass
+
+
+def pack_args(val):
+    """
+    Convert args for a Q-lua function
+
+    Parameters:
+        val: a python object (list, dict, number, string etc)
+
+    Returns:
+        a lua representation for given python object
+    """
+
+    if is_p_vector(val):
+        return val.get_base_vec()
+    elif is_p_scalar(val):
+        return val.get_base_scalar()
+    elif type(val) == list or type(val) == tuple:
+        new_list = []
+        for arg in val:
+            new_list.append(pack_args(arg))
+        return to_table(new_list)
+    elif type(val) == dict:
+        for i, v in val.items():
+            val[i] = pack_args(v)
+        return to_table(val)
+    else:
+        return val
+
+
+def wrap_output(op_name, result):
+    """
+    Convert output from a Q-lua function
+
+    Parameters:
+        op_name: the operation name
+        result: output from Q-lua function
+
+    Returns:
+        a python object (representation) for Q-lua object
+    """
+    if op_name in q_cat.number_as_output:
+        # no action required
         pass
+    elif op_name in q_cat.string_as_output:
+        # no action required
+        pass
+    elif op_name in q_cat.reducer_as_output:
+        # wrap it with PReducer
+        result = PReducer(result)
+    elif op_name in q_cat.scalar_as_output:
+        # wrap it with PScalar
+        result = PScalar(base_scalar=result)
+    elif op_name in q_cat.table_as_output:
+        # convert lua table to dict/list
+        result = util.to_list_or_dict(result)
+        for key, val in result.items():
+            result[key] = PVector(val)
+    elif op_name in q_cat.vec_as_output:
+        # wrap it with PVector
+        result = PVector(result)
+    else:
+        raise Exception("Output type is not supported for operator {}".format(op_name))
+    return result
 
-    def update_args(self, val):
-        if isinstance(val, PVector):
-            return val.get_base_vec()
-        elif isinstance(val, PScalar):
-            return val.get_base_scalar()
-        elif type(val) == list:
-            new_list = []
-            for arg in val:
-                new_list.append(self.update_args(arg))
-            return self.to_table(new_list)
-        elif type(val) == dict:
-            new_dict = {}
-            for i, v in val.items():
-                new_dict[i] = self.update_args(v)
-            return self.to_table(new_dict)
-        else:
-            return val
 
-    def to_table(self, in_val):
-        func_list_to_table = \
-            """
-            function(items)
-                local t = {}
-                for index, item in python.enumerate(items) do
-                    t[ index+1 ] = item
-                end
-                return t
-            end
-            """
+def to_table(in_val):
+    """
+    converts input list or dict to table
 
-        func_dict_to_table = \
-            """
-            function(d)
-                local t = {}
-                for key, value in python.iterex(d.items()) do
-                    t[ key ] = value
-                end
-                return t
-            end
-            """
+    Parameters:
+        in_val: a list or dict
 
-        func = None
-        if type(in_val) == list:
-            func = executor.eval(func_list_to_table)
-        elif type(in_val) == dict:
-            func = executor.eval(func_dict_to_table)
-            in_val = lupa.as_attrgetter(in_val)
-        else:
-            print("Error")
-        return func(in_val)
+    Returns:
+        returns a lua table
+    """
 
-    def to_list(self, in_table):
-        # TODO: check type of in_table, it should be lua table
-        return list(in_table)
+    func = None
+    if type(in_val) == list:
+        func = executor.eval_lua(list_to_table_str)
+    elif type(in_val) == dict:
+        func = executor.eval_lua(dict_to_table_str)
+        in_val = lupa.as_attrgetter(in_val)
+    else:
+        print("Error")
+    return func(in_val)
 
-    def to_dict(self, in_table):
-        # TODO: check type of in_table, it should be lua table
-        return list(in_table)
 
-    def to_list_or_dict(self, in_table):
-        # TODO: check type of in_table, it should be lua table
-        return dict(in_table)
+def to_list(in_table):
+    """converts a lua table to list"""
+
+    # TODO: check type of in_table, it should be lua table
+    return list(in_table)
+
+
+def to_dict(in_table):
+    """converts a lua table to dict"""
+
+    # TODO: check type of in_table, it should be lua table
+    return list(in_table)
+
+
+def to_list_or_dict(in_table):
+    # TODO: check type of in_table, it should be lua table
+    return dict(in_table)

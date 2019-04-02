@@ -2,7 +2,8 @@ local dir = require 'pl.dir'
 local fns =  require 'Q/RUNTIME/test/lVector_test/assert_valid'
 local genbin = require 'Q/RUNTIME/test/generate_bin'
 local create_vector = require 'Q/RUNTIME/test/lVector_test/create_vector'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
+local qc = require 'Q/UTILS/lua/q_core'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
 local script_dir = Q_SRC_ROOT .. "/RUNTIME/test/lVector_test"
@@ -76,14 +77,14 @@ for i, map_value in ipairs(T) do
       if status then
         result, reason = assert_valid(res, map_value, qtype[j])
         -- preamble
-        utils["testcase_results"](map_value, "lVector", "Unit Test", result, "")
+        testcase_results(map_value, "lVector", "Unit Test", result, "")
         if reason ~= nil then
           assert(result,"test name:" .. map_value.name .. ":: Reason: " .. reason)
         end
         assert(result,"test name:" .. map_value.name)
       else      
         -- preamble
-        utils["testcase_results"](v, "lVector", "Unit Test", status, "")
+        testcase_results(v, "lVector", "Unit Test", status, "")
         if res ~= nil then
           assert(status,"test name:" .. map_value.name .. ":: Reason: " .. res)
         end

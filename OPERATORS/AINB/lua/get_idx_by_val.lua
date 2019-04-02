@@ -1,4 +1,5 @@
 local Q = require 'Q/q_export'
+local qc = require 'Q/UTILS/lua/q_core'
 local lVector     = require 'Q/RUNTIME/lua/lVector'
 local qconsts     = require 'Q/UTILS/lua/q_consts'
 local ffi         = require 'Q/UTILS/lua/q_ffi'
@@ -35,6 +36,13 @@ local function get_idx_by_val(x, y, optargs)
   if not status then print(subs) end
   assert(status, "Error in specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic Compilation
   assert(qc[func_name], "Symbol not available" .. func_name)
 
   local lb2 = Scalar.new(0, "I8")

@@ -43,8 +43,14 @@ local function expander_getk(a, fval, k, optargs)
   assert(status, "Error in specializer " .. sp_fn_name)
   local sort_fn = assert(subs.sort_fn)
   assert(qc[sort_fn], "Symbol not available" .. sort_fn)
-  local func = assert(subs.fn)
-  assert(qc[func], "Symbol not available" .. func)
+  local func_name = assert(subs.fn)
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Symbol not defined " .. func_name)
 
   local is_ephemeral = false
   if ( optargs ) then

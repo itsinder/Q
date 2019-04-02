@@ -20,6 +20,14 @@ local function vv_ifxthenyelsez(x, y, z)
   assert(status, "error in call to ifxthenyelsez_specialize")
   assert(type(subs) == "table", "error in call to ifxthenyelsez_specialize")
   local func_name = assert(subs.fn)
+  -- START: Dynamic compilation
+  if ( not qc[func_name] ) then
+    print("Dynamic compilation kicking in... ")
+    qc.q_add(subs, tmpl, func_name)
+  end
+  -- STOP: Dynamic compilation
+  assert(qc[func_name], "Symbol not defined " .. func_name)
+
   -- allocate buffer for output
   local wbufsz = qconsts.chunk_size * ffi.sizeof(subs.ctype)
   local wbuf = nil

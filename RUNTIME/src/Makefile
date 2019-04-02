@@ -2,10 +2,10 @@
 INCS=-I. -I../inc/ -I../../UTILS/gen_inc/ -I../../UTILS/inc -I../../OPERATORS/LOAD_CSV/gen_inc/ -I../../OPERATORS/PRINT/gen_inc/ -I/usr/include/lua5.1/
 
 all: libvec.so libcmem.so libsclr.so 
-	mv libvec.so ${Q_ROOT}/lib/
-	mv libcmem.so ${Q_ROOT}/lib/
-	mv libsclr.so ${Q_ROOT}/lib/
-	mv libmm.so ${Q_ROOT}/lib/
+	cp libvec.so ${Q_ROOT}/lib/
+	cp libcmem.so ${Q_ROOT}/lib/
+	cp libsclr.so ${Q_ROOT}/lib/
+	cp libmm.so ${Q_ROOT}/lib/
 	echo "done"
 
 clean:

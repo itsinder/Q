@@ -10,13 +10,15 @@ $ bash build.sh
 This will create 'libadd.so' (used in case of luajit ffi) & 'add.so' (used in case of lua-C api)
 
 - Run luajit ffi C test
-$ time luajit run_add_luajit_ffi.lua
+$ time luajit ffi_add.lua
 
 - Run lua-C api C test
-$ time luajit run_add_lua_c_api.lua
+$ time luajit c_api_add.lua
 
 
 Results that I got on my VM are as below
 Average timing:
-luajit ffi C test = 5.681 sec
-lua-C api C test = 26.6723 sec
+luajit ffi C test = 5.398 sec
+lua-C api C test = 5.393 sec
+
+Almost same time

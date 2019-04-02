@@ -1,17 +1,8 @@
-local Q_DATA_DIR = os.getenv("Q_DATA_DIR") -- TODO default
-if not Q_DATA_DIR then Q_DATA_DIR = os.getenv("HOME") .. "/Q/DATA_DIR" end
-local Q_META_DATA_DIR = os.getenv("Q_METADATA_DIR") -- TODO default
-if not Q_META_DATA_DIR then Q_META_DATA_DIR = os.getenv("HOME") .. "/Q/METADATA_DIR" end
-
---print ("Your Q_DATA_DIR is: " .. Q_DATA_DIR)
-local pldir = require 'pl.dir'
-pldir.makepath(Q_DATA_DIR)
-pldir.makepath(Q_META_DATA_DIR)
-
-local res = {
-    Q_DATA_DIR = Q_DATA_DIR, 
-    Q_META_DATA_DIR = Q_META_DATA_DIR,
-}
+--[[
+q_export (export) is used only to register a stuff (can be a utility or operator) with Q
+All the operators register themselves with Q using q_export
+]]
+local res = {}
 res.export = function(s, f) 
     res[s] = f
     return f

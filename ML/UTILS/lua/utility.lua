@@ -7,9 +7,13 @@ local function load_csv_col_seq(col_names, goal_feature)
   
   local col_upd = {}
   for i,v in pairs(col_names_load) do
-    col_upd[#col_upd + 1] = i
+    if i ~= goal_feature then
+      col_upd[#col_upd + 1] = i
+    end
   end
   
+  return col_upd
+  --[[
   local col_upd_copy = {}
   for i,v in pairs(col_upd) do
     col_upd_copy[v] = i
@@ -23,6 +27,7 @@ local function load_csv_col_seq(col_names, goal_feature)
   end
   
   return T
+  ]]
 end
 
 fns.load_csv_col_seq = load_csv_col_seq

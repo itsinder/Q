@@ -1,6 +1,9 @@
 -- execute as build.lua gen.lua
 -- execute as build.lua tests.lua
-local rootdir = os.getenv("Q_SRC_ROOT")
+
+local qconsts = require 'Q/UTILS/lua/q_consts'
+
+local rootdir = qconsts.Q_SRC_ROOT
 assert(rootdir, "Do export Q_SRC_ROOT=/home/subramon/WORK/Q or some such")
 local plpath = require 'pl.path'
 local pldir  = require 'pl.dir'

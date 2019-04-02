@@ -40,8 +40,10 @@ main(
   uint64_t n = nX / sizeof(int);
   int *E = (int *)X;
   uint64_t t_start = RDTSC();
+  int max_node_id = 0;
   for ( uint64_t i = 0; i < n; i++ ) {
     int node_id = E[i];
+    if ( node_id > max_node_id ) { max_node_id = node_id; }
 #ifdef DEBUG
     if ( ( node_id < 0 ) || ( node_id >= max_id ) ) { 
       fprintf(stderr, "node_id = %d \n", node_id);
@@ -51,8 +53,9 @@ main(
       fprintf(stderr, "Processed %lf \n", (double)i);
     }
 #endif
-    degree[node_id]++;
+    // TODO P0 PUT THIS BCAK degree[node_id]++;
   }
+  fprintf(stderr, "max_node_id = %d \n", max_node_id);
   uint64_t t_stop = RDTSC();
   fprintf(stderr, "Successfully calculated degrees in time %lf\n",
       (t_stop - t_start)/(2500.0*1000000.0));

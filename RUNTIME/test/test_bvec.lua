@@ -2,10 +2,9 @@ require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
 local Vector = require 'libvec' ; 
 local Scalar = require 'libsclr' ; 
-local cmem = require 'libcmem' ; 
+local cmem = require 'libcmem' ;
+local qconsts = require 'Q/UTILS/lua/q_consts' 
 -- for k, v in pairs(vec) do print(k, v) end 
-local q_data_dir = os.getenv("Q_DATA_DIR")
-q_data_dir = q_data_dir .. "/"
 
 local tests = {} 
 local y 
@@ -14,7 +13,7 @@ local exp_file_size
 
 tests.t1 = function()
   -- create a nascent vector a bit at a time
-  y = Vector.new('B1', q_data_dir)
+  y = Vector.new('B1', qconsts.Q_DATA_DIR)
   local num_elements = 100000
   for j = 1, num_elements do 
     local bval = nil
@@ -41,7 +40,7 @@ end
 tests.t2 = function()
   local buf = cmem.new(8*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
-  y = Vector.new('B1', q_data_dir)
+  y = Vector.new('B1', qconsts.Q_DATA_DIR)
   local num_elements = 9
   for j = 1, num_elements do 
     y:put_chunk(buf, 32)
@@ -58,7 +57,7 @@ end
 
 -- create a 1 bit vector. should be size 8 bytes
 tests.t3 = function()
-  y = Vector.new('B1', q_data_dir)
+  y = Vector.new('B1', qconsts.Q_DATA_DIR)
   local num_elements = 100000
   y:put1(Scalar.new(true, "B1"))
   y:eov()
@@ -75,7 +74,7 @@ end
 tests.t4 = function()
   local buf = cmem.new(9*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
-  y = Vector.new('B1', q_data_dir)
+  y = Vector.new('B1', qconsts.Q_DATA_DIR)
   local num_elements = 9
   local buf_size = 1
   for j = 1, num_elements do 
@@ -99,7 +98,7 @@ end
 tests.t5 = function()
   local buf = cmem.new(17*4, "I4", "buf t2")
   buf:set(2147483647, "I4")
-  y = Vector.new('B1', q_data_dir)
+  y = Vector.new('B1', qconsts.Q_DATA_DIR)
   local num_elements = 17
   local buf_size = 1
   local num_bits = 1

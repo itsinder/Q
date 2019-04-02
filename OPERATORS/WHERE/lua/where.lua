@@ -6,7 +6,7 @@ local function where(x, y, optargs)
   assert(type(x) == "lVector",  "x is not lVector")
   assert(type(y) == "lVector",  "y is not lVector")
   assert(y:qtype() == "B1", "y is not B1")
-  local status, col = pcall(expander, "where", x, y, optargs)
+  local status, col = pcall(expander, x, y, optargs)
   if not status then print(col) end
   assert(status, "Could not execute WHERE")
   return col

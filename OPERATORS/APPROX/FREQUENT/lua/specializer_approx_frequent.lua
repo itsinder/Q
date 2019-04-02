@@ -4,7 +4,7 @@ return function(elem_qtype)
   assert(qtypes[elem_qtype], "approx_frequent specializer called with invalid qtype")
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local subs = {}
-  local tmpl = 'approx_frequent.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/APPROX/FREQUENT/lua/approx_frequent.tmpl"
   subs.elem_qtype = elem_qtype
   subs.elem_ctype = qconsts.qtypes[elem_qtype].ctype
   subs.freq_qtype = 'I8'

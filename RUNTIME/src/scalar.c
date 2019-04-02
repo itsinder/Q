@@ -80,8 +80,61 @@ BYE:
   return 2;
 }
 
-static int l_sclr_to_num( lua_State *L) {
+#define OP_BUF_LEN 4095
+#define BUF_LEN 63
+static int l_sclr_reincarnate(lua_State *L) {
+  int status = 0;
+  char op_str_buf[OP_BUF_LEN+1]; // TODO P3 try not to hard code bound
+  char  buf[BUF_LEN+1];          //  TODO P3 try not to hard code bound
 
+  memset(op_str_buf, '\0', OP_BUF_LEN+1);
+  memset(buf,        '\0', BUF_LEN+1);
+  SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
+  const char *field_type = ptr_sclr->field_type;
+
+  strncpy(op_str_buf, "Scalar.new(", OP_BUF_LEN);
+  if ( strcmp(field_type, "B1" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%s", ptr_sclr->cdata.valB1 ? "true" : "false");
+  }
+  else if ( strcmp(field_type, "I1" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRI1, ptr_sclr->cdata.valI1);
+  }
+  else if ( strcmp(field_type, "I2" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRI2, ptr_sclr->cdata.valI2);
+  }
+  else if ( strcmp(field_type, "I4" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRI4, ptr_sclr->cdata.valI4);
+  }
+  else if ( strcmp(field_type, "I8" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRI8, ptr_sclr->cdata.valI8);
+  }
+  else if ( strcmp(field_type, "F4" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRF4, ptr_sclr->cdata.valF4);
+  }
+  else if ( strcmp(field_type, "F8" ) == 0 ) {
+    snprintf(buf, BUF_LEN, "%" PRF8, ptr_sclr->cdata.valF8);
+  }
+  else {
+    WHEREAMI; goto BYE;
+  }
+  strncat(op_str_buf, buf, OP_BUF_LEN);
+
+  strncat(op_str_buf, ", '", OP_BUF_LEN);
+
+  strncat(op_str_buf, field_type, OP_BUF_LEN);
+
+  strncat(op_str_buf, "')", OP_BUF_LEN);
+
+  lua_pushstring(L, op_str_buf);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: sclr_reincarnate. ");
+  lua_pushnumber(L, status);
+  return 2;
+}
+
+static int l_sclr_to_num( lua_State *L) {
   if ( lua_gettop(L) < 1 ) { WHEREAMI; goto BYE; }
   SCLR_REC_TYPE *ptr_sclr=(SCLR_REC_TYPE *)luaL_checkudata(L, 1, "Scalar");
   const char *field_type = ptr_sclr->field_type;
@@ -706,6 +759,7 @@ static const struct luaL_Reg sclr_methods[] = {
     { "conv", l_sclr_conv },
     { "abs", l_sclr_abs },
     { "fldtype", l_fldtype },
+    { "reincarnate", l_sclr_reincarnate },
     { NULL,          NULL               },
 };
  
@@ -714,6 +768,7 @@ static const struct luaL_Reg sclr_functions[] = {
     { "fldtype", l_fldtype },
     { "to_str", l_sclr_to_str },
     { "to_num", l_sclr_to_num },
+    { "reincarnate", l_sclr_reincarnate },
     { "to_cmem", l_sclr_to_cmem },
     { "conv", l_sclr_conv },
     { "eq", l_sclr_eq },

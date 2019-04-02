@@ -292,7 +292,7 @@ fns.handle_category5 = function (index, status, ret, v)
     end
   end
   
-  local is_present = plfile.isfile(require('Q/q_export').Q_DATA_DIR .. "/_" .."_col2_nn")
+  local is_present = plfile.isfile(qconsts.Q_DATA_DIR .. "/_" .."_col2_nn")
   if is_present then
     fns["increment_failed_load"](index, v, "testcase failed: in category5 , null file still present in data directory")
     return false

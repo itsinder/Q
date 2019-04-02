@@ -8,7 +8,7 @@ local cmem    = require 'libcmem'
 return function (
   qtype
   )
-    local tmpl = 'counts.tmpl'
+    local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/COUNT/lua/counts.tmpl"
     local subs = {}
     if ( qtype == "B1" ) then
       assert(nil, "TODO")
@@ -24,6 +24,7 @@ return function (
 
       --==============================
       -- TODO: is it right place to malloc for count variable
+      --TODO: is it required to introduce mem_initialize?
       local count_size = ffi.sizeof("uint64_t")
       local count = assert(cmem.new(count_size))
       count = ffi.cast('uint64_t *' , get_ptr(count))

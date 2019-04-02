@@ -1,14 +1,14 @@
 local Q = require 'Q'
-local gini_to_q_graphviz = require 'Q/ML/DT/lua/sklearn_to_q_graphviz'['gini_to_q_graphviz']
+local qc = require 'Q/UTILS/lua/q_core'
 local load_csv_col_seq = require 'Q/ML/UTILS/lua/utility'['load_csv_col_seq']
-local graphviz_to_D = require 'Q/ML/DT/lua/graphviz_to_q_dt'['graphviz_to_D']
-local print_g_dt      = require 'Q/ML/DT/lua/graphviz_to_q_dt'['print_dt']
+local export_to_graphviz = require 'Q/ML/DT/lua/export_to_graphviz'
 local predict = require 'Q/ML/DT/lua/dt'['predict']
 local ml_utils = require 'Q/ML/UTILS/lua/ml_utils'
 local extract_goal = require 'Q/ML/UTILS/lua/extract_goal'
 local run_dt = require 'Q/ML/DT/lua/run_dt'
 local split = require 'Q/ML/UTILS/lua/split_csv_to_train_test'
 local preprocess_dt = require 'Q/ML/DT/lua/dt'['preprocess_dt']
+local convert_sklearn_to_q = require 'Q/ML/DT/lua/convert_sklearn_to_q_dt'['convert_sklearn_to_q']
 local Vector = require 'libvec'
 local Scalar = require 'libsclr'
 local plpath = require 'pl.path'
@@ -32,35 +32,27 @@ tests.t1 = function()
   local cmd = "python -Wignore " .. Q_SRC_ROOT .. "/ML/DT/python/DTree_sklearn_breast_cancer_train_test.py"
   os.execute(cmd)
   
-  -- converting sklearn gini graphviz to q graphviz format
-  gini_to_q_graphviz(Q_SRC_ROOT .."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt")
-  
   -- converting q graphviz format file to Q dt
   -- ( i.e. loading q graphviz to q data structure)
-  local features_list = {"radius_worst","fractal_dimension_worst","texture_se","id","symmetry_worst","fractal_dimension_se","concavity_worst","compactness_worst","texture_mean","smoothness_worst","concave points_se","perimeter_worst","area_mean","texture_worst","radius_mean","concavity_mean","concavity_se","concave points_mean","concave points_worst","symmetry_se","area_worst","symmetry_mean","area_se","smoothness_mean","smoothness_se","compactness_se","perimeter_mean","compactness_mean","perimeter_se","radius_se","fractal_dimension_mean"}
+ local features_list = { "id", "diagnosis", "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean","compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst","texture_worst", "perimeter_worst", "area_worst", "smoothness_worst","compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst", "fractal_dimension_worst" }
   
-  local file = Q_SRC_ROOT .. "/ML/DT/lua/gini_to_q_graphviz.txt"
   local goal_feature = "diagnosis"
-  --local new_features_list = load_csv_col_seq(features_list, goal_feature)
-  local D = graphviz_to_D(file, features_list)
-  
-  -- printing the q decision tree structure in a file
-  local fp = io.open(path_to_here .. "graphviz_dt.txt", "w")
-  fp:write("digraph Tree {\n")
-  fp:write("node [shape=box, style=\"filled, rounded\", color=\"pink\", fontname=helvetica] ;\n")
-  fp:write("edge [fontname=helvetica] ;\n")
 
-  print_g_dt(D, fp)
-  fp:write("}\n")
-  fp:close()
+  -- converting sklearn gini graphviz to q dt
+  local tree = convert_sklearn_to_q(Q_SRC_ROOT .."/ML/DT/python/best_fit_graphviz_b_cancer_accuracy.txt", features_list, goal_feature)
+
+  -- perform the preprocess activity
+  -- initializes n_H1 and n_T1 to zero
+  preprocess_dt(tree)
+
+  -- printing the q decision tree structure in a file
+  features_list = load_csv_col_seq(features_list, goal_feature)
+  local file_name = path_to_here .. "graphviz_dt.txt"
+  export_to_graphviz(file_name, tree)
 
   --local status = os.execute("diff " .. file .. " graphviz_dt.txt")
   --assert(status == 0, "graphviz.txt and graphviz_dt files not matched")
   print("Successfully created D from graphviz file")
-
-  -- perform the preprocess activity
-  -- initializes n_H1 and n_T1 to zero
-  preprocess_dt(D)
 
   -- calling the Q decision tree with same training samples as passed to sklearn
   local args = {}
@@ -70,7 +62,7 @@ tests.t1 = function()
   args.is_hdr = true
   args.goal = "diagnosis"
   args.alpha =  Scalar.new(0.2, "F4")
-  args.tree = D
+  args.tree = tree
 
   Vector.reset_timers()
   start_time = qc.RDTSC()

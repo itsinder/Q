@@ -5,8 +5,7 @@ local extend = require 'extend'
 -- TODO WIP local extend = require 'extend2'
 local Vector = require 'libvec'
 
-local saved_path = os.getenv("HOME") .. "/local/Q/meta/saved.meta"
-Q.restore(saved_path)
+Q.restore()
 
 local a_start_time = qc.RDTSC()
 Vector.reset_timers()

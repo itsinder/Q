@@ -1,7 +1,8 @@
---==== From https://www.lua.org/pil/12.1.2.html
--- local -- dbg = require 'Q/UTILS/lua/debugger'
-local plpath = require 'pl.path'
+local ffi = require 'ffi'
 local qconsts = require 'Q/UTILS/lua/q_consts'
+
+ffi.cdef([[ extern bool isfile ( const char * const ); ]])
+local qc = ffi.load('libq_core')
 
 local function basicSerialize (o)
     if type(o) == "number" or type(o) == "boolean" then
@@ -88,51 +89,31 @@ local function save(name, value, saved, file)
     end
   elseif ( type(value) == "Scalar" ) then
     -- Currently not supported
+    local scalar_str = value:reincarnate()
+    file:write(name .. " = " .. scalar_str)
+    file:write("\n")
   else
     error("cannot save " .. name .. " of type " .. type(value))
   end
 end
 
-local function save_global(filename)
-  --[[
-  Q.save() works as below
-  - if filename arg is provided and
-      - if it's a absolute path then continues using provided filename
-      - if not a absolute path then prepends $HOME/local/Q/meta to filepath
-  - if filename arg is not provided then checks for the Q_METADATA_FILE env variable,
-  - if Q_METADATA_FILE variable is set then uses this path or else uses default path present in q_consts.lua ($HOME/local/Q/meta/saved.meta)
-  ]]
-  --[[
-  Q.save("/tmp/saved.meta") : passing absolute path as argument saves the state at given location in the given file
-  Q.save("saved.meta")      : passing filename saves the state at default location (prepends $HOME/local/Q/meta to filename)
-                              in the given file
-  Q.save()                  : without passing filename saves at qconsts.default_meta_file location 
-                              which points to "$HOME/local/Q/meta/saved.meta" value
-      -- if Q_METADATA_FILE is set, then it saves the file at the location specified in Q_METADATA_FILE environment variable
-      -- if Q_METADATA_FILE is not set, then it saves the state at the default location 
-        specified by the qconsts.default_meta_file  variable which points to "$HOME/local/Q/meta/saved.meta" value
-]]
+local function save_global(file_to_save)
   
-  local default_file_name = qconsts.default_meta_file
-  if not filename then
-    local metadata_file = os.getenv("Q_METADATA_FILE")
-    if metadata_file then
-      filename = metadata_file
-    else
-      filename = default_file_name
-    end
+  local metadata_file
+  if ( file_to_save ) then 
+    metadata_file = file_to_save
+  else
+    metadata_file = qconsts.Q_METADATA_FILE
   end
-  -- check does the (abs) valid filepath exists
-  if not plpath.isabs(filename) then
-    -- prepend '$HOME/local/Q/meta' path to file name, 
-    -- we are not going to use Q_METADATA_DIR env variable in Q
-    filename = string.format("%s/%s", plpath.dirname(qconsts.default_meta_file), filename)
+  assert(type(metadata_file) == "string", "metadata file is not provided")
+  local file_exists = qc.isfile(metadata_file)
+  if ( file_exists == true ) then
+    print("Warning! Over-writing meta data file ", metadata_file)
   end
-   
-  -- TODO: what if file already exists, for now it overrides (w+) the file 
-  local file = assert(io.open(filename, "w+"), "Unable to open file for writing")
-  file:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
-  -- file:write("local Vector = require 'libvector'\n")
+  local fp = assert(io.open(metadata_file, "w+"), 
+    "Unable to open file for writing" .. metadata_file)
+  fp:write("local lVector = require 'Q/RUNTIME/lua/lVector'\n")
+  fp:write("local Scalar  = require 'libsclr'\n")
   -- file:write("local Dictionary = require 'Dictionary'\n")
 
   local saved = {}
@@ -140,12 +121,11 @@ local function save_global(filename)
   for k,v in pairs(_G) do
       if not is_g_exception(k,v) then
         -- print("Saving ", k, v)
-        save(k, v, saved, file)
+        save(k, v, saved, fp)
       end
   end
-  file:close()
-  print("Saved to " .. filename)
-  return filename
+  fp:close()
+  print("Saved to " .. metadata_file)
+  return metadata_file
 end
 return require('Q/q_export').export('save', save_global)
---return save_global

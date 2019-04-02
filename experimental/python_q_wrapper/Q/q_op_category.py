@@ -1,3 +1,5 @@
+""" This module contains the Q operator categorization according to their output"""
+
 vec_as_output = ["vvadd", "vvsub", "const", "seq", "mk_col", "add", "vveq"]
 
 

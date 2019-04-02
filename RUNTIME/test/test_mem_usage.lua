@@ -6,8 +6,6 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local qc = require 'Q/UTILS/lua/q_core'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
 require 'Q/UTILS/lua/strict'
-local q_data_dir = os.getenv("Q_DATA_DIR")
-q_data_dir = q_data_dir .. "/"
 
 local tests = {} 
 tests.t1 = function()
@@ -15,9 +13,10 @@ tests.t1 = function()
   -- put happens and zero again after Vector is deleted
   local mem = 0
   local qtype = 'I4'
-  local y = Vector.new(qtype,  q_data_dir)
+  local y = Vector.new(qtype, qconsts.Q_DATA_DIR)
   local s = Scalar.new(123, qtype)
   mem = Vector.print_mem()
+  print(mem)
   assert(mem == 0)
   local status = y:put1(s)
   mem = Vector.print_mem()

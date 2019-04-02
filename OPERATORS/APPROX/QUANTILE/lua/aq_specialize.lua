@@ -8,7 +8,13 @@ return function (
 
   --==============================
   local subs = {}
-  local tmpls = {'approx_quantile.tmpl', 'New.tmpl', 'Output.tmpl', 'Collapse.tmpl'}
+  local tmpl_path = qconsts.Q_SRC_ROOT .. "/OPERATORS/APPROX/QUANTILE/lua/"
+  local tmpls = {
+    tmpl_path .. 'approx_quantile.tmpl',
+    tmpl_path .. 'New.tmpl',
+    tmpl_path .. 'Output.tmpl',
+    tmpl_path .. 'Collapse.tmpl'
+  }
 
   subs.ctype = qconsts.qtypes[qtype].ctype
   subs.qtype = qtype

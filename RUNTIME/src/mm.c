@@ -4,7 +4,7 @@
 
 int
 mm(
-    uint64_t n,
+    uint64_t n, /* == 0 means just status request */
     bool is_incr,
     bool is_vec,
     uint64_t *ptr_vec_sz,
@@ -14,7 +14,10 @@ mm(
   int status = 0;
   static uint64_t vec_sz_malloc;           // number of bytes allocated
   static uint64_t cmem_sz_malloc;           // number of bytes allocated
-  if ( n > 0 ) { 
+  if ( n == 0 ) { 
+    goto BYE;
+  }
+  if ( n > 0 ) {
     if ( is_incr ) { 
       if ( is_vec ) { 
         vec_sz_malloc += n;
@@ -34,8 +37,8 @@ mm(
       }
     }
   }
+BYE:
   *ptr_vec_sz = vec_sz_malloc;
   *ptr_cmem_sz = cmem_sz_malloc;
-BYE:
   return status;
 }

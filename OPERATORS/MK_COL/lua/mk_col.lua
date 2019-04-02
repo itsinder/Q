@@ -7,6 +7,18 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
 local mk_col = function (input, qtype, nn_input)
+  local doc_string = [[ Signature: Q.mk_col(input, qtype, opt_nn_input)
+-- creates a column of input table values of input qtype
+1) input: array of values
+2) qtype: desired qtype of column
+3) nn_input: array of nn values
+-- returns: column of input values of qtype"
+]]
+  -- this call has been just done for docstring
+  if input and input == "help" then
+      return doc_string
+  end
+
   assert(input,  err.INPUT_NOT_TABLE)
   assert(type(input) == "table", err.INPUT_NOT_TABLE)
   assert(#input > 0, "Input table has no entries")

@@ -1,4 +1,5 @@
 local Q = require 'Q'
+local qc = require 'Q/UTILS/lua/q_core'
 local run_knn = require 'Q/ML/KNN/lua/run_knn'
 local Vector = require 'libvec'
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")

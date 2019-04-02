@@ -64,7 +64,17 @@ X, Y, X_test, temp_X_test, y_test, temp_y_test = utils.split_dataset(test_data, 
 # In[22]:
 
 #calling gridsearchcv
-grid = utils.grid_search_cv(X_train, y_train, scoring_method="accuracy")
+grid = utils.grid_search_cv(X_train, y_train, scoring_method="f1_weighted")
+
+# pickle_path = "category1_f1_wt.pkl"
+
+# saving model to pkl file
+# utils.save(grid, pickle_path)
+
+# loading model from pkl file
+# grid = utils.restore(pickle_path)
+
+
 """
 print(grid.cv_results_)
 print("============================")
@@ -75,12 +85,13 @@ print("============================")
 print(grid.best_params_)
 print("============================")
 """
+
 # Prediction using gini
 y_pred_gini = utils.prediction(X_test, grid.best_estimator_)
-print("Results for gini algo")
+print("Results for grid search algo")
 utils.cal_accuracy(y_test, y_pred_gini)
 
-export_graphviz(grid.best_estimator_, out_file="best_fit_graphviz_ramesh_accuracy.txt", filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
+export_graphviz(grid.best_estimator_, out_file="best_fit_graphviz_ramesh_acr.txt", filled=True, rounded=True, special_characters=True, feature_names=X_train.columns)
 
 # Train using gini
 clf_gini = utils.train_using_gini(X_train, y_train)

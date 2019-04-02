@@ -6,7 +6,7 @@ require 'Q/UTILS/lua/strict'
 local plpath = require 'pl.path'
 local mk_col = require 'Q/OPERATORS/MK_COL/lua/mk_col'
 local fns = require 'Q/OPERATORS/MK_COL/test/testcases/handle_category'
-local utils = require 'Q/UTILS/lua/utils'
+local testcase_results = require 'Q/UTILS/lua/testcase_results'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local Q_SRC_ROOT = os.getenv("Q_SRC_ROOT")
@@ -73,11 +73,11 @@ for i, v in ipairs(T) do
     
     if fns[v.category] then
       result = fns[v.category](i, v, status, ret)
-      utils["testcase_results"](v, "Mk_col", "Unit Test", result, "")
+      testcase_results(v, "Mk_col", "Unit Test", result, "")
       assert(result,"handle " .. v.category .. " assertions failed")
     else
       fns["increment_failed_mkcol"](i, v, "Handle input function for "..v.category.." is not defined in handle_category.lua")
-      utils["testcase_results"](v, "Mk_col", "Unit Test", false, "")
+      testcase_results(v, "Mk_col", "Unit Test", false, "")
       assert(fns[v.category], "handle category is not defined in handle_category_print.lua file") 
     end
   end

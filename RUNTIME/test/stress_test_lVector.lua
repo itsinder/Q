@@ -6,12 +6,17 @@ local cmem    = require 'libcmem'
 local lVector = require 'Q/RUNTIME/lua/lVector'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local qc = require 'Q/UTILS/lua/q_core'
+local utils = require 'Q/UTILS/lua/utils'
 require 'Q/UTILS/lua/strict'
+
 local tests = {} 
-local num_chunks = 16
-local num_iters = 65536
+local num_chunks = 8
+--local num_iters = 65536
 -- 
 tests.t1 = function()
+  local start_time = qc.RDTSC()
+  local num_iters = 256
   for i = 1, num_iters do
     local qtype = "I4"
     local x = lVector( { qtype = qtype, gen = true, name = "x"})
@@ -60,9 +65,14 @@ tests.t1 = function()
     local T = x:meta()
     assert(plpath.isfile(T.base.file_name))
   end
-  print("Successfully completed test t1")
+  local stop_time = qc.RDTSC()
+  print("stress_test_lVector t1 time(seconds): ", utils["RDTSC"](stop_time-start_time))
+  print("Successfully completed RUNTIME/test/stress_test_lVector.lua --t1")
 end
+
 tests.t2 = function()
+  local start_time = qc.RDTSC()
+  local num_iters = 512
   for i = 1, num_iters do
     local qtype = "I8"
     local x = lVector( { qtype = qtype, gen = true, name = "x"})
@@ -89,7 +99,9 @@ tests.t2 = function()
       end
     end
   end
-  print("Successfully completed test t2")
+  local stop_time = qc.RDTSC()
+  print("stress_test_lVector t2 time (seconds): ", utils["RDTSC"](stop_time-start_time))
+  print("Successfully completed RUNTIME/test/stress_test_lVector.lua --t2")
 end
 
 return tests

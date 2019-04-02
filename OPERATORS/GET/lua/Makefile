@@ -12,12 +12,17 @@ CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} -Werror
 
 all : libget.so 
 
+all_for_dc : \
+	../gen_src/_get_val_F4_by_idx_I1.c \
+        ../gen_src/_set_sclr_val_F4_by_idx_I1.c \
+        ../gen_src/_add_vec_val_F4_by_idx_I1.c
+
 #----------------------------------
 clean :
-#-------------
 	rm -r -f ../gen_src; 
 	rm -r -f ../gen_inc; 
 	rm -f _*
+	rm -f *.so
 #-------------
 ../gen_src/_get_val_F4_by_idx_I1.c : get_val_by_idx.tmpl get_val_by_idx_specialize.lua
 	luajit generator.lua operators.lua

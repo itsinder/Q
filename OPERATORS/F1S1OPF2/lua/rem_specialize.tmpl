@@ -3,7 +3,7 @@ return function (
   )
   local qconsts  = require 'Q/UTILS/lua/q_consts'
   assert(qconsts.iorf[in_qtype] == "fixed", "in_qtype must be integer")
-  local tmpl = 'arith.tmpl'
+  local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/arith.tmpl"
   local subs = {}
   subs.fn = "<<operator>>_" .. in_qtype 
   subs.in_ctype = assert(qconsts.qtypes[in_qtype].ctype)

@@ -15,7 +15,13 @@ OPTFLAGS=
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
 all : libs_to_f.so _s_to_f.lua
-	
+
+all_for_dc : \
+	_s_to_f.lua
+	test -d ${Q_BUILD_DIR}
+	cp ../src/*.c ${Q_BUILD_DIR}/src/
+	cp ../inc/*.h ${Q_BUILD_DIR}/include/
+
 #----------------------------------
 clean :
 	rm -r -f ../gen_src; 

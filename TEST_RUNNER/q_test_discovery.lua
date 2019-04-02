@@ -1,8 +1,9 @@
 local pldir     = require 'pl.dir'
 local plpath    = require 'pl.path'
 local blacklist = require 'Q/TEST_RUNNER/blacklist'
+local qconsts	= require 'Q/UTILS/lua/q_consts'
 
-local q_src_root = os.getenv("Q_SRC_ROOT")
+local q_src_root = qconsts.Q_SRC_ROOT
 
 local ignore_files = {}
 for i, v in pairs(blacklist) do

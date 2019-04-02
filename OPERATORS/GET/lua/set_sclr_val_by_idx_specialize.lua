@@ -20,7 +20,7 @@ return function (
 
   local subs = {}
   local tmpl
-  tmpl = 'set_sclr_val_by_idx.tmpl'
+  tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/GET/lua/set_sclr_val_by_idx.tmpl"
   subs.fn = "set_sclr_val_" .. val_qtype .. "_by_idx_" .. idx_qtype 
 
   subs.idx_ctype = qconsts.qtypes[idx_qtype].ctype

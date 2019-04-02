@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libf1s1opf2_val.so  
+all : libf1s1opf2_val.so
+
+all_for_dc :
+	luajit gen_specialize.lua
 	
 ../../../UTILS/gen_inc/_bytes_to_bits.h :
 	make -C ../../../UTILS/src/

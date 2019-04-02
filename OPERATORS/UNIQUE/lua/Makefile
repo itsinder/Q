@@ -10,7 +10,10 @@ OPTFLAGS=
 
 CFLAGS = ${DBGFLAGS} ${OPTFLAGS} ${QC_FLAGS} 
 
-all : libunique.so  
+all : libunique.so
+
+all_for_dc:
+	    echo "Nothing to do"
 	
 #AUX_FILES = ../../../UTILS/src/bytes_to_bits.c
 

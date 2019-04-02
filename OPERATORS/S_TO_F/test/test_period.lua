@@ -12,6 +12,7 @@ tests.t1 = function()
   local y = Q.period({start = 1, by = 2, period = 3, qtype = "I4", len = len })
   local actual = Q.sum(y):eval():to_num()
   local expected = (n * (1+3+5))
-  assert (actual == expected ) 
-  end
+  assert (actual == expected )
+  print("successfully executed t1")
+end
 return tests
