@@ -9,8 +9,8 @@ rm -f ../../local/Q/data/_*
 rm -f ../../local/Q/trace/qcore.log
 
 #cleaning up files in git repo
-#git checkout .
-#git clean -fd
+git checkout .
+git clean -fd
 #pulling recent changes in git repo
 git pull
 
