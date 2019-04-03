@@ -35,5 +35,5 @@ luajit $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua s $Q_SRC_ROOT > $HOME/q_testrunn
 q_test_runner_result=$(tail -n1 < $HOME/q_testrunner_output_stress.txt)
 
 #cmd to mail the output of q_testrunner
-echo $q_test_runner_result | /usr/bin/mail -s "Q Unit Tests" krushnakant.mardikar@gslab.com,pragati.pailwan@gslab.com -A $HOME/q_testrunner_output_stress.txt
+echo $q_test_runner_result | /usr/bin/mail -s "Q Unit Tests" Subramonian@gmail.com -A $HOME/q_testrunner_output_stress.txt
 
