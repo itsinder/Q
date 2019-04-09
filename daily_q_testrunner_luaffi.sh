@@ -19,17 +19,31 @@ echo $Q_SRC_ROOT
 source $Q_SRC_ROOT/setup.sh -f
 
 rm -f ../../local/Q/lib/lib*.so
+
+#pointing L to lua
+sudo ln -sf /usr/local/bin/lua /usr/local/bin/L
+#TODO: temporary hack: by creating a link 'luajit' which points to lua
+#our Q build(Makefiles) is using luajit as interpreter, so pointing luajit to lua. Need to discuss.
+sudo ln -sf /usr/local/bin/lua /usr/local/bin/luajit
+
 cd $Q_SRC_ROOT/UTILS/build
 #running build
 build_cleanup_heading="------------OUTPUT of build cleanup--------------------------------------"
-build_cleanup_output=$(make clean 2>&1)
+build_cleanup_output=$(make clean)
+
+#TODO: temporary hack ==> Lua-Luaffi combination requires ffi.so present in local/Q/lib directory,
+# so building luaffi_installation for it.
+cd ../../GUIDING_PRINCIPLES/
+bash luaffi_installation.sh
+cd ../UTILS/build
+
 build_output_heading="------------OUTPUT of build scripts--------------------------------------"
-build_output=$(make static 2>&1)
+build_output=$(make static )
 
 cd ../../
+
 #running q_testrunner from Q_SRC_ROOT and dump output in temporary file
 luajit $Q_SRC_ROOT/TEST_RUNNER/q_testrunner.lua i $Q_SRC_ROOT > $HOME/q_testrunner_output.txt
-
 
 #cmd to get last line of output of q_testrunner
 q_test_runner_result=$(tail -n1 < $HOME/q_testrunner_output.txt)
