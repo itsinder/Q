@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+which gcc
 GCCVER=$(gcc --version | awk '/gcc /{print $4;exit 0;}')
 GCCVER=$(echo "${GCCVER//.}")
 REQUIRED=5.4.0 #specify here the required gcc version

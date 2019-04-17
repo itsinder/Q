@@ -17,6 +17,8 @@ usage(){
 }
 
 #---------- Main program starts ----------
+# installing apt get dependencies
+bash apt_get_dependencies.sh
 # first checking version of system packages required for Q
 bash system_requirements.sh
 
@@ -61,8 +63,6 @@ esac
 
 ## Note: Debugger & Developer mode: building Q with -g flag
 
-# installing apt get dependencies
-bash apt_get_dependencies.sh
 
 if [[ $LUA_DEBUG -eq 1 ]] ; then
   # installing lua with debug mode(set -g flag) if debug mode
