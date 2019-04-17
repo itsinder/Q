@@ -148,3 +148,5 @@ local qc_mt = {
 setmetatable(qt, qc_mt)
 add_libs()
 return qt
+
+-- bogus comment
