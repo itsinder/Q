@@ -15,12 +15,13 @@ int main(void)
   if ( nX > 127 ) { go_BYE(-1); }
   for ( int i = 0; i < nX; i++ ) { val_fld[i] = (i+1)*100; }
   for ( int i = 0; i < nX; i++ ) { out_fld[i] = INT_MAX; }
-  for ( int i = 0; i < nX; i++ ) { grpby_fld[i] = i; }
+  for ( int i = 0; i < nZ; i++ ) { grpby_fld[i] = i; }
   cfld[0] = ~0; // First 64 values are to be included
   cfld[1] = 0;  // Next 64 valyues are to be excluded
-  status = sumby_where_I4_I1_I8(val_fld, nX, grpby_fld, nZ, cfld, is_safe); cBYE(status);
-  for ( int i = 0; i < 5; i++ ) { if ( Z[i] != 11 ) { go_BYE(-1); } }
-  for ( int i = 5; i < nZ; i++ ) { if ( Z[i] != 10 ) { go_BYE(-1); } }
+  status = sumby_where_I4_I1_I8(
+      val_fld, nX, 
+      grpby_fld, nZ, 
+      cfld, out_fld, is_safe); cBYE(status);
 BYE:
   return status;
 }
