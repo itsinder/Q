@@ -16,7 +16,4 @@ for k, v in pairs(grp_by) do
   bvals[k] = Q.sumby_where(T[k], xxx, nxx, { where = b })
 end
 
-
-
-
 print("Successfully completed")

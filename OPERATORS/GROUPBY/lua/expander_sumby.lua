@@ -25,9 +25,11 @@ local function expander_sumby(a, b, nb, optargs)
       assert(type(is_safe) == "boolean")
     end
     if ( optargs.where ) then
+      for k, v in pairs(optargs) do print(k, v) end
+      os.exit()
       c = optargs.where
       assert(type(c) == "lVector")
-      assert(c:fldtype == "B1")
+      assert(c:fldtype() == "B1")
     end
   end
 

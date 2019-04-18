@@ -58,6 +58,7 @@ end
 
 tests.t4 = function()
   -- Length of input vector more than chunk size
+  -- note that len must be a mutlple of period  for this test
   local len = qconsts.chunk_size * 2 + 655
   local period = 3
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )

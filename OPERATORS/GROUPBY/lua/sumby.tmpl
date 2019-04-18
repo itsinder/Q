@@ -36,10 +36,7 @@ ${fn}(
 { 
   int status = 0;
 
-  // Note: we expect nR_out to be small. 
-  for ( uint64_t i = 0; i < nR_out; i++ ) { 
-    out_fld[i] = 0;
-  }
+  /* Assumption: out_fld has been set to 0 prior to the call */
   if ( is_safe ) {
 #pragma omp parallel for schedule(static, 1024)
     for ( uint64_t i = 0; i < nR_in; i++ ) {
