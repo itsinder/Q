@@ -9,7 +9,7 @@ local num_produced = 0
 
 local val_qtypes = { 'I1', 'I2', 'I4', 'I8', 'F4', 'F8' }
 local grpby_qtypes = { 'I1', 'I2', 'I4', 'I8' }
-local operators = { 'sumby' }
+local operators = { 'sumby', 'sumby_where' }
 for k, operator in pairs(operators) do 
   local sp_fn = assert(require((operator .. "_specialize")))
   for i, val_qtype in ipairs(val_qtypes) do 

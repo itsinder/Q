@@ -23,7 +23,7 @@ for k, operator in pairs(operators) do
         -- print(tmpl)
         gen_code.doth(subs, tmpl, incdir)
         gen_code.dotc(subs, tmpl, srcdir)
-        -- print("Produced ", subs.fn)
+        print("Produced ", subs.fn)
         num_produced = num_produced + 1
       else
         print(subs)

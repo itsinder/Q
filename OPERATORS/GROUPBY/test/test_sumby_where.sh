@@ -5,7 +5,7 @@ cd ../lua/
 make clean
 make
 cd -
-gcc test_numby.c  \
+gcc test_sumby_where.c  \
   $Q_SRC_ROOT/UTILS/src/get_bit_u64.c \
   ../lua/libgroupby.so \
   -I../gen_inc/ \

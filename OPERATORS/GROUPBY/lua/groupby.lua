@@ -14,6 +14,19 @@ end
 T.sumby = sumby
 require('Q/q_export').export('sumby', sumby)
 
+local function sumby_where(x, g, ng, cfld, optargs)
+  local expander = require 'Q/OPERATORS/GROUPBY/lua/expander_sumby_where'
+  assert(x, "no arg x to sumby")
+  assert(g, "no arg g to sumby")
+  assert(cfld, "no arg g to sumby")
+  local status, col = pcall(expander, x, g, ng, cfld, optargs)
+  if not status then print(col) end
+  assert(status, "Could not execute SUMBY")
+  return col
+end
+T.sumby = sumby
+require('Q/q_export').export('sumby', sumby)
+
 
 local function numby(g, ng, optargs)
   local expander = require 'Q/OPERATORS/GROUPBY/lua/expander_numby'
