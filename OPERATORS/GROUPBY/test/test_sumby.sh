@@ -2,10 +2,10 @@
 set -e
 test -d $Q_SRC_ROOT
 cd ../lua/
-make clean
-make
+# make clean
+# make
 cd -
-gcc test_sumby_where.c  \
+gcc test_sumby.c  \
   -g $QC_FLAGS \
   $Q_SRC_ROOT/UTILS/src/get_bit_u64.c \
   ../lua/libgroupby.so \

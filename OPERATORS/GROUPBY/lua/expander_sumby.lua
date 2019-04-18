@@ -13,6 +13,7 @@ local function expander_sumby(a, b, nb, optargs)
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
+  local c -- conditional evaluation
 
   -- Keeping default is_safe value as true
   -- This will not allow C code to write values at incorrect locations
@@ -22,6 +23,11 @@ local function expander_sumby(a, b, nb, optargs)
     if ( optargs["is_safe"] == false ) then
       is_safe =  optargs["is_safe"]
       assert(type(is_safe) == "boolean")
+    end
+    if ( optargs.where ) then
+      c = optargs.where
+      assert(type(c) == "lVector")
+      assert(c:fldtype == "B1")
     end
   end
 
@@ -60,6 +66,10 @@ local function expander_sumby(a, b, nb, optargs)
     while true do
       local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
       local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
+      local c_len, c_chunk, c_nn_chunk 
+      if ( c ) then 
+        c_len, c_chunk, c_nn_chunk = c:chunk(chunk_idx)
+      end
       assert(a_len == b_len)
       if a_len == 0 then
         if chunk_idx == 0 then
@@ -71,10 +81,17 @@ local function expander_sumby(a, b, nb, optargs)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Null is not supported")
     
-      local casted_a_chunk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
-      local casted_b_chunk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
-      local casted_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](casted_a_chunk, a_len, casted_b_chunk, nb, casted_out_buf, is_safe)
+      local cst_a_chnk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
+      local cst_b_chnk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
+      local cst_c_chunk  = nil
+      if ( c ) then 
+        cst_c_chunk = ffi.cast( "uint64_t *",    get_ptr(c_chunk))
+      end
+      local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
+      local status = qc[func_name](
+        cst_a_chnk, a_len, cst_b_chnk, 
+        cst_out_buf, nb, 
+        cst_c_chunk, is_safe)
       assert(status == 0, "C error in SUMBY")
       chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then
