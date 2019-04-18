@@ -11,9 +11,20 @@ end
 local a, b = mk_ab(n, 0.4)
 local grp_by = { "f1", "f2", "f3", "f4" }
 local avals = {}
-for k, v in pairs(grp_by) do 
-  avals[k] = Q.sumby_where(T[k], xxx, nxx, { where = a })
-  bvals[k] = Q.sumby_where(T[k], xxx, nxx, { where = b })
+local bvals = {}
+for k, attr in pairs(grp_by) do 
+  local vec = assert(T[attr], " k = " .. k)
+  assert(type(vec) == "lVector")
+  local x, y = Q.max(vec):eval()
+  -- print(x, y, vec:get_name(), vec:fldtype())
+  local nvals = x:to_num() + 1
+  for k2, metric in pairs(M) do 
+    assert(type(metric) == "lVector")
+    avals[k] = Q.sumby(metric, vec, nvals, { where = a }):eval()
+    bvals[k] = Q.sumby(metric, vec, nvals, { where = b }):eval()
+    print("working on " .. metric:get_name() .. " for " .. vec:get_name())
+  end
 end
 
 print("Successfully completed")
+os.exit()

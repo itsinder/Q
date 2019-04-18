@@ -7,7 +7,6 @@ local function mk_ab(len, p)
   local b = Q.rand( { probability = p, qtype = "B1", len = len })
   local sum_a = Q.sum(a)
   local sum_b = Q.sum(b)
-  print(sum_a:eval(), sum_b:eval())
 end
 -- mk_ab(1048575, 0.5)
 return mk_ab

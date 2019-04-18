@@ -9,7 +9,6 @@ local function dload()
   else
     T, M = load_data()
   end
-  print(type(T))
   return T, M
 end
 return dload
