@@ -1,3 +1,5 @@
+#ifndef __Q_INCS
+#define __Q_INCS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -16,3 +18,4 @@
 #include <unistd.h>
 #include "q_constants.h"
 #include "q_macros.h"
+#endif
