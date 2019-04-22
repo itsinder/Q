@@ -11,9 +11,6 @@ local operators = { "shift_left", "shift_right" }
 local qtypes = { 'I1', 'I2', 'I4', 'I8' }
 local num_produced = 0
 for _, operator in pairs(operators) do
-  if ( operator == "shift_right" ) then
-    print("TODO")
-  else
     local sp_fn = assert(require(operator .. "_specialize"))
     for _, qtype in pairs(qtypes) do
       local s = Scalar.new(1, qtype)
@@ -30,6 +27,5 @@ for _, operator in pairs(operators) do
         assert(nil)
       end
     end
-  end
 end
 assert(num_produced > 0)

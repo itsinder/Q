@@ -43,7 +43,7 @@ ${fn}(
 
 #pragma omp parallel for schedule(static, 1024)
   for ( uint64_t i = 0; i < nR; i++ ) { 
-    out[i] = in[i] << shift_by;
+    out[i] =  (( ${cast_in_as} ) in[i]) << shift_by;
   } 
 BYE:
   return status;
