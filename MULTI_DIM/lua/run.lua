@@ -16,7 +16,6 @@ for k, attr in pairs(grp_by) do
   local vec = assert(T[attr], " k = " .. k)
   assert(type(vec) == "lVector")
   local x, y = Q.max(vec):eval()
-  -- print(x, y, vec:get_name(), vec:fldtype())
   local nvals = x:to_num() + 1
   for k2, metric in pairs(M) do 
     assert(type(metric) == "lVector")

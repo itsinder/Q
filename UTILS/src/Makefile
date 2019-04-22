@@ -10,9 +10,6 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_isfile.h :
 	lua ../lua/cli_extract_func_decl.lua isfile.c ${INCDIR}
 
-../gen_inc/_q_omp_get_num_threads.h :
-	lua ../lua/cli_extract_func_decl.lua q_omp_get_num_threads.c ${INCDIR}
-
 ../gen_inc/_isdir.h :
 	lua ../lua/cli_extract_func_decl.lua isdir.c ${INCDIR}
 
@@ -79,6 +76,9 @@ all : libutils.so ${hdr_files} asc2bin
 ../gen_inc/_set_bit_u64.h :
 	lua ../lua/cli_extract_func_decl.lua set_bit_u64.c ${INCDIR}
 
+../gen_inc/_q_omp_get_num_threads.h :
+	lua ../lua/cli_extract_func_decl.lua q_omp_get_num_threads.c ${INCDIR}
+
 ../gen_inc/_copy_file.h :
 	lua ../lua/cli_extract_func_decl.lua copy_file.c ${INCDIR}
 
@@ -115,7 +115,6 @@ hdr_files = \
 	../gen_inc/_rand_file_name.h  \
 	../gen_inc/_file_exists.h  \
         ../gen_inc/_isfile.h  \
-        ../gen_inc/_q_omp_get_num_threads.h  \
         ../gen_inc/_isdir.h  \
 	../gen_inc/_delete_file.h  \
 	../gen_inc/_make_dir.h  \
@@ -133,6 +132,7 @@ hdr_files = \
         ../gen_inc/_get_bit_u64.h \
         ../gen_inc/_set_bit.h \
         ../gen_inc/_set_bit_u64.h \
+        ../gen_inc/_q_omp_get_num_threads.h \
         ../gen_inc/_copy_file.h \
         ../gen_inc/_generate_bin.h \
 	../gen_inc/_is_valid_chars_for_num.h  \
@@ -146,7 +146,6 @@ SRC_FILES=  \
 	rand_file_name.c \
 	file_exists.c \
         isfile.c \
-        q_omp_get_num_threads.c \
         isdir.c \
 	delete_file.c \
 	make_dir.c \
@@ -166,6 +165,7 @@ SRC_FILES=  \
         get_bit_u64.c  \
         set_bit.c  \
         set_bit_u64.c  \
+        q_omp_get_num_threads.c  \
         copy_file.c  \
         generate_bin.c  \
 	is_valid_chars_for_num.c \
