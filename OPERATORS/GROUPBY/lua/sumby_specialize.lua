@@ -1,7 +1,8 @@
 
 return function (
   val_qtype, 
-  grpby_qtype
+  grpby_qtype,
+  c -- condition field 
   )
   local qconsts = require 'Q/UTILS/lua/q_consts'
   local utils = require 'Q/UTILS/lua/utils'
@@ -17,10 +18,18 @@ return function (
   end
   local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/GROUPBY/lua/sumby.tmpl"
   local subs = {};
-  subs.fn = "sumby_" .. val_qtype .. "_" .. grpby_qtype .. "_" .. out_qtype
   subs.val_ctype = qconsts.qtypes[val_qtype].ctype
   subs.grpby_ctype = qconsts.qtypes[grpby_qtype].ctype
   subs.out_qtype = out_qtype
+  if ( c ) then 
+    subs.ifcond = " if ( get_bit_u64(cfld, i) == 1 ) {  "
+    subs.endif = " } "
+    subs.fn = "sumby_where_" .. val_qtype .. "_" .. grpby_qtype .. 
+      "_" .. out_qtype
+  else
+    subs.fn = "sumby_" .. val_qtype .. "_" .. grpby_qtype .. 
+      "_" .. out_qtype
+  end
   subs.out_ctype = qconsts.qtypes[out_qtype].ctype
   return subs, tmpl
 end

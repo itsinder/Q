@@ -14,10 +14,10 @@ local function expander_sumby(a, b, nb, optargs)
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
   local c -- conditional evaluation
-  local np = qc.q_omp_get_num_threads()
+  local nt = qc.q_omp_get_num_threads() -- number of threads
   local na = qconsts.chunk_size -- default estimate of vector size
   if ( a:is_eov() ) then na = a:length() end
-  -- decide what np should be
+  -- decide what nt should be
 
 
   -- Keeping default is_safe value as true
@@ -36,7 +36,7 @@ local function expander_sumby(a, b, nb, optargs)
     end
   end
 
-  local status, subs, tmpl = pcall(spfn, a:fldtype(), b:fldtype())
+  local status, subs, tmpl = pcall(spfn, a:fldtype(), b:fldtype(), c)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
@@ -49,8 +49,11 @@ local function expander_sumby(a, b, nb, optargs)
   -- STOP: Dynamic compilation
 
   assert(qc[func_name], "Symbol not defined " .. func_name)
-  local sz_out = nb
-  local sz_out_in_bytes = sz_out * qconsts.qtypes[subs.out_qtype].width
+  -- following jiggery is so that each core's buffer is 
+  -- spaced sufficiently far away to avoid false sharing
+  local n_buf_per_core = math.ceil((nb / 64 )) * 64
+  local width = qconsts.qtypes[subs.out_qtype].width
+  local sz_out_in_bytes = n_buf_per_core * nt * width
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
@@ -95,7 +98,7 @@ local function expander_sumby(a, b, nb, optargs)
       local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
       local status = qc[func_name](
         cst_a_chnk, a_len, cst_b_chnk, 
-        cst_out_buf, nb, 
+        cst_out_buf, nb, nt, n_buf_per_core, 
         cst_c_chunk, is_safe)
       assert(status == 0, "C error in SUMBY")
       chunk_idx = chunk_idx + 1
