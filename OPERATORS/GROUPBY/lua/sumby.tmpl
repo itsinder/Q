@@ -13,7 +13,9 @@ ${fn}(
       ${out_ctype} * restrict out_fld, /* [nR_out] */
       uint64_t nR_out,
       const uint64_t * const restrict cfld, 
-      bool is_safe
+      bool is_safe,
+      int nT, //  number of threads
+      int out_buf_sz
       ) 
 ;
 
@@ -30,7 +32,9 @@ ${fn}(
       ${out_ctype} * restrict out_fld, /* [nR_out] */
       uint64_t nR_out,
       const uint64_t * const restrict cfld, 
-      bool is_safe
+      bool is_safe,
+      int nT, //  number of threads
+      int out_buf_sz
       )
 
 { 
@@ -48,8 +52,8 @@ ${fn}(
     cBYE(status);
   }
 // TODO put back pragma
-// #pragma omp parallel for schedule(static, 1024)
   if ( cfld != NULL ) { 
+// #pragma omp parallel for schedule(static, 1024)
     for ( uint64_t i = 0; i < nR_in; i++ ) { 
       // TODO: Don't use a function call to extract the bits
       if ( get_bit_u64(cfld, i) == 1 ) { 
@@ -60,10 +64,20 @@ ${fn}(
     }
   }
   else {
-    for ( uint64_t i = 0; i < nR_in; i++ ) { 
-      ${val_ctype} val = val_fld[i];
-      ${grpby_ctype} grpby = grpby_fld[i];
-      out_fld[grpby] += val;
+    int num_blocks = nR_in / nT;
+    if ( num_blocks == 0 )  { num_blocks++; }
+    int block_size = nR_in / num_blocks;
+#pragma omp parallel for schedule(static, 1)
+    for ( int tid = 0; tid < nT; tid++ ) { 
+      uint64_t lb = tid  * block_size;
+      uint64_t ub = lb + block_size;
+      if ( tid == (nT-1) ) { ub = nR_in; }
+      ${out_ctype} * l_out_fld = out_fld + (out_buf_sz * tid);
+      for ( uint64_t i = lb; i < ub; i++ ) { 
+        ${val_ctype} val = val_fld[i];
+        ${grpby_ctype} grpby = grpby_fld[i];
+        l_out_fld[grpby] += val;
+      }
     }
   }
 BYE:

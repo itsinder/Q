@@ -14,6 +14,11 @@ local function expander_sumby(a, b, nb, optargs)
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
   local c -- conditional evaluation
+  local np = qc.q_omp_get_num_threads()
+  local na = qconsts.chunk_size -- default estimate of vector size
+  if ( a:is_eov() ) then na = a:length() end
+  -- decide what np should be
+
 
   -- Keeping default is_safe value as true
   -- This will not allow C code to write values at incorrect locations
