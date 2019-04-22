@@ -126,6 +126,7 @@ logit2_specialize.lua  : f1opf2_specialize.tmpl
 
 libf1s1opf2.so : _arith_files  \
 	_cmp_files \
+	_shift_files \
 	_f1opf2_files \
 	_convert_files \
 	_vnot_files \
@@ -150,6 +151,9 @@ _vnot_files : vnot_specialize.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua
+
+_shift_files : shift_left_specialize.lua shift_right_specialize.lua
+	luajit gen_shift.lua 
 
 _cmp_files : cmp_specializers
 	luajit generator1.lua cmp_operators.lua
