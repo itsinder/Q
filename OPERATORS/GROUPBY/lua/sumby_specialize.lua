@@ -23,9 +23,21 @@ return function (
   subs.out_qtype = out_qtype
   if ( c ) then 
     subs.ifcond = " if ( get_bit_u64(cfld, i) == 1 ) {  "
+    subs.ifcond = " if ( ( cfld_s & 0x1 ) == 1 ) {  "
     subs.endif = " } "
     subs.fn = "sumby_where_" .. val_qtype .. "_" .. grpby_qtype .. 
       "_" .. out_qtype
+    subs.ifpreamble = [[
+      uint64_t cfld_s = cfld[0];
+      int ctr = 0;
+      int xidx = 0;
+    ]]
+    subs.ifloop = [[
+      cfld_s = cfld_s >> 1; 
+      ctr++; 
+      if ( ctr == 64 ) { cfld_s = cfld[++xidx]; ctr = 0; }
+    ]]
+       
   else
     subs.fn = "sumby_" .. val_qtype .. "_" .. grpby_qtype .. 
       "_" .. out_qtype
