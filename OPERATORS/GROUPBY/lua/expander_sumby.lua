@@ -13,6 +13,12 @@ local function expander_sumby(a, b, nb, optargs)
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
+  local c -- conditional evaluation
+  local nt = qc.q_omp_get_num_threads() -- number of threads
+  local na = qconsts.chunk_size -- default estimate of vector size
+  if ( a:is_eov() ) then na = a:length() end
+  -- decide what nt should be
+
 
   -- Keeping default is_safe value as true
   -- This will not allow C code to write values at incorrect locations
@@ -23,9 +29,14 @@ local function expander_sumby(a, b, nb, optargs)
       is_safe =  optargs["is_safe"]
       assert(type(is_safe) == "boolean")
     end
+    if ( optargs.where ) then
+      c = optargs.where
+      assert(type(c) == "lVector")
+      assert(c:fldtype() == "B1")
+    end
   end
 
-  local status, subs, tmpl = pcall(spfn, a:fldtype(), b:fldtype())
+  local status, subs, tmpl = pcall(spfn, a:fldtype(), b:fldtype(), c)
   if not status then print(subs) end
   assert(status, "Specializer failed " .. sp_fn_name)
   local func_name = assert(subs.fn)
@@ -38,8 +49,11 @@ local function expander_sumby(a, b, nb, optargs)
   -- STOP: Dynamic compilation
 
   assert(qc[func_name], "Symbol not defined " .. func_name)
-  local sz_out = nb
-  local sz_out_in_bytes = sz_out * qconsts.qtypes[subs.out_qtype].width
+  -- following jiggery is so that each core's buffer is 
+  -- spaced sufficiently far away to avoid false sharing
+  local n_buf_per_core = math.ceil((nb / 64 )) * 64
+  local width = qconsts.qtypes[subs.out_qtype].width
+  local sz_out_in_bytes = n_buf_per_core * nt * width
   local out_buf = nil
   local first_call = true
   local chunk_idx = 0
@@ -60,6 +74,10 @@ local function expander_sumby(a, b, nb, optargs)
     while true do
       local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
       local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
+      local c_len, c_chunk, c_nn_chunk 
+      if ( c ) then 
+        c_len, c_chunk, c_nn_chunk = c:chunk(chunk_idx)
+      end
       assert(a_len == b_len)
       if a_len == 0 then
         if chunk_idx == 0 then
@@ -71,10 +89,17 @@ local function expander_sumby(a, b, nb, optargs)
       assert(a_nn_chunk == nil, "Null is not supported")
       assert(b_nn_chunk == nil, "Null is not supported")
     
-      local casted_a_chunk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
-      local casted_b_chunk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
-      local casted_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](casted_a_chunk, a_len, casted_b_chunk, nb, casted_out_buf, is_safe)
+      local cst_a_chnk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
+      local cst_b_chnk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
+      local cst_c_chunk  = nil
+      if ( c ) then 
+        cst_c_chunk = ffi.cast( "uint64_t *",    get_ptr(c_chunk))
+      end
+      local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
+      local status = qc[func_name](
+        cst_a_chnk, a_len, cst_b_chnk, 
+        cst_out_buf, nb, nt, n_buf_per_core, 
+        cst_c_chunk, is_safe)
       assert(status == 0, "C error in SUMBY")
       chunk_idx = chunk_idx + 1
       if a_len < qconsts.chunk_size then

@@ -58,6 +58,7 @@ end
 
 tests.t4 = function()
   -- Length of input vector more than chunk size
+  -- note that len must be a mutlple of period  for this test
   local len = qconsts.chunk_size * 2 + 655
   local period = 3
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
@@ -77,6 +78,29 @@ tests.t4 = function()
     assert(val:to_num() == exp_val[i])
   end
   print("Test t4 completed")
+end
+tests.t5 = function()
+  local len = qconsts.chunk_size * 2 + 655
+  local period = 3
+  local nb = 3
+  local p = 0.5
+
+  local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
+  local b = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
+  local c = Q.rand( { probability = p, qtype = "B1", len = len })
+
+  local res = Q.sumby(a, b, nb, { where = c })
+  res:eval()
+
+  assert(res:length() == nb)
+  local val, nn_val
+  for i = 1, res:length() do
+    local val, nn_val = res:get_one(i-1)
+    local n1, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
+    print(i, val:to_num(), n1, n2)
+    assert(val:to_num() == n1)
+  end
+  print("Test t5 completed")
 end
 
 return tests

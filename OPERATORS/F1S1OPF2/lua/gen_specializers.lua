@@ -24,10 +24,6 @@ y = string.gsub(x, "<<operator>>", "vsdiv")
 y = string.gsub(y, "<<c_code>>", "c = a / b")
 plfile.write("vsdiv_specialize.lua", y)
 --=======================
---++++++++++++++++++++++++++++++++++++++++++++++++++++++
-assert(plpath.isfile("rem_specialize.tmpl"), "File not found")
-local x = plfile.read("rem_specialize.tmpl")
-
 y = string.gsub(x, "<<operator>>", "vsrem")
 y = string.gsub(y, "<<c_code>>", 'c = a %% b;')
 plfile.write("vsrem_specialize.lua", y)

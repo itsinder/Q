@@ -16,8 +16,7 @@ all_for_dc : \
 	_f1s1opf2.lua \
 	f1opf2_specializers \
 	arith_specializers \
-	cmp_specializers \
-	bop_specializers \
+	cmp_specializers 
 	
 f1opf2_specializers: f1opf2_specialize.tmpl \
 	abs_specialize.lua \
@@ -30,6 +29,8 @@ f1opf2_specializers: f1opf2_specialize.tmpl \
 arith_specializers: arith_specialize.tmpl \
 	vsadd_specialize.lua vssub_specialize.lua \
 	vsmul_specialize.lua vsdiv_specialize.lua \
+	vsrem_specialize.lua vsxor_specialize.lua \
+	vsand_specialize.lua vsor_specialize.lua   \
 	pow_specialize.lua
 	luajit gen_specializers.lua arith
 
@@ -38,10 +39,6 @@ cmp_specializers: vsgeq_specialize.lua vsleq_specialize.lua  \
 	vseq_specialize.lua vsneq_specialize.lua 
 	luajit gen_specializers.lua cmp
 
-bop_specializers : rem_specialize.tmpl \
-	vsrem_specialize.lua  vsxor_specialize.lua \
-	vsand_specialize.lua vsor_specialize.lua  
-	luajit gen_specializers.lua bop
 
 #----------------------------------
 clean :
@@ -126,6 +123,7 @@ logit2_specialize.lua  : f1opf2_specialize.tmpl
 
 libf1s1opf2.so : _arith_files  \
 	_cmp_files \
+	_shift_files \
 	_f1opf2_files \
 	_convert_files \
 	_vnot_files \
@@ -150,6 +148,9 @@ _vnot_files : vnot_specialize.lua
 		
 _arith_files : arith_specializers
 	luajit generator1.lua arith_operators.lua
+
+_shift_files : shift_left_specialize.lua shift_right_specialize.lua
+	luajit gen_shift.lua 
 
 _cmp_files : cmp_specializers
 	luajit generator1.lua cmp_operators.lua

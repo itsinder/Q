@@ -8,4 +8,5 @@ return {
 "vsor",  
 "vsxor",
 "pow",
+"shift_left",
 }
