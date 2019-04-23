@@ -60,12 +60,15 @@ local function expander_sumby(a, b, nb, optargs)
       -- allocate buffer for output
   local out_buf = assert(cmem.new(sz_out_in_bytes))
   out_buf:zero()
+  assert(type(out_buf) == "CMEM")
   
   local a_ctype = qconsts.qtypes[a:fldtype()].ctype 
   local b_ctype = qconsts.qtypes[b:fldtype()].ctype 
   local out_ctype = qconsts.qtypes[subs.out_qtype].ctype 
+  local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
   
   local vectorizer = function(value)
+    assert(type(value) == "CMEM")
     local v = lVector.new(
     {qtype = subs.out_qtype, gen = true, has_nulls = false})
     v:put_chunk(value, nil, nb)
@@ -94,7 +97,6 @@ local function expander_sumby(a, b, nb, optargs)
     if ( c ) then 
       cst_c_chunk = ffi.cast( "uint64_t *",    get_ptr(c_chunk))
     end
-    local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
     local status = qc[func_name](
         cst_a_chnk, a_len, cst_b_chnk, 
         cst_out_buf, nb, nt, n_buf_per_core, 
@@ -104,6 +106,7 @@ local function expander_sumby(a, b, nb, optargs)
       return nil
     end
     chunk_idx = chunk_idx + 1
+    return true
   end
   local s =  Reducer ( { gen = sumby_gen, func = vectorizer, value = out_buf} )
   return s

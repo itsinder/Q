@@ -43,14 +43,14 @@ tests.t3 = function()
   local exp_val = {0, 22, 20}
   local nb = 3
   local res = Q.sumby(a, b, nb)
-  res:eval()
+  local vres = res:eval()
 
   -- vefiry
-  assert(res:length() == nb)
-  assert(res:length() == #exp_val)
+  assert(vres:length() == nb)
+  assert(vres:length() == #exp_val)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
 
@@ -71,12 +71,12 @@ tests.t4 = function()
   local nb = 3
 
   local res = Q.sumby(a, b, nb)
-  res:eval()
+  local vres = res:eval()
 
-  assert(res:length() == nb)
+  assert(vres:length() == nb)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
   print("Test t4 completed")
@@ -92,15 +92,14 @@ tests.t5 = function()
   local c = Q.rand( { probability = p, qtype = "B1", len = len })
 
   local res = Q.sumby(a, b, nb, { where = c })
-  res:eval()
+  local vres = res:eval()
 
-  assert(res:length() == nb)
+  assert(vres:length() == nb)
   local val, nn_val
-  for i = 1, res:length() do
-    local val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    local val, nn_val = vres:get_one(i-1)
     local n1, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
-    print(i, val:to_num(), n1, n2)
-    assert(val:to_num() == n1)
+    assert(val:to_num() == n1:to_num())
   end
   print("Test t5 completed")
 end

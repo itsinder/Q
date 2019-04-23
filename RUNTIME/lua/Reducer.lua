@@ -66,7 +66,7 @@ function Reducer:next()
   local val = self._gen(self._index)
   self._index = self._index + 1
   if val ~= nil then
-    self._value = val
+    -- TODO P1 IS IT OKAY TO COMMENT HIS OUT?? self._value = val
     return true
   else
     self._gen = nil -- destroy the generator once generation done
