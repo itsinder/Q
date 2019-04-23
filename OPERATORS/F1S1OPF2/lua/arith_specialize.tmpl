@@ -1,5 +1,5 @@
 return function (
-  in_qtype,
+  qtype,
   scalar
   )
   local qconsts       = require "Q/UTILS/lua/q_consts"
@@ -7,17 +7,20 @@ return function (
   local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
   local Scalar        = require 'libsclr'
 
-  assert(is_base_qtype(in_qtype))
+  assert(is_base_qtype(qtype))
   local tmpl = qconsts.Q_SRC_ROOT .. "/OPERATORS/F1S1OPF2/lua/arith.tmpl"
   local subs = {}; 
-  subs.fn = "<<operator>>_" .. in_qtype .. "_" .. in_qtype
-  subs.in_ctype = qconsts.qtypes[in_qtype].ctype
+  local ctype = assert(qconsts.qtypes[qtype].ctype)
+  subs.fn = "<<operator>>_" .. qtype 
+
+  subs.in_qtype    = qtype
+  subs.in_ctype    = ctype
+
+  subs.out_qtype   = qtype
+  subs.out_ctype   = ctype
+
   subs.c_code_for_operator = "<<c_code>>;"
   subs.args        = scalar:to_cmem()
-  subs.args_ctype  = subs.in_ctype
-  subs.in_qtype = in_qtype
-  subs.out_qtype    = in_qtype
-  subs.out_ctype    = qconsts.qtypes[subs.out_qtype].ctype
-  subs.scalar_ctype = subs.out_ctype 
+  subs.args_ctype  = ctype
   return subs, tmpl
 end

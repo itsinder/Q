@@ -11,7 +11,7 @@ ${fn}(
       const ${in_ctype} * restrict in,  
       uint64_t *nn_in,
       uint64_t nR,
-      ${scalar_ctype} *ptr_sval,
+      ${in_ctype} *ptr_sval,
       ${out_ctype} * out,
       uint64_t *nn_out
       ) 
@@ -22,23 +22,12 @@ ${fn}(
 
 #include "_${fn}.h"
 
-static void __operation(
-  ${in_ctype} a,
-  ${scalar_ctype} b,
-  ${out_ctype} *ptr_c
-  )
-{
-  ${out_ctype} c;
-  ${c_code_for_operator}
-  *ptr_c = c;
-}
-
 int
 ${fn}(  
       const ${in_ctype} * restrict in,
       uint64_t *nn_in,
       uint64_t nR,  
-      ${scalar_ctype} *ptr_sval,
+      ${in_ctype} *ptr_sval,
       ${out_ctype} * out,
       uint64_t *nn_out
       )
@@ -50,15 +39,15 @@ ${fn}(
   if ( out == NULL ) { go_BYE(-1); }
   if ( ptr_sval == NULL ) { go_BYE(-1); }
   if ( nR == 0 ) { go_BYE(-1); }
-  ${scalar_ctype} sval = *ptr_sval;
+  ${in_ctype} sval = *ptr_sval;
 
 #pragma omp parallel for schedule(static, 1024)
   for ( uint64_t i = 0; i < nR; i++ ) { 
-    ${in_ctype} inv; 
-    ${out_ctype} outv; 
-    inv = in[i];
-    __operation(inv, sval, &outv);
-    out[i] = outv;
+    ${in_ctype} a = in[i]; 
+    ${in_ctype} b = sval; 
+    ${out_ctype} c; 
+    ${c_code_for_operator}
+    out[i] = c;
   } 
   BYE:
   return status;

@@ -69,5 +69,19 @@ tests.t4 = function()
   assert(n1 == n2)
   print("Test t4 succeeded")
 end
+tests.t5 = function()
+  local qtype = "I4"
+  local len = qconsts.chunk_size * 2 + 17
+  local val = 19
+  local shift = 7
+  local ub = 32767 * 32767
+  local x = Q.rand( { lb = 1, ub = ub, qtype = qtype, len = len })
+  local y = Q.vsand(x, Scalar.new(32767, qtype))
+  local z = Q.const({ val = 32767, qtype = qtype, len = len} )
+
+  local n1, n2 = Q.sum(Q.vvleq(y, z)):eval()
+  assert(n1 == n2)
+  print("Test t5 succeeded")
+end
 return tests
 

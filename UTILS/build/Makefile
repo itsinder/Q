@@ -86,94 +86,94 @@ q_basic: utils load_csv print runtime
 
 runtime:
 	cd ${Q_SRC_ROOT}/RUNTIME/src;
-	make -C ${Q_SRC_ROOT}/RUNTIME/src/
+	make  -C ${Q_SRC_ROOT}/RUNTIME/src/
 
 utils:
-	make -C ${Q_SRC_ROOT}/UTILS/src/ 
+	make  -C ${Q_SRC_ROOT}/UTILS/src/ 
 
 drop_nulls:
-	make -C ${Q_SRC_ROOT}/OPERATORS/DROP_NULLS/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/DROP_NULLS/lua/ ${BUILD_TYPE}
 
 ifxthenyelsez:
-	make -C ${Q_SRC_ROOT}/OPERATORS/IFXTHENYELSEZ/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/IFXTHENYELSEZ/lua/ ${BUILD_TYPE}
 
 ainb:
-	make -C ${Q_SRC_ROOT}/OPERATORS/AINB/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/AINB/lua/ ${BUILD_TYPE}
 
 where:
-	make -C ${Q_SRC_ROOT}/OPERATORS/WHERE/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/WHERE/lua/ ${BUILD_TYPE}
 
 sumby:
-	make -C ${Q_SRC_ROOT}/OPERATORS/GROUPBY/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/GROUPBY/lua/ ${BUILD_TYPE}
 
 getk:
-	make -C ${Q_SRC_ROOT}/OPERATORS/GETK/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/GETK/lua/ ${BUILD_TYPE}
 
 index:
-	make -C ${Q_SRC_ROOT}/OPERATORS/INDEX/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/INDEX/lua/ ${BUILD_TYPE}
 
 unique:
-	make -C ${Q_SRC_ROOT}/OPERATORS/UNIQUE/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/UNIQUE/lua/ ${BUILD_TYPE}
 
 count:
-	make -C ${Q_SRC_ROOT}/OPERATORS/COUNT/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/COUNT/lua/ ${BUILD_TYPE}
 
 join:
-	make -C ${Q_SRC_ROOT}/OPERATORS/JOIN/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/JOIN/lua/ ${BUILD_TYPE}
 
 load_csv:
-	make -C ${Q_SRC_ROOT}/OPERATORS/LOAD_CSV/lua/
+	make  -C ${Q_SRC_ROOT}/OPERATORS/LOAD_CSV/lua/
 
 hash:
-	make -C ${Q_SRC_ROOT}/OPERATORS/HASH/lua/
+	make  -C ${Q_SRC_ROOT}/OPERATORS/HASH/lua/
 
 print:
-	make -C ${Q_SRC_ROOT}/OPERATORS/PRINT/lua/
+	make  -C ${Q_SRC_ROOT}/OPERATORS/PRINT/lua/
 
 f1opf2f3: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/F1OPF2F3/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/F1OPF2F3/lua ${BUILD_TYPE}
 
 f1f2opf3: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/F1F2OPF3/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/F1F2OPF3/lua ${BUILD_TYPE}
 
 f1s1opf2: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/F1S1OPF2/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/F1S1OPF2/lua ${BUILD_TYPE}
 
 f1s1opf2_val: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/F1S1OPF2_VAL/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/F1S1OPF2_VAL/lua ${BUILD_TYPE}
 
 sort: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/SORT/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/SORT/lua ${BUILD_TYPE}
 
 sort2: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/SORT2/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/SORT2/lua ${BUILD_TYPE}
 
 get: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/GET/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/GET/lua ${BUILD_TYPE}
 
 idx_sort: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/IDX_SORT/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/IDX_SORT/lua ${BUILD_TYPE}
 
 s_to_f: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/S_TO_F/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/S_TO_F/lua ${BUILD_TYPE}
 
 f_to_s: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/F_TO_S/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/F_TO_S/lua ${BUILD_TYPE}
 
 ax_equals_b: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/AX_EQUALS_B/
+	make  -C ${Q_SRC_ROOT}/OPERATORS/AX_EQUALS_B/
 
 approx_quantile: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/APPROX/QUANTILE/lua ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/APPROX/QUANTILE/lua ${BUILD_TYPE}
 
 approx_frequent: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/APPROX/FREQUENT ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/APPROX/FREQUENT ${BUILD_TYPE}
 
 mv_mul: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ ${BUILD_TYPE}
+	make  -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ ${BUILD_TYPE}
 
 corrm: q_basic
-	make -C ${Q_SRC_ROOT}/OPERATORS/PCA/src/
+	make  -C ${Q_SRC_ROOT}/OPERATORS/PCA/src/
 
 # maintain following list in alphabetical order
 q_operators: \

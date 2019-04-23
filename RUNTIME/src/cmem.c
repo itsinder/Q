@@ -419,12 +419,14 @@ static int l_cmem_free( lua_State *L)
   CMEM_REC_TYPE *ptr_cmem = luaL_checkudata(L, 1, "CMEM");
   if ( ptr_cmem->data == NULL ) { 
     // explicit free will cause control to come here
-    if ( ( ptr_cmem->size != 0 ) ||
-         ( *(ptr_cmem->field_type) != '\0' ) || 
-         ( *(ptr_cmem->cell_name) != '\0' ) ) {
-        go_BYE(-1);
+    if ( ( ptr_cmem->size == -1 ) && 
+         ( strcmp(ptr_cmem->field_type, "XXX") == 0 ) && 
+         ( strcmp(ptr_cmem->cell_name, "Uninitialized") == 0 ) ) {
+      /* all is well */
     }
-    goto BYE;
+    else {
+      go_BYE(-1); 
+    }
   } 
   if ( ptr_cmem->size <= 0 ) {
     // Control should never come here except as nelow
