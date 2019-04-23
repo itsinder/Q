@@ -67,11 +67,12 @@ function Reducer:next()
   self._index = self._index + 1
   if val ~= nil then
     self._value = val
+    return true
   else
-    self._gen = nil
+    self._gen = nil -- destroy the generator once generation done
+    return false
   end
   record_time(start_time, "Reducer.next")
-  return self._gen ~= nil
 end
 
 function Reducer:get_name()

@@ -10,13 +10,15 @@ tests.t1 = function()
   local exp_val = {9, 13, 20}
   local nb = 3
   local res = Q.sumby(a, b, nb, {is_safe = true})
-  res:eval()
+  assert(type(res) == "Reducer")
+  local vres = res:eval()
+  assert(type(vres) == "lVector")
   -- vefiry
-  assert(res:length() == nb)
-  assert(res:length() == #exp_val)
+  assert(vres:length() == nb)
+  assert(vres:length() == #exp_val)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
   print("Test t1 completed")
