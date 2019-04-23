@@ -27,9 +27,9 @@ register_type(Reducer, "Reducer")
 
 function Reducer.new(arg)
   local start_time = qc.RDTSC()
-  assert(arg.coro == nil, "Migrate code to reducer style, where gen, func, value must be specified")
+  assert(arg.coro == nil, "check to make sure old code eliminated")
   assert(type(arg) == "table",
-  "Reducer: Constructor needs a table as input argument. Instead got " .. type(arg))
+    "Reducer: Constructor needs a table as input argument.")
 
   local reducer = setmetatable({}, Reducer)
   -- gen is optional
@@ -37,15 +37,19 @@ function Reducer.new(arg)
   -- func is necessary
   assert(type(arg.func) == "function",
   "Reducer: Table must have arg [func] which must be a function used to extract reducer")
-  reducer._get_scalars = arg.get_scalars
+  reducer._func = arg.func
+
+  -- TODO: WHY THE HECK??? reducer._get_scalars = arg.get_scalars
 
   if arg.gen == nil then
-    reducer._value= assert(arg.value, "value cannot be nil if there is no method to generate new values")
+    reducer._value= assert(arg.value, 
+      "value cannot be nil if there is no method to generate new values")
+    reducer._value = arg.value
+    reducer._is_eov = true -- we have the final answer
   else
-    assert(type(arg.func) == "function", "Function expected to extract scalars")
-    reducer._func = arg.func
-    reducer._value = arg._value
+    reducer._value = arg.value -- TODO WHY THE HECK?? 
     reducer._gen = arg.gen
+    reducer._is_eov = false -- we need ro figure out final answer
   end
   reducer._index = 0
   record_time(start_time, "Reducer.new")
@@ -53,6 +57,9 @@ function Reducer.new(arg)
 end
 
 function Reducer:next()
+  if ( self._is_eov ) then
+    return false
+  end
   local start_time = qc.RDTSC()
   if self._gen == nil then return false end
   -- assert(self._gen ~= nil,  'Reducer: The reducer is materialized')
@@ -78,6 +85,8 @@ function Reducer:set_name(value)
 end
 
 function Reducer:value()
+  if ( self._value and type(self._value) == "table" ) then 
+  end 
   -- We are allowing user to obtain partial values
   local start_time = qc.RDTSC()
   assert(self._value ~= nil, "The reducer has not been evaluated yet")
@@ -88,6 +97,9 @@ end
 function Reducer:eval()
   local start_time = qc.RDTSC()
   local status = self._gen ~= nil
+  if ( self._is_eov ) then 
+    return self._func(self._value)
+  end
   while status == true do
     status = self:next()
   end

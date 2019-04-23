@@ -18,6 +18,15 @@ return function (a, x, y, optargs )
   local status, subs, tmpl = pcall(spfn, x_qtype, y, optargs)
   assert(status, "Failure of specializer " .. sp_fn_name)
   local func_name = assert(subs.fn)
+  if ( x:is_eov() ) then 
+    local rslt = x:get_meta(a)
+    if ( rslt ) then 
+      assert(type(rslt) == "table") 
+      local extractor = function (tbl) return unpack(tbl) end
+      print("XXX expander_f_to_s: Early return");
+      return Reducer ({value = rslt, func = extractor})
+    end
+  end
 
   -- START: Dynamic compilation
   if ( not qc[func_name] ) then

@@ -1,6 +1,6 @@
 
 local s = [===[
-local function <<operator>>(x, y)
+local function <<operator>>(x, y, optargs)
   assert(type(x) == "lVector", "input must be of type lVector")
   local expander = assert(require 'Q/OPERATORS/F_TO_S/lua/expander_f_to_s')
   local status, z = pcall(expander, "<<operator>>", x, y)

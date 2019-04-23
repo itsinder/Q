@@ -70,8 +70,15 @@ register_type(lVector, "lVector")
 function lVector:get_name()
   -- the name of an lVector is the name of its base Vector
   if ( qconsts.debug ) then self:check() end
+  -- note that Lua is master and C is just for debugging
+  -- TODO P4 We have a problem becuase when restore happens, the name
+  -- is set on the Lua side but not on the C side 
+  if ( self._meta.name ) then 
+    local status = Vector.set_name(self._base_vec, self._meta.name)
+    assert(status)
+  end
   local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
-  return ffi.string(casted_base_vec.name)
+  return self._meta.name
 end
 
 function lVector:set_name(vname)
@@ -79,8 +86,11 @@ function lVector:set_name(vname)
   if ( qconsts.debug ) then self:check() end
   assert(vname)
   assert(type(vname) == "string")
+  -- set on the C side to help with debugging
   local status = Vector.set_name(self._base_vec, vname)
   assert(status)
+  -- set on the Lua side 
+  self._meta.name = vname
   return self
 end
 
@@ -782,6 +792,15 @@ function lVector:set_meta(k, v)
   -- NOT VALID CHECK assert(type(k) == "string")
   -- value acn be number or boolean or string or Scalar
   if ( not self._meta ) then self._meta = {} end 
+  if ( ( k == "max" ) or ( k == "min" ) or ( k == "sum" ) ) then
+    assert(type(v) == "table")
+    if ( ( k == "max" ) or ( k == "min" ) ) then 
+      assert(#v == 3) 
+    end
+    if ( k == "sum" ) then
+      assert(#v == 2) 
+    end
+  end
   self._meta[k] = v
 end
 

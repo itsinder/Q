@@ -13,7 +13,7 @@ local function expander_sumby(a, b, nb, optargs)
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
-  local c -- conditional evaluation
+  local c -- condition field 
   local nt = qc.q_omp_get_num_threads() -- number of threads
   local na = qconsts.chunk_size -- default estimate of vector size
   if ( a:is_eov() ) then na = a:length() end
@@ -64,7 +64,10 @@ local function expander_sumby(a, b, nb, optargs)
   
   local function sumby_gen(chunk_num)
     -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
-    assert(chunk_num == chunk_idx)
+    print("bb: chunk_num, chunk_idx = ", chunk_num, chunk_idx)
+    assert(chunk_num == chunk_idx, 
+    "chunk_num = " .. chunk_num .. 
+    "chunk_idx = " .. chunk_idx  )
     if ( first_call ) then 
       -- allocate buffer for output
       out_buf = assert(cmem.new(sz_out_in_bytes))
@@ -72,6 +75,7 @@ local function expander_sumby(a, b, nb, optargs)
       first_call = false
     end
     while true do
+      print("cc: chunk_num, chunk_idx = ", chunk_num, chunk_idx)
       local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
       local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
       local c_len, c_chunk, c_nn_chunk 
@@ -102,6 +106,7 @@ local function expander_sumby(a, b, nb, optargs)
         cst_c_chunk, is_safe)
       assert(status == 0, "C error in SUMBY")
       chunk_idx = chunk_idx + 1
+      print("dd: chunk_num, chunk_idx = ", chunk_num, chunk_idx)
       if a_len < qconsts.chunk_size then
         return nb, out_buf, nil
       end
