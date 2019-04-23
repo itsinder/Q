@@ -10,6 +10,7 @@ t1[#t1+1] = "convert"
 t1[#t1+1] = "vnot"
 t1[#t1+1] = "cum_cnt"
 t1[#t1+1] = "shift_left"
+t1[#t1+1] = "shift_right"
 
 -- for k, v in ipairs(t1) do print(k, v) end
 return t1
