@@ -17,6 +17,8 @@ if ( first_time ) then
     assert(type(vec) == "lVector")
     local x, y, z = Q.max(vec):eval()
     vec:set_meta("max", {x, y, z})
+    local x, y, z = Q.min(vec):eval()
+    vec:set_meta("min", {x, y, z})
   end
   
   local a, b = mk_ab(n, 0.4)
@@ -33,6 +35,8 @@ local bvals = {}
 for _, attr in pairs(grp_by) do 
   local vec = assert(T[attr])
   assert(type(vec) == "lVector")
+  local x, y = Q.min(vec):eval() -- should not need comoutation
+  assert(x:to_num() >= 0)
   local x, y = Q.max(vec):eval() -- should not need comoutation
   local nvals = x:to_num() + 1
   avals[attr] = {}
@@ -50,21 +54,23 @@ local t_start = qc.RDTSC()
 if ( is_chunking ) then 
   local chunk_num = 0
   local keep_going = true
---  for _, attr in pairs(grp_by) do 
-    attr = "f1"
-    for _, metric in pairs(M) do 
-      print("aa: chunk_num = ", chunk_num)
-      local x = avals[attr][metric]:chunk(chunk_num)
-      -- local y = bvals[attr][metric]:chunk(chunk_idx)
-      -- assert(x == y)
-      if ( not x ) then 
-        keep_going = false 
-        print("Breaking on chunk ", chunk_num)
-      end 
-      chunk_num = chunk_num + 1
+  while true do 
+    for _, attr in pairs(grp_by) do 
+      for _, metric in pairs(M) do 
+        -- print(chunk_num, ": attr, metric, chunk_num = ", attr, metric:get_name())
+        local x = avals[attr][metric]:next()
+        local y = bvals[attr][metric]:next()
+        assert(x == y)
+        if ( not x ) then 
+          keep_going = false 
+          print("Breaking on chunk ", chunk_num)
+        end 
+      end
     end
-    -- if ( not keep_going ) then break end 
-  -- end
+    if ( not keep_going ) then break end 
+    chunk_num = chunk_num + 1
+    -- print("Chunk = ", chunk_num)
+  end
 else
   for _, attr in pairs(grp_by) do 
     for _, metric in pairs(M) do 

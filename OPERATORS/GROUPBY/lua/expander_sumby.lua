@@ -15,11 +15,16 @@ local function expander_sumby(a, b, nb, optargs)
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
   local c -- condition field 
-  local nt = qc.q_omp_get_num_threads() -- number of threads
-  local na = qconsts.chunk_size -- default estimate of vector size
+  local nt = qc.q_omp_get_num_procs() -- number of procs
+  -- Get vector size, start with default estimate 
+  local na = qconsts.chunk_size 
   if ( a:is_eov() ) then na = a:length() end
   -- decide what nt should be
-
+  local tmp1 = math.sqrt(na) / nb
+  if ( nt > tmp1 ) then nt = math.floor(tmp1) end
+  if ( nt < 1 ) then nt = 1 end 
+  nt = 2
+  --================
 
   -- Keeping default is_safe value as true
   -- This will not allow C code to write values at incorrect locations
@@ -55,6 +60,7 @@ local function expander_sumby(a, b, nb, optargs)
   local n_buf_per_core = math.ceil((nb / 64 )) * 64
   local width = qconsts.qtypes[subs.out_qtype].width
   local sz_out_in_bytes = n_buf_per_core * nt * width
+  print(" sz_out_in_bytes = ", sz_out_in_bytes)
   local chunk_idx = 0
 
       -- allocate buffer for output
@@ -103,6 +109,11 @@ local function expander_sumby(a, b, nb, optargs)
         cst_c_chunk, is_safe)
     assert(status == 0, "C error in SUMBY")
     if ( a_len < qconsts.chunk_size ) then 
+      local status = qc[func_name](
+        nil, 0, nil,
+        cst_out_buf, nb, nt, n_buf_per_core, 
+        nil, false)
+      assert(status == 0, "C error in SUMBY")
       return nil
     end
     chunk_idx = chunk_idx + 1

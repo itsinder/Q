@@ -82,24 +82,27 @@ tests.t4 = function()
   print("Test t4 completed")
 end
 tests.t5 = function()
-  local len = qconsts.chunk_size * 2 + 655
+  local len = qconsts.chunk_size * 2 + 7491
   local period = 3
   local nb = 3
   local p = 0.5
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
   local b = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
-  local c = Q.rand( { probability = p, qtype = "B1", len = len })
+  local c = Q.const( { val = 1, qtype = "B1", len = len })
+  -- local c = Q.rand( { probability = p, qtype = "B1", len = len })
 
-  local res = Q.sumby(a, b, nb, { where = c })
+  -- TODO local res = Q.sumby(a, b, nb, { where = c })
+  local res = Q.sumby(a, b, nb)
   local vres = res:eval()
 
   assert(vres:length() == nb)
   local val, nn_val
   for i = 1, vres:length() do
-    local val, nn_val = vres:get_one(i-1)
-    local n1, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
-    assert(val:to_num() == n1:to_num())
+    local act_val, nn_val = vres:get_one(i-1)
+    local exp_val, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
+    print("i/actual/expected", i, act_val:to_num(), exp_val:to_num())
+    assert(act_val:to_num() == exp_val:to_num())
   end
   print("Test t5 completed")
 end
