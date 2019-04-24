@@ -60,7 +60,6 @@ local function expander_sumby(a, b, nb, optargs)
   local n_buf_per_core = math.ceil((nb / 64 )) * 64
   local width = qconsts.qtypes[subs.out_qtype].width
   local sz_out_in_bytes = n_buf_per_core * nt * width
-  print(" sz_out_in_bytes = ", sz_out_in_bytes)
   local chunk_idx = 0
 
       -- allocate buffer for output

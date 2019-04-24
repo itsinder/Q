@@ -76,7 +76,7 @@ ${fn}(
     }
   }
   else {
-    fprintf(stderr, "Aggregate partial results from threads 1, 2, ... into thread 0\n");
+    // Aggregate partial results from threads 1, 2, ... into thread 0
     for ( unsigned int i = 1; i < nT; i++ ) {
       for ( unsigned int j = 0; j < nR_out; j++ ) {
         out_fld[j] += out_fld[i*n_buf_per_core + j];

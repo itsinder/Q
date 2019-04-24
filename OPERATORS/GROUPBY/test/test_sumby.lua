@@ -89,7 +89,7 @@ tests.t5 = function()
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
   local b = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
-  local c = Q.const( { val = 1, qtype = "B1", len = len })
+  local c = Q.const( { val = true, qtype = "B1", len = len })
   -- local c = Q.rand( { probability = p, qtype = "B1", len = len })
 
   -- TODO local res = Q.sumby(a, b, nb, { where = c })
@@ -101,7 +101,7 @@ tests.t5 = function()
   for i = 1, vres:length() do
     local act_val, nn_val = vres:get_one(i-1)
     local exp_val, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
-    print("i/actual/expected", i, act_val:to_num(), exp_val:to_num())
+    -- print("i/actual/expected", i, act_val:to_num(), exp_val:to_num())
     assert(act_val:to_num() == exp_val:to_num())
   end
   print("Test t5 completed")
