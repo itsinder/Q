@@ -12,8 +12,8 @@ const_B1(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  if ( *ptr_val == NULL ) { go_BYE(-1); }
-  if ( *X       == NULL ) { go_BYE(-1); }
+  if ( ptr_val == NULL ) { go_BYE(-1); }
+  if ( X       == NULL ) { go_BYE(-1); }
   if ( nX == 0 ) { go_BYE(-1); }
 
   int val = *ptr_val;
