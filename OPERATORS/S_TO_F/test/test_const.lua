@@ -35,10 +35,13 @@ tests.t2 = function()
 end
 tests.t3 = function() 
   local len = 1941;
-  for val = 0, 1 do 
+  local ival
+  for _, val in pairs({true, false}) do
+    if ( val == true ) then ival = 1 end
+    if ( val == false ) then ival = 0 end
     local c1 = Q.const( {val = val, qtype = "B1", len = len }):eval()
     for i = 1, len do
-      assert(c1:get_one(i-1) == val)
+      assert(c1:get_one(i-1):to_num() == ival)
     end
   end
   print("Test t3 succeeded")
