@@ -23,7 +23,6 @@ local function expander_sumby(a, b, nb, optargs)
   local tmp1 = math.sqrt(na) / nb
   if ( nt > tmp1 ) then nt = math.floor(tmp1) end
   if ( nt < 1 ) then nt = 1 end 
-  nt = 2
   --================
 
   -- Keeping default is_safe value as true

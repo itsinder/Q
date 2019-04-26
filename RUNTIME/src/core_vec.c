@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <malloc.h>
 #include "q_incs.h"
 #include "mmap_types.h"
 #include "core_vec.h"
@@ -84,7 +86,8 @@ l_malloc(
   int status = 0;
   uint64_t delta = 0, t_start = RDTSC(); n_malloc++;
   uint64_t sz1, sz2;
-  void *x = malloc(n);
+  // TODO P2 DOCUMENT THIS CHANGE void *x = malloc(n);
+  void *x = memalign(256, n);
   bool is_incr = true, is_vec = true;
   status = mm(n, is_incr, is_vec, &sz1, &sz2); 
   if ( status < 0 ) { WHEREAMI; return NULL; }

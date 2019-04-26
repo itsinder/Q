@@ -23,7 +23,6 @@ return function (a, x, y, optargs )
     if ( rslt ) then 
       assert(type(rslt) == "table") 
       local extractor = function (tbl) return unpack(tbl) end
-      print("XXX expander_f_to_s: Early return");
       return Reducer ({value = rslt, func = extractor})
     end
   end

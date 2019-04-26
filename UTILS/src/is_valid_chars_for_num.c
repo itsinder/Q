@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "q_macros.h"
 //STOP_INCLUDES
 #include "_is_valid_chars_for_num.h"
@@ -13,17 +14,25 @@ is_valid_chars_for_num(
       )
 //STOP_FUNC_DECL
 {
+  static bool is_valid_char[256];
+  static bool init = false;
+  if ( !init ) {
+    init = true;
+    for ( char c = '0'; c <= '9'; c++ ) { is_valid_char[(uint8_t)c] = true; }
+    for ( char c = 'A'; c <= 'F'; c++ ) { is_valid_char[(uint8_t)c] = true; }
+    is_valid_char['.'] = true;
+    is_valid_char['+'] = true;
+    is_valid_char['-'] = true;
+    is_valid_char['X'] = true; // allow hex 
+    is_valid_char['e'] = true; // allow scientific notation
+    is_valid_char['E'] = true; // allow scientific notation
+  }
   if ( ( X == NULL ) || ( *X == '\0' ) ) { WHEREAMI; return false; }
   for ( char *cptr = (char *)X; *cptr != '\0'; cptr++ ) { 
-    if ( isdigit(*cptr) || 
-        ( *cptr == '-' )  ||
-        ( *cptr == 'E' )  ||/* allow for scientific notation*/
-        ( *cptr == '+' )  ||
-        ( *cptr == 'e' )  || /* allow for scientific notation*/
-        ( *cptr == '.' ) ) {
-      continue;
+    if ( !is_valid_char[(uint8_t)*cptr] ) { 
+      fprintf(stderr, "Invalid char [%c] in string [%s] \n", *cptr, X);
+      return false;
     }
-    return false;
   }
   return true;
 }

@@ -1,5 +1,7 @@
 #define LUA_LIB
 
+#define ALIGNMENT 0 // TODO P2 Document and place carefully
+
 #include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
@@ -58,7 +60,7 @@ static int l_sclr_to_cmem( lua_State *L)
   int status = 0;
   if ( ! is_foreign ) {
     status = cmem_malloc(ptr_cmem,  ptr_sclr->field_size, 
-        ptr_sclr->field_type, "");
+        ptr_sclr->field_type, "", ALIGNMENT);
     memcpy(ptr_cmem->data, &(ptr_sclr->cdata), ptr_sclr->field_size);
   }
   else { 

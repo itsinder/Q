@@ -222,6 +222,16 @@ tests.t11 = function()
   --=======================
   print("test t11 passed")
 end
+tests.t12 = function()
+  -- test set cell name 
+  local size = 1024
+  local qtype = "I4"
+  local name = "some bigus name"
+  local c1 = cmem.new(size, qtype, name)
+  assert(c1:name() == name)
+  print("test t12 passed")
+end
+
 
   
 return tests

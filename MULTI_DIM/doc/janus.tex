@@ -1,8 +1,222 @@
-\startreport{Multi-dimensional databases}
+\startreport{The Janus Project}
 \reportauthor{Ramesh Subramonian}
 
 \section{Introduction}
 
-\section{A QLU Implementation}
+This document is meant to capture my understanding of what Janus is
+intended to do and a proposal of how it could do it. It does seem
+presumptuous to write this with barely a week of study. Therefore,
+this document should be read as a strawman to be debated and not a
+product of deep thought. Several assumptions will be made as the paper proceeds,
+some of which are limitations of the current approach.
+Relevant prior work can be found in \cite{sarawagi99}
+and \cite{Fagin05}
 
+Of the three proposals made in \cite{Fagin05} --- DIVIDE,
+DIFFERENTIATE, DISCOVER --- only DIFFERENTIATE seems worth pursuing. 
+I am less convinced about the value of the other two, although they do 
+make for an interesting academic exercise. 
+Therefore, this paper will focus on DIFFERENTIATE.
+
+The implementation is discussed in the context of Q. We take some liberties when
+presenting pseudo-code in Q --- for ease of exposition, we suppress some
+details. However, doing so does not detract from their correctness.
+
+\section{Building Blocks}
+
+\subsection{Input Data}
+Following \cite{Fagin05}, we assume that the input is a 
+single relational
+table where columns are either dimensions or measures. 
+
+Each row refers to an item or a transaction or a document. 
+Therefore, note that each item is associated with a single value of a
+categorical dimension. For example, an item can be associated with Gender = Male
+or Gender = Female but not both.
+Using an example from \cite{Fagin0}'s work, if a dimension were Language which had 
+values English, Chinese, Russian, then a document could be not be clsassified as
+both English and Russian.
+
+
+\subsubsection{Dimensions}
+Dimensions are
+attributes along which aggregations will be performed e.g., time, age,
+gender, product category. These may be numeric, like time or
+categorical, like gender.
+Conversions of ``raw'' values like a datetime value to a day of the week or a
+month are discussed in Section~\ref{Discretization}
+
+\subsubsection{Measures}
+Measures are numerical and are the target of aggregations. Examples are sale
+price, number of items, \ldots We might want to know how average sale price
+differs based on Gender. Here, Price and Number are the measures and Gender is
+the dimension.
+
+DIFFERENTIATE can be broken up into the following building blocks
+\be
+\item Discretization --- Section~\ref{Discretization}
+\item Select A, B  --- Section~\ref{SelectAB}
+\item Select Dimensions and Measures --- Section~\ref{DimsAndMeasures}
+\item Core Differentiation  --- Section~\ref{Differentiation}
+\item Refinement --- Section~\ref{Refinement}
+\item Classification --- Section~\ref{Classification}
+\ee
+
+\subsection{Discretization}
+\label{Discretization}
+
+Given a ``raw'' attribute, we can create derived attributes. This is most often
+performed for numeric dimensions, like time. This is done by providing a mapping
+function, the input of which is value of the raw attribute and the output is a
+value of the derived attribute e.g., input = datetime, output = day of week.
+
+Several different discretizations of the same raw attribute can be performed.  So, timestamp could be used to create day of week, month, holiday or not, \ldots
+Categorical attributes, whether raw or created by discretization, can be further
+summarized. Hence, states CA, OR, WA could be mapped to the value ``West Coast''  of the derived dimension, Region.
+
+We assume that 
+\be
+\item Differentiation is done using only derived categorical attributes, except
+as discussed in Section~\ref{Classification}
+\item the number of distinct values of a categorical 
+attribute used for differentiation is small, in particular less than 255. 
+\item 
+We have not yet discovered any efficiencies in the case where one derived
+attribute dovetails into another, such as what happens when Month 
+dovetails into Quarter.
+\ee
+
+\subsection{Select A, B}
+\label{SelectAB}
+
+The aim of differentiation is to provide the user with a synopsis of
+``interesting'' ways in which two subsets of the input tables differ. 
+More on what constitutes ``interesting'' in Section~\ref{interesting}
+
+Note that A and B do not need to be mutually exclusive and exhaustive. 
+\bi
+\item not mutually exclusive --- 
+A could be rows categorized as Janaury and B could be those
+categorized as Male
+\item not exhaustive  ---
+A could be rows categorized as California and B could be those
+categorized as Texas. 
+\ei
+
+We leave it to the user to define meaningful A, B sets.
+Clearly, poor choices of A and B are likely to result in meaningless
+answers, the infamous GIGO\footnote{Garbage In, Garbage Out} phenomenon.
+
+The Q operators needed for selection are 
+\be
+\item vseq --- Section~\ref{vseq}
+\item ainb --- Section~\ref{ainb}
+\item vvand --- Section~\ref{vvand}
+\item sum --- Section~\ref{sum}
+\ee
+
+For example, if we wanted to provide the user with the count of elements of A,
+where A is defined as rows where state = California or Texas and Gender = Male,
+then we would write
+\begin{verbatim}
+Q.sum(Q.vvand(Q.vseq(Gender, Male), Q.ainb(State, {California, Texas})))
+\end{verbatim}
+On a 6-core VM, the above operation takes XX seconds with 4B rows.
+
+\subsection{Select Dimensions and Measures}
+\label{DimsAndMeasures}
+
+We assume that the user will select one or more dimensions. For example, they
+may be interested in geographical dimensions but not care about how transactions
+differ when aggregated by Gender. Similarly, they may care about the average
+price of a transaction but not the number of transactions.
+
+\subsection{Core Differentation}
+\label{Differentation}
+
+\subsection{Classification}
+\label{Classification}
+
+
+
+
+\section{Q Operators}
+
+In this section, we list the various Q operators needed
+\subsection{vseq}
+\label{vseq}
+
+\begin{itemize}
+\item \verb+z = Q.vseq(x, y)+ 
+\item \(x\) is a numeric vector of length \(n\)
+\item \(y\) is a boolean vector of length \(n\)
+\item \(z\) is a numeric vector of the same type as \(x\). Consists of each
+element of \(x\) for which the corresponding element of \(y\) is true. The
+boundary cases are \(z = x\) when \(y\) is all true and \(z =\) {\tt nil} when
+\(y\) is all false
+\end{itemize}
+
+\subsection{where}
+\label{where}
+
+\begin{itemize}
+\item \verb+z = Q.where(x, y)+ 
+\item \(x\) is a numeric vector of length \(n\)
+\item \(y\) is a boolean vector of length \(n\)
+\item \(z\) is a numeric vector of the same type as \(x\). Consists of each
+element of \(x\) for which the corresponding element of \(y\) is true. The
+boundary cases are \(z = x\) when \(y\) is all true and \(z =\) {\tt nil} when
+\(y\) is all false
+\end{itemize}
+
+\subsection{vvand}
+\label{vvand}
+
+\begin{itemize}
+\item \verb+z = Q.vvand(x, y)+ 
+\item \(x\) is a boolean vector of length \(n\)
+\item \(y\) is a boolean vector of length \(n\)
+\item \(z\) is a boolean vector of length \(n\) such that \(z_i = x_i \wedge z_i\)
+\end{itemize}
+
+\subsection{sumby}
+\label{sumby}
+\begin{itemize}
+\item \verb+w = Q.sumby(x, y, ny, z)+ 
+\item \(x\) is a numeric vector of length \(n\)
+\item \(y\) is a numeric vector of length \(n\)
+\item \(ny\) is a number such that 
+\(0 \leq \mathrm{min}(y) \leq \mathrm{max}(y) \leq ny-1\)
+\item \(z\) is a boolean vector of length \(n\)
+\item \(w\) is a numeric vector of length \(n+1\) such that 
+\(w_i = \sum_{j=1}^{j=m} \delta(y_j, i) x_i\), where \(\delta(x, y) = 1 \) if
+\(x = y\) and 0 otherwise.
+\ei
+
+\section{Classification}
+\label{Classification}
+\section{What's Interesting}
+\label{interesting}
+
+\subsection{Defining difference}
+
+\subsubsection{Kullback-Leibler Divergence}
+\label{KLDistance}
+
+\begin{displaymath}
+D_{KL}(P | Q ) = - \sum_{x \in X} P(x) \log ( \frac{Q(x)}{P(x)})
+\end{displaymath}
+
+See \url{https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence}
+
+\subsection{What's New}
+\label{WhatsNew}
+
+\begin{quote}
+Those who don't remember the past are condemned to repeat it\footnote{GHeorge
+Santayana}
+\end{quote}
+
+\bibliographystyle{alpha}
+\bibliography{../../DOC/Q_PAPER/ref} 
 

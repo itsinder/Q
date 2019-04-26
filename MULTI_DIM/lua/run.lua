@@ -1,19 +1,25 @@
 local Q = require 'Q'
 local dload = require 'Q/MULTI_DIM/lua/dload'
-local qc    = require 'Q/UTILS/lua/q_core'
 local mk_ab = require 'Q/MULTI_DIM/lua/mk_ab'
+local pldir = require 'pl.dir'
+local plfile = require 'pl.file'
+local qc    = require 'Q/UTILS/lua/q_core'
 local first_time = false
 if ( first_time ) then 
+  local homedir = os.getenv("HOME")
+  local metafile = os.getenv("Q_METADATA_FILE")
+  assert(metafile and #metafile > 0 )
+  plfile.delete(metafile)
+  pldir.rmtree( homedir .. "/local/Q/data/")
+  pldir.makepath(homedir .. "/local/Q/data/")
   local T, M = dload()
   local n
   for k, v in pairs(T) do 
     n = v:length() 
   end
 
-  local grp_by = { "f1", "f2", "f3", "f4" }
   -- Find range for sumby
-  for k1, attr in pairs(grp_by) do 
-    local vec = assert(T[attr], " k = " .. k1)
+  for _, vec in pairs(T) do 
     assert(type(vec) == "lVector")
     local x, y, z = Q.max(vec):eval()
     vec:set_meta("max", {x, y, z})
@@ -21,7 +27,7 @@ if ( first_time ) then
     vec:set_meta("min", {x, y, z})
   end
   
-  local a, b = mk_ab(n, 0.4)
+  a, b = mk_ab(n, 0.4)
   Q.save()
   os.exit()
 end
@@ -32,8 +38,8 @@ print("Setting up computation")
 local grp_by = { "f1", "f2", "f3", "f4" }
 local avals = {}
 local bvals = {}
-for _, attr in pairs(grp_by) do 
-  local vec = assert(T[attr])
+for _, vec in pairs(T) do 
+  local attr = vec:get_name()
   assert(type(vec) == "lVector")
   local x, y = Q.min(vec):eval() -- should not need comoutation
   assert(x:to_num() >= 0)
@@ -43,19 +49,21 @@ for _, attr in pairs(grp_by) do
   bvals[attr] = {}
   for _, metric in pairs(M) do 
     assert(type(metric) == "lVector")
-    avals[attr][metric] = Q.sumby(metric, vec, nvals, { where = a })
+    local optargs = { }; optargs.where = a
+    avals[attr][metric] = Q.sumby(metric, vec, nvals, optargs)
     bvals[attr][metric] = Q.sumby(metric, vec, nvals, { where = b })
-    print("setting up " .. metric:get_name() .. " for " .. vec:get_name())
   end
 end
-local is_chunking = true
+local is_chunking = false
 print("Performing computation")
+local clockspeed = 2200
 local t_start = qc.RDTSC()
 if ( is_chunking ) then 
+  print("Chunking...")
   local chunk_num = 0
   local keep_going = true
   while true do 
-    for _, attr in pairs(grp_by) do 
+    for attr, _ in pairs(T) do 
       for _, metric in pairs(M) do 
         -- print(chunk_num, ": attr, metric, chunk_num = ", attr, metric:get_name())
         local x = avals[attr][metric]:next()
@@ -72,16 +80,20 @@ if ( is_chunking ) then
     -- print("Chunk = ", chunk_num)
   end
 else
-  for _, attr in pairs(grp_by) do 
+  print("NO Chunking...")
+  for attr, _ in pairs(T) do 
     for _, metric in pairs(M) do 
+      local t0 = qc.RDTSC()
       avals[attr][metric]:eval()
       bvals[attr][metric]:eval()
-      print("working on " .. metric:get_name() .. " for " ..  attr)
+      local t1 = qc.RDTSC()
+      print("computed " .. metric:get_name() .. " for " ..  attr 
+        .. " in " ..  tonumber((t1-t0))/(2200.0 * 1000000.0))
+  
     end
   end
 end
 local t_stop = qc.RDTSC()
-local clockspeed = 2200
 print("Time = ", tonumber((t_stop-t_start))/(2200.0 * 1000000.0))
 
 print("Successfully completed")

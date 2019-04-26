@@ -168,3 +168,5 @@ endif
 set textwidth=80
 set wrapmargin=2
 "------------------------------------------------------------
+" set comment sto something more readable
+hi Comment ctermfg=255

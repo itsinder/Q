@@ -4,7 +4,7 @@ local function synth_data(
   num_metrics,
   num_instances
   )
-  local nI = 4*1024*1048576 -- number of instances
+  local nI = 1024*1048576 -- number of instances
   local T = {}
   local nK = 10
   for i = 1, nK do 
