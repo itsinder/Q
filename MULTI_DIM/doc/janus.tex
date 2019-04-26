@@ -79,7 +79,10 @@ We assume that
 \item Differentiation is done using only derived categorical attributes, except
 as discussed in Section~\ref{Classification}
 \item the number of distinct values of a categorical 
-attribute used for differentiation is small, in particular less than 255. 
+attribute used for differentiation is small, in particular less than 255., which
+allows us to represent the value in one byte. We will relax this assumption in
+Section~\ref{Refinement}
+
 \item 
 We have not yet discovered any efficiencies in the case where one derived
 attribute dovetails into another, such as what happens when Month 
@@ -90,7 +93,7 @@ dovetails into Quarter.
 \label{SelectAB}
 
 The aim of differentiation is to provide the user with a synopsis of
-``interesting'' ways in which two subsets of the input tables differ. 
+``interesting'' ways in which two subsets of the input table differ. 
 More on what constitutes ``interesting'' in Section~\ref{interesting}
 
 Note that A and B do not need to be mutually exclusive and exhaustive. 
@@ -128,7 +131,10 @@ On a 6-core VM, the above operation takes XX seconds with 4B rows.
 
 We assume that the user will select one or more dimensions. For example, they
 may be interested in geographical dimensions but not care about how transactions
-differ when aggregated by Gender. Similarly, they may care about the average
+differ when aggregated by Gender. 
+
+Similarly, we assume that the user will select one or more measures. For
+example, they may care about the average
 price of a transaction but not the number of transactions.
 
 \subsection{Core Differentation}
@@ -143,17 +149,25 @@ price of a transaction but not the number of transactions.
 \section{Q Operators}
 
 In this section, we list the various Q operators needed
+
+\subsection{sum}
+\label{sum}
+
+\begin{itemize}
+\item \verb+s = Q.sum(x)+ 
+\item \(x\) is a numeric vector of length \(n\)
+\item \(s\) is a scalar of the same type as \(x\) and \(s = \sum_i x_i\)
+\end{itemize}
+
 \subsection{vseq}
 \label{vseq}
 
 \begin{itemize}
-\item \verb+z = Q.vseq(x, y)+ 
+\item \verb+y = Q.vseq(x, s)+ 
 \item \(x\) is a numeric vector of length \(n\)
-\item \(y\) is a boolean vector of length \(n\)
-\item \(z\) is a numeric vector of the same type as \(x\). Consists of each
-element of \(x\) for which the corresponding element of \(y\) is true. The
-boundary cases are \(z = x\) when \(y\) is all true and \(z =\) {\tt nil} when
-\(y\) is all false
+\item \(s\) is a scalar of the same type as \(x\)
+\item \(y\) is a boolean vector of length \(n\), where \(y_i = \mathrm{true}\)
+if \(x_i = s\) and false otherwise.
 \end{itemize}
 
 \subsection{where}
@@ -182,11 +196,11 @@ boundary cases are \(z = x\) when \(y\) is all true and \(z =\) {\tt nil} when
 \subsection{sumby}
 \label{sumby}
 \begin{itemize}
-\item \verb+w = Q.sumby(x, y, ny, z)+ 
+\item \verb+w = Q.sumby(x, y, n_y, z)+ 
 \item \(x\) is a numeric vector of length \(n\)
 \item \(y\) is a numeric vector of length \(n\)
-\item \(ny\) is a number such that 
-\(0 \leq \mathrm{min}(y) \leq \mathrm{max}(y) \leq ny-1\)
+\item \(n_y\) is a number such that 
+\(0 \leq \mathrm{min}(y) \leq \mathrm{max}(y) \leq n_y-1\)
 \item \(z\) is a boolean vector of length \(n\)
 \item \(w\) is a numeric vector of length \(n+1\) such that 
 \(w_i = \sum_{j=1}^{j=m} \delta(y_j, i) x_i\), where \(\delta(x, y) = 1 \) if
@@ -213,7 +227,7 @@ See \url{https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence}
 \label{WhatsNew}
 
 \begin{quote}
-Those who don't remember the past are condemned to repeat it\footnote{GHeorge
+Those who don't remember the past are condemned to repeat it\footnote{George
 Santayana}
 \end{quote}
 
