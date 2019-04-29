@@ -45,6 +45,9 @@ viewed simultaneously, the difference is apparent.
 The implementation is discussed in the context of Q. We take some liberties when
 presenting pseudo-code in Q --- for ease of exposition, we suppress some
 details. However, doing so does not detract from their correctness.
+As part of some preliminary performance prototyping, we used a VM runnining
+Ubuntu 18.04, configured with 6 cores, where the physical hardware was a MacBook
+Pro, with a 6 core 2.2 Ghz Intel Core i7, with 9 MB of L3 cache and 32 GB RAM.
 
 
 \subsection{Notation}
@@ -155,9 +158,8 @@ then we would write
 \begin{verbatim}
 Q.sum(Q.vvand(Q.vseq(Gender, Male), Q.ainb(State, {California, Texas})))
 \end{verbatim}
-On a 6-core VM, the above operation takes XX seconds with 4B rows.
 
-%% TODO: Complete the benchmark
+%% TODO: The above operation takes XX seconds with 4B rows.
 
 \subsubsection{What if A, B not provided?}
 
@@ -210,8 +212,11 @@ for attr, vec in pairs(dimensions) do
   end
 end
 \end{verbatim}
-%
-%% TODO: Provide a benchmark
+Performing {\tt sumby} for A, B on a billion rows (\(2^{30}\), takes 
+\be
+\item 2.5 seconds When the measure is a 1 byte integer, 
+\item 4.0 seconds When the measure is a 4 byte float.
+\ee
 
 \subsubsection{Difference of Multiple Attributes}
 
@@ -302,6 +307,19 @@ would result in the partial result
 would yield the final result of 
 \((1, 10), (2, 8)\). 
 
+\subsubsection{Approximately associative operators}
+\label{approx}
+
+As discussed above, the operator {\tt sumby} is implemented as a Reducer.  
+This opens up the possibility of using other Q operators like
+\be
+\item approximate quantiles
+\item top K
+\item number of distinct values  \cite{Flajolet07}
+\item \ldots
+\ee
+Note that these are not strictly associatve but almost so.
+
 \subsubsection{Comparison with deferred writes}
 
 The current RocksDB based implementation takes advantage of the fact that the
@@ -331,13 +349,25 @@ value store that supports large binary objects as keys
 
 \TBC
 
+
+
 \subsection{Refinement}
 \label{Refinement}
 
 Refinement in the context of Janus is drill-down in the context of OLAP. 
+Let us say that we find a significant difference between A and B in terms of
+Gender. This could then prompt a further refinement of how Females in A differ
+from Females in B. If \(a, b\) were the boolean vectors identifying A and B,
+and \(g\) is the numeric vector for Gender,
+then we would repeat the computation after doing:
+\begin{verbatim}
+a = Q.vvand(a, Q.vseq(g, Female))
+\end{verbatim}
 
-
-\TBC
+Note that when the cardinality of \(a', b'\) is small, it makes sense 
+to materialize the selection on the original data. This allows us to gain the
+efificiency from not having to scan the entire data set and discard rows which
+do not match \(a\) or \(b\)
 
 \subsection{Classification}
 \label{Classification}
@@ -465,15 +495,29 @@ different these distributions are.
 \centering
 \begin{tabular}{|l|l|l|l|l|l|} \hline \hline
 {\bf Gender}   & {\bf A } & {\bf B } & \(p_A\) & \(p_B\)  \\ \hline
-Male & 100 & 400  &\(p_M|A = 1/4\)  &  \(p_M|B = 4/6\)  \\ \hline
-Female & 300 & 200  & \(p_F|A =3/4\) & \(p_F|B = 2/6\)  \\ \hline
+Male   & 100 & 400  & \(p_M|A = 1/4\) & \(p_M|B = 4/6\)  \\ \hline
+Female & 300 & 200  & \(p_F|A = 3/4\) & \(p_F|B = 2/6\)  \\ \hline
 \hline
 \end{tabular}
 \caption{Sample difference between A and B}
 \label{tbl_sample_diff}
 \end{table}
 
-%% TODO: What to do when measure is real and not integer?
+\subsubsection{Dealing with other measures}
+
+The above example works when we are counting the number of occurrences.
+That is what allows us to think about something like \(p_M|A\). This does not
+translate in a straight-forward manner to the 
+case where we are aggregating a measure like price. Say  we want to quantify
+how the distribution of price for Males in Group A differs from the 
+distribution of price for Males in Group B. 
+We could use Section~\ref{KLDistance} if we had an estimate of the pdf of price for these two sets. To do so, we could either
+\be
+\item assume a Normal distribution and compute the mean and variance 
+\item compute the approximate quantiles (Section~\ref{approx}), use this to 
+approximate a cumulative distribution function, fit a polynomial curve to it and
+then differentiate to get the pdf.
+\ee
 
 \subsubsection{Sample Distance Measures}
 
