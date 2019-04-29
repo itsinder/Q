@@ -326,7 +326,8 @@ consists of 3 reads, one add and one write as shown below.
 
 A critical point that we have not addressed is what happens after the
 differentiation is performed for the user's selections in terms of A, B,
-dimensions, measures, \ldots
+dimensions, measures, \ldots One possibility is to keep it in some kind of key
+value store that supports large binary objects as keys
 
 \TBC
 
@@ -365,6 +366,15 @@ building of the classifier and the evaluation of the distance for every
 combination of attributes. In this case, there are 7 
 --- \(x, y, z, \{x, y\}, \{y, z\}, \{z, x\}, \{x, y, z\}\)
 
+
+\subsubsection{Notes on classifiers}
+\be
+\item We no longer need to discretize dimensions e.g., age could be a real
+valued attribute that does not have to be broken into bands
+\item This approach does not obviate the need for ``feature engineering'' e.g.,
+converting zip codes into economic groups based on census data may make it a
+better predictor than treating a zip code as an integer.
+\ee
 
 \section{Q Operators}
 
@@ -465,6 +475,19 @@ Female & 300 & 200  & \(p_F|A =3/4\) & \(p_F|B = 2/6\)  \\ \hline
 
 %% TODO: What to do when measure is real and not integer?
 
+\subsubsection{Sample Distance Measures}
+
+In Section\ref{Differentiation}, for a given choice of A,B, dimension and
+measure, we get 2 vectors, one for A and one for B, with the length of the
+vectors being the number of categories of the dimension. There are many ways to
+measure the difference. The following code snippet counts the ``distance''
+between \(x\) and \(y\) as the number times 
+\(|\frac{x_i-y_i}{\mathrm{max}(x,y)}|\) exceeds a prescribed scalar \(s\)
+\begin{verbatim}
+sum(vsgt(div(abs(sub(x, y)), vvmax(x, y)), s))
+\end{verbatim}
+The above sample is purely illustrative --- it is relatively easy to create a
+menu of measures which are meaningful in different business contexts.
 
 \subsubsection{Kullback-Leibler Divergence}
 \label{KLDistance}
@@ -488,6 +511,17 @@ new insight or the new data contradicts a previously held truth.
 Those who don't remember the past are condemned to repeat it\footnote{George
 Santayana}
 \end{quote}
+
+\section{Miscellaneous Notes}
+
+\subsection{Distributed Computing}
+
+What happens when the amount of data exceeds what can be reasonably processed on one machine?
+As long as the
+metrics we are computing are amenable to decomposition into associative
+operations, we might consider sharding the data across multiple machines. 
+In this case, we would need to aggregate the results of the {\tt sumby}
+operators across all the machines before the metric can be evaluated.
 
 \bibliographystyle{alpha}
 \bibliography{../../DOC/Q_PAPER/ref} 
