@@ -54,7 +54,7 @@ for _, vec in pairs(T) do
     bvals[attr][metric] = Q.sumby(metric, vec, nvals, { where = b })
   end
 end
-local is_chunking = false
+local is_chunking = true
 print("Performing computation")
 local clockspeed = 2200
 local t_start = qc.RDTSC()

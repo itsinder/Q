@@ -6,8 +6,15 @@ local qconsts       = require 'Q/UTILS/lua/q_consts'
 local cmem          = require 'libcmem'
 local get_ptr       = require 'Q/UTILS/lua/get_ptr'
 
-local function load_csv_fast_C(M, infile, is_hdr)
-  local data_dir = qconsts.Q_DATA_DIR
+local function load_csv_fast_C(
+  M, 
+  infile, 
+  file_offset,
+  is_hdr)
+  assert( M and type(M) == "table")
+  assert(infile and type(infile) == "string")
+  assert(is_hdr and type(is_hdr) == "boolean")
+
   local nR = ffi.cast("uint64_t *", get_ptr(cmem.new(1*ffi.sizeof("uint64_t"))))
   nR[0] = 0
   local nC = #M
