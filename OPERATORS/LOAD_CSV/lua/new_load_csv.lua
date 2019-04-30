@@ -5,77 +5,68 @@ local ffi           = require 'Q/UTILS/lua/q_ffi'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
-local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
-local process_opt_args = require "Q/OPERATORS/LOAD_CSV/lua/process_opt_args"
-local init_buffers  = require "Q/OPERATORS/LOAD_CSV/lua/init_buffers"
+local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/new_validate_meta"
+local chk_file      = require "Q/OPERATORS/LOAD_CSV/lua/chk_file"
+local process_opt_args = 
+  require "Q/OPERATORS/LOAD_CSV/lua/new_process_opt_args"
+local malloc_buffers_for_data = 
+  require "Q/OPERATORS/LOAD_CSV/lua/malloc_buffers_for_data"
 local load_csv_fast_C  = require "Q/OPERATORS/LOAD_CSV/lua/load_csv_fast_C"
-local update_out_buf   = require "Q/OPERATORS/LOAD_CSV/lua/update_out_buf"
-local flush_bufs    = require "Q/OPERATORS/LOAD_CSV/lua/flush_bufs"
 local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
 local cmem          = require 'libcmem'
-local hash          = require 'Q/OPERATORS/HASH/lua/hash'
  --======================================
 local function load_csv(
   infile,   -- input file to read (string)
   M,  -- metadata (table)
   opt_args
   )
-  assert( (infile) and (qc.file_exists(infile)), err.INPUT_FILE_NOT_FOUND)
-  assert(tonumber(qc.get_file_size(infile)) > 0, err.INPUT_FILE_EMPTY)
-  validate_meta(M) 
-  local is_hdr = process_opt_args(opt_args)
+  assert(chk_file(infile))
+  assert(validate_meta(M))
+  local is_hdr, fld_sep = process_opt_args(opt_args)
   --=======================================
-  local chunk_idx = 0
   local file_offset = ffi.cast("uint64_t *", 
     get_ptr(cmem.new(1*ffi.sizeof("uint64_t"))))
   file_offset[0] = 0
+
   local num_rows_read = ffi.cast("uint64_t *", 
     get_ptr(cmem.new(1*ffi.sizeof("uint64_t"))))
+
+  local fld_sep = M.fld_sep
+  assert(malloc_buffers_for_data(M))
   --=======================================
+  -- This is tricky. We create generators for each vector
   lgens = {}
   for _, v in pairs(M) do 
-    local name = v.name
-    local function lgen(chunk_num)
-    assert(chunk_num == chunk_idx)
-    local start_time = qc.RDTSC()
-    num_rows_read[0] = 0
-    local all_done  = load_csv_fast_C(M, infile, is_hdr,
-      file_offset, num_rows_read)
-    record_time(start_time, "load_csv_fast")
-    if  ( num_rows_read == 0 ) then
-      return 0, nil, nil
-    end
-    chunk_idx = chunk_idx + 1 
-    return len, buf, nn_buf
+    lgens[name] = nil
+    if ( v.is_load ) then 
+      local name = v.name
+      local function lgen()
+        num_rows_read[0] = 0
+        --===================================
+        local start_time = qc.RDTSC()
+        assert(load_csv_fast_C(M, infile, fld_sep, is_hdr,
+          file_offset, num_rows_read, data, nn_data))
+        record_time(start_time, "load_csv_fast")
+        --===================================
+        return num_rows_read, XX, YY
+      end
     lgens[name] = lgen
-  end
-      --[[
-      cols[i]:eov()
-      if ( ( M[i].has_nulls ) and ( M[i].num_nulls == 0 ) ) then
-        -- Drop the null column, get the nn_file_name from metadata
-        local null_file = cols[i]:meta().nn.file_name
-        cols[i]:drop_nulls()
-        -- assert(qc["delete_file"](null_file),err.INPUT_FILE_NOT_FOUND)
-      end
-      cols[i]:set_meta("num_nulls", M[i].num_nulls)
-      cols_to_return[M[i].name] = cols[i]
-
-  X = ffi.cast("char *", X)
-  status = qc.rs_munmap(X, nX)
-  assert(status == 0, "Unmap failed")
-      --]]
-  --==============================================
-    local cols_to_return = {} 
-    for _, v in pairs(M) do
-      cols_to_return[v.name] = lVector(
-      {gen = lgen, has_nulls = v.has_nulls, qtype = v.qtype})
-      if ( type(v.meaning) == "string" ) then 
-        cols_to_return[v.name]:set_meta("__meaning", M[i].meaning)
-      end
     end
-    return cols_to_return
   end
+  -- Note that you may have a vector that does not have any null 
+  -- vales but still has a nn_vec. This will happen if you marked it as
+  -- has_nulls==true. Caller's responsibility to clean this up
   --==============================================
+  local cols_to_return = {} 
+  for _, v in pairs(M) do
+    cols_to_return[v.name] = lVector(
+      {gen = lgen, has_nulls = v.has_nulls, qtype = v.qtype})
+    if ( type(v.meaning) == "string" ) then 
+      cols_to_return[v.name]:set_meta("__meaning", M[i].meaning)
+    end
+    cols_to_return[v.name]:is_memo(v.is_memo)
+  end
+  return cols_to_return
 end
 
-return require('Q/q_export').export('load_csv', load_csv)
+return require('Q/q_export').export('new_load_csv', new_load_csv)

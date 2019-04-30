@@ -14,9 +14,8 @@ local function validate_meta(
     local col = "Column " .. midx .. "-"
     assert(type(fld_M) == "table", col .. err.COLUMN_DESC_ERROR)
     assert(fld_M.name,  col .. err.METADATA_NAME_NULL)
-    assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
-    assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
-    assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
+    local qtype = assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
+    assert(qconsts.qtypes[qtype], col ..  err.INVALID_QTYPE)
     --===========================================
     if fld_M.is_memo ~= nil then 
       assert(type(fld_M.is_memo) == "boolean")
@@ -45,10 +44,16 @@ local function validate_meta(
       num_cols_to_load = num_cols_to_load + 1
     end
     --===========================================
-    if fld_M.qtype == "SC" then 
-      local width = assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
+    local width -- how many bytes to allocate per element
+    if qtype == "SC" then 
+      width = assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
+      -- remember 1 byte for nullc
       assert( ((width >= 2) and (width <= qconsts.max_width["SC"])), 
         col .. err.INVALID_WIDTH_SC )
+    elseif fld_M.qtype == "B1" then 
+      width = 1
+    else
+      width = assert(qconsts.qtypes[qtype].width)
     end
     --===========================================
   end

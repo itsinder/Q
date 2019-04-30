@@ -46,6 +46,7 @@ local qconsts = {}
   base_types["F8"] = true;
   qconsts.base_types = base_types
   --===========================
+  -- TODO P2: Where is the following used?
   local width = {}
   width["I1"]  = 8;
   width["I2"] = 16;

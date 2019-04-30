@@ -22,6 +22,7 @@ local function load_csv_fast_C(
   local fldtypes = get_ptr(cmem.new(nC * ffi.sizeof("char *")))
   fldtypes = ffi.cast("char **", fldtypes)
   
+  -- TODO Deal with fld_sep
   local is_load = get_ptr(cmem.new(nC * ffi.sizeof("bool")))
   is_load = ffi.cast("bool *", is_load)
 
