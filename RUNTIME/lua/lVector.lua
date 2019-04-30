@@ -89,7 +89,7 @@ function lVector:set_name(vname)
   if ( qconsts.debug ) then self:check() end
   assert(vname)
   assert(type(vname) == "string")
-  assert(#vname > 0_)
+  assert(#vname > 0)
   -- set on the C side to help with debugging
   local status = Vector.set_name(self._base_vec, vname)
   assert(status)
@@ -802,6 +802,9 @@ function lVector:set_meta(k, v)
     self._meta[k] = v
     return true
   end
+  -- to destroy a value associated with a key
+  if ( not v ) then self._meta[k] = nil; return end
+  -- now deal with reserved keywords
   if ( ( k == "__max" ) or ( k == "__min" ) or ( k == "__sum" ) ) then
     -- TODO P3: Put more asserts on types of elements in table
     assert(type(v) == "table")
@@ -811,6 +814,7 @@ function lVector:set_meta(k, v)
     if ( k == "__sum" ) then
       assert(#v == 2) 
     end
+  end
   if ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
     assert(v and (type(v) == "string") and (#v > 0 ))
   end

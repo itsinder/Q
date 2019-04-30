@@ -33,10 +33,11 @@ local function load_csv(
 
   local fld_sep = M.fld_sep
   assert(malloc_buffers_for_data(M))
+  local vectors = {} 
   --=======================================
   -- This is tricky. We create generators for each vector
   lgens = {}
-  for _, v in pairs(M) do 
+  for midx, v in pairs(M) do 
     lgens[name] = nil
     if ( v.is_load ) then 
       local name = v.name
@@ -48,7 +49,12 @@ local function load_csv(
           file_offset, num_rows_read, data, nn_data))
         record_time(start_time, "load_csv_fast")
         --===================================
-        return num_rows_read, XX, YY
+        for i = 1, #M do
+          if ( i ~= midx ) then 
+            -- TODO put chunk on the vector
+          end
+        end
+        return num_rows_read, data[midx], nn_data[midx]
       end
     lgens[name] = lgen
     end
@@ -57,16 +63,15 @@ local function load_csv(
   -- vales but still has a nn_vec. This will happen if you marked it as
   -- has_nulls==true. Caller's responsibility to clean this up
   --==============================================
-  local cols_to_return = {} 
-  for _, v in pairs(M) do
-    cols_to_return[v.name] = lVector(
-      {gen = lgen, has_nulls = v.has_nulls, qtype = v.qtype})
-    if ( type(v.meaning) == "string" ) then 
-      cols_to_return[v.name]:set_meta("__meaning", M[i].meaning)
+  for midx, col in pairs(M) do
+    vectors[col.name] = lVector(
+      {gen = lgen, has_nulls = col.has_nulls, qtype = col.qtype})
+    if ( type(col.meaning) == "string" ) then 
+      vectors[col.name]:set_meta("__meaning", M[i].meaning)
     end
-    cols_to_return[v.name]:is_memo(v.is_memo)
+    vectors[col.name]:is_memo(col.is_memo)
   end
-  return cols_to_return
+  return vectors
 end
 
 return require('Q/q_export').export('new_load_csv', new_load_csv)
