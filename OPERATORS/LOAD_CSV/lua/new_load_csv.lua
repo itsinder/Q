@@ -1,13 +1,11 @@
-local data_dir      = require('Q/q_export').Q_DATA_DIR
+-- This version supports chunking in load_csv
 local Dictionary    = require 'Q/UTILS/lua/dictionary'
 local err           = require 'Q/UTILS/lua/error_code'
 local ffi           = require 'Q/UTILS/lua/q_ffi'
-local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local lVector       = require 'Q/RUNTIME/lua/lVector'
 local qc            = require 'Q/UTILS/lua/q_core'
 local qconsts       = require 'Q/UTILS/lua/q_consts'
 local validate_meta = require "Q/OPERATORS/LOAD_CSV/lua/validate_meta"
-local is_accelerate = require "Q/OPERATORS/LOAD_CSV/lua/is_accelerate"
 local process_opt_args = require "Q/OPERATORS/LOAD_CSV/lua/process_opt_args"
 local init_buffers  = require "Q/OPERATORS/LOAD_CSV/lua/init_buffers"
 local load_csv_fast_C  = require "Q/OPERATORS/LOAD_CSV/lua/load_csv_fast_C"
