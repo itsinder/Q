@@ -1,5 +1,4 @@
 #include "q_incs.h"
-#include <stdlib.h>
 
 typedef struct _rand_B1_rec_type {
   uint64_t seed;

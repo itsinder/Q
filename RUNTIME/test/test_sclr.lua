@@ -298,4 +298,8 @@ tests.t14 = function()
   --]]
 end
 --================
+tests.t15 = function()
+  local valI8 = Scalar.new("0x1", "I8")
+  print("Scalar = ",valI8)
+end
 return tests

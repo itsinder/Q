@@ -31,9 +31,11 @@ clean :
 		
 SRC_FILES = \
 	../src/rand_B1.c \
+	../src/const_B1.c \
 
 INC_FILES = \
 	../inc/rand_B1.h \
+	../inc/const_B1.h \
 
 TMPL_FILES = period.tmpl rand.tmpl seq.tmpl const.tmpl
 

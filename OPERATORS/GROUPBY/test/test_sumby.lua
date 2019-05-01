@@ -10,13 +10,15 @@ tests.t1 = function()
   local exp_val = {9, 13, 20}
   local nb = 3
   local res = Q.sumby(a, b, nb, {is_safe = true})
-  res:eval()
+  assert(type(res) == "Reducer")
+  local vres = res:eval()
+  assert(type(vres) == "lVector")
   -- vefiry
-  assert(res:length() == nb)
-  assert(res:length() == #exp_val)
+  assert(vres:length() == nb)
+  assert(vres:length() == #exp_val)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
   print("Test t1 completed")
@@ -41,14 +43,14 @@ tests.t3 = function()
   local exp_val = {0, 22, 20}
   local nb = 3
   local res = Q.sumby(a, b, nb)
-  res:eval()
+  local vres = res:eval()
 
   -- vefiry
-  assert(res:length() == nb)
-  assert(res:length() == #exp_val)
+  assert(vres:length() == nb)
+  assert(vres:length() == #exp_val)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
 
@@ -69,36 +71,38 @@ tests.t4 = function()
   local nb = 3
 
   local res = Q.sumby(a, b, nb)
-  res:eval()
+  local vres = res:eval()
 
-  assert(res:length() == nb)
+  assert(vres:length() == nb)
   local val, nn_val
-  for i = 1, res:length() do
-    val, nn_val = res:get_one(i-1)
+  for i = 1, vres:length() do
+    val, nn_val = vres:get_one(i-1)
     assert(val:to_num() == exp_val[i])
   end
   print("Test t4 completed")
 end
 tests.t5 = function()
-  local len = qconsts.chunk_size * 2 + 655
+  local len = qconsts.chunk_size * 2 + 7491
   local period = 3
   local nb = 3
   local p = 0.5
 
   local a = Q.seq( {start = 1, by = 1, qtype = "I4", len = len} )
   local b = Q.period({ len = len, start = 0, by = 1, period = period, qtype = "I4"})
-  local c = Q.rand( { probability = p, qtype = "B1", len = len })
+  local c = Q.const( { val = true, qtype = "B1", len = len })
+  -- local c = Q.rand( { probability = p, qtype = "B1", len = len })
 
-  local res = Q.sumby(a, b, nb, { where = c })
-  res:eval()
+  -- TODO local res = Q.sumby(a, b, nb, { where = c })
+  local res = Q.sumby(a, b, nb)
+  local vres = res:eval()
 
-  assert(res:length() == nb)
+  assert(vres:length() == nb)
   local val, nn_val
-  for i = 1, res:length() do
-    local val, nn_val = res:get_one(i-1)
-    local n1, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
-    print(i, val:to_num(), n1, n2)
-    assert(val:to_num() == n1)
+  for i = 1, vres:length() do
+    local act_val, nn_val = vres:get_one(i-1)
+    local exp_val, n2 = Q.sum(Q.where(a, Q.vvand(c, Q.vseq(b, i-1)))):eval()
+    -- print("i/actual/expected", i, act_val:to_num(), exp_val:to_num())
+    assert(act_val:to_num() == exp_val:to_num())
   end
   print("Test t5 completed")
 end

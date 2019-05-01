@@ -2,7 +2,7 @@ local qconsts = require 'Q/UTILS/lua/q_consts'
 local err     = require 'Q/UTILS/lua/error_code'
 local qc            = require 'Q/UTILS/lua/q_core'
   
-return function (
+local function validate_meta(
   M -- meta data table 
 )
   assert(type(M) == "table", err.METADATA_TYPE_TABLE)
@@ -19,23 +19,33 @@ return function (
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(fld_M.qtype, col .. err.METADATA_TYPE_NULL)
     assert(qconsts.qtypes[fld_M.qtype], col ..  err.INVALID_QTYPE)
+    --===========================================
+    if fld_M.is_memo ~= nil then 
+      assert(type(fld_M.is_memo) == "boolean")
+    else
+      fld_M.is_memo = true
+    end
+    --===========================================
     if fld_M.has_nulls ~= nil then 
       assert((fld_M.has_nulls == true  or fld_M.has_nulls == false ), col .. err.INVALID_NN_BOOL_VALUE )
     else
       fld_M.has_nulls = false
     end
+    --===========================================
     if fld_M.is_load ~= nil then 
       assert((fld_M.is_load == true  or fld_M.is_load == false ), 
       col .. err.IS_LOAD_BOOL_ERROR )
     else
       fld_M.is_load = true
     end
+    --===========================================
     if ( fld_M.is_load ) then 
       assert(not col_names[fld_M.name],
       col .. err.DUPLICATE_COL_NAME) 
       col_names[fld_M.name] = true 
       num_cols_to_load = num_cols_to_load + 1
     end
+    --===========================================
     if fld_M.qtype == "SC" then 
       assert(fld_M.width ~=nil , err.MAX_WIDTH_NULL_ERROR)
       assert((tonumber(fld_M.width) >= 2) and (tonumber(fld_M.width) <= qconsts.max_width["SC"]), col .. err.INVALID_WIDTH_SC )
@@ -47,6 +57,7 @@ return function (
         fld_M.convert_sc = false
       end
     end
+    --===========================================
     if fld_M.qtype == "SV" then
       --print(fld_M.max)
       assert(fld_M.max_width ~=nil , err.MAX_WIDTH_NULL_ERROR)
@@ -73,3 +84,4 @@ return function (
   assert(num_cols_to_load > 0, err.COLUMN_NOT_PRESENT)
   return true
 end
+return validate_meta

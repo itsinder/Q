@@ -3,6 +3,7 @@ return require 'Q/UTILS/lua/code_gen' {
    declaration = [[
 
 #include "q_incs.h"
+#include <omp.h>
 #include "_get_bit_u64.h"
 ${includes}
 extern int
@@ -46,7 +47,7 @@ ${fn}(
 
   /* Assumption: out_fld has been set to 0 prior to the call */
   if ( is_safe ) {
-#pragma omp parallel for schedule(static, 1024)
+// TODO #pragma omp parallel for schedule(static, 1024)
     for ( uint64_t i = 0; i < nR_in; i++ ) {
       ${grpby_ctype} grpby = grpby_fld[i];
       if ( ( grpby < 0 ) || ( grpby >= (${out_ctype})nR_out ) ) { 
@@ -56,14 +57,15 @@ ${fn}(
     cBYE(status);
   }
   if ( val_fld != NULL ) {
+    omp_set_num_threads(nT);
     int block_size = nR_in / nT;
-//  #pragma omp parallel for schedule(static, 1)
+#pragma omp parallel for schedule(static, 1)
     for ( unsigned int tid = 0; tid < nT; tid++ ) { 
       uint64_t lb = tid  * block_size;
       uint64_t ub = lb + block_size;
       if ( tid == 0      ) { lb = 0; }
       if ( tid == (nT-1) ) { ub = nR_in; }
-      ${out_ctype} * l_out_fld = out_fld + (n_buf_per_core * tid);
+      ${out_ctype} * l_out_fld = out_fld + (tid*n_buf_per_core);
       ${ifpreamble}
       for ( uint64_t i = lb; i < ub; i++ ) { 
         ${ifcond}
@@ -76,10 +78,10 @@ ${fn}(
     }
   }
   else {
-    // Aggregate partial results frm thtreads 1, 2, ... into thread 0
-    for ( unsigned int i = 1; i < nT; i++ ) {
+    // Aggregate partial results from threads 1, 2, ... into thread 0
+    for ( unsigned int tid = 1; tid < nT; tid++ ) {
       for ( unsigned int j = 0; j < nR_out; j++ ) {
-        out_fld[j] += out_fld[i*n_buf_per_core + j];
+        out_fld[j] += out_fld[tid*n_buf_per_core + j];
       }
     }
   }

@@ -23,6 +23,14 @@ all : libload_csv.so
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/get_cell.c ${INCDIR}
 
+../gen_inc/_set_up_qtypes.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/set_up_qtypes.c ${INCDIR}
+
+../gen_inc/_new_get_cell.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/new_get_cell.c ${INCDIR}
+
 ../gen_inc/_txt_to_B1.h : 
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/txt_to_B1.c ${INCDIR}
@@ -53,6 +61,10 @@ clean :
 
 ../src/get_cell.c : ../gen_inc/_get_cell.h
 
+../src/new_get_cell.c : ../gen_inc/_new_get_cell.h
+
+../src/set_up_qtypes.c : ../gen_inc/_set_up_qtypes.h
+
 ../src/txt_to_SC.c : ../gen_inc/_txt_to_SC.h
 
 ../src/txt_to_B1.c : ../gen_inc/_txt_to_B1.h
@@ -61,6 +73,8 @@ clean :
 
 SRC_FILES =  \
 	../src/get_cell.c  \
+	../src/new_get_cell.c  \
+	../src/set_up_qtypes.c  \
 	../src/txt_to_SC.c \
 	../src/txt_to_B1.c \
 	../src/load_csv_fast.c \
@@ -86,6 +100,8 @@ libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES}
 	cp ${GEN_FILES}      ${Q_BUILD_DIR}/src/
 	cp ${GEN_INC_FILES}        ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_get_cell.h  ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_new_get_cell.h  ${Q_BUILD_DIR}/include/
+	cp ../gen_inc/_set_up_qtypes.h  ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_txt_to_SC.h ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_txt_to_B1.h ${Q_BUILD_DIR}/include/
 	cp ../inc/load_csv_fast.h ${Q_BUILD_DIR}/include/

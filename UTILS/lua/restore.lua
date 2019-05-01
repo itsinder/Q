@@ -1,4 +1,4 @@
-local qc = require 'Q/UTILS/lua/q_core'
+local qc      = require 'Q/UTILS/lua/q_core'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 
 local function restore(file_to_restore)
@@ -10,8 +10,8 @@ local function restore(file_to_restore)
   end
   assert(type(metadata_file) == "string", "metadata file is not provided")
   -- checking isfile present
-  assert(qc.isfile(file_to_restore),
-"Meta file not found = " .. file_to_restore)
+  assert(qc.isfile(metadata_file),
+    "Meta file not found = " .. metadata_file)
   local status, reason = pcall(dofile, metadata_file)
   return status, reason -- responsibility of caller
 end

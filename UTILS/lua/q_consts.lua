@@ -21,7 +21,7 @@ local qconsts = {}
   qconsts.LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH")
 
   qconsts.space_for_load_csv = 64 * 1048576 -- 64M
-  qconsts.chunk_size = 256 * 1024
+  qconsts.chunk_size = 128 * 1024
   qconsts.debug = false -- set to TRUE only if you want debugging
   qconsts.is_memo = true -- Vector code will refer memo value from this place
   qconsts.qc_trace = false -- set to FALSE if performance logging of qc is to be turned off
@@ -46,6 +46,7 @@ local qconsts = {}
   base_types["F8"] = true;
   qconsts.base_types = base_types
   --===========================
+  -- TODO P2: Where is the following used?
   local width = {}
   width["I1"]  = 8;
   width["I2"] = 16;

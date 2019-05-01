@@ -28,7 +28,6 @@
 #define LEN_BASE_FILE_NAME 64
 #define MAX_LEN_DIR_NAME 255
 
-typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8, B1 } qtype_type;
 //START_FUNC_DECL
 int
 load_csv_fast(

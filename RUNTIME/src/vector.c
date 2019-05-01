@@ -1,5 +1,6 @@
 #define LUA_LIB
-#undef USE_VEC_BUF // Advanced feature which we have not thought through 
+
+#define ALIGNMENT  256 // TODO P2 DOCUMENT AND PLACE CAREFULLY
 
 #include <stdlib.h>
 #include <math.h>
@@ -363,7 +364,7 @@ static int l_vec_get_chunk( lua_State *L)
     is_malloc = true;
     // allocate memory since you cannot send back address of Vector's chunk
     status = cmem_malloc(ptr_cmem, ptr_vec->chunk_sz, 
-        ptr_vec->field_type, "");
+        ptr_vec->field_type, "", ALIGNMENT);
     cBYE(status);
     ret_addr = ptr_cmem->data;
   }

@@ -69,7 +69,7 @@ local function save(name, value, saved, file)
     else
       saved[value] = name   -- save name for next time
       file:write("{}\n")     -- create a new table
-      for k,v in pairs(value) do      -- save its fields
+      for k, v in pairs(value) do      -- save its fields
         local fieldname = string.format("%s[%s]", name, basicSerialize(k))
                 save(fieldname, v, saved, file)
       end

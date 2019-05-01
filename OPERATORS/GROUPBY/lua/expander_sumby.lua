@@ -1,9 +1,10 @@
-local ffi     = require 'Q/UTILS/lua/q_ffi'
-local lVector  = require 'Q/RUNTIME/lua/lVector'
-local qconsts = require 'Q/UTILS/lua/q_consts'
-local qc      = require 'Q/UTILS/lua/q_core'
 local cmem    = require 'libcmem'
+local ffi     = require 'Q/UTILS/lua/q_ffi'
 local get_ptr = require 'Q/UTILS/lua/get_ptr'
+local lVector = require 'Q/RUNTIME/lua/lVector'
+local qc      = require 'Q/UTILS/lua/q_core'
+local qconsts = require 'Q/UTILS/lua/q_consts'
+local Reducer = require 'Q/RUNTIME/lua/Reducer'
 
 local function expander_sumby(a, b, nb, optargs)
   -- Verification
@@ -13,12 +14,16 @@ local function expander_sumby(a, b, nb, optargs)
   assert( ( nb > 0) and ( nb < qconsts.chunk_size) )
   local sp_fn_name = "Q/OPERATORS/GROUPBY/lua/sumby_specialize"
   local spfn = assert(require(sp_fn_name))
-  local c -- conditional evaluation
-  local nt = qc.q_omp_get_num_threads() -- number of threads
-  local na = qconsts.chunk_size -- default estimate of vector size
+  local c -- condition field 
+  local nt = qc.q_omp_get_num_procs() -- number of procs
+  -- Get vector size, start with default estimate 
+  local na = qconsts.chunk_size 
   if ( a:is_eov() ) then na = a:length() end
   -- decide what nt should be
-
+  local tmp1 = math.sqrt(na) / nb
+  if ( nt > tmp1 ) then nt = math.floor(tmp1) end
+  if ( nt < 1 ) then nt = 1 end 
+  --================
 
   -- Keeping default is_safe value as true
   -- This will not allow C code to write values at incorrect locations
@@ -54,60 +59,66 @@ local function expander_sumby(a, b, nb, optargs)
   local n_buf_per_core = math.ceil((nb / 64 )) * 64
   local width = qconsts.qtypes[subs.out_qtype].width
   local sz_out_in_bytes = n_buf_per_core * nt * width
-  local out_buf = nil
-  local first_call = true
   local chunk_idx = 0
+
+      -- allocate buffer for output
+  local out_buf = assert(cmem.new(sz_out_in_bytes))
+  out_buf:zero()
+  assert(type(out_buf) == "CMEM")
   
   local a_ctype = qconsts.qtypes[a:fldtype()].ctype 
   local b_ctype = qconsts.qtypes[b:fldtype()].ctype 
   local out_ctype = qconsts.qtypes[subs.out_qtype].ctype 
+  local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
   
+  local vectorizer = function(value)
+    assert(type(value) == "CMEM")
+    local v = lVector.new(
+    {qtype = subs.out_qtype, gen = true, has_nulls = false})
+    v:put_chunk(value, nil, nb)
+    v:eov()
+    return v
+  end
   local function sumby_gen(chunk_num)
-    -- Adding assert on chunk_idx to have sync between expected chunk_num and generator's chunk_idx state
     assert(chunk_num == chunk_idx)
-    if ( first_call ) then 
-      -- allocate buffer for output
-      out_buf = assert(cmem.new(sz_out_in_bytes))
-      out_buf:zero()
-      first_call = false
+
+    --=============================================
+    local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
+    local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
+    local c_len, c_chunk, c_nn_chunk 
+    if ( c ) then 
+      c_len, c_chunk, c_nn_chunk = c:chunk(chunk_idx)
     end
-    while true do
-      local a_len, a_chunk, a_nn_chunk = a:chunk(chunk_idx)
-      local b_len, b_chunk, b_nn_chunk = b:chunk(chunk_idx)
-      local c_len, c_chunk, c_nn_chunk 
-      if ( c ) then 
-        c_len, c_chunk, c_nn_chunk = c:chunk(chunk_idx)
-      end
-      assert(a_len == b_len)
-      if a_len == 0 then
-        if chunk_idx == 0 then
-          return 0, nil, nil
-        else
-          return nb, out_buf, nil
-        end
-      end
-      assert(a_nn_chunk == nil, "Null is not supported")
-      assert(b_nn_chunk == nil, "Null is not supported")
+    assert(a_len == b_len)
+    assert(a_nn_chunk == nil, "Null is not supported")
+    assert(b_nn_chunk == nil, "Null is not supported")
+    if ( chunk_idx == 0 ) then assert(a_len > 0 ) end
+    --=============================================
     
-      local cst_a_chnk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
-      local cst_b_chnk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
-      local cst_c_chunk  = nil
-      if ( c ) then 
-        cst_c_chunk = ffi.cast( "uint64_t *",    get_ptr(c_chunk))
-      end
-      local cst_out_buf = ffi.cast( out_ctype .. "*",  get_ptr(out_buf))
-      local status = qc[func_name](
+    local cst_a_chnk = ffi.cast( a_ctype .. "*",  get_ptr(a_chunk))
+    local cst_b_chnk = ffi.cast( b_ctype .. "*",  get_ptr(b_chunk))
+    local cst_c_chunk  = nil
+    if ( c ) then 
+      cst_c_chunk = ffi.cast( "uint64_t *",    get_ptr(c_chunk))
+    end
+    local status = qc[func_name](
         cst_a_chnk, a_len, cst_b_chnk, 
         cst_out_buf, nb, nt, n_buf_per_core, 
         cst_c_chunk, is_safe)
+    assert(status == 0, "C error in SUMBY")
+    if ( a_len < qconsts.chunk_size ) then 
+      local status = qc[func_name](
+        nil, 0, nil,
+        cst_out_buf, nb, nt, n_buf_per_core, 
+        nil, false)
       assert(status == 0, "C error in SUMBY")
-      chunk_idx = chunk_idx + 1
-      if a_len < qconsts.chunk_size then
-        return nb, out_buf, nil
-      end
+      return nil
     end
+    chunk_idx = chunk_idx + 1
+    return true
   end
-  return lVector( { gen = sumby_gen, has_nulls = false, qtype = subs.out_qtype } )
+  local s =  Reducer ( { gen = sumby_gen, func = vectorizer, value = out_buf} )
+  return s
 end
 
 return expander_sumby

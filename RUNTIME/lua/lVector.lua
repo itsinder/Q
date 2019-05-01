@@ -1,3 +1,6 @@
+-- TODO Document properly. Key of set_meta is always a string
+-- If it is something that has special meaning to Q, starts with __
+-- If not, any other string will work but do not use __ as a prefix
 local ffi		= require 'Q/UTILS/lua/q_ffi'
 local qconsts		= require 'Q/UTILS/lua/q_consts'
 local log		= require 'Q/UTILS/lua/log'
@@ -70,8 +73,15 @@ register_type(lVector, "lVector")
 function lVector:get_name()
   -- the name of an lVector is the name of its base Vector
   if ( qconsts.debug ) then self:check() end
+  -- note that Lua is master and C is just for debugging
+  -- TODO P4 We have a problem becuase when restore happens, the name
+  -- is set on the Lua side but not on the C side 
+  if ( self._meta.name ) then 
+    local status = Vector.set_name(self._base_vec, self._meta.name)
+    assert(status)
+  end
   local casted_base_vec = ffi.cast("VEC_REC_TYPE *", self._base_vec)
-  return ffi.string(casted_base_vec.name)
+  return self._meta.name
 end
 
 function lVector:set_name(vname)
@@ -79,8 +89,12 @@ function lVector:set_name(vname)
   if ( qconsts.debug ) then self:check() end
   assert(vname)
   assert(type(vname) == "string")
+  assert(#vname > 0)
+  -- set on the C side to help with debugging
   local status = Vector.set_name(self._base_vec, vname)
   assert(status)
+  -- set on the Lua side 
+  self._meta.__name = vname
   return self
 end
 
@@ -296,7 +310,7 @@ end
 function lVector:drop_nulls()
   assert(self:is_eov())
   self._nn_vec = nil
-  self:set_meta("has_nulls", false)
+  self:set_meta("__has_nulls", false)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -309,7 +323,7 @@ function lVector:make_nulls(bvec)
   assert(bvec:num_elements() == self:num_elements())
   assert(bvec:has_nulls() == false)
   self._nn_vec = bvec._base_vec
-  self:set_meta("has_nulls", true)
+  self:set_meta("__has_nulls", true)
   if ( qconsts.debug ) then self:check() end
   return self
 end
@@ -779,10 +793,31 @@ function lVector:set_meta(k, v)
   if ( qconsts.debug ) then self:check() end
   assert(k)
   -- assert(v): do not do this since it is used to set meta of key to nil
-  -- NOT VALID CHECK assert(type(k) == "string")
-  -- value acn be number or boolean or string or Scalar
+  -- NOT VALID CHECK assert(type(k) == "string") 
+  -- TODO P3 WHY IS ABOVE THE CASE?
+  -- value can be number or boolean or string or table 
   if ( not self._meta ) then self._meta = {} end 
-  self._meta[k] = v
+  if ( string.sub(s, 1, 2) ~= "__" ) then 
+    -- this is NOT a reserved word
+    self._meta[k] = v
+    return true
+  end
+  -- to destroy a value associated with a key
+  if ( not v ) then self._meta[k] = nil; return end
+  -- now deal with reserved keywords
+  if ( ( k == "__max" ) or ( k == "__min" ) or ( k == "__sum" ) ) then
+    -- TODO P3: Put more asserts on types of elements in table
+    assert(type(v) == "table")
+    if ( ( k == "__max" ) or ( k == "__min" ) ) then 
+      assert(#v == 3) 
+    end
+    if ( k == "__sum" ) then
+      assert(#v == 2) 
+    end
+  end
+  if ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
+    assert(v and (type(v) == "string") and (#v > 0 ))
+  end
 end
 
 function lVector:get_meta(k)

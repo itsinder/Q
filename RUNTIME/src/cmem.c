@@ -1,6 +1,7 @@
 #define LUA_LIB
 
 #include <stdlib.h>
+#include <malloc.h>
 #include <math.h>
 
 #include "luaconf.h"
@@ -90,7 +91,8 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
     CMEM_REC_TYPE *ptr_cmem,
     int64_t size,
     const char *field_type,
-    const char *cell_name
+    const char *cell_name,
+    int alignment
     )
 {
   int status = 0;
@@ -100,7 +102,14 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
   if ( ( ( size / 16 ) * 16 ) != size ) { 
     size = ( size / 16 ) * 16 + 16;
   }
-  data = malloc(size);
+  // following is a precaution. change if necessary
+  if ( ( alignment < 0 ) || ( alignment > 1024 ) ) { go_BYE(-1); }
+  if ( alignment > 0 ) {
+    data = malloc(size);
+  }
+  else {
+    data = memalign(alignment, size);
+  }
   return_if_malloc_failed(data);
   ptr_cmem->data = data;
   ptr_cmem->size = size;
@@ -167,6 +176,7 @@ static int l_cmem_new( lua_State *L)
   CMEM_REC_TYPE *ptr_cmem = NULL;
   char *field_type = NULL;
   char *cell_name = NULL;
+  int alignment = 0;
 
   int64_t size =  luaL_checknumber(L, 1);
   if ( size <= 0 ) { go_BYE(-1); }
@@ -178,7 +188,7 @@ static int l_cmem_new( lua_State *L)
   luaL_getmetatable(L, "CMEM"); /* Add the metatable to the stack. */
   lua_setmetatable(L, -2); /* Set the metatable on the userdata. */
 
-  if ( lua_gettop(L) > 2 ) { 
+  if ( lua_gettop(L) > 2 ) {  
     if ( lua_isstring(L, 2) ) {
       field_type = (char *)luaL_checkstring(L, 2);
     }
@@ -188,7 +198,12 @@ static int l_cmem_new( lua_State *L)
       cell_name = (char *)luaL_checkstring(L, 3);
     }
   }
-  status = cmem_malloc(ptr_cmem, size, field_type, cell_name);
+  if ( lua_gettop(L) > 4 ) { 
+    if ( lua_isnumber(L, 4) ) {
+      alignment = luaL_checknumber(L, 4);
+    }
+  }
+  status = cmem_malloc(ptr_cmem, size, field_type, cell_name, alignment);
   cBYE(status);
   return 1;
 BYE:
