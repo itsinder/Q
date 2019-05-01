@@ -29,7 +29,7 @@ int
 new_load_csv_fast(
     const char * const infile,
     uint32_t nC,
-    char fld_sep,
+    char *str_fld_sep,
     uint32_t chunk_size,
     uint64_t *ptr_nR,
     uint64_t *ptr_file_offset,
@@ -48,6 +48,17 @@ new_load_csv_fast(
   qtype_type *qtypes = NULL;
   bool *is_trim = NULL; // whether to trim or not */
   uint64_t *word_B1 = NULL; // used for 64 bit integer buffer if col is B1
+  char fld_sep;
+
+  if ( strcasecmp(fld_sep, "comma") == 0 ) { 
+    fld_sep = ';';
+  }
+  else if ( strcasecmp(fld_sep, "tab") == 0 ) { 
+    fld_sep = '\t';
+  }
+  else {
+    go_BYE(-1);
+  }
 
   //---------------------------------
   if ( ( infile == NULL ) || ( *infile == '\0' ) ) { go_BYE(-1); }
@@ -76,21 +87,17 @@ new_load_csv_fast(
   status = rs_mmap(infile, &mmap_file, &file_size, false); cBYE(status);
   if ( ( mmap_file == NULL ) || ( file_size == 0 ) )  { go_BYE(-1); }
   if ( *ptr_file_offset > file_size ) { go_BYE(-1); }
-  mmap_file += *ptr_file_offset; // "seek" to proper point in file
   //----------------------------------------
 
-  size_t xidx = 0;
+  size_t xidx = *ptr_file_offset; // "seek" to proper point in file
   uint64_t row_ctr = 0;
   uint32_t col_ctr = 0;
   bool is_last_col;
-  char null_val[8];
-  memset(null_val, '\0', 8); // we write 0 when value is null
 #define BUFSZ 2047 
-  // TODO BUFSZ should come from max of qconsts.qtypes[*].max_txt_width
+  // TODO P3 BUFSZ should come from max of qconsts.qtypes[*].max_txt_width
   char lbuf[BUFSZ+1];
   char buf[BUFSZ+1];
   bool is_val_null;
-  //read from the input file and write to the output file
 
   while ( true ) {
     memset(buf, '\0', BUFSZ+1); // Clear buffer into which cell is read
@@ -107,7 +114,7 @@ new_load_csv_fast(
     xidx = get_cell(mmap_file, file_size, xidx, fld_sep, is_last_col, buf, 
         tmp_buf, BUFSZ);
 
-    // TODO Rethink below check in terms of chunking
+    // TODO xidx == 0 should not be an error
     // xidx == 0 => means the file is empty 
     if ( xidx == 0 ) { go_BYE(-1); } 
     if ( xidx > file_size ) { break; } // check == or >= 
