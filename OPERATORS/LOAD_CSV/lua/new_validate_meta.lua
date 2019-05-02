@@ -29,6 +29,10 @@ local function validate_meta(
     else
       fld_M.has_nulls = false
     end
+    -- Note special case for SC
+    if ( qtype == "SC" ) then
+      fld_M.has_nulls = false
+    end
     --===========================================
     if fld_M.is_load ~= nil then 
       assert( type(fld_M.is_load) == "boolean",

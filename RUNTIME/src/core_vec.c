@@ -599,8 +599,8 @@ vec_clone(
   else {
     ptr_new_vec->file_size = 0;
   }
-BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_clone += delta; }
+BYE:
   return status;
 }
 
@@ -1081,7 +1081,8 @@ vec_get(
         fp = fopen(ptr_vec->file_name, "r");
         return_if_fopen_failed(fp, ptr_vec->file_name, "r");
         status = fseek(fp, offset, SEEK_SET); cBYE(status);
-        fread(addr, ptr_vec->field_size, len, fp);
+        size_t nr = fread(addr, ptr_vec->field_size, len, fp);
+        if ( nr != len ) { go_BYE(-1); }
         fclose_if_non_null(fp);
         ret_len = len;
       }

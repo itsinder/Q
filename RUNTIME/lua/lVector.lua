@@ -475,7 +475,7 @@ end
 
 function lVector:put1(s, nn_s)
   assert(s)
-  assert(type(s) == "Scalar")
+  assert( ( type(s) == "Scalar" ) or ( type(s) == "CMEM" ) )
   local status = Vector.put1(self._base_vec, s)
   assert(status)
   if ( self._nn_vec ) then 

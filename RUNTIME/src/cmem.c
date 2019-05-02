@@ -472,14 +472,13 @@ static int l_cmem_free( lua_State *L)
   }
   memset(ptr_cmem, '\0', sizeof(CMEM_REC_TYPE));
   // printf("Freeing %x \n", ptr_cmem);
-  ptr_cmem = NULL; // Suggested by Indrajeet
-  lua_pushboolean(L, true);
-  return 1;
+  // OLD lua_pushboolean(L, true);
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, "ERROR: free failed. ");
   return 2;
 }
+
 // Following only for debugging 
 static int l_cmem_seq( lua_State *L) {
   char buf[BUFLEN+1]; 
@@ -578,7 +577,9 @@ static int l_cmem_set( lua_State *L) {
   else if ( strcmp(field_type, "SC") == 0 ) { 
     if ( str_val == NULL ) { WHEREAMI; goto BYE; }
     memset(ptr_cmem->data, '\0', ptr_cmem->size);
-    if ( strlen(str_val) >= (uint64_t)ptr_cmem->size ) { WHEREAMI; goto BYE; }
+    if ( strlen(str_val) >= (uint64_t)ptr_cmem->size ) { 
+      WHEREAMI; goto BYE; 
+    }
     strcpy(ptr_cmem->data, str_val);
   }
   else {

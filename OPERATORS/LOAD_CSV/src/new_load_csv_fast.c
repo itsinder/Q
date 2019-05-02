@@ -156,9 +156,10 @@ new_load_csv_fast(
     }
     // write nn_data if needed
     if ( has_nulls[col_ctr] ) {
-      status = set_bit_u64(nn_data[col_ctr], row_ctr, is_val_null); cBYE(status);
+      status = set_bit_u64(nn_data[col_ctr], row_ctr, is_val_null); 
+      cBYE(status);
     }
-    //write data 
+    // write data 
     switch ( qtypes[col_ctr] ) {
       case B1:
         {
