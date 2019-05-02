@@ -57,8 +57,12 @@ local function load_csv(
         if ( num_rows_read < qconsts.chunk_size ) then 
           -- Free buffers since you won't need them again
           for i = 1, #M do 
-            if (    data[i] ~= nil ) then    data[i]:delete() end
-            if ( nn_data[i] ~= nil ) then nn_data[i]:delete() end
+            if ( i ~= midx ) then 
+              -- Note subtlety of above if condition.  You can't delete 
+              -- buffer for vector whose chunk you are returning
+              if (    data[i] ~= nil ) then    data[i]:delete() end
+              if ( nn_data[i] ~= nil ) then nn_data[i]:delete() end
+            end
           end
         end 
         return num_rows_read, data[midx], nn_data[midx]

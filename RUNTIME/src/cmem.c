@@ -1,5 +1,7 @@
 #define LUA_LIB
 
+#define ALIGNMENT  256 // TODO P2 DOCUMENT AND PLACE CAREFULLY
+
 #include <stdlib.h>
 #include <malloc.h>
 #include <math.h>
@@ -103,8 +105,9 @@ int cmem_malloc( // INTERNAL NOT VISIBLE TO LUA
     size = ( size / 16 ) * 16 + 16;
   }
   // following is a precaution. change if necessary
-  if ( ( alignment < 0 ) || ( alignment > 1024 ) ) { go_BYE(-1); }
-  if ( alignment > 0 ) {
+  if ( alignment > 1024 ) { go_BYE(-1); }
+  if ( alignment <    0 ) { go_BYE(-1); }
+  if ( alignment == 0 ) {
     data = malloc(size);
   }
   else {
@@ -176,7 +179,7 @@ static int l_cmem_new( lua_State *L)
   CMEM_REC_TYPE *ptr_cmem = NULL;
   char *field_type = NULL;
   char *cell_name = NULL;
-  int alignment = 0;
+  int alignment = ALIGNMENT; // default 
 
   int64_t size =  luaL_checknumber(L, 1);
   if ( size <= 0 ) { go_BYE(-1); }
@@ -201,6 +204,7 @@ static int l_cmem_new( lua_State *L)
   if ( lua_gettop(L) > 4 ) { 
     if ( lua_isnumber(L, 4) ) {
       alignment = luaL_checknumber(L, 4);
+      if ( alignment < 0 ) { go_BYE(-1); }
     }
   }
   status = cmem_malloc(ptr_cmem, size, field_type, cell_name, alignment);

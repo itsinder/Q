@@ -4,6 +4,7 @@
 
 require "Q/OPERATORS/MK_COL/lua/mk_col"
 require "Q/OPERATORS/LOAD_CSV/lua/load_csv"
+require "Q/OPERATORS/LOAD_CSV/lua/SC_to_I4"
 require "Q/OPERATORS/PRINT/lua/print_csv"
 require "Q/OPERATORS/SORT/lua/sort"
 require "Q/OPERATORS/SORT2/lua/sort2"

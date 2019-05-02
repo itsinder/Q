@@ -1265,8 +1265,8 @@ vec_add(
   if ( ptr_vec->num_elements != initial_num_elements + len) {
     go_BYE(-1);
   }
-BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_add += delta; }
+BYE:
   return status;
 }
 
