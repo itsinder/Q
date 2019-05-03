@@ -27,4 +27,24 @@ tests.t2 = function()
   assert(not status)
   print("Successfully completed test t2")
 end
+tests.t3 = function()
+  local fmap = {}
+  fmap[1] = "abc"
+  fmap[2] = "def"
+  fmap[3] = "ghi"
+  local D = lDictionary(fmap)
+  assert(D:check())
+  local str = D:reincarnate()
+  --[[ TODO P3 Need to test results better
+  str = "lDictionary = require 'Q/RUNTIME/lua/lDictionary'; return " .. str
+  print(str)
+  local y = loadstring(str)
+  print(type(y))
+  assert(type(y) == "function")
+  local x = y()
+  assert(type(x) == "lDictionary")
+  --]]
+
+  print("Successfully completed test t3")
+end
 return tests

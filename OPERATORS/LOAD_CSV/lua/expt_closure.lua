@@ -1,3 +1,4 @@
+-- This is a quick test to mimic some of the things in load_csv
 local X = {}
 
 local fns = {}

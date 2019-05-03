@@ -3,6 +3,9 @@ local qconsts       = require 'Q/UTILS/lua/q_consts'
 local log           = require 'Q/UTILS/lua/log'
 local qc            = require 'Q/UTILS/lua/q_core'
 local register_type = require 'Q/UTILS/lua/q_types'
+local get_ptr       = require 'Q/UTILS/lua/get_ptr'
+local serialize     = require 'Q/RUNTIME/lua/serialize' -- TODO P4 delete
+local cmem          = require 'libcmem'
 --====================================
 local lDictionary = {}
 lDictionary.__index = lDictionary
@@ -14,6 +17,18 @@ setmetatable(lDictionary, {
 })
 
 register_type(lDictionary, "lDictionary")
+
+local function map_to_string(
+  tbl
+  )
+  local T = {}
+  T[#T+1] = "local T = {} "
+  for k, v in ipairs(tbl) do
+    T[#T+1] = "T[" .. k .. "] = '" .. v .. "'"
+  end
+  T[#T+1] = "return T"
+  return table.concat(T, '\n')
+end
 
 function lDictionary:get_name()
   if ( qconsts.debug ) then self:check() end
@@ -49,7 +64,7 @@ function lDictionary.new(inparam, optargs)
     local filename = inparam
     assert(qc.file_exists(filename))
     assert(qc.get_file_size(filename) > 0)
-    fmap = require(filename)
+    fmap = dofile(filename)
   end
   if ( type(inparam) == "table" ) then 
     fmap = inparam
@@ -101,8 +116,19 @@ function lDictionary:meta()
 end
 
 function lDictionary:reincarnate()
-  if ( qconsts.debug ) then self:check() end
-  -- TODO
+  -- create a random file name in data directory
+  local len = 64 -- TODO P4 Do not hard code
+  local file_name = cmem.new(len)
+  file_name:zero()
+  file_name = ffi.cast("char *", get_ptr(file_name))
+  assert(qc['rand_file_name'](file_name, len-1))
+  file_name = qconsts.Q_DATA_DIR .. "/" .. ffi.string(file_name)
+  -- replace suffix of .bin with .lua
+  file_name = string.gsub(file_name, ".bin", ".lua")
+  assert(io.open(file_name, "w+"))
+  io.output(file_name)
+  io.write(map_to_string(self._map_int_to_str))
+  return "lDictionary ( \"" .. file_name .. "\" ) "
 end
   
 
