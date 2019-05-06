@@ -814,9 +814,12 @@ function lVector:set_meta(k, v)
     if ( k == "__sum" ) then
       assert(#v == 2) 
     end
-  end
-  if ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
+  elseif ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
     assert(v and (type(v) == "string") and (#v > 0 ))
+  elseif ( k == "__dictionary" ) then
+    assert(v and (type(v) == "lDictionary") )
+  else
+    assert(nil)
   end
 end
 

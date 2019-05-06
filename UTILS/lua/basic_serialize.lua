@@ -7,5 +7,4 @@ local function basic_serialize (o)
     assert(nil)
   end
 end
-
-retuen basic_serialize
+return basic_serialize

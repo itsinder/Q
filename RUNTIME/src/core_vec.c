@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include <malloc.h>
 #include "q_incs.h"
 #include "mmap_types.h"
@@ -216,6 +217,7 @@ chk_field_type(
        ( strcmp(field_type, "F4") == 0 ) || 
        ( strcmp(field_type, "F8") == 0 ) || 
        ( strcmp(field_type, "SC") == 0 ) || 
+       ( strcmp(field_type, "TM") == 0 ) || 
        ( strcmp(field_type, "SV") == 0 ) ) {
     /* all is well */
   }
@@ -711,7 +713,11 @@ vec_new(
   else if ( strcmp(field_type, "SV") == 0 ) {
     strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
   }
+  else if ( strcmp(field_type, "TM") == 0 ) {
+    strcpy(qtype, field_type); field_size = sizeof(struct tm); // SV is stored as I4
+  }
   else {
+    fprintf(stderr, "Unknown field_type = ]%s] \n", field_type);
     go_BYE(-1);
   }
 

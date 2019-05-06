@@ -4,6 +4,28 @@
   whoever require access to these constants he should require q_consts.lua
 ]]
 
+--[==[
+--Cannot do this because q_ffi requires libcmem which is not yet built
+--local ffi = require 'Q/UTILS/lua/q_ffi'
+ffi.cdef([[
+typedef struct _tm
+{
+  int tm_sec;			/* Seconds.	[0-60] (1 leap second) */
+  int tm_min;			/* Minutes.	[0-59] */
+  int tm_hour;			/* Hours.	[0-23] */
+  int tm_mday;			/* Day.		[1-31] */
+  int tm_mon;			/* Month.	[0-11] */
+  int tm_year;			/* Year	- 1900.  */
+  int tm_wday;			/* Day of week.	[0-6] */
+  int tm_yday;			/* Days in year.[0-365]	*/
+  int tm_isdst;			/* DST.		[-1/0/1]*/
+
+  long int __tm_gmtoff;		/* Seconds east of UTC.  */
+  const char *__tm_zone;	/* Timezone abbreviation.  */
+} tm ;
+]]
+)
+--]==]
 local qconsts = {}
 --===========================
   -- Initialize environment variable constants
@@ -154,10 +176,13 @@ local qconsts = {}
     ctype_to_txt = "SC_to_txt" 
   }
   qtypes.TM = { 
+    -- no min
+    -- no max
     max_txt_width = 64,
-    ctype = "struct tm",
-    txt_to_ctype = "txt_to_TM",
-    ctype_to_txt = "TBD" 
+    width = 64, -- TODO P2 Need to replace with ffi.sizeof("tm")
+    ctype = "tm",
+    -- txt_to_ctype = "txt_to_TM",
+    -- ctype_to_txt = "TBD" 
   }
   qtypes.B1 = { 
     min = 0,
