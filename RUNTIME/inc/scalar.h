@@ -1,6 +1,5 @@
 #ifndef __SCALAR_H
 #define __SCALAR_H
-typedef enum _qtype_type { undef, B1, I1, I2, I4, I8, F4, F8} QTYPE;
 
 typedef union _cdata_type {
   bool    valB1;

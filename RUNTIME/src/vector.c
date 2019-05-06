@@ -212,6 +212,17 @@ static int l_vec_is_eov( lua_State *L) {
   return 1;
 }
 //----------------------------------------
+static int l_vec_file_name( lua_State *L) {
+  VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
+  if ( ptr_vec->file_name[0] == '\0' ) { WHEREAMI; goto BYE; }
+  lua_pushstring(L, ptr_vec->file_name);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, "ERROR: vec_file_name. ");
+  return 2;
+}
+//----------------------------------------
 static int l_vec_file_size( lua_State *L) {
   VEC_REC_TYPE *ptr_vec = (VEC_REC_TYPE *)luaL_checkudata(L, 1, "Vector");
   if ( ptr_vec->file_name[0] == '\0' ) { WHEREAMI; goto BYE; }
@@ -715,6 +726,8 @@ static const struct luaL_Reg vector_methods[] = {
     { "set_name", l_vec_set_name },
     { "get_name", l_vec_get_name },
     { "fldtype", l_vec_fldtype },
+    { "file_size", l_vec_file_size },
+    { "file_name", l_vec_file_name },
     { "field_size", l_vec_field_size },
     { "start_write", l_vec_start_write },
     { "end_write", l_vec_end_write },
@@ -744,6 +757,7 @@ static const struct luaL_Reg vector_functions[] = {
     { "chunk_num", l_vec_chunk_num },
     { "chunk_size", l_vec_chunk_size },
     { "file_size", l_vec_file_size },
+    { "file_name", l_vec_file_name },
     { "is_nascent", l_vec_is_nascent },
     { "is_memo", l_vec_is_memo },
     { "is_eov", l_vec_is_eov },

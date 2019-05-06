@@ -15,10 +15,11 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <time.h>
 #include <unistd.h>
 #include "q_constants.h"
 #include "q_macros.h"
 
 // for load_csv
-typedef enum _qtype_type { undef, I1, I2, I4, I8, F4, F8, B1, SC } qtype_type;
+typedef enum _qtype_type { undef_qtype, I1, I2, I4, I8, F4, F8, B1, SC } qtype_type;
 #endif

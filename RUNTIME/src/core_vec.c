@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include <malloc.h>
 #include "q_incs.h"
 #include "mmap_types.h"
@@ -216,6 +217,7 @@ chk_field_type(
        ( strcmp(field_type, "F4") == 0 ) || 
        ( strcmp(field_type, "F8") == 0 ) || 
        ( strcmp(field_type, "SC") == 0 ) || 
+       ( strcmp(field_type, "TM") == 0 ) || 
        ( strcmp(field_type, "SV") == 0 ) ) {
     /* all is well */
   }
@@ -599,8 +601,8 @@ vec_clone(
   else {
     ptr_new_vec->file_size = 0;
   }
-BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_clone += delta; }
+BYE:
   return status;
 }
 
@@ -711,7 +713,11 @@ vec_new(
   else if ( strcmp(field_type, "SV") == 0 ) {
     strcpy(qtype, field_type); field_size = 4; // SV is stored as I4
   }
+  else if ( strcmp(field_type, "TM") == 0 ) {
+    strcpy(qtype, field_type); field_size = sizeof(struct tm); // SV is stored as I4
+  }
   else {
+    fprintf(stderr, "Unknown field_type = ]%s] \n", field_type);
     go_BYE(-1);
   }
 
@@ -1081,7 +1087,8 @@ vec_get(
         fp = fopen(ptr_vec->file_name, "r");
         return_if_fopen_failed(fp, ptr_vec->file_name, "r");
         status = fseek(fp, offset, SEEK_SET); cBYE(status);
-        fread(addr, ptr_vec->field_size, len, fp);
+        size_t nr = fread(addr, ptr_vec->field_size, len, fp);
+        if ( nr != len ) { go_BYE(-1); }
         fclose_if_non_null(fp);
         ret_len = len;
       }
@@ -1264,8 +1271,8 @@ vec_add(
   if ( ptr_vec->num_elements != initial_num_elements + len) {
     go_BYE(-1);
   }
-BYE:
   delta = RDTSC() - t_start; if ( delta > 0 ) { t_l_vec_add += delta; }
+BYE:
   return status;
 }
 

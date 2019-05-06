@@ -7,7 +7,9 @@ OPT_FLAGS = -O4
 FLAGS= $(OPT_FLAGS) $(DBG_FLAGS) ${QC_FLAGS}
 DEPS = matrix_multiply.h
 
-INCS= -I../inc -I../../../UTILS/inc/
+INCS= -I../inc \
+      -I../../../UTILS/inc/ \
+      -I../../../UTILS/gen_inc/
 
 all : mm libmm.so
 	test -d ${QQ_BUILD_DIR}

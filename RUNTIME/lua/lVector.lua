@@ -475,7 +475,7 @@ end
 
 function lVector:put1(s, nn_s)
   assert(s)
-  assert(type(s) == "Scalar")
+  assert( ( type(s) == "Scalar" ) or ( type(s) == "CMEM" ) )
   local status = Vector.put1(self._base_vec, s)
   assert(status)
   if ( self._nn_vec ) then 
@@ -814,9 +814,12 @@ function lVector:set_meta(k, v)
     if ( k == "__sum" ) then
       assert(#v == 2) 
     end
-  end
-  if ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
+  elseif ( ( k == "__meaning" ) or  ( k == "__name" ) ) then 
     assert(v and (type(v) == "string") and (#v > 0 ))
+  elseif ( k == "__dictionary" ) then
+    assert(v and (type(v) == "lDictionary") )
+  else
+    assert(nil)
   end
 end
 

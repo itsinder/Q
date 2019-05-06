@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "q_macros.h"
+#include "q_incs.h"
 #include "_mmap.h"
 #include "_txt_to_SC.h"
 #include "_txt_to_I1.h"
@@ -22,7 +18,6 @@
 
 #define MAXLINE 64
 
-typedef enum _qtype_type { undef_qtype, B1, I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
 //START_FUNC_DECL
 int
 asc2bin(

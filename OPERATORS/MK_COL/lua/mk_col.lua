@@ -6,7 +6,11 @@ local cmem    = require 'libcmem'
 local qconsts = require 'Q/UTILS/lua/q_consts'
 local to_scalar = require 'Q/UTILS/lua/to_scalar'
 
-local mk_col = function (input, qtype, nn_input)
+local mk_col = function (
+  input, 
+  qtype, 
+  nn_input
+  )
   local doc_string = [[ Signature: Q.mk_col(input, qtype, opt_nn_input)
 -- creates a column of input table values of input qtype
 1) input: array of values
@@ -29,39 +33,49 @@ local mk_col = function (input, qtype, nn_input)
     has_nulls = true
   end
   
-  -- Does not support SC or SV
+  assert( qconsts.qtypes[qtype], err.INVALID_COLUMN_TYPE)
   assert((( qtype == "I1" )  or ( qtype == "I2" )  or ( qtype == "I4" )  or
-          ( qtype == "I8" )  or ( qtype == "F4" )  or ( qtype == "F8" ) or ( qtype == "B1")),
+          ( qtype == "I8" )  or ( qtype == "F4" )  or ( qtype == "F8" ) or 
+          ( qtype == "B1") or ( qtype == "SC" ) ),
   err.INVALID_COLUMN_TYPE)
-  -- TODO: Support SC in future
   
-  assert( qconsts.qtypes[qtype] ~= nil, err.INVALID_COLUMN_TYPE)
-  
-  local width = assert(qconsts.qtypes[qtype]["width"], err.NULL_WIDTH_ERROR)
-
-  -- To do - check max and min value in qtype except B1
-  if qtype ~= "B1" then
-    assert(qconsts.qtypes[qtype].max, "max value of qtype nil " .. err.INVALID_COLUMN_TYPE)
-    assert(qconsts.qtypes[qtype].min, "min value of qtype nil " .. err.INVALID_COLUMN_TYPE)
-  end
+  local width
 
   local ctype =  assert(qconsts.qtypes[qtype].ctype, err.NULL_CTYPE_ERROR)
   local table_length = table.getn(input)
   local length_in_bytes = nil
   local chunk = nil
   
-  
-  local col = lVector{ qtype=qtype, gen = true, has_nulls = has_nulls}
-    
-  for k, v in ipairs(input) do
-    local v_nn = nil
-    v = assert(to_scalar(v, qtype))
-     if ( nn_input ) then 
-       local v = nn_input[k]
-       assert(type(v) == "boolean")
-       v_nn = Scalar.new(v, "B1")
-     end
-    col:put1(v, v_nn)
+  local col
+  if ( qtype == "SC" ) then 
+    assert(not nn_input) -- no nulls for SC
+    --== Figure out width
+    width = 0
+    for k, v in pairs(input) do 
+      assert(type(v) == "string")
+      if ( #v > width ) then width = #v end
+    end
+    width = width + 1 -- add space for nullc
+    --=====================
+    col = lVector{ qtype=qtype, gen = true, width = width, 
+      has_nulls = false}
+    for k, v in pairs(input) do 
+      local sval = cmem.new(width, "SC")
+      assert(sval:set(v))
+      col:put1(sval)
+    end
+  else
+    col = lVector{ qtype=qtype, gen = true, has_nulls = has_nulls}
+    for k, v in ipairs(input) do
+      local v_nn = nil
+      v = assert(to_scalar(v, qtype))
+       if ( nn_input ) then 
+         local v = nn_input[k]
+         assert(type(v) == "boolean")
+         v_nn = Scalar.new(v, "B1")
+       end
+      col:put1(v, v_nn)
+    end
   end
   col:eov()
   return col

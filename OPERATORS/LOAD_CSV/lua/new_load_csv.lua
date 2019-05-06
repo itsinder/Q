@@ -11,7 +11,7 @@ local process_opt_args =
   require "Q/OPERATORS/LOAD_CSV/lua/new_process_opt_args"
 local malloc_buffers_for_data = 
   require "Q/OPERATORS/LOAD_CSV/lua/malloc_buffers_for_data"
-local load_csv_fast_C  = require "Q/OPERATORS/LOAD_CSV/lua/load_csv_fast_C"
+local bridge_C  = require "Q/OPERATORS/LOAD_CSV/lua/bridge_C"
 local get_ptr	    = require 'Q/UTILS/lua/get_ptr'
 local cmem          = require 'libcmem'
  --======================================
@@ -45,15 +45,26 @@ local function load_csv(
         num_rows_read[0] = 0
         --===================================
         local start_time = qc.RDTSC()
-        assert(load_csv_fast_C(M, infile, fld_sep, is_hdr,
+        assert(bridge_C(M, infile, fld_sep, is_hdr,
           file_offset, num_rows_read, data, nn_data))
         record_time(start_time, "load_csv_fast")
         --===================================
         for i = 1, #M do
           if ( i ~= midx ) then 
-            -- TODO put chunk on the vector
+            vectors[i]:put_chunk(data[i], nn_data[i], num_rows_read)
           end
         end
+        if ( num_rows_read < qconsts.chunk_size ) then 
+          -- Free buffers since you won't need them again
+          for i = 1, #M do 
+            if ( i ~= midx ) then 
+              -- Note subtlety of above if condition.  You can't delete 
+              -- buffer for vector whose chunk you are returning
+              if (    data[i] ~= nil ) then    data[i]:delete() end
+              if ( nn_data[i] ~= nil ) then nn_data[i]:delete() end
+            end
+          end
+        end 
         return num_rows_read, data[midx], nn_data[midx]
       end
     lgens[name] = lgen

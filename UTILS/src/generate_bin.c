@@ -11,8 +11,6 @@
 #include "_generate_bin.h"
 #include "_get_time_usec.h"
 
-typedef enum _qtype_type { undef_qtype, B1, I1, I2, I4, I8, F4, F8 } qtype_type;
-
 /*
 
 Convention:-

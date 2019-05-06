@@ -43,7 +43,6 @@ clean:
 	make -C ${Q_SRC_ROOT}/OPERATORS/S_TO_F/lua clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/F_TO_S/lua clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/AX_EQUALS_B/ clean
-	make -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/APPROX/QUANTILE/lua  clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/APPROX/FREQUENT  clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/PCA/src clean
@@ -56,6 +55,8 @@ clean:
 	make -C ${Q_SRC_ROOT}/OPERATORS/COUNT/lua clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/JOIN/lua clean
 	make -C ${Q_SRC_ROOT}/OPERATORS/F1S1OPF2_VAL/lua clean
+
+#	make -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ clean
 
 install: uninstall 
 	cd ../../;\
@@ -169,8 +170,8 @@ approx_quantile: q_basic
 approx_frequent: q_basic
 	make  -C ${Q_SRC_ROOT}/OPERATORS/APPROX/FREQUENT ${BUILD_TYPE}
 
-mv_mul: q_basic
-	make  -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ ${BUILD_TYPE}
+# mv_mul: q_basic
+# 	make  -C ${Q_SRC_ROOT}/OPERATORS/MM/lua/ ${BUILD_TYPE}
 
 corrm: q_basic
 	make  -C ${Q_SRC_ROOT}/OPERATORS/PCA/src/
@@ -193,15 +194,16 @@ q_operators: \
 	sort \
 	sort2 \
 	s_to_f \
-	mv_mul \
 	drop_nulls \
 	sumby  \
 	index \
 	unique \
 	count \
 	join \
+	mv_mul \
 	getk \
 	hash \
 	where 
 	echo "all done for operators"
+
 

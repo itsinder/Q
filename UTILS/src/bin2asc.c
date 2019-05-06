@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "q_macros.h"
+#include "q_incs.h"
 #include "_mmap.h"
 #include "_SC_to_txt.h"
 #include "_I1_to_txt.h"
@@ -23,7 +19,6 @@
 
 #define MAXLINE 64
 
-typedef enum _qtype_type { I1, I2, I4, I8, F4, F8, SC, TM } qtype_type;
 
 #define BUFLEN 1024
 

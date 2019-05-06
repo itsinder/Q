@@ -27,7 +27,7 @@ int set_up_qtypes(
   bool  some_load = false;
   for ( uint32_t i = 0; i < nC; i++ ) {
     if ( !is_load[i] ) {
-      qtypes[i] = undef;
+      qtypes[i] = undef_qtype;
       continue;
     }
     some_load = true;

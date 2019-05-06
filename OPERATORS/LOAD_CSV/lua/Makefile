@@ -19,6 +19,10 @@ all : libload_csv.so
 ../../UTILS/gen_inc/_is_valid_chars_for_num.h :
 	make -C ../../../UTILS/src/ 
 
+../gen_inc/_SC_to_TM.h : 
+	mkdir -p ../gen_inc/
+	lua ${UDIR}/cli_extract_func_decl.lua ../src/SC_to_TM.c ${INCDIR}
+
 ../gen_inc/_get_cell.h : 
 	mkdir -p ../gen_inc/
 	lua ${UDIR}/cli_extract_func_decl.lua ../src/get_cell.c ${INCDIR}
@@ -59,6 +63,8 @@ clean :
 	rm -f _*
 	rm -f *.so
 
+../src/SC_to_TM.c : ../gen_inc/_SC_to_TM.h
+
 ../src/get_cell.c : ../gen_inc/_get_cell.h
 
 ../src/new_get_cell.c : ../gen_inc/_new_get_cell.h
@@ -72,6 +78,7 @@ clean :
 #../src/load_csv_fast.c : ../gen_inc/_load_csv_fast.h
 
 SRC_FILES =  \
+	../src/SC_to_TM.c  \
 	../src/get_cell.c  \
 	../src/new_get_cell.c  \
 	../src/set_up_qtypes.c  \
@@ -98,6 +105,7 @@ libload_csv.so : ${SRC_FILES} ${GEN_FILES} ${AUX_FILES}
 	test -d  ${Q_BUILD_DIR}/src/
 	cp ${SRC_FILES}      ${Q_BUILD_DIR}/src/
 	cp ${GEN_FILES}      ${Q_BUILD_DIR}/src/
+	cp ../inc/SC_to_TM.h ${Q_BUILD_DIR}/include/
 	cp ${GEN_INC_FILES}        ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_get_cell.h  ${Q_BUILD_DIR}/include/
 	cp ../gen_inc/_new_get_cell.h  ${Q_BUILD_DIR}/include/

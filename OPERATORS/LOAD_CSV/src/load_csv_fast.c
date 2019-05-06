@@ -145,7 +145,7 @@ load_csv_fast(
   bool  some_load = false;
   for ( uint32_t i = 0; i < nC; i++ ) {
     if ( !is_load[i] ) {
-      qtypes[i] = undef;
+      qtypes[i] = undef_qtype;
       continue;
     }
     some_load = true;
